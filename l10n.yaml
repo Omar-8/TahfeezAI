@@ -1,0 +1,10 @@
+# Flutter localization generator configuration.
+# Generated sources are NOT committed to version control (see .gitignore);
+# run `flutter gen-l10n` (or `flutter pub get`, which triggers it) after
+# checkout and whenever an .arb file changes.
+arb-dir: lib/core/localization/l10n
+template-arb-file: app_en.arb
+output-localization-file: app_localizations.dart
+output-dir: lib/core/localization/generated
+output-class: AppLocalizations
+nullable-getter: false

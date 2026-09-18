@@ -1,0 +1,15 @@
+{
+  "@@locale": "ar",
+  "appName": "تحفيظ AI",
+  "foundationDemoTitle": "معاينة الأساس",
+  "foundationDemoBody": "هذه الشاشة موجودة فقط لإثبات أن المظهر الفاتح والداكن، والتخطيط من اليمين إلى اليسار، ونقاط الاستجابة تعمل تمامًا. شاشات الميزات ستأتي في مراحل لاحقة.",
+  "themeModeLabel": "المظهر",
+  "themeModeSystem": "النظام",
+  "themeModeLight": "فاتح",
+  "themeModeDark": "داكن",
+  "languageLabel": "اللغة",
+  "breakpointPhone": "تخطيط الهاتف",
+  "breakpointTablet": "تخطيط الجهاز اللوحي",
+  "breakpointDesktop": "تخطيط سطح المكتب",
+  "breakpointDescription": "فئة العرض الحالية: {breakpoint}"
+}

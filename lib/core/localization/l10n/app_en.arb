@@ -1,0 +1,38 @@
+{
+  "@@locale": "en",
+  "appName": "Tahfeez AI",
+  "@appName": {
+    "description": "The application name, shown in the app bar and OS surfaces."
+  },
+  "foundationDemoTitle": "Foundation preview",
+  "@foundationDemoTitle": {
+    "description": "Title of the Milestone 1 screen that proves theme/RTL/responsive foundations."
+  },
+  "foundationDemoBody": "This screen exists only to prove the Tahfeez light theme, dark theme, right-to-left layout, and responsive breakpoints work end to end. Feature screens arrive in later milestones.",
+  "@foundationDemoBody": {
+    "description": "Explanatory body text on the foundation preview screen."
+  },
+  "themeModeLabel": "Theme",
+  "@themeModeLabel": {
+    "description": "Label for the theme mode selector."
+  },
+  "themeModeSystem": "System",
+  "themeModeLight": "Light",
+  "themeModeDark": "Dark",
+  "languageLabel": "Language",
+  "@languageLabel": {
+    "description": "Label for the language/locale selector."
+  },
+  "breakpointPhone": "Phone layout",
+  "breakpointTablet": "Tablet layout",
+  "breakpointDesktop": "Desktop layout",
+  "breakpointDescription": "Current width class: {breakpoint}",
+  "@breakpointDescription": {
+    "description": "Shows which responsive breakpoint is currently active.",
+    "placeholders": {
+      "breakpoint": {
+        "type": "String"
+      }
+    }
+  }
+}
