@@ -113,8 +113,8 @@ requirement independent of that finding. Tahfeez's plan:
 
 | Database | Owns | Introduced by |
 |---|---|---|
-| Core app database (`lib/core/database/app_database.dart`) | App-level bookkeeping only (a generic key/value table) — no Quran or user content | Milestone 1 (this milestone) |
-| Quran database | Canonical chapters/verses/scripts/Mushaf maps/navigation units — **immutable** | Milestone 2 (Quran Data Engine) |
+| Core app database (`lib/core/database/app_database.dart`) | App-level bookkeeping only (a generic key/value table) — no Quran or user content | Milestone 1 |
+| Quran database (`lib/quran/data/quran_database.dart`) | Canonical chapters/verses/scripts/Mushaf maps/navigation units — **immutable** | Milestone 2 (Quran Data Engine) — delivered |
 | User database | Bookmarks, reading history — **mutable** | Milestone 11 (User Data & Sharing) |
 | Search index database | Derived, normalized, rebuildable text index — never the source of truth | Milestone 10 (Search) |
 | Resource metadata (translations/tafsir/WBW/audio/atlas) | Downloadable content + its version-tracking state | Milestones 8, 9, 12, 13 |
@@ -126,6 +126,79 @@ No milestone should ever add a table that mixes canonical and mutable data in th
 and no milestone should destructively normalize canonical Quran text in place — normalized/
 derived text belongs only in the search index database, per `docs/CLEAN_ROOM_RULES.md`'s Quran
 correctness rules.
+
+### 4a. The Quran data engine (Milestone 2)
+
+`lib/quran/` is organized exactly along the `domain`/`data` split from §1:
+
+- **`quran/domain/models/`** — plain, Drift-independent domain models (`Surah`, `Ayah`,
+  `AyahWord`, `QuranScript`, `QuranScriptVariant`, `Mushaf`, `MushafLine`, `MushafPage`,
+  `NavigationRange`, `Juz`, `Hizb`, `DatasetMetadata`), built with `freezed` for cheap value
+  equality. `QuranScript` and `QuranScriptVariant` are two distinct types (a family and its
+  editions) rather than one self-referencing type, unlike the single self-referencing entity the
+  reference app uses internally for the same concept (`docs/reference/05_MUSHAF_SPEC.md` §7) — an
+  independent modeling choice, not a copy.
+- **`quran/domain/quran_dataset_payload.dart`** — `QuranDatasetPayload`, the seam between "where
+  Quran data comes from" and "how it is imported." A dataset can be replaced entirely by
+  constructing a different payload from a different source; neither `QuranRepository` nor its
+  Drift implementation changes.
+- **`quran/domain/dataset_integrity.dart`** — `DatasetIntegrityValidator`, pure Dart, no database
+  required. Runs ten structural rules (exactly 114 surahs, contiguous ayah numbering per surah,
+  unique/stable ayah ids, contiguous word indices, valid Mushaf page/line bounds, contiguous line
+  numbers, valid line word-ranges, valid navigation-range bounds, no missing/blank verse text,
+  present dataset version/hash) against a `QuranDatasetPayload` and returns a
+  `DatasetIntegrityReport`. This is what makes "integrity tests fail loudly" concrete: every rule
+  has a dedicated unit test asserting it fires (`test/quran/domain/dataset_integrity_test.dart`),
+  not just a test that the validator exists.
+- **`quran/domain/repositories/quran_repository.dart`** — the full `QuranRepository` interface
+  (surahs, ayahs/words, batch verse-range loading, Mushaf pages/lines, Juz/Hizb/navigation lookup,
+  location validation, dataset metadata). Superseded Milestone 1's placeholder four-method version
+  now that this milestone owns the real contract.
+- **`quran/data/tables/`** — the Drift `Table` definitions (`Surahs`, `SurahLocalizations`,
+  `Ayahs`, `AyahWords`, `QuranScripts`, `QuranScriptVariants`, `Mushafs`, `MushafLines`,
+  `NavigationRanges`, `DatasetMetadataEntries`), combined into `QuranDatabase`
+  (`quran/data/quran_database.dart`) — schema only, per the same "database class declares tables,
+  repository does the querying" convention `lib/core/database/app_database.dart` established.
+  `QuranScripts`, `QuranScriptVariants`, and `Mushafs` use **caller-supplied**, non-autoincrement
+  integer primary keys (like `Ayahs.id`) rather than autoincrement, because other rows in the same
+  import batch reference them by id before they exist in the database — an autoincrement id
+  can't be known ahead of the insert.
+- **`quran/data/quran_mappers.dart`** — one-directional Drift-row-to-domain-model conversions, so
+  no domain model or repository consumer ever sees a generated Drift type.
+- **`quran/data/import/quran_dataset_importer.dart`** — `QuranDatasetImporter`: validates a
+  payload (throwing `DatasetIntegrityException`, which carries the full report, if invalid),
+  then replaces the database's content inside one transaction. This is the **only** code path
+  allowed to write to the Quran database; `DriftQuranRepository` is read-only, enforcing
+  `docs/CLEAN_ROOM_RULES.md`'s "never silently edit Quran text" at the architecture level, not
+  just by convention.
+- **`quran/data/repositories/drift_quran_repository.dart`** — `DriftQuranRepository`. Every
+  batch-shaped method (`getVerseRangeWithWords`, `getWordsForLine`) issues a small, fixed number
+  of queries regardless of range size — proven, not just asserted, by
+  `test/quran/data/drift_quran_repository_test.dart`'s `CountingQueryInterceptor`, which wraps a
+  test database's `QueryExecutor` and counts real `SELECT` statements sent to SQLite.
+- **`quran/quran_providers.dart`** — the first two Riverpod providers in the app wired to a real
+  implementation rather than left as bare interfaces: `quranDatabaseProvider` and
+  `quranRepositoryProvider`.
+
+Two non-obvious Drift lessons worth keeping in mind for every future table in this project:
+1. **Never name a column the same as a `Table` DSL method** (`text`, `integer`, `boolean`,
+   `dateTime`, `blob`, …). A column getter named `text` shadows the inherited `Table.text()`
+   factory method it needs to call internally, which does not just misbehave at runtime — it
+   corrupts `drift_dev`'s static analysis of the whole table with an opaque
+   `FunctionExpressionInvocationImpl` cast error. `AyahWords`' text column is named `wordText` for
+   exactly this reason.
+2. **`part of` files share only their library file's own imports, not transitively-imported
+   files' imports.** `quran_database.g.dart` is `part of quran_database.dart`, and its generated
+   code references enums (`RevelationType`, `SajdahType`, …) declared in the domain model files.
+   Those enums are visible to the *table* files (which import them directly), but not to
+   `quran_database.dart` itself unless it also imports them directly — Dart imports are not
+   transitive. `quran_database.dart` therefore imports every domain model file that defines an
+   enum used by any of its tables, even though nothing in that file references those enums by
+   name (documented inline with `// ignore: unused_import` at each one).
+
+Dataset sourcing itself is not part of this milestone's deliverable — see
+`docs/DATA_RESOURCE_REQUIREMENTS.md` for the researched candidate sources (Tanzil.net, Al Quran
+Cloud, QUL) and their license status, none of which have been integrated yet.
 
 ## 5. Offline strategy
 
@@ -271,9 +344,23 @@ needs, with **no implementation**. This means:
   screen, per the milestone's explicit scope.
 - No concrete implementations of `QuranRepository`, `TranslationRepository`,
   `TafsirRepository`, `SearchRepository`, `UserDataRepository`, `ResourceRepository`, or
-  `MemorizationRepository` — interfaces only, by design (§3).
+  `MemorizationRepository` — interfaces only, by design (§3). (`QuranRepository` gained a real
+  implementation in Milestone 2 — see §13.)
 - No `audio_service` background session wiring (§8) — only a minimal foreground `just_audio`
   implementation to prove the seam.
 - No actual Quran data, translations, tafsir, or downloadable resources of any kind.
 - No AI recognition implementation of any kind (§10) — interfaces only, as the milestone
   explicitly requires.
+
+## 13. What Milestone 2 deliberately did not do
+
+- No real Quran text/dataset of any kind — every test uses the clearly-labeled synthetic fixture
+  in `test/quran/quran_test_fixtures.dart`, never anything resembling actual Quran content.
+  `docs/DATA_RESOURCE_REQUIREMENTS.md` records candidate sources for a future milestone to
+  actually integrate, once licensing is verified and recorded in `docs/THIRD_PARTY_RESOURCES.md`.
+- No script/font rendering assets or decisions — flagged as out of scope for a later
+  Mushaf/Design-System milestone in `docs/DATA_RESOURCE_REQUIREMENTS.md` §5.
+- No `TranslationRepository`, `TafsirRepository`, or `SearchRepository` implementations — still
+  interfaces only, owned by their respective later milestones (9, 9, 10).
+- No UI whatsoever — this milestone is explicitly "primarily non-visual," and no screen depends
+  on `quranRepositoryProvider` yet.

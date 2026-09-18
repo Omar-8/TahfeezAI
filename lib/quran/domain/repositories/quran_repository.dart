@@ -1,23 +1,136 @@
-import '../models/quran_refs.dart';
+import '../models/ayah_models.dart';
+import '../models/dataset_metadata.dart';
+import '../models/mushaf_models.dart';
+import '../models/navigation_models.dart';
+import '../models/surah_models.dart';
+import '../models/quran_refs.dart' show VerseRangeRef, VerseRef;
 
 /// Read access to the **immutable** canonical Quran dataset: chapters,
-/// verses, and navigation units (Juz/Hizb/Rub/Manzil/page), independent of
-/// script/Mushaf edition, translation, or tafsir.
+/// verses, words, scripts, Mushaf pagination, and navigation units.
 ///
-/// This interface is deliberately small for Milestone 1 — the Quran Data
-/// Engine milestone (2) defines the real entity models (mirroring
-/// `docs/reference/06_DATA_MODEL_SPEC.md`) and a fuller repository surface
-/// (Mushaf page/line lookups, search-adjacent metadata, etc.). What matters
-/// now is the boundary: UI code depends on [QuranRepository], never on
-/// Drift/SQL directly, and this repository must never expose a way to
-/// mutate canonical text (see `docs/CLEAN_ROOM_RULES.md` §"Quran
-/// correctness").
+/// Implemented against Drift by `DriftQuranRepository`
+/// (`lib/quran/data/repositories/drift_quran_repository.dart`). Per
+/// `docs/CLEAN_ROOM_RULES.md`'s Quran-correctness rules, this repository
+/// exposes **no method that can mutate canonical text** — importing/
+/// replacing the dataset is a separate concern
+/// (`lib/quran/data/import/quran_dataset_importer.dart`), never part of the
+/// read-only surface UI code depends on.
+///
+/// Every read method here is backed by local data only; per
+/// `docs/PROJECT_BRIEF.md`'s offline-first requirement, none of them may
+/// require network access to answer once the dataset is installed.
 abstract class QuranRepository {
-  Future<int> chapterCount();
+  // ---------------------------------------------------------------------
+  // Surahs
+  // ---------------------------------------------------------------------
 
-  Future<int> verseCountForChapter(int chapterNo);
+  /// The Quran always has exactly 114 chapters — a constant, not a query.
+  int get chapterCount => 114;
 
-  Future<String> chapterName(int chapterNo, {required String languageCode});
+  Future<List<Surah>> getAllSurahs();
 
-  Future<bool> isVerseRangeValid(VerseRangeRef range);
+  Future<Surah?> getSurah(int surahNo);
+
+  Future<SurahLocalization?> getSurahLocalization(
+    int surahNo, {
+    required String languageCode,
+  });
+
+  // ---------------------------------------------------------------------
+  // Ayahs and words
+  // ---------------------------------------------------------------------
+
+  Future<Ayah?> getAyah(VerseRef verse);
+
+  /// Looks up a verse by its stable id (`chapterNo * 1000 + verseNo`) rather
+  /// than by chapter/verse — useful when a caller already holds an id from
+  /// another record (e.g. a [MushafLine]'s `startAyahId`).
+  Future<Ayah?> getAyahByStableId(int ayahId);
+
+  Future<List<Ayah>> getVerseRange(VerseRangeRef range);
+
+  Future<List<AyahWord>> getWordsForAyah(
+    int ayahId, {
+    required String scriptCode,
+  });
+
+  /// Loads every verse in [range] together with its words, in a small,
+  /// fixed number of queries regardless of how many verses [range] spans —
+  /// this is the method reader UI should use instead of calling
+  /// [getVerseRange] and [getWordsForAyah] once per verse. See
+  /// `docs/reference/06_DATA_MODEL_SPEC.md` §8 for why this batching
+  /// matters, and this milestone's own "do not query SQLite separately for
+  /// each visible word/verse" requirement.
+  Future<List<AyahWithWords>> getVerseRangeWithWords(
+    VerseRangeRef range, {
+    required String scriptCode,
+  });
+
+  // ---------------------------------------------------------------------
+  // Mushaf
+  // ---------------------------------------------------------------------
+
+  Future<Mushaf?> getMushaf({
+    required String scriptCode,
+    String? scriptVariantCode,
+  });
+
+  Future<Mushaf?> getMushafById(int mushafId);
+
+  Future<MushafPage?> getPage({required int mushafId, required int pageNumber});
+
+  Future<List<MushafLine>> getPageLines({
+    required int mushafId,
+    required int pageNumber,
+  });
+
+  Future<List<AyahWord>> getWordsForLine(
+    MushafLine line, {
+    required String scriptCode,
+  });
+
+  /// The page number containing [ayahId] in [mushafId]'s pagination, or
+  /// `null` if the ayah/mushaf combination is unknown.
+  Future<int?> getPageForAyah({required int mushafId, required int ayahId});
+
+  // ---------------------------------------------------------------------
+  // Navigation (Juz/Hizb/Rub/Manzil)
+  // ---------------------------------------------------------------------
+
+  Future<int?> getJuzForVerse(VerseRef verse);
+
+  Future<int?> getHizbForVerse(VerseRef verse);
+
+  Future<int?> getJuzForPage({required int mushafId, required int pageNumber});
+
+  /// A page can straddle more than one Hizb boundary, hence a list.
+  Future<List<int>> getHizbsForPage({
+    required int mushafId,
+    required int pageNumber,
+  });
+
+  Future<Juz?> getJuz(int juzNo);
+
+  Future<Hizb?> getHizb(int hizbNo);
+
+  Future<List<NavigationRange>> getNavigationRanges(NavigationUnitType type);
+
+  // ---------------------------------------------------------------------
+  // Location validation
+  // ---------------------------------------------------------------------
+
+  bool isValidChapterNo(int chapterNo) =>
+      chapterNo >= 1 && chapterNo <= chapterCount;
+
+  Future<bool> isValidVerse(VerseRef verse);
+
+  Future<bool> isValidVerseRange(VerseRangeRef range);
+
+  Future<bool> isValidPage({required int mushafId, required int pageNumber});
+
+  // ---------------------------------------------------------------------
+  // Dataset
+  // ---------------------------------------------------------------------
+
+  Future<DatasetMetadata?> getDatasetMetadata();
 }
