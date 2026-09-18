@@ -3,20 +3,35 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tahfeez_ai/app/app.dart';
 import 'package:tahfeez_ai/core/localization/locale_controller.dart';
+import 'package:tahfeez_ai/core/routing/app_router.dart';
 import 'package:tahfeez_ai/core/theme/tahfeez_theme_families.dart';
 import 'package:tahfeez_ai/core/theme/theme_controller.dart';
 
+import 'test_helpers/widget_test_overrides.dart';
+
 void main() {
+  Widget app() => ProviderScope(
+    overrides: tahfeezWidgetTestOverrides(),
+    child: const TahfeezApp(),
+  );
+
   testWidgets(
-    'renders the foundation demo screen and reacts to theme/locale changes',
+    'renders Home (the shell\'s initial route) and reacts to theme/locale changes',
     (tester) async {
-      await tester.pumpWidget(const ProviderScope(child: TahfeezApp()));
+      await tester.pumpWidget(app());
       await tester.pumpAndSettle();
 
-      // English by default: the LTR foundation-demo copy is visible.
-      expect(find.text('Foundation preview'), findsOneWidget);
+      // English by default: the LTR Home greeting subtitle is visible.
       expect(
-        Directionality.of(tester.element(find.text('Foundation preview'))),
+        find.text('Your calm place to read and memorize the Quran.'),
+        findsOneWidget,
+      );
+      expect(
+        Directionality.of(
+          tester.element(
+            find.text('Your calm place to read and memorize the Quran.'),
+          ),
+        ),
         TextDirection.ltr,
       );
 
@@ -26,14 +41,16 @@ void main() {
 
       // Switching to Arabic flips the ambient text direction to RTL, proving
       // the RTL foundation is live end-to-end (locale -> MaterialApp -> app
-      // bar) rather than only theoretically supported.
+      // shell), not just theoretically supported.
       await container
           .read(localeControllerProvider.notifier)
           .setLocale(const Locale('ar'));
       await tester.pumpAndSettle();
-      expect(find.text('معاينة الأساس'), findsOneWidget);
+      expect(find.text('مكانك الهادئ لقراءة القرآن وحفظه.'), findsOneWidget);
       expect(
-        Directionality.of(tester.element(find.text('معاينة الأساس'))),
+        Directionality.of(
+          tester.element(find.text('مكانك الهادئ لقراءة القرآن وحفظه.')),
+        ),
         TextDirection.rtl,
       );
 
@@ -50,7 +67,7 @@ void main() {
   testWidgets('switching the color family changes the resolved theme', (
     tester,
   ) async {
-    await tester.pumpWidget(const ProviderScope(child: TahfeezApp()));
+    await tester.pumpWidget(app());
     await tester.pumpAndSettle();
 
     final container = ProviderScope.containerOf(
@@ -79,7 +96,7 @@ void main() {
   testWidgets('the dynamic-color preference can be toggled without crashing', (
     tester,
   ) async {
-    await tester.pumpWidget(const ProviderScope(child: TahfeezApp()));
+    await tester.pumpWidget(app());
     await tester.pumpAndSettle();
 
     final container = ProviderScope.containerOf(
@@ -99,9 +116,15 @@ void main() {
   });
 
   testWidgets(
-    'the "open component gallery" button navigates to the gallery route',
+    'the debug foundation screen\'s "open component gallery" button navigates to the gallery route',
     (tester) async {
-      await tester.pumpWidget(const ProviderScope(child: TahfeezApp()));
+      await tester.pumpWidget(app());
+      await tester.pumpAndSettle();
+
+      final router = ProviderScope.containerOf(
+        tester.element(find.byType(TahfeezApp)),
+      ).read(appRouterProvider);
+      router.go(AppRoutes.debugFoundation);
       await tester.pumpAndSettle();
 
       await tester.ensureVisible(find.text('Open component gallery'));

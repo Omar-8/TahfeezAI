@@ -13,6 +13,7 @@ export 'tahfeez_dialog.dart';
 export 'tahfeez_download_progress_row.dart';
 export 'tahfeez_list_row.dart';
 export 'tahfeez_mini_player_shell.dart';
+export 'tahfeez_primary_nav_bar.dart';
 export 'tahfeez_quran_section_card.dart';
 export 'tahfeez_resource_row.dart';
 export 'tahfeez_responsive_scaffold.dart';

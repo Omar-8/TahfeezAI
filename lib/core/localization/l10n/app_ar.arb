@@ -11,5 +11,45 @@
   "breakpointPhone": "تخطيط الهاتف",
   "breakpointTablet": "تخطيط الجهاز اللوحي",
   "breakpointDesktop": "تخطيط سطح المكتب",
-  "breakpointDescription": "فئة العرض الحالية: {breakpoint}"
+  "breakpointDescription": "فئة العرض الحالية: {breakpoint}",
+
+  "navHome": "الرئيسية",
+  "navQuran": "القرآن",
+  "navSearch": "بحث",
+
+  "homeGreetingMorning": "صباح الخير",
+  "homeGreetingAfternoon": "مساء الخير",
+  "homeGreetingEvening": "مساء الخير",
+  "homeGreetingSubtitle": "مكانك الهادئ لقراءة القرآن وحفظه.",
+
+  "homeSectionDailyAyah": "آية اليوم",
+  "homeSectionContinueReading": "متابعة القراءة",
+  "homeSectionMemorization": "الحفظ",
+  "homeSectionFeaturedReading": "قراءات مختارة",
+  "homeSectionExplore": "استكشاف القرآن",
+
+  "homeDailyAyahReference": "سورة {surahNo} · آية {verseNo}",
+  "homeDailyAyahReferenceNamed": "{surahName} · آية {verseNo}",
+
+  "homeQuranDatasetUnavailableTitle": "نص القرآن غير مثبت بعد",
+  "homeQuranDatasetUnavailableBody": "سيظهر هذا تلقائيًا بمجرد إضافة بيانات القرآن إلى التطبيق.",
+  "homeReadHistoryEmpty": "سيظهر سجل قراءتك هنا بمجرد أن تبدأ بالقراءة.",
+  "homeMemorizationTeaserTitle": "الحفظ، قريبًا",
+  "homeMemorizationTeaserBody": "سيظهر هنا حفظ اليوم ومراجعته وتقدمك.",
+  "homeFeaturedReadingUnavailable": "ستظهر القراءات المختارة بمجرد تثبيت بيانات القرآن.",
+  "comingSoonMessage": "قريبًا",
+
+  "exploreDuas": "أدعية",
+  "exploreTopics": "مواضيع",
+  "exploreProphets": "الأنبياء",
+  "exploreScience": "علوم",
+
+  "quranPlaceholderTitle": "القرآن",
+  "quranPlaceholderBody": "التنقل بين السور والأجزاء والصفحات سيتوفر في مرحلة لاحقة.",
+  "quranPlaceholderChapterCount": "{count} سورة، جاهزة بمجرد تثبيت بيانات القرآن.",
+
+  "searchPlaceholderTitle": "بحث",
+  "searchPlaceholderBody": "البحث في القرآن سيتوفر في مرحلة لاحقة.",
+
+  "miniPlayerDefaultTitle": "قيد التشغيل الآن"
 }

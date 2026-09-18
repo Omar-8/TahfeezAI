@@ -43,7 +43,7 @@ class FoundationDemoScreen extends ConsumerWidget {
               _LanguageCard(l10n: l10n),
               _BreakpointCard(l10n: l10n, breakpoint: breakpoint),
               FilledButton.tonal(
-                onPressed: () => context.go('/gallery'),
+                onPressed: () => context.go('/debug/gallery'),
                 child: const Text('Open component gallery'),
               ),
             ],

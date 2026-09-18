@@ -34,5 +34,64 @@
         "type": "String"
       }
     }
-  }
+  },
+
+  "navHome": "Home",
+  "navQuran": "Quran",
+  "navSearch": "Search",
+
+  "homeGreetingMorning": "Good morning",
+  "homeGreetingAfternoon": "Good afternoon",
+  "homeGreetingEvening": "Good evening",
+  "homeGreetingSubtitle": "Your calm place to read and memorize the Quran.",
+
+  "homeSectionDailyAyah": "Daily Ayah",
+  "homeSectionContinueReading": "Continue Reading",
+  "homeSectionMemorization": "Memorization",
+  "homeSectionFeaturedReading": "Featured Reading",
+  "homeSectionExplore": "Explore Quran",
+
+  "homeDailyAyahReference": "Surah {surahNo} · Ayah {verseNo}",
+  "@homeDailyAyahReference": {
+    "description": "Numeric chapter/verse reference shown on the Daily Ayah card.",
+    "placeholders": {
+      "surahNo": { "type": "int" },
+      "verseNo": { "type": "int" }
+    }
+  },
+  "homeDailyAyahReferenceNamed": "{surahName} · Ayah {verseNo}",
+  "@homeDailyAyahReferenceNamed": {
+    "description": "Chapter-name reference shown on the Daily Ayah card once a localized chapter name is available.",
+    "placeholders": {
+      "surahName": { "type": "String" },
+      "verseNo": { "type": "int" }
+    }
+  },
+
+  "homeQuranDatasetUnavailableTitle": "Quran text isn't installed yet",
+  "homeQuranDatasetUnavailableBody": "This will appear automatically once a Quran dataset is added to the app.",
+  "homeReadHistoryEmpty": "Your reading history will appear here once you start reading.",
+  "homeMemorizationTeaserTitle": "Memorization, coming soon",
+  "homeMemorizationTeaserBody": "Today's memorization, revision, and progress will live right here.",
+  "homeFeaturedReadingUnavailable": "Featured passages will appear once a Quran dataset is installed.",
+  "comingSoonMessage": "Coming soon",
+
+  "exploreDuas": "Duas",
+  "exploreTopics": "Topics",
+  "exploreProphets": "Prophets",
+  "exploreScience": "Science",
+
+  "quranPlaceholderTitle": "Quran",
+  "quranPlaceholderBody": "Chapter, Juz, and page navigation are coming in a later milestone.",
+  "quranPlaceholderChapterCount": "{count} chapters, ready once a Quran dataset is installed.",
+  "@quranPlaceholderChapterCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "searchPlaceholderTitle": "Search",
+  "searchPlaceholderBody": "Search across the Quran is coming in a later milestone.",
+
+  "miniPlayerDefaultTitle": "Now playing"
 }

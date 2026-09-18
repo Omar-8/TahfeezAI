@@ -421,6 +421,106 @@ indeterminate animation — every widget test that renders this screen uses a fi
 `tester.pump(duration)` calls instead. Any future screen with a permanent (not just
 transient-during-fetch) indeterminate spinner will need the same test pattern.
 
+## 11b. Navigation shell & Home (Milestone 4)
+
+### Navigation architecture decision
+
+Tahfeez uses a **shell-based** `go_router` model — `StatefulShellRoute.indexedStack`
+(`lib/core/routing/app_router.dart`) wrapping three branches (Home, Quran, Search), each
+rendered inside `lib/app/shell/app_shell.dart`'s `AppShell` widget — rather than the reference
+app's own Activity-per-top-level-screen model (`docs/reference/03_NAVIGATION_MAP.md` §1-2). This
+was chosen over a pushed-route model for two reasons that reference document's own §7 flags as
+worth improving on:
+
+1. Each branch (`StatefulShellBranch`) keeps its own independent navigation stack via a separate
+   `Navigator`/`GlobalKey<NavigatorState>`, which the reference app's Activity boundaries only
+   approximate — this matters once Quran's branch grows its own nested navigation (chapter list →
+   reader) in later milestones, without disturbing Home's or Search's stacks.
+2. A single, shell-level mini-player region (`lib/app/shell/mini_player_region.dart`) persists
+   across every branch, instead of being re-created at every Activity boundary the way the
+   reference app's mini player is described as doing. This is a genuine, deliberate improvement
+   over the reference behavior, not a deviation for its own sake.
+
+`Home` is now the app's real initial route (`AppRoutes.home = '/home'`, `initialLocation`).
+Milestone 1/3's dev-proof screens (`FoundationDemoScreen`, `ComponentGalleryScreen`) moved to
+non-shell debug routes (`/debug/foundation`, `/debug/gallery`) — reachable, but never linked from
+user-facing navigation.
+
+### Main navigation: the "Quran is prominent" component
+
+Three destinations at this stage (Home, Quran, Search), per the milestone's explicit scope —
+`Memorize` is reserved for Milestone 17 by simply being a fourth `TahfeezPrimaryNavItem`/
+`StatefulShellBranch` to add later, not a structural change.
+
+Rather than cloning the reference app's specific center-pill artwork for Quran access (which
+`docs/CLEAN_ROOM_RULES.md` forbids anyway), Quran's visual prominence is a new, genuinely reusable
+design-system component: `TahfeezPrimaryNavigationBar`/`TahfeezPrimaryNavigationRail`
+(`lib/core/theme/components/tahfeez_primary_nav_bar.dart`). Exactly one `TahfeezPrimaryNavItem` per
+list can be marked `isPrimary`, which renders as a raised, filled circle (built only from
+`TahfeezElevation`, `TahfeezSpacing`, and the active `ColorScheme` — no new hardcoded color/shape)
+instead of a plain icon+label. The same "Quran is prominent" identity holds on phone (bottom bar)
+and tablet/desktop (side rail) using the same token treatment.
+
+This intentionally is not a change to `TahfeezResponsiveScaffold` (Milestone 3): that component
+stays a generic, uniform-destinations scaffold usable by any future screen that needs simple
+navigation, while `AppShell` composes the bespoke primary-nav widgets directly (still reusing
+`TahfeezContentWidth.maxReading` centering via a small private `_ConstrainedContent` helper, the
+same width-capping rule `TahfeezResponsiveScaffold` encodes).
+
+### Home information hierarchy
+
+`lib/features/home/presentation/home_screen.dart` composes the reference-equivalent hierarchy as
+one `SingleChildScrollView`-over-`Column` (not a lazy `ListView` — same "every widget must exist in
+the tree for tests without scrolling first" reasoning as `ComponentGalleryScreen`, §11a):
+
+1. A greeting header (`homeGreetingBandForHour`, `lib/features/home/presentation/home_greeting.dart`)
+   — a pure, unit-tested hour→band mapping, satisfying "clear page greeting/title."
+2. `HomeResourceUpdatesBanner` — hides itself entirely while
+   `outdatedResourceSummariesProvider` is empty (always true today; no concrete
+   `ResourceRepository` exists until Milestone 13), matching the reference app's own "shown only
+   if" banner behavior.
+3. `HomeDailyAyahSection` — a deterministic, date-seeded chapter/verse *reference* (never
+   canonical Arabic text) via `dailyAyahSurahNoForDate`.
+4. `HomeReadHistorySection` — permanently empty today; no `UserDataRepository` provider exists yet
+   (Milestone 11).
+5. `HomeMemorizationTeaserSection` — a concrete, visible placeholder for Today's Memorization/
+   Today's Revision/Memorization progress, satisfying "do not paint the architecture into a
+   reading-only corner" by literally reserving and showing the slot today rather than only
+   architecting an invisible seam.
+6. `HomeFeaturedReadingSection` — a horizontal rail over a small curated list of chapter
+   *numbers* (`featuredReadingSurahNumbers`; structural metadata, not Quran text).
+7. `HomeExploreSection` — an adaptive grid (2 columns phone, 4 tablet+) of category placeholders
+   (Duas/Topics/Prophets/Science) drawn from `docs/PROJECT_BRIEF.md`'s own "Explore" product area,
+   not the reference app's specific category roster/icons.
+
+The persistent mini-player region (hierarchy item 6) is deliberately **not** part of this list —
+it is mounted once at the `AppShell` level so it survives switching branches (see above).
+
+### The "no Quran dataset installed" state
+
+Milestone 2 built the Quran data engine's plumbing, but no app-boot step has ever imported a real
+(or even synthetic) dataset into the live app's `QuranDatabase` — only tests exercise the importer,
+against ephemeral in-memory databases. This means the running app's Quran database is genuinely
+empty today, and Home is the first screen to have to confront that honestly.
+`lib/features/home/application/home_providers.dart`'s `hasInstalledQuranDatasetProvider` (a
+`getSurah(1) != null` check) is the single seam every Quran-data-dependent Home section checks
+first, rendering an "unavailable resource" state (never fabricated content) when it's `false` —
+which is the only state reachable in the shipped app until a real dataset import path exists. This
+is the concrete form this milestone's "do not insert fake production Quran data" /
+"implement intentional loading/empty/offline/unavailable-resource states" requirements take.
+
+### Testing gotcha: `flutter test` cannot exercise real Drift/`just_audio` backends
+
+`HomeScreen`/`AppShell` are the first screens to actually watch `quranRepositoryProvider` and
+`audioControllerProvider` from a widget tree. Both real backends need a platform channel
+`flutter test` does not provide (`drift_flutter`'s native SQLite path via `path_provider`;
+`just_audio`'s real player), which otherwise leaves `pumpAndSettle()` stuck forever the first time
+either provider is watched. `test/test_helpers/widget_test_overrides.dart` overrides
+`quranDatabaseProvider` with a real in-memory `NativeDatabase` (the same "real Drift, test-safe
+backend" pattern §11 already established) and `audioControllerProvider` with a small
+`FakeAudioController` (no test-safe real backend exists for `just_audio`). Every widget test that
+renders `TahfeezApp`/`AppShell`/`HomeScreen` must use these overrides.
+
 ## 12. What Milestone 1 deliberately did not do
 
 - No feature screens (Home, Reader, Search, Settings, ...) — only the one foundation-proof
@@ -463,3 +563,21 @@ transient-during-fetch) indeterminate spinner will need the same test pattern.
 - No motion applied to route transitions — `TahfeezMotionDuration`/`TahfeezMotionCurves` are
   defined and available, but wiring them into `go_router`'s page-transition builders is deferred
   until real routes exist to transition between (Milestone 4+).
+
+## 15. What Milestone 4 deliberately did not do
+
+- No Quran Index & Navigation (chapter/Juz/Hizb/page lists) — `QuranPlaceholderScreen` only proves
+  the shell's second destination is real and discoverable; the real navigator lists are Milestone
+  5's job.
+- No full-text search — `SearchPlaceholderScreen` only proves the third destination is real; real
+  search (and its own derived search-index database, §4) is Milestone 10's job.
+- No real Quran dataset import wired into the running app — the live app's `QuranDatabase` is
+  genuinely empty (see §11b); a real import path is a data-sourcing concern outside this
+  milestone's scope (`docs/DATA_RESOURCE_REQUIREMENTS.md`).
+- No `UserDataRepository` or `ResourceRepository` implementations — `HomeReadHistorySection` and
+  `HomeResourceUpdatesBanner` depend on provider seams that resolve to empty today, by design,
+  until Milestones 11 and 13 respectively supply real data.
+- No route-transition animations — same deferral as Milestone 3 (§14), now genuinely applicable
+  since real routes exist; still deferred, as motion polish is not this milestone's scope.
+- No memorization functionality — `HomeMemorizationTeaserSection` is a visible placeholder only,
+  proving the Home layout can hold the section; the real dashboard is Milestone 17's job.
