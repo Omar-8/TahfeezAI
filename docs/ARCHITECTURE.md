@@ -338,6 +338,89 @@ needs, with **no implementation**. This means:
   standard `flutter create` iOS project template is present and untouched. A real iOS build must
   be verified on macOS before Tahfeez ships to iOS.
 
+## 11a. The design system (Milestone 3)
+
+`lib/core/theme/` is now Tahfeez's full production design system, not just the light/dark proof
+Milestone 1 shipped. Everything in it uses the `Tahfeez*` naming the milestone suggested
+(`TahfeezSpacing`, `TahfeezRadii`, `TahfeezBreakpoint`, etc.), superseding Milestone 1's `App*`
+names.
+
+**Tokens** (`core/theme/`, one file per concern): `app_spacing.dart` (`TahfeezSpacing`,
+`TahfeezRadii`), `tahfeez_elevation.dart` (`TahfeezElevation` — deliberately shallow, per
+`docs/DESIGN_DIRECTION.md`'s "restrained elevation"), `tahfeez_motion.dart`
+(`TahfeezMotionDuration`/`TahfeezMotionCurves`), `tahfeez_icon_sizes.dart` (`TahfeezIconSize`),
+`tahfeez_content_widths.dart` (`TahfeezContentWidth` — the constrained-reading-width cap used by
+`TahfeezResponsiveScaffold`), `app_typography.dart` (`buildTahfeezTextTheme`), `app_colors.dart`
+(the emerald/default exploration palette + `TahfeezColorTokens` extension for tokens with no
+`ColorScheme` slot, e.g. the muted-gold accent).
+
+**Color families** (`tahfeez_theme_families.dart`): `TahfeezThemeFamily` — 7 independently-chosen
+seed colors (emerald/blue/burgundy/purple/violet/gold/monochrome), each producing a full light and
+dark `ColorScheme` via `ColorScheme.fromSeed`. Emerald (the default) is special-cased to use
+`docs/DESIGN_DIRECTION.md`'s exact exploration values instead of the algorithmic seed result,
+since that document only gives concrete guidance for the default family. None of these hues or
+names are drawn from the reference app's own preset-theme roster
+(`docs/reference/18_VISUAL_REFERENCE_NOTES.md` §8 flags that roster as reference-only).
+
+**Dynamic (Material You) color** (`lib/app/app.dart`, via `package:dynamic_color`): optional and
+off by default (`DynamicColorPreferenceController`), matching this milestone's "support platform
+dynamic/system color only where appropriate and optional." **Dependency note worth remembering**:
+`dynamic_color` versions 2.0.0+ depend on a new standalone `material_ui` package and return *its*
+`ColorScheme` type from `DynamicColorBuilder`, which is a different, incompatible class from
+Flutter SDK's own `package:flutter/material.dart` `ColorScheme` that `MaterialApp`/`ThemeData`
+still use in this Flutter version — passing one where the other is expected fails to compile with
+a confusing "type X can't be assigned to type X" error (same name, different library). Pinned to
+`dynamic_color: ^1.9.0`, the last major version before that split, which returns the SDK's own
+`ColorScheme` directly. Revisit this pin (and the error) if the ecosystem migration to
+`material_ui` completes and Flutter's own Material widgets adopt it too.
+
+**Typography** (`app_typography.dart`, fonts in `assets/fonts/`): Noto Sans (Latin) with Noto Sans
+Arabic registered as `fontFamilyFallback`, so any UI string mixing scripts renders both correctly
+without the app detecting script itself. Both are single-file variable fonts (one file covers
+every weight via the `wght` axis) under SIL Open Font License 1.1, bundled as local assets — not
+fetched from Google Fonts at runtime — so the UI font never depends on network access, consistent
+with this project's offline-first requirement. Recorded in `docs/THIRD_PARTY_RESOURCES.md` (its
+first real entry) with checksums and the exact upstream commit fetched from. As always, this is
+the **UI** typeface only; canonical Quran text will never render with it (see
+`docs/DESIGN_DIRECTION.md`'s UI/Quran typography separation, already enforced structurally since
+`buildTahfeezTextTheme` has no code path that could reach Quran content).
+
+**Components** (`core/theme/components/`, barrel-exported from `components.dart`): all 19 named
+in the milestone — `TahfeezAppBar`, `TahfeezCard`, `TahfeezSettingsTile`, `TahfeezSectionHeader`,
+`TahfeezListRow`, `TahfeezActionChip`/`TahfeezFilterChip`, `TahfeezSegmentedControl`,
+`TahfeezResourceRow`, `showTahfeezModalBottomSheet`, `showTahfeezConfirmationDialog`,
+`TahfeezLoadingView`/`TahfeezEmptyView`/`TahfeezErrorView`, `TahfeezDownloadProgressRow`,
+`TahfeezMiniPlayerShell`, `TahfeezQuranSectionCard`, `TahfeezVerseActionBar`, and
+`TahfeezResponsiveScaffold` (bottom nav on phone, a `NavigationRail` from tablet upward, body
+capped at `TahfeezContentWidth.maxReading` — the "do not stretch the phone layout across large
+screens" rule). Every one is built only from the tokens above; none hardcodes a color, radius, or
+spacing value.
+
+**Icon set**: Flutter's bundled Material Symbols (`Icons`), already licensed as part of the SDK
+(`uses-material-design: true`) and functionally independent of the reference app's own custom
+drawable artwork — satisfies "use Material Symbols or another independently licensed icon set"
+without adding a new dependency.
+
+**Component gallery** (`core/theme/gallery/`): `ComponentGalleryScreen`, reachable at the
+`/gallery` route (linked from the foundation demo screen, not from any user-facing navigation),
+shows every component above across every theme family, both brightnesses, and both a supported
+LTR (English) and RTL (Arabic) locale, plus `MemorizationStateGallery` — a placeholder sketch of
+the 14 memorization visual states `docs/DESIGN_DIRECTION.md`'s "Memorization visual language"
+section calls for (visible/hidden/partially-revealed text, current ayah/word, listening,
+correct/skipped/incorrect word, hesitation, self-correction, weak memory range, scheduled
+revision, completed session). Every placeholder uses plain English UI copy ("sample word"),
+deliberately never anything resembling Quran text, per `docs/CLEAN_ROOM_RULES.md`'s Quran-
+correctness rules — the real, session-wired implementation is the Memorization milestone's (17)
+job; this only proves the visual vocabulary (overlays/opacity/underlines, never editing text
+itself) reads clearly in every theme.
+
+**A testing gotcha worth remembering**: `ComponentGalleryScreen` permanently displays an
+indeterminate `CircularProgressIndicator` (the loading-state demo), which schedules a new frame
+forever by design. `tester.pumpAndSettle()` can never settle on a screen with a permanent
+indeterminate animation — every widget test that renders this screen uses a fixed number of
+`tester.pump(duration)` calls instead. Any future screen with a permanent (not just
+transient-during-fetch) indeterminate spinner will need the same test pattern.
+
 ## 12. What Milestone 1 deliberately did not do
 
 - No feature screens (Home, Reader, Search, Settings, ...) — only the one foundation-proof
@@ -364,3 +447,19 @@ needs, with **no implementation**. This means:
   interfaces only, owned by their respective later milestones (9, 9, 10).
 - No UI whatsoever — this milestone is explicitly "primarily non-visual," and no screen depends
   on `quranRepositoryProvider` yet.
+
+## 14. What Milestone 3 deliberately did not do
+
+- No Quran/Mushaf rendering font or atlas decision — `docs/DATA_RESOURCE_REQUIREMENTS.md` §5
+  already flags that as a later Mushaf/Design-System-adjacent decision; the Noto Sans/Noto Sans
+  Arabic pair chosen here is explicitly the **UI** typeface only.
+- No real feature screens — the component gallery and the extended foundation demo screen are
+  proof/dev tooling, not Home/Reader/Search/Settings, per this milestone's own framing ("the
+  visual foundation for all future UI," not the UI itself).
+- No reader-specific theming (the "Light / Warm / Sepia / Dark / Black" reader appearances
+  `docs/DESIGN_DIRECTION.md` §"Reader themes" describes) — that is separable from the application
+  theme built here and belongs to the Reader/Mushaf milestones, which will read the same token
+  files rather than reinvent them.
+- No motion applied to route transitions — `TahfeezMotionDuration`/`TahfeezMotionCurves` are
+  defined and available, but wiring them into `go_router`'s page-transition builders is deferred
+  until real routes exist to transition between (Milestone 4+).

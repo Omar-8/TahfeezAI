@@ -1,3 +1,4 @@
+import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,35 +12,60 @@ import '../core/theme/theme_controller.dart';
 
 /// Tahfeez AI's root widget.
 ///
-/// Wires together the three foundations this milestone proves — theme
-/// (light/dark, `core/theme`), localization (RTL-capable, `core/localization`),
-/// and routing (`core/routing`) — behind Riverpod so every piece is
-/// independently swappable/testable, per this milestone's architecture
-/// goals.
+/// Wires together theme (light/dark/family/optional dynamic color,
+/// `core/theme`), localization (RTL-capable, `core/localization`), and
+/// routing (`core/routing`) — behind Riverpod so every piece is
+/// independently swappable/testable.
 class TahfeezApp extends ConsumerWidget {
   const TahfeezApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeModeControllerProvider);
+    final family = ref.watch(themeFamilyControllerProvider);
+    final useDynamicColor = ref.watch(dynamicColorPreferenceControllerProvider);
     final localeOverride = ref.watch(localeControllerProvider);
     final router = ref.watch(appRouterProvider);
 
-    return MaterialApp.router(
-      onGenerateTitle: (context) => AppLocalizations.of(context).appName,
-      debugShowCheckedModeBanner: false,
-      themeMode: themeMode,
-      theme: buildLightTheme(),
-      darkTheme: buildDarkTheme(),
-      locale: localeOverride,
-      supportedLocales: kTahfeezSupportedLocales,
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      routerConfig: router,
+    // DynamicColorBuilder provides the OS's Material You palette on
+    // platforms that have one (Android 12+); `lightDynamic`/`darkDynamic`
+    // are `null` everywhere else (iOS, web, older Android) — in which case
+    // this always falls back to the selected TahfeezThemeFamily, per this
+    // milestone's "support platform dynamic/system color only where
+    // appropriate and optional" requirement.
+    return DynamicColorBuilder(
+      builder: (lightDynamic, darkDynamic) {
+        final ColorScheme lightScheme;
+        if (useDynamicColor && lightDynamic != null) {
+          lightScheme = lightDynamic;
+        } else {
+          lightScheme = family.colorScheme(Brightness.light);
+        }
+
+        final ColorScheme darkScheme;
+        if (useDynamicColor && darkDynamic != null) {
+          darkScheme = darkDynamic;
+        } else {
+          darkScheme = family.colorScheme(Brightness.dark);
+        }
+
+        return MaterialApp.router(
+          onGenerateTitle: (context) => AppLocalizations.of(context).appName,
+          debugShowCheckedModeBanner: false,
+          themeMode: themeMode,
+          theme: buildTahfeezTheme(lightScheme),
+          darkTheme: buildTahfeezTheme(darkScheme),
+          locale: localeOverride,
+          supportedLocales: kTahfeezSupportedLocales,
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          routerConfig: router,
+        );
+      },
     );
   }
 }

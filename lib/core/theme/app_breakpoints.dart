@@ -6,9 +6,9 @@ import 'package:flutter/widgets.dart';
 /// (phone / tablet / desktop-web), each with a materially different layout
 /// intent (compact nav + single-page Mushaf on phone, up to an optional
 /// side panel and two-page Mushaf on wider surfaces). Feature milestones
-/// should branch on [AppBreakpoint] rather than raw width comparisons or
+/// should branch on [TahfeezBreakpoint] rather than raw width comparisons or
 /// platform checks, so the thresholds stay centralized and consistent.
-enum AppBreakpoint {
+enum TahfeezBreakpoint {
   /// Compact navigation, single-page Mushaf, bottom sheets for secondary
   /// actions.
   phone,
@@ -27,14 +27,23 @@ enum AppBreakpoint {
   /// (at or above [phoneMaxWidth]).
   static const double tabletMaxWidth = 1024;
 
-  static AppBreakpoint fromWidth(double width) {
-    if (width < phoneMaxWidth) return AppBreakpoint.phone;
-    if (width < tabletMaxWidth) return AppBreakpoint.tablet;
-    return AppBreakpoint.desktop;
+  static TahfeezBreakpoint fromWidth(double width) {
+    if (width < phoneMaxWidth) return TahfeezBreakpoint.phone;
+    if (width < tabletMaxWidth) return TahfeezBreakpoint.tablet;
+    return TahfeezBreakpoint.desktop;
   }
 
-  /// Convenience accessor: `AppBreakpoint.of(context)`.
-  static AppBreakpoint of(BuildContext context) {
+  /// Convenience accessor: `TahfeezBreakpoint.of(context)`.
+  static TahfeezBreakpoint of(BuildContext context) {
     return fromWidth(MediaQuery.sizeOf(context).width);
   }
+
+  bool get isPhone => this == TahfeezBreakpoint.phone;
+  bool get isTablet => this == TahfeezBreakpoint.tablet;
+  bool get isDesktop => this == TahfeezBreakpoint.desktop;
+
+  /// True from [tablet] upward — the point at which a navigation rail
+  /// becomes viable instead of a bottom nav bar, per
+  /// `docs/DESIGN_DIRECTION.md`'s responsive guidance.
+  bool get isAtLeastTablet => this != TahfeezBreakpoint.phone;
 }

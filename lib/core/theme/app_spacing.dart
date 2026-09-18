@@ -5,7 +5,7 @@
 /// cramped feel than the reference app. This scale is the single source of
 /// truth for gaps/padding across the app; widgets should reference these
 /// constants instead of inlining raw numbers.
-abstract final class AppSpacing {
+abstract final class TahfeezSpacing {
   /// 4dp — tight inline gaps (e.g. between an icon and its label).
   static const double xs = 4;
 
@@ -32,7 +32,7 @@ abstract final class AppSpacing {
 ///
 /// `docs/DESIGN_DIRECTION.md` calls for "cards around 16-20 logical pixels
 /// radius" — softer and more rounded than the reference app.
-abstract final class AppRadii {
+abstract final class TahfeezRadii {
   static const double sm = 12;
   static const double md = 16;
   static const double lg = 20;

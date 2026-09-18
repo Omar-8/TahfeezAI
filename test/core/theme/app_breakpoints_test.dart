@@ -2,20 +2,20 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tahfeez_ai/core/theme/app_breakpoints.dart';
 
 void main() {
-  group('AppBreakpoint.fromWidth', () {
+  group('TahfeezBreakpoint.fromWidth', () {
     test('classifies phone widths', () {
-      expect(AppBreakpoint.fromWidth(320), AppBreakpoint.phone);
-      expect(AppBreakpoint.fromWidth(599.9), AppBreakpoint.phone);
+      expect(TahfeezBreakpoint.fromWidth(320), TahfeezBreakpoint.phone);
+      expect(TahfeezBreakpoint.fromWidth(599.9), TahfeezBreakpoint.phone);
     });
 
     test('classifies tablet widths', () {
-      expect(AppBreakpoint.fromWidth(600), AppBreakpoint.tablet);
-      expect(AppBreakpoint.fromWidth(1023.9), AppBreakpoint.tablet);
+      expect(TahfeezBreakpoint.fromWidth(600), TahfeezBreakpoint.tablet);
+      expect(TahfeezBreakpoint.fromWidth(1023.9), TahfeezBreakpoint.tablet);
     });
 
     test('classifies desktop widths', () {
-      expect(AppBreakpoint.fromWidth(1024), AppBreakpoint.desktop);
-      expect(AppBreakpoint.fromWidth(2560), AppBreakpoint.desktop);
+      expect(TahfeezBreakpoint.fromWidth(1024), TahfeezBreakpoint.desktop);
+      expect(TahfeezBreakpoint.fromWidth(2560), TahfeezBreakpoint.desktop);
     });
   });
 }
