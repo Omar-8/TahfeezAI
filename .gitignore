@@ -58,7 +58,14 @@ lib/core/localization/generated/
 
 # Re-fetchable raw upstream sources for the production Quran dataset
 # (tool/quran_data/fetch_sources.dart repopulates this). The vendored QUL
-# layout zip under tool/quran_data/sources/ is NOT ignored — it cannot be
-# re-fetched automatically (see docs/QURAN_DATA_PROVENANCE.md) and is
-# committed deliberately.
+# layout/word-by-word zips under tool/quran_data/sources/ are NOT ignored —
+# they cannot be re-fetched automatically (see docs/QURAN_DATA_PROVENANCE.md)
+# and are committed deliberately, small enough to be reasonable in git.
 tool/quran_data/.cache/
+
+# The QPC V2 per-page font package (~136MB, 604 individual TTFs) is
+# deliberately NOT committed yet — its packaging strategy (which formats,
+# whether all 604 pages ship in every build, compression) is an explicit
+# pending decision, not something to bloat repo history with by accident.
+tool/quran_data/sources/*.bz2
+tool/quran_data/sources/*Font*

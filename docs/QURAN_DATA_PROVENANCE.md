@@ -189,51 +189,143 @@ whenever a resource needs updating (obligation 6).
   lines (every surah except Al-Fatiha and At-Tawbah), and 8,820 `ayah` text lines; every
   page's line numbers are contiguous starting at 1 (pages 1–2 have 8 lines each, every
   other page has 15).
-- **The missing piece — a companion word/script dataset**: this file's `ayah` lines carry
-  only bare integer `first_word_id`/`last_word_id` references into a *separate* QUL
-  "Quran script/word database" resource that resolves each id to its actual
-  surah/ayah/word-index and glyph text. **That companion file has not been supplied.**
-  Without it, `first_word_id`/`last_word_id` cannot be turned into real
-  `MushafLine.startAyahId/startWordIndex/endAyahId/endWordIndex` values.
-- **What Tahfeez has built regardless**: the full replaceable architecture this layout
-  will populate once the word dataset arrives —
+- **The companion word/script dataset — now supplied and verified compatible**: this
+  file's `ayah` lines carry bare integer `first_word_id`/`last_word_id` references into a
+  *separate* QUL "Quran script/word database" resource that resolves each id to its
+  actual surah/ayah/word-position and glyph text. The project owner obtained this
+  resource (§7a below) and a full read-only compatibility audit (604 pages, every word-id
+  reference, global monotonicity, per-ayah word counts cross-checked against the
+  canonical Tanzil dataset) confirmed the two files are genuinely built from the same
+  underlying word sequence. See §7a for the resource itself and §7b for what that audit
+  found.
+- **What Tahfeez has built so far**: the replaceable layout-reading architecture —
   `lib/quran/domain/mushaf_data_source.dart` (`MushafDataSource`, `RawMushafLayout`,
   `MushafWordIdResolver`, `resolveMushafLines`) and
   `tool/quran_data/src/mushaf_layout_source.dart` (`QulKfgqpcV2MushafDataSource`, which
-  already reads and structurally validates the real file above). No synthetic or
-  placeholder Mushaf line/word content has been generated anywhere, at the explicit,
-  repeated instruction of the project owner — the `Mushafs`/`MushafLines` tables remain
-  empty in the shipped dataset until the real companion file is imported through this
-  same architecture.
+  reads and structurally validates the real file above) — plus, now that real word data
+  exists, the token-classification layer described in §7b/§7c. No synthetic or
+  placeholder Mushaf content has been generated anywhere, at the explicit, repeated
+  instruction of the project owner. **Not yet done**: wiring classified tokens into a
+  production `MushafLine`/`MushafToken` import that populates the shipped dataset — the
+  `Mushafs`/`MushafLines` tables remain empty in `assets/quran/quran_dataset.json` until
+  that import is built (a deliberately separate, still-pending step from this schema
+  design and its font-package/packaging-strategy decisions).
 - **License**: **unverified**. Per QUL's own FAQ, "the resources available on QUL vary in
   their copyright status... review the licensing terms for each resource" — there is no
   blanket grant, and QUL's platform/codebase being MIT-licensed does **not** extend to
   this specific data resource. The specific redistribution terms for this exact layout
   file have not been independently confirmed (QUL's resource-specific license page is
   only reachable after the same login gate that blocks automated fetching).
-- **Status**: `SHIP_BLOCKED_PENDING_WORD_DATA` (missing companion dataset) **and**
-  `SHIP_BLOCKED_LICENSE` (redistribution terms not yet independently verified). Per this
-  project's rules: this is recorded honestly as blocked, **not** assumed permitted, and
-  **not** silently marked "MIT" because QUL's software repository happens to be MIT.
-  Resolving either blocker requires the project owner's direct QUL account access.
+- **Status**: `SHIP_BLOCKED_LICENSE`. The data itself is now fully understood and
+  verified compatible (§7a/§7b) — the only remaining blocker for this resource is that
+  its redistribution terms have not been independently verified. Per this project's
+  rules: this is recorded honestly as blocked, **not** assumed permitted, and **not**
+  silently marked "MIT" because QUL's software repository happens to be MIT. Resolving
+  this requires the project owner's direct QUL account access to the resource's own
+  license/terms page.
+
+## 7a. Quran script/word-by-word dataset — QUL KFGQPC V2 Glyph (word IDs)
+
+- **Source**: QUL, resource "QPC V2 Glyph - Word by Word"
+  (`https://qul.tarteel.ai/resources/quran-script/61`).
+- **File**: `qpc-v2.db` (table `words`), manually provided by the project owner and
+  vendored at `tool/quran_data/sources/qpc-v2-word-by-word.db.zip`.
+- **Content hash (SHA-256, of the extracted `qpc-v2.db` file)**:
+  `4bf9549dfcfd367d4d4b151bd58b51af63b677d1c980cf5e52541c2f981d7e6d` (computed by
+  `QulKfgqpcV2WordByWordSource.readInfo()`, `tool/quran_data/src/mushaf_wbw_source.dart`).
+  Vendored zip hash: `a766a033cad47b36f00f493f5f0541d5f07e1336857eaa6feba92465af3f68bb`.
+- **Schema**: `words(id INTEGER, location TEXT, surah INTEGER, ayah INTEGER, word INTEGER,
+  text TEXT)`. `id` is the exact value §7's `pages.first_word_id`/`last_word_id` reference;
+  `location` is `surah:ayah:word`; `text` is QCF V2 glyph text (see §8).
+- **Why vendored rather than fetched by tooling**: same login gate as §7 — confirmed by
+  inspecting the resource's own download links, which redirect to `/users/sign_in`.
+- **License**: **unverified**, same status and reasoning as §7 (`SHIP_BLOCKED_LICENSE`).
+
+## 7b. Compatibility audit and the ayah-marker finding
+
+A full read-only audit (no import performed) confirmed §7 and §7a are genuinely built
+from the same underlying word sequence:
+
+- 604 pages; `words` has exactly 83,668 rows, ids contiguous 1..83,668, no duplicates.
+- Every one of the 8,820 `ayah` lines' `first_word_id`/`last_word_id` resolves to a real
+  `words` row; zero unresolved references, zero reversed ranges.
+- Zero gaps between consecutive ayah-lines' word-id ranges across the entire book — the
+  layout's final `last_word_id` (83,668) exactly equals `words`' max `id`.
+- `location` is internally consistent with `surah`/`ayah`/`word` for all 83,668 rows.
+
+**Finding**: QUL's per-ayah token count is exactly one more than the canonical Tanzil
+word count, for 6,235 of the Quran's 6,236 ayahs (verified by exact arithmetic:
+`83,668 − 77,433 canonical words = 6,235`). This is the small ayah-end/verse-number
+ornament every printed ayah carries, occupying its own id immediately after the ayah's
+real words — not a data error. The sole exception is ayah 37:130, which has no such
+token (all 4 of its tokens are real words, matching the canonical count exactly) — a
+genuine, singular anomaly in the authentic data, detected structurally by
+`MushafTokenClassifier` rather than hardcoded. See §7c for how Tahfeez represents this.
+
+Real-word-to-canonical mapping was verified at the count and positional-order level
+exhaustively (every ayah's tokens sort identically by id and by word-position; every
+ayah's real-word count, once its trailing marker is excluded, exactly matches the
+canonical `AyahWord` count for that ayah). It was **not** possible to independently
+verify glyph-level text *content* equality, since QUL's text is font-remapped codepoints
+rather than plain Unicode, and the one plain-Unicode word-by-word resource sharing this
+numbering scheme ("KFGQPC Hafs script - Word by word", resource 312) is also
+login-gated and has not been obtained.
+
+## 7c. `MushafToken` — a separate Mushaf-rendering token model
+
+Per explicit product decision, QUL's word-id stream is **not** imported into canonical
+`AyahWord` rows (an ayah-end marker is not Quran text and must never be counted as a
+word, searched, or included in word-by-word/AI alignment). Instead:
+
+- `lib/quran/domain/models/mushaf_token_models.dart` — `MushafToken` (fields:
+  `mushafId, sourceTokenId, sequenceIndex, tokenType, displayText, surahNumber?,
+  ayahNumber?, sourceWordPosition?, canonicalWordIndex?, canonicalAyahId?`) and
+  `MushafTokenType` (`quranWord | ayahMarker | otherMarker | unknown`).
+  `sourceTokenId` preserves QUL's `id` exactly. `canonicalWordIndex`/`canonicalAyahId`
+  are set only for `quranWord` tokens — a marker never receives a fabricated canonical
+  reference. No `canonicalAyahWordId` field exists: `AyahWord` has no surrogate key, so
+  `canonicalAyahId` + `canonicalWordIndex` together are already the complete join key.
+- `lib/quran/domain/mushaf_token_classifier.dart` — `MushafTokenClassifier`, which
+  derives each ayah's token classification *from the data itself* (comparing that ayah's
+  QUL token count against its canonical word count — exact match → all `quranWord`;
+  exactly one more → all but the last are `quranWord`, the last is `ayahMarker`; anything
+  else → every token for that ayah is `unknown`, with a reported warning). This is a
+  direct, nullable mapping (validated reliable by §7b's audit), not a separate mapping
+  table — per instruction, a separate `MushafTokenCanonicalWordMap` table is reserved for
+  if a future source's mapping proves non-1:1.
+- `test/quran_data/qul_word_by_word_source_test.dart` runs this classifier against the
+  real vendored `qpc-v2.db` and the real bundled canonical dataset, asserting exactly the
+  numbers above (6,235 `ayahMarker`, 77,433 `quranWord`, 0 `unknown`, 0 `otherMarker`,
+  every `quranWord` token's canonical reference resolves to a real `AyahWord`).
+- **Not yet built**: the production import that turns classified tokens into
+  `MushafLine`/`MushafToken` rows in the shipped dataset, and the Drift table(s) to store
+  them — this schema/classifier is the foundation that step will use.
 
 ## 8. Quran script/glyph font — KFGQPC/QCF V2
 
-- **What it is**: the private-use-area glyph font QUL's KFGQPC V2 layout is typeset
-  against (each Mushaf page has its own font subset — confirmed via QUL's own CDN URL
-  pattern, e.g. `https://static-cdn.tarteel.ai/qul/fonts/quran_fonts/v2/woff2/p574.woff2`).
-- **Status**: `SHIP_BLOCKED_LICENSE`. Not downloaded, not bundled, not used anywhere in
-  Tahfeez. Its redistribution terms are a **separate** license gate from the layout data
-  itself (§7) and have not been researched to a shippable standard — QUL's own FAQ places
-  fonts under the same "review per resource, no blanket grant" rule as every other
-  dataset category. `docs/reference/05_MUSHAF_SPEC.md` already recorded, before this
-  milestone, that a reference-app KFQPC-style font must never simply be copied into
-  Tahfeez; this finding is consistent with that and extends it to QUL's redistribution of
-  the same font family. Per instruction, this blocker is recorded honestly rather than
-  worked around by silently substituting an unrelated font and calling the Mushaf layer
-  "done" — the 15-line layout integration itself is not abandoned because of this; it
-  simply cannot render real glyphs yet, and currently cannot render anything at all
-  because §7's word dataset is also missing.
+- **What it is**: the glyph font QUL's KFGQPC V2 layout is typeset against — confirmed to
+  be genuinely page-by-page: the project owner obtained "QPC V2 Font.ttf.bz2" (actually a
+  zip; not yet vendored into git — see below), which contains 604 individual TTF files
+  (`p1.ttf`..`p604.ttf`, ~198MB uncompressed), named `QCF2001`..`QCF2604` internally.
+  Inspecting each font's `cmap` table directly confirmed the earlier CDN-based finding:
+  the *same* numeric codepoint (e.g. `0xFC41`) is deliberately reused across different
+  pages' fonts to draw *different* glyphs (verified: it renders Al-Fatiha's first word on
+  page 1's font and Al-Ikhlas's first word on page 604's font) — a line's `MushafToken`
+  text is only meaningful when rendered through that exact page's own font file.
+- **Status**: `SHIP_BLOCKED_LICENSE`. The font files are in hand (via the project owner)
+  but **not committed to git yet** (`.gitignore`d at `tool/quran_data/sources/*.bz2` and
+  `*Font*`) — packaging strategy (which formats to ship, whether all 604 pages bundle in
+  every build, compression) is a deliberate pending decision, not something to commit by
+  accident given the uncompressed size. Its redistribution terms are a **separate**
+  license gate from the layout/word data (§7/§7a) and have not been researched to a
+  shippable standard — QUL's own FAQ places fonts under the same "review per resource, no
+  blanket grant" rule as every other dataset category, and the official font resource
+  page's own download links are also login-gated.
+  `docs/reference/05_MUSHAF_SPEC.md` already recorded, before this milestone, that a
+  reference-app KFQPC-style font must never simply be copied into Tahfeez; this finding
+  is consistent with that and extends it to QUL's redistribution of the same font family.
+  Per instruction, this blocker is recorded honestly rather than worked around by
+  silently substituting an unrelated font and calling the Mushaf layer "done."
 
 ## 9. Tahfeez-generated data — search indexes
 
@@ -251,13 +343,17 @@ dart run tool/quran_data/fetch_sources.dart        # Tanzil + QuranEnc, live net
 dart run tool/quran_data/build_production_data.dart # writes assets/quran/*.json
 ```
 
-The QUL layout file must already exist at
-`tool/quran_data/sources/qpc-v2-15-lines.db.zip` (it is committed to this repository,
-since it cannot be re-fetched automatically — see §7). Re-running both commands against
-the same upstream state reproduces byte-identical `assets/quran/*.json` output; every
-hash in this document was produced this way and is re-checked by
-`test/quran_data/bundled_dataset_integrity_test.dart` and
-`test/quran_data/qul_layout_source_test.dart` on every test run.
+The QUL layout and word-by-word files must already exist at
+`tool/quran_data/sources/qpc-v2-15-lines.db.zip` and
+`tool/quran_data/sources/qpc-v2-word-by-word.db.zip` (both committed to this repository,
+since neither can be re-fetched automatically — see §7/§7a). The QPC V2 font package is
+**not** committed (see §8) and is not required to reproduce `assets/quran/*.json`, since
+Mushaf content is not yet part of that output. Re-running both commands against the same
+upstream state reproduces byte-identical `assets/quran/*.json` output; every hash in this
+document was produced this way and is re-checked by
+`test/quran_data/bundled_dataset_integrity_test.dart`,
+`test/quran_data/qul_layout_source_test.dart`, and
+`test/quran_data/qul_word_by_word_source_test.dart` on every test run.
 
 ## Summary table
 
@@ -268,6 +364,6 @@ hash in this document was produced this way and is re-checked by
 | English translation (Rowwad) | QuranEnc | Integrated |
 | German translation (Rowwad) | QuranEnc | Integrated |
 | Tafsir Al-Muyassar (Arabic) | QuranEnc | Integrated |
-| Mushaf page/line layout (KFGQPC V2) | QUL | `SHIP_BLOCKED_PENDING_WORD_DATA`, `SHIP_BLOCKED_LICENSE` |
-| Quran script/word dataset (word id resolution) | QUL | Not yet supplied |
-| Mushaf glyph font (QCF V2) | QUL | `SHIP_BLOCKED_LICENSE` |
+| Mushaf page/line layout (KFGQPC V2) | QUL | Data verified compatible; `SHIP_BLOCKED_LICENSE`; not yet imported |
+| Quran script/word-by-word dataset (word id resolution) | QUL | Obtained, audited, `MushafToken` schema built; `SHIP_BLOCKED_LICENSE`; not yet imported |
+| Mushaf glyph font (QCF V2) | QUL | Obtained (not committed to git); `SHIP_BLOCKED_LICENSE` |

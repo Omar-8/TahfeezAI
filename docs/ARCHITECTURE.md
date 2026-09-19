@@ -1249,6 +1249,76 @@ itself). `test/quran/data/import/bundled_dataset_seeder_test.dart` runs the full
 verify-then-import boot path against real in-memory Drift databases and the real bundled
 assets, asserting zero errors are logged and every resource ends up installed.
 
+## 11j. Mushaf Token Schema (Milestone 9B, in progress)
+
+### `MushafToken`, not `MushafWord`
+
+Once the project owner obtained QUL's real KFGQPC V2 word-by-word export
+(`qpc-v2-word-by-word.db.zip`) alongside the layout file, a read-only compatibility audit
+(documented in full in `docs/QURAN_DATA_PROVENANCE.md` §7b) found that QUL's word-id
+stream is not purely Quran words: every printed ayah (with one confirmed, singular
+exception, 37:130) carries a small ayah-end/verse-number ornament as its own addressable
+id, immediately after that ayah's real words — confirmed by exact arithmetic
+(83,668 total ids − 77,433 canonical words = 6,235, exactly the number of ayahs with a
+marker). This directly shaped the schema: `lib/quran/domain/models/mushaf_token_models.dart`
+defines `MushafToken` (never `MushafWord`, per explicit product decision, since "word"
+would overclaim what every entry in this id stream actually is) and `MushafTokenType`
+(`quranWord | ayahMarker | otherMarker | unknown`) as a model deliberately **separate**
+from `AyahWord` — canonical Quran word semantics (search, sharing, word-by-word
+translation, AI alignment) continue to use `AyahWord` exclusively; `MushafToken` is the
+sole authority for the exact printed-Mushaf token sequence, markers included.
+
+### A data-driven classifier, not a hardcoded rule
+
+`lib/quran/domain/mushaf_token_classifier.dart`'s `MushafTokenClassifier` decides each
+ayah's token classification by comparing that ayah's actual QUL token count against its
+canonical `AyahWord` count — not by hardcoding "the last token of every ayah is a
+marker." This is what lets it correctly detect ayah 37:130's real, singular exception
+(zero tokens beyond its 4 canonical words) without a special case, and what makes it
+safe against a hypothetical future anomaly: any per-ayah token count that isn't an exact
+match or exactly one more is marked entirely `unknown` and reported as a
+`MushafTokenClassificationWarning`, never guessed at. `MushafTokenType.otherMarker`
+exists in the enum for a future source that might need it, but is never produced by this
+classifier — no token pattern in the currently-vendored data warrants it.
+
+### A direct nullable mapping, not a join table — because the data justified it
+
+`MushafToken.canonicalWordIndex`/`canonicalAyahId` are plain nullable fields on the
+token itself, populated only for `quranWord` tokens, rather than a separate
+`MushafTokenCanonicalWordMap` table. This was an explicit two-way instruction: use the
+direct mapping *if and only if* real-data validation shows it is reliable. The audit
+validated it exhaustively (every ayah's tokens sort identically by id and by
+QUL-reported word-position; every ayah's real-word count, once its trailing marker is
+excluded, matches its canonical count) before this design was chosen — it was not
+assumed up front. There is also no `canonicalAyahWordId` field: `AyahWord` has no
+surrogate key of its own (identified by the composite `(ayahId, scriptId, wordIndex)`),
+so `canonicalAyahId` + `canonicalWordIndex` are already the complete, minimal join key.
+
+### What is honestly still missing
+
+The Mushaf *layout-reading* side (`MushafDataSource`, `RawMushafLayout`) and the new
+*token* side (`MushafTokenSource`, `RawMushafToken`, `MushafTokenClassifier`) both now
+exist and are both validated against real vendored files
+(`test/quran_data/qul_layout_source_test.dart`,
+`test/quran_data/qul_word_by_word_source_test.dart`). What does **not** exist yet: the
+production import that combines them into real `Mushafs`/`MushafLines` rows (and
+whatever Drift table stores `MushafToken`s) in the shipped dataset, and any rendering
+code. `assets/quran/quran_dataset.json`'s `mushafs`/`mushafLines` remain empty. The QCF
+V2 font package (604 real per-page TTFs, confirmed genuinely page-specific via direct
+`cmap` inspection) is in hand but deliberately not committed to git pending a packaging
+decision — see `docs/QURAN_DATA_PROVENANCE.md` §8.
+
+### Testing
+
+`test/quran/domain/mushaf_token_classifier_test.dart` covers the classifier's decision
+rules with small synthetic fixtures (testing the generic mechanism, never treated as
+real Mushaf content).
+`test/quran_data/qul_word_by_word_source_test.dart` is the real-data proof: it classifies
+every one of the real 83,668 tokens against the real bundled canonical dataset and
+asserts the exact counts the audit found (6,235 `ayahMarker`, 77,433 `quranWord`, zero
+`unknown`, zero `otherMarker`), plus that every `quranWord` token's canonical reference
+resolves to a real, existing `AyahWord` — never a fabricated one.
+
 ## 12. What Milestone 1 deliberately did not do
 
 - No feature screens (Home, Reader, Search, Settings, ...) — only the one foundation-proof
