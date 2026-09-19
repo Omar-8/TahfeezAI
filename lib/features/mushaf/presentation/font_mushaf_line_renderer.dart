@@ -21,6 +21,7 @@ class FontMushafLineRenderer extends MushafLineRenderer {
     required double availableWidth,
     required double lineHeight,
     required Color textColor,
+    String? fontFamily,
     ValueChanged<MushafWordPlacement>? onWordTap,
   }) {
     return GestureDetector(
@@ -43,6 +44,7 @@ class FontMushafLineRenderer extends MushafLineRenderer {
             layout: layout,
             availableWidth: availableWidth,
             color: textColor,
+            fontFamily: fontFamily,
           ),
         ),
       ),
@@ -71,11 +73,13 @@ class _MushafLinePainter extends CustomPainter {
     required this.layout,
     required this.availableWidth,
     required this.color,
+    required this.fontFamily,
   });
 
   final MushafLineLayout layout;
   final double availableWidth;
   final Color color;
+  final String? fontFamily;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -92,7 +96,11 @@ class _MushafLinePainter extends CustomPainter {
       final painter = TextPainter(
         text: TextSpan(
           text: placement.text,
-          style: TextStyle(fontSize: layout.fontSize, color: color),
+          style: TextStyle(
+            fontSize: layout.fontSize,
+            color: color,
+            fontFamily: fontFamily,
+          ),
         ),
         textDirection: TextDirection.rtl,
       )..layout();
@@ -108,6 +116,7 @@ class _MushafLinePainter extends CustomPainter {
   bool shouldRepaint(covariant _MushafLinePainter oldDelegate) {
     return oldDelegate.layout != layout ||
         oldDelegate.availableWidth != availableWidth ||
-        oldDelegate.color != color;
+        oldDelegate.color != color ||
+        oldDelegate.fontFamily != fontFamily;
   }
 }

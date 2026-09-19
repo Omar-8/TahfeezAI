@@ -6,6 +6,7 @@ import '../../../quran/application/quran_chapter_localization.dart';
 import '../../../quran/domain/models/mushaf_models.dart';
 import '../application/mushaf_appearance_controller.dart';
 import '../application/mushaf_page_providers.dart';
+import '../application/qpc_page_font_providers.dart';
 import '../domain/mushaf_appearance.dart';
 import '../domain/mushaf_line_layout.dart';
 import 'mushaf_layout_providers.dart';
@@ -41,30 +42,104 @@ class MushafPageView extends ConsumerWidget {
       child: bundleAsync.when(
         data: (bundle) {
           if (bundle == null) {
-            return Center(
-              child: Text(
-                'This page will appear automatically once a Quran dataset is added to the app.',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: colors.secondaryText),
-              ),
+            return _MushafPagePlaceholder(colors: colors);
+          }
+          if (bundle.mushaf.renderingType !=
+              MushafRenderingType.pageSpecificGlyphFont) {
+            // No page-specific font concept for this rendering type — no
+            // font gating needed.
+            return _MushafPageContent(
+              bundle: bundle,
+              colors: colors,
+              onWordTap: onWordTap,
+              fontFamily: null,
             );
           }
-          return _MushafPageContent(
-            bundle: bundle,
-            colors: colors,
-            onWordTap: onWordTap,
+
+          // A page-specific-glyph Mushaf must never render its Quran text
+          // with any font other than that exact page's own — wait for it
+          // rather than showing a fallback/previous-page font, per
+          // docs/QURAN_DATA_PROVENANCE.md §8.
+          final fontAsync = ref.watch(
+            mushafPageFontProvider(mushafId, pageNumber),
+          );
+          return fontAsync.when(
+            data: (handle) {
+              if (handle == null) {
+                return _MushafFontPendingPlaceholder(colors: colors);
+              }
+              return _MushafPageContent(
+                bundle: bundle,
+                colors: colors,
+                onWordTap: onWordTap,
+                fontFamily: handle.fontFamily,
+              );
+            },
+            loading: () => Center(
+              child: CircularProgressIndicator(color: colors.secondaryText),
+            ),
+            error: (_, _) => _MushafFontErrorPlaceholder(colors: colors),
           );
         },
         loading: () => Center(
           child: CircularProgressIndicator(color: colors.secondaryText),
         ),
-        error: (_, _) => Center(
-          child: Text(
-            'This page will appear automatically once a Quran dataset is added to the app.',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: colors.secondaryText),
-          ),
-        ),
+        error: (_, _) => _MushafPagePlaceholder(colors: colors),
+      ),
+    );
+  }
+}
+
+class _MushafPagePlaceholder extends StatelessWidget {
+  const _MushafPagePlaceholder({required this.colors});
+
+  final MushafAppearanceColors colors;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Text(
+        'This page will appear automatically once a Quran dataset is added to the app.',
+        textAlign: TextAlign.center,
+        style: TextStyle(color: colors.secondaryText),
+      ),
+    );
+  }
+}
+
+/// Shown when Mushaf line/token data is real and ready, but no page-font
+/// manifest is bundled in this build — the honest `SHIP_BLOCKED_LICENSE`
+/// state (`docs/QURAN_DATA_PROVENANCE.md` §8), never a silent fallback to
+/// an approximate font.
+class _MushafFontPendingPlaceholder extends StatelessWidget {
+  const _MushafFontPendingPlaceholder({required this.colors});
+
+  final MushafAppearanceColors colors;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Text(
+        'Authentic Mushaf rendering is pending font packaging clearance.',
+        textAlign: TextAlign.center,
+        style: TextStyle(color: colors.secondaryText),
+      ),
+    );
+  }
+}
+
+class _MushafFontErrorPlaceholder extends StatelessWidget {
+  const _MushafFontErrorPlaceholder({required this.colors});
+
+  final MushafAppearanceColors colors;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Text(
+        'This page\'s Mushaf font could not be loaded.',
+        textAlign: TextAlign.center,
+        style: TextStyle(color: colors.secondaryText),
       ),
     );
   }
@@ -75,11 +150,17 @@ class _MushafPageContent extends ConsumerWidget {
     required this.bundle,
     required this.colors,
     required this.onWordTap,
+    required this.fontFamily,
   });
 
   final MushafPageBundle bundle;
   final MushafAppearanceColors colors;
   final ValueChanged<MushafWordPlacement>? onWordTap;
+
+  /// The exact font this page's Quran glyph text must be drawn with — set
+  /// only once `QpcPageFontManager.ensureLoaded` has confirmed it, or
+  /// `null` for a rendering type with no page-specific font concept.
+  final String? fontFamily;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -98,6 +179,7 @@ class _MushafPageContent extends ConsumerWidget {
                   lines: bundle.lines,
                   tokensByLineNumber: bundle.tokensByLineNumber,
                   availableWidth: constraints.maxWidth,
+                  fontFamily: fontFamily,
                 );
                 final lineHeight = layout.lines.isEmpty
                     ? 0.0
@@ -153,6 +235,7 @@ class _MushafPageContent extends ConsumerWidget {
           availableWidth: availableWidth,
           lineHeight: lineHeight,
           textColor: colors.text,
+          fontFamily: fontFamily,
           onWordTap: onWordTap,
         );
     }

@@ -81,3 +81,20 @@ tool/quran_data/sources/*Font*
 # this file to exist and are skipped-by-failure otherwise, the same
 # prerequisite the other qul_*_test.dart real-data tests already have.
 assets/quran/mushaf/
+
+# The generated, copied QPC V2 page fonts (604 real TTFs, ~200MB) — same
+# unresolved redistribution status as the raw vendored package
+# (tool/quran_data/sources/*Font*, also gitignored) and the Mushaf dataset
+# above. Regenerate locally with `dart run tool/quran_data/build_qpc_fonts.dart`
+# (requires the vendored font package to exist first — see
+# docs/QURAN_DATA_PROVENANCE.md §8). test/quran_data/qpc_font_manifest_test.dart
+# and test/features/mushaf/data/font_loader_qpc_page_font_manager_test.dart
+# require these files and skip/fail gracefully otherwise.
+assets/quran/fonts/
+
+# The generated font manifest (assets/quran/manifests/qpc_v2_fonts.json) is
+# NOT gitignored — unlike the font files themselves, it contains no
+# copyrighted content (only page numbers, filenames, font family names, and
+# hashes), the same reasoning that already keeps resource_manifest.json
+# committed despite recording hashes of other gated resources.
+!assets/quran/manifests/

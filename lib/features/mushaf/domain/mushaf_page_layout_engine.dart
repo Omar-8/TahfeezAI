@@ -54,6 +54,7 @@ class MushafPageLayoutEngine {
     required List<MushafLine> lines,
     required Map<int, List<MushafToken>> tokensByLineNumber,
     required double availableWidth,
+    String? fontFamily,
   }) {
     final laidOutLines = [
       for (final line in lines)
@@ -61,17 +62,22 @@ class MushafPageLayoutEngine {
           line: line,
           tokens: tokensByLineNumber[line.lineNumber] ?? const [],
           availableWidth: availableWidth,
+          fontFamily: fontFamily,
         ),
     ];
     return MushafPageLayout(pageNumber: pageNumber, lines: laidOutLines);
   }
 
   /// Lays out one line. Deterministic: the same [line]/[tokens]/
-  /// [availableWidth] always produce the same [MushafLineLayout].
+  /// [availableWidth]/[fontFamily] always produce the same
+  /// [MushafLineLayout]. [fontFamily] should be the exact font this line
+  /// will be painted with, so the justification math matches real glyph
+  /// widths (see [MushafWordMeasurer]'s doc comment).
   MushafLineLayout layoutLine({
     required MushafLine line,
     required List<MushafToken> tokens,
     required double availableWidth,
+    String? fontFamily,
   }) {
     if (tokens.isEmpty) {
       // A pure surah-header or Bismillah line carries no ayah words of its
@@ -91,7 +97,11 @@ class MushafPageLayoutEngine {
     double naturalWidthAt(double fontSize) {
       var total = 0.0;
       for (final token in tokens) {
-        total += measurer.measure(token.displayText, fontSize);
+        total += measurer.measure(
+          token.displayText,
+          fontSize,
+          fontFamily: fontFamily,
+        );
       }
       total += baseInterWordSpacing * (tokens.length - 1);
       return total;
@@ -103,7 +113,8 @@ class MushafPageLayoutEngine {
     final fontSize = baseFontSize * scale;
 
     final tokenWidths = [
-      for (final token in tokens) measurer.measure(token.displayText, fontSize),
+      for (final token in tokens)
+        measurer.measure(token.displayText, fontSize, fontFamily: fontFamily),
     ];
     final totalTokenWidth = tokenWidths.fold<double>(0, (a, b) => a + b);
 

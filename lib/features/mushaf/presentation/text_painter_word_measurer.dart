@@ -10,11 +10,11 @@ class TextPainterWordMeasurer implements MushafWordMeasurer {
   const TextPainterWordMeasurer();
 
   @override
-  double measure(String text, double fontSize) {
+  double measure(String text, double fontSize, {String? fontFamily}) {
     final painter = TextPainter(
       text: TextSpan(
         text: text,
-        style: TextStyle(fontSize: fontSize),
+        style: TextStyle(fontSize: fontSize, fontFamily: fontFamily),
       ),
       textDirection: TextDirection.rtl,
     )..layout();

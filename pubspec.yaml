@@ -112,6 +112,24 @@ flutter:
     - assets/quran/translations/de_rowwad.json
     - assets/quran/tafsir/ar_muyassar.json
 
+    # DEVELOPMENT-ONLY, LICENSE-GATED — see docs/QURAN_DATA_PROVENANCE.md
+    # §7/§7a/§8 and the release checklist there. The real Mushaf
+    # line/token dataset and the real QPC V2 per-page fonts (604 files,
+    # ~200MB uncompressed) are declared here so local/debug builds can
+    # actually render the authentic Mushaf; lib/quran/data/import/
+    # bundled_dataset_seeder.dart and
+    # lib/features/mushaf/application/qpc_page_font_providers.dart both
+    # refuse to import/load this content when kReleaseMode is true, so the
+    # app itself never displays it in a release build even if these bytes
+    # are physically present. That refusal does NOT remove the bytes from
+    # a naively-built release package — a true public release must also
+    # strip or flavor-gate these three asset lines before shipping; do not
+    # mark the release checklist's redistribution items "cleared" without
+    # verified upstream permission.
+    - assets/quran/mushaf/kfgqpc_v2.json
+    - assets/quran/manifests/qpc_v2_fonts.json
+    - assets/quran/fonts/qpc_v2/
+
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
 

@@ -1396,6 +1396,52 @@ Surah transition — An-Nisa's last ayah into Al-Ma'idah's header), 302 (a repre
 middle page), and 604, reporting line/token counts and first/last Quran location for
 each.
 
+## 11k. Mushaf Rendering and Font Packaging (Milestone 9C)
+
+Once real Mushaf line/token data existed (§11j), this milestone connected it to the
+actual renderer and to the real QPC V2 page-specific font system, and made the
+production data reach the app's own local database at boot rather than only a
+build-tool output file. Full detail lives in two dedicated documents rather than here,
+since both are substantial enough to need their own space:
+
+- **`docs/MUSHAF_RENDERING.md`** — the full pipeline
+  (`MushafRepository` → `MushafLine`/`MushafToken` → `QpcPageFontManager` →
+  `MushafPageLayoutEngine` → `FontMushafLineRenderer`), the generated, per-file-verified
+  page→font manifest (`tool/quran_data/build_qpc_fonts.dart`,
+  `PageFontManifest`/`PageFontManifestEntry`), the lazy `FontLoader`-based loading
+  design (concurrency-safe, ±2 preload radius, no eviction — Flutter has no supported
+  API to unregister a loaded font family), and the Riverpod-provider-based race safety
+  that keeps rapid page swiping correct.
+- **`docs/OFFLINE_MOBILE_ARCHITECTURE.md`** — the boot-time seeding flow, the
+  cheap-manifest-first check `BundledDatasetSeeder` uses to avoid re-parsing large JSON
+  on every launch, per-resource failure isolation, and the measured (this-sandbox-only)
+  app size impact of bundling the font package.
+
+### `MushafLine`'s and `AyahWord`'s field-level schema were not changed for this
+
+Every schema decision from Milestone 9B (`firstTokenId`/`lastTokenId`, `MushafToken`
+separate from `AyahWord`, per-`(mushafId, sourceTokenId)` uniqueness) is unchanged —
+this milestone is entirely about *connecting* that already-correct schema to a real
+renderer and a real font system, not revising it. `MushafPageLayoutEngine` and
+`MushafWordMeasurer` gained a `fontFamily` parameter (so justification math measures
+with the same font that will actually paint the glyphs), and
+`MushafWordPlacement`/`MushafLineRenderer.buildLine` gained the same, but no line's
+token membership, no line's page assignment, and no token's canonical mapping changed.
+
+### The one honestly-unresolved architectural gap
+
+`BundledDatasetSeeder` and `qpcPageFontManifestProvider` refuse to import/load the
+Mushaf dataset and font package when `kReleaseMode` is true, which stops *the running
+app* from displaying this content in a release build. It does not stop the *asset
+bytes* from being physically included in a release package — verified directly: a real
+`flutter build appbundle --release` produced a 204.9MB AAB still containing the full
+font package and Mushaf dataset, since Flutter's asset system has no per-build-type
+exclusion without a product-flavor setup, which this milestone did not implement. This
+is recorded as a real, open item in `docs/QURAN_DATA_PROVENANCE.md`'s release checklist,
+not papered over — resolving it (via a flavor, or via removing the asset declarations
+before a real release build) is required before any public distribution, independent of
+whether QUL's redistribution terms are ever cleared.
+
 ## 12. What Milestone 1 deliberately did not do
 
 - No feature screens (Home, Reader, Search, Settings, ...) — only the one foundation-proof
@@ -1668,3 +1714,29 @@ each.
   milestone's scale and consistent with typical Quran-app asset sizes; a more compact on-disk
   encoding (e.g. arrays instead of keyed objects) is a pure size optimization revisitable later with
   zero effect on `QuranDatasetPayload`, `DatasetIntegrityValidator`, or any repository consumer.
+
+## 23. What Milestone 9C (Mushaf Rendering and Font Packaging) deliberately did not do
+
+- No build-time/flavor-based exclusion of the gated Mushaf/font assets from a release build — only
+  a `kReleaseMode` runtime refusal in Dart code. A real test release AAB still physically contained
+  the ~200MB font package and ~26MB Mushaf dataset. Recorded as an explicit, unresolved release
+  blocker in `docs/QURAN_DATA_PROVENANCE.md`'s release checklist, not hidden or worked around.
+- No font subsetting, merging, re-encoding, or custom atlas generation — every one of the 604 QCF
+  V2 files is bundled byte-for-byte unmodified, per explicit instruction not to modify a font file
+  whose modification rights have not been separately verified.
+- No CDN-based runtime font delivery and no scraping of QUL/Tarteel's public font CDN — the only
+  font source is the real, manually-obtained package the project owner supplied.
+- No Play Asset Delivery or iOS On-Demand Resources — deliberately deferred (per instruction) as a
+  future optimization if the current bundled-and-lazy-loaded approach's app-size impact proves
+  unacceptable once licensing clears; see `docs/OFFLINE_MOBILE_ARCHITECTURE.md` §7.
+- No physical-device testing of font load latency, memory behavior, or the Android/iOS offline
+  acceptance walkthrough — no device was available in this environment. Numbers reported are from
+  this sandbox's `flutter_test` engine only, explicitly caveated as such rather than presented as
+  device-representative.
+- No iOS build or compile check — no macOS/Xcode available in this environment.
+- No `unicodeText` `MushafRenderingType` implementation — the enum value and the rendering
+  branch that skips font-gating for it exist, but no real Mushaf source of that type has been
+  integrated; QUL's KFGQPC V2 (`pageSpecificGlyphFont`) remains the only real Mushaf.
+- No change to canonical `AyahWord`/`Ayah` schema, translation/tafsir architecture, or search — this
+  milestone is scoped entirely to the Mushaf rendering/font layer built on top of already-existing,
+  unmodified canonical data.

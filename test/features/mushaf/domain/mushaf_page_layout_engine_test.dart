@@ -14,7 +14,7 @@ class FakeWordMeasurer implements MushafWordMeasurer {
   final double charWidth;
 
   @override
-  double measure(String text, double fontSize) =>
+  double measure(String text, double fontSize, {String? fontFamily}) =>
       text.length * charWidth * (fontSize / 28);
 }
 

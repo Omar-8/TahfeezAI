@@ -20,7 +20,7 @@ class _FakeMeasurer implements MushafWordMeasurer {
   const _FakeMeasurer();
 
   @override
-  double measure(String text, double fontSize) =>
+  double measure(String text, double fontSize, {String? fontFamily}) =>
       text.length * 10 * (fontSize / 28);
 }
 

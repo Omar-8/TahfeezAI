@@ -9,5 +9,10 @@
 /// (`lib/features/mushaf/presentation/text_painter_word_measurer.dart`)
 /// wraps `TextPainter`.
 abstract class MushafWordMeasurer {
-  double measure(String text, double fontSize);
+  /// [fontFamily] should be the exact font the text will actually be
+  /// painted with (`null` falls back to the platform default) — for a
+  /// page-specific-glyph Mushaf, measuring with the wrong font can shift
+  /// justification/spacing math away from what the real glyphs occupy,
+  /// even though it never changes which words belong to which line.
+  double measure(String text, double fontSize, {String? fontFamily});
 }

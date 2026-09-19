@@ -2,9 +2,12 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
+import 'package:flutter/foundation.dart' show kReleaseMode;
 import 'package:flutter/services.dart' show rootBundle;
 
 import '../../../core/logging/app_logger.dart';
+import '../../../core/storage/browser_storage.dart';
+import '../../domain/quran_dataset_payload.dart';
 import '../../domain/repositories/quran_repository.dart';
 import '../../domain/repositories/tafsir_repository.dart';
 import '../../domain/repositories/translation_repository.dart';
@@ -22,17 +25,31 @@ import 'quran_dataset_importer.dart';
 /// Every asset's bytes are hash-verified against
 /// `assets/quran/resource_manifest.json` before anything is imported —
 /// "verify manifest/hash, then open the local database" — and each of the
-/// three resources this seeds (canonical Quran, English translation, German
-/// translation, Al-Muyassar tafsir) fails independently: a corrupt or
-/// missing translation/tafsir never blocks the canonical Quran, and a
-/// corrupt or missing canonical Quran is logged as a critical error and
-/// left unimported rather than partially written — [QuranDatasetImporter]
-/// already guarantees the latter is all-or-nothing.
+/// three independently-seeded resources (translations, tafsir) fails on
+/// its own: a corrupt or missing translation/tafsir never blocks the
+/// canonical Quran, and a corrupt or missing canonical Quran is logged as a
+/// critical error and left unimported rather than partially written —
+/// [QuranDatasetImporter] already guarantees the latter is all-or-nothing.
 ///
-/// The Mushaf layer is not seeded here at all: no bundled Mushaf asset
-/// exists yet, since the real QUL word dataset needed to populate one
-/// hasn't been supplied (see `docs/QURAN_DATA_PROVENANCE.md`) and no
-/// synthetic stand-in is ever created for it.
+/// **Startup cost**: [seedIfNeeded] avoids re-parsing the (multi-megabyte)
+/// canonical/Mushaf JSON on every launch. It first reads only the small
+/// `resource_manifest.json` and compares its recorded hashes against a
+/// tiny marker string persisted in [storage] from the last successful
+/// import; only a mismatch (first launch, or an updated bundled dataset)
+/// triggers loading and parsing the large files. A normal subsequent
+/// launch does a handful of cheap reads, never a full JSON parse.
+///
+/// **The Mushaf layer** is seeded only when [includeMushaf] is true
+/// (defaults to `!kReleaseMode` — development/profile builds only). QUL's
+/// redistribution terms for the Mushaf layout/word-by-word/font resources
+/// remain unverified (`SHIP_BLOCKED_LICENSE`,
+/// `docs/QURAN_DATA_PROVENANCE.md` §7/§7a/§8); this gate stops the app's
+/// own code from importing or displaying that data in a release build even
+/// if the asset bytes happen to be present in a naively-built package. It
+/// does **not** by itself keep those bytes out of a release binary — a
+/// true public release must also remove/flavor-gate the asset declarations
+/// themselves; see the release checklist in
+/// `docs/QURAN_DATA_PROVENANCE.md`.
 class BundledDatasetSeeder {
   const BundledDatasetSeeder({
     required this.quranRepository,
@@ -40,7 +57,9 @@ class BundledDatasetSeeder {
     required this.translationRepository,
     required this.tafsirRepository,
     required this.logger,
+    required this.storage,
     this.importer = const QuranDatasetImporter(),
+    this.includeMushaf = !kReleaseMode,
   });
 
   final QuranRepository quranRepository;
@@ -48,9 +67,13 @@ class BundledDatasetSeeder {
   final TranslationRepository translationRepository;
   final TafsirRepository tafsirRepository;
   final AppLogger logger;
+  final BrowserStorage storage;
   final QuranDatasetImporter importer;
+  final bool includeMushaf;
 
   static const _manifestAsset = 'assets/quran/resource_manifest.json';
+  static const _mushafAsset = 'assets/quran/mushaf/kfgqpc_v2.json';
+  static const _seededVersionKey = 'quran.dataset.seeded_version';
 
   Future<void> seedIfNeeded() async {
     final Map<String, dynamic> manifest;
@@ -70,7 +93,7 @@ class BundledDatasetSeeder {
       return;
     }
 
-    await _seedCanonicalQuran(hashes);
+    await _seedCanonicalQuranAndMushaf(hashes, manifest);
     await _seedTranslation(
       hashes,
       assetPath: 'assets/quran/translations/en_rowwad.json',
@@ -126,8 +149,23 @@ class BundledDatasetSeeder {
     return bytes;
   }
 
-  Future<void> _seedCanonicalQuran(Map<String, dynamic> hashes) async {
-    final existing = await quranRepository.getDatasetMetadata();
+  Future<void> _seedCanonicalQuranAndMushaf(
+    Map<String, dynamic> hashes,
+    Map<String, dynamic> manifest,
+  ) async {
+    final canonicalHash = hashes['quran_dataset.json'] as String?;
+    final mushafHash = includeMushaf
+        ? manifest['mushafGeneratedDatasetHash'] as String?
+        : null;
+    final versionMarker = '$canonicalHash::${mushafHash ?? 'excluded'}';
+
+    final existingMeta = await quranRepository.getDatasetMetadata();
+    final storedMarker = await storage.getString(_seededVersionKey);
+    if (existingMeta != null && storedMarker == versionMarker) {
+      // Cheap path: already seeded with this exact combination — never
+      // touches the large canonical/Mushaf JSON files on this launch.
+      return;
+    }
 
     final bytes = await _loadVerified(
       hashes,
@@ -139,17 +177,18 @@ class BundledDatasetSeeder {
 
     try {
       final json = jsonDecode(utf8.decode(bytes)) as Map<String, dynamic>;
-      final payload = quranDatasetPayloadFromJson(json);
+      var payload = quranDatasetPayloadFromJson(json);
 
-      if (existing != null &&
-          existing.contentHash == payload.metadata.contentHash) {
-        return; // Already seeded with this exact dataset.
+      if (includeMushaf) {
+        payload = await _mergeMushaf(payload, mushafHash);
       }
 
       await importer.import(quranDatabase, payload);
+      await storage.setString(_seededVersionKey, versionMarker);
       logger.info(
         'Seeded canonical Quran: ${payload.surahs.length} surahs, '
-        '${payload.ayahs.length} ayahs.',
+        '${payload.ayahs.length} ayahs'
+        '${payload.mushafs.isEmpty ? '' : ' + Mushaf (${payload.mushafLines.length} lines, ${payload.mushafTokens.length} tokens)'}.',
         tag: 'BundledDatasetSeeder',
       );
     } on DatasetIntegrityException catch (e, st) {
@@ -169,6 +208,66 @@ class BundledDatasetSeeder {
         stackTrace: st,
       );
     }
+  }
+
+  /// Loads and hash-verifies the (development-only) bundled Mushaf dataset
+  /// and merges it into [payload], or returns [payload] unchanged if the
+  /// asset is absent/unverifiable — a missing Mushaf dataset is an honest,
+  /// expected state (`SHIP_BLOCKED_LICENSE`), never an error that blocks
+  /// canonical Quran seeding.
+  Future<QuranDatasetPayload> _mergeMushaf(
+    QuranDatasetPayload payload,
+    String? expectedHash,
+  ) async {
+    final Uint8List bytes;
+    try {
+      bytes = (await rootBundle.load(_mushafAsset)).buffer.asUint8List();
+    } catch (_) {
+      return payload; // Not bundled in this build — expected in release.
+    }
+
+    if (expectedHash == null) {
+      logger.warning(
+        'Mushaf dataset asset is present but the manifest has no recorded '
+        'hash for it — skipping Mushaf seeding.',
+        tag: 'BundledDatasetSeeder',
+      );
+      return payload;
+    }
+    final actualHash = sha256.convert(bytes).toString();
+    if (actualHash != expectedHash) {
+      logger.error(
+        'Mushaf dataset failed hash verification (expected $expectedHash, '
+        'got $actualHash) — refusing to import it.',
+        tag: 'BundledDatasetSeeder',
+      );
+      return payload;
+    }
+
+    final json = jsonDecode(utf8.decode(bytes)) as Map<String, dynamic>;
+    final mushaf = mushafFromJson(json['mushaf'] as Map<String, dynamic>);
+    final lines = (json['mushafLines'] as List)
+        .cast<Map<String, dynamic>>()
+        .map(mushafLineFromJson)
+        .toList();
+    final tokens = (json['mushafTokens'] as List)
+        .cast<Map<String, dynamic>>()
+        .map(mushafTokenFromJson)
+        .toList();
+
+    return QuranDatasetPayload(
+      surahs: payload.surahs,
+      surahLocalizations: payload.surahLocalizations,
+      ayahs: payload.ayahs,
+      ayahWords: payload.ayahWords,
+      scripts: payload.scripts,
+      scriptVariants: payload.scriptVariants,
+      mushafs: [mushaf],
+      mushafLines: lines,
+      mushafTokens: tokens,
+      navigationRanges: payload.navigationRanges,
+      metadata: payload.metadata,
+    );
   }
 
   Future<void> _seedTranslation(

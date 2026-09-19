@@ -322,27 +322,59 @@ word, searched, or included in word-by-word/AI alignment). Instead:
 
 - **What it is**: the glyph font QUL's KFGQPC V2 layout is typeset against — confirmed to
   be genuinely page-by-page: the project owner obtained "QPC V2 Font.ttf.bz2" (actually a
-  zip; not yet vendored into git — see below), which contains 604 individual TTF files
-  (`p1.ttf`..`p604.ttf`, ~198MB uncompressed), named `QCF2001`..`QCF2604` internally.
-  Inspecting each font's `cmap` table directly confirmed the earlier CDN-based finding:
-  the *same* numeric codepoint (e.g. `0xFC41`) is deliberately reused across different
-  pages' fonts to draw *different* glyphs (verified: it renders Al-Fatiha's first word on
-  page 1's font and Al-Ikhlas's first word on page 604's font) — a line's `MushafToken`
-  text is only meaningful when rendered through that exact page's own font file.
-- **Status**: `SHIP_BLOCKED_LICENSE`. The font files are in hand (via the project owner)
-  but **not committed to git yet** (`.gitignore`d at `tool/quran_data/sources/*.bz2` and
-  `*Font*`) — packaging strategy (which formats to ship, whether all 604 pages bundle in
-  every build, compression) is a deliberate pending decision, not something to commit by
-  accident given the uncompressed size. Its redistribution terms are a **separate**
-  license gate from the layout/word data (§7/§7a) and have not been researched to a
-  shippable standard — QUL's own FAQ places fonts under the same "review per resource, no
-  blanket grant" rule as every other dataset category, and the official font resource
-  page's own download links are also login-gated.
+  zip), which contains 604 individual TTF files (`p1.ttf`..`p604.ttf`, ~198MB
+  uncompressed, ~130MB compressed), named `QCF2001`..`QCF2604` internally. A pure-Dart TTF
+  `name`-table parser (`tool/quran_data/src/ttf_inspector.dart`, no external tool
+  dependency) verified **all 604** files' embedded family names against their filename's
+  page number — not just spot-checked — with zero mismatches. Inspecting each font's
+  `cmap` table directly confirmed the earlier CDN-based finding: the *same* numeric
+  codepoint (e.g. `0xFC41`) is deliberately reused across different pages' fonts to draw
+  *different* glyphs (verified: it renders Al-Fatiha's first word on page 1's font and
+  Al-Ikhlas's first word on page 604's font) — a line's `MushafToken` text is only
+  meaningful when rendered through that exact page's own font file.
+- **Generated font package**: `tool/quran_data/build_qpc_fonts.dart` copies the 604
+  unmodified files to `assets/quran/fonts/qpc_v2/pN.ttf` and writes a generated,
+  per-file-verified manifest to `assets/quran/manifests/qpc_v2_fonts.json`
+  (`PageFontManifest`/`PageFontManifestEntry`,
+  `lib/quran/domain/models/page_font_manifest_models.dart`) mapping every page to its
+  exact asset path, verified font family, source filename, and content hash. Neither the
+  font files nor the manifest are hand-written; both are regenerated deterministically
+  from the real vendored package. The font *files* are gitignored
+  (`assets/quran/fonts/`) for the same reason as the Mushaf dataset (§7); the *manifest*
+  is committed, since it carries no copyrighted content, only structural metadata and
+  hashes (the same reasoning that already applies to `resource_manifest.json`).
+- **Rendering architecture**: `QpcPageFontManager` (`lib/features/mushaf/domain/
+  qpc_page_font_manager.dart`, implemented by `FontLoaderQpcPageFontManager` in
+  `lib/features/mushaf/data/`) lazily registers one page's font via `dart:ui`/
+  `package:flutter`'s `FontLoader` only when that page is actually viewed — never all 604
+  at startup. Concurrent requests for the same page share one in-flight load (verified by
+  a real-engine test, `test/features/mushaf/data/font_loader_qpc_page_font_manager_test.dart`);
+  ±2 neighboring pages preload in the background without blocking the current page.
+  `MushafPageView` never renders Quran glyph text before that page's real font is
+  confirmed loaded — no fallback/previous-page font is ever substituted, per explicit
+  instruction; a brief loading state (or an honest "font packaging pending" message when
+  no manifest is bundled at all) is shown instead.
+- **Status**: `SHIP_BLOCKED_LICENSE`. Obtaining, verifying structure, and building a
+  correct rendering pipeline around these files is **not** the same thing as clearing
+  their redistribution — that has not happened. QUL's own FAQ places fonts under the same
+  "review per resource, no blanket grant" rule as every other dataset category, and the
+  official font resource page's own download links are login-gated.
   `docs/reference/05_MUSHAF_SPEC.md` already recorded, before this milestone, that a
   reference-app KFQPC-style font must never simply be copied into Tahfeez; this finding
   is consistent with that and extends it to QUL's redistribution of the same font family.
   Per instruction, this blocker is recorded honestly rather than worked around by
   silently substituting an unrelated font and calling the Mushaf layer "done."
+- **The runtime gate is a Dart-code refusal, not a build-time exclusion — a known, real
+  gap**: `BundledDatasetSeeder` and `qpcPageFontManifestProvider` both refuse to
+  import/load this content when `kReleaseMode` is true, so *the app itself* never
+  displays it in a release build. This does **not** remove the asset bytes from a
+  naively-built release package: a real `flutter build appbundle --release` performed
+  during this work produced a 204.9MB AAB that still physically contains the full font
+  package and Mushaf dataset (Flutter's asset system has no built-in per-build-type
+  exclusion without a product-flavor setup, which was not implemented — see the release
+  checklist below). Any real public release **must** either clear the redistribution
+  question or remove/flavor-gate the three asset lines in `pubspec.yaml` before building;
+  do not treat the `kReleaseMode` code gate alone as sufficient for a store submission.
 
 ## 9. Tahfeez-generated data — search indexes
 
@@ -387,4 +419,27 @@ document was produced this way and is re-checked by
 | Tafsir Al-Muyassar (Arabic) | QuranEnc | Integrated |
 | Mushaf page/line layout (KFGQPC V2) | QUL | Imported (9,046 lines); `SHIP_BLOCKED_LICENSE` for redistribution, not shipped |
 | Quran script/word-by-word dataset (word id resolution) | QUL | Imported (83,668 tokens); `SHIP_BLOCKED_LICENSE` for redistribution, not shipped |
-| Mushaf glyph font (QCF V2) | QUL | Obtained (not committed to git); `SHIP_BLOCKED_LICENSE`; font-packaging strategy pending |
+| Mushaf glyph font (QCF V2) | QUL | Imported into `assets/quran/fonts/qpc_v2/` + verified manifest (dev builds only); `SHIP_BLOCKED_LICENSE`; not committed to git |
+
+## Release checklist — QUL resource redistribution
+
+**Do not mark any of these "YES" without source documentation** (an email, a QUL account
+license page, or written confirmation from Tarteel AI/Digital Khadeeja Foundation) — never
+inferred from CDN accessibility, successful download, or QUL's own MIT-licensed platform
+code.
+
+- [ ] QPC V2 layout redistribution cleared (§7)
+- [ ] QPC V2 word/script data redistribution cleared (§7a)
+- [ ] QPC V2 font redistribution cleared (§8)
+- [ ] If any of the above is unresolved: `pubspec.yaml`'s three gated asset lines
+      (`assets/quran/mushaf/kfgqpc_v2.json`, `assets/quran/manifests/qpc_v2_fonts.json`,
+      `assets/quran/fonts/qpc_v2/`) have been removed, or moved behind a build flavor that
+      a public release build does not include — the `kReleaseMode` code-level refusal in
+      `BundledDatasetSeeder`/`qpcPageFontManifestProvider` is **not sufficient by itself**
+      (see §8's note on the 204.9MB test release AAB that still contained these assets)
+- [ ] A `flutter build appbundle --release` (or `ipa`) intended for real distribution has
+      been inspected to confirm the gated assets are actually absent, not just unused
+
+Until every applicable box above is checked, no build of Tahfeez produced from this
+codebase should be uploaded to the Play Store, App Store, or any other public
+distribution channel.

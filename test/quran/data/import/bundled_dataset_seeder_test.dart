@@ -2,9 +2,12 @@
 // (assets/quran/) and real (in-memory) Drift databases — proving the whole
 // "verify hash -> import" boot-time seeding path actually populates a
 // working app, not just that the JSON files themselves look right.
+import 'dart:io';
+
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tahfeez_ai/core/logging/app_logger.dart';
+import 'package:tahfeez_ai/core/storage/browser_storage.dart';
 import 'package:tahfeez_ai/quran/data/import/bundled_dataset_seeder.dart';
 import 'package:tahfeez_ai/quran/data/quran_database.dart';
 import 'package:tahfeez_ai/quran/data/repositories/drift_quran_repository.dart';
@@ -50,8 +53,9 @@ void main() {
   late DriftTranslationRepository translationRepository;
   late DriftTafsirRepository tafsirRepository;
   late _RecordingLogger logger;
+  const storage = SharedPreferencesBrowserStorage();
 
-  setUp(() {
+  setUp(() async {
     quranDb = QuranDatabase(NativeDatabase.memory());
     translationDb = TranslationDatabase(NativeDatabase.memory());
     tafsirDb = TafsirDatabase(NativeDatabase.memory());
@@ -59,6 +63,11 @@ void main() {
     translationRepository = DriftTranslationRepository(translationDb);
     tafsirRepository = DriftTafsirRepository(tafsirDb);
     logger = _RecordingLogger();
+    // BrowserStorage is a real, process-wide store shared across every
+    // test in this file (the same gotcha documented in
+    // docs/ARCHITECTURE.md for keepAlive+BrowserStorage controllers) — the
+    // seeded-version marker must not leak between tests.
+    await storage.remove('quran.dataset.seeded_version');
   });
 
   tearDown(() async {
@@ -75,6 +84,7 @@ void main() {
       translationRepository: translationRepository,
       tafsirRepository: tafsirRepository,
       logger: logger,
+      storage: storage,
     );
 
     await seeder.seedIfNeeded();
@@ -92,6 +102,23 @@ void main() {
     final de = await translationRepository.getInstalledTranslation('de-rowwad');
     expect(de, isNotNull);
 
+    // Mushaf seeding is dev/debug-build-only (BundledDatasetSeeder.includeMushaf
+    // defaults to !kReleaseMode, true in `flutter test`) and only actually
+    // imports anything when the real, license-gated Mushaf dataset happens
+    // to be present on disk (it is not committed to git) — assert
+    // conditionally on what is really there, never fabricate an
+    // expectation either way.
+    final mushaf = await quranRepository.getMushafById(1);
+    if (File('assets/quran/mushaf/kfgqpc_v2.json').existsSync()) {
+      expect(
+        mushaf,
+        isNotNull,
+        reason: 'real Mushaf dataset is present on disk',
+      );
+      final page1 = await quranRepository.getPage(mushafId: 1, pageNumber: 1);
+      expect(page1, isNotNull);
+    }
+
     final tafsir = await tafsirRepository.getInstalledTafsir('ar-muyassar');
     expect(tafsir, isNotNull);
   });
@@ -103,6 +130,7 @@ void main() {
       translationRepository: translationRepository,
       tafsirRepository: tafsirRepository,
       logger: logger,
+      storage: storage,
     );
 
     await seeder.seedIfNeeded();
