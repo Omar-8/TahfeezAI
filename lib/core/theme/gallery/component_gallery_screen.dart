@@ -143,6 +143,11 @@ class ComponentGalleryScreen extends ConsumerWidget {
                   ),
                   Divider(height: 1),
                   TahfeezResourceRow(
+                    title: 'Queued',
+                    state: TahfeezResourceRowState.queued,
+                  ),
+                  Divider(height: 1),
+                  TahfeezResourceRow(
                     title: 'Downloading…',
                     state: TahfeezResourceRowState.downloading,
                     progressFraction: 0.62,
@@ -161,6 +166,11 @@ class ComponentGalleryScreen extends ConsumerWidget {
                   TahfeezResourceRow(
                     title: 'Download failed',
                     state: TahfeezResourceRowState.failed,
+                  ),
+                  Divider(height: 1),
+                  TahfeezResourceRow(
+                    title: 'Deleting…',
+                    state: TahfeezResourceRowState.deleting,
                   ),
                 ],
               ),

@@ -2,6 +2,7 @@ import '../models/ayah_models.dart';
 import '../models/dataset_metadata.dart';
 import '../models/mushaf_models.dart';
 import '../models/navigation_models.dart';
+import '../models/script_models.dart';
 import '../models/surah_models.dart';
 import '../models/quran_refs.dart' show VerseRangeRef, VerseRef;
 
@@ -43,6 +44,16 @@ abstract class QuranRepository {
   Future<List<SurahLocalization>> getAllSurahLocalizations({
     required String languageCode,
   });
+
+  // ---------------------------------------------------------------------
+  // Scripts
+  // ---------------------------------------------------------------------
+
+  /// Every installed [QuranScript], for a script picker (Milestone 8) to
+  /// list — the running app may have zero, one, or several installed at
+  /// once (a script "family" ships with, or is imported alongside, the
+  /// Quran dataset itself; there is no separate script-only import path).
+  Future<List<QuranScript>> getAllScripts();
 
   // ---------------------------------------------------------------------
   // Ayahs and words

@@ -79,6 +79,12 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.textContaining('Ayah 1:'), findsOneWidget);
+      // The real word detail sheet (Milestone 8), not the old placeholder
+      // SnackBar — honest about no word-by-word pack being installed.
+      expect(
+        find.textContaining('Install a word-by-word language pack'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('swiping moves to the next page', (tester) async {

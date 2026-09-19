@@ -80,17 +80,39 @@ void main() {
         await tester.scrollUntilVisible(find.text('1:$verse'), 200);
         expect(find.text('1:$verse'), findsOneWidget);
       }
-      // Arabic text visible by default (the fixture's synthetic word text).
-      expect(find.textContaining('lafz kalima'), findsWidgets);
+      // Arabic text visible by default (the fixture's synthetic word text),
+      // rendered as individually tappable words (Milestone 8), not one
+      // joined string.
+      expect(find.text('lafz'), findsWidgets);
+      expect(find.text('kalima'), findsWidgets);
     });
 
+    testWidgets('tapping a word opens the word detail sheet', (tester) async {
+      await tester.pumpWidget(wrap(db));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('lafz').first);
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('Ayah 1:1'), findsOneWidget);
+      expect(
+        find.textContaining('Install a word-by-word language pack'),
+        findsOneWidget,
+      );
+    });
+
+    // NOTE: this test persists "Arabic text visible = false" to the real
+    // (process-wide) preferences store `ArabicTextVisiblePreferenceController`
+    // reads from, which is not reset between tests — it must run after any
+    // other test in this file that depends on Arabic text being visible by
+    // default, or that later test will see it already hidden.
     testWidgets('the reader options sheet toggles Arabic text visibility', (
       tester,
     ) async {
       await tester.pumpWidget(wrap(db));
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('lafz kalima'), findsWidgets);
+      expect(find.text('lafz'), findsWidgets);
 
       await tester.tap(find.byTooltip('Reader options'));
       await tester.pumpAndSettle();
@@ -99,7 +121,7 @@ void main() {
       await tester.tapAt(const Offset(10, 10));
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('lafz kalima'), findsNothing);
+      expect(find.text('lafz'), findsNothing);
     });
 
     testWidgets(

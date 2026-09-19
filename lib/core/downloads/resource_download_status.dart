@@ -11,6 +11,7 @@ enum ResourceDownloadState {
   completed,
   outdated,
   failed,
+  deleting,
 }
 
 /// A snapshot of one resource item's download progress, keyed by

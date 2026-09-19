@@ -3,6 +3,8 @@ import 'package:tahfeez_ai/core/audio/audio_controller.dart';
 import 'package:tahfeez_ai/core/core_providers.dart';
 import 'package:tahfeez_ai/quran/data/quran_database.dart';
 import 'package:tahfeez_ai/quran/quran_providers.dart';
+import 'package:tahfeez_ai/wbw/data/wbw_database.dart';
+import 'package:tahfeez_ai/wbw/wbw_providers.dart';
 
 import 'fake_audio_controller.dart';
 
@@ -14,8 +16,8 @@ import 'fake_audio_controller.dart';
 /// Both real backends need a platform channel `flutter test` does not
 /// provide (`drift_flutter`'s native SQLite path via `path_provider`;
 /// `just_audio`'s real player), which otherwise leaves a `pumpAndSettle()`
-/// stuck forever. This overrides `quranDatabaseProvider` with a real
-/// in-memory `NativeDatabase` (matching
+/// stuck forever. This overrides `quranDatabaseProvider`/`wbwDatabaseProvider`
+/// with a real in-memory `NativeDatabase` (matching
 /// `test/quran/data/drift_quran_repository_test.dart`'s pattern) and
 /// `audioControllerProvider` with [FakeAudioController] — real behavior
 /// wherever an equivalent test-safe backend exists (Drift), a fake only
@@ -37,6 +39,11 @@ tahfeezWidgetTestOverrides({AudioController? audioController}) {
   return [
     quranDatabaseProvider.overrideWith((ref) {
       final db = QuranDatabase(NativeDatabase.memory());
+      ref.onDispose(db.close);
+      return db;
+    }),
+    wbwDatabaseProvider.overrideWith((ref) {
+      final db = WbwDatabase(NativeDatabase.memory());
       ref.onDispose(db.close);
       return db;
     }),

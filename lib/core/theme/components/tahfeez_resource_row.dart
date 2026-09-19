@@ -9,10 +9,12 @@ import 'tahfeez_download_progress_row.dart';
 /// the download service itself, keeping it presentation-only.
 enum TahfeezResourceRowState {
   notDownloaded,
+  queued,
   downloading,
   downloaded,
   outdated,
   failed,
+  deleting,
 }
 
 /// One row in a downloadable-resource list (a translation, a reciter, a
@@ -41,11 +43,14 @@ class TahfeezResourceRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
 
-    if (state == TahfeezResourceRowState.downloading) {
+    if (state == TahfeezResourceRowState.downloading ||
+        state == TahfeezResourceRowState.deleting) {
       return TahfeezDownloadProgressRow(
         title: title,
         fraction: progressFraction,
-        onCancel: onAction,
+        onCancel: state == TahfeezResourceRowState.downloading
+            ? onAction
+            : null,
       );
     }
 
@@ -81,6 +86,16 @@ class TahfeezResourceRow extends StatelessWidget {
           iconSize: TahfeezIconSize.lg,
           onPressed: onAction,
         );
+      case TahfeezResourceRowState.queued:
+        return SizedBox(
+          width: TahfeezIconSize.lg,
+          height: TahfeezIconSize.lg,
+          child: Icon(
+            Icons.schedule,
+            size: TahfeezIconSize.lg,
+            color: scheme.onSurfaceVariant,
+          ),
+        );
       case TahfeezResourceRowState.downloaded:
         return Icon(
           Icons.check_circle,
@@ -100,6 +115,7 @@ class TahfeezResourceRow extends StatelessWidget {
           tooltip: 'Retry',
         );
       case TahfeezResourceRowState.downloading:
+      case TahfeezResourceRowState.deleting:
         return const SizedBox.shrink(); // handled above
     }
   }

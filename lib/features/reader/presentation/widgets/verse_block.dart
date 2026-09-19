@@ -6,6 +6,7 @@ import '../../../../core/theme/components/components.dart';
 import '../../../../core/theme/quran_text_style.dart';
 import '../../../../core/ui/coming_soon.dart';
 import '../../../../quran/domain/models/ayah_models.dart';
+import '../../../../wbw/presentation/word_detail_sheet.dart';
 import 'verse_share_sheet.dart';
 
 /// One verse — `docs/reference/04_READER_SPEC.md` §5's `VerseView`,
@@ -120,10 +121,26 @@ class VerseBlock extends StatelessWidget {
               if (arabicVisible)
                 Directionality(
                   textDirection: TextDirection.rtl,
-                  child: Text(
-                    _arabicText,
-                    textAlign: TextAlign.right,
-                    style: quranTextStyle(context),
+                  child: Wrap(
+                    textDirection: TextDirection.rtl,
+                    alignment: WrapAlignment.end,
+                    children: [
+                      for (final word in ayah.words)
+                        InkWell(
+                          onTap: () => showWordDetailSheet(
+                            context,
+                            wordRef: (
+                              ayahId: word.ayahId,
+                              wordIndex: word.wordIndex,
+                            ),
+                            arabicText: word.text,
+                          ),
+                          child: Text(
+                            word.text,
+                            style: quranTextStyle(context),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
             ],

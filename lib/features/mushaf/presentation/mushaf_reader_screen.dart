@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_breakpoints.dart';
+import '../../../wbw/presentation/word_detail_sheet.dart';
 import '../application/mushaf_appearance_controller.dart';
 import '../application/mushaf_page_providers.dart';
 import '../domain/mushaf_appearance.dart';
@@ -192,17 +193,10 @@ class _MushafPagerState extends State<_MushafPager> {
   }
 
   void _showWordInfo(BuildContext context, MushafWordPlacement placement) {
-    // `Ayah.id == chapterNo * 1000 + verseNo` (the stable id formula
-    // documented on `Ayah`) -- resolving the reference this way avoids an
-    // extra repository lookup just to show it.
-    final chapterNo = placement.ayahId ~/ 1000;
-    final verseNo = placement.ayahId % 1000;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Ayah $chapterNo:$verseNo · word ${placement.wordIndex + 1}',
-        ),
-      ),
+    showWordDetailSheet(
+      context,
+      wordRef: (ayahId: placement.ayahId, wordIndex: placement.wordIndex),
+      arabicText: placement.text,
     );
   }
 }

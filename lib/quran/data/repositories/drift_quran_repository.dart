@@ -4,6 +4,7 @@ import '../../domain/models/ayah_models.dart';
 import '../../domain/models/dataset_metadata.dart';
 import '../../domain/models/mushaf_models.dart';
 import '../../domain/models/navigation_models.dart';
+import '../../domain/models/script_models.dart';
 import '../../domain/models/surah_models.dart';
 import '../../domain/models/quran_refs.dart';
 import '../../domain/repositories/quran_repository.dart';
@@ -71,6 +72,18 @@ class DriftQuranRepository implements QuranRepository {
               ..where((l) => l.languageCode.equals(languageCode))
               ..orderBy([(l) => OrderingTerm(expression: l.surahNo)]))
             .get();
+    return rows.map((r) => r.toDomain()).toList();
+  }
+
+  // ---------------------------------------------------------------------
+  // Scripts
+  // ---------------------------------------------------------------------
+
+  @override
+  Future<List<QuranScript>> getAllScripts() async {
+    final rows = await (_db.select(
+      _db.quranScripts,
+    )..orderBy([(s) => OrderingTerm(expression: s.displayName)])).get();
     return rows.map((r) => r.toDomain()).toList();
   }
 

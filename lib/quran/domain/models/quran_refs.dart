@@ -16,3 +16,12 @@ typedef VerseRef = ({int chapterNo, int verseNo});
 
 /// An inclusive verse range within one chapter.
 typedef VerseRangeRef = ({int chapterNo, int fromVerseNo, int toVerseNo});
+
+/// One canonical Quran word, identified by its verse and 0-based word
+/// index — the shared identifier both reading modes' word-tap handling
+/// (verse-by-verse `VerseBlock` and Mushaf's `FontMushafLineRenderer`)
+/// resolve a tap to, independent of which script rendered the glyphs a
+/// user actually tapped. A word's identity (and, once installed, its
+/// word-by-word translation) does not change with script — only its
+/// Arabic text does — so this ref deliberately carries no `scriptId`.
+typedef WordRef = ({int ayahId, int wordIndex});

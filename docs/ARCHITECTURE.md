@@ -62,7 +62,8 @@ lib/
     platform/                   PlatformCapabilities — the one place platform checks live.
     ui/                         Small UI helpers shared by more than one feature (e.g. showComingSoon).
   quran/domain/                 QuranRepository, TranslationRepository, TafsirRepository, SearchRepository, QuranLocation.
-  quran/application/            Quran-domain concerns shared by more than one feature (dataset-installed status, recent location, script code, chapter localization).
+  quran/application/            Quran-domain concerns shared by more than one feature (dataset-installed status, recent location, script code + preference, available scripts, chapter localization).
+  wbw/                           Word-by-word: its own domain/data/application/presentation, own database (Milestone 8).
   user_data/domain/             UserDataRepository (bookmarks, reading history).
   memorization/domain/          MemorizationRepository.
   ai/domain/                    RecitationRecognizer, RecitationContext, RecitationEvent (interfaces only).
@@ -822,6 +823,100 @@ coverage. One genuine pixel `matchesGoldenFile` test
 renderer produces stable, deterministic output — the "golden test" infrastructure itself, proven
 working, ready to gain real fidelity value once a real dataset and font exist.
 
+## 11f. Scripts and Word-by-Word (Milestone 8)
+
+### Scripts become a real, swappable preference
+
+`QuranScript`/`QuranScriptVariant` and the storage-layer plumbing to support more than one script
+(`Mushaf.scriptId`, `AyahWord.scriptId`-keyed word text, `getMushaf(scriptCode:)`) already existed
+from Milestone 2 — this milestone made script *selection* real rather than architecturally-ready-
+but-inert. `QuranRepository.getAllScripts()` (new) lists every script the installed dataset
+provides; `lib/quran/application/quran_script_code.dart`'s `QuranScriptPreferenceController`
+(`@Riverpod(keepAlive: true)`, persisted via `BrowserStorage` exactly like `MushafAppearanceController`)
+replaces the previous hardcoded `defaultQuranScriptCode` constant as the source every Reader/Mushaf
+session actually resolves against. `quranScriptCodeProvider` — the plain function every existing
+call site and test already depended on — is kept as a thin derived provider
+(`ref.watch(quranScriptPreferenceControllerProvider)`) rather than converted into the controller
+itself, specifically so every existing `quranScriptCodeProvider.overrideWith((ref) => testCode)`
+test override across the codebase kept working unchanged; only production code needed to start
+reading the new controller (via a new "Quran script" picker in the Reader's options sheet,
+`lib/features/reader/presentation/widgets/quran_script_sheet.dart`).
+
+Because Reader and Mushaf already resolved every word/page lookup through `quranScriptCodeProvider`
+rather than a hardcoded constant (a Milestone 7 decision), switching the controller's value is
+sufficient on its own to change what both screens render — no code in either screen's own files
+changed. `test/features/reader/presentation/reader_script_switch_test.dart` proves this end-to-end
+against a new two-script fixture (`test/quran/multi_script_test_fixtures.dart`) where the two
+scripts deliberately have different word text *and* different Mushaf page counts/pagination for the
+identical canonical ayahs — this milestone's explicit "do not assume identical word strings/page
+mappings/page count/line count" requirement, checked mechanically rather than only by code review.
+
+### Word-by-word is its own resource, not a canonical-data extension
+
+Per `docs/ARCHITECTURE.md` §4's data-model table ("Resource metadata (translations/tafsir/WBW/
+audio/atlas) ... Milestones 8, 9, 12, 13"), WBW content is downloadable/optional resource data, not
+canonical Quran data — even though it is keyed against canonical word indices. `lib/wbw/` is a new
+top-level bounded area (sibling to `quran/`, `user_data/`, `memorization/`), with its own physically
+separate Drift database (`lib/wbw/data/wbw_database.dart`, opened via the same
+`core/database/database_connection.dart` helper the Quran database uses) rather than new tables on
+`QuranDatabase`. `WbwRepository` (`lib/wbw/domain/repositories/`) exposes exactly the operations a
+downloadable, versioned, deletable resource needs: `getInstalledPacks`/`getInstalledPack`,
+`installPack` (an atomic replace-in-place, mirroring `QuranDatasetImporter`'s transactional-replace
+shape — an "update" is just installing the same pack id at a newer version), `deletePack`, and a
+single-word `getWord` lookup for the word detail sheet. `WbwLanguagePack` records the provenance
+metadata `docs/CLEAN_ROOM_RULES.md`'s resource-provenance rules require (`source`, `license`,
+`version`, `checksum`) as mandatory fields from day one, not something bolted on before a real pack
+ships.
+
+### No real network download yet — by design, not oversight
+
+`core/downloads/`'s `ResourceDownloadService`/`ResourceRepository` interfaces (Milestone 1) are
+explicitly reserved for the Resource Manager milestone's (13) real background-download
+implementation. This milestone does not implement them for WBW; instead, `WbwPackCatalog`
+(`lib/wbw/domain/wbw_pack_catalog.dart`) is a small, WBW-scoped "what's available to install"
+interface with one production implementation, `NoWbwPackCatalog`, which honestly reports nothing
+available — the same "no real dataset shipped yet" shape `hasInstalledQuranDatasetProvider` already
+established for the canonical dataset itself. `WbwLibraryController`
+(`lib/wbw/application/wbw_library_controller.dart`) merges installed packs with catalog packs into
+one list of `(pack, ResourceDownloadState)` pairs and drives `install`/`remove` through the full
+`notDownloaded → queued → downloading → completed`/`outdated`/`failed`/`deleting` state machine this
+milestone's Definition of Done requires — real and independently testable
+(`test/wbw/application/wbw_library_controller_test.dart`) even though, with no real catalog/network
+yet, `install` performs its write immediately rather than actually taking time. `ResourceDownloadState`
+gained a `deleting` value and `TahfeezResourceRowState` gained `queued`/`deleting` (previously
+missing) specifically to make this full state list expressible — a small, deliberate extension to
+Milestone 1's shared resource vocabulary rather than a WBW-only parallel enum.
+
+### One word-tap seam, shared by both reading modes
+
+`lib/quran/domain/models/quran_refs.dart`'s new `WordRef` typedef (`({int ayahId, int wordIndex})`)
+is the identifier both reading modes now resolve a tap to and hand to
+`lib/wbw/presentation/word_detail_sheet.dart`'s `showWordDetailSheet`. Verse-by-verse `VerseBlock`
+previously rendered a whole verse's words as one joined `Text` string with no tap targets at all
+(`docs/ARCHITECTURE.md` §17 flagged this as an explicit Milestone 6 deferral); it now renders each
+`AyahWord` as its own `InkWell`-wrapped `Text` inside a `Wrap(textDirection: TextDirection.rtl)` —
+individually tappable, still reading right-to-left, with no change to the batched
+`getVerseRangeWithWords` data it already loaded. Mushaf's `_showWordInfo` (previously a placeholder
+`SnackBar` showing only the raw ayah/word reference, per §18's explicit deferral) now calls the same
+`showWordDetailSheet`, reusing the exact `(ayahId, wordIndex)` hit-testing `FontMushafLineRenderer`
+already computed for Milestone 7's tap-to-placement mapping — no change to the renderer or the
+layout engine. The sheet itself always shows the tapped word's Arabic text and ayah/word reference
+(available from canonical data regardless of WBW); it shows translation/transliteration only once
+`activeWbwPackProvider` resolves a real installed pack, and otherwise shows an honest hint with a
+shortcut into the WBW packs sheet — the same "real, tappable, honestly-incomplete" shape `VerseBlock`'s
+Play/Bookmark/Tafsir actions already established for features later milestones provide.
+
+### Testing
+
+`test/wbw/data/repositories/drift_wbw_repository_test.dart` covers the repository against a real
+in-memory `WbwDatabase` (empty-by-default, install/read, update-in-place replaces old words, delete
+removes both pack and words). `test/wbw/application/wbw_library_controller_test.dart` covers the
+merge/state-machine logic against a fake `WbwPackCatalog`. `test/wbw/presentation/` covers the word
+detail sheet's three states (no pack, pack with data, preference toggles) and the WBW packs sheet's
+empty/install-to-downloaded flow. `test/quran/data/multi_script_repository_test.dart` and
+`test/features/reader/presentation/reader_script_switch_test.dart` cover script-swapping at the
+repository and full-UI layers respectively, per this section's earlier discussion.
+
 ## 12. What Milestone 1 deliberately did not do
 
 - No feature screens (Home, Reader, Search, Settings, ...) — only the one foundation-proof
@@ -954,3 +1049,42 @@ working, ready to gain real fidelity value once a real dataset and font exist.
   yet.
 - No real Quran dataset import — same gap as every milestone since 2; the shipped app's Mushaf
   pages render their honest "unavailable resource" state until a real dataset exists.
+
+## 19. What Milestone 8 deliberately did not do
+
+- No real WBW manifest or network download — `WbwPackCatalog`'s only implementation
+  (`NoWbwPackCatalog`) honestly reports nothing available; `core/downloads/`'s generic
+  `ResourceDownloadService`/`ResourceRepository` interfaces remain unimplemented, reserved for the
+  Resource Manager milestone (13), per those interfaces' own doc comments. `WbwLibraryController.install`
+  performs its write immediately rather than actually downloading bytes over time — every DoD-required
+  resource state is real and reachable, but "downloading" has no real progress percentage to report
+  yet (§11f).
+- No real WBW content ships — `WbwPackCatalog`, `WbwRepository`, and every test exercising them use
+  clearly-labeled synthetic fixture data (`test/wbw/wbw_test_fixtures.dart`), never a real
+  translation/transliteration corpus; per `docs/CLEAN_ROOM_RULES.md`'s resource-provenance rules, no
+  real WBW dataset's rights have been verified or recorded in `docs/THIRD_PARTY_RESOURCES.md`, so
+  none ships.
+- No script-picker entry point from the Mushaf reader itself — only the Reader's options sheet
+  exposes `quran_script_sheet.dart` today (no Settings screen exists yet, Milestone 14). Mushaf
+  already benefits from script changes immediately because it reads the same
+  `quranScriptCodeProvider`, but has no in-screen affordance of its own to change it — the same
+  "start feature-local, relocate once a second screen needs its own entry point" pattern this
+  codebase has used repeatedly (§1's `quran/application` relocations).
+- No tooltip variant of the word detail sheet — `docs/reference/14_WORD_BY_WORD_SPEC.md` §6 leaves
+  "tooltip vs. sheet" as `NEEDS_VERIFICATION` in the reference app itself; Tahfeez always uses the
+  fuller bottom sheet. "Tooltip translation"/"tooltip transliteration" preferences from the
+  milestone spec are modeled as which fields the sheet shows, not as a separate lightweight popover.
+- No word-audio playback — `WbwWordAudioEnabledPreferenceController` exists and gates the word
+  detail sheet's play affordance, but pressing it always shows "coming soon"; real per-word audio
+  (and `WbwAudioTimingEntity`-equivalent timing data) is Milestone 12's job.
+- No inline, always-visible WBW translation/transliteration under Reader/Mushaf words — "show
+  translation"/"show transliteration" preferences control only what the word detail sheet displays
+  once opened, not a permanent second line under every word in the reading surface itself; the
+  milestone's "Reader interaction" section only describes the tap-to-sheet flow, not an always-on
+  overlay.
+- No multiple-simultaneously-active WBW languages — `WbwSelectedPackController` holds exactly one
+  active pack id, matching translations' "one active WBW language at a time" behavior the reference
+  spec describes (distinct from translations' own multi-select, which is Milestone 9's concern).
+- No real Quran dataset import — same gap as every milestone since 2; without a real dataset
+  installed, the shipped app's script picker and word detail sheet render their honest empty/
+  unavailable states.

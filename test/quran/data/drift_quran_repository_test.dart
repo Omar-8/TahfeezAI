@@ -155,6 +155,14 @@ void main() {
     });
   });
 
+  group('scripts', () {
+    test('getAllScripts returns every installed script', () async {
+      final scripts = await repo.getAllScripts();
+      expect(scripts, hasLength(1));
+      expect(scripts.single.code, testScriptCode);
+    });
+  });
+
   group('mushaf', () {
     test('getMushaf resolves by script code with no variant', () async {
       final mushaf = await repo.getMushaf(scriptCode: testScriptCode);
