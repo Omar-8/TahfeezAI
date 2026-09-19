@@ -141,6 +141,8 @@ class VerseBlock extends StatelessWidget {
                   child: Wrap(
                     textDirection: TextDirection.rtl,
                     alignment: WrapAlignment.end,
+                    spacing: TahfeezSpacing.sm,
+                    runSpacing: TahfeezSpacing.xs,
                     children: [
                       for (final word in ayah.words)
                         InkWell(
