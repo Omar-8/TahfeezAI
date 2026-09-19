@@ -60,7 +60,8 @@ lib/
     audio/                      AudioController interface (+ minimal just_audio impl) + domain/AudioRepository.
     logging/                    AppLogger interface + implementation + global error hook.
     platform/                   PlatformCapabilities — the one place platform checks live.
-  quran/domain/                 QuranRepository, TranslationRepository, TafsirRepository, SearchRepository.
+  quran/domain/                 QuranRepository, TranslationRepository, TafsirRepository, SearchRepository, QuranLocation.
+  quran/application/            Quran-domain concerns shared by more than one feature (e.g. dataset-installed status).
   user_data/domain/             UserDataRepository (bookmarks, reading history).
   memorization/domain/          MemorizationRepository.
   ai/domain/                    RecitationRecognizer, RecitationContext, RecitationEvent (interfaces only).
@@ -502,11 +503,12 @@ Milestone 2 built the Quran data engine's plumbing, but no app-boot step has eve
 (or even synthetic) dataset into the live app's `QuranDatabase` — only tests exercise the importer,
 against ephemeral in-memory databases. This means the running app's Quran database is genuinely
 empty today, and Home is the first screen to have to confront that honestly.
-`lib/features/home/application/home_providers.dart`'s `hasInstalledQuranDatasetProvider` (a
-`getSurah(1) != null` check) is the single seam every Quran-data-dependent Home section checks
-first, rendering an "unavailable resource" state (never fabricated content) when it's `false` —
-which is the only state reachable in the shipped app until a real dataset import path exists. This
-is the concrete form this milestone's "do not insert fake production Quran data" /
+`hasInstalledQuranDatasetProvider` (a `getSurah(1) != null` check, originally added here and
+relocated to `lib/quran/application/quran_dataset_status.dart` in Milestone 5 once the Quran index
+needed the same check — see §11c) is the single seam every Quran-data-dependent Home section
+checks first, rendering an "unavailable resource" state (never fabricated content) when it's
+`false` — which is the only state reachable in the shipped app until a real dataset import path
+exists. This is the concrete form this milestone's "do not insert fake production Quran data" /
 "implement intentional loading/empty/offline/unavailable-resource states" requirements take.
 
 ### Testing gotcha: `flutter test` cannot exercise real Drift/`just_audio` backends
@@ -520,6 +522,93 @@ either provider is watched. `test/test_helpers/widget_test_overrides.dart` overr
 backend" pattern §11 already established) and `audioControllerProvider` with a small
 `FakeAudioController` (no test-safe real backend exists for `just_audio`). Every widget test that
 renders `TahfeezApp`/`AppShell`/`HomeScreen` must use these overrides.
+
+## 11c. Quran Index and Navigation (Milestone 5)
+
+### The unified location model
+
+`lib/quran/domain/models/quran_location.dart` defines `QuranLocation`, a `freezed` sealed union
+with exactly six variants: `surah`, `ayah`, `ayahRange`, `juz`, `hizb`, `page`. This is the single
+domain concept every screen that jumps into Quran content is meant to describe its target with —
+the Quran index today; Search, Bookmarks, and eventually the Reader itself in later milestones —
+rather than each screen inventing its own navigation argument shape, per this milestone's explicit
+"do not invent separate incompatible navigation argument schemes per screen" requirement. It is
+pure Dart (no Flutter dependency), living in `quran/domain` alongside the rest of the read-domain
+model types.
+
+`lib/quran/domain/quran_location_path.dart` provides the one canonical, deep-link-safe string
+serialization of a `QuranLocation` (`quranLocationPath`/`quranLocationFromPath`, e.g. `surah/2`,
+`ayah/2/255`, `page/1/42`) — also pure Dart, reused by two independent consumers rather than
+duplicated: `core/routing`'s literal `go_router` path templates, and
+`lib/features/quran/application/quran_index_providers.dart`'s persisted "recent location" value
+(the milestone's "remember recent/current context where appropriate" requirement, backed by
+`BrowserStorage`).
+
+### Routing: `core/routing`'s one documented exception
+
+`lib/core/routing/quran_location_routing.dart` defines six `GoRoute`s (one per `QuranLocation`
+variant, nested under the Quran branch) and the single `goToQuranLocation(context, location)`
+helper every index result — and every future caller — must go through, per this milestone's
+"every index result should route through `QuranLocation`... without screen-specific routing hacks"
+requirement. `go_router` path parameters match exactly one segment each, so the six variants get
+six literal path templates (`surah/:surahNo`, `ayah/:chapterNo/:verseNo`, …) rather than one
+generic catch-all segment carrying the slash-bearing encoded string from
+`quran_location_path.dart`.
+
+This file, like `app_router.dart` itself (which has referenced feature screens directly since
+Milestone 4), is a **documented exception** to §1's "`core` never depends on a feature" rule:
+something has to wire concrete route paths to concrete screens, and that composition-root role
+belongs to `core/routing` alone. No other file under `core/` may depend downward into `features/`
+or a feature-owning domain area. `AppRoutes` was extracted into its own file
+(`lib/core/routing/app_routes.dart`, re-exported from `app_router.dart` for existing importers) so
+`quran_location_routing.dart` could depend on the path constants without an import cycle with
+`app_router.dart`.
+
+### The Quran index UI
+
+`lib/features/quran/presentation/quran_index_screen.dart` is a four-tab `TabBar`/`TabBarView`
+(Surah / Juz / Hizb / Page) plus a "Go to Ayah" app-bar action
+(`lib/features/quran/presentation/go_to_ayah_sheet.dart`) — covering all five navigation modes
+this milestone requires. Every tab and the quick action funnel through one `_select` callback that
+records the location (`RecentQuranLocationController`) and calls `goToQuranLocation`.
+
+- **Surah tab** (`tabs/surah_index_tab.dart`) — searchable (by number or name) and filterable (by
+  revelation place). Chapter metadata comes from `quran_index_providers.dart`'s `indexedSurahs`,
+  which resolves every chapter's Arabic and current-UI-language localized names via two *batched*
+  `getAllSurahLocalizations` calls — never 114 individual `getSurahLocalization` lookups. This
+  batch method is this milestone's one addition to `QuranRepository`/`DriftQuranRepository`,
+  following the exact "small, fixed number of queries" discipline §4a established.
+- **Juz/Hizb tabs** — all 30/60 units, each showing where it starts. Built by grouping a single
+  `getNavigationRanges(NavigationUnitType.juz|hizb)` call client-side by `unitNo`
+  (`_groupByUnit`) rather than querying `getJuz`/`getHizb` once per unit (30/60 queries) — the same
+  batching discipline applied to a repository method that already existed but wasn't previously
+  used this way.
+- **Page tab** — a validated "go to page" entry (`isValidPage`) rather than one row per page (a
+  Mushaf commonly has 600+ pages); a Tahfeez-owned take on "jump to any page" more appropriate to
+  the medium than a giant list.
+- No "Favourites" tab (the reference index's fourth tab, `docs/reference/02_SCREEN_INVENTORY.md`
+  §5): that concept depends on bookmarks, which don't exist until Milestone 11 — a Page tab
+  fills the fourth slot instead, matching this milestone's own explicit "Surah; Juz; Hizb; Page;
+  direct Ayah selection" mode list instead of the reference app's exact tab roster.
+
+`hasInstalledQuranDatasetProvider` moved from `features/home/application/home_providers.dart` to
+`lib/quran/application/quran_dataset_status.dart` in this milestone, once the Quran index needed
+the identical "is a dataset installed" check Home already had — per §1's "feature areas do not
+depend on each other directly" rule, a check two features need is a `quran`-level concern, not one
+feature's private implementation reused by reaching into another feature's `application/` folder.
+This is the first file under `lib/quran/application/`; the project structure table in §2 predates
+per-feature `application/` folders needing a shared, feature-spanning counterpart, and this is that
+counterpart for the `quran` domain area specifically (mirroring how `quran/quran_providers.dart`
+already serves every feature needing Quran data, not just one).
+
+### The Reader stub
+
+`QuranLocationStubScreen` (`lib/features/quran/presentation/quran_location_stub_screen.dart`) is
+every index result's destination for this milestone: it resolves and displays the real
+`QuranLocation` a route parsed, proving the routing genuinely works end to end, without building
+Verse Reader UI that belongs to Milestone 6 — the same "honest placeholder, not a fake screen"
+pattern `QuranPlaceholderScreen`/`SearchPlaceholderScreen` established in Milestone 4.
+`QuranPlaceholderScreen` itself is deleted, superseded by the real `QuranIndexScreen`.
 
 ## 12. What Milestone 1 deliberately did not do
 
@@ -581,3 +670,20 @@ renders `TahfeezApp`/`AppShell`/`HomeScreen` must use these overrides.
   since real routes exist; still deferred, as motion polish is not this milestone's scope.
 - No memorization functionality — `HomeMemorizationTeaserSection` is a visible placeholder only,
   proving the Home layout can hold the section; the real dashboard is Milestone 17's job.
+
+## 16. What Milestone 5 deliberately did not do
+
+- No Verse Reader — `QuranLocationStubScreen` only proves a `QuranLocation` route resolves
+  correctly end to end; rendering actual Quran content at that location is Milestone 6's job.
+- No Favourites tab — that concept depends on bookmarks, which don't exist until
+  `UserDataRepository` is implemented (Milestone 11); a Page tab fills the fourth slot instead
+  (§11c).
+- No Sajdah or chapter-length filter on the Surah tab — the reference index's exact filter set is
+  reference-only per `docs/CLEAN_ROOM_RULES.md`'s "functional parity is acceptable, not
+  mandatory"; only a revelation-place filter and search were built, since those need no new
+  repository method beyond fields the domain model already has.
+- No script/Mushaf selection UI — `defaultQuranScriptCode` (`quran_index_providers.dart`) is a
+  single hardcoded placeholder value the Page tab depends on until Settings/Localization
+  (Milestone 14) supplies a real user preference.
+- No real Quran dataset import — same gap as Milestone 4 (§11b); the Surah/Juz/Hizb/Page tabs all
+  render their honest "unavailable resource" state in the shipped app today.

@@ -1,24 +1,11 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/localization/locale_controller.dart';
+import '../../../quran/application/quran_dataset_status.dart';
 import '../../../quran/domain/models/surah_models.dart';
 import '../../../quran/quran_providers.dart';
 
 part 'home_providers.g.dart';
-
-/// The Quran database has real plumbing (Milestone 2) but no app-boot import
-/// step wires an actual dataset into it yet — see `docs/ARCHITECTURE.md` §4a
-/// and `docs/DATA_RESOURCE_REQUIREMENTS.md`. Every Home section that reads
-/// Quran content checks this first and renders an "unavailable resource"
-/// state when it's `false`, rather than showing broken or fabricated
-/// content — this milestone's explicit "do not insert fake production
-/// Quran data" requirement.
-@riverpod
-Future<bool> hasInstalledQuranDataset(Ref ref) async {
-  final repository = ref.watch(quranRepositoryProvider);
-  final surah = await repository.getSurah(1);
-  return surah != null;
-}
 
 /// A deterministic, date-seeded chapter number, so "today's" featured verse
 /// is stable across rebuilds/app restarts on the same calendar day without

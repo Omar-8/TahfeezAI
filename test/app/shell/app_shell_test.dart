@@ -56,12 +56,8 @@ void main() {
 
     await tester.tap(find.text('Quran'));
     await tester.pumpAndSettle();
-    expect(
-      find.textContaining(
-        'Chapter, Juz, and page navigation are coming in a later milestone.',
-      ),
-      findsOneWidget,
-    );
+    expect(find.byType(TabBar), findsOneWidget);
+    expect(find.text('Surah'), findsOneWidget);
 
     await tester.tap(find.text('Search'));
     await tester.pumpAndSettle();

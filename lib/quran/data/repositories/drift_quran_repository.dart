@@ -62,6 +62,18 @@ class DriftQuranRepository implements QuranRepository {
     return row?.toDomain();
   }
 
+  @override
+  Future<List<SurahLocalization>> getAllSurahLocalizations({
+    required String languageCode,
+  }) async {
+    final rows =
+        await (_db.select(_db.surahLocalizations)
+              ..where((l) => l.languageCode.equals(languageCode))
+              ..orderBy([(l) => OrderingTerm(expression: l.surahNo)]))
+            .get();
+    return rows.map((r) => r.toDomain()).toList();
+  }
+
   // ---------------------------------------------------------------------
   // Ayahs and words
   // ---------------------------------------------------------------------

@@ -67,6 +67,26 @@ void main() {
       expect(localization?.name, 'Test Chapter One');
       expect(localization?.meaning, 'The First Test');
     });
+
+    test('getAllSurahLocalizations returns every localized chapter for one language', () async {
+      final localizations = await repo.getAllSurahLocalizations(
+        languageCode: 'en',
+      );
+      // The synthetic fixture only localizes surah 1.
+      expect(localizations, hasLength(1));
+      expect(localizations.single.surahNo, 1);
+      expect(localizations.single.name, 'Test Chapter One');
+    });
+
+    test(
+      'getAllSurahLocalizations returns nothing for an uncovered language',
+      () async {
+        final localizations = await repo.getAllSurahLocalizations(
+          languageCode: 'fr',
+        );
+        expect(localizations, isEmpty);
+      },
+    );
   });
 
   group('ayahs and words', () {

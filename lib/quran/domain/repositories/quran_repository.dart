@@ -36,6 +36,14 @@ abstract class QuranRepository {
     required String languageCode,
   });
 
+  /// Every chapter's localization for one language, in a single query —
+  /// the batch counterpart to [getSurahLocalization], for callers (e.g. the
+  /// Quran index) that need every chapter's localized name at once and
+  /// must not do it as 114 individual lookups.
+  Future<List<SurahLocalization>> getAllSurahLocalizations({
+    required String languageCode,
+  });
+
   // ---------------------------------------------------------------------
   // Ayahs and words
   // ---------------------------------------------------------------------
