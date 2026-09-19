@@ -73,6 +73,11 @@ abstract class QuranRepository {
     required String scriptCode,
   });
 
+  /// Every ayah word in [scriptCode], across the whole Quran — used only to
+  /// (re)build the Arabic-text search index (Milestone 10), which needs
+  /// every word at once rather than one ayah/verse-range/page at a time.
+  Future<List<AyahWord>> getAllWordsForScript(String scriptCode);
+
   /// Loads every verse in [range] together with its words, in a small,
   /// fixed number of queries regardless of how many verses [range] spans —
   /// this is the method reader UI should use instead of calling

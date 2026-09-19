@@ -125,4 +125,17 @@ class DriftTranslationRepository implements TranslationRepository {
             .get();
     return rows.map((r) => r.toDomain()).toList();
   }
+
+  @override
+  Future<List<TranslationVerseText>> getAllVerseText(String slug) async {
+    final rows =
+        await (_db.select(_db.translationVerses)
+              ..where((v) => v.slug.equals(slug))
+              ..orderBy([
+                (v) => OrderingTerm(expression: v.chapterNo),
+                (v) => OrderingTerm(expression: v.verseNo),
+              ]))
+            .get();
+    return rows.map((r) => r.toDomain()).toList();
+  }
 }

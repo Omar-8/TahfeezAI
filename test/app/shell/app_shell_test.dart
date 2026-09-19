@@ -62,7 +62,9 @@ void main() {
     await tester.tap(find.text('Search'));
     await tester.pumpAndSettle();
     expect(
-      find.text('Search across the Quran is coming in a later milestone.'),
+      find.text(
+        'This will appear automatically once a Quran dataset is added to the app.',
+      ),
       findsOneWidget,
     );
 

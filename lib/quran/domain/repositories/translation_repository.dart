@@ -48,4 +48,9 @@ abstract class TranslationRepository {
     VerseRangeRef range, {
     required String slug,
   });
+
+  /// Every verse [slug] has installed, across the whole Quran — used only
+  /// to (re)build that translation's search index (Milestone 10), which
+  /// needs every verse at once rather than one chapter range at a time.
+  Future<List<TranslationVerseText>> getAllVerseText(String slug);
 }

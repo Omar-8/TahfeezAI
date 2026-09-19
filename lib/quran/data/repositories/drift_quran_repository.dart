@@ -136,6 +136,22 @@ class DriftQuranRepository implements QuranRepository {
   }
 
   @override
+  Future<List<AyahWord>> getAllWordsForScript(String scriptCode) async {
+    final script = await _getScriptRowByCode(scriptCode);
+    if (script == null) return const [];
+
+    final rows =
+        await (_db.select(_db.ayahWords)
+              ..where((w) => w.scriptId.equals(script.id))
+              ..orderBy([
+                (w) => OrderingTerm(expression: w.ayahId),
+                (w) => OrderingTerm(expression: w.wordIndex),
+              ]))
+            .get();
+    return rows.map((r) => r.toDomain()).toList();
+  }
+
+  @override
   Future<List<AyahWithWords>> getVerseRangeWithWords(
     VerseRangeRef range, {
     required String scriptCode,

@@ -5,7 +5,7 @@ import '../../app/foundation_demo_screen.dart';
 import '../../app/shell/app_shell.dart';
 import '../../features/home/presentation/home_screen.dart';
 import '../../features/quran/presentation/quran_index_screen.dart';
-import '../../features/search/presentation/search_placeholder_screen.dart';
+import '../../features/search/presentation/search_screen.dart';
 import '../theme/gallery/component_gallery_screen.dart';
 import 'app_routes.dart';
 import 'quran_location_routing.dart';
@@ -45,7 +45,7 @@ GoRouter appRouter(Ref ref) {
             routes: [
               GoRoute(
                 path: AppRoutes.search,
-                builder: (context, state) => const SearchPlaceholderScreen(),
+                builder: (context, state) => const SearchScreen(),
               ),
             ],
           ),

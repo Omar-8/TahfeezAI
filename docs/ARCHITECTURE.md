@@ -1016,6 +1016,90 @@ and `TafsirReaderScreen`'s no-tafsir/with-tafsir/previous-next states end-to-end
 `GoRouter`. `test/features/mushaf/presentation/mushaf_translation_sheet_test.dart` covers the
 Mushaf sheet's empty and populated states.
 
+## 11h. Advanced Offline Quran Search (Milestone 10)
+
+### A fourth database, finally claiming §4's reserved row
+
+`lib/quran/data/search_index_database.dart` is the "Search index database | Derived, normalized,
+rebuildable text index | Milestone 10" row §4's table has reserved since Milestone 1 — the last of
+the four databases that table originally planned for (the user-data database remains Milestone 11's
+job). `ArabicSearchIndexEntries`/`TranslationSearchIndexEntries` hold only a normalized-text column
+plus enough denormalized identity (ayahId/scriptCode or slug/chapterNo/verseNo) to resolve a hit back
+to its canonical source — the index holds no canonical text of its own, so it can be dropped and
+fully rebuilt from `QuranRepository`/`TranslationRepository` with zero data loss, the same property
+§6 of `docs/reference/06_DATA_MODEL_SPEC.md` highlighted for the reference app's own derived search
+database.
+
+### FTS5 considered and deliberately not used
+
+The milestone spec explicitly permits "SQLite FTS5 or an equivalent local indexed approach." Drift's
+FTS5 support (`package:drift/extensions/fts5.dart`) requires the virtual table to be declared in a
+`.drift` SQL file — a source-file type this project has never used, introducing new toolchain surface
+for no real matching benefit here: FTS5's own tokenizer would still need custom configuration to
+reproduce the exact Arabic diacritic-stripping/alef-folding `SearchNormalizer` already performs in
+Dart, since `SearchNormalizer` must run identically over index content and queries regardless of
+which storage mechanism holds the index (`docs/reference/07_SEARCH_SPEC.md` §3's "normalize both
+sides the same way" requirement). Tahfeez instead stores pre-normalized text in an ordinary indexed
+column (`@TableIndex` on `normalizedText`) and matches with `LIKE '%token%'`, ANDing one `LIKE`
+clause per query token — functionally equivalent full-word/partial-word matching, expressed entirely
+in the pure-Dart `Table` style every other table in this codebase already uses.
+
+### SearchNormalizer: a scoped-down but honest equivalent
+
+`lib/quran/domain/search_normalizer.dart` reproduces `docs/reference/07_SEARCH_SPEC.md` §3's Arabic
+fold set (tashkeel/tatweel stripped, hamza-bearing alef variants folded to bare alef, alef-maksura
+folded to yaa) exactly, but does not reproduce the reference's Unicode NFKC pass — no dedicated
+Unicode-normalization dependency was added for it, since neither Arabic nor the ASCII/Latin-1 Latin
+content this milestone targets has compatibility-decomposition forms that would matter for matching
+at this milestone's scope. This is recorded as a deliberate, documented gap (§21), not a silent
+omission, and is exactly why matched-term highlighting (`search_match_highlight.dart`) is applied
+only to Latin-script (translation) results: highlighting Arabic results would need to map normalized
+token positions back onto un-normalized, character-shifted canonical text, which `normalizeArabic`'s
+character-folding makes unreliable to do correctly.
+
+### Surah search needs no index at all
+
+Rather than modeling a `SurahSearchAlias`-equivalent dataset — the reference app's own alias list is
+exactly the kind of curated, proprietary dataset `docs/CLEAN_ROOM_RULES.md` forbids copying, and
+Tahfeez has not sourced an independent one — Surah search matches directly against
+`QuranRepository.getAllSurahLocalizations`, normalized and substring-matched in memory. 114 rows is
+cheap enough to scan on every query, so this needed no persistent index, no rebuild step, and no new
+canonical dataset most other search domains required.
+
+### Quick links: pure and synchronous, no index dependency
+
+`lib/quran/domain/quick_link_parser.dart`'s `QuickLinkParser` recognizes a verse (`2:255`), a verse
+range (`2:255-257`), and a bare number as both a Surah and (when ≤30) a Juz — resolved purely from
+the query's shape and the Quran's fixed structural constants (114 chapters, 30 Juz), with no
+repository dependency at all, so quick links always resolve instantly regardless of index state.
+
+### Ensuring indexes exist without a dataset-import trigger point
+
+No milestone has ever wired a real Quran-dataset-import completion event (`docs/ARCHITECTURE.md`
+§11b onward all note the shipped app's Quran database is empty), so there is nothing for indexing to
+hook into automatically. `SearchController` (`lib/features/search/application/search_controller.dart`)
+instead checks `isQuranTextIndexed`/`isTranslationIndexed` on each search and indexes lazily on first
+use — correct, real, and fully tested, without inventing an import-pipeline hook this codebase has
+no other use for yet.
+
+### Testing gotcha: another `keepAlive`+`BrowserStorage` race, same fix as Milestone 9
+
+`SearchHistoryController`/`SearchFiltersController` are `keepAlive` and persist to the same
+process-wide `BrowserStorage` every test in a file shares — the exact race §11g's testing note
+already documented for `TranslationSelectionController`. Both controllers' test files clear their
+storage key in `setUp` for the same reason.
+
+### Testing
+
+`test/quran/domain/search_normalizer_test.dart` and `quick_link_parser_test.dart` cover the
+normalization/tokenization rules and quick-link shapes directly (this milestone's explicit "test
+representative Arabic normalization and exact/partial behavior" requirement).
+`test/quran/data/repositories/drift_search_repository_test.dart` covers indexing, re-indexing,
+multi-token AND matching, per-domain filtering, and translation-slug scoping against real in-memory
+databases. `test/features/search/` covers both preference controllers and the search screen
+end-to-end (empty/no-dataset/no-match states, typing a query, a quick-link result navigating through
+a real `GoRouter`, the filter sheet actually changing what a subsequent search returns).
+
 ## 12. What Milestone 1 deliberately did not do
 
 - No feature screens (Home, Reader, Search, Settings, ...) — only the one foundation-proof
@@ -1219,3 +1303,34 @@ Mushaf sheet's empty and populated states.
 - No real Quran dataset import — same gap as every milestone since 2; without a real dataset
   installed, the shipped app's reader/Mushaf/tafsir screens render their honest empty/unavailable
   states.
+
+## 21. What Milestone 10 deliberately did not do
+
+- No SQLite FTS5 — a plain indexed column matched by `LIKE`, per §11h's reasoning; the milestone
+  spec explicitly allows this "equivalent local indexed approach."
+- No Unicode NFKC normalization pass — `SearchNormalizer` only lowercases/trims/collapses whitespace
+  as its generic base step; real translations in scripts with meaningful compatibility-decomposition
+  forms may need this revisited once real (non-synthetic) content is sourced.
+- No character-accurate highlighting for Arabic results — only Latin-script (translation) hits are
+  highlighted; see §11h for why normalized-Arabic token positions don't reliably map back onto
+  canonical, un-normalized text.
+- No Surah alias/transliteration dataset — Surah search matches only the installed dataset's own
+  localized name/meaning, not a curated alternate-spelling list (the reference app's own alias
+  dataset is exactly the kind of proprietary content `docs/CLEAN_ROOM_RULES.md` forbids copying, and
+  Tahfeez has not sourced an independent one).
+- No reference-content collections search (duas, topics, prophets, Quran-and-science) —
+  `docs/reference/07_SEARCH_SPEC.md` §2.5's `ExclusiveVersesSearchProvider` domain has no Tahfeez
+  dataset behind it yet; those datasets are their own future product-area milestones, not this one.
+- No real voice search — the mic icon is a real, tappable, honest "coming soon" affordance; per this
+  milestone's own "Future AI" requirement, `SearchController` already accepts any plain `String`
+  query, so wiring real speech-to-text later needs no controller-level change, only a UI entry point
+  that produces text.
+- No incremental/paginated result loading — result lists are capped at a fixed `limit` (default 50)
+  per domain rather than using an incremental-loading widget; acceptable at this milestone's scale
+  (a `LIKE`-scanned local index over a dataset with no real content yet) and revisitable once real,
+  large installed content makes pagination worth the added complexity.
+- No automatic re-indexing triggered by dataset import or translation install/update completing —
+  `SearchController` indexes lazily on first search instead, per §11h's reasoning (no real import/
+  install trigger point exists in this codebase yet to hook into).
+- No real Quran dataset import — same gap as every milestone since 2; without a real dataset
+  installed, the shipped app's search screen renders its honest "not available yet" empty state.
