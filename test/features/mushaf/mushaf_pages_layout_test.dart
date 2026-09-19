@@ -6,8 +6,8 @@ import 'package:tahfeez_ai/features/mushaf/domain/mushaf_word_measurer.dart';
 import 'package:tahfeez_ai/quran/data/import/quran_dataset_importer.dart';
 import 'package:tahfeez_ai/quran/data/quran_database.dart';
 import 'package:tahfeez_ai/quran/data/repositories/drift_quran_repository.dart';
-import 'package:tahfeez_ai/quran/domain/models/ayah_models.dart';
 import 'package:tahfeez_ai/quran/domain/models/mushaf_models.dart';
+import 'package:tahfeez_ai/quran/domain/models/mushaf_token_models.dart';
 
 import 'mushaf_test_fixtures.dart';
 
@@ -42,18 +42,17 @@ void main() {
       mushafId: mushafTestMushafId,
       pageNumber: pageNumber,
     );
-    final pageWords = await repo.getWordsForPage(
+    final pageTokens = await repo.getPageTokens(
       mushafId: mushafTestMushafId,
       pageNumber: pageNumber,
-      scriptCode: mushafTestScriptCode,
     );
-    final wordsByLine = <int, List<AyahWord>>{
-      for (final line in lines) line.lineNumber: _trim(pageWords, line),
+    final tokensByLine = <int, List<MushafToken>>{
+      for (final line in lines) line.lineNumber: _trim(pageTokens, line),
     };
     final layout = engine.layoutPage(
       pageNumber: pageNumber,
       lines: lines,
-      wordsByLineNumber: wordsByLine,
+      tokensByLineNumber: tokensByLine,
       availableWidth: width,
     );
     return (lines: layout.lines);
@@ -161,21 +160,11 @@ void main() {
   });
 }
 
-List<AyahWord> _trim(List<AyahWord> pageWords, MushafLine line) {
-  final startAyahId = line.startAyahId;
-  final endAyahId = line.endAyahId;
-  final startWordIndex = line.startWordIndex;
-  final endWordIndex = line.endWordIndex;
-  if (startAyahId == null ||
-      endAyahId == null ||
-      startWordIndex == null ||
-      endWordIndex == null) {
-    return const [];
-  }
-  return pageWords.where((w) {
-    if (w.ayahId < startAyahId || w.ayahId > endAyahId) return false;
-    if (w.ayahId == startAyahId && w.wordIndex < startWordIndex) return false;
-    if (w.ayahId == endAyahId && w.wordIndex > endWordIndex) return false;
-    return true;
-  }).toList();
+List<MushafToken> _trim(List<MushafToken> pageTokens, MushafLine line) {
+  final first = line.firstTokenId;
+  final last = line.lastTokenId;
+  if (first == null || last == null) return const [];
+  return pageTokens
+      .where((t) => t.sourceTokenId >= first && t.sourceTokenId <= last)
+      .toList();
 }

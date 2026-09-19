@@ -48,6 +48,7 @@ class QuranDatasetImporter {
       // Deleted in dependency order (children before parents) so foreign
       // keys never momentarily point at a deleted row mid-import.
       await db.delete(db.mushafLines).go();
+      await db.delete(db.mushafTokens).go();
       await db.delete(db.mushafs).go();
       await db.delete(db.quranScriptVariants).go();
       await db.delete(db.quranScripts).go();
@@ -146,6 +147,9 @@ class QuranDatasetImporter {
               scriptVariantId: Value(m.scriptVariantId),
               pageCount: m.pageCount,
               linesPerPage: m.linesPerPage,
+              qiraah: m.qiraah,
+              edition: m.edition,
+              renderingType: m.renderingType,
             ),
           ),
         );
@@ -159,11 +163,27 @@ class QuranDatasetImporter {
               lineNumber: l.lineNumber,
               lineType: l.lineType,
               isCentered: l.isCentered,
-              startAyahId: Value(l.startAyahId),
-              startWordIndex: Value(l.startWordIndex),
-              endAyahId: Value(l.endAyahId),
-              endWordIndex: Value(l.endWordIndex),
+              firstTokenId: Value(l.firstTokenId),
+              lastTokenId: Value(l.lastTokenId),
               surahNo: Value(l.surahNo),
+            ),
+          ),
+        );
+
+        batch.insertAll(
+          db.mushafTokens,
+          payload.mushafTokens.map(
+            (t) => MushafTokensCompanion.insert(
+              mushafId: t.mushafId,
+              sourceTokenId: t.sourceTokenId,
+              sequenceIndex: t.sequenceIndex,
+              tokenType: t.tokenType,
+              displayText: t.displayText,
+              surahNumber: Value(t.surahNumber),
+              ayahNumber: Value(t.ayahNumber),
+              sourceWordPosition: Value(t.sourceWordPosition),
+              canonicalAyahId: Value(t.canonicalAyahId),
+              canonicalWordIndex: Value(t.canonicalWordIndex),
             ),
           ),
         );

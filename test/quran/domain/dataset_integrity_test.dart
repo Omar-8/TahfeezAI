@@ -3,6 +3,7 @@ import 'package:tahfeez_ai/quran/domain/dataset_integrity.dart';
 import 'package:tahfeez_ai/quran/domain/models/ayah_models.dart';
 import 'package:tahfeez_ai/quran/domain/models/dataset_metadata.dart';
 import 'package:tahfeez_ai/quran/domain/models/mushaf_models.dart';
+import 'package:tahfeez_ai/quran/domain/models/mushaf_token_models.dart';
 import 'package:tahfeez_ai/quran/domain/models/navigation_models.dart';
 import 'package:tahfeez_ai/quran/domain/models/script_models.dart';
 import 'package:tahfeez_ai/quran/domain/models/surah_models.dart';
@@ -25,6 +26,7 @@ QuranDatasetPayload _emptyPayload({
   List<QuranScriptVariant> scriptVariants = const [],
   List<Mushaf> mushafs = const [],
   List<MushafLine> mushafLines = const [],
+  List<MushafToken> mushafTokens = const [],
   List<NavigationRange> navigationRanges = const [],
   DatasetMetadata? metadata,
 }) {
@@ -37,10 +39,23 @@ QuranDatasetPayload _emptyPayload({
     scriptVariants: scriptVariants,
     mushafs: mushafs,
     mushafLines: mushafLines,
+    mushafTokens: mushafTokens,
     navigationRanges: navigationRanges,
     metadata: metadata ?? _metadata,
   );
 }
+
+Mushaf _testMushaf({int id = 1, int pageCount = 1, int linesPerPage = 5}) =>
+    Mushaf(
+      id: id,
+      code: 'm$id',
+      scriptId: 1,
+      pageCount: pageCount,
+      linesPerPage: linesPerPage,
+      qiraah: 'Test',
+      edition: 'Test',
+      renderingType: MushafRenderingType.unicodeText,
+    );
 
 void main() {
   const validator = DatasetIntegrityValidator();
@@ -213,9 +228,7 @@ void main() {
 
   test('flags a page number outside a Mushaf\'s declared page count', () {
     final payload = _emptyPayload(
-      mushafs: const [
-        Mushaf(id: 1, code: 'm', scriptId: 1, pageCount: 1, linesPerPage: 5),
-      ],
+      mushafs: [_testMushaf()],
       mushafLines: const [
         MushafLine(
           mushafId: 1,
@@ -232,9 +245,7 @@ void main() {
 
   test('flags non-contiguous line numbers on a Mushaf page', () {
     final payload = _emptyPayload(
-      mushafs: const [
-        Mushaf(id: 1, code: 'm', scriptId: 1, pageCount: 1, linesPerPage: 5),
-      ],
+      mushafs: [_testMushaf()],
       mushafLines: const [
         MushafLine(
           mushafId: 1,
@@ -257,11 +268,9 @@ void main() {
     expect(hasCode(report, 'mushaf_lines_not_contiguous'), isTrue);
   });
 
-  test('flags a Quran-text line missing its word range', () {
+  test('flags a Quran-text line missing its token range', () {
     final payload = _emptyPayload(
-      mushafs: const [
-        Mushaf(id: 1, code: 'm', scriptId: 1, pageCount: 1, linesPerPage: 5),
-      ],
+      mushafs: [_testMushaf()],
       mushafLines: const [
         MushafLine(
           mushafId: 1,
@@ -273,14 +282,12 @@ void main() {
       ],
     );
     final report = validator.validate(payload);
-    expect(hasCode(report, 'line_missing_word_range'), isTrue);
+    expect(hasCode(report, 'line_missing_token_range'), isTrue);
   });
 
-  test('flags a line whose start/end ayah id does not exist', () {
+  test('flags a line referencing a token id that does not exist', () {
     final payload = _emptyPayload(
-      mushafs: const [
-        Mushaf(id: 1, code: 'm', scriptId: 1, pageCount: 1, linesPerPage: 5),
-      ],
+      mushafs: [_testMushaf()],
       mushafLines: const [
         MushafLine(
           mushafId: 1,
@@ -288,33 +295,33 @@ void main() {
           lineNumber: 1,
           lineType: MushafLineType.quranText,
           isCentered: false,
-          startAyahId: 1001,
-          startWordIndex: 0,
-          endAyahId: 1001,
-          endWordIndex: 1,
+          firstTokenId: 1,
+          lastTokenId: 2,
         ),
       ],
     );
     final report = validator.validate(payload);
-    expect(hasCode(report, 'line_references_unknown_ayah'), isTrue);
+    expect(hasCode(report, 'line_references_unknown_token'), isTrue);
   });
 
-  test('flags a line whose start position is after its end position', () {
+  test('flags a line whose first token id is after its last token id', () {
     final payload = _emptyPayload(
-      ayahs: const [
-        Ayah(
-          id: 1001,
-          chapterNo: 1,
-          verseNo: 1,
-          juzNo: 1,
-          hizbNo: 1,
-          rubNo: 1,
-          manzilNo: 1,
-          rukuNo: 1,
+      mushafs: [_testMushaf()],
+      mushafTokens: const [
+        MushafToken(
+          mushafId: 1,
+          sourceTokenId: 1,
+          sequenceIndex: 0,
+          tokenType: MushafTokenType.ayahMarker,
+          displayText: 'a',
         ),
-      ],
-      mushafs: const [
-        Mushaf(id: 1, code: 'm', scriptId: 1, pageCount: 1, linesPerPage: 5),
+        MushafToken(
+          mushafId: 1,
+          sourceTokenId: 2,
+          sequenceIndex: 1,
+          tokenType: MushafTokenType.ayahMarker,
+          displayText: 'b',
+        ),
       ],
       mushafLines: const [
         MushafLine(
@@ -323,10 +330,8 @@ void main() {
           lineNumber: 1,
           lineType: MushafLineType.quranText,
           isCentered: false,
-          startAyahId: 1001,
-          startWordIndex: 5,
-          endAyahId: 1001,
-          endWordIndex: 1,
+          firstTokenId: 2,
+          lastTokenId: 1,
         ),
       ],
     );

@@ -1,6 +1,7 @@
 import 'models/ayah_models.dart';
 import 'models/dataset_metadata.dart';
 import 'models/mushaf_models.dart';
+import 'models/mushaf_token_models.dart';
 import 'models/navigation_models.dart';
 import 'models/script_models.dart';
 import 'models/surah_models.dart';
@@ -30,6 +31,7 @@ class QuranDatasetPayload {
     required this.scriptVariants,
     required this.mushafs,
     required this.mushafLines,
+    this.mushafTokens = const [],
     required this.navigationRanges,
     required this.metadata,
   });
@@ -42,6 +44,12 @@ class QuranDatasetPayload {
   final List<QuranScriptVariant> scriptVariants;
   final List<Mushaf> mushafs;
   final List<MushafLine> mushafLines;
+
+  /// Every [MushafToken] for every [Mushaf] in [mushafs] — the printed
+  /// token sequence a [MushafLine]'s `firstTokenId`/`lastTokenId` range
+  /// resolves against. Defaults to empty since not every payload (e.g. one
+  /// with no Mushaf at all) needs to supply it.
+  final List<MushafToken> mushafTokens;
   final List<NavigationRange> navigationRanges;
   final DatasetMetadata metadata;
 }

@@ -1,6 +1,7 @@
 import '../models/ayah_models.dart';
 import '../models/dataset_metadata.dart';
 import '../models/mushaf_models.dart';
+import '../models/mushaf_token_models.dart';
 import '../models/navigation_models.dart';
 import '../models/script_models.dart';
 import '../models/surah_models.dart';
@@ -108,24 +109,25 @@ abstract class QuranRepository {
     required int pageNumber,
   });
 
-  Future<List<AyahWord>> getWordsForLine(
-    MushafLine line, {
-    required String scriptCode,
-  });
+  /// Every [MushafToken] [line] spans, in printed order — real Quran words
+  /// and any marker/other tokens alike, per
+  /// `lib/quran/domain/models/mushaf_token_models.dart`'s separation from
+  /// [AyahWord]. Returns an empty list for a line with no token range of
+  /// its own ([MushafLineType.surahHeader]/[MushafLineType.bismillah]).
+  Future<List<MushafToken>> getLineTokens(MushafLine line);
 
-  /// Every word for every line of one Mushaf page, in a small, fixed
+  /// Every token for every line of one Mushaf page, in a small, fixed
   /// number of queries regardless of the page's line count — the batch
-  /// counterpart to [getWordsForLine], for the Mushaf renderer (Milestone
-  /// 7), which needs a whole page's words at once and must not query once
-  /// per line (~15 queries for a standard 15-line page). Returned in
-  /// (ayahId, wordIndex) order, unfiltered by any single line's word-index
-  /// bounds — callers slice per line themselves using each
-  /// [MushafLine.startWordIndex]/[MushafLine.endWordIndex], the same
-  /// trimming [getWordsForLine] does internally for one line.
-  Future<List<AyahWord>> getWordsForPage({
+  /// counterpart to [getLineTokens], for the Mushaf renderer, which needs a
+  /// whole page's tokens at once and must not query once per line (~15
+  /// queries for a standard 15-line page). Returned in printed
+  /// ([MushafToken.sequenceIndex]) order, unfiltered by any single line's
+  /// token-id bounds — callers slice per line themselves using each
+  /// [MushafLine.firstTokenId]/[MushafLine.lastTokenId], the same trimming
+  /// [getLineTokens] does internally for one line.
+  Future<List<MushafToken>> getPageTokens({
     required int mushafId,
     required int pageNumber,
-    required String scriptCode,
   });
 
   /// The page number containing [ayahId] in [mushafId]'s pagination, or

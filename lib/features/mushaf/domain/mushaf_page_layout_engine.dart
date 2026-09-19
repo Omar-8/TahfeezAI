@@ -1,5 +1,5 @@
-import '../../../quran/domain/models/ayah_models.dart';
 import '../../../quran/domain/models/mushaf_models.dart';
+import '../../../quran/domain/models/mushaf_token_models.dart';
 import 'mushaf_line_layout.dart';
 import 'mushaf_word_measurer.dart';
 
@@ -44,36 +44,36 @@ class MushafPageLayoutEngine {
 
   /// Lays out every line of one page.
   ///
-  /// [wordsByLineNumber] must already contain each line's exact word
-  /// sequence (e.g. from batch-loading a whole page's words via
-  /// `QuranRepository.getWordsForPage` and slicing per line — see
+  /// [tokensByLineNumber] must already contain each line's exact token
+  /// sequence (e.g. from batch-loading a whole page's tokens via
+  /// `QuranRepository.getPageTokens` and slicing per line — see
   /// `lib/features/mushaf/application/mushaf_page_providers.dart`); this
   /// engine does no data loading of its own.
   MushafPageLayout layoutPage({
     required int pageNumber,
     required List<MushafLine> lines,
-    required Map<int, List<AyahWord>> wordsByLineNumber,
+    required Map<int, List<MushafToken>> tokensByLineNumber,
     required double availableWidth,
   }) {
     final laidOutLines = [
       for (final line in lines)
         layoutLine(
           line: line,
-          words: wordsByLineNumber[line.lineNumber] ?? const [],
+          tokens: tokensByLineNumber[line.lineNumber] ?? const [],
           availableWidth: availableWidth,
         ),
     ];
     return MushafPageLayout(pageNumber: pageNumber, lines: laidOutLines);
   }
 
-  /// Lays out one line. Deterministic: the same [line]/[words]/
+  /// Lays out one line. Deterministic: the same [line]/[tokens]/
   /// [availableWidth] always produce the same [MushafLineLayout].
   MushafLineLayout layoutLine({
     required MushafLine line,
-    required List<AyahWord> words,
+    required List<MushafToken> tokens,
     required double availableWidth,
   }) {
-    if (words.isEmpty) {
+    if (tokens.isEmpty) {
       // A pure surah-header or Bismillah line carries no ayah words of its
       // own — the renderer overlays the chapter name / Bismillah marker
       // separately (see `docs/reference/05_MUSHAF_SPEC.md` §2).
@@ -90,10 +90,10 @@ class MushafPageLayoutEngine {
 
     double naturalWidthAt(double fontSize) {
       var total = 0.0;
-      for (final word in words) {
-        total += measurer.measure(word.text, fontSize);
+      for (final token in tokens) {
+        total += measurer.measure(token.displayText, fontSize);
       }
-      total += baseInterWordSpacing * (words.length - 1);
+      total += baseInterWordSpacing * (tokens.length - 1);
       return total;
     }
 
@@ -102,41 +102,43 @@ class MushafPageLayoutEngine {
     scale = scale.clamp(minScale, maxScale);
     final fontSize = baseFontSize * scale;
 
-    final wordWidths = [
-      for (final word in words) measurer.measure(word.text, fontSize),
+    final tokenWidths = [
+      for (final token in tokens) measurer.measure(token.displayText, fontSize),
     ];
-    final totalWordWidth = wordWidths.fold<double>(0, (a, b) => a + b);
+    final totalTokenWidth = tokenWidths.fold<double>(0, (a, b) => a + b);
 
     double spacing;
-    if (words.length > 1 && !line.isCentered) {
-      // Justify: distribute the remaining space as inter-word gaps,
+    if (tokens.length > 1 && !line.isCentered) {
+      // Justify: distribute the remaining space as inter-token gaps,
       // clamped so a very short line doesn't stretch into absurd gaps.
-      final remaining = availableWidth - totalWordWidth;
-      final rawSpacing = remaining / (words.length - 1);
+      final remaining = availableWidth - totalTokenWidth;
+      final rawSpacing = remaining / (tokens.length - 1);
       spacing = rawSpacing.clamp(0.0, baseInterWordSpacing * scale * 3);
     } else {
-      spacing = words.length > 1 ? baseInterWordSpacing * scale : 0;
+      spacing = tokens.length > 1 ? baseInterWordSpacing * scale : 0;
     }
 
-    var lineWidth = totalWordWidth + spacing * (words.length - 1);
+    var lineWidth = totalTokenWidth + spacing * (tokens.length - 1);
     // Prevent clipping: in the rare case scaling still leaves the line
-    // wider than available (e.g. a single very long word at minScale),
+    // wider than available (e.g. a single very long token at minScale),
     // drop the extra spacing rather than let it overflow further.
-    if (lineWidth > availableWidth && words.length > 1) {
+    if (lineWidth > availableWidth && tokens.length > 1) {
       spacing = 0;
-      lineWidth = totalWordWidth;
+      lineWidth = totalTokenWidth;
     }
 
     final placements = <MushafWordPlacement>[];
     var cursor = 0.0;
-    for (var i = 0; i < words.length; i++) {
-      final word = words[i];
-      final width = wordWidths[i];
+    for (var i = 0; i < tokens.length; i++) {
+      final token = tokens[i];
+      final width = tokenWidths[i];
       placements.add(
         MushafWordPlacement(
-          ayahId: word.ayahId,
-          wordIndex: word.wordIndex,
-          text: word.text,
+          sourceTokenId: token.sourceTokenId,
+          tokenType: token.tokenType,
+          canonicalAyahId: token.canonicalAyahId,
+          canonicalWordIndex: token.canonicalWordIndex,
+          text: token.displayText,
           x: cursor,
           width: width,
         ),

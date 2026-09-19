@@ -1,4 +1,5 @@
 import 'models/mushaf_models.dart';
+import 'models/mushaf_token_models.dart';
 import 'quran_dataset_payload.dart';
 
 /// The Quran has exactly 114 chapters — an immutable fact about the Quran
@@ -73,7 +74,9 @@ class DatasetIntegrityValidator {
       ..._checkOrderedWords(payload),
       ..._checkMushafPageMappings(payload),
       ..._checkOrderedMushafLines(payload),
-      ..._checkLineWordRanges(payload),
+      ..._checkLineTokenRanges(payload),
+      ..._checkMushafTokenIds(payload),
+      ..._checkMushafTokenCanonicalMapping(payload),
       ..._checkNavigationRangeBoundaries(payload),
       ..._checkNoMissingText(payload),
       ..._checkDatasetMetadata(payload),
@@ -280,57 +283,121 @@ class DatasetIntegrityValidator {
     }
   }
 
-  Iterable<IntegrityIssue> _checkLineWordRanges(
+  Iterable<IntegrityIssue> _checkLineTokenRanges(
     QuranDatasetPayload payload,
   ) sync* {
-    final ayahIds = payload.ayahs.map((a) => a.id).toSet();
+    // Scoped per (mushafId, sourceTokenId): different Mushaf editions each
+    // have their own independent token-id numbering scheme (from their own
+    // upstream source), so the same numeric id legitimately means a
+    // different token in a different Mushaf.
+    final tokenIdsByMushaf = <int, Set<int>>{};
+    for (final token in payload.mushafTokens) {
+      tokenIdsByMushaf
+          .putIfAbsent(token.mushafId, () => {})
+          .add(token.sourceTokenId);
+    }
 
     for (final line in payload.mushafLines) {
-      final hasStart = line.startAyahId != null;
-      final hasEnd = line.endAyahId != null;
-
       if (line.lineType != MushafLineType.quranText) {
         continue;
       }
 
-      if (!hasStart ||
-          !hasEnd ||
-          line.startWordIndex == null ||
-          line.endWordIndex == null) {
+      final first = line.firstTokenId;
+      final last = line.lastTokenId;
+      if (first == null || last == null) {
         yield IntegrityIssue(
-          code: 'line_missing_word_range',
+          code: 'line_missing_token_range',
           severity: IntegritySeverity.error,
           message:
               'Mushaf ${line.mushafId} page ${line.pageNumber} line ${line.lineNumber} is a Quran-text '
-              'line but is missing its start/end ayah or word index.',
+              'line but is missing its first/last token id.',
         );
         continue;
       }
 
-      if (!ayahIds.contains(line.startAyahId) ||
-          !ayahIds.contains(line.endAyahId)) {
+      final tokenIds = tokenIdsByMushaf[line.mushafId] ?? const {};
+      if (!tokenIds.contains(first) || !tokenIds.contains(last)) {
         yield IntegrityIssue(
-          code: 'line_references_unknown_ayah',
+          code: 'line_references_unknown_token',
           severity: IntegritySeverity.error,
           message:
-              'Mushaf ${line.mushafId} page ${line.pageNumber} line ${line.lineNumber} references an '
-              'ayah id not present in the dataset.',
+              'Mushaf ${line.mushafId} page ${line.pageNumber} line ${line.lineNumber} references a '
+              'token id not present in that Mushaf\'s token set.',
         );
         continue;
       }
 
-      final startsAfterEnds =
-          line.startAyahId! > line.endAyahId! ||
-          (line.startAyahId == line.endAyahId &&
-              line.startWordIndex! > line.endWordIndex!);
-
-      if (startsAfterEnds) {
+      if (first > last) {
         yield IntegrityIssue(
           code: 'line_range_reversed',
           severity: IntegritySeverity.error,
           message:
-              'Mushaf ${line.mushafId} page ${line.pageNumber} line ${line.lineNumber} has a start '
-              'position after its end position.',
+              'Mushaf ${line.mushafId} page ${line.pageNumber} line ${line.lineNumber} has a first '
+              'token id after its last token id.',
+        );
+      }
+    }
+  }
+
+  Iterable<IntegrityIssue> _checkMushafTokenIds(
+    QuranDatasetPayload payload,
+  ) sync* {
+    final seen = <(int, int)>{};
+    for (final token in payload.mushafTokens) {
+      if (!seen.add((token.mushafId, token.sourceTokenId))) {
+        yield IntegrityIssue(
+          code: 'mushaf_token_id_duplicate',
+          severity: IntegritySeverity.error,
+          message:
+              'Mushaf ${token.mushafId} token id ${token.sourceTokenId} is used by more than one token.',
+        );
+      }
+    }
+  }
+
+  Iterable<IntegrityIssue> _checkMushafTokenCanonicalMapping(
+    QuranDatasetPayload payload,
+  ) sync* {
+    final ayahWordKeys = {
+      for (final w in payload.ayahWords) (w.ayahId, w.wordIndex),
+    };
+
+    for (final token in payload.mushafTokens) {
+      final hasCanonicalRef =
+          token.canonicalAyahId != null || token.canonicalWordIndex != null;
+
+      if (token.tokenType == MushafTokenType.quranWord) {
+        if (token.canonicalAyahId == null || token.canonicalWordIndex == null) {
+          yield IntegrityIssue(
+            code: 'mushaf_token_missing_canonical_mapping',
+            severity: IntegritySeverity.error,
+            message:
+                'Mushaf token ${token.sourceTokenId} is a quranWord but has no '
+                'canonicalAyahId/canonicalWordIndex.',
+          );
+          continue;
+        }
+        if (!ayahWordKeys.contains((
+          token.canonicalAyahId,
+          token.canonicalWordIndex,
+        ))) {
+          yield IntegrityIssue(
+            code: 'mushaf_token_invalid_canonical_mapping',
+            severity: IntegritySeverity.error,
+            message:
+                'Mushaf token ${token.sourceTokenId} claims canonical ayah '
+                '${token.canonicalAyahId} word ${token.canonicalWordIndex}, which '
+                'does not exist in ayahWords.',
+          );
+        }
+      } else if (hasCanonicalRef) {
+        yield IntegrityIssue(
+          code: 'mushaf_token_fabricated_canonical_mapping',
+          severity: IntegritySeverity.error,
+          message:
+              'Mushaf token ${token.sourceTokenId} is ${token.tokenType.name}, '
+              'not quranWord, but carries a canonical ayah/word mapping — '
+              'markers must never receive a fabricated canonical reference.',
         );
       }
     }

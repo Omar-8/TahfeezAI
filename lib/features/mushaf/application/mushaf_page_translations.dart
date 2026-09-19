@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../quran/application/translation_selection_controller.dart';
+import '../../../quran/domain/models/mushaf_token_models.dart';
 import '../../../quran/domain/models/translation_models.dart';
 import '../../../quran/translation_providers.dart';
 import 'mushaf_page_providers.dart';
@@ -12,9 +13,11 @@ part 'mushaf_page_translations.g.dart';
 /// `MushafTranslationSheet` (Milestone 9's "use a separate sheet so the
 /// printed page remains visually clean" requirement).
 ///
-/// Ayah identity for the page comes for free from the page's own word data
-/// ([MushafPageBundle.wordsByLineNumber]'s `AyahWord.ayahId`s) — no extra
-/// repository call needed just to know which verses are on the page.
+/// Ayah identity for the page comes for free from the page's own token data
+/// ([MushafPageBundle.tokensByLineNumber]'s `quranWord` tokens'
+/// `canonicalAyahId`s — markers carry no canonical ayah and are excluded) —
+/// no extra repository call needed just to know which verses are on the
+/// page.
 /// Translation text is then loaded in a small, fixed number of queries:
 /// one per (chapter segment on the page) × (active translation), via
 /// [TranslationRepository.getVerseRangeText] — never one query per verse.
@@ -33,8 +36,10 @@ Future<Map<int, Map<String, TranslationVerseText>>> mushafPageTranslations(
   if (page == null) return const {};
 
   final ayahIds = <int>{
-    for (final words in page.wordsByLineNumber.values)
-      for (final word in words) word.ayahId,
+    for (final tokens in page.tokensByLineNumber.values)
+      for (final token in tokens)
+        if (token.tokenType == MushafTokenType.quranWord)
+          token.canonicalAyahId!,
   };
   if (ayahIds.isEmpty) return const {};
 

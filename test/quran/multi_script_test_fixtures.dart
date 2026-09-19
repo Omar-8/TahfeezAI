@@ -9,6 +9,7 @@
 import 'package:tahfeez_ai/quran/domain/models/ayah_models.dart';
 import 'package:tahfeez_ai/quran/domain/models/dataset_metadata.dart';
 import 'package:tahfeez_ai/quran/domain/models/mushaf_models.dart';
+import 'package:tahfeez_ai/quran/domain/models/mushaf_token_models.dart';
 import 'package:tahfeez_ai/quran/domain/models/navigation_models.dart';
 import 'package:tahfeez_ai/quran/domain/models/script_models.dart';
 import 'package:tahfeez_ai/quran/domain/models/surah_models.dart';
@@ -96,6 +97,37 @@ QuranDatasetPayload buildMultiScriptSyntheticPayload() {
     }
   }
 
+  // Each Mushaf gets its own independent token-id space (ids 1..14, mirroring
+  // its own 7-ayah x 2-word span) — real Mushaf editions from different
+  // sources are not guaranteed to share a numbering scheme.
+  List<MushafToken> tokensFor(int mushafId) {
+    final tokens = <MushafToken>[];
+    var tokenCounter = 1;
+    for (var verseNo = 1; verseNo <= 7; verseNo++) {
+      for (var w = 0; w < 2; w++) {
+        tokens.add(
+          MushafToken(
+            mushafId: mushafId,
+            sourceTokenId: tokenCounter,
+            sequenceIndex: tokenCounter - 1,
+            tokenType: MushafTokenType.quranWord,
+            displayText: w == 0 ? 'lafz' : 'kalima',
+            surahNumber: 1,
+            ayahNumber: verseNo,
+            sourceWordPosition: w + 1,
+            canonicalAyahId: 1000 + verseNo,
+            canonicalWordIndex: w,
+          ),
+        );
+        tokenCounter++;
+      }
+    }
+    return tokens;
+  }
+
+  final mushafATokens = tokensFor(multiScriptAMushafId);
+  final mushafBTokens = tokensFor(multiScriptBMushafId);
+
   // Script A's Mushaf: one page, three lines — the same layout
   // `buildValidSyntheticPayload()` uses.
   final mushafALines = [
@@ -113,10 +145,8 @@ QuranDatasetPayload buildMultiScriptSyntheticPayload() {
       lineNumber: 2,
       lineType: MushafLineType.quranText,
       isCentered: false,
-      startAyahId: 1001,
-      startWordIndex: 0,
-      endAyahId: 1004,
-      endWordIndex: 1,
+      firstTokenId: 1,
+      lastTokenId: 8,
     ),
     const MushafLine(
       mushafId: multiScriptAMushafId,
@@ -124,10 +154,8 @@ QuranDatasetPayload buildMultiScriptSyntheticPayload() {
       lineNumber: 3,
       lineType: MushafLineType.quranText,
       isCentered: false,
-      startAyahId: 1005,
-      startWordIndex: 0,
-      endAyahId: 1007,
-      endWordIndex: 1,
+      firstTokenId: 9,
+      lastTokenId: 14,
     ),
   ];
 
@@ -150,10 +178,8 @@ QuranDatasetPayload buildMultiScriptSyntheticPayload() {
       lineNumber: 2,
       lineType: MushafLineType.quranText,
       isCentered: false,
-      startAyahId: 1001,
-      startWordIndex: 0,
-      endAyahId: 1004,
-      endWordIndex: 1,
+      firstTokenId: 1,
+      lastTokenId: 8,
     ),
     const MushafLine(
       mushafId: multiScriptBMushafId,
@@ -161,10 +187,8 @@ QuranDatasetPayload buildMultiScriptSyntheticPayload() {
       lineNumber: 1,
       lineType: MushafLineType.quranText,
       isCentered: false,
-      startAyahId: 1005,
-      startWordIndex: 0,
-      endAyahId: 1007,
-      endWordIndex: 1,
+      firstTokenId: 9,
+      lastTokenId: 14,
     ),
   ];
 
@@ -200,6 +224,9 @@ QuranDatasetPayload buildMultiScriptSyntheticPayload() {
         scriptId: multiScriptAId,
         pageCount: 1,
         linesPerPage: 3,
+        qiraah: 'Test',
+        edition: 'Test',
+        renderingType: MushafRenderingType.unicodeText,
       ),
       Mushaf(
         id: multiScriptBMushafId,
@@ -207,9 +234,13 @@ QuranDatasetPayload buildMultiScriptSyntheticPayload() {
         scriptId: multiScriptBId,
         pageCount: 2,
         linesPerPage: 2,
+        qiraah: 'Test',
+        edition: 'Test',
+        renderingType: MushafRenderingType.unicodeText,
       ),
     ],
     mushafLines: [...mushafALines, ...mushafBLines],
+    mushafTokens: [...mushafATokens, ...mushafBTokens],
     navigationRanges: const [
       NavigationRange(
         type: NavigationUnitType.juz,

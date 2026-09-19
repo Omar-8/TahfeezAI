@@ -13,6 +13,8 @@ import '../domain/models/ayah_models.dart';
 // ignore: unused_import
 import '../domain/models/mushaf_models.dart';
 // ignore: unused_import
+import '../domain/models/mushaf_token_models.dart';
+// ignore: unused_import
 import '../domain/models/navigation_models.dart';
 // ignore: unused_import
 import '../domain/models/surah_models.dart';
@@ -49,6 +51,7 @@ part 'quran_database.g.dart';
     QuranScriptVariants,
     Mushafs,
     MushafLines,
+    MushafTokens,
     NavigationRanges,
     DatasetMetadataEntries,
   ],

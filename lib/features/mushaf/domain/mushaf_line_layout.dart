@@ -1,25 +1,31 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../../quran/domain/models/mushaf_models.dart';
+import '../../../quran/domain/models/mushaf_token_models.dart';
 
 part 'mushaf_line_layout.freezed.dart';
 
-/// One word's computed position within its line.
+/// One token's computed position within its line.
 ///
 /// [x] is a "reading-order offset from the line's own leading edge": `x`
-/// is 0 for the first word (`wordIndex` 0 of the line's first ayah), and
-/// increases in reading order for subsequent words. Since Arabic reads
-/// right-to-left, the *first* word in reading order is the *rightmost* one
-/// on screen — converting this reading-order offset into an actual screen
-/// x-coordinate is the renderer's job
-/// (`lib/features/mushaf/presentation/font_mushaf_line_painter.dart`), kept
+/// is 0 for the first token, and increases in reading order for subsequent
+/// tokens. Since Arabic reads right-to-left, the *first* token in reading
+/// order is the *rightmost* one on screen — converting this reading-order
+/// offset into an actual screen x-coordinate is the renderer's job
+/// (`lib/features/mushaf/presentation/font_mushaf_line_renderer.dart`), kept
 /// out of this pure-Dart layout model so the layout math itself has no
 /// notion of "screen" or "canvas."
+///
+/// [canonicalAyahId]/[canonicalWordIndex] are only set when [tokenType] is
+/// [MushafTokenType.quranWord] — mirroring [MushafToken] itself, never
+/// fabricated for a marker (`lib/quran/domain/models/mushaf_token_models.dart`).
 @freezed
 abstract class MushafWordPlacement with _$MushafWordPlacement {
   const factory MushafWordPlacement({
-    required int ayahId,
-    required int wordIndex,
+    required int sourceTokenId,
+    required MushafTokenType tokenType,
+    int? canonicalAyahId,
+    int? canonicalWordIndex,
     required String text,
     required double x,
     required double width,

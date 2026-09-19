@@ -210,13 +210,13 @@ void main() {
   });
 
   group('Mushaf layout status (honest, not fabricated)', () {
-    test(
-      'no Mushaf layout is shipped yet — the word dataset has not arrived',
-      () {
-        expect(payload.mushafs, isEmpty);
-        expect(payload.mushafLines, isEmpty);
-        expect(manifest['mushafStatus'], 'SHIP_BLOCKED_PENDING_WORD_DATA');
-      },
-    );
+    test('the bundled canonical dataset carries no Mushaf content — Mushaf '
+        'data is real but lives in its own separate, non-bundled asset '
+        '(see test/quran_data/mushaf_production_integrity_test.dart) pending '
+        'the QUL redistribution-license release gate', () {
+      expect(payload.mushafs, isEmpty);
+      expect(payload.mushafLines, isEmpty);
+      expect(manifest['mushafStatus'], 'DATA_IMPORTED_SHIP_BLOCKED_LICENSE');
+    });
   });
 }

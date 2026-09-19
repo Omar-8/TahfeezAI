@@ -198,18 +198,34 @@ whenever a resource needs updating (obligation 6).
   canonical Tanzil dataset) confirmed the two files are genuinely built from the same
   underlying word sequence. See §7a for the resource itself and §7b for what that audit
   found.
-- **What Tahfeez has built so far**: the replaceable layout-reading architecture —
-  `lib/quran/domain/mushaf_data_source.dart` (`MushafDataSource`, `RawMushafLayout`,
-  `MushafWordIdResolver`, `resolveMushafLines`) and
-  `tool/quran_data/src/mushaf_layout_source.dart` (`QulKfgqpcV2MushafDataSource`, which
-  reads and structurally validates the real file above) — plus, now that real word data
-  exists, the token-classification layer described in §7b/§7c. No synthetic or
-  placeholder Mushaf content has been generated anywhere, at the explicit, repeated
-  instruction of the project owner. **Not yet done**: wiring classified tokens into a
-  production `MushafLine`/`MushafToken` import that populates the shipped dataset — the
-  `Mushafs`/`MushafLines` tables remain empty in `assets/quran/quran_dataset.json` until
-  that import is built (a deliberately separate, still-pending step from this schema
-  design and its font-package/packaging-strategy decisions).
+- **Production import — complete**: `tool/quran_data/src/mushaf_import.dart` combines
+  this layout with §7a's word-by-word data through `MushafTokenClassifier` and writes the
+  result to `assets/quran/mushaf/kfgqpc_v2.json`: **1 Mushaf, 9,046 `MushafLine` rows,
+  83,668 `MushafToken` rows** (77,433 `quranWord`, 6,235 `ayahMarker`, 0 `otherMarker`,
+  0 `unknown`). The full canonical+Mushaf dataset passes `DatasetIntegrityValidator`
+  (including the Mushaf-specific token/line-range/canonical-mapping checks added for this
+  import). Verified deterministic: two independent runs against the same source files
+  produced a byte-identical output file. Generated-dataset SHA-256:
+  `e222f50aca11c320466a7a6a8a8348a0aaa13e1236c7e57b7945fde935f9ead8`.
+- **Why this output is a separate, non-bundled asset**: `assets/quran/mushaf/kfgqpc_v2.json`
+  is **not** declared in `pubspec.yaml`'s `assets:` list, so it is never packaged into a
+  real app build. This is deliberate: QUL's redistribution terms for the layout and
+  word-by-word resources are still `SHIP_BLOCKED_LICENSE` (unverified, not assumed), so
+  the data is generated and fully tested for local development purposes — proving the
+  pipeline is correct — without yet being distributed as part of the shipped app. This is
+  the "release gate" `tool/quran_data/build_production_data.dart` records as
+  `mushafReleaseGate` in the resource manifest. Once QUL's terms are confirmed, wiring
+  this file into `pubspec.yaml` and `BundledDatasetSeeder` is the only remaining step —
+  no further data engineering is needed.
+- **What Tahfeez has built**: the replaceable layout-reading architecture
+  (`lib/quran/domain/mushaf_data_source.dart`) plus the token-classification layer
+  (§7c) plus this production import (`tool/quran_data/src/mushaf_import.dart`) plus
+  updated `MushafRepository`-style read APIs (`QuranRepository.getLineTokens`/
+  `getPageTokens`, replacing the earlier `getWordsForLine`/`getWordsForPage`, which could
+  not represent a line containing a marker token) plus a Mushaf renderer
+  (`lib/features/mushaf/`) now wired end-to-end against real `MushafToken` data instead
+  of `AyahWord`. No synthetic or placeholder Mushaf content has been generated anywhere,
+  at the explicit, repeated instruction of the project owner.
 - **License**: **unverified**. Per QUL's own FAQ, "the resources available on QUL vary in
   their copyright status... review the licensing terms for each resource" — there is no
   blanket grant, and QUL's platform/codebase being MIT-licensed does **not** extend to
@@ -297,9 +313,10 @@ word, searched, or included in word-by-word/AI alignment). Instead:
   real vendored `qpc-v2.db` and the real bundled canonical dataset, asserting exactly the
   numbers above (6,235 `ayahMarker`, 77,433 `quranWord`, 0 `unknown`, 0 `otherMarker`,
   every `quranWord` token's canonical reference resolves to a real `AyahWord`).
-- **Not yet built**: the production import that turns classified tokens into
-  `MushafLine`/`MushafToken` rows in the shipped dataset, and the Drift table(s) to store
-  them — this schema/classifier is the foundation that step will use.
+- **Built**: `tool/quran_data/src/mushaf_import.dart` (the production import combining
+  §7's layout with this classifier) and `MushafTokens`/updated `MushafLines` Drift tables
+  (`lib/quran/data/tables/mushaf_tables.dart`) that store the result — see §7's "Production
+  import — complete" note for row counts and hashes.
 
 ## 8. Quran script/glyph font — KFGQPC/QCF V2
 
@@ -346,10 +363,14 @@ dart run tool/quran_data/build_production_data.dart # writes assets/quran/*.json
 The QUL layout and word-by-word files must already exist at
 `tool/quran_data/sources/qpc-v2-15-lines.db.zip` and
 `tool/quran_data/sources/qpc-v2-word-by-word.db.zip` (both committed to this repository,
-since neither can be re-fetched automatically — see §7/§7a). The QPC V2 font package is
-**not** committed (see §8) and is not required to reproduce `assets/quran/*.json`, since
-Mushaf content is not yet part of that output. Re-running both commands against the same
-upstream state reproduces byte-identical `assets/quran/*.json` output; every hash in this
+since neither can be re-fetched automatically — see §7/§7a) for the Mushaf layer
+(`assets/quran/mushaf/kfgqpc_v2.json`) to build; if either is absent the build still
+succeeds for the canonical/translation/tafsir layers and reports the Mushaf layer as
+`SHIP_BLOCKED_MISSING_SOURCE`. The QPC V2 font package is **not** committed (see §8) and
+is not required by this build at all. Re-running the commands against the same upstream
+state reproduces byte-identical output for every file, Mushaf included (verified: two
+independent runs produced an identical `assets/quran/mushaf/kfgqpc_v2.json` hash); every
+hash in this
 document was produced this way and is re-checked by
 `test/quran_data/bundled_dataset_integrity_test.dart`,
 `test/quran_data/qul_layout_source_test.dart`, and
@@ -364,6 +385,6 @@ document was produced this way and is re-checked by
 | English translation (Rowwad) | QuranEnc | Integrated |
 | German translation (Rowwad) | QuranEnc | Integrated |
 | Tafsir Al-Muyassar (Arabic) | QuranEnc | Integrated |
-| Mushaf page/line layout (KFGQPC V2) | QUL | Data verified compatible; `SHIP_BLOCKED_LICENSE`; not yet imported |
-| Quran script/word-by-word dataset (word id resolution) | QUL | Obtained, audited, `MushafToken` schema built; `SHIP_BLOCKED_LICENSE`; not yet imported |
-| Mushaf glyph font (QCF V2) | QUL | Obtained (not committed to git); `SHIP_BLOCKED_LICENSE` |
+| Mushaf page/line layout (KFGQPC V2) | QUL | Imported (9,046 lines); `SHIP_BLOCKED_LICENSE` for redistribution, not shipped |
+| Quran script/word-by-word dataset (word id resolution) | QUL | Imported (83,668 tokens); `SHIP_BLOCKED_LICENSE` for redistribution, not shipped |
+| Mushaf glyph font (QCF V2) | QUL | Obtained (not committed to git); `SHIP_BLOCKED_LICENSE`; font-packaging strategy pending |

@@ -4,18 +4,24 @@
 // Mushaf renderer's plumbing (page/line layout, chapter transitions,
 // centered final lines). None of it is, or is derived from, actual Quran
 // text, and none of it is ever bundled into the shipped app — see
-// `docs/DATA_RESOURCE_REQUIREMENTS.md` for how a real, license-verified
-// dataset will eventually be sourced.
+// `docs/QURAN_DATA_PROVENANCE.md` for how the real, license-verified
+// dataset is sourced.
 //
 // Unlike `test/quran/quran_test_fixtures.dart`'s single-page fixture, this
 // one models five pages matching this milestone's explicit "representative
 // pages" list: an opening chapter, the beginning of a longer chapter, a
 // plain mid-chapter page, a page spanning a chapter transition, and a
-// final page ending in a short, centered line.
+// final page ending in a short, centered line. Every MushafLine's token
+// range is backed by real MushafToken rows (all tokenType quranWord, no
+// markers — marker classification is covered separately, with real data,
+// by test/quran_data/qul_word_by_word_source_test.dart), matching the
+// production shape: MushafLine references token ids, never ayah/word
+// indices directly.
 
 import 'package:tahfeez_ai/quran/domain/models/ayah_models.dart';
 import 'package:tahfeez_ai/quran/domain/models/dataset_metadata.dart';
 import 'package:tahfeez_ai/quran/domain/models/mushaf_models.dart';
+import 'package:tahfeez_ai/quran/domain/models/mushaf_token_models.dart';
 import 'package:tahfeez_ai/quran/domain/models/navigation_models.dart';
 import 'package:tahfeez_ai/quran/domain/models/script_models.dart';
 import 'package:tahfeez_ai/quran/domain/models/surah_models.dart';
@@ -97,9 +103,66 @@ QuranDatasetPayload buildMushafTestPayload() {
 
   int ayahId(int surahNo, int verseNo) => surahNo * 1000 + verseNo;
 
+  // Token ids are assigned globally increasing, in the same order lines are
+  // declared below — mirroring real QUL data's own "monotonic across the
+  // whole book" property (`docs/QURAN_DATA_PROVENANCE.md` §7b).
+  var tokenCounter = 1;
+  final mushafTokens = <MushafToken>[];
+
+  ({int first, int last}) tokenRange(int surahNo, int fromVerse, int toVerse) {
+    final first = tokenCounter;
+    for (var verseNo = fromVerse; verseNo <= toVerse; verseNo++) {
+      for (var w = 0; w < 2; w++) {
+        mushafTokens.add(
+          MushafToken(
+            mushafId: mushafTestMushafId,
+            sourceTokenId: tokenCounter,
+            sequenceIndex: tokenCounter - 1,
+            tokenType: MushafTokenType.quranWord,
+            displayText: w == 0 ? 'lafz' : 'kalima',
+            surahNumber: surahNo,
+            ayahNumber: verseNo,
+            sourceWordPosition: w + 1,
+            canonicalAyahId: ayahId(surahNo, verseNo),
+            canonicalWordIndex: w,
+          ),
+        );
+        tokenCounter++;
+      }
+    }
+    return (first: first, last: tokenCounter - 1);
+  }
+
+  // Page 1 -- opening chapter: header, Bismillah, then justified lines
+  // ending in a short, centered final line (the last verse alone).
+  final page1Line3 = tokenRange(_fatihaLikeSurah, 1, 3);
+  final page1Line4 = tokenRange(_fatihaLikeSurah, 4, 6);
+  final page1Line5 = tokenRange(_fatihaLikeSurah, 7, 7);
+
+  // Page 2 -- beginning of a longer chapter: header, Bismillah, three
+  // justified text lines.
+  final page2Line3 = tokenRange(_baqarahLikeSurah, 1, 3);
+  final page2Line4 = tokenRange(_baqarahLikeSurah, 4, 7);
+  final page2Line5 = tokenRange(_baqarahLikeSurah, 8, 10);
+
+  // Page 3 -- a plain mid-chapter page: no header/Bismillah at all.
+  final page3Line1 = tokenRange(_middleSurah, 1, 3);
+  final page3Line2 = tokenRange(_middleSurah, 4, 6);
+  final page3Line3 = tokenRange(_middleSurah, 7, 8);
+
+  // Page 4 -- a chapter transition: the previous chapter's last (short,
+  // centered) line, then the next chapter's header/Bismillah/text, all on
+  // one page.
+  final page4Line1 = tokenRange(_transitionFromSurah, 1, 3);
+  final page4Line2 = tokenRange(_transitionFromSurah, 4, 6);
+  final page4Line5 = tokenRange(_transitionToSurah, 1, 4);
+
+  // Page 5 -- the final page: ends in a short, centered final line.
+  final page5Line1 = tokenRange(_finalSurah, 1, 2);
+  final page5Line2 = tokenRange(_finalSurah, 3, 4);
+  final page5Line3 = tokenRange(_finalSurah, 5, 6);
+
   final mushafLines = <MushafLine>[
-    // Page 1 -- opening chapter: header, Bismillah, then justified lines
-    // ending in a short, centered final line (the last verse alone).
     MushafLine(
       mushafId: mushafTestMushafId,
       pageNumber: 1,
@@ -121,10 +184,8 @@ QuranDatasetPayload buildMushafTestPayload() {
       lineNumber: 3,
       lineType: MushafLineType.quranText,
       isCentered: false,
-      startAyahId: ayahId(_fatihaLikeSurah, 1),
-      startWordIndex: 0,
-      endAyahId: ayahId(_fatihaLikeSurah, 3),
-      endWordIndex: 1,
+      firstTokenId: page1Line3.first,
+      lastTokenId: page1Line3.last,
     ),
     MushafLine(
       mushafId: mushafTestMushafId,
@@ -132,10 +193,8 @@ QuranDatasetPayload buildMushafTestPayload() {
       lineNumber: 4,
       lineType: MushafLineType.quranText,
       isCentered: false,
-      startAyahId: ayahId(_fatihaLikeSurah, 4),
-      startWordIndex: 0,
-      endAyahId: ayahId(_fatihaLikeSurah, 6),
-      endWordIndex: 1,
+      firstTokenId: page1Line4.first,
+      lastTokenId: page1Line4.last,
     ),
     MushafLine(
       mushafId: mushafTestMushafId,
@@ -143,14 +202,10 @@ QuranDatasetPayload buildMushafTestPayload() {
       lineNumber: 5,
       lineType: MushafLineType.quranText,
       isCentered: true,
-      startAyahId: ayahId(_fatihaLikeSurah, 7),
-      startWordIndex: 0,
-      endAyahId: ayahId(_fatihaLikeSurah, 7),
-      endWordIndex: 1,
+      firstTokenId: page1Line5.first,
+      lastTokenId: page1Line5.last,
     ),
 
-    // Page 2 -- beginning of a longer chapter: header, Bismillah, three
-    // justified text lines.
     MushafLine(
       mushafId: mushafTestMushafId,
       pageNumber: 2,
@@ -172,10 +227,8 @@ QuranDatasetPayload buildMushafTestPayload() {
       lineNumber: 3,
       lineType: MushafLineType.quranText,
       isCentered: false,
-      startAyahId: ayahId(_baqarahLikeSurah, 1),
-      startWordIndex: 0,
-      endAyahId: ayahId(_baqarahLikeSurah, 3),
-      endWordIndex: 1,
+      firstTokenId: page2Line3.first,
+      lastTokenId: page2Line3.last,
     ),
     MushafLine(
       mushafId: mushafTestMushafId,
@@ -183,10 +236,8 @@ QuranDatasetPayload buildMushafTestPayload() {
       lineNumber: 4,
       lineType: MushafLineType.quranText,
       isCentered: false,
-      startAyahId: ayahId(_baqarahLikeSurah, 4),
-      startWordIndex: 0,
-      endAyahId: ayahId(_baqarahLikeSurah, 7),
-      endWordIndex: 1,
+      firstTokenId: page2Line4.first,
+      lastTokenId: page2Line4.last,
     ),
     MushafLine(
       mushafId: mushafTestMushafId,
@@ -194,23 +245,18 @@ QuranDatasetPayload buildMushafTestPayload() {
       lineNumber: 5,
       lineType: MushafLineType.quranText,
       isCentered: false,
-      startAyahId: ayahId(_baqarahLikeSurah, 8),
-      startWordIndex: 0,
-      endAyahId: ayahId(_baqarahLikeSurah, 10),
-      endWordIndex: 1,
+      firstTokenId: page2Line5.first,
+      lastTokenId: page2Line5.last,
     ),
 
-    // Page 3 -- a plain mid-chapter page: no header/Bismillah at all.
     MushafLine(
       mushafId: mushafTestMushafId,
       pageNumber: 3,
       lineNumber: 1,
       lineType: MushafLineType.quranText,
       isCentered: false,
-      startAyahId: ayahId(_middleSurah, 1),
-      startWordIndex: 0,
-      endAyahId: ayahId(_middleSurah, 3),
-      endWordIndex: 1,
+      firstTokenId: page3Line1.first,
+      lastTokenId: page3Line1.last,
     ),
     MushafLine(
       mushafId: mushafTestMushafId,
@@ -218,10 +264,8 @@ QuranDatasetPayload buildMushafTestPayload() {
       lineNumber: 2,
       lineType: MushafLineType.quranText,
       isCentered: false,
-      startAyahId: ayahId(_middleSurah, 4),
-      startWordIndex: 0,
-      endAyahId: ayahId(_middleSurah, 6),
-      endWordIndex: 1,
+      firstTokenId: page3Line2.first,
+      lastTokenId: page3Line2.last,
     ),
     MushafLine(
       mushafId: mushafTestMushafId,
@@ -229,25 +273,18 @@ QuranDatasetPayload buildMushafTestPayload() {
       lineNumber: 3,
       lineType: MushafLineType.quranText,
       isCentered: false,
-      startAyahId: ayahId(_middleSurah, 7),
-      startWordIndex: 0,
-      endAyahId: ayahId(_middleSurah, 8),
-      endWordIndex: 1,
+      firstTokenId: page3Line3.first,
+      lastTokenId: page3Line3.last,
     ),
 
-    // Page 4 -- a chapter transition: the previous chapter's last (short,
-    // centered) line, then the next chapter's header/Bismillah/text, all on
-    // one page.
     MushafLine(
       mushafId: mushafTestMushafId,
       pageNumber: 4,
       lineNumber: 1,
       lineType: MushafLineType.quranText,
       isCentered: false,
-      startAyahId: ayahId(_transitionFromSurah, 1),
-      startWordIndex: 0,
-      endAyahId: ayahId(_transitionFromSurah, 3),
-      endWordIndex: 1,
+      firstTokenId: page4Line1.first,
+      lastTokenId: page4Line1.last,
     ),
     MushafLine(
       mushafId: mushafTestMushafId,
@@ -255,10 +292,8 @@ QuranDatasetPayload buildMushafTestPayload() {
       lineNumber: 2,
       lineType: MushafLineType.quranText,
       isCentered: true,
-      startAyahId: ayahId(_transitionFromSurah, 4),
-      startWordIndex: 0,
-      endAyahId: ayahId(_transitionFromSurah, 6),
-      endWordIndex: 1,
+      firstTokenId: page4Line2.first,
+      lastTokenId: page4Line2.last,
     ),
     MushafLine(
       mushafId: mushafTestMushafId,
@@ -281,23 +316,18 @@ QuranDatasetPayload buildMushafTestPayload() {
       lineNumber: 5,
       lineType: MushafLineType.quranText,
       isCentered: false,
-      startAyahId: ayahId(_transitionToSurah, 1),
-      startWordIndex: 0,
-      endAyahId: ayahId(_transitionToSurah, 4),
-      endWordIndex: 1,
+      firstTokenId: page4Line5.first,
+      lastTokenId: page4Line5.last,
     ),
 
-    // Page 5 -- the final page: ends in a short, centered final line.
     MushafLine(
       mushafId: mushafTestMushafId,
       pageNumber: 5,
       lineNumber: 1,
       lineType: MushafLineType.quranText,
       isCentered: false,
-      startAyahId: ayahId(_finalSurah, 1),
-      startWordIndex: 0,
-      endAyahId: ayahId(_finalSurah, 2),
-      endWordIndex: 1,
+      firstTokenId: page5Line1.first,
+      lastTokenId: page5Line1.last,
     ),
     MushafLine(
       mushafId: mushafTestMushafId,
@@ -305,10 +335,8 @@ QuranDatasetPayload buildMushafTestPayload() {
       lineNumber: 2,
       lineType: MushafLineType.quranText,
       isCentered: false,
-      startAyahId: ayahId(_finalSurah, 3),
-      startWordIndex: 0,
-      endAyahId: ayahId(_finalSurah, 4),
-      endWordIndex: 1,
+      firstTokenId: page5Line2.first,
+      lastTokenId: page5Line2.last,
     ),
     MushafLine(
       mushafId: mushafTestMushafId,
@@ -316,10 +344,8 @@ QuranDatasetPayload buildMushafTestPayload() {
       lineNumber: 3,
       lineType: MushafLineType.quranText,
       isCentered: true,
-      startAyahId: ayahId(_finalSurah, 5),
-      startWordIndex: 0,
-      endAyahId: ayahId(_finalSurah, 6),
-      endWordIndex: 1,
+      firstTokenId: page5Line3.first,
+      lastTokenId: page5Line3.last,
     ),
   ];
 
@@ -364,9 +390,13 @@ QuranDatasetPayload buildMushafTestPayload() {
         scriptId: mushafTestScriptId,
         pageCount: 5,
         linesPerPage: 5,
+        qiraah: 'Test',
+        edition: 'Test',
+        renderingType: MushafRenderingType.unicodeText,
       ),
     ],
     mushafLines: mushafLines,
+    mushafTokens: mushafTokens,
     navigationRanges: const [
       NavigationRange(
         type: NavigationUnitType.juz,

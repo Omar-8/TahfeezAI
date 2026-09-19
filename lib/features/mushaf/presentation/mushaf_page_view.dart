@@ -96,7 +96,7 @@ class _MushafPageContent extends ConsumerWidget {
                 final layout = engine.layoutPage(
                   pageNumber: bundle.pageNumber,
                   lines: bundle.lines,
-                  wordsByLineNumber: bundle.wordsByLineNumber,
+                  tokensByLineNumber: bundle.tokensByLineNumber,
                   availableWidth: constraints.maxWidth,
                 );
                 final lineHeight = layout.lines.isEmpty

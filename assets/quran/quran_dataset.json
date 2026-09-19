@@ -529042,6 +529042,7 @@
   "scriptVariants": [],
   "mushafs": [],
   "mushafLines": [],
+  "mushafTokens": [],
   "navigationRanges": [
     {
       "type": "juz",
@@ -534087,6 +534088,6 @@
   "metadata": {
     "datasetVersion": "tanzil-uthmani-1.1",
     "contentHash": "bf4f57b968d03f4131c070b1e285da9be0e0a108a21c910e872801ca273312c8",
-    "importedAt": "2026-09-19T15:55:33.271055Z"
+    "importedAt": "2026-09-19T17:53:02.069022Z"
   }
 }

@@ -1249,7 +1249,7 @@ itself). `test/quran/data/import/bundled_dataset_seeder_test.dart` runs the full
 verify-then-import boot path against real in-memory Drift databases and the real bundled
 assets, asserting zero errors are logged and every resource ends up installed.
 
-## 11j. Mushaf Token Schema (Milestone 9B, in progress)
+## 11j. Mushaf Token Schema and Production Import (Milestone 9B)
 
 ### `MushafToken`, not `MushafWord`
 
@@ -1294,30 +1294,107 @@ assumed up front. There is also no `canonicalAyahWordId` field: `AyahWord` has n
 surrogate key of its own (identified by the composite `(ayahId, scriptId, wordIndex)`),
 so `canonicalAyahId` + `canonicalWordIndex` are already the complete, minimal join key.
 
-### What is honestly still missing
+### `MushafLine` redesigned around token ids, not ayah/word-index ranges
 
-The Mushaf *layout-reading* side (`MushafDataSource`, `RawMushafLayout`) and the new
-*token* side (`MushafTokenSource`, `RawMushafToken`, `MushafTokenClassifier`) both now
-exist and are both validated against real vendored files
-(`test/quran_data/qul_layout_source_test.dart`,
-`test/quran_data/qul_word_by_word_source_test.dart`). What does **not** exist yet: the
-production import that combines them into real `Mushafs`/`MushafLines` rows (and
-whatever Drift table stores `MushafToken`s) in the shipped dataset, and any rendering
-code. `assets/quran/quran_dataset.json`'s `mushafs`/`mushafLines` remain empty. The QCF
-V2 font package (604 real per-page TTFs, confirmed genuinely page-specific via direct
-`cmap` inspection) is in hand but deliberately not committed to git pending a packaging
-decision — see `docs/QURAN_DATA_PROVENANCE.md` §8.
+Populating real data forced a schema correction: `MushafLine` originally carried
+`startAyahId/startWordIndex/endAyahId/endWordIndex` (a design that predates any real
+Mushaf word data). Once §7b's ayah-marker finding was confirmed, that shape became
+provably wrong — a line spanning a marker token cannot be expressed as an ayah/word-index
+range at all, since a marker has neither. `MushafLine` now carries
+`firstTokenId`/`lastTokenId` (raw [MushafToken.sourceTokenId] bounds, copied directly from
+QUL's own `first_word_id`/`last_word_id` with no resolution step —
+`mushafLineFromRaw` in `lib/quran/domain/mushaf_data_source.dart` is now a plain field
+copy, replacing the earlier `MushafWordIdResolver`/`resolveMushafLines` machinery that
+this correction made unnecessary). `Mushaf` itself also gained real fields this milestone
+needed and the original schema never had: `qiraah`, `edition`, and a
+`MushafRenderingType` enum (`pageSpecificGlyphFont` for QUL's per-page-font scheme,
+`unicodeText` reserved for a future plain-text Mushaf source) — deliberately real Mushaf
+metadata, not a UI assumption, per explicit instruction.
+
+### Repository surface: `getLineTokens`/`getPageTokens` replace the AyahWord-based methods
+
+`QuranRepository.getWordsForLine`/`getWordsForPage` (AyahWord-returning, added when
+Mushaf data was still hypothetical) are removed, not deprecated-and-kept: they had
+exactly two callers, both in the Mushaf rendering pipeline, and both needed to become
+token-based regardless, so keeping an AyahWord-shaped version around would be dead
+surface no other code exercises. `getLineTokens(MushafLine)`/`getPageTokens({mushafId,
+pageNumber})` (`lib/quran/data/repositories/drift_quran_repository.dart`) do the same
+two-query-per-page batching discipline the methods they replace already established,
+now against `MushafTokens`. `getJuzForPage`/`getHizbsForPage`/`getPageForAyah` were
+adapted to resolve through a token's own `surahNumber`/`ayahNumber` fields (populated for
+every token, markers included) rather than a line's old `startAyahId`, with the same
+N-queries-per-unique-ayah-on-the-page cost the original implementation already had — not
+a regression, since page-level Juz/Hizb lookups were never claimed to be O(1).
+
+### The Mushaf renderer, wired to tokens instead of AyahWord
+
+`MushafWordPlacement` (`lib/features/mushaf/domain/mushaf_line_layout.dart`) now carries
+`sourceTokenId`/`tokenType`/nullable `canonicalAyahId`/`canonicalWordIndex` instead of a
+required `ayahId`/`wordIndex` pair, and `MushafPageLayoutEngine.layoutLine`/`layoutPage`
+take `List<MushafToken>` instead of `List<AyahWord>` — the line-fitting/justification math
+itself is unchanged (it only ever needed each item's display text and a width), so this
+was a rename-and-retype exercise, not a rewrite of the layout algorithm.
+`MushafReaderScreen._showWordInfo` now checks `tokenType == MushafTokenType.quranWord`
+before opening the word-detail sheet — an `ayahMarker`/`otherMarker`/`unknown` token
+renders normally (same painter, same hit-testable region) but produces no word lookup,
+concretely realizing "markers render normally but do not return a canonical Quran word."
+
+### Production import: real data, generated to a deliberately non-bundled asset
+
+`tool/quran_data/src/mushaf_import.dart` combines a `MushafDataSource` (layout) and a
+`MushafTokenSource` (word-by-word) through `MushafTokenClassifier`, using canonical word
+counts computed from the already-parsed Tanzil payload, and refuses to proceed if the
+classifier reports any warning (an unresolved token pattern must never be silently
+imported). `tool/quran_data/build_production_data.dart` runs this, validates the
+**combined** canonical+Mushaf payload through `DatasetIntegrityValidator` (exercising the
+Mushaf-specific checks below), and writes `assets/quran/mushaf/kfgqpc_v2.json` — 9,046
+`MushafLine` rows, 83,668 `MushafToken` rows (77,433 `quranWord`, 6,235 `ayahMarker`, 0
+`otherMarker`, 0 `unknown`), verified deterministic (byte-identical output across two
+independent runs against the same source files). This file is **not** declared in
+`pubspec.yaml`'s asset list: QUL's redistribution terms for the layout and word-by-word
+resources are still unverified (`SHIP_BLOCKED_LICENSE`), so real, fully-validated Mushaf
+data now exists and is exercised by tests, without being distributed as part of a real
+app build until that license question resolves — the release gate is about
+*distribution*, not about whether the data pipeline itself works.
+
+### Validator additions: token ids and canonical mappings are scoped per-Mushaf
+
+`DatasetIntegrityValidator` gained `_checkLineTokenRanges` (replacing the old
+ayah/word-index range check), `_checkMushafTokenIds`, and
+`_checkMushafTokenCanonicalMapping` — the last of which is also what makes "a marker must
+never receive a fabricated canonical reference" a build-breaking invariant, not just a
+classifier convention. All three scope uniqueness/resolution by `(mushafId,
+sourceTokenId)`, not by `sourceTokenId` alone — a real bug caught while adapting this
+milestone's own multi-Mushaf test fixture: two independent Mushaf editions are not
+guaranteed to share a token-id numbering scheme, so the same numeric id can validly mean
+a different token in a different Mushaf.
+
+### The QCF V2 font: obtained, not yet packaged
+
+The real 604-file, page-specific TTF font package (confirmed via direct `cmap`
+inspection: identical codepoints draw different glyphs per page) is in hand but
+deliberately not committed to git pending a packaging-strategy decision — seeing the
+data pipeline through to a real, tested Mushaf dataset first, then evaluating font
+packaging as its own decision, per explicit instruction not to build a complicated
+packaging system before that comparison is presented. See
+`docs/QURAN_DATA_PROVENANCE.md` §8 for the comparison itself.
 
 ### Testing
 
 `test/quran/domain/mushaf_token_classifier_test.dart` covers the classifier's decision
 rules with small synthetic fixtures (testing the generic mechanism, never treated as
-real Mushaf content).
-`test/quran_data/qul_word_by_word_source_test.dart` is the real-data proof: it classifies
-every one of the real 83,668 tokens against the real bundled canonical dataset and
-asserts the exact counts the audit found (6,235 `ayahMarker`, 77,433 `quranWord`, zero
-`unknown`, zero `otherMarker`), plus that every `quranWord` token's canonical reference
-resolves to a real, existing `AyahWord` — never a fabricated one.
+real Mushaf content). `test/quran_data/qul_word_by_word_source_test.dart` classifies
+every one of the real 83,668 tokens against the real bundled canonical dataset.
+`test/quran_data/mushaf_production_integrity_test.dart` validates the **generated
+production asset** itself (not just importer sources): page coverage, line counts,
+token-range resolution, the full token-type breakdown, the 37:130 exception, and that
+every canonical mapping resolves to a real `AyahWord`.
+`test/quran_data/mushaf_representative_pages_test.dart` imports the real combined
+dataset into an in-memory Drift database through the same `QuranDatasetImporter`/
+`DriftQuranRepository` path the real app uses, and materializes pages 1, 2, 106 (a real
+Surah transition — An-Nisa's last ayah into Al-Ma'idah's header), 302 (a representative
+middle page), and 604, reporting line/token counts and first/last Quran location for
+each.
 
 ## 12. What Milestone 1 deliberately did not do
 

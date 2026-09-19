@@ -8,6 +8,7 @@
 import 'package:tahfeez_ai/quran/domain/models/ayah_models.dart';
 import 'package:tahfeez_ai/quran/domain/models/dataset_metadata.dart';
 import 'package:tahfeez_ai/quran/domain/models/mushaf_models.dart';
+import 'package:tahfeez_ai/quran/domain/models/mushaf_token_models.dart';
 import 'package:tahfeez_ai/quran/domain/models/navigation_models.dart';
 import 'package:tahfeez_ai/quran/domain/models/script_models.dart';
 import 'package:tahfeez_ai/quran/domain/models/surah_models.dart';
@@ -69,7 +70,24 @@ Map<String, dynamic> mushafToJson(Mushaf m) => {
   if (m.scriptVariantId != null) 'scriptVariantId': m.scriptVariantId,
   'pageCount': m.pageCount,
   'linesPerPage': m.linesPerPage,
+  'qiraah': m.qiraah,
+  'edition': m.edition,
+  'renderingType': m.renderingType.name,
 };
+
+Mushaf mushafFromJson(Map<String, dynamic> j) => Mushaf(
+  id: j['id'] as int,
+  code: j['code'] as String,
+  scriptId: j['scriptId'] as int,
+  scriptVariantId: j['scriptVariantId'] as int?,
+  pageCount: j['pageCount'] as int,
+  linesPerPage: j['linesPerPage'] as int,
+  qiraah: j['qiraah'] as String,
+  edition: j['edition'] as String,
+  renderingType: MushafRenderingType.values.byName(
+    j['renderingType'] as String,
+  ),
+);
 
 Map<String, dynamic> mushafLineToJson(MushafLine l) => {
   'mushafId': l.mushafId,
@@ -77,12 +95,47 @@ Map<String, dynamic> mushafLineToJson(MushafLine l) => {
   'lineNumber': l.lineNumber,
   'lineType': l.lineType.name,
   'isCentered': l.isCentered,
-  if (l.startAyahId != null) 'startAyahId': l.startAyahId,
-  if (l.startWordIndex != null) 'startWordIndex': l.startWordIndex,
-  if (l.endAyahId != null) 'endAyahId': l.endAyahId,
-  if (l.endWordIndex != null) 'endWordIndex': l.endWordIndex,
+  if (l.firstTokenId != null) 'firstTokenId': l.firstTokenId,
+  if (l.lastTokenId != null) 'lastTokenId': l.lastTokenId,
   if (l.surahNo != null) 'surahNo': l.surahNo,
 };
+
+MushafLine mushafLineFromJson(Map<String, dynamic> j) => MushafLine(
+  mushafId: j['mushafId'] as int,
+  pageNumber: j['pageNumber'] as int,
+  lineNumber: j['lineNumber'] as int,
+  lineType: MushafLineType.values.byName(j['lineType'] as String),
+  isCentered: j['isCentered'] as bool,
+  firstTokenId: j['firstTokenId'] as int?,
+  lastTokenId: j['lastTokenId'] as int?,
+  surahNo: j['surahNo'] as int?,
+);
+
+Map<String, dynamic> mushafTokenToJson(MushafToken t) => {
+  'mushafId': t.mushafId,
+  'sourceTokenId': t.sourceTokenId,
+  'sequenceIndex': t.sequenceIndex,
+  'tokenType': t.tokenType.name,
+  'displayText': t.displayText,
+  if (t.surahNumber != null) 'surahNumber': t.surahNumber,
+  if (t.ayahNumber != null) 'ayahNumber': t.ayahNumber,
+  if (t.sourceWordPosition != null) 'sourceWordPosition': t.sourceWordPosition,
+  if (t.canonicalWordIndex != null) 'canonicalWordIndex': t.canonicalWordIndex,
+  if (t.canonicalAyahId != null) 'canonicalAyahId': t.canonicalAyahId,
+};
+
+MushafToken mushafTokenFromJson(Map<String, dynamic> j) => MushafToken(
+  mushafId: j['mushafId'] as int,
+  sourceTokenId: j['sourceTokenId'] as int,
+  sequenceIndex: j['sequenceIndex'] as int,
+  tokenType: MushafTokenType.values.byName(j['tokenType'] as String),
+  displayText: j['displayText'] as String,
+  surahNumber: j['surahNumber'] as int?,
+  ayahNumber: j['ayahNumber'] as int?,
+  sourceWordPosition: j['sourceWordPosition'] as int?,
+  canonicalWordIndex: j['canonicalWordIndex'] as int?,
+  canonicalAyahId: j['canonicalAyahId'] as int?,
+);
 
 Map<String, dynamic> navigationRangeToJson(NavigationRange r) => {
   'type': r.type.name,
@@ -109,6 +162,7 @@ Map<String, dynamic> quranDatasetPayloadToJson(QuranDatasetPayload p) => {
   'scriptVariants': p.scriptVariants.map(scriptVariantToJson).toList(),
   'mushafs': p.mushafs.map(mushafToJson).toList(),
   'mushafLines': p.mushafLines.map(mushafLineToJson).toList(),
+  'mushafTokens': p.mushafTokens.map(mushafTokenToJson).toList(),
   'navigationRanges': p.navigationRanges.map(navigationRangeToJson).toList(),
   'metadata': datasetMetadataToJson(p.metadata),
 };
@@ -192,34 +246,18 @@ QuranDatasetPayload quranDatasetPayloadFromJson(Map<String, dynamic> json) {
         .toList(),
     mushafs: (json['mushafs'] as List)
         .cast<Map<String, dynamic>>()
-        .map(
-          (j) => Mushaf(
-            id: j['id'] as int,
-            code: j['code'] as String,
-            scriptId: j['scriptId'] as int,
-            scriptVariantId: j['scriptVariantId'] as int?,
-            pageCount: j['pageCount'] as int,
-            linesPerPage: j['linesPerPage'] as int,
-          ),
-        )
+        .map(mushafFromJson)
         .toList(),
     mushafLines: (json['mushafLines'] as List)
         .cast<Map<String, dynamic>>()
-        .map(
-          (j) => MushafLine(
-            mushafId: j['mushafId'] as int,
-            pageNumber: j['pageNumber'] as int,
-            lineNumber: j['lineNumber'] as int,
-            lineType: MushafLineType.values.byName(j['lineType'] as String),
-            isCentered: j['isCentered'] as bool,
-            startAyahId: j['startAyahId'] as int?,
-            startWordIndex: j['startWordIndex'] as int?,
-            endAyahId: j['endAyahId'] as int?,
-            endWordIndex: j['endWordIndex'] as int?,
-            surahNo: j['surahNo'] as int?,
-          ),
-        )
+        .map(mushafLineFromJson)
         .toList(),
+    mushafTokens: json['mushafTokens'] == null
+        ? const []
+        : (json['mushafTokens'] as List)
+              .cast<Map<String, dynamic>>()
+              .map(mushafTokenFromJson)
+              .toList(),
     navigationRanges: (json['navigationRanges'] as List)
         .cast<Map<String, dynamic>>()
         .map(

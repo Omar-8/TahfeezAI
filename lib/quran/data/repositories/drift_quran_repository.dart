@@ -3,6 +3,7 @@ import 'package:drift/drift.dart';
 import '../../domain/models/ayah_models.dart';
 import '../../domain/models/dataset_metadata.dart';
 import '../../domain/models/mushaf_models.dart';
+import '../../domain/models/mushaf_token_models.dart';
 import '../../domain/models/navigation_models.dart';
 import '../../domain/models/script_models.dart';
 import '../../domain/models/surah_models.dart';
@@ -15,7 +16,7 @@ import '../quran_mappers.dart';
 ///
 /// Every method here does a small, fixed number of queries regardless of
 /// how much data it returns (see [getVerseRangeWithWords] and
-/// [getWordsForLine] in particular) — batching across a whole verse range
+/// [getLineTokens] in particular) — batching across a whole verse range
 /// or page in one or two queries, per this milestone's explicit "do not
 /// query SQLite separately for each visible word/verse" requirement. This
 /// class only ever reads; writing is [QuranDatasetImporter]'s job
@@ -278,108 +279,58 @@ class DriftQuranRepository implements QuranRepository {
   }
 
   @override
-  Future<List<AyahWord>> getWordsForLine(
-    MushafLine line, {
-    required String scriptCode,
-  }) async {
-    final startAyahId = line.startAyahId;
-    final endAyahId = line.endAyahId;
-    final startWordIndex = line.startWordIndex;
-    final endWordIndex = line.endWordIndex;
-    if (startAyahId == null ||
-        endAyahId == null ||
-        startWordIndex == null ||
-        endWordIndex == null) {
-      return const [];
-    }
+  Future<List<MushafToken>> getLineTokens(MushafLine line) async {
+    final first = line.firstTokenId;
+    final last = line.lastTokenId;
+    if (first == null || last == null) return const [];
 
-    final script = await _getScriptRowByCode(scriptCode);
-    if (script == null) return const [];
-
-    // A line can span more than one ayah (a verse ending mid-line and the
-    // next one starting on the same line); resolve the ayah ids spanned,
-    // then trim the boundary ayahs down to the line's exact word range —
-    // still just two queries no matter how many words/ayahs are involved.
-    final ayahIds =
-        (await (_db.select(_db.ayahs)
-                  ..where((a) => a.id.isBetweenValues(startAyahId, endAyahId)))
-                .get())
-            .map((a) => a.id)
-            .toSet();
-
-    final wordRows =
-        await (_db.select(_db.ayahWords)
+    final rows =
+        await (_db.select(_db.mushafTokens)
               ..where(
-                (w) => w.ayahId.isIn(ayahIds) & w.scriptId.equals(script.id),
+                (t) =>
+                    t.mushafId.equals(line.mushafId) &
+                    t.sourceTokenId.isBetweenValues(first, last),
               )
-              ..orderBy([
-                (w) => OrderingTerm(expression: w.ayahId),
-                (w) => OrderingTerm(expression: w.wordIndex),
-              ]))
+              ..orderBy([(t) => OrderingTerm(expression: t.sequenceIndex)]))
             .get();
-
-    return wordRows
-        .where((w) {
-          if (w.ayahId == startAyahId && w.wordIndex < startWordIndex) {
-            return false;
-          }
-          if (w.ayahId == endAyahId && w.wordIndex > endWordIndex) {
-            return false;
-          }
-          return true;
-        })
-        .map((r) => r.toDomain())
-        .toList();
+    return rows.map((r) => r.toDomain()).toList();
   }
 
   @override
-  Future<List<AyahWord>> getWordsForPage({
+  Future<List<MushafToken>> getPageTokens({
     required int mushafId,
     required int pageNumber,
-    required String scriptCode,
   }) async {
     final lines = await getPageLines(
       mushafId: mushafId,
       pageNumber: pageNumber,
     );
 
-    int? minAyahId;
-    int? maxAyahId;
+    int? minTokenId;
+    int? maxTokenId;
     for (final line in lines) {
-      final start = line.startAyahId;
-      final end = line.endAyahId;
-      if (start == null || end == null) continue;
-      minAyahId = minAyahId == null
-          ? start
-          : (start < minAyahId ? start : minAyahId);
-      maxAyahId = maxAyahId == null ? end : (end > maxAyahId ? end : maxAyahId);
+      final first = line.firstTokenId;
+      final last = line.lastTokenId;
+      if (first == null || last == null) continue;
+      minTokenId = minTokenId == null
+          ? first
+          : (first < minTokenId ? first : minTokenId);
+      maxTokenId = maxTokenId == null
+          ? last
+          : (last > maxTokenId ? last : maxTokenId);
     }
-    if (minAyahId == null || maxAyahId == null) return const [];
-    final rangeStart = minAyahId;
-    final rangeEnd = maxAyahId;
+    if (minTokenId == null || maxTokenId == null) return const [];
 
-    final script = await _getScriptRowByCode(scriptCode);
-    if (script == null) return const [];
-
-    final ayahIds =
-        (await (_db.select(
-              _db.ayahs,
-            )..where((a) => a.id.isBetweenValues(rangeStart, rangeEnd))).get())
-            .map((a) => a.id)
-            .toSet();
-
-    final wordRows =
-        await (_db.select(_db.ayahWords)
+    final rows =
+        await (_db.select(_db.mushafTokens)
               ..where(
-                (w) => w.ayahId.isIn(ayahIds) & w.scriptId.equals(script.id),
+                (t) =>
+                    t.mushafId.equals(mushafId) &
+                    t.sourceTokenId.isBetweenValues(minTokenId!, maxTokenId!),
               )
-              ..orderBy([
-                (w) => OrderingTerm(expression: w.ayahId),
-                (w) => OrderingTerm(expression: w.wordIndex),
-              ]))
+              ..orderBy([(t) => OrderingTerm(expression: t.sequenceIndex)]))
             .get();
-
-    return wordRows.map((r) => r.toDomain()).toList();
+    return rows.map((r) => r.toDomain()).toList();
   }
 
   @override
@@ -387,17 +338,33 @@ class DriftQuranRepository implements QuranRepository {
     required int mushafId,
     required int ayahId,
   }) async {
-    final row =
+    final ayah = await getAyahByStableId(ayahId);
+    if (ayah == null) return null;
+
+    final token =
+        await (_db.select(_db.mushafTokens)
+              ..where(
+                (t) =>
+                    t.mushafId.equals(mushafId) &
+                    t.surahNumber.equals(ayah.chapterNo) &
+                    t.ayahNumber.equals(ayah.verseNo),
+              )
+              ..orderBy([(t) => OrderingTerm(expression: t.sequenceIndex)])
+              ..limit(1))
+            .getSingleOrNull();
+    if (token == null) return null;
+
+    final line =
         await (_db.select(_db.mushafLines)
               ..where(
                 (l) =>
                     l.mushafId.equals(mushafId) &
-                    l.startAyahId.isSmallerOrEqualValue(ayahId) &
-                    l.endAyahId.isBiggerOrEqualValue(ayahId),
+                    l.firstTokenId.isSmallerOrEqualValue(token.sourceTokenId) &
+                    l.lastTokenId.isBiggerOrEqualValue(token.sourceTokenId),
               )
               ..limit(1))
             .getSingleOrNull();
-    return row?.pageNumber;
+    return line?.pageNumber;
   }
 
   // ---------------------------------------------------------------------
@@ -417,14 +384,16 @@ class DriftQuranRepository implements QuranRepository {
     required int mushafId,
     required int pageNumber,
   }) async {
-    final lines = await getPageLines(
+    final tokens = await getPageTokens(
       mushafId: mushafId,
       pageNumber: pageNumber,
     );
-    for (final line in lines) {
-      final ayahId = line.startAyahId;
-      if (ayahId == null) continue;
-      final ayah = await getAyahByStableId(ayahId);
+    for (final token in tokens) {
+      if (token.surahNumber == null || token.ayahNumber == null) continue;
+      final ayah = await getAyah((
+        chapterNo: token.surahNumber!,
+        verseNo: token.ayahNumber!,
+      ));
       if (ayah != null) return ayah.juzNo;
     }
     return null;
@@ -435,15 +404,20 @@ class DriftQuranRepository implements QuranRepository {
     required int mushafId,
     required int pageNumber,
   }) async {
-    final lines = await getPageLines(
+    final tokens = await getPageTokens(
       mushafId: mushafId,
       pageNumber: pageNumber,
     );
     final hizbs = <int>{};
-    for (final line in lines) {
-      final ayahId = line.startAyahId;
-      if (ayahId == null) continue;
-      final ayah = await getAyahByStableId(ayahId);
+    final seenAyahs = <(int, int)>{};
+    for (final token in tokens) {
+      if (token.surahNumber == null || token.ayahNumber == null) continue;
+      final key = (token.surahNumber!, token.ayahNumber!);
+      if (!seenAyahs.add(key)) continue;
+      final ayah = await getAyah((
+        chapterNo: token.surahNumber!,
+        verseNo: token.ayahNumber!,
+      ));
       if (ayah != null) hizbs.add(ayah.hizbNo);
     }
     final sorted = hizbs.toList()..sort();

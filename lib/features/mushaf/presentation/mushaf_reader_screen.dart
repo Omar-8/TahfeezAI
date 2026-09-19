@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_breakpoints.dart';
+import '../../../quran/domain/models/mushaf_token_models.dart';
 import '../../../wbw/presentation/word_detail_sheet.dart';
 import '../application/mushaf_appearance_controller.dart';
 import '../application/mushaf_page_providers.dart';
@@ -216,9 +217,18 @@ class _MushafPagerState extends State<_MushafPager> {
   }
 
   void _showWordInfo(BuildContext context, MushafWordPlacement placement) {
+    // Only a real Quran word has canonical identity to look up — an
+    // ayahMarker/otherMarker/unknown token renders normally but is not a
+    // recited Quran word, per this project's explicit "markers must not
+    // participate in word-by-word" rule.
+    if (placement.tokenType != MushafTokenType.quranWord) return;
+    final ayahId = placement.canonicalAyahId;
+    final wordIndex = placement.canonicalWordIndex;
+    if (ayahId == null || wordIndex == null) return;
+
     showWordDetailSheet(
       context,
-      wordRef: (ayahId: placement.ayahId, wordIndex: placement.wordIndex),
+      wordRef: (ayahId: ayahId, wordIndex: wordIndex),
       arabicText: placement.text,
     );
   }

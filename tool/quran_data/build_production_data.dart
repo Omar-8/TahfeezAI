@@ -1,18 +1,21 @@
-// Builds Tahfeez's bundled production Quran dataset from the cached upstream
+// Builds Tahfeez's production Quran dataset from the cached upstream
 // sources (run `dart run tool/quran_data/fetch_sources.dart` first) and the
-// vendored QUL layout file, writing:
+// vendored QUL files, writing:
 //
 //   assets/quran/quran_dataset.json          (canonical Tanzil text + metadata)
 //   assets/quran/translations/en_rowwad.json
 //   assets/quran/translations/de_rowwad.json
 //   assets/quran/tafsir/ar_muyassar.json
+//   assets/quran/mushaf/kfgqpc_v2.json       (real Mushaf/MushafLine/MushafToken data)
 //   assets/quran/resource_manifest.json
 //
-// The Mushaf layout is deliberately NOT written into any asset: QUL's real
-// KFGQPC V2 layout file has been validated structurally, but the companion
-// word/script dataset that resolves its word ids to (ayah, wordIndex) has
-// not been supplied yet, and no synthetic Mushaf data is ever generated as
-// a stand-in. See docs/QURAN_DATA_PROVENANCE.md.
+// assets/quran/mushaf/kfgqpc_v2.json is deliberately NOT declared as a
+// Flutter asset in pubspec.yaml (see docs/QURAN_DATA_PROVENANCE.md §7/§7a):
+// QUL's redistribution terms for the layout and word-by-word resources are
+// still unverified (SHIP_BLOCKED_LICENSE), so this file exists for local
+// development, integrity testing, and validation, but is never bundled
+// into a real app build until that license gate clears. No synthetic
+// Mushaf content is ever substituted for the real files.
 //
 // Run with: dart run tool/quran_data/build_production_data.dart
 import 'dart:convert';
@@ -21,8 +24,11 @@ import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:tahfeez_ai/quran/data/import/dataset_json_codec.dart';
 import 'package:tahfeez_ai/quran/domain/dataset_integrity.dart';
+import 'package:tahfeez_ai/quran/domain/quran_dataset_payload.dart';
 
+import 'src/mushaf_import.dart';
 import 'src/mushaf_layout_source.dart';
+import 'src/mushaf_wbw_source.dart';
 import 'src/quranenc_source.dart';
 import 'src/tanzil_source.dart';
 
@@ -123,36 +129,126 @@ Future<void> main() async {
     'Tafsir: ${muyassar.verses.length} verses.',
   );
 
-  // The Mushaf layout is validated (real file, real structure) but not
-  // shipped: see the file-level doc comment above.
+  // The Mushaf layer: real layout + real word-by-word data, combined and
+  // classified through the same MushafTokenClassifier documented in
+  // docs/QURAN_DATA_PROVENANCE.md §7c. Written to its own, non-bundled
+  // asset (see the file-level doc comment) — the release gate (QUL
+  // redistribution terms) is separate from whether the data itself is
+  // correct, and this build fails loudly if the data is not.
+  const mushafId = 1;
   String mushafStatus;
   QulLayoutInfo? mushafInfo;
-  final qulZip = File('tool/quran_data/sources/qpc-v2-15-lines.db.zip');
-  if (qulZip.existsSync()) {
-    final extractDir = Directory('$_cache/qul_layout');
-    extractDir.createSync(recursive: true);
-    final result = Process.runSync('unzip', [
-      '-o',
-      qulZip.path,
-      '-d',
-      extractDir.path,
-    ]);
-    if (result.exitCode != 0) {
-      throw StateError('Failed to extract QUL layout zip: ${result.stderr}');
-    }
-    final dbFile = File('${extractDir.path}/qpc-v2-15-lines.db');
-    final source = QulKfgqpcV2MushafDataSource(dbFile);
-    mushafInfo = source.readInfo();
-    final layout = await source.loadRawLayout();
-    final layoutReport = validateQulLayout(layout);
-    stdout.writeln(
-      'QUL layout structurally valid: ${layoutReport.isValid} '
-      '(${layout.lines.length} lines across ${mushafInfo.pageCount} pages)',
+  QulWordByWordInfo? wbwInfo;
+  var mushafRowCounts = const <String, int>{};
+  String? mushafDatasetHash;
+  final qulLayoutZip = File('tool/quran_data/sources/qpc-v2-15-lines.db.zip');
+  final qulWbwZip = File('tool/quran_data/sources/qpc-v2-word-by-word.db.zip');
+
+  if (qulLayoutZip.existsSync() && qulWbwZip.existsSync()) {
+    final layoutExtractDir = Directory('$_cache/qul_layout');
+    layoutExtractDir.createSync(recursive: true);
+    _unzip(qulLayoutZip, layoutExtractDir);
+    final layoutSource = QulKfgqpcV2MushafDataSource(
+      File('${layoutExtractDir.path}/qpc-v2-15-lines.db'),
     );
-    mushafStatus = 'SHIP_BLOCKED_PENDING_WORD_DATA';
+    mushafInfo = layoutSource.readInfo();
+
+    final wbwExtractDir = Directory('$_cache/qul_wbw');
+    wbwExtractDir.createSync(recursive: true);
+    _unzip(qulWbwZip, wbwExtractDir);
+    final tokenSource = QulKfgqpcV2WordByWordSource(
+      File('${wbwExtractDir.path}/qpc-v2.db'),
+    );
+    wbwInfo = tokenSource.readInfo();
+
+    final canonicalWordCountByAyahId = <int, int>{};
+    for (final word in tanzil.payload.ayahWords) {
+      canonicalWordCountByAyahId[word.ayahId] =
+          (canonicalWordCountByAyahId[word.ayahId] ?? 0) + 1;
+    }
+
+    stdout.writeln('Importing Mushaf (layout + word-by-word)...');
+    final mushafImport = await importMushaf(
+      mushafId: mushafId,
+      code: 'kfgqpc_v2',
+      qiraah: 'Hafs',
+      edition: 'Madinah / 1421H',
+      scriptId: tanzil.payload.scripts.single.id,
+      layoutSource: layoutSource,
+      tokenSource: tokenSource,
+      canonicalWordCountByAyahId: canonicalWordCountByAyahId,
+    );
+
+    if (mushafImport.classificationWarnings.isNotEmpty) {
+      stderr.writeln(
+        'Mushaf token classification produced '
+        '${mushafImport.classificationWarnings.length} warning(s) — refusing '
+        'to import an unresolved dataset:',
+      );
+      for (final w in mushafImport.classificationWarnings.take(20)) {
+        stderr.writeln('  $w');
+      }
+      exitCode = 1;
+      return;
+    }
+
+    // Validate the FULL dataset (canonical + Mushaf together) — this is
+    // where a fabricated/invalid canonical mapping, a reversed token
+    // range, or an unresolved line would be caught, per
+    // DatasetIntegrityValidator's Mushaf-token checks.
+    final fullPayload = QuranDatasetPayload(
+      surahs: tanzil.payload.surahs,
+      surahLocalizations: tanzil.payload.surahLocalizations,
+      ayahs: tanzil.payload.ayahs,
+      ayahWords: tanzil.payload.ayahWords,
+      scripts: tanzil.payload.scripts,
+      scriptVariants: tanzil.payload.scriptVariants,
+      mushafs: [mushafImport.mushaf],
+      mushafLines: mushafImport.lines,
+      mushafTokens: mushafImport.tokens,
+      navigationRanges: tanzil.payload.navigationRanges,
+      metadata: tanzil.payload.metadata,
+    );
+    final fullReport = validator.validate(fullPayload);
+    if (!fullReport.isValid) {
+      stderr.writeln('Mushaf dataset FAILED integrity validation:');
+      for (final issue in fullReport.errors.take(30)) {
+        stderr.writeln('  $issue');
+      }
+      exitCode = 1;
+      return;
+    }
+
+    final byType = <String, int>{};
+    for (final t in mushafImport.tokens) {
+      byType[t.tokenType.name] = (byType[t.tokenType.name] ?? 0) + 1;
+    }
+    mushafRowCounts = {
+      'mushafs': 1,
+      'mushafLines': mushafImport.lines.length,
+      'mushafTokens': mushafImport.tokens.length,
+      'quranWord': byType['quranWord'] ?? 0,
+      'ayahMarker': byType['ayahMarker'] ?? 0,
+      'otherMarker': byType['otherMarker'] ?? 0,
+      'unknown': byType['unknown'] ?? 0,
+    };
+    stdout.writeln(
+      'Mushaf import valid: ${mushafImport.lines.length} lines, '
+      '${mushafImport.tokens.length} tokens '
+      '(quranWord=${byType['quranWord']}, ayahMarker=${byType['ayahMarker']}).',
+    );
+
+    Directory('$_outDir/mushaf').createSync(recursive: true);
+    mushafDatasetHash = _writeJson('$_outDir/mushaf/kfgqpc_v2.json', {
+      'mushaf': mushafToJson(mushafImport.mushaf),
+      'mushafLines': mushafImport.lines.map(mushafLineToJson).toList(),
+      'mushafTokens': mushafImport.tokens.map(mushafTokenToJson).toList(),
+    });
+
+    mushafStatus = 'DATA_IMPORTED_SHIP_BLOCKED_LICENSE';
   } else {
     stdout.writeln(
-      'No QUL layout source found at ${qulZip.path} — Mushaf layer skipped entirely.',
+      'QUL layout and/or word-by-word source missing — Mushaf layer skipped entirely.',
     );
     mushafStatus = 'SHIP_BLOCKED_MISSING_SOURCE';
   }
@@ -170,9 +266,17 @@ Future<void> main() async {
     'mushafQirah': "Hafs 'an Asim",
     'mushafPages': mushafInfo?.pageCount ?? 604,
     'mushafLinesPerPage': mushafInfo?.linesPerPage ?? 15,
-    'mushafDataHash': mushafInfo?.sourceHash,
+    'mushafLayoutDataHash': mushafInfo?.sourceHash,
+    'mushafWordByWordDataHash': wbwInfo?.sourceHash,
+    'mushafGeneratedDatasetHash': mushafDatasetHash,
+    'mushafRowCounts': mushafRowCounts,
     'mushafFontStatus': 'SHIP_BLOCKED_LICENSE',
     'mushafStatus': mushafStatus,
+    'mushafReleaseGate':
+        'BLOCKED — QUL layout/word-by-word/font redistribution terms not '
+        'independently verified (see docs/QURAN_DATA_PROVENANCE.md §7/§7a/§8). '
+        'assets/quran/mushaf/kfgqpc_v2.json is generated for local '
+        'development/testing only and is not declared as a Flutter asset.',
     'translationResources': [
       {
         'slug': en.book.slug,
@@ -213,6 +317,13 @@ Future<void> main() async {
   _writeJson('$_outDir/resource_manifest.json', manifest);
 
   stdout.writeln('Done. Assets written under $_outDir/.');
+}
+
+void _unzip(File zip, Directory destDir) {
+  final result = Process.runSync('unzip', ['-o', zip.path, '-d', destDir.path]);
+  if (result.exitCode != 0) {
+    throw StateError('Failed to extract ${zip.path}: ${result.stderr}');
+  }
 }
 
 void _requireFile(String path, {required String hint}) {

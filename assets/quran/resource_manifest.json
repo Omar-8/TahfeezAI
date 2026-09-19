@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "buildDate": "2026-09-19T15:55:34.039397Z",
+  "buildDate": "2026-09-19T17:53:03.720496Z",
   "canonicalQuranSource": "Tanzil Project (tanzil.net)",
   "canonicalQuranVersion": "Uthmani, Version 1.1",
   "canonicalQuranHash": "bf4f57b968d03f4131c070b1e285da9be0e0a108a21c910e872801ca273312c8",
@@ -11,9 +11,21 @@
   "mushafQirah": "Hafs 'an Asim",
   "mushafPages": 604,
   "mushafLinesPerPage": 15,
-  "mushafDataHash": "e4df98f35dd3b8927ff096337c8739e0f0b12c8ba622834c345eaa4c3e28dd8c",
+  "mushafLayoutDataHash": "e4df98f35dd3b8927ff096337c8739e0f0b12c8ba622834c345eaa4c3e28dd8c",
+  "mushafWordByWordDataHash": "4bf9549dfcfd367d4d4b151bd58b51af63b677d1c980cf5e52541c2f981d7e6d",
+  "mushafGeneratedDatasetHash": "e222f50aca11c320466a7a6a8a8348a0aaa13e1236c7e57b7945fde935f9ead8",
+  "mushafRowCounts": {
+    "mushafs": 1,
+    "mushafLines": 9046,
+    "mushafTokens": 83668,
+    "quranWord": 77433,
+    "ayahMarker": 6235,
+    "otherMarker": 0,
+    "unknown": 0
+  },
   "mushafFontStatus": "SHIP_BLOCKED_LICENSE",
-  "mushafStatus": "SHIP_BLOCKED_PENDING_WORD_DATA",
+  "mushafStatus": "DATA_IMPORTED_SHIP_BLOCKED_LICENSE",
+  "mushafReleaseGate": "BLOCKED — QUL layout/word-by-word/font redistribution terms not independently verified (see docs/QURAN_DATA_PROVENANCE.md §7/§7a/§8). assets/quran/mushaf/kfgqpc_v2.json is generated for local development/testing only and is not declared as a Flutter asset.",
   "translationResources": [
     {
       "slug": "en-rowwad",
@@ -44,7 +56,7 @@
   ],
   "toolVersion": "1.0.0",
   "packagedAssetHashes": {
-    "quran_dataset.json": "9ed528dc503cd91ff93a14d48028ad5da6c0f697cf6d8420580f50cf1f51c90e",
+    "quran_dataset.json": "f7218187450bd1f8e12438fbece08db9820e4780f5fa33e007d0edc506ce7104",
     "translations/en_rowwad.json": "9f8260516e290f14072838e713c5ce52313e9e2954d6da7a374ded058c502e2b",
     "translations/de_rowwad.json": "f300113d6f09024d46bbe08a0a9ade70a2f6c9f76ba67fccfe56970dc351f64f",
     "tafsir/ar_muyassar.json": "75583a480b3d2824dd781a9f088656d897b218d7413a66a58663e3d6e3a7410e"

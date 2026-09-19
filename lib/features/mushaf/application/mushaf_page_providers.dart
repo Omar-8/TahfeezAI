@@ -1,8 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../quran/application/quran_script_code.dart';
-import '../../../quran/domain/models/ayah_models.dart';
 import '../../../quran/domain/models/mushaf_models.dart';
+import '../../../quran/domain/models/mushaf_token_models.dart';
 import '../../../quran/quran_providers.dart';
 
 part 'mushaf_page_providers.g.dart';
@@ -15,7 +14,7 @@ Future<Mushaf?> mushafById(Ref ref, int mushafId) {
   return ref.watch(quranRepositoryProvider).getMushafById(mushafId);
 }
 
-/// One Mushaf page's data: its lines, each line's exact words (already
+/// One Mushaf page's data: its lines, each line's exact tokens (already
 /// sliced from one batched page-wide load — never one query per line), and
 /// the Juz/Hizb context the page's chrome needs.
 class MushafPageBundle {
@@ -23,7 +22,7 @@ class MushafPageBundle {
     required this.mushaf,
     required this.pageNumber,
     required this.lines,
-    required this.wordsByLineNumber,
+    required this.tokensByLineNumber,
     required this.juzNo,
     required this.hizbNos,
   });
@@ -31,7 +30,7 @@ class MushafPageBundle {
   final Mushaf mushaf;
   final int pageNumber;
   final List<MushafLine> lines;
-  final Map<int, List<AyahWord>> wordsByLineNumber;
+  final Map<int, List<MushafToken>> tokensByLineNumber;
   final int? juzNo;
   final List<int> hizbNos;
 }
@@ -53,15 +52,13 @@ Future<MushafPageBundle?> mushafPageData(
   );
   if (lines.isEmpty) return null;
 
-  final scriptCode = ref.watch(quranScriptCodeProvider);
-  final pageWords = await repository.getWordsForPage(
+  final pageTokens = await repository.getPageTokens(
     mushafId: mushafId,
     pageNumber: pageNumber,
-    scriptCode: scriptCode,
   );
 
-  final wordsByLine = <int, List<AyahWord>>{
-    for (final line in lines) line.lineNumber: _wordsForLine(pageWords, line),
+  final tokensByLine = <int, List<MushafToken>>{
+    for (final line in lines) line.lineNumber: _tokensForLine(pageTokens, line),
   };
 
   final juzNo = await repository.getJuzForPage(
@@ -77,36 +74,25 @@ Future<MushafPageBundle?> mushafPageData(
     mushaf: mushaf,
     pageNumber: pageNumber,
     lines: lines,
-    wordsByLineNumber: wordsByLine,
+    tokensByLineNumber: tokensByLine,
     juzNo: juzNo,
     hizbNos: hizbNos,
   );
 }
 
-/// Slices one page-wide word list down to the words belonging to [line],
-/// using the exact same ayah-id/word-index boundary trimming
-/// `DriftQuranRepository.getWordsForLine` applies for a single line — done
+/// Slices one page-wide token list down to the tokens belonging to [line],
+/// using the exact same token-id boundary trimming
+/// `DriftQuranRepository.getLineTokens` applies for a single line — done
 /// once in memory per page here instead of as N extra database queries.
-List<AyahWord> _wordsForLine(List<AyahWord> pageWords, MushafLine line) {
-  final startAyahId = line.startAyahId;
-  final endAyahId = line.endAyahId;
-  final startWordIndex = line.startWordIndex;
-  final endWordIndex = line.endWordIndex;
-  if (startAyahId == null ||
-      endAyahId == null ||
-      startWordIndex == null ||
-      endWordIndex == null) {
-    return const [];
-  }
+List<MushafToken> _tokensForLine(
+  List<MushafToken> pageTokens,
+  MushafLine line,
+) {
+  final first = line.firstTokenId;
+  final last = line.lastTokenId;
+  if (first == null || last == null) return const [];
 
-  return pageWords.where((word) {
-    if (word.ayahId < startAyahId || word.ayahId > endAyahId) return false;
-    if (word.ayahId == startAyahId && word.wordIndex < startWordIndex) {
-      return false;
-    }
-    if (word.ayahId == endAyahId && word.wordIndex > endWordIndex) {
-      return false;
-    }
-    return true;
-  }).toList();
+  return pageTokens
+      .where((t) => t.sourceTokenId >= first && t.sourceTokenId <= last)
+      .toList();
 }

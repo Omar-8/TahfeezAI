@@ -1,15 +1,20 @@
 import 'models/mushaf_models.dart';
 
-/// One physical line of a Mushaf page as a raw layout source describes it —
-/// before its word range has been resolved against Tahfeez's own ayah/word
-/// numbering.
+/// One physical line of a Mushaf page as a raw layout source describes it.
 ///
 /// This is the seam a Mushaf layout provider (currently: QUL's KFGQPC V2
-/// export) produces, distinct from [MushafLine] itself. A layout source
-/// typically identifies a line's words by *its own* global word-id scheme
-/// (e.g. QUL's `first_word_id`/`last_word_id`), not by (ayahId, wordIndex) —
-/// [firstWordId]/[lastWordId] are `null` for a line with no word range of
-/// its own ([MushafLineType.surahHeader]/[MushafLineType.bismillah]).
+/// export) produces, distinct from [MushafLine] itself only in field naming
+/// (`firstWordId`/`lastWordId`, matching the source's own vocabulary) —
+/// turning this into a real [MushafLine] is a direct field copy
+/// ([mushafLineFromRaw]), since both now agree that a line's range is a
+/// [MushafToken.sourceTokenId] range, not an (ayahId, wordIndex) range. This
+/// was not always true: an earlier design tried to resolve word ids into
+/// canonical ayah/word positions at this stage, before this project had a
+/// real Mushaf word dataset to test that assumption against. Real data
+/// showed a line's token range is not guaranteed to contain only real
+/// words (`docs/QURAN_DATA_PROVENANCE.md` §7b's ayah-marker finding), so
+/// resolution now happens per-token, downstream ([MushafTokenClassifier]),
+/// never at the line level.
 class RawMushafLine {
   const RawMushafLine({
     required this.pageNumber,
@@ -31,7 +36,7 @@ class RawMushafLine {
 }
 
 /// A Mushaf edition's raw page/line layout, exactly as its source describes
-/// it — no ayah/word resolution performed yet.
+/// it.
 class RawMushafLayout {
   const RawMushafLayout({
     required this.editionCode,
@@ -50,11 +55,7 @@ class RawMushafLayout {
 ///
 /// This is the abstraction that lets a Mushaf layout provider be replaced
 /// without touching [QuranRepository], the Mushaf renderer, or any other UI
-/// — the same role [QuranDatasetPayload] plays for canonical text. A source
-/// only has to produce a [RawMushafLayout]; turning that into real
-/// [MushafLine] rows is [resolveMushafLines]'s job, kept separate because it
-/// additionally needs a [MushafWordIdResolver] the layout source itself does
-/// not own.
+/// — the same role [QuranDatasetPayload] plays for canonical text.
 ///
 /// The only implementation as of this milestone reads QUL's KFGQPC V2 export
 /// (`tool/quran_data/src/mushaf_layout_source.dart`, build-time tooling
@@ -66,92 +67,18 @@ abstract class MushafDataSource {
   Future<RawMushafLayout> loadRawLayout();
 }
 
-/// Resolves one Mushaf layout source's own word-id scheme to Tahfeez's
-/// (ayahId, wordIndex) numbering.
-///
-/// A [MushafDataSource] alone is not enough to populate real [MushafLine]
-/// rows: QUL's `first_word_id`/`last_word_id` are bare integers into a
-/// companion word/script dataset Tahfeez has not yet received (see
-/// `docs/QURAN_DATA_PROVENANCE.md`'s Mushaf resource entry) — until a real
-/// resolver backed by that dataset exists, [resolveMushafLines] cannot be
-/// run against production data, and must not be run against fabricated
-/// data either.
-abstract class MushafWordIdResolver {
-  /// The (ayahId, wordIndex) position of [wordId], or `null` if [wordId] is
-  /// outside this resolver's known range.
-  ({int ayahId, int wordIndex})? resolve(int wordId);
-}
-
-/// Thrown by [resolveMushafLines] when a raw line references a word id
-/// [resolver] cannot resolve — surfaced rather than silently dropped, since
-/// a gap here means the Mushaf layout and the word dataset disagree.
-class MushafWordIdResolutionException implements Exception {
-  MushafWordIdResolutionException(
-    this.wordId,
-    this.pageNumber,
-    this.lineNumber,
+/// Converts one [RawMushafLine] into a real [MushafLine] for [mushafId] — a
+/// direct field copy, not a resolution step (see [RawMushafLine]'s doc
+/// comment for why no resolution is needed here any more).
+MushafLine mushafLineFromRaw(RawMushafLine raw, {required int mushafId}) {
+  return MushafLine(
+    mushafId: mushafId,
+    pageNumber: raw.pageNumber,
+    lineNumber: raw.lineNumber,
+    lineType: raw.lineType,
+    isCentered: raw.isCentered,
+    firstTokenId: raw.firstWordId,
+    lastTokenId: raw.lastWordId,
+    surahNo: raw.surahNo,
   );
-
-  final int wordId;
-  final int pageNumber;
-  final int lineNumber;
-
-  @override
-  String toString() =>
-      'Could not resolve word id $wordId referenced by Mushaf page '
-      '$pageNumber line $lineNumber against the supplied word dataset.';
-}
-
-/// Turns a [RawMushafLayout] into real [MushafLine] rows for [mushafId],
-/// using [resolver] to translate each line's word-id range into
-/// (ayahId, wordIndex) bounds. Never fabricates a resolution: throws
-/// [MushafWordIdResolutionException] rather than guessing when a word id is
-/// unknown to [resolver].
-List<MushafLine> resolveMushafLines({
-  required RawMushafLayout layout,
-  required MushafWordIdResolver resolver,
-  required int mushafId,
-}) {
-  return layout.lines.map((raw) {
-    int? startAyahId;
-    int? startWordIndex;
-    int? endAyahId;
-    int? endWordIndex;
-
-    if (raw.firstWordId != null && raw.lastWordId != null) {
-      final start = resolver.resolve(raw.firstWordId!);
-      if (start == null) {
-        throw MushafWordIdResolutionException(
-          raw.firstWordId!,
-          raw.pageNumber,
-          raw.lineNumber,
-        );
-      }
-      final end = resolver.resolve(raw.lastWordId!);
-      if (end == null) {
-        throw MushafWordIdResolutionException(
-          raw.lastWordId!,
-          raw.pageNumber,
-          raw.lineNumber,
-        );
-      }
-      startAyahId = start.ayahId;
-      startWordIndex = start.wordIndex;
-      endAyahId = end.ayahId;
-      endWordIndex = end.wordIndex;
-    }
-
-    return MushafLine(
-      mushafId: mushafId,
-      pageNumber: raw.pageNumber,
-      lineNumber: raw.lineNumber,
-      lineType: raw.lineType,
-      isCentered: raw.isCentered,
-      startAyahId: startAyahId,
-      startWordIndex: startWordIndex,
-      endAyahId: endAyahId,
-      endWordIndex: endWordIndex,
-      surahNo: raw.surahNo,
-    );
-  }).toList();
 }

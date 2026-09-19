@@ -69,3 +69,15 @@ tool/quran_data/.cache/
 # pending decision, not something to bloat repo history with by accident.
 tool/quran_data/sources/*.bz2
 tool/quran_data/sources/*Font*
+
+# The generated production Mushaf dataset (assets/quran/mushaf/) is real,
+# fully validated data (see docs/QURAN_DATA_PROVENANCE.md §7c) but is
+# deliberately NOT committed while QUL's redistribution terms for the
+# layout/word-by-word resources remain unverified (SHIP_BLOCKED_LICENSE) —
+# committing it to the shared repository would distribute that content
+# before the release gate clears. Regenerate locally with
+# `dart run tool/quran_data/build_production_data.dart` (the vendored source
+# zips it needs are committed); test/quran_data/mushaf_*_test.dart require
+# this file to exist and are skipped-by-failure otherwise, the same
+# prerequisite the other qul_*_test.dart real-data tests already have.
+assets/quran/mushaf/

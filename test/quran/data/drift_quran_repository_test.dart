@@ -180,35 +180,28 @@ void main() {
       expect(await repo.getPage(mushafId: 1, pageNumber: 2), isNull);
     });
 
-    test('getWordsForLine resolves words spanning multiple ayahs', () async {
+    test('getLineTokens resolves tokens spanning multiple ayahs', () async {
       final lines = await repo.getPageLines(mushafId: 1, pageNumber: 1);
       final secondLine = lines.firstWhere((l) => l.lineNumber == 2);
 
-      final words = await repo.getWordsForLine(
-        secondLine,
-        scriptCode: testScriptCode,
-      );
+      final tokens = await repo.getLineTokens(secondLine);
 
-      // Line 2 spans ayah 1001..1004 (word 0..1 each) => 8 words.
-      expect(words.length, 8);
+      // Line 2 spans ayah 1001..1004 (2 tokens each) => 8 tokens.
+      expect(tokens.length, 8);
     });
 
     test('getPageForAyah finds the page containing a given ayah', () async {
       expect(await repo.getPageForAyah(mushafId: 1, ayahId: 1005), 1);
     });
 
-    test('getWordsForPage returns every word for every line on the page in one batch', () async {
-      final words = await repo.getWordsForPage(
-        mushafId: 1,
-        pageNumber: 1,
-        scriptCode: testScriptCode,
-      );
+    test('getPageTokens returns every token for every line on the page in one batch', () async {
+      final tokens = await repo.getPageTokens(mushafId: 1, pageNumber: 1);
 
-      // Line 1 (surahHeader) contributes no words; line 2 spans ayahs
-      // 1001-1004 (2 words each = 8); line 3 spans ayahs 1005-1007 (2
-      // words each = 6). 8 + 6 = 14.
-      expect(words, hasLength(14));
-      expect(words.map((w) => w.ayahId).toSet(), {
+      // Line 1 (surahHeader) contributes no tokens; line 2 spans ayahs
+      // 1001-1004 (2 tokens each = 8); line 3 spans ayahs 1005-1007 (2
+      // tokens each = 6). 8 + 6 = 14.
+      expect(tokens, hasLength(14));
+      expect(tokens.map((t) => t.canonicalAyahId).toSet(), {
         1001,
         1002,
         1003,
@@ -218,18 +211,6 @@ void main() {
         1007,
       });
     });
-
-    test(
-      'getWordsForPage returns empty for an unrecognized script code',
-      () async {
-        final words = await repo.getWordsForPage(
-          mushafId: 1,
-          pageNumber: 1,
-          scriptCode: 'not-a-real-script',
-        );
-        expect(words, isEmpty);
-      },
-    );
   });
 
   group('navigation', () {

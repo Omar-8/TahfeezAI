@@ -10,6 +10,7 @@ library;
 import '../domain/models/ayah_models.dart';
 import '../domain/models/dataset_metadata.dart';
 import '../domain/models/mushaf_models.dart';
+import '../domain/models/mushaf_token_models.dart';
 import '../domain/models/navigation_models.dart';
 import '../domain/models/script_models.dart';
 import '../domain/models/surah_models.dart';
@@ -79,6 +80,9 @@ extension MushafRowMapper on MushafRow {
     scriptVariantId: scriptVariantId,
     pageCount: pageCount,
     linesPerPage: linesPerPage,
+    qiraah: qiraah,
+    edition: edition,
+    renderingType: renderingType,
   );
 }
 
@@ -89,11 +93,24 @@ extension MushafLineRowMapper on MushafLineRow {
     lineNumber: lineNumber,
     lineType: lineType,
     isCentered: isCentered,
-    startAyahId: startAyahId,
-    startWordIndex: startWordIndex,
-    endAyahId: endAyahId,
-    endWordIndex: endWordIndex,
+    firstTokenId: firstTokenId,
+    lastTokenId: lastTokenId,
     surahNo: surahNo,
+  );
+}
+
+extension MushafTokenRowMapper on MushafTokenRow {
+  MushafToken toDomain() => MushafToken(
+    mushafId: mushafId,
+    sourceTokenId: sourceTokenId,
+    sequenceIndex: sequenceIndex,
+    tokenType: tokenType,
+    displayText: displayText,
+    surahNumber: surahNumber,
+    ayahNumber: ayahNumber,
+    sourceWordPosition: sourceWordPosition,
+    canonicalWordIndex: canonicalWordIndex,
+    canonicalAyahId: canonicalAyahId,
   );
 }
 
