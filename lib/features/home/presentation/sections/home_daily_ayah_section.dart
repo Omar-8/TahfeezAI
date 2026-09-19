@@ -4,8 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/localization/generated/app_localizations.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/components/components.dart';
+import '../../../../core/ui/coming_soon.dart';
 import '../../application/home_providers.dart';
-import '../coming_soon.dart';
 
 /// Home's "Recommended / Daily Ayah" section
 /// (`docs/reference/11_HOME_SPEC.md` §3). Shows a deterministic, date-seeded

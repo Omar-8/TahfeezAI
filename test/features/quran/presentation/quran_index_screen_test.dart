@@ -106,8 +106,11 @@ void main() {
       await tester.tap(find.text('Test Chapter One'));
       await tester.pumpAndSettle();
 
+      // Navigates to the real Reader (Milestone 6), not a stub: its app
+      // bar shows the location and its chapter-info card shows the real
+      // chapter name loaded from the (synthetic) dataset.
       expect(find.text('Surah 1'), findsOneWidget);
-      expect(find.textContaining('Opening Surah 1'), findsOneWidget);
+      expect(find.text('Test Chapter One'), findsOneWidget);
     });
 
     testWidgets('the Juz tab lists the fixture\'s one Juz', (tester) async {

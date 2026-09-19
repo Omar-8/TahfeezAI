@@ -1,12 +1,9 @@
 import 'package:drift/native.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tahfeez_ai/core/storage/storage_providers.dart';
 import 'package:tahfeez_ai/features/quran/application/quran_index_providers.dart';
 import 'package:tahfeez_ai/quran/data/import/quran_dataset_importer.dart';
 import 'package:tahfeez_ai/quran/data/quran_database.dart';
-import 'package:tahfeez_ai/quran/domain/models/quran_location.dart';
-import 'package:tahfeez_ai/quran/domain/quran_location_path.dart';
 import 'package:tahfeez_ai/quran/quran_providers.dart';
 
 import '../../../quran/quran_test_fixtures.dart';
@@ -98,41 +95,6 @@ void main() {
       'supplies a real script preference',
       () async {
         expect(await container.read(defaultMushafProvider.future), isNull);
-      },
-    );
-  });
-
-  group('RecentQuranLocationController', () {
-    test('starts null and records a location', () async {
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
-
-      expect(container.read(recentQuranLocationControllerProvider), isNull);
-
-      await container
-          .read(recentQuranLocationControllerProvider.notifier)
-          .record(const QuranLocation.surah(2));
-
-      expect(
-        container.read(recentQuranLocationControllerProvider),
-        const QuranLocation.surah(2),
-      );
-    });
-
-    test(
-      'persists the recorded location as its canonical path string',
-      () async {
-        final container = ProviderContainer();
-        addTearDown(container.dispose);
-
-        await container
-            .read(recentQuranLocationControllerProvider.notifier)
-            .record(const QuranLocation.juz(5));
-
-        final stored = await container
-            .read(browserStorageProvider)
-            .getString('quran.recent_location');
-        expect(stored, quranLocationPath(const QuranLocation.juz(5)));
       },
     );
   });

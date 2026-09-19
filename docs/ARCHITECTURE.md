@@ -60,12 +60,13 @@ lib/
     audio/                      AudioController interface (+ minimal just_audio impl) + domain/AudioRepository.
     logging/                    AppLogger interface + implementation + global error hook.
     platform/                   PlatformCapabilities — the one place platform checks live.
+    ui/                         Small UI helpers shared by more than one feature (e.g. showComingSoon).
   quran/domain/                 QuranRepository, TranslationRepository, TafsirRepository, SearchRepository, QuranLocation.
-  quran/application/            Quran-domain concerns shared by more than one feature (e.g. dataset-installed status).
+  quran/application/            Quran-domain concerns shared by more than one feature (e.g. dataset-installed status, recent location).
   user_data/domain/             UserDataRepository (bookmarks, reading history).
   memorization/domain/          MemorizationRepository.
   ai/domain/                    RecitationRecognizer, RecitationContext, RecitationEvent (interfaces only).
-  features/                     Reserved for feature-area presentation code; empty until Milestone 4+.
+  features/                     Feature-area presentation code (home, quran, search, reader, ...).
 ```
 
 This refines the milestone prompt's suggested tree in one deliberate way: `UserDataRepository`,
@@ -603,12 +604,110 @@ already serves every feature needing Quran data, not just one).
 
 ### The Reader stub
 
-`QuranLocationStubScreen` (`lib/features/quran/presentation/quran_location_stub_screen.dart`) is
-every index result's destination for this milestone: it resolves and displays the real
-`QuranLocation` a route parsed, proving the routing genuinely works end to end, without building
-Verse Reader UI that belongs to Milestone 6 — the same "honest placeholder, not a fake screen"
-pattern `QuranPlaceholderScreen`/`SearchPlaceholderScreen` established in Milestone 4.
-`QuranPlaceholderScreen` itself is deleted, superseded by the real `QuranIndexScreen`.
+`QuranLocationStubScreen` (`lib/features/quran/presentation/quran_location_stub_screen.dart`) was
+every index result's destination for this milestone: it resolved and displayed the real
+`QuranLocation` a route parsed, proving the routing genuinely worked end to end, without building
+Verse Reader UI that belonged to Milestone 6. `QuranPlaceholderScreen` itself was deleted,
+superseded by the real `QuranIndexScreen`. Milestone 6 then superseded this stub in turn for five
+of its six variants — see §11d.
+
+## 11d. Verse-by-Verse Reader (Milestone 6)
+
+### Every reading mode is one batched-loading engine, not six
+
+`lib/features/reader/application/reader_session_controller.dart`'s `ReaderSession` (a
+`QuranLocation`-keyed family provider) is the single engine behind every reading mode this
+milestone requires — full Surah, verse range, individual Ayah, Juz, Hizb — plus "continuous
+scrolling," which is modeled as a *behavior* (`loadMore()`, appending the next chapter once the
+current content is exhausted) rather than a seventh mode, since it changes what happens at the
+*end* of any session rather than how one starts. Every load goes through the existing
+`QuranRepository.getVerseRangeWithWords` batch method (never a per-verse or per-word query, per
+this milestone's explicit performance requirement), with a `_nextSurahNo` cursor tracking where
+continuous scrolling should resume regardless of which mode the session started in.
+
+`Ayah`-mode loads the *whole containing chapter* (scrolled to the requested verse), matching how
+a "resume my position" deep link should feel; `ayahRange`-mode loads *only* the requested range
+(a focused, quoted excerpt) — a deliberate distinction between "jump into this chapter at verse
+N" and "show me exactly this range," both real, both useful, and both worth keeping distinct
+rather than collapsing into one behavior.
+
+### `ReaderLayoutItem`: one domain/presentation unit per milestone's own requirement
+
+`lib/features/reader/domain/reader_layout_item.dart` is a `freezed` sealed union (`chapterInfo`,
+`bismillah`, `chapterTitle`, `sectionMarker`, `verse`) — independently modeled from
+`docs/reference/04_READER_SPEC.md` §13's `ReaderLayoutItem` concept, not copied. `ReaderVerseItem`
+carries only immutable content (an `AyahWithWords`, straight from `QuranRepository`) — per this
+milestone's "do not hard-code Quran text into widgets" requirement, no verse text of any kind is
+ever a literal string in `lib/features/reader/presentation/`. Per-verse *mutable* state (selection,
+future playback highlight) lives in `ReaderSessionState`, not in the content item, so the same
+content never needs rebuilding just because its display state changed.
+
+**The Bismillah is deliberately textless.** `ReaderBismillahItem` renders as a plain decorative
+divider (`BismillahDivider`) with no Arabic glyphs at all — the Bismillah is canonical Quran text,
+and this milestone's schema has no dedicated place to source it from independently of a real
+Mushaf line/word dataset (Milestone 7). Hard-coding it as a UI string, even as a "just this one
+fixed phrase" shortcut, would be exactly the kind of literal-Quran-text-in-a-widget this milestone
+(and `docs/CLEAN_ROOM_RULES.md`'s Quran-correctness rules) forbids.
+
+### Quran typography gets its own, separate token — still no real font
+
+`lib/core/theme/quran_text_style.dart`'s `quranTextStyle()` is intentionally **not** part of
+`buildTahfeezTextTheme`/`app_typography.dart`: per `docs/DESIGN_DIRECTION.md`, UI and Quran
+typography are separate systems, and canonical Quran text must never render with Tahfeez's own
+branded UI font (Noto Sans / Noto Sans Arabic). No real Quran-specific script/font has been
+selected yet — `docs/DATA_RESOURCE_REQUIREMENTS.md` §5 explicitly defers that to the Mushaf
+Renderer milestone (7), since a font choice is entangled with which Mushaf pagination dataset
+ends up usable. `quranTextStyle()` leaves `fontFamily` unset, deferring to each platform's own
+default Arabic-capable system font — distinct from (not a substitute for) a real Uthmani-style
+typeface, but also not Tahfeez's UI font, honestly satisfying the separation rule until Milestone
+7 lands. Arabic text always renders inside an explicit `Directionality(textDirection: TextDirection.rtl)`
+wrapper regardless of the app's own UI locale.
+
+### Real actions where genuinely possible, honest hooks elsewhere
+
+Per this milestone's explicit "wire interfaces or intentional disabled states rather than fake
+behavior": Copy (a verse's reference, `Clipboard`) and Share (a composed reference + Arabic-text
+card with a working Copy button, `lib/features/reader/presentation/widgets/verse_share_sheet.dart`)
+are genuinely functional today — no native OS share-sheet plugin dependency was added, since
+`docs/reference/04_READER_SPEC.md` §9 flags exact share composition as reference-only and adding a
+plugin is a deliberate product decision, not something to default into mid-milestone. Play,
+Bookmark, and Tafsir are real, tappable `TahfeezVerseAction`s that show an honest "coming soon"
+(no verse-audio source, no `UserDataRepository` implementation, and no Tafsir dataset exist yet —
+Milestones 12, 11, 9 respectively). The Mushaf/Translation segments of `ReaderModeSwitch` are
+visible but disabled the same way, per "architecturally ready for translation... audio, and
+memorization" — switching to them shows "coming soon" rather than doing nothing or crashing.
+
+### `showComingSoon` moved to `core/ui`
+
+`lib/core/ui/coming_soon.dart` (moved from `features/home/presentation/coming_soon.dart`) is the
+same relocation pattern §11c already established for `hasInstalledQuranDataset`: once a second
+feature (the Reader, following Home and the Quran index) needed the identical "give honest tap
+feedback for a not-yet-built destination" helper, it moved to `core` rather than being duplicated
+or reached into across feature boundaries.
+
+### A real correctness gap this milestone's own tests caught
+
+`QuranRepository.getVerseRangeWithWords` returns **zero verses outright** — not "verses with empty
+words" — when its `scriptCode` argument matches no installed `QuranScript` row. `ReaderSession`
+originally read a hardcoded `defaultReaderScriptCode` constant directly; every reader test using
+the synthetic fixture (which registers its own `testScriptCode`, not the production placeholder)
+silently saw empty chapters instead of the fixture's real content, surfacing as "Juz/Hizb sessions
+load zero verses" test failures with a correct-looking Juz/Hizb resolution underneath. The fix:
+`readerScriptCodeProvider` wraps the constant, so tests can override which script a session loads
+instead of the controller being hardwired to one value it can never be told to change — worth
+remembering for any future "default X" constant a controller reads directly instead of through an
+overridable provider.
+
+### Persistence
+
+`lib/features/reader/application/reader_preferences_controller.dart` follows the exact
+`ThemeModeController` pattern (§11a): three independent, `BrowserStorage`-backed controllers for
+continuous scrolling (on by default), Arabic-text visibility, and reader mode (always
+`verseByVerse` today, persisted so a real mode switch is a one-controller change once Milestones 7
+and 9 exist). "Current location"/"last read" (this milestone's other persistence requirement)
+reuses §11c's `RecentQuranLocationController` rather than introducing a second, overlapping
+persisted value — the Reader records into it once a session's content loads, exactly like the
+Quran index's "Jump back in" chip does, since both are the same underlying concept.
 
 ## 12. What Milestone 1 deliberately did not do
 
@@ -687,3 +786,28 @@ pattern `QuranPlaceholderScreen`/`SearchPlaceholderScreen` established in Milest
   (Milestone 14) supplies a real user preference.
 - No real Quran dataset import — same gap as Milestone 4 (§11b); the Surah/Juz/Hizb/Page tabs all
   render their honest "unavailable resource" state in the shipped app today.
+
+## 17. What Milestone 6 deliberately did not do
+
+- No Mushaf/Translation reading modes — `ReaderMode` reserves both, but only `verseByVerse` is
+  implemented; the mode switch shows them disabled with "coming soon" (Milestones 7, 9).
+- No real Quran/Mushaf font — `quranTextStyle()` exists as a separate token from the UI theme, but
+  still resolves to each platform's default system font, not a real Uthmani-style typeface; that
+  selection is Milestone 7's job (§11d, `docs/DATA_RESOURCE_REQUIREMENTS.md` §5).
+- No real Bismillah text — `ReaderBismillahItem` is a textless decorative marker; sourcing the
+  actual Bismillah glyphs needs a real Mushaf line/word dataset (Milestone 7).
+- No word-by-word tap interaction, footnotes, similar-verses, or a Verse Options sheet — all
+  explicitly deferred by the milestone itself to later WBW/translation/tafsir milestones (8, 9).
+- No native OS share-sheet integration — Share composes real, copyable text in Tahfeez's own
+  sheet; adding a `share_plus`-style plugin dependency is deferred as a separate product decision.
+- No real Play/Bookmark/Tafsir behavior — genuinely wired, tappable actions that honestly report
+  "coming soon" until verse audio (Milestone 12), `UserDataRepository` (Milestone 11), and a
+  Tafsir dataset (Milestone 9) exist.
+- No audio-driven auto-scroll or "current playing verse" highlighting — the reader's `ScrollController`
+  and `GlobalKey`-based scroll-to-verse mechanism are the same machinery that behavior would reuse,
+  but no audio position-to-ayah mapping exists yet to drive it (Milestone 12).
+- No collapsing/scroll-linked app bar — a plain, non-collapsing `AppBar` satisfies "quieter than
+  Home" without the added complexity of a physics-based collapsing header; real motion polish is
+  deferred, consistent with Milestone 3/4's own deferrals (§14, §15).
+- No real Quran dataset import — same gap as every milestone since 2; every reading session in the
+  shipped app renders its honest "unavailable resource" empty state today.

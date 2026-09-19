@@ -1,12 +1,9 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/localization/locale_controller.dart';
-import '../../../core/storage/storage_providers.dart';
 import '../../../quran/domain/models/mushaf_models.dart';
 import '../../../quran/domain/models/navigation_models.dart';
 import '../../../quran/domain/models/surah_models.dart';
-import '../../../quran/domain/quran_location_path.dart';
-import '../../../quran/domain/models/quran_location.dart';
 import '../../../quran/quran_providers.dart';
 
 part 'quran_index_providers.g.dart';
@@ -117,37 +114,4 @@ List<IndexedNavigationUnit> _groupByUnit(List<NavigationRange> ranges) {
 Future<Mushaf?> defaultMushaf(Ref ref) async {
   final repository = ref.watch(quranRepositoryProvider);
   return repository.getMushaf(scriptCode: defaultQuranScriptCode);
-}
-
-const _recentQuranLocationPrefKey = 'quran.recent_location';
-
-/// The last [QuranLocation] the user navigated to from the Quran index,
-/// persisted via [BrowserStorage] so it survives app restarts — the
-/// milestone's "remember recent/current context where appropriate"
-/// requirement. `null` means none has been recorded yet.
-@Riverpod(keepAlive: true)
-class RecentQuranLocationController extends _$RecentQuranLocationController {
-  @override
-  QuranLocation? build() {
-    _restore();
-    return null;
-  }
-
-  Future<void> _restore() async {
-    final stored = await ref
-        .read(browserStorageProvider)
-        .getString(_recentQuranLocationPrefKey);
-    if (stored == null) return;
-    final location = quranLocationFromPath(stored);
-    if (location != null) {
-      state = location;
-    }
-  }
-
-  Future<void> record(QuranLocation location) async {
-    state = location;
-    await ref
-        .read(browserStorageProvider)
-        .setString(_recentQuranLocationPrefKey, quranLocationPath(location));
-  }
 }

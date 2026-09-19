@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/quran/presentation/quran_location_stub_screen.dart';
+import '../../features/reader/presentation/reader_screen.dart';
 import '../../quran/domain/models/quran_location.dart';
 import 'app_routes.dart';
 
@@ -13,6 +14,11 @@ import 'app_routes.dart';
 /// `lib/quran/domain/quran_location_path.dart`'s encoding — a location's
 /// *kind* is part of the route shape, its numeric fields are the path
 /// parameters.
+///
+/// Five of the six variants open the real [ReaderScreen] (Milestone 6).
+/// [QuranLocationPage] still opens [QuranLocationStubScreen]: Mushaf paging
+/// is Milestone 7's job, and the reader has no page-based content model to
+/// serve yet.
 ///
 /// This file, like `app_router.dart` itself, is `core/routing`'s one
 /// documented exception to `docs/ARCHITECTURE.md` §1's "core never depends
@@ -26,7 +32,7 @@ List<RouteBase> quranLocationRoutes() {
   return [
     GoRoute(
       path: 'surah/:surahNo',
-      builder: (context, state) => QuranLocationStubScreen(
+      builder: (context, state) => ReaderScreen(
         location: QuranLocation.surah(
           _parsePathInt(state.pathParameters, 'surahNo'),
         ),
@@ -34,7 +40,7 @@ List<RouteBase> quranLocationRoutes() {
     ),
     GoRoute(
       path: 'ayah/:chapterNo/:verseNo',
-      builder: (context, state) => QuranLocationStubScreen(
+      builder: (context, state) => ReaderScreen(
         location: QuranLocation.ayah(
           _parsePathInt(state.pathParameters, 'chapterNo'),
           _parsePathInt(state.pathParameters, 'verseNo'),
@@ -43,7 +49,7 @@ List<RouteBase> quranLocationRoutes() {
     ),
     GoRoute(
       path: 'ayah-range/:chapterNo/:fromVerseNo/:toVerseNo',
-      builder: (context, state) => QuranLocationStubScreen(
+      builder: (context, state) => ReaderScreen(
         location: QuranLocation.ayahRange(
           _parsePathInt(state.pathParameters, 'chapterNo'),
           _parsePathInt(state.pathParameters, 'fromVerseNo'),
@@ -53,7 +59,7 @@ List<RouteBase> quranLocationRoutes() {
     ),
     GoRoute(
       path: 'juz/:juzNo',
-      builder: (context, state) => QuranLocationStubScreen(
+      builder: (context, state) => ReaderScreen(
         location: QuranLocation.juz(
           _parsePathInt(state.pathParameters, 'juzNo'),
         ),
@@ -61,7 +67,7 @@ List<RouteBase> quranLocationRoutes() {
     ),
     GoRoute(
       path: 'hizb/:hizbNo',
-      builder: (context, state) => QuranLocationStubScreen(
+      builder: (context, state) => ReaderScreen(
         location: QuranLocation.hizb(
           _parsePathInt(state.pathParameters, 'hizbNo'),
         ),

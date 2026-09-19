@@ -4,7 +4,7 @@ import '../../../../core/localization/generated/app_localizations.dart';
 import '../../../../core/theme/app_breakpoints.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/components/components.dart';
-import '../coming_soon.dart';
+import '../../../../core/ui/coming_soon.dart';
 
 /// Home's "Quran collections/exploration" section
 /// (`docs/reference/11_HOME_SPEC.md` §6). The category set

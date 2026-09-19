@@ -4,15 +4,13 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/components/components.dart';
 import '../../../quran/domain/models/quran_location.dart';
 
-/// The destination every Quran index result routes to, for this milestone.
-///
-/// The Verse Reader (Milestone 6) doesn't exist yet, so this proves the
-/// `QuranLocation`-based routing genuinely resolves end to end (a real
-/// `go_router` route, parsed back into a real, correctly-typed
-/// [QuranLocation]) without prematurely building reader UI that belongs to
-/// a later milestone — the same "honest placeholder, not a fake screen"
-/// pattern `QuranPlaceholderScreen`/`SearchPlaceholderScreen` used in
-/// Milestone 4.
+/// The destination for [QuranLocation.page] results specifically — every
+/// other [QuranLocation] variant now opens the real
+/// `lib/features/reader/presentation/reader_screen.dart` (Milestone 6).
+/// Mushaf paging itself is Milestone 7's job, so this stays the same
+/// "honest placeholder, not a fake screen" pattern
+/// `QuranPlaceholderScreen`/`SearchPlaceholderScreen` used in Milestone 4,
+/// narrowed to the one variant the reader still can't serve.
 class QuranLocationStubScreen extends StatelessWidget {
   const QuranLocationStubScreen({super.key, required this.location});
 
@@ -20,18 +18,8 @@ class QuranLocationStubScreen extends StatelessWidget {
 
   String _describe() {
     return switch (location) {
-      QuranLocationSurah(:final surahNo) => 'Surah $surahNo',
-      QuranLocationAyah(:final chapterNo, :final verseNo) =>
-        'Ayah $chapterNo:$verseNo',
-      QuranLocationAyahRange(
-        :final chapterNo,
-        :final fromVerseNo,
-        :final toVerseNo,
-      ) =>
-        'Ayah $chapterNo:$fromVerseNo-$toVerseNo',
-      QuranLocationJuz(:final juzNo) => 'Juz $juzNo',
-      QuranLocationHizb(:final hizbNo) => 'Hizb $hizbNo',
       QuranLocationPage(:final pageNumber) => 'Page $pageNumber',
+      _ => 'This location',
     };
   }
 
@@ -45,7 +33,7 @@ class QuranLocationStubScreen extends StatelessWidget {
           icon: Icons.auto_stories_outlined,
           message:
               'Opening ${_describe()}.\n'
-              'The Quran reader arrives in a later milestone.',
+              'Mushaf paging arrives in a later milestone.',
         ),
       ),
     );
