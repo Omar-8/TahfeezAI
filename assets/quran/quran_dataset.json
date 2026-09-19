@@ -529035,7 +529035,7 @@
   "scripts": [
     {
       "id": 1,
-      "code": "tanzil_uthmani",
+      "code": "uthmani",
       "displayName": "Uthmani (Tanzil)"
     }
   ],
@@ -534087,6 +534087,6 @@
   "metadata": {
     "datasetVersion": "tanzil-uthmani-1.1",
     "contentHash": "bf4f57b968d03f4131c070b1e285da9be0e0a108a21c910e872801ca273312c8",
-    "importedAt": "2026-09-19T15:41:42.431161Z"
+    "importedAt": "2026-09-19T15:55:33.271055Z"
   }
 }

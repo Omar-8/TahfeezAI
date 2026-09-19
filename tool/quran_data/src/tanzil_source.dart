@@ -21,10 +21,18 @@ import 'package:tahfeez_ai/quran/domain/models/surah_models.dart';
 import 'package:tahfeez_ai/quran/domain/quran_dataset_payload.dart';
 
 /// The canonical Uthmani text script Tahfeez ships, sourced from Tanzil.
-/// A stable, deliberately Tahfeez-chosen id/code — not a reference-app value.
+///
+/// `code` is deliberately `'uthmani'`, matching
+/// `defaultQuranScriptCode` (`lib/quran/application/quran_script_code.dart`)
+/// exactly — every reader/Mushaf/index session resolves words by that
+/// default script code until a user picks a different one, and
+/// `QuranRepository` returns zero words outright for a script code that
+/// matches no installed [QuranScript] row, so this is not cosmetic: a
+/// mismatch here would silently make every screen show no Quran text at all
+/// despite a fully valid, imported dataset.
 const kTanzilUthmaniScript = QuranScript(
   id: 1,
-  code: 'tanzil_uthmani',
+  code: 'uthmani',
   displayName: 'Uthmani (Tanzil)',
 );
 

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "buildDate": "2026-09-19T15:41:43.191016Z",
+  "buildDate": "2026-09-19T15:55:34.039397Z",
   "canonicalQuranSource": "Tanzil Project (tanzil.net)",
   "canonicalQuranVersion": "Uthmani, Version 1.1",
   "canonicalQuranHash": "bf4f57b968d03f4131c070b1e285da9be0e0a108a21c910e872801ca273312c8",
@@ -44,7 +44,7 @@
   ],
   "toolVersion": "1.0.0",
   "packagedAssetHashes": {
-    "quran_dataset.json": "f71b033b485894031ab2fc164864025bda3f6c14f4f26ba818bf848545ee3ff2",
+    "quran_dataset.json": "9ed528dc503cd91ff93a14d48028ad5da6c0f697cf6d8420580f50cf1f51c90e",
     "translations/en_rowwad.json": "9f8260516e290f14072838e713c5ce52313e9e2954d6da7a374ded058c502e2b",
     "translations/de_rowwad.json": "f300113d6f09024d46bbe08a0a9ade70a2f6c9f76ba67fccfe56970dc351f64f",
     "tafsir/ar_muyassar.json": "75583a480b3d2824dd781a9f088656d897b218d7413a66a58663e3d6e3a7410e"

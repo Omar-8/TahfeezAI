@@ -11,6 +11,7 @@ import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tahfeez_ai/quran/application/quran_script_code.dart';
 import 'package:tahfeez_ai/quran/data/import/dataset_json_codec.dart';
 import 'package:tahfeez_ai/quran/domain/dataset_integrity.dart';
 import 'package:tahfeez_ai/quran/domain/models/ayah_models.dart';
@@ -58,6 +59,18 @@ void main() {
     test('has exactly 6236 ayahs in total', () {
       expect(payload.ayahs, hasLength(6236));
     });
+
+    test(
+      'the shipped script code matches the app-wide default script code',
+      () {
+        // A mismatch here is not cosmetic: QuranRepository returns zero
+        // words outright for a script code that matches no installed
+        // QuranScript row, so every reader/Mushaf/index screen would show
+        // no Quran text at all despite a fully valid, imported dataset.
+        expect(payload.scripts, hasLength(1));
+        expect(payload.scripts.single.code, defaultQuranScriptCode);
+      },
+    );
 
     test('passes full structural integrity validation', () {
       const validator = DatasetIntegrityValidator();
