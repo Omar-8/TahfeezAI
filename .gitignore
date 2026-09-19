@@ -55,3 +55,10 @@ lib/core/localization/generated/
 
 # Downloaded drift web assets are vendored deliberately (offline-first PWA),
 # so they are intentionally NOT ignored here.
+
+# Re-fetchable raw upstream sources for the production Quran dataset
+# (tool/quran_data/fetch_sources.dart repopulates this). The vendored QUL
+# layout zip under tool/quran_data/sources/ is NOT ignored — it cannot be
+# re-fetched automatically (see docs/QURAN_DATA_PROVENANCE.md) and is
+# committed deliberately.
+tool/quran_data/.cache/

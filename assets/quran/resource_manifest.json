@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "buildDate": "2026-09-19T15:41:43.191016Z",
+  "canonicalQuranSource": "Tanzil Project (tanzil.net)",
+  "canonicalQuranVersion": "Uthmani, Version 1.1",
+  "canonicalQuranHash": "bf4f57b968d03f4131c070b1e285da9be0e0a108a21c910e872801ca273312c8",
+  "canonicalMetadataSource": "Tanzil Project quran-data.xml",
+  "canonicalMetadataHash": "8867c1d88191472adec9db694b3cd9f135b1a2ef580574d32cf888dcb22c5c7a",
+  "mushafName": "QCF V2 ( 1421H print )",
+  "mushafEdition": "KFGQPC V2",
+  "mushafQirah": "Hafs 'an Asim",
+  "mushafPages": 604,
+  "mushafLinesPerPage": 15,
+  "mushafDataHash": "e4df98f35dd3b8927ff096337c8739e0f0b12c8ba622834c345eaa4c3e28dd8c",
+  "mushafFontStatus": "SHIP_BLOCKED_LICENSE",
+  "mushafStatus": "SHIP_BLOCKED_PENDING_WORD_DATA",
+  "translationResources": [
+    {
+      "slug": "en-rowwad",
+      "resourceId": "tahfeez.translation.en.rowwad",
+      "quranEncKey": "english_rwwad",
+      "version": "1.0.19",
+      "sourceHash": "77e2ede3d8e6d6b5c6e16ff78eda2d2b6cc0a6b7489c94a5dde4f7481f5fdee8",
+      "ayahCount": 6236
+    },
+    {
+      "slug": "de-rowwad",
+      "resourceId": "tahfeez.translation.de.rowwad",
+      "quranEncKey": "german_rwwad",
+      "version": "1.0.15",
+      "sourceHash": "32c6a6e0e45b4ece65f3b85094fa6f4c0a9b9bdc5c94a7933e8fe711efb5125e",
+      "ayahCount": 6236
+    }
+  ],
+  "tafsirResources": [
+    {
+      "id": "ar-muyassar",
+      "resourceId": "tahfeez.tafsir.ar.muyassar",
+      "quranEncKey": "arabic_moyassar",
+      "version": "unversioned upstream (QuranEnc publishes no version number for this resource; tracked by sourceHash)",
+      "sourceHash": "eb384e586487b089b826375d3f705d07e775e0019325da405e0337a9f6b3da04",
+      "ayahCount": 6236
+    }
+  ],
+  "toolVersion": "1.0.0",
+  "packagedAssetHashes": {
+    "quran_dataset.json": "f71b033b485894031ab2fc164864025bda3f6c14f4f26ba818bf848545ee3ff2",
+    "translations/en_rowwad.json": "9f8260516e290f14072838e713c5ce52313e9e2954d6da7a374ded058c502e2b",
+    "translations/de_rowwad.json": "f300113d6f09024d46bbe08a0a9ade70a2f6c9f76ba67fccfe56970dc351f64f",
+    "tafsir/ar_muyassar.json": "75583a480b3d2824dd781a9f088656d897b218d7413a66a58663e3d6e3a7410e"
+  }
+}

@@ -1100,6 +1100,155 @@ databases. `test/features/search/` covers both preference controllers and the se
 end-to-end (empty/no-dataset/no-match states, typing a query, a quick-link result navigating through
 a real `GoRouter`, the filter sheet actually changing what a subsequent search returns).
 
+## 11i. Production Quran Data Integration (Milestone 9A)
+
+### The gap this milestone closes
+
+Every milestone since 2 shipped real repository/import/validation *machinery* against a
+`QuranDatabase` that stayed empty in the real app — §11h's own testing note above records
+this plainly. This milestone integrates real, licensed, source-verified data through that
+existing machinery for three of the dataset's four layers (canonical Arabic text, Surah/
+navigation metadata, translations, tafsir), and builds — but does not yet populate — the
+architecture for the fourth (Mushaf page/line layout). `docs/QURAN_DATA_PROVENANCE.md` is
+the authoritative per-resource record (exact editions, versions, content hashes, license
+terms); this section is the architectural "how," not the provenance "what."
+
+### No schema changes were needed for the canonical/translation/tafsir layers
+
+`QuranDatasetPayload`, `DatasetIntegrityValidator`, `QuranDatasetImporter`,
+`TranslationRepository`/`TafsirRepository`, and every table under `lib/quran/data/tables/`
+already existed with exactly the shape real data needs — Milestone 2's "dataset can be
+replaced without rewriting UI" design and Milestone 9's checksum-verified install path
+turned out to be literally, not just aspirationally, true. The only genuinely new
+production code is: the import tooling that turns real upstream files into these existing
+shapes (`tool/quran_data/`), the JSON encoding those shapes are packaged in
+(`lib/quran/data/import/dataset_json_codec.dart`), and the boot-time seeding step that
+imports them (`lib/quran/data/import/bundled_dataset_seeder.dart`).
+
+### Deterministic, re-runnable import tooling (`tool/quran_data/`)
+
+- `fetch_sources.dart` — fetches Tanzil's text/metadata and QuranEnc's translation/tafsir
+  sqlite exports over the live network into a gitignored `.cache/` directory. Re-running it
+  reproduces byte-identical files (verified: two independent fetches in this session hashed
+  identically).
+- `src/tanzil_source.dart` — parses Tanzil's `surah|ayah|text` export plus its metadata XML
+  into a `QuranDatasetPayload`. This is where the Bismillah-prefix parsing rule documented
+  in `docs/QURAN_DATA_PROVENANCE.md` §1 lives, and where Tanzil's 240 quarter-Hizb
+  boundaries are split into Rub (all 240) and derived Hizb (every 4th) `NavigationRange`
+  rows, since Tanzil's own `<juzs>` element (not a derived value) already gives the 30 Juz
+  boundaries directly.
+- `src/quranenc_source.dart` — parses QuranEnc's shared `translations(sura, aya,
+  translation, footnotes)` sqlite shape into `TranslationBook`/`TranslationVerseText` or
+  `TafsirWork`/`TafsirVerseText`, including a regex-based split of QuranEnc's `[n] text`
+  footnote blobs into structured `TranslationFootnote` entries (§3 of the provenance doc).
+- `src/mushaf_layout_source.dart` — reads and structurally validates the real, vendored QUL
+  layout file (see below); produces no `MushafLine` content.
+- `build_production_data.dart` — the single orchestrator: fetch-checked, parsed, validated
+  (`DatasetIntegrityValidator`, refusing to write anything on failure), then written to
+  `assets/quran/*.json` plus `assets/quran/resource_manifest.json` (schema version, every
+  source's content hash, every packaged asset's own content hash, and each blocked
+  resource's explicit status string).
+- `sqlite3` and `xml` were added as **dev dependencies** (`pubspec.yaml`) — used only by
+  this tooling, never by the shipped app; `sqlite3` was already present transitively via
+  Drift.
+
+### Why JSON assets, not a pre-built Drift database file
+
+The dataset is packaged as JSON (`assets/quran/quran_dataset.json`,
+`translations/en_rowwad.json`, `translations/de_rowwad.json`, `tafsir/ar_muyassar.json`),
+read at boot and imported through the *existing* `QuranDatasetImporter`/
+`TranslationRepository.installTranslation`/`TafsirRepository.installTafsir` — not shipped
+as a ready-made `.sqlite` file swapped in for the app's own database. A pre-built Drift
+database file must exactly match the app's current Drift-generated schema version to open
+safely; JSON decoded through the same domain models and written via the same
+already-checksum-verified install paths every other resource in this codebase uses has no
+such coupling, reuses 100% of already-tested validation logic, and costs one JSON-decode
+pass at first launch (single-digit seconds for ~77k words) against a real, meaningfully
+simpler on-disk story.
+
+### `BundledDatasetSeeder`: verify hash, then import, one resource at a time
+
+`lib/quran/data/import/bundled_dataset_seeder.dart` runs once at boot
+(`lib/app/bootstrap.dart`, before `runApp` — via a `ProviderContainer` handed to
+`UncontrolledProviderScope` rather than a lazily-created `ProviderScope`, so the same
+container the seeded databases were opened on is the one the app actually runs with). For
+each of the four assets: it loads `resource_manifest.json`'s `packagedAssetHashes`,
+computes the sha256 of the *exact bytes* `rootBundle` returns for that asset, and refuses
+to import anything whose hash does not match — "verify manifest/hash, then open the local
+database," not "trust whatever bytes happened to load." Each resource then fails
+independently:
+
+- **Canonical Quran**: a hash mismatch or `DatasetIntegrityException` from the importer is
+  logged as a critical error and the import is skipped — `QuranDatasetImporter` already
+  guarantees this is all-or-nothing (one transaction), so a failure here can never leave a
+  half-imported, partially-corrupt Quran on disk. An empty `QuranDatabase` (today's
+  already-existing, already-handled state throughout the reader/Mushaf/search UI) is always
+  the safe fallback, never a partially-written one.
+- **Each translation/tafsir**: failures are caught and logged individually — a broken
+  German translation file never prevents the English translation, the tafsir, or the
+  canonical Quran from seeding successfully.
+
+Already-seeded data is never re-imported redundantly: the canonical Quran compares its
+existing `DatasetMetadata.contentHash` against the freshly-parsed payload's; translations/
+tafsir compare `checksum`. A second `seedIfNeeded()` call (e.g. a subsequent app launch) is
+a fast no-op once seeded, verified by
+`test/quran/data/import/bundled_dataset_seeder_test.dart`'s "seeding twice" case.
+
+### The Mushaf layer: architecture built, content deliberately withheld
+
+The project owner provided one real file — QUL's KFGQPC V2 layout export
+(`qpc-v2-15-lines.db`, vendored at `tool/quran_data/sources/qpc-v2-15-lines.db.zip`,
+**not** ignored by git, since it cannot be re-fetched automatically) — and explicitly
+instructed that no synthetic Mushaf layout data be created while a second, still-missing
+file (QUL's companion word/script dataset, which resolves the layout's bare
+`first_word_id`/`last_word_id` integers to real surah/ayah/word-index positions) remains
+outstanding. Rather than waiting to build anything at all, this milestone built the full
+seam that file will plug into without weakening that instruction:
+
+- `lib/quran/domain/mushaf_data_source.dart` — `MushafDataSource` (a layout provider
+  abstraction: "produce a `RawMushafLayout`"), `MushafWordIdResolver` (a separate
+  abstraction: "resolve one word id to `(ayahId, wordIndex)`"), and `resolveMushafLines`
+  (pure function: `RawMushafLayout` + `MushafWordIdResolver` → real `MushafLine` rows,
+  throwing `MushafWordIdResolutionException` rather than guessing on an unresolvable id).
+  Deliberately two separate abstractions, not one: a layout source and a word-id resolver
+  are genuinely different upstream resources (per `docs/QURAN_DATA_PROVENANCE.md` §7), and
+  QUL's own real files arrived exactly that way — one file with layout, no word file yet.
+- `tool/quran_data/src/mushaf_layout_source.dart` — `QulKfgqpcV2MushafDataSource`, a
+  concrete `MushafDataSource` that reads and structurally validates the real vendored file
+  (604 pages, 15 lines/page, correct `surah_name`/`basmallah`/`ayah` line-type counts) —
+  proven against the real file by `test/quran_data/qul_layout_source_test.dart`, not a
+  hypothetical. It produces zero `MushafLine` content on its own; that step needs a
+  resolver this codebase does not have.
+- `build_production_data.dart` runs this validation and records its result
+  (`mushafDataHash`, `mushafStatus: "SHIP_BLOCKED_PENDING_WORD_DATA"`,
+  `mushafFontStatus: "SHIP_BLOCKED_LICENSE"`) in the manifest, but writes no `mushafs`/
+  `mushafLines` into the shipped dataset — `payload.mushafs`/`payload.mushafLines` are
+  empty lists, asserted directly by
+  `test/quran_data/bundled_dataset_integrity_test.dart`'s "Mushaf layout status (honest,
+  not fabricated)" group.
+
+`MushafReaderScreen` already handled a `null` Mushaf gracefully before this milestone
+(`_unavailable(...)`, pre-existing code) — real Surah/Ayah/translation/tafsir/search data
+and an honestly-empty Mushaf reader now coexist correctly with no UI change required.
+
+### Testing
+
+`test/quran_data/bundled_dataset_integrity_test.dart` runs `DatasetIntegrityValidator`
+against the real generated `assets/quran/quran_dataset.json` (not a synthetic fixture),
+asserts 114 surahs with individually-checked ayah counts, exactly 6236 ayahs, exactly 15
+Sajdahs, exactly 30/60/240/7 Juz/Hizb/Rub/Manzil units, the documented Bismillah-handling
+behavior, every packaged asset's hash matching the manifest, and translation/tafsir
+per-ayah completeness (every one of the 6236 canonical `(chapterNo, verseNo)` pairs has a
+matching entry in each bundled translation/tafsir file — a real "no missing verse"
+completeness check, not a total-count-only one).
+`test/quran_data/qul_layout_source_test.dart` validates the real vendored QUL file's
+structure directly. `test/quran/domain/mushaf_data_source_test.dart` tests the generic
+word-id resolution *mechanism* with small synthetic fixtures (the established,
+pre-existing pattern for testing generic logic — never used to fabricate Mushaf content
+itself). `test/quran/data/import/bundled_dataset_seeder_test.dart` runs the full
+verify-then-import boot path against real in-memory Drift databases and the real bundled
+assets, asserting zero errors are logged and every resource ends up installed.
+
 ## 12. What Milestone 1 deliberately did not do
 
 - No feature screens (Home, Reader, Search, Settings, ...) — only the one foundation-proof
@@ -1334,3 +1483,41 @@ a real `GoRouter`, the filter sheet actually changing what a subsequent search r
   install trigger point exists in this codebase yet to hook into).
 - No real Quran dataset import — same gap as every milestone since 2; without a real dataset
   installed, the shipped app's search screen renders its honest "not available yet" empty state.
+
+## 22. What Milestone 9A (Production Quran Data Integration) deliberately did not do
+
+- No Mushaf layout or word content of any kind — real or synthetic. The project owner's explicit
+  instruction ("Do not create synthetic Mushaf layout data") is honored literally: `payload.mushafs`
+  and `payload.mushafLines` are empty in the shipped dataset, asserted directly by a test, not just
+  left empty by omission. The full replaceable architecture (`MushafDataSource`,
+  `MushafWordIdResolver`, `resolveMushafLines`, `QulKfgqpcV2MushafDataSource`) is built and tested
+  against the one real file that has been provided; it imports nothing until the remaining real word
+  dataset arrives.
+- No Mushaf glyph font — the QCF V2 font's redistribution terms were not independently verified
+  (`SHIP_BLOCKED_LICENSE`, `docs/QURAN_DATA_PROVENANCE.md` §8), and no substitute font was silently
+  wired in as if the question were resolved.
+- No independent verification of the QUL layout file's own redistribution terms — its per-resource
+  license page sits behind the same login gate that blocks automated fetching. Recorded as
+  `SHIP_BLOCKED_LICENSE`, not assumed permitted and not inferred from QUL's MIT-licensed platform
+  code, per this project's explicit "a software repository license does not automatically define the
+  rights of third-party content referenced by that repository" rule.
+- No additional languages beyond the two QuranEnc translations and one tafsir the governing spec
+  named explicitly (`english_rwwad`, `german_rwwad`, `arabic_moyassar`) — adding more is a matter of
+  calling `parseQuranEncTranslation`/`parseQuranEncTafsir` again with a different key, not a design
+  change, whenever a future milestone wants to.
+- No cross-source page-boundary validation between Tanzil's own page metadata (`<pages>` in
+  `quran-data.xml`, imported for potential future use but not currently read by any importer) and
+  QUL's Mushaf pagination — meaningless while the Mushaf layer has no imported content to compare
+  against; revisit once real Mushaf data lands.
+- No on-device/physical Android or iOS offline acceptance test (install → airplane mode → launch →
+  verify) was run in this environment — no device was connected. What was verified instead: every
+  seeding path in `BundledDatasetSeeder` reads only `rootBundle` assets and writes only to local
+  Drift databases, with no HTTP client constructed anywhere in the seeding or app-boot path, and the
+  full `flutter test` suite (real bundled assets, real in-memory databases) exercises the same code
+  a real device boot would run. This is a real gap, not a hidden one — a physical-device pass is
+  still owed before shipping.
+- No compaction of the bundled JSON assets (~16 MB combined, dominated by ~9.9 MB for ~77k
+  word-level canonical text rows plus per-verse translation/tafsir text) — acceptable at this
+  milestone's scale and consistent with typical Quran-app asset sizes; a more compact on-disk
+  encoding (e.g. arrays instead of keyed objects) is a pure size optimization revisitable later with
+  zero effect on `QuranDatasetPayload`, `DatasetIntegrityValidator`, or any repository consumer.

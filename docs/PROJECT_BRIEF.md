@@ -26,29 +26,27 @@ Primary targets:
 
 The shared Flutter codebase should contain the majority of domain, data, application, and UI code. Platform-specific adapters are acceptable for capabilities such as widgets, notifications, background execution, audio sessions, file picking, and browser persistence.
 
-## Offline philosophy
+## Offline requirement
 
-The application is **offline-first**.
+The application is **offline-first**, with different guarantees per platform.
 
-The following should work with no network after installation/resources are available:
+### Android and iOS
 
-- open the app;
-- read Quran;
-- navigate Surah/Juz/Hizb/Page;
-- Mushaf mode;
-- verse-by-verse mode;
-- search Quran;
-- bookmarks;
-- reading history;
-- memorization;
-- settings;
-- installed translation;
-- installed tafsir;
-- installed word-by-word data;
-- downloaded audio;
-- local progress and analytics.
+- Core Quran reading must work fully offline.
+- Mushaf must work fully offline.
+- Quran navigation/search must work fully offline.
+- Bundled starter translations/tafsir must work fully offline.
+- Bookmarks, history, memorization, and settings must work fully offline.
+- Downloaded optional resources must remain usable offline.
 
-The network is primarily for obtaining optional resources, updates, and optional enhanced AI services.
+### Web
+
+- Offline support is optional.
+- Do not block development on PWA persistence or browser storage guarantees.
+- Web may fetch resources over the network.
+- Preserve the same domain/repository APIs so behavior stays consistent — platform differences belong in adapters/implementations, not in different contracts.
+
+The network is otherwise used for obtaining optional resources, updates, and optional enhanced AI services.
 
 ## Brand
 

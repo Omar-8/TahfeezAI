@@ -1,11 +1,18 @@
 # Tahfeez AI — Data Resource Requirements
 
+**Superseded for the canonical Arabic text, Surah/navigation metadata, and translation/tafsir
+resources**: those were integrated in the "Production Quran Data Integration" milestone. See
+`docs/QURAN_DATA_PROVENANCE.md` for their exact editions, versions, content hashes, and license
+terms, and `docs/THIRD_PARTY_RESOURCES.md` for their individual resource-register entries. The
+Mushaf page/line layout (§4 below) remains genuinely unresolved — `docs/QURAN_DATA_PROVENANCE.md`
+§7–§8 record its current `SHIP_BLOCKED_PENDING_WORD_DATA`/`SHIP_BLOCKED_LICENSE` status. This
+document is kept as-is below for its original research and reasoning; it is no longer the
+authoritative status source for the resources that have since been integrated.
+
 Per `prompts/milestones/MILESTONE_02_QURAN_DATA_ENGINE.md` and `docs/CLEAN_ROOM_RULES.md`, this
-document is **planning and license research only**. No dataset listed here has been integrated
-into Tahfeez. `QuranApp`'s bundled database has **not** been imported, and will not be. A dataset
-may be integrated only after its specific source and terms are recorded in
-`docs/THIRD_PARTY_RESOURCES.md` — this document exists to make that a well-informed decision when
-it happens, not to authorize it now.
+document was originally **planning and license research only**. `QuranApp`'s bundled database has
+**not** been imported, and will not be. A dataset may be integrated only after its specific source
+and terms are recorded in `docs/THIRD_PARTY_RESOURCES.md`.
 
 All license summaries below were read directly from each project's own current license/terms
 page (URLs given per source) as of this milestone. They are summaries for planning purposes, not
