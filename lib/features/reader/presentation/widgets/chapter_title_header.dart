@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/localization/locale_controller.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../application/reader_session_controller.dart';
+import '../../../../quran/application/quran_chapter_localization.dart';
 
 /// `ReaderChapterTitleItem`'s header: a chapter-name divider used when a
 /// reading session spans multiple chapters (Juz/Hizb reading, or
@@ -19,7 +19,7 @@ class ChapterTitleHeader extends ConsumerWidget {
     final languageCode =
         ref.watch(localeControllerProvider)?.languageCode ?? 'en';
     final localization = ref.watch(
-      readerChapterLocalizationProvider(surahNo, languageCode: languageCode),
+      chapterLocalizationProvider(surahNo, languageCode: languageCode),
     );
     final scheme = Theme.of(context).colorScheme;
 

@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../features/quran/presentation/quran_location_stub_screen.dart';
+import '../../features/mushaf/presentation/mushaf_reader_screen.dart';
 import '../../features/reader/presentation/reader_screen.dart';
 import '../../quran/domain/models/quran_location.dart';
 import 'app_routes.dart';
@@ -16,9 +16,7 @@ import 'app_routes.dart';
 /// parameters.
 ///
 /// Five of the six variants open the real [ReaderScreen] (Milestone 6).
-/// [QuranLocationPage] still opens [QuranLocationStubScreen]: Mushaf paging
-/// is Milestone 7's job, and the reader has no page-based content model to
-/// serve yet.
+/// [QuranLocationPage] opens the real [MushafReaderScreen] (Milestone 7).
 ///
 /// This file, like `app_router.dart` itself, is `core/routing`'s one
 /// documented exception to `docs/ARCHITECTURE.md` §1's "core never depends
@@ -75,11 +73,9 @@ List<RouteBase> quranLocationRoutes() {
     ),
     GoRoute(
       path: 'page/:mushafId/:pageNumber',
-      builder: (context, state) => QuranLocationStubScreen(
-        location: QuranLocation.page(
-          _parsePathInt(state.pathParameters, 'mushafId'),
-          _parsePathInt(state.pathParameters, 'pageNumber'),
-        ),
+      builder: (context, state) => MushafReaderScreen(
+        mushafId: _parsePathInt(state.pathParameters, 'mushafId'),
+        initialPageNumber: _parsePathInt(state.pathParameters, 'pageNumber'),
       ),
     ),
   ];

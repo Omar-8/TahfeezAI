@@ -4,8 +4,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tahfeez_ai/core/localization/generated/app_localizations.dart';
-import 'package:tahfeez_ai/features/reader/application/reader_session_controller.dart';
 import 'package:tahfeez_ai/features/reader/presentation/reader_screen.dart';
+import 'package:tahfeez_ai/quran/application/quran_script_code.dart';
 import 'package:tahfeez_ai/quran/data/import/quran_dataset_importer.dart';
 import 'package:tahfeez_ai/quran/data/quran_database.dart';
 import 'package:tahfeez_ai/quran/domain/models/quran_location.dart';
@@ -21,7 +21,7 @@ void main() {
     return ProviderScope(
       overrides: [
         quranDatabaseProvider.overrideWith((ref) => db),
-        readerScriptCodeProvider.overrideWith((ref) => testScriptCode),
+        quranScriptCodeProvider.overrideWith((ref) => testScriptCode),
       ],
       child: MaterialApp(
         supportedLocales: const [Locale('en'), Locale('ar')],
@@ -117,17 +117,18 @@ void main() {
       },
     );
 
-    testWidgets('tapping a disabled mode switch segment shows coming soon', (
-      tester,
-    ) async {
-      await tester.pumpWidget(wrap(db));
-      await tester.pumpAndSettle();
+    testWidgets(
+      'tapping the disabled Translation mode segment shows coming soon',
+      (tester) async {
+        await tester.pumpWidget(wrap(db));
+        await tester.pumpAndSettle();
 
-      await tester.tap(find.byTooltip('Mushaf — coming soon'));
-      await tester.pumpAndSettle();
+        await tester.tap(find.byTooltip('Translation — coming soon'));
+        await tester.pumpAndSettle();
 
-      expect(find.text('Coming soon'), findsOneWidget);
-    });
+        expect(find.text('Coming soon'), findsOneWidget);
+      },
+    );
 
     testWidgets('tapping Play/Bookmark/Tafsir shows coming soon', (
       tester,

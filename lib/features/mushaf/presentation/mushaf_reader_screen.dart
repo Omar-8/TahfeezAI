@@ -1,0 +1,208 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../core/theme/app_breakpoints.dart';
+import '../application/mushaf_appearance_controller.dart';
+import '../application/mushaf_page_providers.dart';
+import '../domain/mushaf_appearance.dart';
+import '../domain/mushaf_line_layout.dart';
+import 'mushaf_appearance_sheet.dart';
+import 'mushaf_page_view.dart';
+
+/// Tahfeez's Mushaf (paginated, printed-page-style) reader.
+///
+/// Device modes (`docs/DESIGN_DIRECTION.md`'s responsive guidance,
+/// this milestone's explicit "device modes" requirement):
+/// - **Phone / portrait**: one page, horizontal swipe.
+/// - **Tablet landscape / wide desktop**: an optional two-page spread, with
+///   the lower-numbered (earlier-read) page on the right and the next page
+///   on the left, matching how a physical Mushaf opens right-to-left.
+///
+/// A `PageView.builder` with no explicit `controller:` — Flutter manages
+/// its own internal `PageController` when none is given, which naturally
+/// resets to a fresh position when this widget's `key` changes (used here
+/// to reset cleanly when switching between single-page and two-page-spread
+/// layouts, e.g. on rotation, rather than trying to remap one controller's
+/// index meaning across two different pagination schemes).
+class MushafReaderScreen extends ConsumerWidget {
+  const MushafReaderScreen({
+    super.key,
+    required this.mushafId,
+    required this.initialPageNumber,
+  });
+
+  final int mushafId;
+  final int initialPageNumber;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colors = ref.watch(mushafAppearanceControllerProvider).colors;
+    final mushafAsync = ref.watch(mushafByIdProvider(mushafId));
+
+    return Scaffold(
+      backgroundColor: colors.background,
+      appBar: AppBar(
+        backgroundColor: colors.background,
+        foregroundColor: colors.text,
+        title: const Text('Mushaf'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.palette_outlined),
+            tooltip: 'Appearance',
+            onPressed: () => showMushafAppearanceSheet(context),
+          ),
+        ],
+      ),
+      body: mushafAsync.when(
+        data: (mushaf) {
+          if (mushaf == null) {
+            return _unavailable(colors.secondaryText);
+          }
+          return _MushafPager(
+            mushafId: mushaf.id,
+            pageCount: mushaf.pageCount,
+            initialPageNumber: initialPageNumber,
+          );
+        },
+        loading: () => Center(
+          child: CircularProgressIndicator(color: colors.secondaryText),
+        ),
+        error: (_, _) => _unavailable(colors.secondaryText),
+      ),
+    );
+  }
+
+  Widget _unavailable(Color color) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Text(
+          'This will appear automatically once a Quran dataset is added to the app.',
+          textAlign: TextAlign.center,
+          style: TextStyle(color: color),
+        ),
+      ),
+    );
+  }
+}
+
+class _MushafPager extends StatefulWidget {
+  const _MushafPager({
+    required this.mushafId,
+    required this.pageCount,
+    required this.initialPageNumber,
+  });
+
+  final int mushafId;
+  final int pageCount;
+  final int initialPageNumber;
+
+  @override
+  State<_MushafPager> createState() => _MushafPagerState();
+}
+
+class _MushafPagerState extends State<_MushafPager> {
+  bool? _twoPageSpread;
+  late PageController _controller;
+
+  void _ensureController(bool useTwoPageSpread) {
+    if (_twoPageSpread == useTwoPageSpread) return;
+    if (_twoPageSpread != null) _controller.dispose();
+    _twoPageSpread = useTwoPageSpread;
+    final initialIndex = useTwoPageSpread
+        ? ((widget.initialPageNumber - 1) ~/ 2).clamp(
+            0,
+            (widget.pageCount / 2).ceil() - 1,
+          )
+        : (widget.initialPageNumber - 1).clamp(0, widget.pageCount - 1);
+    _controller = PageController(initialPage: initialIndex);
+  }
+
+  @override
+  void dispose() {
+    if (_twoPageSpread != null) _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final breakpoint = TahfeezBreakpoint.of(context);
+    final size = MediaQuery.sizeOf(context);
+    final isLandscape = size.width > size.height;
+    final useTwoPageSpread =
+        breakpoint.isAtLeastTablet && isLandscape && size.width > 700;
+    _ensureController(useTwoPageSpread);
+
+    if (!useTwoPageSpread) {
+      return PageView.builder(
+        key: const ValueKey('single'),
+        controller: _controller,
+        reverse: true,
+        itemCount: widget.pageCount,
+        itemBuilder: (context, index) {
+          return Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 480),
+              child: MushafPageView(
+                mushafId: widget.mushafId,
+                pageNumber: index + 1,
+                onWordTap: (placement) => _showWordInfo(context, placement),
+              ),
+            ),
+          );
+        },
+      );
+    }
+
+    final spreadCount = (widget.pageCount / 2).ceil();
+    return PageView.builder(
+      key: const ValueKey('spread'),
+      controller: _controller,
+      reverse: true,
+      itemCount: spreadCount,
+      itemBuilder: (context, spreadIndex) {
+        final rightPageNumber = spreadIndex * 2 + 1;
+        final leftPageNumber = spreadIndex * 2 + 2;
+        return Row(
+          children: [
+            Expanded(
+              child: rightPageNumber <= widget.pageCount
+                  ? MushafPageView(
+                      mushafId: widget.mushafId,
+                      pageNumber: rightPageNumber,
+                      onWordTap: (placement) =>
+                          _showWordInfo(context, placement),
+                    )
+                  : const SizedBox.shrink(),
+            ),
+            Expanded(
+              child: leftPageNumber <= widget.pageCount
+                  ? MushafPageView(
+                      mushafId: widget.mushafId,
+                      pageNumber: leftPageNumber,
+                      onWordTap: (placement) =>
+                          _showWordInfo(context, placement),
+                    )
+                  : const SizedBox.shrink(),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showWordInfo(BuildContext context, MushafWordPlacement placement) {
+    // `Ayah.id == chapterNo * 1000 + verseNo` (the stable id formula
+    // documented on `Ayah`) -- resolving the reference this way avoids an
+    // extra repository lookup just to show it.
+    final chapterNo = placement.ayahId ~/ 1000;
+    final verseNo = placement.ayahId % 1000;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Ayah $chapterNo:$verseNo · word ${placement.wordIndex + 1}',
+        ),
+      ),
+    );
+  }
+}

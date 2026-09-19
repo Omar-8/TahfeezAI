@@ -1,8 +1,9 @@
 import 'package:drift/native.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tahfeez_ai/features/reader/domain/reader_layout_item.dart';
 import 'package:tahfeez_ai/features/reader/application/reader_session_controller.dart';
+import 'package:tahfeez_ai/features/reader/domain/reader_layout_item.dart';
+import 'package:tahfeez_ai/quran/application/quran_script_code.dart';
 import 'package:tahfeez_ai/quran/data/import/quran_dataset_importer.dart';
 import 'package:tahfeez_ai/quran/data/quran_database.dart';
 import 'package:tahfeez_ai/quran/domain/models/quran_location.dart';
@@ -21,9 +22,9 @@ void main() {
       overrides: [
         quranDatabaseProvider.overrideWith((ref) => db),
         // The synthetic fixture uses its own script code, not the
-        // production default -- see `readerScriptCodeProvider`'s doc
+        // production default -- see `quranScriptCodeProvider`'s doc
         // comment for why this must be overridden rather than assumed.
-        readerScriptCodeProvider.overrideWith((ref) => testScriptCode),
+        quranScriptCodeProvider.overrideWith((ref) => testScriptCode),
       ],
     );
   });

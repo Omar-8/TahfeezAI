@@ -62,11 +62,11 @@ lib/
     platform/                   PlatformCapabilities — the one place platform checks live.
     ui/                         Small UI helpers shared by more than one feature (e.g. showComingSoon).
   quran/domain/                 QuranRepository, TranslationRepository, TafsirRepository, SearchRepository, QuranLocation.
-  quran/application/            Quran-domain concerns shared by more than one feature (e.g. dataset-installed status, recent location).
+  quran/application/            Quran-domain concerns shared by more than one feature (dataset-installed status, recent location, script code, chapter localization).
   user_data/domain/             UserDataRepository (bookmarks, reading history).
   memorization/domain/          MemorizationRepository.
   ai/domain/                    RecitationRecognizer, RecitationContext, RecitationEvent (interfaces only).
-  features/                     Feature-area presentation code (home, quran, search, reader, ...).
+  features/                     Feature-area presentation code (home, quran, search, reader, mushaf, ...).
 ```
 
 This refines the milestone prompt's suggested tree in one deliberate way: `UserDataRepository`,
@@ -709,6 +709,119 @@ reuses §11c's `RecentQuranLocationController` rather than introducing a second,
 persisted value — the Reader records into it once a session's content loads, exactly like the
 Quran index's "Jump back in" chip does, since both are the same underlying concept.
 
+## 11e. Accurate Mushaf Renderer (Milestone 7)
+
+### A pure-Dart layout engine, injected with a measurer
+
+`lib/features/mushaf/domain/mushaf_page_layout_engine.dart`'s `MushafPageLayoutEngine` is the
+milestone's required "UI-independent `MushafPageLayoutEngine`": it depends only on an abstract
+`MushafWordMeasurer` (`measure(text, fontSize) → width`), not on Flutter's `TextPainter` directly,
+so the scaling/justification math is unit-testable with a fake, deterministic measurer
+(`test/features/mushaf/domain/mushaf_page_layout_engine_test.dart`) with no widget pump or real
+font shaping involved. The real measurer
+(`lib/features/mushaf/presentation/text_painter_word_measurer.dart`, wrapping `TextPainter`) and
+the engine instance that uses it
+(`lib/features/mushaf/presentation/mushaf_layout_providers.dart`) live in `presentation/`, not
+`application/` — `TextPainter` is a rendering concern, and wiring it to the pure engine must sit
+on the presentation side of the `domain → application → presentation` dependency direction (§1),
+never the reverse.
+
+Per line, the engine: measures every word at a base font size, computes a scale (clamped to
+`[minScale, maxScale]`) so the line's natural width roughly matches the available width, re-measures
+at the resulting font size, then either justifies (distributes remaining space as inter-word
+spacing, itself clamped so a very short line doesn't stretch into absurd gaps) or — for a
+`isCentered` line (a Bismillah, a chapter heading, or a short final line of a chapter, per
+`docs/reference/05_MUSHAF_SPEC.md` §2's convention) — leaves the line at its natural scaled width
+for the renderer to center. The result (`MushafLineLayout`) always has `lineWidth <=
+availableWidth` — the concrete "prevent clipping" guarantee — and every word's placement is
+computed once as an explicit `(x, width)` pair, never left to a text layout's own line-breaking,
+which is what makes "prevent accidental wrap" true by construction rather than by convention.
+
+### Rendering: no wrapping widget, ever
+
+`lib/features/mushaf/presentation/font_mushaf_line_renderer.dart`'s `FontMushafLineRenderer` paints
+each word's placement as its own positioned `TextPainter` call inside one `CustomPainter` — never a
+`Text`/`RichText` widget wrapping a whole line's words — the literal form of this milestone's "do
+not render a page by placing all Quran text into one wrapping widget" requirement. Word hit testing
+reuses the exact same placement geometry the painter draws from (a `GestureDetector.onTapUp` maps a
+local tap position back to the placement whose `[x, x+width]` range contains it), so a tap always
+maps to a real `(ayahId, wordIndex)` pair — the "Ayah/word mapping" this milestone requires for
+future WBW (8), playback highlighting (12), and memorization overlays (17).
+
+### The future atlas boundary
+
+`lib/features/mushaf/presentation/mushaf_line_renderer.dart`'s `MushafLineRenderer` is the
+milestone's required "replaceable interface for a future glyph-atlas renderer": `FontMushafLineRenderer`
+is its only implementation today, selected via `mushafLineRendererProvider`
+(`mushaf_layout_providers.dart`). Milestone 7B's optional atlas renderer is meant to be a second
+implementation swapped in behind that same provider, with no change to `MushafPageView` or the
+layout engine.
+
+### Batched data loading
+
+`QuranRepository.getWordsForPage` (added this milestone, alongside `getWordsForLine` from
+Milestone 2) loads every word for every line of one page in a small, fixed number of queries —
+never one query per line (~5-15 for a typical page) — mirroring the exact "batch, don't N+1"
+discipline §4a established for verse ranges. `lib/features/mushaf/application/mushaf_page_providers.dart`'s
+`mushafPageDataProvider` calls it once per page and slices the result per line in memory (the same
+ayah-id/word-index boundary trimming `getWordsForLine` does internally for one line), rather than
+querying per line itself.
+
+### Reader appearance, independent of the application theme
+
+`lib/features/mushaf/domain/mushaf_appearance.dart`'s `MushafAppearance` (Light/Warm/Sepia/Dark/
+Black, per `docs/DESIGN_DIRECTION.md`'s "Reader themes") carries its own
+`MushafAppearanceColors` — `MushafPageView` never reads `Theme.of(context)` for page background/
+text color, per this milestone's explicit "do not let application card styling leak into the
+Mushaf page" requirement. Persisted via `MushafAppearanceController`, the same `BrowserStorage`-backed
+pattern as `ThemeModeController` (§11a) and the Reader's own preference controllers (§11d).
+
+### Device modes and a real mode transition
+
+`lib/features/mushaf/presentation/mushaf_reader_screen.dart`'s `_MushafPager` switches between a
+single-page `PageView` (phone, or any portrait viewport) and a two-page spread (tablet-landscape or
+a wide desktop viewport, lower-numbered page on the right per RTL book convention) based on
+`TahfeezBreakpoint` and orientation. It intentionally does **not** try to preserve one
+`PageController`'s position across a live switch between these two layouts (which use different
+index-to-page-number mappings) — switching resets to the requested initial page instead of
+remapping an in-flight scroll position. This is a deliberate, documented scope limitation, not an
+oversight (see §18 below).
+
+The Reader's `ReaderModeSwitch` (§11d) now has a genuinely working Mushaf segment: tapping it
+resolves the topmost currently-loaded verse to a Mushaf page (`getPageForAyah`) and navigates
+there — the same intent as the reference's `handleModeTransition` (carrying the reading position
+across a mode change), independently implemented. `QuranLocation.page(...)` now opens the real
+`MushafReaderScreen` everywhere it's produced (the Quran index's Page tab, this mode switch, any
+future deep link), superseding the `QuranLocationStubScreen` placeholder from Milestone 5, which is
+now deleted (nothing routes to it any more).
+
+### A fourth relocation to `quran/application`
+
+Two more concerns moved to the shared `quran/application` location this milestone, continuing the
+pattern §11c/§11d established: the "default script code" constant/provider (previously duplicated
+independently as `defaultQuranScriptCode` in the Quran index and `defaultReaderScriptCode` in the
+Reader — consolidated into `quran/application/quran_script_code.dart`'s `quranScriptCodeProvider`
+once the Mushaf renderer needed the identical concept a third time), and per-chapter localization
+lookup (previously `readerChapterLocalizationProvider` in the Reader — moved to
+`quran/application/quran_chapter_localization.dart`'s `chapterLocalizationProvider` once the Mushaf
+renderer's chapter-header lines needed it too).
+
+### Testing
+
+`test/features/mushaf/mushaf_test_fixtures.dart` is a second, richer synthetic fixture (five
+pages, distinct from `test/quran/quran_test_fixtures.dart`'s single-page one) modeling exactly this
+milestone's five named representative-page scenarios: an opening chapter, the beginning of a
+longer chapter, a plain mid-chapter page, a page spanning a chapter transition, and a final page
+ending in a short centered line. Each is covered by layout-invariant tests
+(`mushaf_pages_layout_test.dart` — expected line count/structure, no overflow, deterministic
+placements, correct centering) rather than five separate pixel-golden images: with only synthetic
+filler words standing in for real Quran text and no real script/font chosen yet, five pixel goldens
+would mostly re-test the same rendering mechanism five times without adding real Mushaf-fidelity
+coverage. One genuine pixel `matchesGoldenFile` test
+(`mushaf_page_view_golden_test.dart`) still exists, locking in that the `CustomPainter`-based
+renderer produces stable, deterministic output — the "golden test" infrastructure itself, proven
+working, ready to gain real fidelity value once a real dataset and font exist.
+
 ## 12. What Milestone 1 deliberately did not do
 
 - No feature screens (Home, Reader, Search, Settings, ...) — only the one foundation-proof
@@ -811,3 +924,33 @@ Quran index's "Jump back in" chip does, since both are the same underlying conce
   deferred, consistent with Milestone 3/4's own deferrals (§14, §15).
 - No real Quran dataset import — same gap as every milestone since 2; every reading session in the
   shipped app renders its honest "unavailable resource" empty state today.
+
+## 18. What Milestone 7 deliberately did not do
+
+- No glyph-atlas rendering — `MushafLineRenderer` defines the replaceable boundary
+  (`FontMushafLineRenderer` is the only implementation); the atlas renderer itself is the explicitly
+  optional, explicitly later Milestone 7B, which this milestone's spec says to attempt only once
+  "the regular Mushaf renderer is already correct and stable."
+- No real Quran/Mushaf font or real Bismillah text — same gap as recorded for Milestone 6 (§17);
+  `quranTextStyle()`/`MushafPageView`'s Bismillah marker still resolve to platform defaults and a
+  textless divider respectively, both pending a real dataset and font (Milestone 7B /
+  `docs/DATA_RESOURCE_REQUIREMENTS.md` §5).
+- No script/Mushaf-edition selection UI — `quranScriptCodeProvider`'s placeholder default (§11e)
+  is still the one value every Mushaf/Reader session resolves against, pending Settings (Milestone
+  14).
+- No live-position preservation when switching between single-page and two-page-spread layouts
+  (e.g. on device rotation) — `_MushafPager` resets to the requested initial page instead of
+  remapping an in-flight `PageController` position across two different index schemes; a deliberate
+  scope trim (§11e), not an oversight.
+- No five-scenario pixel-golden suite — the five representative pages this milestone names are
+  covered as layout-invariant tests instead (§11e); one pixel `matchesGoldenFile` test proves the
+  golden-test mechanism itself works.
+- No word-by-word tooltip/translation content on tap — tapping a Mushaf word shows only its raw
+  ayah/word reference; real WBW content is Milestone 8's job, which reuses the same tap-to-placement
+  hit-testing this milestone builds.
+- No audio/memorization highlighting on the Mushaf page — the same `onWordTap`/placement-based seam
+  Milestone 8 will use is also what Milestones 12 (playback highlighting) and 17 (memorization
+  overlays) are meant to reuse, per `MushafLineRenderer`'s doc comment; none of that wiring exists
+  yet.
+- No real Quran dataset import — same gap as every milestone since 2; the shipped app's Mushaf
+  pages render their honest "unavailable resource" state until a real dataset exists.

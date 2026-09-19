@@ -1,33 +1,14 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../quran/application/quran_script_code.dart';
 import '../../../quran/domain/models/navigation_models.dart';
 import '../../../quran/domain/models/quran_location.dart';
-import '../../../quran/domain/models/surah_models.dart';
 import '../../../quran/domain/repositories/quran_repository.dart';
 import '../../../quran/quran_providers.dart';
 import '../domain/reader_layout_item.dart';
 import 'reader_preferences_controller.dart';
 
 part 'reader_session_controller.g.dart';
-
-/// The script every reading session renders words in.
-///
-/// A placeholder default, exactly like
-/// `lib/features/quran/application/quran_index_providers.dart`'s
-/// `defaultQuranScriptCode` — no script-selection preference exists yet
-/// (Settings/Localization is Milestone 14).
-const defaultReaderScriptCode = 'uthmani';
-
-/// A provider (rather than [ReaderSession] reading [defaultReaderScriptCode]
-/// directly) so tests can override which script a reading session loads —
-/// necessary because [QuranRepository.getVerseRangeWithWords] returns zero
-/// verses outright for a script code that matches no installed
-/// `QuranScript` row (not "verses with empty words"), so a fixture using a
-/// different script code than the production default would otherwise make
-/// every reader test see an empty chapter regardless of what data actually
-/// exists.
-@riverpod
-String readerScriptCode(Ref ref) => defaultReaderScriptCode;
 
 /// The immutable content plus the reader's own transient UI state for one
 /// reading session — selection, the verse to scroll to once the first
@@ -93,7 +74,7 @@ class ReaderSession extends _$ReaderSession {
   @override
   Future<ReaderSessionState> build(QuranLocation location) async {
     final repository = ref.watch(quranRepositoryProvider);
-    _scriptCode = ref.watch(readerScriptCodeProvider);
+    _scriptCode = ref.watch(quranScriptCodeProvider);
 
     final items = <ReaderLayoutItem>[];
     int? scrollTarget;
@@ -314,18 +295,4 @@ class ReaderSession extends _$ReaderSession {
     if (current == null) return;
     state = AsyncData(current.copyWith(selectedAyahIds: const {}));
   }
-}
-
-/// The chapter's localization, for [ReaderChapterInfoItem]'s card — loaded
-/// on demand per chapter shown (small, fixed number of chapters per
-/// session) rather than batched, since the reader's chapter-info cards
-/// need at most a handful of lookups even for a full Juz/Hizb session.
-@riverpod
-Future<SurahLocalization?> readerChapterLocalization(
-  Ref ref,
-  int surahNo, {
-  required String languageCode,
-}) {
-  final repository = ref.watch(quranRepositoryProvider);
-  return repository.getSurahLocalization(surahNo, languageCode: languageCode);
 }

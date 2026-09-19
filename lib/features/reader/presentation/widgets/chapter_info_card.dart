@@ -4,8 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/localization/locale_controller.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/components/components.dart';
+import '../../../../quran/application/quran_chapter_localization.dart';
 import '../../../../quran/domain/models/surah_models.dart';
-import '../../application/reader_session_controller.dart';
 
 /// `ReaderChapterInfoItem`'s card: chapter name/meaning, revelation place,
 /// ayah count — `docs/reference/04_READER_SPEC.md` §13's `ChapterInfo`,
@@ -20,10 +20,7 @@ class ChapterInfoCard extends ConsumerWidget {
     final languageCode =
         ref.watch(localeControllerProvider)?.languageCode ?? 'en';
     final localization = ref.watch(
-      readerChapterLocalizationProvider(
-        surah.surahNo,
-        languageCode: languageCode,
-      ),
+      chapterLocalizationProvider(surah.surahNo, languageCode: languageCode),
     );
     final scheme = Theme.of(context).colorScheme;
 

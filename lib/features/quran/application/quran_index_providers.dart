@@ -1,22 +1,13 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/localization/locale_controller.dart';
+import '../../../quran/application/quran_script_code.dart';
 import '../../../quran/domain/models/mushaf_models.dart';
 import '../../../quran/domain/models/navigation_models.dart';
 import '../../../quran/domain/models/surah_models.dart';
 import '../../../quran/quran_providers.dart';
 
 part 'quran_index_providers.g.dart';
-
-/// Placeholder default script code for [defaultMushafProvider]'s lookup.
-///
-/// No script-selection preference exists yet (Settings/Localization is
-/// Milestone 14) — this is the one hardcoded value the Page navigator tab
-/// depends on until a real user preference replaces it. Harmless today
-/// regardless of its exact value, since the live app's Quran dataset is
-/// empty (`docs/ARCHITECTURE.md` §11b) and every `QuranScript` lookup
-/// resolves to nothing either way.
-const defaultQuranScriptCode = 'uthmani';
 
 /// One chapter enriched with its Arabic and current-UI-language localized
 /// names, for the Surah index tab. Built from two batched
@@ -107,11 +98,12 @@ List<IndexedNavigationUnit> _groupByUnit(List<NavigationRange> ranges) {
 }
 
 /// The Mushaf the Page navigator tab jumps within, resolved from
-/// [defaultQuranScriptCode]. `null` means no matching Mushaf is installed
+/// [quranScriptCodeProvider]. `null` means no matching Mushaf is installed
 /// (the "unavailable resource" state the Page tab must render honestly —
 /// true for every install today, since no dataset import path exists yet).
 @riverpod
 Future<Mushaf?> defaultMushaf(Ref ref) async {
   final repository = ref.watch(quranRepositoryProvider);
-  return repository.getMushaf(scriptCode: defaultQuranScriptCode);
+  final scriptCode = ref.watch(quranScriptCodeProvider);
+  return repository.getMushaf(scriptCode: scriptCode);
 }

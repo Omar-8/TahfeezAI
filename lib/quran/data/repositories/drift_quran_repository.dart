@@ -304,6 +304,56 @@ class DriftQuranRepository implements QuranRepository {
   }
 
   @override
+  Future<List<AyahWord>> getWordsForPage({
+    required int mushafId,
+    required int pageNumber,
+    required String scriptCode,
+  }) async {
+    final lines = await getPageLines(
+      mushafId: mushafId,
+      pageNumber: pageNumber,
+    );
+
+    int? minAyahId;
+    int? maxAyahId;
+    for (final line in lines) {
+      final start = line.startAyahId;
+      final end = line.endAyahId;
+      if (start == null || end == null) continue;
+      minAyahId = minAyahId == null
+          ? start
+          : (start < minAyahId ? start : minAyahId);
+      maxAyahId = maxAyahId == null ? end : (end > maxAyahId ? end : maxAyahId);
+    }
+    if (minAyahId == null || maxAyahId == null) return const [];
+    final rangeStart = minAyahId;
+    final rangeEnd = maxAyahId;
+
+    final script = await _getScriptRowByCode(scriptCode);
+    if (script == null) return const [];
+
+    final ayahIds =
+        (await (_db.select(
+              _db.ayahs,
+            )..where((a) => a.id.isBetweenValues(rangeStart, rangeEnd))).get())
+            .map((a) => a.id)
+            .toSet();
+
+    final wordRows =
+        await (_db.select(_db.ayahWords)
+              ..where(
+                (w) => w.ayahId.isIn(ayahIds) & w.scriptId.equals(script.id),
+              )
+              ..orderBy([
+                (w) => OrderingTerm(expression: w.ayahId),
+                (w) => OrderingTerm(expression: w.wordIndex),
+              ]))
+            .get();
+
+    return wordRows.map((r) => r.toDomain()).toList();
+  }
+
+  @override
   Future<int?> getPageForAyah({
     required int mushafId,
     required int ayahId,

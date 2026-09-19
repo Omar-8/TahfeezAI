@@ -188,6 +188,40 @@ void main() {
     test('getPageForAyah finds the page containing a given ayah', () async {
       expect(await repo.getPageForAyah(mushafId: 1, ayahId: 1005), 1);
     });
+
+    test('getWordsForPage returns every word for every line on the page in one batch', () async {
+      final words = await repo.getWordsForPage(
+        mushafId: 1,
+        pageNumber: 1,
+        scriptCode: testScriptCode,
+      );
+
+      // Line 1 (surahHeader) contributes no words; line 2 spans ayahs
+      // 1001-1004 (2 words each = 8); line 3 spans ayahs 1005-1007 (2
+      // words each = 6). 8 + 6 = 14.
+      expect(words, hasLength(14));
+      expect(words.map((w) => w.ayahId).toSet(), {
+        1001,
+        1002,
+        1003,
+        1004,
+        1005,
+        1006,
+        1007,
+      });
+    });
+
+    test(
+      'getWordsForPage returns empty for an unrecognized script code',
+      () async {
+        final words = await repo.getWordsForPage(
+          mushafId: 1,
+          pageNumber: 1,
+          scriptCode: 'not-a-real-script',
+        );
+        expect(words, isEmpty);
+      },
+    );
   });
 
   group('navigation', () {

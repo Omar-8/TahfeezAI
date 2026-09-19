@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/routing/quran_location_routing.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/components/components.dart';
+import '../../../core/ui/coming_soon.dart';
+import '../../../quran/application/quran_script_code.dart';
 import '../../../quran/application/recent_quran_location.dart';
 import '../../../quran/domain/models/quran_location.dart';
+import '../../../quran/quran_providers.dart';
 import '../application/reader_preferences_controller.dart';
 import '../application/reader_session_controller.dart';
 import '../domain/reader_layout_item.dart';
@@ -74,6 +78,34 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
   GlobalKey _keyFor(int ayahId) =>
       _verseKeys.putIfAbsent(ayahId, () => GlobalKey());
 
+  /// A real position-preserving transition into the Mushaf renderer
+  /// (Milestone 7): resolves the topmost currently-loaded verse to a
+  /// Mushaf page and navigates there — the same intent as the reference's
+  /// `handleModeTransition`, independently implemented.
+  Future<void> _switchToMushaf() async {
+    final session = ref.read(readerSessionProvider(widget.location)).value;
+    final verses = session?.items.whereType<ReaderVerseItem>();
+    if (verses == null || verses.isEmpty) {
+      showComingSoon(context);
+      return;
+    }
+
+    final repository = ref.read(quranRepositoryProvider);
+    final scriptCode = ref.read(quranScriptCodeProvider);
+    final mushaf = await repository.getMushaf(scriptCode: scriptCode);
+    if (mushaf == null) {
+      if (mounted) showComingSoon(context);
+      return;
+    }
+
+    final ayahId = verses.first.ayah.ayah.id;
+    final pageNumber =
+        await repository.getPageForAyah(mushafId: mushaf.id, ayahId: ayahId) ??
+        1;
+    if (!mounted) return;
+    goToQuranLocation(context, QuranLocation.page(mushaf.id, pageNumber));
+  }
+
   void _maybeScrollTo(int? ayahId) {
     if (ayahId == null) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -117,7 +149,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
       appBar: AppBar(
         title: Text(_titleFor(widget.location)),
         actions: [
-          ReaderModeSwitch(mode: readerMode),
+          ReaderModeSwitch(mode: readerMode, onSwitchToMushaf: _switchToMushaf),
           IconButton(
             icon: const Icon(Icons.tune),
             tooltip: 'Reader options',

@@ -97,6 +97,21 @@ abstract class QuranRepository {
     required String scriptCode,
   });
 
+  /// Every word for every line of one Mushaf page, in a small, fixed
+  /// number of queries regardless of the page's line count — the batch
+  /// counterpart to [getWordsForLine], for the Mushaf renderer (Milestone
+  /// 7), which needs a whole page's words at once and must not query once
+  /// per line (~15 queries for a standard 15-line page). Returned in
+  /// (ayahId, wordIndex) order, unfiltered by any single line's word-index
+  /// bounds — callers slice per line themselves using each
+  /// [MushafLine.startWordIndex]/[MushafLine.endWordIndex], the same
+  /// trimming [getWordsForLine] does internally for one line.
+  Future<List<AyahWord>> getWordsForPage({
+    required int mushafId,
+    required int pageNumber,
+    required String scriptCode,
+  });
+
   /// The page number containing [ayahId] in [mushafId]'s pagination, or
   /// `null` if the ayah/mushaf combination is unknown.
   Future<int?> getPageForAyah({required int mushafId, required int ayahId});
