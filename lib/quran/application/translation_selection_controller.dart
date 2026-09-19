@@ -1,0 +1,56 @@
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+import '../../core/storage/storage_providers.dart';
+
+part 'translation_selection_controller.g.dart';
+
+const _activeTranslationSlugsPrefKey = 'translation.active_slugs';
+
+/// Which installed translations are active in the reader right now, and in
+/// what order their blocks stack under each verse
+/// (`docs/reference/13_TRANSLATION_TAFSIR_SPEC.md` §2's "reader stacks each
+/// selected translation's text ... in the order they were selected").
+/// Independent of which translations are merely *installed*
+/// (`TranslationRepository.getInstalledTranslations`) — the same
+/// installed-vs-active separation `WbwSelectedPackController`
+/// (`lib/wbw/application/wbw_preferences_controller.dart`) establishes for
+/// word-by-word, generalized here to a multi-select, ordered list.
+///
+/// Persisted as a comma-joined slug list, like every other simple
+/// `BrowserStorage`-backed preference in this codebase.
+@Riverpod(keepAlive: true)
+class TranslationSelectionController extends _$TranslationSelectionController {
+  @override
+  List<String> build() {
+    _restore();
+    return const [];
+  }
+
+  Future<void> _restore() async {
+    final stored = await ref
+        .read(browserStorageProvider)
+        .getString(_activeTranslationSlugsPrefKey);
+    if (stored == null) return;
+    state = stored.isEmpty ? const [] : stored.split(',');
+  }
+
+  Future<void> _persist(List<String> slugs) async {
+    state = slugs;
+    await ref
+        .read(browserStorageProvider)
+        .setString(_activeTranslationSlugsPrefKey, slugs.join(','));
+  }
+
+  Future<void> toggle(String slug) {
+    return state.contains(slug)
+        ? _persist(state.where((s) => s != slug).toList())
+        : _persist([...state, slug]);
+  }
+
+  Future<void> reorder(int oldIndex, int newIndex) {
+    final list = [...state];
+    final item = list.removeAt(oldIndex);
+    list.insert(newIndex, item);
+    return _persist(list);
+  }
+}

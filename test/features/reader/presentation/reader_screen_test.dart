@@ -8,8 +8,10 @@ import 'package:tahfeez_ai/features/reader/presentation/reader_screen.dart';
 import 'package:tahfeez_ai/quran/application/quran_script_code.dart';
 import 'package:tahfeez_ai/quran/data/import/quran_dataset_importer.dart';
 import 'package:tahfeez_ai/quran/data/quran_database.dart';
+import 'package:tahfeez_ai/quran/data/translation_database.dart';
 import 'package:tahfeez_ai/quran/domain/models/quran_location.dart';
 import 'package:tahfeez_ai/quran/quran_providers.dart';
+import 'package:tahfeez_ai/quran/translation_providers.dart';
 
 import '../../../quran/quran_test_fixtures.dart';
 
@@ -22,6 +24,14 @@ void main() {
       overrides: [
         quranDatabaseProvider.overrideWith((ref) => db),
         quranScriptCodeProvider.overrideWith((ref) => testScriptCode),
+        // `TranslationLibraryController` (opened via "Reader options" ->
+        // "Translations") always queries `translationRepositoryProvider`
+        // unconditionally, unlike `ReaderSession`'s active-slugs-gated
+        // lookup — so this must never fall through to the real
+        // drift_flutter connection in tests either.
+        translationDatabaseProvider.overrideWith(
+          (ref) => TranslationDatabase(NativeDatabase.memory()),
+        ),
       ],
       child: MaterialApp(
         supportedLocales: const [Locale('en'), Locale('ar')],
@@ -125,17 +135,17 @@ void main() {
     });
 
     testWidgets(
-      'the reader options sheet select-translations row shows coming soon',
+      'the reader options sheet Translations row opens the real translations sheet',
       (tester) async {
         await tester.pumpWidget(wrap(db));
         await tester.pumpAndSettle();
 
         await tester.tap(find.byTooltip('Reader options'));
         await tester.pumpAndSettle();
-        await tester.tap(find.text('Select translations'));
+        await tester.tap(find.text('Translations'));
         await tester.pumpAndSettle();
 
-        expect(find.text('Coming soon'), findsOneWidget);
+        expect(find.text('No translations available yet.'), findsOneWidget);
       },
     );
 

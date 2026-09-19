@@ -8,19 +8,28 @@ import 'package:tahfeez_ai/quran/data/import/quran_dataset_importer.dart';
 import 'package:tahfeez_ai/quran/data/quran_database.dart';
 import 'package:tahfeez_ai/quran/domain/models/quran_location.dart';
 import 'package:tahfeez_ai/quran/quran_providers.dart';
+import 'package:tahfeez_ai/quran/data/translation_database.dart';
+import 'package:tahfeez_ai/quran/translation_providers.dart';
 
 import '../../../quran/quran_test_fixtures.dart';
 
 void main() {
   late QuranDatabase db;
+  late TranslationDatabase translationDb;
   late ProviderContainer container;
 
   setUp(() async {
     db = QuranDatabase(NativeDatabase.memory());
     await const QuranDatasetImporter().import(db, buildValidSyntheticPayload());
+    translationDb = TranslationDatabase(NativeDatabase.memory());
     container = ProviderContainer(
       overrides: [
         quranDatabaseProvider.overrideWith((ref) => db),
+        // ReaderSession always watches `translationRepositoryProvider`
+        // (even with no active translations selected), so it must never
+        // fall through to the real drift_flutter connection in tests —
+        // the same reasoning `quranDatabaseProvider`'s override exists for.
+        translationDatabaseProvider.overrideWith((ref) => translationDb),
         // The synthetic fixture uses its own script code, not the
         // production default -- see `quranScriptCodeProvider`'s doc
         // comment for why this must be overridden rather than assumed.
@@ -29,7 +38,10 @@ void main() {
     );
   });
 
-  tearDown(() => container.dispose());
+  tearDown(() {
+    container.dispose();
+    translationDb.close();
+  });
 
   group('full Surah', () {
     test('surah 1 (skips Bismillah): chapter info + all 7 verses', () async {

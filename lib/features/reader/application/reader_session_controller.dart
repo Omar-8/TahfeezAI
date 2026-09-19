@@ -1,10 +1,14 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../quran/application/quran_script_code.dart';
+import '../../../quran/application/translation_selection_controller.dart';
 import '../../../quran/domain/models/navigation_models.dart';
 import '../../../quran/domain/models/quran_location.dart';
+import '../../../quran/domain/models/translation_models.dart';
 import '../../../quran/domain/repositories/quran_repository.dart';
+import '../../../quran/domain/repositories/translation_repository.dart';
 import '../../../quran/quran_providers.dart';
+import '../../../quran/translation_providers.dart';
 import '../domain/reader_layout_item.dart';
 import 'reader_preferences_controller.dart';
 
@@ -20,6 +24,8 @@ class ReaderSessionState {
     required this.canLoadMore,
     this.scrollToAyahId,
     this.selectedAyahIds = const {},
+    this.translationsByAyahId = const {},
+    this.translationBooks = const {},
   });
 
   final List<ReaderLayoutItem> items;
@@ -33,12 +39,24 @@ class ReaderSessionState {
 
   final Set<int> selectedAyahIds;
 
+  /// Every active translation's text for every loaded verse, keyed by
+  /// ayahId then slug — batch-loaded per chapter segment alongside
+  /// [items] (Milestone 9), never fetched per verse by a widget.
+  final Map<int, Map<String, TranslationVerseText>> translationsByAyahId;
+
+  /// Metadata (author, display name) for every currently active,
+  /// installed translation — resolved once per session build/extension so
+  /// `VerseBlock` never has to look up a book's author itself.
+  final Map<String, TranslationBook> translationBooks;
+
   ReaderSessionState copyWith({
     List<ReaderLayoutItem>? items,
     bool? canLoadMore,
     int? scrollToAyahId,
     bool clearScrollTarget = false,
     Set<int>? selectedAyahIds,
+    Map<int, Map<String, TranslationVerseText>>? translationsByAyahId,
+    Map<String, TranslationBook>? translationBooks,
   }) {
     return ReaderSessionState(
       items: items ?? this.items,
@@ -47,6 +65,8 @@ class ReaderSessionState {
           ? null
           : (scrollToAyahId ?? this.scrollToAyahId),
       selectedAyahIds: selectedAyahIds ?? this.selectedAyahIds,
+      translationsByAyahId: translationsByAyahId ?? this.translationsByAyahId,
+      translationBooks: translationBooks ?? this.translationBooks,
     );
   }
 }
@@ -62,28 +82,35 @@ class ReaderSessionState {
 /// exhausted — `loadMore()` — rather than a separate mode, per this
 /// milestone's [ContinuousScrollingPreferenceController] doc comment.
 ///
-/// Every load goes through [QuranRepository.getVerseRangeWithWords], which
-/// batches a whole verse range into a small, fixed number of queries
-/// (`docs/ARCHITECTURE.md` §4a) — this controller never queries per verse
-/// or per word.
+/// Every load goes through [QuranRepository.getVerseRangeWithWords] and
+/// [TranslationRepository.getVerseRangeText], which batch a whole verse
+/// range into a small, fixed number of queries (`docs/ARCHITECTURE.md`
+/// §4a) — this controller never queries per verse or per word, for
+/// canonical text or for translations.
 @riverpod
 class ReaderSession extends _$ReaderSession {
   int _nextSurahNo = 1;
   late String _scriptCode;
+  late List<String> _activeTranslationSlugs;
 
   @override
   Future<ReaderSessionState> build(QuranLocation location) async {
     final repository = ref.watch(quranRepositoryProvider);
+    final translationRepository = ref.watch(translationRepositoryProvider);
     _scriptCode = ref.watch(quranScriptCodeProvider);
+    _activeTranslationSlugs = ref.watch(translationSelectionControllerProvider);
 
     final items = <ReaderLayoutItem>[];
+    final translationsByAyahId = <int, Map<String, TranslationVerseText>>{};
     int? scrollTarget;
 
     switch (location) {
       case QuranLocationSurah(:final surahNo):
         scrollTarget = await _appendChapter(
           repository,
+          translationRepository,
           items,
+          translationsByAyahId,
           surahNo: surahNo,
           isSessionStart: true,
         );
@@ -92,7 +119,9 @@ class ReaderSession extends _$ReaderSession {
       case QuranLocationAyah(:final chapterNo, :final verseNo):
         await _appendChapter(
           repository,
+          translationRepository,
           items,
+          translationsByAyahId,
           surahNo: chapterNo,
           isSessionStart: true,
         );
@@ -109,7 +138,9 @@ class ReaderSession extends _$ReaderSession {
           items.add(ReaderLayoutItem.chapterInfo(surah: surah));
           await _appendVerseRange(
             repository,
+            translationRepository,
             items,
+            translationsByAyahId,
             chapterNo: chapterNo,
             fromVerseNo: fromVerseNo,
             toVerseNo: toVerseNo,
@@ -121,14 +152,26 @@ class ReaderSession extends _$ReaderSession {
       case QuranLocationJuz(:final juzNo):
         final juz = await repository.getJuz(juzNo);
         if (juz != null) {
-          scrollTarget = await _appendRanges(repository, items, juz.ranges);
+          scrollTarget = await _appendRanges(
+            repository,
+            translationRepository,
+            items,
+            translationsByAyahId,
+            juz.ranges,
+          );
           _nextSurahNo = juz.ranges.isEmpty ? 1 : juz.ranges.last.surahNo + 1;
         }
 
       case QuranLocationHizb(:final hizbNo):
         final hizb = await repository.getHizb(hizbNo);
         if (hizb != null) {
-          scrollTarget = await _appendRanges(repository, items, hizb.ranges);
+          scrollTarget = await _appendRanges(
+            repository,
+            translationRepository,
+            items,
+            translationsByAyahId,
+            hizb.ranges,
+          );
           _nextSurahNo = hizb.ranges.isEmpty ? 1 : hizb.ranges.last.surahNo + 1;
         }
 
@@ -139,10 +182,18 @@ class ReaderSession extends _$ReaderSession {
         break;
     }
 
+    final translationBooks = <String, TranslationBook>{};
+    for (final slug in _activeTranslationSlugs) {
+      final book = await translationRepository.getInstalledTranslation(slug);
+      if (book != null) translationBooks[slug] = book;
+    }
+
     return ReaderSessionState(
       items: items,
       canLoadMore: _nextSurahNo <= repository.chapterCount,
       scrollToAyahId: scrollTarget,
+      translationsByAyahId: translationsByAyahId,
+      translationBooks: translationBooks,
     );
   }
 
@@ -150,7 +201,9 @@ class ReaderSession extends _$ReaderSession {
   /// full-Surah/Ayah load and continuous-scroll extension share.
   Future<int?> _appendChapter(
     QuranRepository repository,
-    List<ReaderLayoutItem> items, {
+    TranslationRepository translationRepository,
+    List<ReaderLayoutItem> items,
+    Map<int, Map<String, TranslationVerseText>> translationsByAyahId, {
     required int surahNo,
     required bool isSessionStart,
   }) async {
@@ -167,7 +220,9 @@ class ReaderSession extends _$ReaderSession {
     }
     await _appendVerseRange(
       repository,
+      translationRepository,
       items,
+      translationsByAyahId,
       chapterNo: surahNo,
       fromVerseNo: 1,
       toVerseNo: surah.ayahCount,
@@ -179,7 +234,9 @@ class ReaderSession extends _$ReaderSession {
   /// chapter marker (and Bismillah where appropriate) at each boundary.
   Future<int?> _appendRanges(
     QuranRepository repository,
+    TranslationRepository translationRepository,
     List<ReaderLayoutItem> items,
+    Map<int, Map<String, TranslationVerseText>> translationsByAyahId,
     List<NavigationRange> ranges,
   ) async {
     if (ranges.isEmpty) return null;
@@ -199,7 +256,9 @@ class ReaderSession extends _$ReaderSession {
       }
       await _appendVerseRange(
         repository,
+        translationRepository,
         items,
+        translationsByAyahId,
         chapterNo: range.surahNo,
         fromVerseNo: range.startAyahNo,
         toVerseNo: range.endAyahNo,
@@ -209,21 +268,40 @@ class ReaderSession extends _$ReaderSession {
     return scrollTarget;
   }
 
-  /// The one place that actually calls the batched repository method and
+  /// The one place that actually calls the batched repository methods and
   /// inserts Ruku [ReaderSectionMarkerItem]s at Ruku boundaries within the
-  /// loaded range.
+  /// loaded range. Loads canonical words and every active translation's
+  /// text for the same range in the same small number of queries each.
   Future<void> _appendVerseRange(
     QuranRepository repository,
-    List<ReaderLayoutItem> items, {
+    TranslationRepository translationRepository,
+    List<ReaderLayoutItem> items,
+    Map<int, Map<String, TranslationVerseText>> translationsByAyahId, {
     required int chapterNo,
     required int fromVerseNo,
     required int toVerseNo,
   }) async {
-    final verses = await repository.getVerseRangeWithWords((
+    final range = (
       chapterNo: chapterNo,
       fromVerseNo: fromVerseNo,
       toVerseNo: toVerseNo,
-    ), scriptCode: _scriptCode);
+    );
+    final verses = await repository.getVerseRangeWithWords(
+      range,
+      scriptCode: _scriptCode,
+    );
+
+    for (final slug in _activeTranslationSlugs) {
+      final texts = await translationRepository.getVerseRangeText(
+        range,
+        slug: slug,
+      );
+      for (final text in texts) {
+        final ayahId = chapterNo * 1000 + text.verseNo;
+        translationsByAyahId.putIfAbsent(ayahId, () => {})[slug] = text;
+      }
+    }
+
     int? previousRukuNo;
     for (final verse in verses) {
       if (previousRukuNo != null && verse.ayah.rukuNo != previousRukuNo) {
@@ -251,10 +329,17 @@ class ReaderSession extends _$ReaderSession {
 
     try {
       final repository = ref.read(quranRepositoryProvider);
+      final translationRepository = ref.read(translationRepositoryProvider);
       final items = <ReaderLayoutItem>[...current.items];
+      final translationsByAyahId = {
+        for (final entry in current.translationsByAyahId.entries)
+          entry.key: {...entry.value},
+      };
       await _appendChapter(
         repository,
+        translationRepository,
         items,
+        translationsByAyahId,
         surahNo: _nextSurahNo,
         isSessionStart: false,
       );
@@ -265,6 +350,7 @@ class ReaderSession extends _$ReaderSession {
           items: items,
           canLoadMore: _nextSurahNo <= repository.chapterCount,
           clearScrollTarget: true,
+          translationsByAyahId: translationsByAyahId,
         ),
       );
     } finally {

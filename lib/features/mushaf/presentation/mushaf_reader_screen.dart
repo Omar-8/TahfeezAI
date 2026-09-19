@@ -9,6 +9,7 @@ import '../domain/mushaf_appearance.dart';
 import '../domain/mushaf_line_layout.dart';
 import 'mushaf_appearance_sheet.dart';
 import 'mushaf_page_view.dart';
+import 'mushaf_translation_sheet.dart';
 
 /// Tahfeez's Mushaf (paginated, printed-page-style) reader.
 ///
@@ -25,7 +26,7 @@ import 'mushaf_page_view.dart';
 /// to reset cleanly when switching between single-page and two-page-spread
 /// layouts, e.g. on rotation, rather than trying to remap one controller's
 /// index meaning across two different pagination schemes).
-class MushafReaderScreen extends ConsumerWidget {
+class MushafReaderScreen extends ConsumerStatefulWidget {
   const MushafReaderScreen({
     super.key,
     required this.mushafId,
@@ -36,9 +37,16 @@ class MushafReaderScreen extends ConsumerWidget {
   final int initialPageNumber;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MushafReaderScreen> createState() => _MushafReaderScreenState();
+}
+
+class _MushafReaderScreenState extends ConsumerState<MushafReaderScreen> {
+  late int _currentPageNumber = widget.initialPageNumber;
+
+  @override
+  Widget build(BuildContext context) {
     final colors = ref.watch(mushafAppearanceControllerProvider).colors;
-    final mushafAsync = ref.watch(mushafByIdProvider(mushafId));
+    final mushafAsync = ref.watch(mushafByIdProvider(widget.mushafId));
 
     return Scaffold(
       backgroundColor: colors.background,
@@ -47,6 +55,15 @@ class MushafReaderScreen extends ConsumerWidget {
         foregroundColor: colors.text,
         title: const Text('Mushaf'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.translate_outlined),
+            tooltip: 'Translation & tafsir',
+            onPressed: () => showMushafTranslationSheet(
+              context,
+              mushafId: widget.mushafId,
+              pageNumber: _currentPageNumber,
+            ),
+          ),
           IconButton(
             icon: const Icon(Icons.palette_outlined),
             tooltip: 'Appearance',
@@ -62,7 +79,9 @@ class MushafReaderScreen extends ConsumerWidget {
           return _MushafPager(
             mushafId: mushaf.id,
             pageCount: mushaf.pageCount,
-            initialPageNumber: initialPageNumber,
+            initialPageNumber: widget.initialPageNumber,
+            onPageChanged: (pageNumber) =>
+                setState(() => _currentPageNumber = pageNumber),
           );
         },
         loading: () => Center(
@@ -92,11 +111,13 @@ class _MushafPager extends StatefulWidget {
     required this.mushafId,
     required this.pageCount,
     required this.initialPageNumber,
+    required this.onPageChanged,
   });
 
   final int mushafId;
   final int pageCount;
   final int initialPageNumber;
+  final ValueChanged<int> onPageChanged;
 
   @override
   State<_MushafPager> createState() => _MushafPagerState();
@@ -140,6 +161,7 @@ class _MushafPagerState extends State<_MushafPager> {
         controller: _controller,
         reverse: true,
         itemCount: widget.pageCount,
+        onPageChanged: (index) => widget.onPageChanged(index + 1),
         itemBuilder: (context, index) {
           return Center(
             child: ConstrainedBox(
@@ -161,6 +183,7 @@ class _MushafPagerState extends State<_MushafPager> {
       controller: _controller,
       reverse: true,
       itemCount: spreadCount,
+      onPageChanged: (index) => widget.onPageChanged(index * 2 + 1),
       itemBuilder: (context, spreadIndex) {
         final rightPageNumber = spreadIndex * 2 + 1;
         final leftPageNumber = spreadIndex * 2 + 2;

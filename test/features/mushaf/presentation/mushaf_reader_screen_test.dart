@@ -121,5 +121,18 @@ void main() {
 
       expect(find.textContaining('Page 3'), findsOneWidget);
     });
+
+    testWidgets(
+      'the translation icon opens a separate sheet, keeping the page itself unchanged',
+      (tester) async {
+        await tester.pumpWidget(wrap(db));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byTooltip('Translation & tafsir'));
+        await tester.pumpAndSettle();
+
+        expect(find.textContaining('No active translations'), findsOneWidget);
+      },
+    );
   });
 }

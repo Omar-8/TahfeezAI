@@ -62,7 +62,8 @@ lib/
     platform/                   PlatformCapabilities — the one place platform checks live.
     ui/                         Small UI helpers shared by more than one feature (e.g. showComingSoon).
   quran/domain/                 QuranRepository, TranslationRepository, TafsirRepository, SearchRepository, QuranLocation.
-  quran/application/            Quran-domain concerns shared by more than one feature (dataset-installed status, recent location, script code + preference, available scripts, chapter localization).
+  quran/application/            Quran-domain concerns shared by more than one feature (dataset-installed status, recent location, script code + preference, available scripts, chapter localization, translation/tafsir selection + library controllers).
+  quran/presentation/           Translation/tafsir UI shared by more than one feature (Milestone 9): TranslationBlock, quick reference, packs sheets, TafsirReaderScreen.
   wbw/                           Word-by-word: its own domain/data/application/presentation, own database (Milestone 8).
   user_data/domain/             UserDataRepository (bookmarks, reading history).
   memorization/domain/          MemorizationRepository.
@@ -917,6 +918,104 @@ empty/install-to-downloaded flow. `test/quran/data/multi_script_repository_test.
 `test/features/reader/presentation/reader_script_switch_test.dart` cover script-swapping at the
 repository and full-UI layers respectively, per this section's earlier discussion.
 
+## 11g. Translations and Tafsir (Milestone 9)
+
+### A new shared presentation layer: `lib/quran/presentation/`
+
+Milestone 1 already assigned `TranslationRepository`/`TafsirRepository` to `quran/domain/repositories/`
+(§2: "they all describe read access to Quran-adjacent content"). This milestone extends that
+decision one layer further: `lib/quran/presentation/` is a **new** folder holding UI that more than
+one feature needs (`translation_block.dart`, `quick_reference_sheet.dart`, `translation_packs_sheet.dart`,
+`tafsir_packs_sheet.dart`, `tafsir_reader_screen.dart`) — the same "shared-by-more-than-one-feature
+belongs outside any one feature" rule `lib/wbw/presentation/` already established for word-by-word
+(Milestone 8), applied here under `quran/` instead of a new top-level module, since translation/
+tafsir domain models already live under `quran/`. `TafsirReaderScreen` in particular is reached from
+both the verse-by-verse reader's Tafsir action and Mushaf's translation/tafsir sheet, so it could
+never have been feature-local without violating "feature areas do not depend on each other
+directly" (§1).
+
+### Two more resource databases, same shape as WBW's
+
+`lib/quran/data/translation_database.dart` and `lib/quran/data/tafsir_database.dart` are two more
+physically separate `@DriftDatabase`s (per §4's "Resource metadata" row), each schema-only, each
+paired with a `Drift*Repository` that is the only code path allowed to write to it. `TranslationBooks`/
+`TranslationVerses` and `TafsirWorks`/`TafsirVerses` mirror `WbwPacks`/`WbwWords`'s "one metadata
+table + one per-verse-or-word content table" shape; a translation verse's footnotes and cross-references
+are stored as nullable JSON columns (`footnotesJson`/`crossReferencesJson`) rather than further
+tables, since they're small, per-verse, and never queried structurally — a table per footnote would
+add join cost for no real benefit.
+
+### Resource safety made real without a real network
+
+This milestone's explicit "Resource safety" requirement (staged, format-validated, checksum-verified,
+activated atomically, never replacing a working resource with a corrupt download) is implemented as
+a real, tested code path even though no network layer exists yet: `core/downloads/resource_integrity.dart`'s
+`computeResourceChecksum` hashes a payload's canonical fields, and `DriftTranslationRepository`/
+`DriftTafsirRepository`'s `install*` methods verify the computed hash against the resource's declared
+`checksum` metadata *before* the same method's `_db.transaction()` deletes any previously-installed
+data for that resource — a checksum mismatch (`ResourceChecksumMismatchException`) or an unsupported
+`formatVersion` (`ResourceFormatVersionException`) throws before the transaction ever starts, so a
+corrupt payload can never partially or fully replace working installed data. `test/quran/data/repositories/drift_translation_repository_test.dart`'s
+"a failed checksum verification never touches a previously installed book" test proves this directly,
+not just "installing a bad payload throws."
+
+### Reader integration: batched per chapter segment, never per verse
+
+`ReaderSessionState` gained `translationsByAyahId`/`translationBooks`; `ReaderSession` (`reader_session_controller.dart`)
+loads every active translation's text for each chapter segment it already loads canonical words for,
+via `TranslationRepository.getVerseRangeText` — the exact same "batch by range, not by verse"
+discipline `getVerseRangeWithWords` already established (§4a), now applied to a second, independent
+data source in parallel. `VerseBlock` renders one `TranslationBlock` per active translation under the
+Arabic text, each showing footnote markers (`[n]` in the stored text) as individually tappable spans
+opening the footnote's text, and cross-reference chips opening `showQuickReferenceSheet` — a
+lightweight preview of a referenced verse's Arabic text with a "Go to verse" shortcut, independently
+designed rather than a copy of the reference app's `AnnotatedString`/`QuickReference` markup. The
+verse action bar's Tafsir button now opens the real `TafsirReaderScreen` (`core/routing/tafsir_routing.dart`'s
+`openTafsirReader`) instead of "coming soon."
+
+### Mushaf integration: a separate sheet, per this milestone's explicit instruction
+
+`lib/features/mushaf/application/mushaf_page_translations.dart`'s `mushafPageTranslationsProvider`
+derives which ayahs are on the current page for free from the page's own already-loaded word data
+(`MushafPageBundle.wordsByLineNumber`'s `AyahWord.ayahId`s — no extra repository call needed just to
+know which verses are present), then loads each active translation's text for each chapter segment
+on the page in the same batched-by-range shape as the reader. `MushafReaderScreen` gained a
+"Translation & tafsir" AppBar action (and, to support it, was converted from `ConsumerWidget` to
+`ConsumerStatefulWidget` tracking `_currentPageNumber`, updated via `PageView.builder`'s
+`onPageChanged`) that opens `showMushafTranslationSheet` — a page-scoped list of each ayah's active
+translations plus a per-ayah "Tafsir" shortcut, reusing the same `TranslationBlock` the reader stacks
+inline. The printed Mushaf page itself never gains any translation-related decoration, satisfying
+this milestone's explicit "use a separate bottom/side sheet or panel so the printed page remains
+visually clean" instruction literally.
+
+### Resource-row UI reused, not duplicated
+
+`translation_packs_sheet.dart`/`tafsir_packs_sheet.dart` mirror `wbw_packs_sheet.dart`'s shape
+exactly (merge installed + cataloged into `TahfeezResourceRow` states, install/remove actions) —
+this milestone's explicit "do not duplicate the reference settings/resource rows" instruction,
+satisfied by reusing the same Tahfeez component three times rather than three bespoke rows.
+Translations differ only in that a "completed" row toggles multi-select membership
+(`TranslationSelectionController.toggle`) rather than single-select (`TafsirSelectionController.select`,
+matching the reference app's own translations-multi-select/tafsir-single-select asymmetry, §5). Both
+`TranslationCatalog`/`TafsirCatalog` follow `WbwPackCatalog`'s exact "no real implementation until
+Milestone 13; production uses a catalog that honestly reports nothing available" shape.
+
+### Testing
+
+`test/quran/data/repositories/` covers both repositories' checksum/format-version verification,
+install/update/delete lifecycle, and batched range reads. `test/quran/application/` covers both
+library controllers' merge/state-machine logic and both selection controllers' persistence —
+including a documented, deliberately-added `setUp` that clears each controller's `BrowserStorage`
+key before every test, because these `keepAlive` controllers' fire-and-forget `_restore()` reads
+from the same real, process-wide storage every test in a file shares, and can otherwise race with
+and clobber a later test's own synchronous-looking mutations (discovered while writing
+`TranslationSelectionController`'s reorder test, which failed intermittently with a `RangeError`
+until this was fixed — worth remembering for any future `keepAlive`+`BrowserStorage` controller
+test). `test/quran/presentation/` covers `TranslationBlock`'s footnote/cross-reference interaction
+and `TafsirReaderScreen`'s no-tafsir/with-tafsir/previous-next states end-to-end through a real
+`GoRouter`. `test/features/mushaf/presentation/mushaf_translation_sheet_test.dart` covers the
+Mushaf sheet's empty and populated states.
+
 ## 12. What Milestone 1 deliberately did not do
 
 - No feature screens (Home, Reader, Search, Settings, ...) — only the one foundation-proof
@@ -1088,3 +1187,35 @@ repository and full-UI layers respectively, per this section's earlier discussio
 - No real Quran dataset import — same gap as every milestone since 2; without a real dataset
   installed, the shipped app's script picker and word detail sheet render their honest empty/
   unavailable states.
+
+## 20. What Milestone 9 deliberately did not do
+
+- No real translation or tafsir content ships — `TranslationCatalog`/`TafsirCatalog`'s only
+  implementations (`NoTranslationCatalog`/`NoTafsirCatalog`) honestly report nothing available, and
+  every test uses clearly-labeled synthetic fixture data
+  (`test/quran/translation_tafsir_test_fixtures.dart`); per `docs/CLEAN_ROOM_RULES.md`'s licensing
+  rule, no real translation/tafsir edition's redistribution/offline terms have been verified or
+  recorded in `docs/THIRD_PARTY_RESOURCES.md`, so none is bundled.
+- No real network download — same reasoning as Milestone 8's WBW catalog: `install` writes
+  immediately once given a payload rather than actually fetching bytes over time, deferred to the
+  Resource Manager milestone (13).
+- No drag-to-reorder UI for active translations — `TranslationSelectionController.reorder` is a
+  real, tested method or the underlying preference (§11g), but the translations sheet only supports
+  toggling membership today; wiring a drag gesture to it is a deliberate scope trim.
+- No footnote/cross-reference authoring or validation tooling — `[n]`-marker parsing
+  (`TranslationBlock`) trusts installed verse text to use this convention correctly; a malformed or
+  out-of-range marker simply renders as literal text rather than a tappable span, which is
+  acceptable since no real (unverified) content is ever installed to begin with.
+- No `QuickReference` support inside the tafsir reader itself — cross-reference chips only appear
+  in the verse-by-verse reader's translation blocks and the Mushaf translation sheet, not inside
+  tafsir commentary text, since tafsir verse text has no footnote/cross-reference structure in this
+  milestone's data model (only translations do).
+- No multi-tafsir simultaneous display — `TafsirSelectionController` holds exactly one active
+  tafsir id, matching the reference app's own single-active-tafsir behavior
+  (`docs/reference/13_TRANSLATION_TAFSIR_SPEC.md` §5); this is a deliberate design choice, not an
+  oversight (`NEEDS_VERIFICATION` in the reference spec itself notwithstanding).
+- No search integration — translation text is not yet indexed for search (`SearchIndexDatabase`
+  equivalent); that is Milestone 10's job per `docs/ARCHITECTURE.md` §4's database-separation table.
+- No real Quran dataset import — same gap as every milestone since 2; without a real dataset
+  installed, the shipped app's reader/Mushaf/tafsir screens render their honest empty/unavailable
+  states.

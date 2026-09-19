@@ -9,6 +9,7 @@ import '../../features/search/presentation/search_placeholder_screen.dart';
 import '../theme/gallery/component_gallery_screen.dart';
 import 'app_routes.dart';
 import 'quran_location_routing.dart';
+import 'tafsir_routing.dart';
 
 export 'app_routes.dart';
 
@@ -50,6 +51,7 @@ GoRouter appRouter(Ref ref) {
           ),
         ],
       ),
+      ...tafsirRoutes(),
       GoRoute(
         path: AppRoutes.debugFoundation,
         builder: (context, state) => const FoundationDemoScreen(),

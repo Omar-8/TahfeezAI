@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/components/components.dart';
-import '../../../../core/ui/coming_soon.dart';
 import '../../../../quran/application/quran_script_code.dart';
+import '../../../../quran/application/translation_selection_controller.dart';
+import '../../../../quran/presentation/tafsir_packs_sheet.dart';
+import '../../../../quran/presentation/translation_packs_sheet.dart';
 import '../../../../wbw/presentation/wbw_packs_sheet.dart';
 import '../../application/reader_preferences_controller.dart';
 import 'quran_script_sheet.dart';
@@ -11,11 +13,9 @@ import 'quran_script_sheet.dart';
 /// The reader's own options — a lighter-weight, reader-scoped counterpart
 /// to the "reader settings only" gear `docs/reference/04_READER_SPEC.md`
 /// §3 describes, since a full Settings screen doesn't exist yet
-/// (Milestone 14). Everything here is real and working except "select
-/// translations", shown disabled per this milestone's explicit
-/// "intentional disabled states rather than fake behavior" instruction,
-/// since no translation resource exists yet (Milestone 9). "Quran script"
-/// and "Word by word" (Milestone 8) are real, persisted preferences.
+/// (Milestone 14). Everything here is real and working: "Quran script"
+/// and "Word by word" (Milestone 8), and "Translations" (Milestone 9) are
+/// real, persisted preferences/resources.
 void showReaderOptionsSheet(BuildContext context) {
   showTahfeezModalBottomSheet(
     context: context,
@@ -36,6 +36,9 @@ class _ReaderOptionsBody extends ConsumerWidget {
       arabicTextVisiblePreferenceControllerProvider,
     );
     final scriptCode = ref.watch(quranScriptCodeProvider);
+    final activeTranslations = ref.watch(
+      translationSelectionControllerProvider,
+    );
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -56,10 +59,16 @@ class _ReaderOptionsBody extends ConsumerWidget {
               .setVisible(value),
         ),
         ListTile(
-          title: const Text('Select translations'),
-          subtitle: const Text('Coming in a later milestone'),
+          title: const Text('Translations'),
+          subtitle: Text('${activeTranslations.length} selected'),
           trailing: const Icon(Icons.chevron_right),
-          onTap: () => showComingSoon(context),
+          onTap: () => showTranslationPacksSheet(context),
+        ),
+        ListTile(
+          title: const Text('Tafsir'),
+          subtitle: const Text('Language, active work'),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => showTafsirPacksSheet(context),
         ),
         ListTile(
           title: const Text('Quran script'),

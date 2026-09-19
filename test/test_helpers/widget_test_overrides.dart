@@ -2,7 +2,11 @@ import 'package:drift/native.dart';
 import 'package:tahfeez_ai/core/audio/audio_controller.dart';
 import 'package:tahfeez_ai/core/core_providers.dart';
 import 'package:tahfeez_ai/quran/data/quran_database.dart';
+import 'package:tahfeez_ai/quran/data/tafsir_database.dart';
+import 'package:tahfeez_ai/quran/data/translation_database.dart';
 import 'package:tahfeez_ai/quran/quran_providers.dart';
+import 'package:tahfeez_ai/quran/tafsir_providers.dart';
+import 'package:tahfeez_ai/quran/translation_providers.dart';
 import 'package:tahfeez_ai/wbw/data/wbw_database.dart';
 import 'package:tahfeez_ai/wbw/wbw_providers.dart';
 
@@ -44,6 +48,16 @@ tahfeezWidgetTestOverrides({AudioController? audioController}) {
     }),
     wbwDatabaseProvider.overrideWith((ref) {
       final db = WbwDatabase(NativeDatabase.memory());
+      ref.onDispose(db.close);
+      return db;
+    }),
+    translationDatabaseProvider.overrideWith((ref) {
+      final db = TranslationDatabase(NativeDatabase.memory());
+      ref.onDispose(db.close);
+      return db;
+    }),
+    tafsirDatabaseProvider.overrideWith((ref) {
+      final db = TafsirDatabase(NativeDatabase.memory());
       ref.onDispose(db.close);
       return db;
     }),

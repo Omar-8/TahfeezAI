@@ -278,6 +278,9 @@ class _ReaderBody extends StatelessWidget {
               isSelected: state.selectedAyahIds.contains(ayah.ayah.id),
               hasActiveSelection: hasActiveSelection,
               onToggleSelection: () => onToggleSelection(ayah.ayah.id),
+              translations:
+                  state.translationsByAyahId[ayah.ayah.id] ?? const {},
+              translationBooks: state.translationBooks,
             ),
           ),
         };
