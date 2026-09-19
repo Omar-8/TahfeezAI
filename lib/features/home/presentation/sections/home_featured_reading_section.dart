@@ -39,7 +39,7 @@ class HomeFeaturedReadingSection extends ConsumerWidget {
               );
             }
             return SizedBox(
-              height: 96,
+              height: 132,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 itemCount: list.length,
