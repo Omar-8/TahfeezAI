@@ -54,6 +54,8 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   dynamic_color: ^1.9.0
+  qvp_flutter: ^0.2.2
+  web: ^1.1.1
 
 dev_dependencies:
   flutter_test:
@@ -160,6 +162,19 @@ flutter:
     # lib/features/reader/application/quran_display_providers.dart refuses
     # to load this in kReleaseMode.
     - assets/quran/quran_display/qpc_hafs_display_words.json
+
+    # Quran Engine's own KFGQPC-derived Mushaf page corpus
+    # (feature/quran-engine-migration — docs/QURAN_ENGINE_MIGRATION.md),
+    # vendored from Quran.ws's CDN release (tool/quran_engine/README.md).
+    # Same development-only/license-gated treatment as every block above:
+    # this corpus's public redistribution is unresolved, exactly like QPC
+    # V2's is — a different technical delivery mechanism for material with
+    # the same underlying KFGQPC provenance question, not a separate
+    # license. lib/features/mushaf/data/quran_engine/
+    # quran_engine_android_backend.dart refuses to load this in
+    # kReleaseMode. Only the six representative pages (1, 2, 42, 106, 302,
+    # 604) are vendored — never the full 604-page corpus.
+    - assets/quran/quran_engine/pages/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

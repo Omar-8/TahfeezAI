@@ -6,13 +6,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../quran/domain/models/mushaf_models.dart';
 import '../application/mushaf_appearance_controller.dart';
 import '../application/mushaf_page_providers.dart';
+import '../application/mushaf_render_backend_controller.dart';
 import '../application/qpc_page_font_providers.dart';
 import '../domain/mushaf_appearance.dart';
+import '../domain/mushaf_render_backend.dart';
 import '../domain/qpc_page_font_manager.dart';
 import 'mushaf_layout_providers.dart';
 import 'mushaf_page_painter.dart';
 import 'mushaf_page_render_model.dart';
 import 'mushaf_prewarm_controller.dart';
+import 'quran_engine_mushaf_page_content.dart';
 
 /// Renders one printed Mushaf page — a single [RepaintBoundary]-wrapped
 /// [CustomPaint] ([MushafPagePainter]) drawing an already-fully-shaped
@@ -58,6 +61,23 @@ class MushafPageView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = ref.watch(mushafAppearanceControllerProvider).colors;
+
+    // The single place this widget forks on which engine actually draws
+    // the page — everything else (`MushafPager`'s tap handling, the
+    // Reader's chrome) is identical regardless of backend, since both
+    // report hits as the same `MushafTokenHitRect`.
+    final backend = ref.watch(mushafRenderBackendControllerProvider);
+    if (backend == MushafRenderBackend.quranEngine) {
+      return Container(
+        color: colors.background,
+        child: QuranEngineMushafPageContent(
+          pageNumber: pageNumber,
+          colors: colors,
+          onWordTap: onWordTap,
+        ),
+      );
+    }
+
     final bundleAsync = ref.watch(mushafPageDataProvider(mushafId, pageNumber));
 
     return Container(

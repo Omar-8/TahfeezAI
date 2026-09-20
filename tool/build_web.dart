@@ -1,19 +1,29 @@
-// Deterministic Web build wrapper: excludes the native-only QPC V2
-// 604-page-font package (~200MB, SHIP_BLOCKED_LICENSE and offline-only —
-// Web has no hard offline requirement, see docs/QURAN_DATA_PROVENANCE.md
-// §8) from build/web entirely — not just from what the app chooses to
-// fetch at runtime (`WebQpcPageFontManager` already never eagerly loads
-// it; this is about the deployable Web bundle's own size, confirmed to be
-// ~201MB/~69% of a naive `flutter build web` output).
+// Deterministic Web build wrapper: excludes native-only, KFGQPC-derived
+// Mushaf resources from build/web entirely — not just from what the app
+// chooses to fetch/load at runtime — since Web has no hard offline
+// requirement (`docs/QURAN_DATA_PROVENANCE.md` §8) for content whose
+// redistribution is unresolved either way.
+//
+// Excludes two independent things, both pubspec `assets:` entries:
+//   1. The QPC V2 604-page-font package (~200MB) — mandatory; every
+//      pubspec on this codebase has this line.
+//   2. Quran Engine's own vendored page corpus
+//      (`assets/quran/quran_engine/pages/`,
+//      feature/quran-engine-migration — docs/QURAN_ENGINE_MIGRATION.md) —
+//      optional; only present once `tool/quran_engine/fetch_page_data.sh`
+//      has been run. Same unresolved-redistribution status as QPC V2, a
+//      different technical delivery mechanism for the same underlying
+//      KFGQPC provenance question — confirmed to leak into a naive
+//      `flutter build web` output the exact same way QPC V2 used to,
+//      caught by actually inspecting a real build/web directory.
 //
 // Flutter's pubspec `assets:` declarations apply to every target platform
 // built from the same pubspec.yaml — there is no native per-platform
 // asset filter. This works around that the least fragile way available
 // without forking the project into two Flutter apps: temporarily comment
-// out the one `- assets/quran/fonts/qpc_v2/` line for the duration of
-// `flutter build web`, then restore the original file byte-for-byte
-// (in a `finally`, so an interrupted or failed build never leaves the
-// repo modified).
+// out the matched line(s) for the duration of `flutter build web`, then
+// restore the original file byte-for-byte (in a `finally`, so an
+// interrupted or failed build never leaves the repo modified).
 //
 // Left bundled on Web (deliberately NOT excluded): the Mushaf line/token
 // dataset (`assets/quran/mushaf/kfgqpc_v2.json`) and the font manifest
@@ -29,7 +39,8 @@
 //   dart run tool/build_web.dart -- --dart-define=QPC_FONT_BASE_URL=https://example.test/fonts
 import 'dart:io';
 
-const _targetLine = '- assets/quran/fonts/qpc_v2/';
+const _mandatoryTargetLine = '- assets/quran/fonts/qpc_v2/';
+const _optionalTargetLine = '- assets/quran/quran_engine/pages/';
 const _stagedComment =
     '# excluded for Web by tool/build_web.dart -- see its own doc comment';
 
@@ -42,11 +53,17 @@ Future<void> main(List<String> args) async {
   final original = pubspecFile.readAsStringSync();
   final lines = original.split('\n');
 
-  var found = false;
+  var foundMandatory = false;
+  var foundOptional = false;
   final staged = <String>[];
   for (final line in lines) {
-    if (line.trim() == _targetLine) {
-      found = true;
+    final trimmed = line.trim();
+    if (trimmed == _mandatoryTargetLine) {
+      foundMandatory = true;
+      final indent = line.substring(0, line.indexOf('-'));
+      staged.add('$indent$_stagedComment');
+    } else if (trimmed == _optionalTargetLine) {
+      foundOptional = true;
       final indent = line.substring(0, line.indexOf('-'));
       staged.add('$indent$_stagedComment');
     } else {
@@ -54,12 +71,12 @@ Future<void> main(List<String> args) async {
     }
   }
 
-  if (!found) {
+  if (!foundMandatory) {
     stderr.writeln(
-      'Could not find the expected pubspec.yaml line ("$_targetLine") — '
-      'pubspec.yaml may have changed shape. Refusing to build so this '
-      'script never silently does nothing; update tool/build_web.dart to '
-      'match before re-running.',
+      'Could not find the expected pubspec.yaml line '
+      '("$_mandatoryTargetLine") — pubspec.yaml may have changed shape. '
+      'Refusing to build so this script never silently does nothing; '
+      'update tool/build_web.dart to match before re-running.',
     );
     exit(1);
   }
@@ -67,6 +84,11 @@ Future<void> main(List<String> args) async {
   stdout.writeln(
     'Staging pubspec.yaml: excluding the native QPC V2 font package for Web build...',
   );
+  if (foundOptional) {
+    stdout.writeln(
+      'Staging pubspec.yaml: excluding the Quran Engine page corpus for Web build...',
+    );
+  }
   pubspecFile.writeAsStringSync(staged.join('\n'));
 
   var buildExitCode = 0;
@@ -109,7 +131,24 @@ Future<void> main(List<String> args) async {
     exit(verify.exitCode);
   }
 
+  if (foundOptional) {
+    stdout.writeln(
+      'Verifying build/web excludes the Quran Engine page corpus...',
+    );
+    final engineVerify = await Process.run('dart', [
+      'run',
+      'tool/quran_engine/verify_web_build_no_page_corpus.dart',
+    ], runInShell: true);
+    stdout.write(engineVerify.stdout);
+    stderr.write(engineVerify.stderr);
+    if (engineVerify.exitCode != 0) {
+      stderr.writeln('Web build verification FAILED.');
+      exit(engineVerify.exitCode);
+    }
+  }
+
   stdout.writeln(
-    'Web build complete: build/web excludes the native QPC V2 font package.',
+    'Web build complete: build/web excludes the native QPC V2 font package'
+    '${foundOptional ? ' and the Quran Engine page corpus' : ''}.',
   );
 }

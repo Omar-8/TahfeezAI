@@ -132,3 +132,11 @@ assets/quran/fonts/
 # hashes), the same reasoning that already keeps resource_manifest.json
 # committed despite recording hashes of other gated resources.
 !assets/quran/manifests/
+
+# Quran Engine's own vendored page corpus and Web runtime
+# (feature/quran-engine-migration — docs/QURAN_ENGINE_MIGRATION.md) — same
+# unresolved-redistribution treatment as the QPC V2 assets above.
+# Regenerate locally with tool/quran_engine/fetch_page_data.sh /
+# fetch_web_runtime.sh.
+assets/quran/quran_engine/
+web/quran_engine/
