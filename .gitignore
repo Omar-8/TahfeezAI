@@ -140,3 +140,7 @@ assets/quran/fonts/
 # fetch_web_runtime.sh.
 assets/quran/quran_engine/
 web/quran_engine/
+
+# Generated output of tool/quran_engine/verify_all_pages_structural.mjs —
+# a local run artifact, not source; the script itself is committed.
+tool/quran_engine/structural_test_results.json

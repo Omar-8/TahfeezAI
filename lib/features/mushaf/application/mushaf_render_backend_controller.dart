@@ -8,6 +8,17 @@ part 'mushaf_render_backend_controller.g.dart';
 
 const _mushafRenderBackendPrefKey = 'mushaf.renderBackend';
 
+/// Overrides the *initial* backend for this process only — never persisted,
+/// never read in a release build. Exists so live verification
+/// (`docs/QURAN_ENGINE_MIGRATION.md`) can boot straight into
+/// [MushafRenderBackend.quranEngine] via
+/// `--dart-define=MUSHAF_RENDER_BACKEND=quranEngine` without hand-editing
+/// this controller and risking forgetting to revert it. Unset (or any
+/// other value) leaves the default at [MushafRenderBackend.qpcV2].
+const _mushafRenderBackendDefineOverride = String.fromEnvironment(
+  'MUSHAF_RENDER_BACKEND',
+);
+
 /// The persisted Mushaf rendering backend selection —
 /// [MushafRenderBackend.qpcV2] by default, matching the current, unchanged
 /// production behavior (per the migration's Stage 1: "old QPC still
@@ -28,6 +39,13 @@ const _mushafRenderBackendPrefKey = 'mushaf.renderBackend';
 class MushafRenderBackendController extends _$MushafRenderBackendController {
   @override
   MushafRenderBackend build() {
+    if (!kReleaseMode) {
+      for (final backend in MushafRenderBackend.values) {
+        if (backend.name == _mushafRenderBackendDefineOverride) {
+          return backend;
+        }
+      }
+    }
     _restore();
     return MushafRenderBackend.qpcV2;
   }

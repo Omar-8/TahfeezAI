@@ -28,6 +28,26 @@ class QuranEngineReleaseModeBlockedException implements Exception {
       'docs/QURAN_ENGINE_MIGRATION.md.';
 }
 
+/// Thrown by the Web backend when the Quran Engine page-delivery endpoint
+/// is not configured (`QURAN_ENGINE_PAGE_BASE_URL` unset) — the honest,
+/// expected `SHIP_BLOCKED_LICENSE` state, never a silent fallback.
+/// Distinguished from a genuine fetch failure the same way
+/// `QpcWebFontDeliveryNotConfiguredException` is. Lives here (not in the
+/// Web-only backend file) so platform-agnostic presentation code — which
+/// must compile on Android too — can catch it without importing anything
+/// `dart:js_interop`-dependent.
+class QuranEngineWebDeliveryNotConfiguredException implements Exception {
+  const QuranEngineWebDeliveryNotConfiguredException(this.pageNumber);
+
+  final int pageNumber;
+
+  @override
+  String toString() =>
+      'QuranEngineWebDeliveryNotConfiguredException(page $pageNumber): '
+      'QURAN_ENGINE_PAGE_BASE_URL is not set — see '
+      'docs/QURAN_ENGINE_MIGRATION.md.';
+}
+
 /// A thin, platform-independent facade over Quran.ws's "Quran Engine"
 /// (`https://github.com/quran-ws/quran-engine`), promoted from the
 /// `poc/quran-engine` branch's evaluation
@@ -64,6 +84,15 @@ abstract class QuranEngineMushafBackend {
   Future<QuranEngineMushafPage> loadPage(int pageNumber);
 
   void disposePage(QuranEngineMushafPage page);
+
+  /// Fire-and-forget warmup of [pageNumber]'s neighbors, mirroring
+  /// `QpcPageFontManager.preloadAround`'s exact role for the QPC V2
+  /// renderer. Meaningful only for a backend with a real transport cost
+  /// per page (Web, fetching over HTTP); a backend serving from bundled
+  /// local assets (Android) may no-op this. Never awaited by a caller, and
+  /// a failing/slow neighbor must never affect the page actually on
+  /// screen.
+  Future<void> preloadAround(int pageNumber, {int radius = 1});
 }
 
 /// One loaded Quran Engine page. [buildView] returns the actual platform

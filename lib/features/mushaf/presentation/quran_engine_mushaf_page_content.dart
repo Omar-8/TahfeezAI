@@ -1,3 +1,5 @@
+import 'dart:async' show unawaited;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -64,6 +66,10 @@ class _QuranEngineMushafPageContentState
         _backend = backend;
         _page = page;
       });
+      // Fire-and-forget: mirrors QpcPageFontManager.preloadAround's own
+      // role for the QPC V2 renderer -- never awaited, never allowed to
+      // affect the page actually on screen.
+      unawaited(backend.preloadAround(widget.pageNumber));
     } catch (error) {
       if (!mounted) return;
       setState(() => _loadError = error);
@@ -90,7 +96,10 @@ class _QuranEngineMushafPageContentState
     }
 
     if (_loadError != null) {
-      final message = _loadError is QuranEngineReleaseModeBlockedException
+      final error = _loadError;
+      final message =
+          error is QuranEngineReleaseModeBlockedException ||
+              error is QuranEngineWebDeliveryNotConfiguredException
           ? 'Quran Engine rendering is pending licensing clearance.'
           : 'This page could not be rendered.';
       return Center(

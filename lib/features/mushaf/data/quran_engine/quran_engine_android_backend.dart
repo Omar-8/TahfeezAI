@@ -67,6 +67,13 @@ class QuranEngineAndroidBackend implements QuranEngineMushafBackend {
 
   @override
   void disposePage(QuranEngineMushafPage page) => page.dispose();
+
+  @override
+  Future<void> preloadAround(int pageNumber, {int radius = 1}) async {
+    // No-op: pages are bundled local assets (`rootBundle.load`), not
+    // fetched over a network transport with a per-page cost worth
+    // hiding — unlike the Web backend, there is nothing useful to warm.
+  }
 }
 
 /// The asset path Quran Engine's own `.qvp` page corpus lives at — the one
