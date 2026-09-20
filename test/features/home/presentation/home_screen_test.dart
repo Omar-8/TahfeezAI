@@ -50,7 +50,6 @@ void main() {
     expect(find.text('Continue Reading'), findsOneWidget);
     expect(find.text('Memorization'), findsOneWidget);
     expect(find.text('Featured Reading'), findsOneWidget);
-    expect(find.text('Explore Quran'), findsOneWidget);
 
     // No Quran dataset is installed in this test's (empty) in-memory
     // database, so every Quran-data-dependent section shows its honest
@@ -102,22 +101,5 @@ void main() {
 
     expect(tester.takeException(), isNull);
     expect(find.byType(HomeScreen), findsOneWidget);
-  });
-
-  testWidgets('the Explore section shows an adaptive grid of categories', (
-    tester,
-  ) async {
-    await tester.pumpWidget(wrap());
-    await tester.pumpAndSettle();
-
-    expect(find.text('Duas'), findsOneWidget);
-    expect(find.text('Topics'), findsOneWidget);
-    expect(find.text('Prophets'), findsOneWidget);
-    expect(find.text('Science'), findsOneWidget);
-
-    await tester.ensureVisible(find.text('Duas'));
-    await tester.tap(find.text('Duas'));
-    await tester.pump();
-    expect(find.text('Coming soon'), findsOneWidget);
   });
 }

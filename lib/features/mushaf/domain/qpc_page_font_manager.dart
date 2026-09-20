@@ -34,6 +34,30 @@ class QpcPageFontLoadException implements Exception {
       '(asset $assetPath): $reason';
 }
 
+/// Thrown by the Web implementation when no font-delivery endpoint is
+/// configured (`QPC_FONT_BASE_URL` unset at build time) — QPC V2
+/// redistribution remains `SHIP_BLOCKED_LICENSE`
+/// (`docs/QURAN_DATA_PROVENANCE.md` §8), so a production Web build has no
+/// endpoint to fetch from until that clears, and this is the honest,
+/// distinguishable-from-a-network-failure signal for that state. Never
+/// caught and silently turned into a fallback font — presentation code
+/// checks for this specific type to show "Mushaf page font resources are
+/// not configured for Web." instead of a generic load-failure message.
+class QpcWebFontDeliveryNotConfiguredException implements Exception {
+  QpcWebFontDeliveryNotConfiguredException({
+    required this.mushafId,
+    required this.pageNumber,
+  });
+
+  final int mushafId;
+  final int pageNumber;
+
+  @override
+  String toString() =>
+      'QPC Web font delivery is not configured (QPC_FONT_BASE_URL unset) — '
+      'Mushaf $mushafId page $pageNumber font unavailable on Web.';
+}
+
 /// Lazily loads and registers QCF V2's page-specific fonts, one at a time,
 /// as Mushaf pages are actually viewed — never eagerly registering all 604
 /// font families at startup (per `docs/QURAN_DATA_PROVENANCE.md` §8's
@@ -48,11 +72,23 @@ class QpcPageFontLoadException implements Exception {
 /// pages get loaded in the first place is controlled (current page ±2 by
 /// default), not their lifetime.
 ///
-/// The only implementation
-/// (`lib/features/mushaf/data/font_loader_qpc_page_font_manager.dart`) uses
-/// `dart:ui`'s `FontLoader` against the real, bundled, page-specific QPC V2
-/// font files — this interface exists so presentation code never has to
-/// know the asset-path/font-family naming convention itself.
+/// Two implementations, chosen by platform
+/// (`lib/features/mushaf/application/qpc_page_font_providers.dart`), never
+/// forking anything else in the Mushaf stack:
+/// - `FontLoaderQpcPageFontManager`
+///   (`lib/features/mushaf/data/font_loader_qpc_page_font_manager.dart`) —
+///   native (Android/iOS): `rootBundle` against the real, bundled,
+///   page-specific QPC V2 font files. Fully offline, unchanged by the Web
+///   font-delivery work.
+/// - `WebQpcPageFontManager`
+///   (`lib/features/mushaf/data/web_qpc_page_font_manager.dart`) — Web:
+///   fetches the one requested page's font bytes over HTTP from a
+///   configurable, currently-unset-by-default endpoint (see
+///   [QpcWebFontDeliveryNotConfiguredException]).
+///
+/// Either way, presentation code only ever sees this interface — it never
+/// knows the asset-path/font-family naming convention, or which concrete
+/// implementation is in use.
 abstract class QpcPageFontManager {
   /// Ensures [pageNumber]'s font is loaded and registered, returning a
   /// handle once it is. Must be awaited by the renderer *before* that

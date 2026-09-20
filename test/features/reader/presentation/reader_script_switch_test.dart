@@ -4,6 +4,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tahfeez_ai/core/localization/generated/app_localizations.dart';
+import 'package:tahfeez_ai/features/reader/application/reader_preferences_controller.dart';
+import 'package:tahfeez_ai/features/reader/domain/reader_mode.dart';
 import 'package:tahfeez_ai/features/reader/presentation/reader_screen.dart';
 import 'package:tahfeez_ai/quran/data/import/quran_dataset_importer.dart';
 import 'package:tahfeez_ai/quran/data/quran_database.dart';
@@ -16,6 +18,16 @@ import '../../../quran/multi_script_test_fixtures.dart';
 /// rewrites" requirement: `ReaderScreen` never branches on which script is
 /// active — picking a different one from the Reader options sheet's Quran
 /// script picker is enough, on its own, to change the rendered word text.
+/// Fixed to verse-by-verse mode: this test's "Reader options" sheet is
+/// verse-by-verse-only chrome, unrelated to
+/// [ReaderModePreferenceController]'s real default (`ReaderMode.mushaf`).
+class _FixedReaderMode extends ReaderModePreferenceController {
+  _FixedReaderMode(this._fixed);
+  final ReaderMode _fixed;
+  @override
+  ReaderMode build() => _fixed;
+}
+
 void main() {
   testWidgets(
     'picking a different script from the options sheet changes the rendered words',
@@ -29,7 +41,12 @@ void main() {
 
       await tester.pumpWidget(
         ProviderScope(
-          overrides: [quranDatabaseProvider.overrideWith((ref) => db)],
+          overrides: [
+            quranDatabaseProvider.overrideWith((ref) => db),
+            readerModePreferenceControllerProvider.overrideWith(
+              () => _FixedReaderMode(ReaderMode.verseByVerse),
+            ),
+          ],
           child: const MaterialApp(
             supportedLocales: [Locale('en'), Locale('ar')],
             localizationsDelegates: [

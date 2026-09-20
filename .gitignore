@@ -70,6 +70,40 @@ tool/quran_data/.cache/
 tool/quran_data/sources/*.bz2
 tool/quran_data/sources/*Font*
 
+# The QCF2BSML (Bismillah) and QUL Surah Header fonts, plus their ligature
+# mapping, are the same category as the block above: real, copyrighted font
+# files whose redistribution terms are unverified (SHIP_BLOCKED_LICENSE, see
+# docs/QURAN_DATA_PROVENANCE.md) — not committed, unlike the small QUL
+# layout/word-by-word database zips above. `*Font*` above doesn't happen to
+# match these filenames, so they need their own patterns.
+tool/quran_data/sources/QCF2BSML.ttf
+tool/quran_data/sources/QCF_SurahHeader*
+tool/quran_data/sources/ligatures.json*
+
+# quran_common.ttf/suracon.ttf (QuranApp's own special-line fonts, vendored
+# from a local AlfaazPlus/QuranApp checkout) are the same category: real,
+# copyrighted font files whose redistribution terms are unverified
+# (SHIP_BLOCKED_LICENSE — QuranApp's repo-level GPLv3 does not necessarily
+# extend to these specific font resources, see
+# docs/QURAN_DATA_PROVENANCE.md §12/§13) — not committed.
+tool/quran_data/sources/quran_common.ttf
+tool/quran_data/sources/suracon.ttf
+tool/quran_data/sources/uthmanic_hafs.ttf
+# QUL's own official QPC Hafs font package — confirmed byte-identical to
+# uthmanic_hafs.ttf above, same SHIP_BLOCKED_LICENSE status.
+tool/quran_data/sources/UthmanicHafs_V22.ttf.zip
+
+# The generated QPC Hafs display-word manifest (assets/quran/quran_display/)
+# is real, fully validated Quran text (docs/QURAN_DATA_PROVENANCE.md §17)
+# but is deliberately NOT committed while QUL's redistribution terms for
+# the QPC Hafs word-by-word script remain unverified (SHIP_BLOCKED_LICENSE)
+# — same treatment, and same reasoning, as assets/quran/mushaf/ above.
+# Regenerate locally with
+# `dart run tool/quran_data/build_qpc_hafs_display.dart` (the vendored
+# source zip it needs, tool/quran_data/sources/qpc-hafs-word-by-word.db.zip,
+# is committed).
+assets/quran/quran_display/
+
 # The generated production Mushaf dataset (assets/quran/mushaf/) is real,
 # fully validated data (see docs/QURAN_DATA_PROVENANCE.md §7c) but is
 # deliberately NOT committed while QUL's redistribution terms for the

@@ -383,6 +383,388 @@ Milestone 10) are derived entirely from the canonical/translation data above at
 index-build time, contain no independently-licensed content, and are not a data
 provenance concern — see `docs/ARCHITECTURE.md` §21 for their own design rationale.
 
+## 10. Surah header decorative font — QUL Surah Header (color)
+
+- **Source**: QUL's official Surah Header font and its own ligature/JSON mapping,
+  manually provided by the project owner and vendored at
+  `tool/quran_data/sources/QCF_SurahHeader_COLOR-Regular.ttf.zip` and
+  `tool/quran_data/sources/ligatures.json.zip`.
+- **Content hash (SHA-256, of the extracted files)**: font
+  `731cdc14a3e50669ffd44c06335ce269665e22cb75db39ca137527e29c516308`; ligature JSON
+  `c4480a1fb616685421ada1f9cbd36187c1c27c01d8d78d27a866858fdaf5c4f7`.
+- **What the font actually is**: embedded family `QCF_SurahHeader_COLOR`, 124 glyphs, a
+  **COLRv0/CPAL color font** (6 palettes, 120 base color-glyph records) — confirmed via
+  `tool/quran_data/src/ttf_inspector.dart`, extended this milestone to parse `cmap`
+  (format 4 and format 12 subtables) and read `COLR`/`CPAL`/`GSUB` table presence, not
+  assumed from the filename. Each of QUL's 114 `surah-N` ligature-JSON entries maps to
+  **exactly one** real Arabic Presentation-Forms-A codepoint (e.g. `surah-1` →
+  `U+FC45`) that the font's own `cmap` resolves to a real glyph — verified for all 114
+  entries, not sampled. The font has **no `GSUB` table**: each surah's complete
+  frame+name artwork is a single pre-composed color glyph behind one codepoint, not a
+  ligature substitution assembled at shaping time — so no shaping engine is needed to
+  render it correctly, only a correct `cmap` lookup.
+- **Rendering — confirmed working, not just theoretically supported**: a real
+  `flutter test` render (Skia, software rendering) of this font at its real codepoint
+  produces the *complete*, correctly-colored decorative frame+name artwork, matching a
+  real printed Mushaf's Surah-header banner — see
+  `test/features/mushaf/presentation/goldens/mushaf_page_1.png`. This directly resolves
+  the open question this milestone was asked to test: whether a QUL color Surah Header
+  font renders correctly under Flutter/Skia. It does, at least under Skia's software
+  rasterizer on Linux; this has **not** additionally been confirmed on a real Android/iOS
+  device, and COLR palette selection (the font's 6 palettes) is not currently
+  controllable from `dart:ui`'s `TextStyle` API — Tahfeez always gets palette 0, the
+  font's own default.
+- **Built**:
+  - `tool/quran_data/src/surah_header_font_package.dart` /
+    `tool/quran_data/build_surah_header_font.dart` — verifies all 114 ligature-JSON
+    entries against the real font's `cmap` and writes
+    `assets/quran/manifests/surah_header_glyphs.json` (committed; no copyrighted content)
+    plus the copied, unmodified font at
+    `assets/quran/fonts/qcf_surah_header/QCF_SurahHeader_COLOR-Regular.ttf` (gitignored,
+    same as the QPC V2 page fonts).
+  - `lib/quran/domain/models/surah_header_glyph_models.dart` /
+    `lib/quran/data/surah_header_glyph_manifest_codec.dart` — the manifest model and its
+    decoder, mirroring `PageFontManifest`'s established pattern.
+  - `lib/features/mushaf/application/surah_header_font_providers.dart` —
+    `surahHeaderGlyphManifestProvider`, which loads the manifest and registers the font
+    via `FontLoader`; refuses to load in `kReleaseMode`, same `SHIP_BLOCKED_LICENSE` gate
+    as §8.
+  - `lib/features/mushaf/presentation/mushaf_page_render_model.dart` —
+    `_buildDecorativeSurahHeaderLine` shapes the single glyph codepoint at a reference
+    size, then uniform-scales it (`scale = min(targetWidth / naturalWidth, lineHeight /
+    naturalHeight)`, one factor for both axes — aspect ratio is always exactly
+    preserved) to occupy 96% of the line's available width (the middle of a 94–98%
+    target band, leaving an even safety margin so it never touches or crosses the page's
+    own content margins) or as much of it as the authoritative `surah_name` line's own
+    height allows, whichever binds first — never distorted to force the target if height
+    is the limit. Falls back to the previous plain localized-name text
+    (`isDecorative: false`) when the manifest isn't bundled. The localized chapter name
+    is always carried as `semanticLabel`, exposed as a real accessibility node via
+    `MushafPagePainter.semanticsBuilder` — the visible glyph is never the semantics
+    source of truth, verified by
+    `test/features/mushaf/presentation/mushaf_page_render_model_test.dart` and a
+    real-semantics-tree assertion in `mushaf_reader_screen_test.dart`.
+  - **Monochrome presentation**: the font's own embedded COLR/CPAL color layers are
+    never edited, removed, or re-encoded — `MushafPagePainter` instead wraps the header
+    glyph's paint call in a real `Canvas.saveLayer` with
+    `Paint()..colorFilter = ColorFilter.mode(headerInk, BlendMode.srcIn)`, the Canvas
+    -level equivalent of a widget-tree `ColorFiltered` (necessary here since this line is
+    painted directly onto a `CustomPainter`'s canvas, not through a widget). This
+    preserves every glyph layer, frame detail, and antialiased edge — only the *color*
+    each pixel is painted with changes, never the shape. `headerInk` is a new semantic
+    field on `MushafAppearanceColors` (`lib/features/mushaf/domain/mushaf_appearance.dart`),
+    one value per appearance (light/warm/sepia/dark/black), distinct from body text
+    color, never a single hard-coded color across themes. Verified via real pixel
+    decomposition (not just a visual diff) for all of Al-Fatihah, Al-Baqarah,
+    Al-Ma'idah, Al-Kahf, Maryam, Ya-Sin, Ar-Rahman, Al-Ikhlas, and An-Nas, plus a
+    multi-transition page, in
+    `test/features/mushaf/presentation/mushaf_surah_header_monochrome_test.dart`
+    (confirms every non-background pixel is a valid alpha blend of the exact ink color —
+    no trace of the font's own green/gold/pink artwork survives), with representative
+    visual goldens across three themes in
+    `mushaf_surah_header_monochrome_golden_test.dart`. The `saveLayer` this requires is
+    real, non-free offscreen-composition cost, but only runs inside `paint()`, which the
+    page's `RepaintBoundary`+`willChange: false` does not re-invoke on every
+    scroll/composite frame for an otherwise-unchanged page — reasoned about, not measured
+    on a real device; see `docs/MUSHAF_RENDERING.md`'s known limitations.
+  - Decorative artwork is used **only** on the Mushaf page itself; every other surface
+    (index, search, navigation, bookmarks, home) already renders plain localized names
+    through entirely separate code paths untouched by this work.
+- **License**: **unverified**, same reasoning and status as §7/§7a/§8 — QUL's
+  resource-specific terms have not been independently confirmed.
+- **Status**: `SHIP_BLOCKED_LICENSE`. Fully built, verified against all 114 surahs, and
+  confirmed to render correctly; not shipped in a release build for the same
+  redistribution reason as §8.
+
+## 11. Bismillah decorative font — QCF2BSML (KFGQPC V2) — investigated, NOT wired in
+
+- **Source**: `QCF2BSML.ttf`, from the KFGQPC V2 package, manually provided by the
+  project owner at `tool/quran_data/sources/QCF2BSML.ttf` (SHA-256
+  `457cd1bf2174e9c10b31eab25bc5eda20c12abbafe5f47bdea473c64036f411e`).
+- **What was verified, and what that rules out**: embedded family `QCF2BSML`; 718
+  `cmap` entries spanning ASCII, Latin-1 Supplement, the basic Arabic block, Arabic
+  diacritics, Arabic-Indic digits, and Arabic Presentation Forms A/B. **`U+FDFD`
+  ("Arabic Ligature Bismillah Ar-Rahman Ar-Raheem") is absent from this font's `cmap`**
+  — the "just use U+FDFD" assumption this milestone was explicitly told not to make is
+  confirmed wrong, not just unconfirmed. The font has `morx`/`feat`/`prop`/`just`
+  tables (Apple Advanced Typography) and no `GSUB` table.
+- **What was tested, and what it showed**: a real `flutter test` render (`FontLoader`
+  + `TextPainter`/`Text`, real Skia engine) of the font against the app's own
+  already-canonical Bismillah text (`bismillahText` provider, sourced from Al-Fatiha
+  1:1 — never a fresh literal) produced **empty "tofu" glyph boxes for every basic
+  Arabic letter and every Arabic-Presentation-Forms-B codepoint tested**, including
+  ones confirmed present in the `cmap`. A control render of three plain ASCII Latin
+  letters (`'ABC'`, arbitrarily chosen as a sanity check) instead produced a
+  **complete, correctly-shaped, fully-diacritized Arabic phrase** — proving this font
+  uses the *same* per-arbitrary-codepoint, one-glyph-per-word encoding scheme as the
+  ordinary QCF2NNN page fonts (§8: "the same numeric codepoint is deliberately reused
+  across different pages' fonts to draw different glyphs"), not a plain-Arabic-text
+  font that a shaping engine (AAT or otherwise) turns into real letterforms. Plain
+  canonical Unicode Bismillah text is therefore **not** valid input for this font —
+  that assumption is now disproven, not merely unverified.
+- **The blocker**: rendering the Bismillah correctly with this font requires knowing
+  the *specific* arbitrary codepoint sequence its own author assigned to
+  "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ" — exactly the kind of per-font word→codepoint
+  mapping the ordinary QCF2NNN pages get from the companion `qpc-v2-word-by-word.db`
+  (§7a). **No equivalent word-by-word/mapping resource for QCF2BSML has been
+  provided.** `qpc-v2-word-by-word.db`'s `words` table was directly re-checked for any
+  non-standard `location` values that might represent a standalone Bismillah insertion
+  (as opposed to an ordinary `surah:ayah:word` reference): none exist — exactly
+  83,668 contiguous rows, all normally addressed, with no room for an additional 112×4
+  Bismillah-only entries. Per this milestone's explicit instruction not to "manufacture
+  `first_word_id`/`last_word_id` values for these lines," and given the strict
+  Quran-correctness rules in `CLAUDE.md`, this codebase does **not** attempt to
+  reverse-engineer the mapping by visually matching candidate glyphs to known word
+  shapes — that would risk shipping a subtly wrong rendering of text that appears 112
+  times, based on a guess rather than a verified source.
+- **Forensic search of the provided package — confirmed empty, not just unchecked**: a
+  follow-up read-only search covered every file the project owner provided (not just
+  the font in isolation): the "QPC V2 Font.ttf.bz2" package (verified to contain
+  exactly 604 page-font files and nothing else), both QUL SQLite databases' complete
+  schemas (`qpc-v2-15-lines.db`: `pages`/`info` only; `qpc-v2.db`: `words` only — no
+  additional table), and a literal-string search of every source file for `QCF2BSML`,
+  `BSML`, `BASMALA`, `BISMILLAH`, `بسملة`, `بسم`. Only the font's own embedded `name`
+  table matches (its own family name). The font's `post` table (format 2.0, all 606
+  glyphs) was also fully dumped: glyphs 0–474 use standard Adobe Arabic glyph names
+  (`behinitialarabic`, `noonjeemisolatedarabic`, etc. — ordinary *letter*-level AAT
+  font glyph names), while the higher glyph range that includes the composite
+  word-glyphs found by the earlier rendering test (475–605) are all **unnamed**
+  (Mac-standard-slot placeholders or empty strings) — meaning even the font's own
+  authors (Harf Information Technology, per its `name` table) never recorded a semantic
+  label for these glyphs; the word→codepoint mapping lived only in their internal
+  production tooling and was never shipped with this file, in any form.
+- **What is needed to unblock this**: a QUL (or other verified official KFGQPC)
+  resource that maps the standalone Bismillah insertion's word sequence to
+  `QCF2BSML`'s own codepoints — the same kind of resource §7a already provides for
+  every ordinary page. Until that exists, `QCF2BSML.ttf` remains unwired.
+- **Status**: investigated, **not wired into the render pipeline**. No code change was
+  made to shape text through this font — shipping a fabricated or guessed glyph mapping
+  for text repeated 112 times across the Mushaf was judged a worse outcome than leaving
+  it unwired. **Superseded as the active Bismillah rendering plan**: §14 below
+  (`quran_common.ttf`) is now the active mechanism, replacing what had been a plain
+  -system-font fallback at the time this section was written.
+
+## 14. Bismillah + Surah-header title frame font — QuranApp's `quran_common.ttf`
+
+- **Source**: `quran_common.ttf`, vendored from a local checkout of
+  AlfaazPlus/QuranApp (`app/src/main/res/font/quran_common.ttf`) — a public,
+  GPLv3-licensed reference application studied for behavior only, per
+  `docs/CLEAN_ROOM_RULES.md` (no Kotlin/Compose code was ported; the visual
+  composition was reimplemented independently in Flutter).
+- **Content hash (SHA-256)**: `63675d54764c3e0acd3875e191dc6f0af1339ddbd53a1df7fcebbaabebc918fa`.
+- **What was verified, directly against the real file — never assumed**: embedded
+  family `quran-common`; both codepoints this project actually uses are confirmed
+  present in its real `cmap` table: U+E000 (the decorative title-frame glyph,
+  QuranApp's own `QuranGlyphs.Special.TITLE_FRAME`) and U+FDFD (the decorative
+  Bismillah glyph, `QuranGlyphs.Special.BISMILLAH`) — the same "do not assume U+FDFD"
+  discipline §11 already established, here resolved by inspection rather than ruled
+  out. The font's table directory has **no `COLR`/`CPAL`** — an ordinary, single-color
+  outline font, confirmed by direct inspection, not assumed from its filename or
+  purpose — so no `saveLayer`/`ColorFilter` monochrome treatment is needed to use it;
+  color is baked in at shape time via ordinary `TextStyle.color`, exactly like normal
+  text.
+- **Built**: `tool/quran_data/src/quranapp_font_package.dart` /
+  `tool/quran_data/build_quranapp_special_fonts.dart` verify both codepoints against
+  the real `cmap` and write `assets/quran/manifests/quran_common_font.json`
+  (committed; no copyrighted content) plus the copied, unmodified font at
+  `assets/quran/fonts/quranapp/quran_common.ttf` (gitignored, same treatment as every
+  other vendored font in this document).
+  `lib/features/mushaf/application/quranapp_special_font_providers.dart` loads the
+  manifest and registers the font via `FontLoader`; refuses to load in `kReleaseMode`,
+  same gate as every other resource in this document.
+- **Rendering — the active mechanism**: `lib/features/mushaf/presentation/
+  mushaf_page_render_model.dart`'s `_buildDecorativeBismillahLine` (Bismillah) and
+  `_buildQuranAppSurahHeaderLine` (the frame half of the Surah header, §15 covers the
+  name half) — both reimplemented independently from studying QuranApp's
+  `compose/components/reader/Bismillah.kt`/`ChapterTitle.kt`/`ChapterIcon.kt` and
+  `utils/quran/QuranGlyphs.kt`/`compose/theme/Type.kt` for behavior only, never a
+  ported Kotlin/Compose file. Sizing is expressed as ratios against this project's own
+  `MushafPageLayoutEngine.baseFontSize` (QuranApp's reference 36sp/46sp against this
+  project's reference 28 — see those functions' own doc comments), never a hard-coded
+  logical-pixel constant, so both glyphs scale with the page's real, already-calibrated
+  font scale. Both glyphs shrink to fit their line's authoritative box (never adding
+  line height, never moving surrounding lines) and are centered.
+- **Superseded**: replaces the plain-system-font Bismillah fallback that was this
+  project's only implementation before this milestone (that fallback still exists, now
+  correctly demoted to the dev-only state used while this font isn't bundled at all).
+- **License**: **unverified**. QuranApp's repository-level `LICENSE` is GPLv3; per
+  `docs/CLEAN_ROOM_RULES.md`'s explicit instruction not to assume a repository's
+  license extends to every third-party resource it contains, this is **not** assumed
+  to cover redistribution of this specific font file, and no separate font
+  license/attribution file exists anywhere in the QuranApp repository (checked
+  directly: only its repo-level `LICENSE`, no per-font `NOTICE`/license file next to
+  `app/src/main/res/font/`).
+- **Status**: `SHIP_BLOCKED_LICENSE`. Fully built, verified, and confirmed rendering
+  correctly for all 10 representative surahs this milestone named plus the Bismillah
+  glyph itself; not shipped in a release build pending redistribution clearance.
+
+## 15. Surah-name calligraphy font — QuranApp's `suracon.ttf`
+
+- **Source**: `suracon.ttf`, vendored from the same local AlfaazPlus/QuranApp checkout
+  (`app/src/main/res/font/suracon.ttf`) — same clean-room basis as §14.
+- **Content hash (SHA-256)**: `cbda233eed3177c473793b513b9b55f219937ab0ffcc494f35c70750c690014c`.
+- **What was verified, directly against the real file**: embedded family `suracon`; all
+  114 Surah-name codepoints *and* the shared prefix codepoint from QuranApp's own
+  `utils/quran/QuranGlyphs.kt` (`Chapter.icons`, studied as factual character-map data —
+  never ported as code) are confirmed present in the font's real `cmap` table — 0
+  missing, not sampled. No two surahs (or the prefix) collide on the same codepoint. No
+  `COLR`/`CPAL` — an ordinary outline font, same as §14, so no color-treatment is
+  needed.
+- **Built**: `tool/quran_data/src/quranapp_font_package.dart`'s
+  `buildSuraconGlyphManifest` verifies every codepoint and writes
+  `assets/quran/manifests/suracon_glyphs.json` (committed) plus the copied font at
+  `assets/quran/fonts/quranapp/suracon.ttf` (gitignored).
+  `lib/features/mushaf/application/quranapp_special_font_providers.dart` loads and
+  registers it, same `kReleaseMode` gate as §14.
+- **Rendering**: `_buildQuranAppSurahHeaderLine` overlays the Surah name glyph
+  concatenated with the shared prefix glyph (name first, then prefix — the same order
+  QuranApp's own `ChapterIcon.kt` concatenates them) on top of the §14 title frame,
+  scaled proportionally to it (QuranApp's fixed 46sp:30sp frame:name ratio, preserved
+  as a ratio rather than two independently-sized constants) and shifted down from the
+  frame's own vertical center by a proportional amount (QuranApp's fixed 8dp shift,
+  likewise converted to a ratio of the frame's own rendered size).
+- **Superseded**: replaces the QUL Surah Header COLR font (§10) as the active Surah
+  -header mechanism. §10's font/manifest/provider/render-model code is deliberately
+  **not deleted** — kept as an unused development resource per explicit instruction,
+  pending a decision on whether to remove it entirely — but
+  `mushaf_layout_providers.dart` no longer watches or supplies its resolver, so it
+  never runs in production any more.
+- **License**: **unverified**, same reasoning and status as §14 — GPLv3 at the
+  repository level does not automatically extend to this specific font file, and no
+  separate font license exists in the checkout.
+- **Status**: `SHIP_BLOCKED_LICENSE`. Fully built, verified against all 114 surahs, and
+  confirmed rendering correctly (including real pixel-level ink verification, not just
+  a visual diff) for Al-Fatihah, Al-Baqarah, Al-Ma'idah, Al-Kahf, Maryam, Ya-Sin,
+  Ar-Rahman, Al-Ikhlas, Al-Falaq, and An-Nas; not shipped in a release build pending
+  redistribution clearance.
+
+## 16. Verse-by-verse Quran text font — QuranApp's `uthmanic_hafs.ttf`
+
+- **Source**: `uthmanic_hafs.ttf` ("KFGQPC HAFS Uthmanic Script"), vendored from the same
+  local AlfaazPlus/QuranApp checkout as §14/§15
+  (`app/src/main/res/font/uthmanic_hafs.ttf`) — same clean-room basis: studied and
+  vendored as a font resource only, no Kotlin/Compose code ported.
+- **Content hash (SHA-256)**: `aa68bffce289b4c0ebac68e90502eb69e42356abcd1603cb2b8e99c2c723f145`.
+- **Why this font, and not the §8 QCF V2 page fonts**: the verse-by-verse reader displays
+  the canonical `AyahWord` text (real Unicode Arabic codepoints, script-independent), never
+  a specific Mushaf page's `MushafToken` text. §8's QCF V2 files are page-specific
+  private-use-area glyph fonts — a given codepoint only draws the right glyph when paired
+  with *that exact page's* font file (see §8's own finding), so rendering canonical Arabic
+  text through one would produce wrong or blank glyphs. `uthmanic_hafs.ttf` is an ordinary
+  Uthmanic-Hafs-style Arabic text font — real Unicode cmap coverage, real `GSUB`/`GPOS`
+  shaping tables for correct Arabic contextual forms and diacritic positioning — so it can
+  shape any canonical Arabic string, not just one page's pre-arranged glyph run. Using it
+  is how "the same font of the verses in Mushaf mode" is honored in spirit (the same
+  Uthmanic Hafs calligraphy style) without the page-specific-glyph mismatch that would
+  result from literally reusing a §8 file outside its own page context.
+- **What was verified, directly against the real file**: embedded family
+  `KFGQPC HAFS Uthmanic Script`; the font's table directory has `GSUB`/`GPOS`/`kern` (real
+  Arabic shaping support) and **no `COLR`/`CPAL`** — an ordinary, single-color outline
+  font, same treatment as §14/§15.
+- **Built**: `tool/quran_data/src/quranapp_font_package.dart`'s
+  `buildQuranTextFontManifest` (a generic family+hash verifier — no per-codepoint check is
+  needed for an ordinary text font, unlike §14/§15's private-use glyphs) writes
+  `assets/quran/manifests/uthmanic_hafs_font.json` (committed) plus the copied,
+  unmodified font at `assets/quran/fonts/quranapp/uthmanic_hafs.ttf` (gitignored, same
+  treatment as every other vendored font in this document).
+  `lib/features/mushaf/application/quranapp_special_font_providers.dart`'s
+  `uthmanicHafsFontManifestProvider` loads the manifest and registers the font via
+  `FontLoader`, same `kReleaseMode` refusal gate as §14/§15.
+- **Also distributed as**: `UthmanicHafs_V22.ttf` (the file name QUL's own official QPC
+  Hafs font package uses) — vendored separately during the §17 compatibility audit and
+  confirmed **byte-for-byte identical** (same SHA-256 above) to this file. The two names
+  refer to the exact same font; this document treats them as one resource.
+- **Rendering history — the original defect was a text/font mismatch, not a font defect
+  (corrected finding)**: an earlier attempt to wire this font into `VerseBlock`/
+  `BismillahDivider`/`word_detail_sheet.dart` rendered real canonical **Tanzil** `AyahWord`
+  text through it and found a reproducible defect — U+06DF ARABIC SMALL HIGH ROUNDED ZERO,
+  as it appears in the real word "أُو۟لَٰٓئِكَ" (2:5's "أُولَٰئِكَ"), painted as an
+  oversized, full-height black circle instead of a small positioned mark. That wiring was
+  reverted and every affected call site fell back to the plain system Arabic font (see
+  git history for that change). A later compatibility audit (§17) re-tested this font
+  against its **own paired script** (QPC Hafs word-by-word, not Tanzil) and found the
+  defect does not reproduce: that script encodes the same phonetic phenomenon as 2:5:1
+  differently (U+0652 plain sukun, never U+06DF — U+06DF does not occur anywhere in the
+  83,668-word QPC Hafs corpus), and real-font rendering of one sample word for all 19
+  distinct Quranic annotation marks (U+06D6–U+06ED) the corpus actually uses showed no
+  oversized/malformed glyphs. **Conclusion: this font is not defective — it was rendering
+  text encoded for a different script.** Per this project's own explicit "do not render
+  arbitrary Tanzil text through the QPC Hafs font and assume correctness" rule (learned
+  from this exact incident), the font is approved for use **only** when paired with its
+  own QPC Hafs script (§17), never with Tanzil `AyahWord` text directly.
+- **Status**: not yet wired into production rendering. The font, manifest, and provider
+  infrastructure are built and verified; what remains is importing the §17 script into the
+  app's data layer and pointing verse-by-verse-mode call sites at it instead of Tanzil
+  text (canonical word identity/tap-targets stay on `AyahWord` regardless — see §17).
+- **License**: **unverified** — GPLv3 at AlfaazPlus/QuranApp's repository level is not
+  assumed to cover this specific font file, and separately, QUL's own distribution of the
+  identical `UthmanicHafs_V22.ttf` carries QUL's own "review per resource, no blanket
+  grant" terms (see §17). `SHIP_BLOCKED_LICENSE` either way.
+
+## 17. Verse-by-verse Quran display script — QUL "QPC Hafs" word-by-word dataset
+
+- **Source**: `qpc-hafs-word-by-word.db`, manually vendored from QUL (Quran Complex/King
+  Fahd Glorious Quran Printing Complex's own "Hafs" Unicode word-by-word export), the
+  same "manually supplied, not auto-fetched" basis as every other QUL resource in this
+  document (§7/§7a/§8) — QUL's downloads are account/login-gated.
+- **Vendored as**: `tool/quran_data/sources/qpc-hafs-word-by-word.db.zip` (SHA-256
+  `64b59c7ae3dae32f3650c534cb5a40c91089e0a6319372ded9500181a3cc6a47`), containing
+  `qpc-hafs-word-by-word.db` (SHA-256
+  `e1cf266ed47a56e58100c08f69499f635f84c97233318cc53daf17200fb9048e`) — gitignored, same
+  treatment as `qpc-v2-word-by-word.db.zip` (§7a).
+- **Schema**: a single table, `words(id, location, surah, ayah, word, text)` — the exact
+  same shape as §7a's own `words` table.
+- **What was verified, directly against the real file, for all 83,668 rows (not
+  sampled)**: `id` ranges 1–83668 in both this table and §7a's QPC V2 word-by-word table,
+  contiguous, no duplicates; every `id`'s `(surah, ayah, word)` is identical between the
+  two tables — only `text` differs (this table's real Unicode Arabic vs. §7a's
+  page-specific glyph codepoints). Cross-checked against §7's 15-line layout's
+  `first_word_id`/`last_word_id` ranges: zero missing references, zero duplicate word
+  usages, zero gaps, across all 8,820 `ayah`-type lines on all 604 pages — a perfect,
+  deterministic partition. (This check was performed as part of evaluating — and
+  rejecting — a QPC V2→QPC Hafs Mushaf-mode migration; see
+  `docs/MUSHAF_RENDERING.md` §2a for that decision. This resource's own data quality was
+  not in question; only whether it should *replace* QPC V2 for the Mushaf page body.)
+- **Rendering — validated when paired with its own font**: see §16's "Rendering history"
+  bullet for the full account. In short: this script's own text, rendered through
+  `uthmanic_hafs.ttf`/`UthmanicHafs_V22.ttf`, does not reproduce the U+06DF defect found
+  when a *different* script (Tanzil) was rendered through the same font — this script
+  encodes the relevant phenomenon differently (plain sukun, not U+06DF), and real-font
+  rendering of all 19 distinct Quranic annotation marks this corpus uses showed no
+  defects.
+- **A caveat this project's import handles explicitly, not by assumption**: this script's
+  `word` numbering counts ayah-end markers (the Arabic-Indic ayah number, e.g. `٥`) as
+  their own "word" entries — it is **not** always a simple "canonical count + 1" away from
+  `AyahWord`'s own word count for the same ayah. `tool/quran_data/build_qpc_hafs_display.dart`
+  validates every one of the 6,236 canonical ayahs against this script directly (not by
+  formula): 6,235 ayahs have exactly one extra trailing word (the marker) and are imported;
+  **one ayah — 37:130 — does not** and is excluded rather than guessed. Real cause,
+  confirmed by inspection: Tanzil's canonical text splits the compound name "الياسين" into
+  two words ("إِلْ"/"يَاسِينَ"), while this script keeps it as one word
+  ("إِلۡ يَاسِينَ") — a genuine cross-source word-segmentation difference, not a data
+  error in either source. Canonical word identity/tap-targets/audio-highlighting always
+  read from `AyahWord`'s own `(ayahId, wordIndex)`, never this script's `word` column —
+  see `docs/ARCHITECTURE.md` §25's `QuranDisplayRepository` design note.
+- **Imported**: `tool/quran_data/build_qpc_hafs_display.dart` writes
+  `assets/quran/quran_display/qpc_hafs_display_words.json` — 6,235 ayahs' worth of
+  ordered word lists (37:130 excluded, recorded in the manifest's own `excludedAyahIds`),
+  each list exactly as long as that ayah's real `AyahWord` count, so
+  `QuranDisplayRepository.displayWordsForAyah(ayahId)![i]` and `AyahWord`s for that ayah at
+  index `i` are always guaranteed to refer to the same word. Same gitignored/
+  license-gated/`kReleaseMode`-refusal treatment as `assets/quran/mushaf/kfgqpc_v2.json`
+  (§7) — see `.gitignore`'s own comment for this path, and
+  `lib/features/reader/application/quran_display_providers.dart`.
+- **Wired into rendering**: `lib/features/reader/presentation/widgets/verse_block.dart`
+  and `bismillah_divider.dart` use `QuranDisplayRepository` + `uthmanicHafsFontManifestProvider`
+  (§16) together — only when *both* a validated word list (same length as the ayah's real
+  word count) and the font are available; otherwise falling back to the pre-existing
+  canonical-text/system-font rendering, per-ayah. Word tap, word-by-word translation, and
+  the verse's own copy/share text all continue to read `AyahWord` directly, unaffected by
+  which text is visually painted.
+- **Status**: `SHIP_BLOCKED_LICENSE`. Imported, validated, and wired into verse-by-verse
+  rendering; `kReleaseMode` refuses to load it in a release build, same as every other
+  QUL-sourced resource in this document, until redistribution is cleared.
+
 ---
 
 ## Reproducing this dataset
@@ -420,23 +802,48 @@ document was produced this way and is re-checked by
 | Mushaf page/line layout (KFGQPC V2) | QUL | Imported (9,046 lines); `SHIP_BLOCKED_LICENSE` for redistribution, not shipped |
 | Quran script/word-by-word dataset (word id resolution) | QUL | Imported (83,668 tokens); `SHIP_BLOCKED_LICENSE` for redistribution, not shipped |
 | Mushaf glyph font (QCF V2) | QUL | Imported into `assets/quran/fonts/qpc_v2/` + verified manifest (dev builds only); `SHIP_BLOCKED_LICENSE`; not committed to git |
+| Surah header decorative font (QUL Surah Header, color) | QUL | Imported + verified for all 114 surahs, confirmed rendering correctly; kept only as an **unused development resource** (superseded by `suracon.ttf`, §15) — `SHIP_BLOCKED_LICENSE`; not committed to git |
+| Bismillah decorative font (QCF2BSML) | QUL/KFGQPC | Investigated only — **not wired into rendering**: no verified word→codepoint mapping exists for this font (see §11) |
+| Bismillah + title-frame font (`quran_common.ttf`) | AlfaazPlus/QuranApp | Imported + verified; **the active Bismillah/Surah-header-frame mechanism**; `SHIP_BLOCKED_LICENSE`; not committed to git |
+| Surah-name calligraphy font (`suracon.ttf`) | AlfaazPlus/QuranApp | Imported + verified for all 114 surahs; **the active Surah-header-name mechanism**; `SHIP_BLOCKED_LICENSE`; not committed to git |
+| Verse-by-verse Quran text font (`uthmanic_hafs.ttf` / `UthmanicHafs_V22.ttf`) | AlfaazPlus/QuranApp + QUL (identical file) | Imported + verified; validated defect-free when paired with its own QPC Hafs script (§17); **wired into verse-by-verse rendering**; `SHIP_BLOCKED_LICENSE` |
+| Verse-by-verse Quran display script (QPC Hafs word-by-word) | QUL | Vendored, fully audited (83,668 words, 100% match against QPC V2's own word IDs), and **imported + wired into verse-by-verse rendering** (6,235 of 6,236 ayahs; 37:130 excluded, a genuine word-segmentation difference); `SHIP_BLOCKED_LICENSE` (§17) |
 
 ## Release checklist — QUL resource redistribution
 
 **Do not mark any of these "YES" without source documentation** (an email, a QUL account
 license page, or written confirmation from Tarteel AI/Digital Khadeeja Foundation) — never
 inferred from CDN accessibility, successful download, or QUL's own MIT-licensed platform
-code.
+code. The same standard applies to the AlfaazPlus/QuranApp-sourced fonts below: their
+repository's GPLv3 license is never assumed to cover these specific font files without
+separate, explicit confirmation.
 
 - [ ] QPC V2 layout redistribution cleared (§7)
 - [ ] QPC V2 word/script data redistribution cleared (§7a)
 - [ ] QPC V2 font redistribution cleared (§8)
-- [ ] If any of the above is unresolved: `pubspec.yaml`'s three gated asset lines
+- [ ] Surah header decorative font redistribution cleared (§10) — moot unless this
+      unused development resource is ever reactivated
+- [ ] `quran_common.ttf` redistribution cleared (§14)
+- [ ] `suracon.ttf` redistribution cleared (§15)
+- [ ] `uthmanic_hafs.ttf`/`UthmanicHafs_V22.ttf` redistribution cleared (§16) — validated
+      defect-free when correctly paired (§17), **wired into verse-by-verse rendering**;
+      still blocked on license, not on rendering
+- [ ] QPC Hafs word-by-word script redistribution cleared (§17) — data fully audited,
+      compatible, imported, and **wired into verse-by-verse rendering**; blocked on
+      license, not on data quality
+- [ ] If any of the above is unresolved: `pubspec.yaml`'s gated asset lines
       (`assets/quran/mushaf/kfgqpc_v2.json`, `assets/quran/manifests/qpc_v2_fonts.json`,
-      `assets/quran/fonts/qpc_v2/`) have been removed, or moved behind a build flavor that
-      a public release build does not include — the `kReleaseMode` code-level refusal in
-      `BundledDatasetSeeder`/`qpcPageFontManifestProvider` is **not sufficient by itself**
-      (see §8's note on the 204.9MB test release AAB that still contained these assets)
+      `assets/quran/fonts/qpc_v2/`, `assets/quran/manifests/surah_header_glyphs.json`,
+      `assets/quran/fonts/qcf_surah_header/`, `assets/quran/manifests/quran_common_font.json`,
+      `assets/quran/manifests/suracon_glyphs.json`, `assets/quran/manifests/uthmanic_hafs_font.json`,
+      `assets/quran/fonts/quranapp/`, `assets/quran/quran_display/qpc_hafs_display_words.json`)
+      have been removed, or moved behind a build flavor
+      that a public release build does not include — the `kReleaseMode` code-level
+      refusal in `BundledDatasetSeeder`/`qpcPageFontManifestProvider`/
+      `surahHeaderGlyphManifestProvider`/`quranCommonFontManifestProvider`/
+      `suraconGlyphManifestProvider`/`uthmanicHafsFontManifestProvider`/
+      `qpcHafsDisplayManifestProvider` is **not sufficient by itself** (see §8's note on
+      the 204.9MB test release AAB that still contained these assets)
 - [ ] A `flutter build appbundle --release` (or `ipa`) intended for real distribution has
       been inspected to confirm the gated assets are actually absent, not just unused
 

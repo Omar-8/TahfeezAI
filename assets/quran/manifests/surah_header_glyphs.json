@@ -1,0 +1,582 @@
+{
+  "schemaVersion": 1,
+  "assetPath": "assets/quran/fonts/qcf_surah_header/QCF_SurahHeader_COLOR-Regular.ttf",
+  "fontFamily": "QCF_SurahHeader_COLOR",
+  "fontSource": "QUL Surah Header color font (tool/quran_data/sources/QCF_SurahHeader_COLOR-Regular.ttf.zip)",
+  "fontHash": "731cdc14a3e50669ffd44c06335ce269665e22cb75db39ca137527e29c516308",
+  "ligatureMappingSource": "QUL Surah Header ligature JSON (tool/quran_data/sources/ligatures.json.zip)",
+  "ligatureMappingHash": "c4480a1fb616685421ada1f9cbd36187c1c27c01d8d78d27a866858fdaf5c4f7",
+  "generatedAt": "2026-09-20T04:49:27.407149Z",
+  "entries": [
+    {
+      "surahNumber": 1,
+      "inputText": "ﱅ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 2,
+      "inputText": "ﱆ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 3,
+      "inputText": "ﱇ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 4,
+      "inputText": "ﱊ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 5,
+      "inputText": "ﱋ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 6,
+      "inputText": "ﱎ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 7,
+      "inputText": "ﱏ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 8,
+      "inputText": "ﱑ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 9,
+      "inputText": "ﱒ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 10,
+      "inputText": "ﱓ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 11,
+      "inputText": "ﱕ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 12,
+      "inputText": "ﱖ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 13,
+      "inputText": "ﱘ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 14,
+      "inputText": "ﱚ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 15,
+      "inputText": "ﱛ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 16,
+      "inputText": "ﱜ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 17,
+      "inputText": "ﱝ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 18,
+      "inputText": "ﱞ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 19,
+      "inputText": "ﱡ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 20,
+      "inputText": "ﱢ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 21,
+      "inputText": "ﱤ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 22,
+      "inputText": "ﭑ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 23,
+      "inputText": "ﭒ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 24,
+      "inputText": "ﭔ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 25,
+      "inputText": "ﭕ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 26,
+      "inputText": "ﭗ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 27,
+      "inputText": "ﭘ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 28,
+      "inputText": "ﭚ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 29,
+      "inputText": "ﭛ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 30,
+      "inputText": "ﭝ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 31,
+      "inputText": "ﭞ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 32,
+      "inputText": "ﭠ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 33,
+      "inputText": "ﭡ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 34,
+      "inputText": "ﭣ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 35,
+      "inputText": "ﭤ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 36,
+      "inputText": "ﭦ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 37,
+      "inputText": "ﭧ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 38,
+      "inputText": "ﭩ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 39,
+      "inputText": "ﭪ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 40,
+      "inputText": "ﭬ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 41,
+      "inputText": "ﭭ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 42,
+      "inputText": "ﭯ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 43,
+      "inputText": "ﭰ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 44,
+      "inputText": "ﭲ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 45,
+      "inputText": "ﭳ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 46,
+      "inputText": "ﭵ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 47,
+      "inputText": "ﭶ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 48,
+      "inputText": "ﭸ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 49,
+      "inputText": "ﭹ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 50,
+      "inputText": "ﭻ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 51,
+      "inputText": "ﭼ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 52,
+      "inputText": "ﭾ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 53,
+      "inputText": "ﭿ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 54,
+      "inputText": "ﮁ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 55,
+      "inputText": "ﮂ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 56,
+      "inputText": "ﮄ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 57,
+      "inputText": "ﮅ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 58,
+      "inputText": "ﮇ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 59,
+      "inputText": "ﮈ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 60,
+      "inputText": "ﮊ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 61,
+      "inputText": "ﮋ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 62,
+      "inputText": "ﮍ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 63,
+      "inputText": "ﮎ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 64,
+      "inputText": "ﮐ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 65,
+      "inputText": "ﮑ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 66,
+      "inputText": "ﮓ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 67,
+      "inputText": "ﮔ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 68,
+      "inputText": "ﮖ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 69,
+      "inputText": "ﮗ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 70,
+      "inputText": "ﮙ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 71,
+      "inputText": "ﮚ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 72,
+      "inputText": "ﮜ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 73,
+      "inputText": "ﮝ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 74,
+      "inputText": "ﮟ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 75,
+      "inputText": "ﮠ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 76,
+      "inputText": "ﮢ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 77,
+      "inputText": "ﮣ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 78,
+      "inputText": "ﮥ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 79,
+      "inputText": "ﮦ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 80,
+      "inputText": "ﮨ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 81,
+      "inputText": "ﮩ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 82,
+      "inputText": "ﮫ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 83,
+      "inputText": "ﮬ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 84,
+      "inputText": "ﮮ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 85,
+      "inputText": "ﮯ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 86,
+      "inputText": "ﮱ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 87,
+      "inputText": "﮲",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 88,
+      "inputText": "﮴",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 89,
+      "inputText": "﮵",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 90,
+      "inputText": "﮷",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 91,
+      "inputText": "﮸",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 92,
+      "inputText": "﮺",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 93,
+      "inputText": "﮻",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 94,
+      "inputText": "﮽",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 95,
+      "inputText": "﮾",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 96,
+      "inputText": "﯀",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 97,
+      "inputText": "﯁",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 98,
+      "inputText": "ﯓ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 99,
+      "inputText": "ﯔ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 100,
+      "inputText": "ﯖ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 101,
+      "inputText": "ﯗ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 102,
+      "inputText": "ﯙ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 103,
+      "inputText": "ﯚ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 104,
+      "inputText": "ﯜ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 105,
+      "inputText": "ﯝ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 106,
+      "inputText": "ﯟ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 107,
+      "inputText": "ﯠ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 108,
+      "inputText": "ﯢ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 109,
+      "inputText": "ﯣ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 110,
+      "inputText": "ﯥ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 111,
+      "inputText": "ﯦ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 112,
+      "inputText": "ﯨ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 113,
+      "inputText": "ﯩ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    },
+    {
+      "surahNumber": 114,
+      "inputText": "ﯫ",
+      "fontFamily": "QCF_SurahHeader_COLOR"
+    }
+  ]
+}

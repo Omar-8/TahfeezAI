@@ -9,11 +9,20 @@ part 'reader_layout_item.freezed.dart';
 ///
 /// Mirrors the structural-marker concept in
 /// `docs/reference/04_READER_SPEC.md` §13 (`ReaderLayoutItem`/`ChapterInfo`/
-/// `Bismillah`/`ChapterTitle`/`SectionMarker`) — independently modeled, not
-/// copied — so a reading session over a Surah/Juz/Hizb/range/single Ayah is
-/// always the *same* shape: a flat, orderable list an ordinary
-/// `ListView.builder` can render lazily, with each verse an independent
-/// domain/presentation unit per this milestone's explicit requirement.
+/// `Bismillah`/`SectionMarker`) — independently modeled, not copied — so a
+/// reading session over a Surah/Juz/Hizb/range/single Ayah is always the
+/// *same* shape: a flat, orderable list an ordinary `ListView.builder` can
+/// render lazily, with each verse an independent domain/presentation unit
+/// per this milestone's explicit requirement.
+///
+/// [ReaderChapterInfoItem] marks *every* chapter entry point, not only the
+/// session's opening one — an earlier design used a separate, much plainer
+/// `ChapterTitle` marker for a chapter reached mid-session (continuous
+/// scrolling, or a later segment of a Juz/Hizb range), but that made the
+/// same kind of moment — "a new Surah begins here" — look different
+/// depending on how the reader arrived at it (e.g. Al-Fatiha's own opening
+/// card looking nothing like Al-Baqarah's marker one continuous scroll
+/// later). Every chapter entry now gets the same card.
 ///
 /// [ReaderVerseItem] deliberately carries only the immutable content
 /// ([AyahWithWords], from the read-only [QuranRepository]) — never a
@@ -36,20 +45,12 @@ sealed class ReaderLayoutItem with _$ReaderLayoutItem {
   /// Fatiha (whose Bismillah is verse 1) and At-Tawbah (which conventionally
   /// omits it) — `docs/reference/04_READER_SPEC.md` §13's `Bismillah`.
   ///
-  /// Deliberately carries **no Arabic text of its own**: the Bismillah is
-  /// canonical Quran text, and this milestone's schema has no dedicated
-  /// place to source it from independently of a real Mushaf line/word
-  /// dataset (see `docs/ARCHITECTURE.md`'s Milestone 6 section) — rendering
-  /// it as a plain decorative divider avoids ever hard-coding that text.
+  /// Carries no Arabic text of its own: [BismillahDivider]
+  /// (`lib/features/reader/presentation/widgets/bismillah_divider.dart`)
+  /// resolves the real text itself, from `bismillahTextProvider` — sourced
+  /// from Al-Fatiha's own ayah 1, which *is* the Bismillah word-for-word,
+  /// never a literal string written into a widget.
   const factory ReaderLayoutItem.bismillah() = ReaderBismillahItem;
-
-  /// A chapter-name header, used when a reading session spans multiple
-  /// chapters (Juz/Hizb reading) to mark a chapter boundary inline —
-  /// `docs/reference/04_READER_SPEC.md` §13's `ChapterTitle`.
-  const factory ReaderLayoutItem.chapterTitle({
-    required int surahNo,
-    String? localizedName,
-  }) = ReaderChapterTitleItem;
 
   /// A lightweight inline label marking a structural boundary (a Ruku
   /// change) between verses — `docs/reference/04_READER_SPEC.md` §13's
@@ -70,7 +71,6 @@ Object readerLayoutItemKey(ReaderLayoutItem item, int index) {
   return switch (item) {
     ReaderChapterInfoItem(:final surah) => 'chapter-info-${surah.surahNo}',
     ReaderBismillahItem() => 'bismillah-$index',
-    ReaderChapterTitleItem(:final surahNo) => 'chapter-title-$surahNo',
     ReaderSectionMarkerItem(:final label) => 'section-$index-$label',
     ReaderVerseItem(:final ayah) => 'verse-${ayah.ayah.id}',
   };

@@ -70,7 +70,15 @@ class _QuickReferenceBody extends ConsumerWidget {
                     child: Text(
                       words.map((w) => w.text).join(' '),
                       textAlign: TextAlign.right,
-                      style: quranTextStyle(context),
+                      // Plain theme color here, not the reader's own
+                      // appearance/font: `lib/quran/presentation/` sits
+                      // below `features/mushaf/` in the dependency
+                      // direction (`docs/ARCHITECTURE.md` §1), and this is
+                      // a lightweight, secondary preview popup rather than
+                      // the main reading surface.
+                      style: quranTextStyle(
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
                     ),
                   ),
             loading: () => const TahfeezLoadingView(),

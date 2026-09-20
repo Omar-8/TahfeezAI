@@ -29,7 +29,7 @@ void main() {
       final items = <(ReaderLayoutItem, int)>[
         (ReaderLayoutItem.chapterInfo(surah: _surah(1)), 0),
         (const ReaderLayoutItem.bismillah(), 1),
-        (const ReaderLayoutItem.chapterTitle(surahNo: 2), 2),
+        (ReaderLayoutItem.chapterInfo(surah: _surah(2)), 2),
         (const ReaderLayoutItem.sectionMarker(label: 'Ruku 1'), 3),
         (
           ReaderLayoutItem.verse(

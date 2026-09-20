@@ -713,6 +713,12 @@ Quran index's "Jump back in" chip does, since both are the same underlying conce
 
 ## 11e. Accurate Mushaf Renderer (Milestone 7)
 
+> **Superseded, historical record only**: the per-word rendering described here
+> (`FontMushafLineRenderer`, `MushafLineRenderer`, `MushafWordPlacement`) was replaced by
+> the line-level shaping architecture in §24 — those classes no longer exist. Kept
+> as-is below for the historical decision record, per this document's own stated
+> purpose; see `docs/MUSHAF_RENDERING.md` for the current, accurate architecture.
+
 ### A pure-Dart layout engine, injected with a measurer
 
 `lib/features/mushaf/domain/mushaf_page_layout_engine.dart`'s `MushafPageLayoutEngine` is the
@@ -1398,6 +1404,12 @@ each.
 
 ## 11k. Mushaf Rendering and Font Packaging (Milestone 9C)
 
+> **Partially superseded**: the per-word `FontMushafLineRenderer` this section
+> describes was replaced by line-level shaping in §24 (`MushafPagePainter`,
+> `MushafPageRenderModel`). The font-packaging/`QpcPageFontManager` material below is
+> still current and unaffected — see `docs/MUSHAF_RENDERING.md` for the up-to-date
+> combined picture.
+
 Once real Mushaf line/token data existed (§11j), this milestone connected it to the
 actual renderer and to the real QPC V2 page-specific font system, and made the
 production data reach the app's own local database at boot rather than only a
@@ -1740,3 +1752,112 @@ whether QUL's redistribution terms are ever cleared.
 - No change to canonical `AyahWord`/`Ayah` schema, translation/tafsir architecture, or search — this
   milestone is scoped entirely to the Mushaf rendering/font layer built on top of already-existing,
   unmodified canonical data.
+
+## 24. Line-Level Mushaf Rendering Rewrite, Surah Header, and Bismillah Investigation
+
+Replaced §11e/§11k's per-word rendering (one `TextPainter`/shaping call per word, 100+
+per page) with line-level shaping (one `TextPainter` per line, 8–15 per page): each
+line's tokens are concatenated once, shaped once with the page's real QCF V2 font, and
+per-token hit rectangles are recovered from that single shaped paragraph via
+`TextPainter.getBoxesForSelection` — never computed by hand, never re-shaped per word.
+One `CustomPainter` (`MushafPagePainter`) now paints an entire page, wrapped in a
+`RepaintBoundary` (`isComplex: true, willChange: false`); the shaped
+`MushafPageRenderModel` is cached by a `keepAlive` Riverpod provider keyed on
+everything that actually changes what gets shaped, so an unrelated widget rebuild
+reuses the same instance rather than re-shaping. Full current architecture:
+`docs/MUSHAF_RENDERING.md` §1, §5.
+
+Also investigated (per explicit instruction) whether the two QUL/KFGQPC special-line
+fonts the project owner supplied could replace the existing non-final fallbacks for
+`surahHeader`/`bismillah` lines:
+
+- **Surah header — done and working.** QUL's official Surah Header color font
+  (COLRv0/CPAL) plus its own ligature JSON give a single verified codepoint per surah
+  (all 114 cross-checked against the font's real `cmap`, never sampled) whose glyph
+  already contains the complete decorative frame+name artwork. A real Skia render
+  confirmed it draws correctly. Wired in via `surahHeaderGlyphManifestProvider` +
+  `_buildDecorativeSurahHeaderLine`, with the localized name always carried as a real
+  accessibility node (`MushafPagePainter.semanticsBuilder`) separate from the visible
+  glyph, and a plain-text fallback when the font isn't bundled.
+  `docs/QURAN_DATA_PROVENANCE.md` §10.
+- **Bismillah — investigated, not wired in.** The supplied `QCF2BSML.ttf` turned out to
+  use the same per-arbitrary-codepoint, one-glyph-per-word encoding as the ordinary QCF
+  page fonts (confirmed by direct rendering tests: plain canonical Arabic text renders
+  as empty glyphs, while an arbitrary ASCII control string renders a real, correctly
+  shaped Arabic phrase) — not a plain-Arabic-text font a shaping engine turns into
+  letterforms. No companion word-by-word mapping resource for this specific font was
+  provided, so the exact codepoint sequence for the Bismillah phrase in this font's own
+  encoding is unknown; fabricating or visually reverse-engineering one was rejected as
+  too risky for text repeated 112 times across the Mushaf. `bismillah` lines keep their
+  pre-existing plain-system-font rendering. `docs/QURAN_DATA_PROVENANCE.md` §11.
+
+`tool/quran_data/src/ttf_inspector.dart` was extended (still a from-scratch,
+dependency-free parser, no external tool dependency) to read `cmap` (format 4 and
+format 12 subtables) and `GSUB`/`COLR`/`CPAL` table presence — needed to verify both
+fonts' actual codepoint mappings rather than assume one.
+
+### What this did not do
+
+- No change to Quran data, authoritative page/line mapping, or QPC V2 word mappings —
+  scoped entirely to the rendering layer built on top of already-existing, unmodified
+  data, per explicit instruction.
+- No `ui.Picture`-level page caching (the "second stage" some specifications describe)
+  — line-level shaping plus render-model memoization was the whole scope here; revisit
+  only if real-device profiling (still not done — see below) shows it's still needed.
+- No `flutter run --profile`/release-APK frame-timing measurement on a real Android
+  device — no device was available in this environment. Scrolling smoothness is
+  therefore not a verified claim; it should be measured before being treated as one.
+- No page-render-model prewarming beyond the pre-existing font prewarming (±2 pages) —
+  a page's render model is currently built on first watch, not proactively ahead of a
+  swipe landing on it.
+- No attempt to reverse-engineer or fabricate a QCF2BSML word→codepoint mapping — see
+  above.
+
+## 25. QPC Hafs Mushaf-migration Audit and the Three-Layer Quran Text Model
+
+A compatibility audit evaluated whether Mushaf mode's page-specific QPC V2 rendering
+(§11e/§11k/§24) could be replaced by the QPC Hafs Unicode script + a single
+`UthmanicHafs_V22.ttf` font, to simplify the rendering pipeline. **Rejected, based on
+measured results, not assumption**: full (not sampled) cross-checking of all 83,668
+words confirmed the QPC Hafs word-by-word script is completely data-compatible with the
+existing 15-line layout (identical `id`→`(surah,ayah,word)` mapping, zero gaps/
+duplicates/missing references against every page's `first_word_id`/`last_word_id`), and
+real-Skia rendering confirmed the font itself has no defect when paired with its own
+script (a previous defect finding, §16 of `docs/QURAN_DATA_PROVENANCE.md`, turned out to
+be a text/font *mismatch* — Tanzil text rendered through a font paired with a different
+script — not a font defect). But direct side-by-side rendering of the same real pages
+showed QPC Hafs does not reproduce QPC V2's page-specific hand-tuned justification or its
+more elaborate traditional Madinah-Mushaf letterforms. Mushaf mode keeps QPC V2 as its
+authoritative renderer. Full audit detail and the decision rationale:
+`docs/MUSHAF_RENDERING.md` §2a.
+
+This audit settled Tahfeez's three-layer Quran text model, which was previously implicit
+and is now made explicit as an architectural rule future work must not collapse without
+review:
+
+```
+QuranRepository (Tanzil-sourced AyahWord/Ayah)
+    → canonical Quran semantic identity: search, copy/share, references,
+      integrity validation, word-by-word/audio-highlighting tap-targets
+      — never displayed through a page-specific or private-use-area font
+
+MushafRepository-shaped data (QPC V2 MushafToken + 604 page-specific fonts)
+    → authentic, page-faithful printed-Mushaf presentation (Mushaf mode
+      only) — §11e/§11k/§24; never used to back canonical identity
+
+QuranDisplayRepository (planned; not yet implemented — QPC Hafs word-by-word,
+§17 of docs/QURAN_DATA_PROVENANCE.md)
+    → scalable Unicode display text for verse-by-verse/Ayah mode, paired
+      only with its own UthmanicHafs_V22.ttf font (never fed arbitrary
+      Tanzil text through that font — see §16's corrected finding)
+```
+
+All three map to the same stable `(surah, ayah, word)` identity but are deliberately
+separate source layers — the same "canonical semantics vs. presentation stay separate"
+principle §11e already established for QPC V2/`MushafToken`, extended to a second
+presentation layer. `QuranDisplayRepository` does not yet exist as code: this section
+records the target shape for when that import/wiring work happens, so it lands inside
+this layering rather than bypassing it. When it is built, canonical word
+identity/tap-targets/audio-highlighting must keep reading from `QuranRepository`'s
+`AyahWord`, never from the QPC Hafs script's own `word` column (that script counts
+ayah-end markers as words, so its count does not match `AyahWord`'s).

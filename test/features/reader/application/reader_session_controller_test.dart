@@ -131,26 +131,25 @@ void main() {
   });
 
   group('continuous scrolling (loadMore)', () {
-    test(
-      'appends the next chapter with a ChapterTitle marker, not ChapterInfo',
-      () async {
-        const location = QuranLocation.surah(1);
-        // Prime the provider.
-        await container.read(readerSessionProvider(location).future);
+    test('appends the next chapter with the same ChapterInfo card the session '
+        'opened with, not a separate lighter marker', () async {
+      const location = QuranLocation.surah(1);
+      // Prime the provider.
+      await container.read(readerSessionProvider(location).future);
 
-        final notifier = container.read(
-          readerSessionProvider(location).notifier,
-        );
-        await notifier.loadMore();
+      final notifier = container.read(readerSessionProvider(location).notifier);
+      await notifier.loadMore();
 
-        final state = container.read(readerSessionProvider(location)).value!;
-        expect(state.items.whereType<ReaderChapterTitleItem>(), hasLength(1));
-        expect(state.items.whereType<ReaderChapterInfoItem>(), hasLength(1));
-        // 7 verses from surah 1 + 2 from surah 2.
-        expect(state.items.whereType<ReaderVerseItem>(), hasLength(9));
-        expect(state.canLoadMore, isTrue);
-      },
-    );
+      final state = container.read(readerSessionProvider(location)).value!;
+      // One for surah 1 (the session's opening chapter) and one for
+      // surah 2 (appended by continuous scrolling) -- both the same
+      // ChapterInfoCard-backed item, so "a new Surah begins here" looks
+      // identical regardless of how the reader arrived at it.
+      expect(state.items.whereType<ReaderChapterInfoItem>(), hasLength(2));
+      // 7 verses from surah 1 + 2 from surah 2.
+      expect(state.items.whereType<ReaderVerseItem>(), hasLength(9));
+      expect(state.canLoadMore, isTrue);
+    });
 
     test('is a no-op once canLoadMore is false', () async {
       const location = QuranLocation.surah(114);

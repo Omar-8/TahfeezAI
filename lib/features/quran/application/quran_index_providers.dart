@@ -99,8 +99,10 @@ List<IndexedNavigationUnit> _groupByUnit(List<NavigationRange> ranges) {
 
 /// The Mushaf the Page navigator tab jumps within, resolved from
 /// [quranScriptCodeProvider]. `null` means no matching Mushaf is installed
-/// (the "unavailable resource" state the Page tab must render honestly —
-/// true for every install today, since no dataset import path exists yet).
+/// (the "unavailable resource" state the Page tab must render honestly) —
+/// still the normal state in a release build, or in a dev build without
+/// the license-gated Mushaf dataset present; see
+/// `docs/QURAN_DATA_PROVENANCE.md` §7.
 @riverpod
 Future<Mushaf?> defaultMushaf(Ref ref) async {
   final repository = ref.watch(quranRepositoryProvider);

@@ -5,16 +5,29 @@ import 'package:flutter/foundation.dart' show kReleaseMode;
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../core/core_providers.dart';
 import '../../../core/logging/app_logger.dart';
 import '../../../core/logging/logging_package_logger.dart';
 import '../../../quran/data/page_font_manifest_codec.dart';
 import '../../../quran/domain/models/page_font_manifest_models.dart';
 import '../data/font_loader_qpc_page_font_manager.dart';
+import '../data/web_qpc_page_font_manager.dart';
 import '../domain/qpc_page_font_manager.dart';
 
 part 'qpc_page_font_providers.g.dart';
 
 const _manifestAsset = 'assets/quran/manifests/qpc_v2_fonts.json';
+
+/// The Web QPC-font-delivery endpoint's base URL, resolved once at compile
+/// time via `--dart-define=QPC_FONT_BASE_URL=…` — never a hard-coded
+/// default, and unset by default (empty string, treated as "not
+/// configured"). QPC V2 redistribution remains `SHIP_BLOCKED_LICENSE`
+/// (`docs/QURAN_DATA_PROVENANCE.md` §8): this must stay unset in every
+/// production build until upstream permission to redistribute is
+/// confirmed — do not hard-code a QUL/Tarteel or any other public URL
+/// here. See `WebQpcPageFontManager`'s own doc comment for the URL shape
+/// this feeds into.
+const _qpcFontBaseUrlEnv = String.fromEnvironment('QPC_FONT_BASE_URL');
 
 /// The generated QPC V2 page->font manifest, or `null` if it is not bundled
 /// in this build, or if this is a release build — see
@@ -44,14 +57,28 @@ AppLogger qpcPageFontLogger(Ref ref) => LoggingPackageLogger();
 /// bundled (see [qpcPageFontManifestProvider]) — presentation code must
 /// treat a `null` manager as "Mushaf glyph rendering unavailable," never
 /// substitute a fallback font.
+///
+/// Platform selection happens *only* here — [FontLoaderQpcPageFontManager]
+/// (native) and [WebQpcPageFontManager] (Web) both implement
+/// [QpcPageFontManager] identically as far as every other caller is
+/// concerned; nothing downstream (`mushafPageFontProvider` below, the
+/// Mushaf renderer, page navigation, layout) forks on platform at all.
 @Riverpod(keepAlive: true)
 Future<QpcPageFontManager?> qpcPageFontManager(Ref ref) async {
   final manifest = await ref.watch(qpcPageFontManifestProvider.future);
   if (manifest == null) return null;
-  return FontLoaderQpcPageFontManager(
-    manifest: manifest,
-    logger: ref.watch(qpcPageFontLoggerProvider),
-  );
+  final logger = ref.watch(qpcPageFontLoggerProvider);
+
+  if (ref.watch(platformCapabilitiesProvider).isWeb) {
+    return WebQpcPageFontManager(
+      manifest: manifest,
+      logger: logger,
+      networkClient: ref.watch(networkClientProvider),
+      baseUrl: _qpcFontBaseUrlEnv.isEmpty ? null : _qpcFontBaseUrlEnv,
+    );
+  }
+
+  return FontLoaderQpcPageFontManager(manifest: manifest, logger: logger);
 }
 
 /// Ensures [pageNumber]'s font is loaded, returning the handle to render

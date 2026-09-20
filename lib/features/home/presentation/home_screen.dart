@@ -4,7 +4,6 @@ import '../../../core/localization/generated/app_localizations.dart';
 import '../../../core/theme/app_spacing.dart';
 import 'home_greeting.dart';
 import 'sections/home_daily_ayah_section.dart';
-import 'sections/home_explore_section.dart';
 import 'sections/home_featured_reading_section.dart';
 import 'sections/home_memorization_teaser_section.dart';
 import 'sections/home_read_history_section.dart';
@@ -14,7 +13,7 @@ import 'sections/home_resource_updates_banner.dart';
 /// (`docs/reference/03_NAVIGATION_MAP.md`), composed from the
 /// reference-equivalent information hierarchy this milestone requires:
 /// resource/update notices, Daily Ayah, Continue Reading, a reserved
-/// Memorization slot, Featured Reading, and Explore. The persistent
+/// Memorization slot, and Featured Reading. The persistent
 /// mini-player region (item 6) is mounted at the app-shell level
 /// (`lib/app/shell/app_shell.dart`), not here, so it can persist across
 /// Home/Quran/Search rather than being tied to one screen.
@@ -45,7 +44,6 @@ class HomeScreen extends StatelessWidget {
             const HomeReadHistorySection(),
             const HomeMemorizationTeaserSection(),
             const HomeFeaturedReadingSection(),
-            const HomeExploreSection(),
           ],
         ),
       ),

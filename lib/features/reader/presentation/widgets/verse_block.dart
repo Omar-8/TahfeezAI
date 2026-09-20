@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/routing/tafsir_routing.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -10,6 +11,10 @@ import '../../../../quran/domain/models/ayah_models.dart';
 import '../../../../quran/domain/models/translation_models.dart';
 import '../../../../quran/presentation/translation_block.dart';
 import '../../../../wbw/presentation/word_detail_sheet.dart';
+import '../../../mushaf/application/mushaf_appearance_controller.dart';
+import '../../../mushaf/application/quranapp_special_font_providers.dart';
+import '../../../mushaf/domain/mushaf_appearance.dart';
+import '../../application/quran_display_providers.dart';
 import 'verse_share_sheet.dart';
 
 /// One verse — `docs/reference/04_READER_SPEC.md` §5's `VerseView`,
@@ -28,7 +33,7 @@ import 'verse_share_sheet.dart';
 /// Play/Bookmark are wired, real widgets whose action is an honest "coming
 /// soon" today (no verse-audio source, no `UserDataRepository`
 /// implementation). Copy, Share, and Tafsir are genuinely functional.
-class VerseBlock extends StatelessWidget {
+class VerseBlock extends ConsumerWidget {
   const VerseBlock({
     super.key,
     required this.ayah,
@@ -70,8 +75,30 @@ class VerseBlock extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final scheme = Theme.of(context).colorScheme;
+    final quranTextColor = ref
+        .watch(mushafAppearanceControllerProvider)
+        .colors
+        .text;
+    final quranFontFamily = ref
+        .watch(uthmanicHafsFontManifestProvider)
+        .value
+        ?.fontFamily;
+    final displayWords = ref
+        .watch(quranDisplayRepositoryProvider)
+        .displayWordsForAyah(ayah.ayah.id);
+    // Both the font and a validated, correctly-paired QPC Hafs word list
+    // (same length as the canonical word list, so index `i` in each refers
+    // to the same word) must be available, or this ayah falls back to
+    // plain canonical text through the system font — never QPC Hafs text
+    // through a missing font, and never canonical text forced through the
+    // QPC Hafs font (the exact mismatch that produced the confirmed U+06DF
+    // rendering defect; see `docs/QURAN_DATA_PROVENANCE.md` §16/§17).
+    final useQpcHafs =
+        quranFontFamily != null &&
+        displayWords != null &&
+        displayWords.length == ayah.words.length;
 
     return Material(
       color: isSelected
@@ -89,6 +116,61 @@ class VerseBlock extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             spacing: TahfeezSpacing.sm,
             children: [
+              if (arabicVisible)
+                Directionality(
+                  textDirection: TextDirection.rtl,
+                  child: Wrap(
+                    textDirection: TextDirection.rtl,
+                    // `WrapAlignment.start` -- not `.end` -- hugs the right
+                    // margin: under `TextDirection.rtl`, `start` means "as
+                    // close to the beginning of reading order as possible",
+                    // which for Arabic is the right edge. `.end` was
+                    // pushing verse text to the LEFT instead, backwards for
+                    // Arabic script.
+                    alignment: WrapAlignment.start,
+                    spacing: TahfeezSpacing.sm,
+                    runSpacing: TahfeezSpacing.xs,
+                    children: [
+                      for (var i = 0; i < ayah.words.length; i++)
+                        InkWell(
+                          // Always the canonical word identity -- word tap,
+                          // word-by-word translation, and future audio
+                          // highlighting must never key off QPC Hafs's own
+                          // word numbering, which counts the trailing
+                          // ayah-end marker as an extra "word" that
+                          // canonical `AyahWord` doesn't have.
+                          onTap: () => showWordDetailSheet(
+                            context,
+                            wordRef: (
+                              ayahId: ayah.words[i].ayahId,
+                              wordIndex: ayah.words[i].wordIndex,
+                            ),
+                          ),
+                          child: Text(
+                            // QPC Hafs display text when a validated entry
+                            // and its font are both available; otherwise
+                            // the pre-existing canonical-text/system-font
+                            // rendering -- never QPC Hafs text through a
+                            // missing font, and never canonical text forced
+                            // through the QPC Hafs font (the exact mismatch
+                            // that produced the confirmed U+06DF rendering
+                            // defect; see `useQpcHafs`'s own doc comment).
+                            useQpcHafs ? displayWords[i] : ayah.words[i].text,
+                            style: quranTextStyle(
+                              color: quranTextColor,
+                              fontFamily: useQpcHafs ? quranFontFamily : null,
+                              fontSize: quranVerseFontSize,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              for (final entry in translations.entries)
+                TranslationBlock(
+                  verseText: entry.value,
+                  authorName: translationBooks[entry.key]?.author ?? entry.key,
+                ),
               TahfeezVerseActionBar(
                 trailing: InkWell(
                   onTap: () => _copyReference(context),
@@ -135,38 +217,6 @@ class VerseBlock extends StatelessWidget {
                   ),
                 ],
               ),
-              if (arabicVisible)
-                Directionality(
-                  textDirection: TextDirection.rtl,
-                  child: Wrap(
-                    textDirection: TextDirection.rtl,
-                    alignment: WrapAlignment.end,
-                    spacing: TahfeezSpacing.sm,
-                    runSpacing: TahfeezSpacing.xs,
-                    children: [
-                      for (final word in ayah.words)
-                        InkWell(
-                          onTap: () => showWordDetailSheet(
-                            context,
-                            wordRef: (
-                              ayahId: word.ayahId,
-                              wordIndex: word.wordIndex,
-                            ),
-                            arabicText: word.text,
-                          ),
-                          child: Text(
-                            word.text,
-                            style: quranTextStyle(context),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              for (final entry in translations.entries)
-                TranslationBlock(
-                  verseText: entry.value,
-                  authorName: translationBooks[entry.key]?.author ?? entry.key,
-                ),
             ],
           ),
         ),

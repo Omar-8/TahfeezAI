@@ -73,17 +73,17 @@ class ArabicTextVisiblePreferenceController
   }
 }
 
-/// The reader mode used for new reading sessions. Always
-/// [ReaderMode.verseByVerse] today (the only implemented mode), but
-/// persisted so switching modes becomes a one-controller change once
-/// Mushaf/Translation modes exist (Milestones 7, 9), per this milestone's
-/// "architecturally ready" requirement.
+/// The reader mode used for new reading sessions.
+/// [ReaderMode.mushaf] is the default for a fresh install — the authentic
+/// printed-page experience is Tahfeez's primary reading mode, per product
+/// direction — until the user explicitly switches
+/// (`ReaderScreen`/`ReaderModeSwitch`), which persists their choice here.
 @Riverpod(keepAlive: true)
 class ReaderModePreferenceController extends _$ReaderModePreferenceController {
   @override
   ReaderMode build() {
     _restore();
-    return ReaderMode.verseByVerse;
+    return ReaderMode.mushaf;
   }
 
   Future<void> _restore() async {

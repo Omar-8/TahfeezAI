@@ -223,6 +223,18 @@ class BundledDatasetSeeder {
     try {
       bytes = (await rootBundle.load(_mushafAsset)).buffer.asUint8List();
     } catch (_) {
+      // Logged (not silently swallowed) even though an absent Mushaf asset
+      // is an expected, honest state in a release build: at `debug` level
+      // so it never looks like an error, but still visible via
+      // `adb logcat`/`flutter logs` if someone genuinely expected the
+      // asset to be present (e.g. a debug build where it was bundled but
+      // failed to load for some other reason) and needs to tell the two
+      // cases apart.
+      logger.debug(
+        'Mushaf dataset asset not loadable at "$_mushafAsset" — treating '
+        'as not bundled in this build.',
+        tag: 'BundledDatasetSeeder',
+      );
       return payload; // Not bundled in this build — expected in release.
     }
 

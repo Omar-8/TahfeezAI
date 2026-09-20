@@ -1,20 +1,29 @@
+import 'dart:async' show unawaited;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/localization/locale_controller.dart';
-import '../../../quran/application/quran_chapter_localization.dart';
 import '../../../quran/domain/models/mushaf_models.dart';
 import '../application/mushaf_appearance_controller.dart';
 import '../application/mushaf_page_providers.dart';
 import '../application/qpc_page_font_providers.dart';
 import '../domain/mushaf_appearance.dart';
-import '../domain/mushaf_line_layout.dart';
+import '../domain/qpc_page_font_manager.dart';
 import 'mushaf_layout_providers.dart';
-import 'mushaf_line_renderer.dart';
+import 'mushaf_page_painter.dart';
+import 'mushaf_page_render_model.dart';
+import 'mushaf_prewarm_controller.dart';
 
-/// Renders one printed Mushaf page: margins, a Juz/Hizb/page-number footer,
-/// and every line — chapter-name headers, Bismillah markers, and justified
-/// Quran-text lines via the active [MushafLineRenderer].
+/// Renders one printed Mushaf page — a single [RepaintBoundary]-wrapped
+/// [CustomPaint] ([MushafPagePainter]) drawing an already-fully-shaped
+/// [MushafPageRenderModel]
+/// (`mushaf_layout_providers.dart`'s `mushafPageRenderModelProvider`), not
+/// a separate widget/render object per line or per word — the concrete
+/// form of this project's "shape at line level, one CustomPainter per
+/// page" performance requirement. Word taps are resolved by testing the
+/// tap position against [MushafTokenHitRect]s carried in that same render
+/// model, recovered from each line's one real shaped paragraph via
+/// `TextPainter.getBoxesForSelection` — never computed by hand.
 ///
 /// Colors come only from [MushafAppearanceController]'s active
 /// [MushafAppearanceColors] — never from `Theme.of(context)` — per this
@@ -26,11 +35,25 @@ class MushafPageView extends ConsumerWidget {
     required this.mushafId,
     required this.pageNumber,
     this.onWordTap,
+    this.isCurrentPage = false,
   });
 
   final int mushafId;
   final int pageNumber;
-  final ValueChanged<MushafWordPlacement>? onWordTap;
+  final ValueChanged<MushafTokenHitRect>? onWordTap;
+
+  /// Whether this instance represents the page the pager considers
+  /// authoritatively "current" right now — set by [MushafPager], which is
+  /// the only thing that knows this: `PageView.builder`'s
+  /// `allowImplicitScrolling`/`scrollCacheExtent` (`mushaf_pager.dart`)
+  /// pre-build neighboring pages' widgets too, so *this widget existing*
+  /// is not by itself proof of being the visible page. Only the current
+  /// page triggers [MushafPagePrewarmController.prewarmAround] — every
+  /// pre-built neighbor calling it with *its own* page number as "current"
+  /// would thrash the controller's single-target tracking between
+  /// competing pages every frame, never settling (a real bug this field
+  /// exists to prevent, caught by a `pumpAndSettle` timeout in testing).
+  final bool isCurrentPage;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -49,10 +72,13 @@ class MushafPageView extends ConsumerWidget {
             // No page-specific font concept for this rendering type — no
             // font gating needed.
             return _MushafPageContent(
-              bundle: bundle,
+              mushafId: mushafId,
+              pageNumber: pageNumber,
+              totalPages: bundle.mushaf.pageCount,
               colors: colors,
               onWordTap: onWordTap,
               fontFamily: null,
+              isCurrentPage: isCurrentPage,
             );
           }
 
@@ -69,16 +95,22 @@ class MushafPageView extends ConsumerWidget {
                 return _MushafFontPendingPlaceholder(colors: colors);
               }
               return _MushafPageContent(
-                bundle: bundle,
+                mushafId: mushafId,
+                pageNumber: pageNumber,
+                totalPages: bundle.mushaf.pageCount,
                 colors: colors,
                 onWordTap: onWordTap,
                 fontFamily: handle.fontFamily,
+                isCurrentPage: isCurrentPage,
               );
             },
             loading: () => Center(
               child: CircularProgressIndicator(color: colors.secondaryText),
             ),
-            error: (_, _) => _MushafFontErrorPlaceholder(colors: colors),
+            error: (error, _) =>
+                error is QpcWebFontDeliveryNotConfiguredException
+                ? _MushafWebFontNotConfiguredPlaceholder(colors: colors)
+                : _MushafFontErrorPlaceholder(colors: colors),
           );
         },
         loading: () => Center(
@@ -145,17 +177,46 @@ class _MushafFontErrorPlaceholder extends StatelessWidget {
   }
 }
 
+/// Shown specifically on Web when [QpcWebFontDeliveryNotConfiguredException]
+/// is thrown (`QPC_FONT_BASE_URL` unset) — distinct from
+/// [_MushafFontErrorPlaceholder]'s generic "could not be loaded" message
+/// (a real fetch failure) so this honest, expected-while-
+/// `SHIP_BLOCKED_LICENSE` state is never confused with a bug to retry.
+/// Never a silent fallback to a system font.
+class _MushafWebFontNotConfiguredPlaceholder extends StatelessWidget {
+  const _MushafWebFontNotConfiguredPlaceholder({required this.colors});
+
+  final MushafAppearanceColors colors;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Text(
+        'Mushaf page font resources are not configured for Web.',
+        textAlign: TextAlign.center,
+        style: TextStyle(color: colors.secondaryText),
+      ),
+    );
+  }
+}
+
 class _MushafPageContent extends ConsumerWidget {
   const _MushafPageContent({
-    required this.bundle,
+    required this.mushafId,
+    required this.pageNumber,
+    required this.totalPages,
     required this.colors,
     required this.onWordTap,
     required this.fontFamily,
+    required this.isCurrentPage,
   });
 
-  final MushafPageBundle bundle;
+  final int mushafId;
+  final int pageNumber;
+  final int totalPages;
   final MushafAppearanceColors colors;
-  final ValueChanged<MushafWordPlacement>? onWordTap;
+  final ValueChanged<MushafTokenHitRect>? onWordTap;
+  final bool isCurrentPage;
 
   /// The exact font this page's Quran glyph text must be drawn with — set
   /// only once `QpcPageFontManager.ensureLoaded` has confirmed it, or
@@ -164,147 +225,103 @@ class _MushafPageContent extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final engine = ref.watch(mushafPageLayoutEngineProvider);
-    final renderer = ref.watch(mushafLineRendererProvider);
-
+    // No page footer: the page/Juz/Surah context it used to show now lives
+    // in the (live, per-page) app bar title instead
+    // (`MushafPageTitle`/`lib/features/reader/presentation/reader_screen.dart`),
+    // and the vertical space it used to take, plus the slack this padding
+    // used to reserve above/below the 15 lines, is given back to the text
+    // itself — see `buildMushafPageRenderModel`'s `availableHeight`.
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      child: Column(
-        children: [
-          Expanded(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final layout = engine.layoutPage(
-                  pageNumber: bundle.pageNumber,
-                  lines: bundle.lines,
-                  tokensByLineNumber: bundle.tokensByLineNumber,
-                  availableWidth: constraints.maxWidth,
-                  fontFamily: fontFamily,
-                );
-                final lineHeight = layout.lines.isEmpty
-                    ? 0.0
-                    : constraints.maxHeight / layout.lines.length;
-
-                return Column(
-                  children: [
-                    for (final line in layout.lines)
-                      SizedBox(
-                        key: ValueKey(
-                          'mushaf-page-${bundle.pageNumber}-line-${line.lineNumber}',
-                        ),
-                        width: constraints.maxWidth,
-                        height: lineHeight,
-                        child: _lineContent(
-                          context,
-                          ref,
-                          line,
-                          renderer,
-                          constraints.maxWidth,
-                          lineHeight,
-                        ),
-                      ),
-                  ],
-                );
-              },
+      padding: const EdgeInsets.only(left: 16, right: 16, top: 4, bottom: 8),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final renderModel = ref.watch(
+            mushafPageRenderModelProvider(
+              mushafId: mushafId,
+              pageNumber: pageNumber,
+              availableWidth: constraints.maxWidth,
+              availableHeight: constraints.maxHeight,
+              fontFamily: fontFamily,
             ),
-          ),
-          const SizedBox(height: 8),
-          _PageFooter(bundle: bundle, colors: colors),
-        ],
+          );
+
+          // Deferred to after this frame (never called synchronously from
+          // build): warms neighboring pages' render models — font load
+          // *then* line shaping — ahead of a swipe landing on them, so
+          // that work never happens on the destination page's own first
+          // frame. Never awaited here: this page's own paint above never
+          // waits on a neighbor.
+          //
+          // Gated on `isCurrentPage`: `PageView.builder`'s
+          // `allowImplicitScrolling`/`scrollCacheExtent`
+          // (`mushaf_pager.dart`) keep neighboring pages' widgets built
+          // too, each running this same `LayoutBuilder`. If *every* one of
+          // them called `prewarmAround` with *its own* page number as
+          // "current", the controller's single-target tracking would
+          // thrash between competing pages every frame and never settle —
+          // a real bug caught by a `pumpAndSettle` timeout in testing.
+          // Only the pager's own authoritative current page may drive
+          // prewarming.
+          if (isCurrentPage) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              unawaited(
+                ref
+                    .read(mushafPagePrewarmControllerProvider.notifier)
+                    .prewarmAround(
+                      mushafId: mushafId,
+                      currentPage: pageNumber,
+                      totalPages: totalPages,
+                      availableWidth: constraints.maxWidth,
+                      availableHeight: constraints.maxHeight,
+                    ),
+              );
+            });
+          }
+
+          if (renderModel == null) return const SizedBox.shrink();
+
+          // One painter for the whole page — every line's text was already
+          // shaped once when `renderModel` was built (never here, and
+          // never per word) — wrapped in its own `RepaintBoundary` so
+          // repainting this page (e.g. a page-turn animation frame) never
+          // forces sibling pages/chrome to repaint, and marked `isComplex`/
+          // `willChange: false`: a Mushaf page's shaped text is static
+          // between render-model rebuilds, never animating on its own.
+          return RepaintBoundary(
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTapUp: onWordTap == null
+                  ? null
+                  : (details) {
+                      final hitRect = _hitRectAt(
+                        renderModel,
+                        details.localPosition,
+                      );
+                      if (hitRect != null) onWordTap!(hitRect);
+                    },
+              child: CustomPaint(
+                size: renderModel.size,
+                isComplex: true,
+                willChange: false,
+                painter: MushafPagePainter(renderModel),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
 
-  Widget _lineContent(
-    BuildContext context,
-    WidgetRef ref,
-    MushafLineLayout line,
-    MushafLineRenderer renderer,
-    double availableWidth,
-    double lineHeight,
+  MushafTokenHitRect? _hitRectAt(
+    MushafPageRenderModel renderModel,
+    Offset position,
   ) {
-    switch (line.lineType) {
-      case MushafLineType.surahHeader:
-        return _SurahHeaderLine(surahNo: line.surahNo, colors: colors);
-      case MushafLineType.bismillah:
-        return _BismillahLine(colors: colors);
-      case MushafLineType.quranText:
-        return renderer.buildLine(
-          context,
-          layout: line,
-          availableWidth: availableWidth,
-          lineHeight: lineHeight,
-          textColor: colors.text,
-          fontFamily: fontFamily,
-          onWordTap: onWordTap,
-        );
+    for (final line in renderModel.lines) {
+      if (line is! MushafQuranTextLineRenderModel) continue;
+      for (final hitRect in line.tokenRects) {
+        if (hitRect.rect.contains(position)) return hitRect;
+      }
     }
-  }
-}
-
-class _SurahHeaderLine extends ConsumerWidget {
-  const _SurahHeaderLine({required this.surahNo, required this.colors});
-
-  final int? surahNo;
-  final MushafAppearanceColors colors;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    if (surahNo == null) return const SizedBox.shrink();
-    final languageCode =
-        ref.watch(localeControllerProvider)?.languageCode ?? 'en';
-    final localization = ref.watch(
-      chapterLocalizationProvider(surahNo!, languageCode: languageCode),
-    );
-
-    return Center(
-      child: Text(
-        localization.value?.name ?? 'Surah $surahNo',
-        style: TextStyle(
-          color: colors.text,
-          fontWeight: FontWeight.w600,
-          fontSize: 18,
-        ),
-      ),
-    );
-  }
-}
-
-/// A decorative divider marking where a chapter's Bismillah belongs.
-/// Deliberately textless — see `ReaderBismillahItem`'s doc comment
-/// (`lib/features/reader/domain/reader_layout_item.dart`) for why: the
-/// Bismillah is canonical Quran text with no dedicated source in this
-/// milestone's schema.
-class _BismillahLine extends StatelessWidget {
-  const _BismillahLine({required this.colors});
-
-  final MushafAppearanceColors colors;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Icon(Icons.auto_awesome, size: 14, color: colors.secondaryText),
-    );
-  }
-}
-
-class _PageFooter extends StatelessWidget {
-  const _PageFooter({required this.bundle, required this.colors});
-
-  final MushafPageBundle bundle;
-  final MushafAppearanceColors colors;
-
-  @override
-  Widget build(BuildContext context) {
-    final parts = <String>['Page ${bundle.pageNumber}'];
-    if (bundle.juzNo != null) parts.add('Juz ${bundle.juzNo}');
-    if (bundle.hizbNos.isNotEmpty) {
-      parts.add('Hizb ${bundle.hizbNos.join(', ')}');
-    }
-
-    return Text(
-      parts.join(' · '),
-      style: TextStyle(color: colors.secondaryText, fontSize: 12),
-    );
+    return null;
   }
 }

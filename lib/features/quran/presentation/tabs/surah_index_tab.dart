@@ -9,6 +9,12 @@ import '../../application/quran_index_providers.dart';
 
 enum _RevelationFilter { all, meccan, medinan }
 
+/// The search bar's and filter button's shared height — a single constant
+/// so the two can never drift apart by sizing independently to their own
+/// content (the search `TextField`'s natural height vs. an `IconButton`'s
+/// default Material tap target are not the same by default).
+const _searchBarHeight = 44.0;
+
 /// The Surah navigator tab: every chapter, searchable by number/name and
 /// filterable by revelation place — `docs/reference/02_SCREEN_INVENTORY.md`
 /// §5's "Chapters" tab reimagined with Tahfeez's own components rather than
@@ -27,6 +33,7 @@ class _SurahIndexTabState extends ConsumerState<SurahIndexTab> {
   final _searchController = TextEditingController();
   String _query = '';
   _RevelationFilter _filter = _RevelationFilter.all;
+  bool _reversed = false;
 
   @override
   void dispose() {
@@ -36,11 +43,12 @@ class _SurahIndexTabState extends ConsumerState<SurahIndexTab> {
 
   List<IndexedSurah> _apply(List<IndexedSurah> all) {
     final query = _query.trim().toLowerCase();
-    return [
+    final matched = [
       for (final indexed in all)
         if (_matchesFilter(indexed.surah) && _matchesQuery(indexed, query))
           indexed,
     ];
+    return _reversed ? matched.reversed.toList() : matched;
   }
 
   bool _matchesFilter(Surah surah) {
@@ -60,51 +68,209 @@ class _SurahIndexTabState extends ConsumerState<SurahIndexTab> {
     return name.contains(query) || arabicName.contains(query);
   }
 
+  void _showFilterSheet() {
+    // Counts are of every Surah (never just the currently-searched/filtered
+    // subset) -- this sheet is the "change the filter" surface, so it should
+    // always answer "how many Meccan/Medinan chapters are there in total,"
+    // not "how many currently match my search." "All" gets no count: its
+    // meaning (114, the whole Mushaf) is self-evident and would just repeat
+    // the other two chips' sum right next to them.
+    final all = ref.read(indexedSurahsProvider).value ?? const [];
+    final meccanCount = all
+        .where((s) => s.surah.revelationType == RevelationType.meccan)
+        .length;
+    final medinanCount = all
+        .where((s) => s.surah.revelationType == RevelationType.medinan)
+        .length;
+
+    showTahfeezModalBottomSheet<void>(
+      context: context,
+      title: 'Filter chapters',
+      builder: (context) => StatefulBuilder(
+        builder: (context, setSheetState) {
+          void select(_RevelationFilter value) {
+            setState(() => _filter = value);
+            setSheetState(() {});
+          }
+
+          return Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+            child: Wrap(
+              spacing: TahfeezSpacing.sm,
+              children: [
+                TahfeezFilterChip(
+                  label: 'All',
+                  selected: _filter == _RevelationFilter.all,
+                  onSelected: (_) => select(_RevelationFilter.all),
+                ),
+                TahfeezFilterChip(
+                  label: 'Meccan ($meccanCount)',
+                  selected: _filter == _RevelationFilter.meccan,
+                  onSelected: (_) => select(_RevelationFilter.meccan),
+                ),
+                TahfeezFilterChip(
+                  label: 'Medinan ($medinanCount)',
+                  selected: _filter == _RevelationFilter.medinan,
+                  onSelected: (_) => select(_RevelationFilter.medinan),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final surahs = ref.watch(indexedSurahsProvider);
+    final scheme = Theme.of(context).colorScheme;
 
     return Column(
       children: [
         Padding(
+          // A little more top margin than a typical section
+          // (`TahfeezSpacing.smPlus`, not `.sm`): this tab's content sits
+          // directly under the Quran index's `TabBar`
+          // (`quran_index_screen.dart`), which otherwise reads as cramped
+          // against the search bar right below it -- but not so much that
+          // it pushes the search bar noticeably far from the tabs above it.
           padding: const EdgeInsets.fromLTRB(
             TahfeezSpacing.md,
-            TahfeezSpacing.sm,
+            TahfeezSpacing.smPlus,
             TahfeezSpacing.md,
-            0,
+            TahfeezSpacing.md,
           ),
-          child: TextField(
-            controller: _searchController,
-            decoration: const InputDecoration(
-              hintText: 'Search chapters',
-              prefixIcon: Icon(Icons.search),
-              isDense: true,
-            ),
-            onChanged: (value) => setState(() => _query = value),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(TahfeezSpacing.md),
-          child: Wrap(
-            spacing: TahfeezSpacing.sm,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              TahfeezFilterChip(
-                label: 'All',
-                selected: _filter == _RevelationFilter.all,
-                onSelected: (_) =>
-                    setState(() => _filter = _RevelationFilter.all),
+              // A filled, borderless pill -- not a plain underlined/outlined
+              // `TextField` -- matching a modern search bar's usual shape
+              // rather than a generic form-field look. Fixed to
+              // `_searchBarHeight` so it lines up exactly with the filter
+              // button beside it, rather than each sizing independently to
+              // its own content and drifting apart by a few pixels.
+              Expanded(
+                child: SizedBox(
+                  height: _searchBarHeight,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: scheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(TahfeezRadii.pill),
+                    ),
+                    child: TextField(
+                      controller: _searchController,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                      // Without this, the hint text/input baseline sits
+                      // slightly above true center within the search bar's
+                      // now-fixed `_searchBarHeight` box (`TextField`'s
+                      // default vertical alignment accounts for its own
+                      // natural content height, not an ancestor-imposed
+                      // fixed height) -- while the prefix search icon,
+                      // constrained separately, already looked centered.
+                      textAlignVertical: TextAlignVertical.center,
+                      decoration: InputDecoration(
+                        hintText: 'Search chapters',
+                        border: InputBorder.none,
+                        isDense: true,
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: TahfeezSpacing.sm,
+                        ),
+                        prefixIcon: Icon(
+                          Icons.search,
+                          color: scheme.onSurfaceVariant,
+                        ),
+                        prefixIconConstraints: const BoxConstraints(
+                          minWidth: 40,
+                          minHeight: 40,
+                        ),
+                        suffixIcon: _query.isEmpty
+                            ? null
+                            : IconButton(
+                                icon: Icon(
+                                  Icons.close,
+                                  color: scheme.onSurfaceVariant,
+                                ),
+                                tooltip: 'Clear',
+                                onPressed: () {
+                                  _searchController.clear();
+                                  setState(() => _query = '');
+                                },
+                              ),
+                      ),
+                      onChanged: (value) => setState(() => _query = value),
+                    ),
+                  ),
+                ),
               ),
-              TahfeezFilterChip(
-                label: 'Meccan',
-                selected: _filter == _RevelationFilter.meccan,
-                onSelected: (_) =>
-                    setState(() => _filter = _RevelationFilter.meccan),
+              const SizedBox(width: TahfeezSpacing.sm),
+              // Beside the search bar, not stacked under it -- opens a
+              // sheet with the same Meccan/Medinan/All choice the tab used
+              // to show as a permanent chip row, so the space that row
+              // took is given back to the chapter list. Same fixed height
+              // and tight `constraints`/`padding` so the button itself
+              // (not just its `DecoratedBox`) actually fills that height,
+              // rather than centering a smaller Material tap target inside it.
+              SizedBox(
+                height: _searchBarHeight,
+                width: _searchBarHeight,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: scheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(TahfeezRadii.pill),
+                  ),
+                  child: IconButton(
+                    onPressed: _showFilterSheet,
+                    tooltip: 'Filter chapters',
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints.tightFor(
+                      width: _searchBarHeight,
+                      height: _searchBarHeight,
+                    ),
+                    icon: Badge(
+                      isLabelVisible: _filter != _RevelationFilter.all,
+                      smallSize: 8,
+                      child: Icon(
+                        Icons.filter_list,
+                        color: scheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ),
               ),
-              TahfeezFilterChip(
-                label: 'Medinan',
-                selected: _filter == _RevelationFilter.medinan,
-                onSelected: (_) =>
-                    setState(() => _filter = _RevelationFilter.medinan),
+              const SizedBox(width: TahfeezSpacing.sm),
+              // Reverses the (filtered/searched) list to start from the
+              // last chapter -- same fixed-size treatment as the filter
+              // button beside it, so all three controls share one row and
+              // one height.
+              SizedBox(
+                height: _searchBarHeight,
+                width: _searchBarHeight,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: _reversed
+                        ? scheme.primaryContainer
+                        : scheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(TahfeezRadii.pill),
+                  ),
+                  child: IconButton(
+                    onPressed: () => setState(() => _reversed = !_reversed),
+                    tooltip: _reversed
+                        ? 'Showing last chapter first'
+                        : 'Show last chapter first',
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints.tightFor(
+                      width: _searchBarHeight,
+                      height: _searchBarHeight,
+                    ),
+                    icon: Icon(
+                      Icons.swap_vert,
+                      color: _reversed
+                          ? scheme.onPrimaryContainer
+                          : scheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
               ),
             ],
           ),

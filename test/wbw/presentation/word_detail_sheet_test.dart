@@ -2,6 +2,7 @@ import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tahfeez_ai/quran/application/canonical_ayah_word_text.dart';
 import 'package:tahfeez_ai/wbw/application/wbw_preferences_controller.dart';
 import 'package:tahfeez_ai/wbw/data/wbw_database.dart';
 import 'package:tahfeez_ai/wbw/presentation/word_detail_sheet.dart';
@@ -14,6 +15,10 @@ void main() {
     return ProviderScope(
       overrides: [
         wbwDatabaseProvider.overrideWith((ref) => db),
+        canonicalAyahWordTextProvider(
+          ayahId: 1001,
+          wordIndex: 0,
+        ).overrideWith((ref) => 'lafz'),
         if (selectedPackId != null)
           wbwSelectedPackControllerProvider.overrideWith(
             () => _FixedSelectedPack(selectedPackId),
@@ -26,7 +31,6 @@ void main() {
               onPressed: () => showWordDetailSheet(
                 context,
                 wordRef: (ayahId: 1001, wordIndex: 0),
-                arabicText: 'lafz',
               ),
               child: const Text('open sheet'),
             ),

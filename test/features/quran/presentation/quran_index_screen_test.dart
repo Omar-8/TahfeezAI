@@ -7,11 +7,24 @@ import 'package:go_router/go_router.dart';
 import 'package:tahfeez_ai/core/localization/generated/app_localizations.dart';
 import 'package:tahfeez_ai/core/routing/quran_location_routing.dart';
 import 'package:tahfeez_ai/features/quran/presentation/quran_index_screen.dart';
+import 'package:tahfeez_ai/features/reader/application/reader_preferences_controller.dart';
+import 'package:tahfeez_ai/features/reader/domain/reader_mode.dart';
 import 'package:tahfeez_ai/quran/data/import/quran_dataset_importer.dart';
 import 'package:tahfeez_ai/quran/data/quran_database.dart';
 import 'package:tahfeez_ai/quran/quran_providers.dart';
 
 import '../../../quran/quran_test_fixtures.dart';
+
+/// The Quran index navigates to `ReaderScreen`, which now defaults to
+/// `ReaderMode.mushaf` (see `ReaderModePreferenceController`) — fixed to
+/// verse-by-verse here since these tests assert verse-by-verse-specific
+/// content (the chapter-info card, "Ayah 1:3", …), not Mushaf mode itself.
+class _FixedReaderMode extends ReaderModePreferenceController {
+  _FixedReaderMode(this._fixed);
+  final ReaderMode _fixed;
+  @override
+  ReaderMode build() => _fixed;
+}
 
 void main() {
   Widget wrap(QuranDatabase db) {
@@ -27,7 +40,12 @@ void main() {
     );
 
     return ProviderScope(
-      overrides: [quranDatabaseProvider.overrideWith((ref) => db)],
+      overrides: [
+        quranDatabaseProvider.overrideWith((ref) => db),
+        readerModePreferenceControllerProvider.overrideWith(
+          () => _FixedReaderMode(ReaderMode.verseByVerse),
+        ),
+      ],
       child: MaterialApp.router(
         routerConfig: router,
         supportedLocales: const [Locale('en'), Locale('ar')],
@@ -85,12 +103,23 @@ void main() {
       expect(find.text('Surah 2'), findsNothing);
     });
 
-    testWidgets('filters by revelation type', (tester) async {
+    testWidgets('filters by revelation type via the filter sheet', (
+      tester,
+    ) async {
       await tester.pumpWidget(wrap(db));
       await tester.pumpAndSettle();
 
+      // The Meccan/Medinan/All choice now lives behind a filter button
+      // beside the search bar, not as a permanent chip row.
+      await tester.tap(find.byTooltip('Filter chapters'));
+      await tester.pumpAndSettle();
+
       // Surah 1 is Meccan (odd), Surah 2 is Medinan (even) per the fixture.
-      await tester.tap(find.text('Medinan'));
+      // The chip's own label includes a "(count)" suffix, so this matches
+      // by prefix rather than the exact old "Medinan" string.
+      await tester.tap(find.textContaining('Medinan ('));
+      await tester.pumpAndSettle();
+      await tester.tapAt(const Offset(1, 1)); // dismiss the sheet
       await tester.pumpAndSettle();
 
       expect(find.text('Test Chapter One'), findsNothing);

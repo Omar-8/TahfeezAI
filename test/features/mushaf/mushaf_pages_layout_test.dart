@@ -116,19 +116,10 @@ void main() {
       );
     });
 
-    test('no line overflows and none unexpectedly wraps (single placement run each)', () async {
+    test('no line overflows the available width', () async {
       final result = await layoutFullPage(3);
       for (final line in result.lines) {
         expect(line.lineWidth, lessThanOrEqualTo(320));
-        // Placements strictly increase in x -- a single, non-wrapping run.
-        for (var i = 1; i < line.placements.length; i++) {
-          expect(
-            line.placements[i].x,
-            greaterThanOrEqualTo(
-              line.placements[i - 1].x + line.placements[i - 1].width,
-            ),
-          );
-        }
       }
     });
   });

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/localization/generated/app_localizations.dart';
@@ -38,6 +39,7 @@ class AppShell extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final breakpoint = TahfeezBreakpoint.of(context);
+    final scheme = Theme.of(context).colorScheme;
 
     final items = [
       TahfeezPrimaryNavItem(
@@ -73,28 +75,65 @@ class AppShell extends StatelessWidget {
     );
 
     if (breakpoint.isPhone) {
-      return Scaffold(
-        body: content,
-        bottomNavigationBar: TahfeezPrimaryNavigationBar(
-          items: items,
-          selectedIndex: navigationShell.currentIndex,
-          onDestinationSelected: onDestinationSelected,
-        ),
-      );
-    }
-
-    return Scaffold(
-      body: Row(
-        children: [
-          TahfeezPrimaryNavigationRail(
+      // Without this, the phone's own system navigation bar (the on-screen
+      // gesture/button strip below everything this app draws) keeps
+      // whatever color it had before Tahfeez started (usually plain black
+      // or white) instead of matching `TahfeezPrimaryNavigationBar`'s own
+      // `scheme.surfaceContainer` — a visible, jarring seam right where the
+      // two bars meet, worse in dark mode where the mismatch is starkest.
+      return AnnotatedRegion<SystemUiOverlayStyle>(
+        value: _systemNavigationBarStyle(scheme),
+        child: Scaffold(
+          body: content,
+          bottomNavigationBar: TahfeezPrimaryNavigationBar(
             items: items,
             selectedIndex: navigationShell.currentIndex,
             onDestinationSelected: onDestinationSelected,
           ),
-          const VerticalDivider(width: 1),
-          Expanded(child: content),
-        ],
+        ),
+      );
+    }
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: _systemNavigationBarStyle(scheme),
+      child: Scaffold(
+        body: Row(
+          children: [
+            TahfeezPrimaryNavigationRail(
+              items: items,
+              selectedIndex: navigationShell.currentIndex,
+              onDestinationSelected: onDestinationSelected,
+            ),
+            const VerticalDivider(width: 1),
+            Expanded(child: content),
+          ],
+        ),
       ),
+    );
+  }
+
+  /// Matches the phone's own system navigation bar to whatever color
+  /// [TahfeezPrimaryNavigationBar]/[TahfeezPrimaryNavigationRail] paint
+  /// their own background with (`scheme.surfaceContainer`), and picks
+  /// light-or-dark system icon glyphs by that color's actual brightness —
+  /// never assumed from the app's overall theme mode, since a custom
+  /// `ColorScheme.surfaceContainer` need not track light/dark 1:1.
+  SystemUiOverlayStyle _systemNavigationBarStyle(ColorScheme scheme) {
+    final isDarkBar =
+        ThemeData.estimateBrightnessForColor(scheme.surfaceContainer) ==
+        Brightness.dark;
+    return SystemUiOverlayStyle(
+      systemNavigationBarColor: scheme.surfaceContainer,
+      systemNavigationBarIconBrightness: isDarkBar
+          ? Brightness.light
+          : Brightness.dark,
+      systemNavigationBarDividerColor: Colors.transparent,
+      // Android draws a translucent black scrim over the navigation bar by
+      // default (API 29+, "contrast enforcement") regardless of the color
+      // requested above — without disabling it, `surfaceContainer` still
+      // renders visibly darker/duller than the real bar right above it,
+      // which looks like the color was never applied at all.
+      systemNavigationBarContrastEnforced: false,
     );
   }
 }

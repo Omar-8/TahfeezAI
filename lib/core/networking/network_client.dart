@@ -26,6 +26,12 @@ abstract class NetworkClient {
     void Function(int received, int total)? onReceiveProgress,
     CancelToken? cancelToken,
   });
+
+  /// Fetches [path]'s raw response body as bytes, held in memory — for
+  /// small-to-medium binary resources (e.g. a single font file) where
+  /// there is no platform filesystem to [download] to (Web has none), so
+  /// the caller (not this client) decides what to do with the bytes.
+  Future<Response<List<int>>> getBytes(String path, {CancelToken? cancelToken});
 }
 
 class DioNetworkClient implements NetworkClient {
@@ -57,6 +63,18 @@ class DioNetworkClient implements NetworkClient {
       urlPath,
       savePath,
       onReceiveProgress: onReceiveProgress,
+      cancelToken: cancelToken,
+    );
+  }
+
+  @override
+  Future<Response<List<int>>> getBytes(
+    String path, {
+    CancelToken? cancelToken,
+  }) {
+    return _dio.get<List<int>>(
+      path,
+      options: Options(responseType: ResponseType.bytes),
       cancelToken: cancelToken,
     );
   }

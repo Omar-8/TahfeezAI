@@ -4,6 +4,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tahfeez_ai/core/localization/generated/app_localizations.dart';
+import 'package:tahfeez_ai/features/reader/application/reader_preferences_controller.dart';
+import 'package:tahfeez_ai/features/reader/domain/reader_mode.dart';
 import 'package:tahfeez_ai/features/reader/presentation/reader_screen.dart';
 import 'package:tahfeez_ai/quran/application/quran_script_code.dart';
 import 'package:tahfeez_ai/quran/data/import/quran_dataset_importer.dart';
@@ -15,6 +17,30 @@ import 'package:tahfeez_ai/quran/translation_providers.dart';
 
 import '../../../quran/quran_test_fixtures.dart';
 
+/// This whole file exercises the verse-by-verse body specifically, so every
+/// test fixes the reader mode rather than relying on
+/// [ReaderModePreferenceController]'s real default (`ReaderMode.mushaf`,
+/// per product direction) or its real, process-wide persisted state.
+class _FixedReaderMode extends ReaderModePreferenceController {
+  _FixedReaderMode(this._fixed);
+  final ReaderMode _fixed;
+  @override
+  ReaderMode build() => _fixed;
+}
+
+/// Continuous scrolling (auto-loading the next chapter near the end of the
+/// current one) is a real, independent feature this file's tests don't mean
+/// to exercise -- they're about rendering a single Surah's own body. Fixed
+/// off so a test that scrolls through a short Surah (whose total scrollable
+/// range is well under continuous scrolling's own "near the end" distance,
+/// by design intentionally aggressive for short remaining content) doesn't
+/// incidentally cascade into loading chapter after chapter while a test
+/// merely scrolls to check its own verses render.
+class _NoContinuousScrolling extends ContinuousScrollingPreferenceController {
+  @override
+  bool build() => false;
+}
+
 void main() {
   Widget wrap(
     QuranDatabase db, {
@@ -24,6 +50,12 @@ void main() {
       overrides: [
         quranDatabaseProvider.overrideWith((ref) => db),
         quranScriptCodeProvider.overrideWith((ref) => testScriptCode),
+        readerModePreferenceControllerProvider.overrideWith(
+          () => _FixedReaderMode(ReaderMode.verseByVerse),
+        ),
+        continuousScrollingPreferenceControllerProvider.overrideWith(
+          () => _NoContinuousScrolling(),
+        ),
         // `TranslationLibraryController` (opened via "Reader options" ->
         // "Translations") always queries `translationRepositoryProvider`
         // unconditionally, unlike `ReaderSession`'s active-slugs-gated
@@ -82,7 +114,10 @@ void main() {
       await tester.pumpWidget(wrap(db));
       await tester.pumpAndSettle();
 
-      expect(find.text('Test Chapter One'), findsOneWidget);
+      // Appears twice: the chapter-info card's own title, and the app bar's
+      // live Mushaf-page title (Surah name), which resolves to the same
+      // Surah once the current position's Mushaf page loads.
+      expect(find.text('Test Chapter One'), findsNWidgets(2));
       expect(find.text('Meccan · 7 ayahs'), findsOneWidget);
       // The list is lazily built (`ListView.builder`), so scroll to prove
       // every verse -- not just the first screenful -- actually loaded.
@@ -245,7 +280,10 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('Ayah 1:3'), findsOneWidget);
+      // The app bar title now shows the live Mushaf page's Surah/page/Juz
+      // (once resolved), not a plain "Ayah 1:3" string.
+      expect(find.text('Test Chapter One'), findsWidgets);
+      expect(find.textContaining('Page 1'), findsOneWidget);
       // The whole chapter loads (all 7 verses), not just verse 3. The
       // reader auto-scrolled to verse 3, so scroll up to verse 1 first,
       // then down through the rest, to visit every verse regardless of

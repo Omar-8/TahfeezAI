@@ -112,7 +112,6 @@ class ReaderSession extends _$ReaderSession {
           items,
           translationsByAyahId,
           surahNo: surahNo,
-          isSessionStart: true,
         );
         _nextSurahNo = surahNo + 1;
 
@@ -123,7 +122,6 @@ class ReaderSession extends _$ReaderSession {
           items,
           translationsByAyahId,
           surahNo: chapterNo,
-          isSessionStart: true,
         );
         scrollTarget = chapterNo * 1000 + verseNo;
         _nextSurahNo = chapterNo + 1;
@@ -198,23 +196,22 @@ class ReaderSession extends _$ReaderSession {
   }
 
   /// Appends the next chapter's content — the mechanism both the initial
-  /// full-Surah/Ayah load and continuous-scroll extension share.
+  /// full-Surah/Ayah load and continuous-scroll extension share. Every
+  /// chapter entry gets the same [ReaderLayoutItem.chapterInfo] card,
+  /// whether it opens the session or is reached mid-session, so "a new
+  /// Surah begins here" always looks the same regardless of how the reader
+  /// arrived at it.
   Future<int?> _appendChapter(
     QuranRepository repository,
     TranslationRepository translationRepository,
     List<ReaderLayoutItem> items,
     Map<int, Map<String, TranslationVerseText>> translationsByAyahId, {
     required int surahNo,
-    required bool isSessionStart,
   }) async {
     final surah = await repository.getSurah(surahNo);
     if (surah == null) return null;
 
-    if (isSessionStart) {
-      items.add(ReaderLayoutItem.chapterInfo(surah: surah));
-    } else {
-      items.add(ReaderLayoutItem.chapterTitle(surahNo: surahNo));
-    }
+    items.add(ReaderLayoutItem.chapterInfo(surah: surah));
     if (_needsBismillah(surahNo)) {
       items.add(const ReaderLayoutItem.bismillah());
     }
@@ -246,11 +243,7 @@ class ReaderSession extends _$ReaderSession {
       final surah = await repository.getSurah(range.surahNo);
       if (surah == null) continue;
 
-      items.add(
-        i == 0
-            ? ReaderLayoutItem.chapterInfo(surah: surah)
-            : ReaderLayoutItem.chapterTitle(surahNo: range.surahNo),
-      );
+      items.add(ReaderLayoutItem.chapterInfo(surah: surah));
       if (range.startAyahNo == 1 && _needsBismillah(range.surahNo)) {
         items.add(const ReaderLayoutItem.bismillah());
       }
@@ -341,7 +334,6 @@ class ReaderSession extends _$ReaderSession {
         items,
         translationsByAyahId,
         surahNo: _nextSurahNo,
-        isSessionStart: false,
       );
       _nextSurahNo++;
 
@@ -364,6 +356,17 @@ class ReaderSession extends _$ReaderSession {
     final current = state.value;
     if (current == null) return;
     state = AsyncData(current.copyWith(clearScrollTarget: true));
+  }
+
+  /// Sets a new [ReaderSessionState.scrollToAyahId] on an already-loaded
+  /// session — used when the Reader switches from its in-place Mushaf mode
+  /// back to verse-by-verse (`reader_screen.dart`), so the verse-by-verse
+  /// view opens scrolled to the ayah the Mushaf page was showing rather
+  /// than resetting to wherever [location] originally started.
+  void scrollTo(int ayahId) {
+    final current = state.value;
+    if (current == null) return;
+    state = AsyncData(current.copyWith(scrollToAyahId: ayahId));
   }
 
   void toggleSelection(int ayahId) {

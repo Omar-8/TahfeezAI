@@ -35,7 +35,15 @@ class MushafPageBundle {
   final List<int> hizbNos;
 }
 
-@riverpod
+/// `keepAlive: true`: unlike the 604 QPC page *fonts* (individually large
+/// binary assets that genuinely need lazy, bounded loading — see
+/// `QpcPageFontManager`), one page's lines/tokens are a handful of small
+/// Dart objects. Caching every page a session ever visits for the app's
+/// lifetime costs at most a few MB even for the full 604-page Mushaf, and
+/// avoids re-querying the database (and, downstream, redoing that page's
+/// real-font-shaping layout pass — see `mushafPageLayoutProvider`) every
+/// time the user swipes back to a page they've already seen.
+@Riverpod(keepAlive: true)
 Future<MushafPageBundle?> mushafPageData(
   Ref ref,
   int mushafId,

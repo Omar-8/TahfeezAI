@@ -7,6 +7,9 @@ import '../../../../quran/application/translation_selection_controller.dart';
 import '../../../../quran/presentation/tafsir_packs_sheet.dart';
 import '../../../../quran/presentation/translation_packs_sheet.dart';
 import '../../../../wbw/presentation/wbw_packs_sheet.dart';
+import '../../../mushaf/application/mushaf_appearance_controller.dart';
+import '../../../mushaf/domain/mushaf_appearance.dart';
+import '../../../mushaf/presentation/mushaf_appearance_sheet.dart';
 import '../../application/reader_preferences_controller.dart';
 import 'quran_script_sheet.dart';
 
@@ -39,10 +42,31 @@ class _ReaderOptionsBody extends ConsumerWidget {
     final activeTranslations = ref.watch(
       translationSelectionControllerProvider,
     );
+    final appearance = ref.watch(mushafAppearanceControllerProvider);
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
+        ListTile(
+          title: const Text('Appearance'),
+          // The same Light/Warm/Sepia/Dark/Black reader theme Mushaf mode
+          // already offers, now genuinely applied to verse-by-verse mode
+          // too (background, verse Arabic text) -- not just a picker with
+          // no effect.
+          subtitle: Text(appearance.label),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => showMushafAppearanceSheet(context),
+        ),
+        // "Quran text boldness" (Mushaf-only) does NOT belong in this
+        // sheet: `_ReaderScreenState.build()` only ever renders
+        // `showReaderOptionsSheet` from its verse-by-verse branch --
+        // Mushaf mode returns `_MushafModeScaffold` instead, which opens
+        // `showMushafReaderOptionsSheet` (`mushaf_reader_options_sheet
+        // .dart`). A `readerMode == ReaderMode.mushaf` condition here
+        // would be unreachable dead code, not a real gate -- that was a
+        // real, shipped bug (the setting was completely unreachable from
+        // Mushaf mode, the one place it applies) fixed by moving it there
+        // instead of guarding it here.
         SwitchListTile(
           title: const Text('Continuous scrolling'),
           subtitle: const Text('Automatically continue into the next chapter'),

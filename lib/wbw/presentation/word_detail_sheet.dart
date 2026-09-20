@@ -6,6 +6,9 @@ import '../../core/theme/components/tahfeez_bottom_sheet.dart';
 import '../../core/theme/components/tahfeez_state_views.dart';
 import '../../core/theme/quran_text_style.dart';
 import '../../core/ui/coming_soon.dart';
+import '../../features/mushaf/application/mushaf_appearance_controller.dart';
+import '../../features/mushaf/domain/mushaf_appearance.dart';
+import '../../quran/application/canonical_ayah_word_text.dart';
 import '../../quran/domain/models/quran_refs.dart';
 import '../application/active_wbw_pack.dart';
 import '../application/wbw_preferences_controller.dart';
@@ -22,24 +25,27 @@ import 'wbw_packs_sheet.dart';
 /// [showWbwPacksSheet] otherwise — the same "real, tappable, honest
 /// coming-soon" shape `VerseBlock`'s Play/Bookmark/Tafsir actions use for
 /// features later milestones provide.
-void showWordDetailSheet(
-  BuildContext context, {
-  required WordRef wordRef,
-  required String arabicText,
-}) {
+///
+/// Deliberately resolves its own displayed Arabic text from
+/// [canonicalAyahWordTextProvider] rather than accepting a caller-supplied
+/// string: a caller in the Mushaf renderer only ever has that word's
+/// [MushafToken.displayText] in hand, which is QCF page-specific-glyph text
+/// (private-use-area codepoints meaningful only with that exact page's own
+/// font) — rendering it here with this sheet's generic Arabic-capable font
+/// would silently show a different, wrong-looking word. See
+/// `canonical_ayah_word_text.dart`'s doc comment.
+void showWordDetailSheet(BuildContext context, {required WordRef wordRef}) {
   showTahfeezModalBottomSheet(
     context: context,
     title: 'Word details',
-    builder: (context) =>
-        _WordDetailSheetBody(wordRef: wordRef, arabicText: arabicText),
+    builder: (context) => _WordDetailSheetBody(wordRef: wordRef),
   );
 }
 
 class _WordDetailSheetBody extends ConsumerWidget {
-  const _WordDetailSheetBody({required this.wordRef, required this.arabicText});
+  const _WordDetailSheetBody({required this.wordRef});
 
   final WordRef wordRef;
-  final String arabicText;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -50,6 +56,16 @@ class _WordDetailSheetBody extends ConsumerWidget {
     final wordAudioEnabled = ref.watch(
       wbwWordAudioEnabledPreferenceControllerProvider,
     );
+    final arabicTextAsync = ref.watch(
+      canonicalAyahWordTextProvider(
+        ayahId: wordRef.ayahId,
+        wordIndex: wordRef.wordIndex,
+      ),
+    );
+    final quranTextColor = ref
+        .watch(mushafAppearanceControllerProvider)
+        .colors
+        .text;
 
     return Padding(
       padding: const EdgeInsets.symmetric(
@@ -69,9 +85,10 @@ class _WordDetailSheetBody extends ConsumerWidget {
           Directionality(
             textDirection: TextDirection.rtl,
             child: Text(
-              arabicText,
+              arabicTextAsync.value ?? '',
               textAlign: TextAlign.right,
-              style: quranTextStyle(context),
+              // No custom `fontFamily` -- see `VerseBlock`'s doc comment.
+              style: quranTextStyle(color: quranTextColor),
             ),
           ),
           activePack.when(

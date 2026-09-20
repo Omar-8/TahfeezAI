@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/routing/quran_location_routing.dart';
-import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/components/components.dart';
 import '../../../quran/application/recent_quran_location.dart';
 import '../../../quran/domain/models/quran_location.dart';
@@ -56,6 +55,16 @@ class _QuranIndexScreenState extends ConsumerState<QuranIndexScreen>
         title: const Text('Quran'),
         centerTitle: false,
         actions: [
+          // Beside the page-jump ("Go to Ayah") button, not a full-width
+          // chip row below the app bar taking real estate away from the
+          // tab content -- only shown once there's somewhere to jump back
+          // to.
+          if (recent != null)
+            IconButton(
+              icon: const Icon(Icons.history),
+              tooltip: 'Jump back in',
+              onPressed: () => goToQuranLocation(context, recent),
+            ),
           IconButton(
             icon: const Icon(Icons.pin_outlined),
             tooltip: 'Go to Ayah',
@@ -65,23 +74,6 @@ class _QuranIndexScreenState extends ConsumerState<QuranIndexScreen>
       ),
       body: Column(
         children: [
-          if (recent != null)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                TahfeezSpacing.md,
-                TahfeezSpacing.sm,
-                TahfeezSpacing.md,
-                0,
-              ),
-              child: Align(
-                alignment: AlignmentDirectional.centerStart,
-                child: TahfeezActionChip(
-                  icon: Icons.history,
-                  label: 'Jump back in',
-                  onPressed: () => goToQuranLocation(context, recent),
-                ),
-              ),
-            ),
           TabBar(
             controller: _tabController,
             tabs: const [

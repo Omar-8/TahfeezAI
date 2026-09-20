@@ -146,7 +146,10 @@ class _ArabicResultRow extends StatelessWidget {
               child: Text(
                 hit.matchedText,
                 textAlign: TextAlign.right,
-                style: quranTextStyle(context, fontSize: 20),
+                style: quranTextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
+                  fontSize: 20,
+                ),
               ),
             ),
           ],

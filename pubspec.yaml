@@ -130,6 +130,37 @@ flutter:
     - assets/quran/manifests/qpc_v2_fonts.json
     - assets/quran/fonts/qpc_v2/
 
+    # The QUL Surah Header decorative color font — kept only as an unused
+    # development resource (docs/QURAN_DATA_PROVENANCE.md §10): no longer
+    # wired into the active Mushaf renderer (superseded by
+    # quran_common.ttf/suracon.ttf below), but not deleted pending a
+    # decision on whether to remove it entirely. Same
+    # development-only/license-gated treatment as the block above.
+    # lib/features/mushaf/application/surah_header_font_providers.dart
+    # refuses to load this in kReleaseMode.
+    - assets/quran/manifests/surah_header_glyphs.json
+    - assets/quran/fonts/qcf_surah_header/
+
+    # QuranApp-style special-line fonts (Bismillah + Surah header),
+    # vendored from a local AlfaazPlus/QuranApp checkout — same
+    # development-only/license-gated treatment as the blocks above (see
+    # docs/QURAN_DATA_PROVENANCE.md §12/§13).
+    # lib/features/mushaf/application/quranapp_special_font_providers.dart
+    # refuses to load these in kReleaseMode.
+    - assets/quran/manifests/quran_common_font.json
+    - assets/quran/manifests/suracon_glyphs.json
+    - assets/quran/manifests/uthmanic_hafs_font.json
+    - assets/quran/fonts/quranapp/
+
+    # The QPC Hafs display-word manifest (verse-by-verse mode's Quran text
+    # display) — real, fully validated QUL text (every ayah in it is
+    # confirmed to zip 1:1 with canonical AyahWord order; see
+    # docs/QURAN_DATA_PROVENANCE.md §17), same development-only/
+    # license-gated treatment as the blocks above.
+    # lib/features/reader/application/quran_display_providers.dart refuses
+    # to load this in kReleaseMode.
+    - assets/quran/quran_display/qpc_hafs_display_words.json
+
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
 

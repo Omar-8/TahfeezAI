@@ -1,23 +1,44 @@
 import 'package:flutter/material.dart';
 
-/// Builds the text style used to render canonical Quran Arabic text.
+/// The verse-by-verse reader's own Arabic Quran font size when rendering
+/// through the QPC Hafs font (`VerseBlock`/`BismillahDivider`) — larger
+/// than [quranTextStyle]'s own default (26), because that Uthmani
+/// calligraphy reads best with more room; the "make the Arabic Quran text
+/// visually dominant" design goal. Applies whether or not the QPC Hafs
+/// font actually loaded, so a font-load fallback never also shrinks the
+/// text relative to how it looked with the font.
+const quranVerseFontSize = 30.0;
+
+/// Builds the text style used to render Quran Arabic text in the
+/// verse-by-verse reader.
 ///
 /// Deliberately **not** part of [buildTahfeezTextTheme]/`app_typography.dart`
 /// — per `docs/DESIGN_DIRECTION.md`'s "UI typography and Quran typography
-/// are separate systems" rule, canonical Quran text must never render with
-/// Tahfeez's own UI font (Noto Sans / Noto Sans Arabic). No Quran-specific
-/// script/font has been selected yet — that decision belongs to the Mushaf
-/// Renderer milestone (7), which must reconcile a font choice with a
-/// specific Mushaf page/line dataset (`docs/DATA_RESOURCE_REQUIREMENTS.md`
-/// §5). Leaving [TextStyle.fontFamily] unset here defers to each platform's
-/// own default Arabic-capable system font — distinct from (and not a
-/// substitute for) a real Uthmani-style Quran typeface, but also not
-/// Tahfeez's branded UI font, satisfying the separation rule honestly until
-/// that milestone lands.
-TextStyle quranTextStyle(BuildContext context, {double fontSize = 26}) {
+/// are separate systems" rule, Quran text must never render with Tahfeez's
+/// own UI font (Noto Sans / Noto Sans Arabic).
+///
+/// Takes [color]/[fontFamily] as plain parameters rather than reading them
+/// from a `BuildContext`/`WidgetRef` itself: [color] comes from
+/// `MushafAppearanceController`, a feature-layer concern `core/theme` must
+/// not import directly (`docs/ARCHITECTURE.md` §1's dependency direction) —
+/// callers (`VerseBlock`/`BismillahDivider`) resolve it and pass it in.
+/// [fontFamily] exists for the same reason: those callers resolve
+/// `uthmanicHafsFontManifestProvider`'s font and pass it through, but only
+/// when paired with that font's own validated QPC Hafs display text (see
+/// `docs/QURAN_DATA_PROVENANCE.md` §16/§17) — plain canonical `AyahWord`
+/// text through this font was found to mis-render several genuine Uthmani
+/// Quran-annotation marks. `fontFamily: null` is the honest, expected
+/// fallback to the platform's own default Arabic-capable system font
+/// whenever that pairing isn't available, not an error.
+TextStyle quranTextStyle({
+  required Color color,
+  String? fontFamily,
+  double fontSize = 26,
+}) {
   return TextStyle(
     fontSize: fontSize,
     height: 1.9,
-    color: Theme.of(context).colorScheme.onSurface,
+    color: color,
+    fontFamily: fontFamily,
   );
 }

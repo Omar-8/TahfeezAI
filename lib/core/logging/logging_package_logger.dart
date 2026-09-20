@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 import 'package:logging/logging.dart' as pkg;
 
 import 'app_logger.dart';
@@ -10,8 +12,33 @@ import 'app_logger.dart';
 /// persists records to disk for an in-app log viewer, without changing any
 /// call site, because everything depends on [AppLogger].
 class LoggingPackageLogger implements AppLogger {
+  static bool _sinkAttached = false;
+
   LoggingPackageLogger() {
     pkg.hierarchicalLoggingEnabled = true;
+    // `package:logging` records are otherwise held only in memory by each
+    // `Logger` instance and never reach any visible output — every
+    // `AppLogger` call in the app (including BundledDatasetSeeder's import
+    // diagnostics) would silently produce nothing in `adb logcat` or
+    // `flutter logs`. `dart:developer`'s `log()` is what both surface.
+    // Guarded by a static flag since `Logger.root.onRecord` is a
+    // process-wide broadcast stream: without it, constructing a second
+    // `LoggingPackageLogger` would double- (or N-)register listeners and
+    // print every record multiple times.
+    if (!_sinkAttached) {
+      _sinkAttached = true;
+      pkg.Logger.root.level = pkg.Level.ALL;
+      pkg.Logger.root.onRecord.listen((record) {
+        developer.log(
+          record.message,
+          time: record.time,
+          level: record.level.value,
+          name: record.loggerName,
+          error: record.error,
+          stackTrace: record.stackTrace,
+        );
+      });
+    }
   }
 
   pkg.Logger _loggerFor(String? tag) => pkg.Logger(tag ?? 'tahfeez');

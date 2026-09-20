@@ -95,8 +95,14 @@ class _PrimaryNavBarItem extends StatelessWidget {
       final color = selected ? scheme.primary : scheme.onSurfaceVariant;
       return InkWell(
         onTap: onTap,
+        // `end`, not `center`: the primary item's icon sits in a much
+        // taller filled circle than a plain `Icon`, so centering each
+        // item's Column independently (the previous approach) pushed
+        // *that* item's label further down than its plain-icon siblings
+        // -- aligning every item's label to the same bottom edge instead
+        // keeps all labels on one shared line regardless of icon height.
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.end,
           mainAxisSize: MainAxisSize.min,
           spacing: TahfeezSpacing.xs,
           children: [
@@ -117,13 +123,24 @@ class _PrimaryNavBarItem extends StatelessWidget {
     // idiom on top of the bar).
     return InkWell(
       onTap: onTap,
+      // `end`, not `center` -- see the plain-item branch above for why:
+      // this keeps "Quran"'s label on the exact same line as "Home"/
+      // "Search" despite its much taller filled-circle icon. The circle
+      // still floats above the bar via `Transform.translate` (a pure
+      // paint-time shift, so it doesn't disturb this shared baseline) --
+      // kept small (not the circle's full raise-worthy amount) because
+      // `Transform.translate` doesn't reclaim layout space: every pixel of
+      // upward shift becomes extra empty gap between the visible circle and
+      // the label below it, on top of the `spacing` below, so a larger
+      // offset here visibly pushes "Quran"'s label further from its icon
+      // than "Home"/"Search"'s label sits from theirs.
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.end,
         mainAxisSize: MainAxisSize.min,
         spacing: TahfeezSpacing.xs,
         children: [
           Transform.translate(
-            offset: const Offset(0, -10),
+            offset: const Offset(0, -4),
             child: Material(
               color: scheme.primary,
               elevation: TahfeezElevation.high,

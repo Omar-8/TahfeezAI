@@ -59,6 +59,31 @@ part 'quran_database.g.dart';
 class QuranDatabase extends _$QuranDatabase {
   QuranDatabase(super.connection);
 
+  // Bump whenever a table or column is added/changed/removed above. Drift
+  // only runs [migration] when this actually changes — leaving it stale
+  // (as it was through the Milestone 9B/9C Mushaf-token work, which added
+  // the MushafTokens table and new Mushafs/MushafLines columns without
+  // bumping it) leaves an existing on-device database file exactly as it
+  // was, so a device that already ran an older build never gets the new
+  // schema and every import against it throws.
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+    onUpgrade: (Migrator m, int from, int to) async {
+      // Every row in this database is derived from bundled assets and
+      // re-seeded by BundledDatasetSeeder whenever its version marker
+      // doesn't match — there is no user-generated data here to preserve
+      // (that lives in the separate user database, see the class doc
+      // comment above). So the correct migration for any schema change is
+      // simply to drop and recreate every table and let the seeder
+      // reimport from scratch, rather than hand-writing per-version
+      // ALTER TABLE steps for content that gets fully overwritten anyway.
+      for (final table in allTables) {
+        await m.deleteTable(table.actualTableName);
+      }
+      await m.createAll();
+    },
+  );
 }
