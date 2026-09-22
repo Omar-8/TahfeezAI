@@ -124,8 +124,9 @@ void main() {
 
   testWidgets(
     "in Mushaf mode, the in-place Reader's own 'Reader options' sheet "
-    "(reader_options_sheet.dart's _ReaderOptionsBody -- distinct from "
-    "MushafReaderScreen's own smaller menu) lists 'Quran text boldness'",
+    "(mushaf_reader_options_sheet.dart) lists 'Appearance' -- the "
+    "QPC-V2-specific 'Quran text boldness' setting was removed with that "
+    'renderer (docs/QURAN_ENGINE_MIGRATION.md)',
     (tester) async {
       final db = QuranDatabase(NativeDatabase.memory());
       await const QuranDatasetImporter().import(
@@ -143,7 +144,6 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Appearance'), findsOneWidget);
-      expect(find.text('Quran text boldness'), findsOneWidget);
     },
   );
 
@@ -263,7 +263,12 @@ void main() {
     expect(find.textContaining('Page 1'), findsWidgets);
     expect(find.textContaining('Page 2'), findsNothing);
 
-    await tester.fling(find.byType(PageView), const Offset(400, 0), 1000);
+    // 300px, not the full 390px viewport width: a fling distance close to
+    // (or past) a full page width can overshoot by an extra page under
+    // PageScrollPhysics' ballistic simulation -- this needs enough
+    // distance to register as a deliberate one-page swipe with real
+    // margin below that threshold, not exactly one viewport's width.
+    await tester.fling(find.byType(PageView), const Offset(300, 0), 1000);
     await tester.pumpAndSettle();
 
     expect(find.textContaining('Page 2'), findsWidgets);

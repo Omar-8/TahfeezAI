@@ -1831,6 +1831,21 @@ more elaborate traditional Madinah-Mushaf letterforms. Mushaf mode keeps QPC V2 
 authoritative renderer. Full audit detail and the decision rationale:
 `docs/MUSHAF_RENDERING.md` §2a.
 
+> **Superseded, later milestone**: the "Mushaf mode keeps QPC V2 as its authoritative
+> renderer" decision immediately above was itself later revisited and reversed — QPC V2
+> was replaced in full by Quran Engine (`quran-ws/quran-engine`) as Tahfeez's only Mushaf
+> rendering backend, and the QPC V2 renderer (`MushafPageLayoutEngine`/
+> `MushafPagePainter`/`MushafPageRenderModel`/`QpcPageFontManager`, referenced throughout
+> §11e/§11k/§24/§25 below) was deleted outright. This paragraph and the sections below it
+> are kept as an accurate record of the reasoning at the time that decision was made, not
+> as a description of the current renderer. See `docs/QURAN_ENGINE_MIGRATION.md` for the
+> current Mushaf rendering architecture and the record of why and how this changed
+> (§10 in particular: this was a deliberate, informed decision to accept an unresolved
+> licensing risk, not a routine architecture swap). The three-layer Quran text model
+> described just below this note is **unaffected** by that change — Quran Engine
+> replaced only the middle layer's *rendering mechanism*, not the layering principle
+> itself or the other two layers.
+
 This audit settled Tahfeez's three-layer Quran text model, which was previously implicit
 and is now made explicit as an architectural rule future work must not collapse without
 review:

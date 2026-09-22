@@ -6,17 +6,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../application/mushaf_quran_engine_providers.dart';
 import '../domain/mushaf_appearance.dart';
 import '../domain/quran_engine/quran_engine_mushaf_backend.dart';
-import 'mushaf_page_render_model.dart';
+import 'mushaf_token_hit_rect.dart';
 
-/// The [MushafRenderBackend.quranEngine] counterpart to `MushafPageView`'s
-/// own QPC V2 content — renders [pageNumber] through
-/// [mushafQuranEngineBackendProvider] instead of the font-based line
-/// shaping pipeline. Reports word/decoration taps as the exact same
-/// [MushafTokenHitRect] shape the QPC path already reports, so
-/// `MushafPager`'s tap handling needs no backend-specific branch.
+/// Renders one Mushaf page through Quran Engine
+/// (`mushafQuranEngineBackendProvider`'s Android/Web adapter, chosen by
+/// platform) — Tahfeez's Mushaf rendering backend since the Quran Engine
+/// migration completed (`docs/QURAN_ENGINE_MIGRATION.md`). Reports
+/// word/decoration taps as [MushafTokenHitRect], the same type
+/// `MushafPager`'s tap handling already consumes.
 ///
-/// Colors still come only from [MushafAppearanceColors] — never
-/// `Theme.of(context)` — matching `MushafPageView`'s own rule.
+/// Colors come only from [MushafAppearanceColors] — never
+/// `Theme.of(context)` — matching every other Mushaf-mode rule.
 class QuranEngineMushafPageContent extends ConsumerStatefulWidget {
   const QuranEngineMushafPageContent({
     super.key,
@@ -60,15 +60,21 @@ class _QuranEngineMushafPageContentState
       final backend = await ref.read(mushafQuranEngineBackendProvider.future);
       final page = await backend.loadPage(widget.pageNumber);
       if (!mounted) return;
+      // Publish the page's real aspect ratio so `MushafPager` can size its
+      // web frame tightly around the printed page (see
+      // `mushafPageAspectRatiosProvider`). This widget keeps sole ownership
+      // of the loaded page itself; the ratio is just a number.
+      ref
+          .read(mushafPageAspectRatiosProvider.notifier)
+          .report(widget.pageNumber, page.aspectRatio);
       final previous = _page;
       if (previous != null) backend.disposePage(previous);
       setState(() {
         _backend = backend;
         _page = page;
       });
-      // Fire-and-forget: mirrors QpcPageFontManager.preloadAround's own
-      // role for the QPC V2 renderer -- never awaited, never allowed to
-      // affect the page actually on screen.
+      // Fire-and-forget: never awaited, never allowed to affect the page
+      // actually on screen.
       unawaited(backend.preloadAround(widget.pageNumber));
     } catch (error) {
       if (!mounted) return;
@@ -96,17 +102,11 @@ class _QuranEngineMushafPageContentState
     }
 
     if (_loadError != null) {
-      final error = _loadError;
-      final message =
-          error is QuranEngineReleaseModeBlockedException ||
-              error is QuranEngineWebDeliveryNotConfiguredException
-          ? 'Quran Engine rendering is pending licensing clearance.'
-          : 'This page could not be rendered.';
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Text(
-            message,
+            'This page could not be rendered.',
             textAlign: TextAlign.center,
             style: TextStyle(color: widget.colors.secondaryText),
           ),
@@ -121,14 +121,37 @@ class _QuranEngineMushafPageContentState
       );
     }
 
-    return AspectRatio(
-      aspectRatio: page.aspectRatio,
-      child: page.buildView(
-        ink: widget.colors.text,
-        paper: widget.colors.background,
-        onWordHit: widget.onWordTap,
-        onDecorationHit: widget.onWordTap,
-      ),
+    // No outer AspectRatio/FittedBox wrapper here -- deliberately. Both
+    // platform implementations already receive whatever raw box this
+    // widget is given (via their own internal LayoutBuilder:
+    // `QvpPageView.build()` on Android, `_QuranEngineWebPageViewState
+    // .build()` on Web) and compute their own uniform fit-to-box scale
+    // and centering internally, using the engine's own layout call --
+    // there is nothing left for a Flutter-level wrapper to usefully add.
+    //
+    // An earlier version of this widget wrapped `buildView()` first in
+    // `AspectRatio` (which pre-shapes the box to the page's exact
+    // proportions *before* the platform view ever sees it -- defeating
+    // the point: the box handed down was never wider than natural to
+    // begin with) and later in `FittedBox(fit: BoxFit.cover)` (which
+    // does fill the box completely, but by cropping the printed page's
+    // own edges when the box's proportions don't match closely enough --
+    // real content, not just margin, on a sufficiently mismatched
+    // viewport). Neither is used any more: `QvpPageView`'s own built-in
+    // ceiling on how much wider than natural it would draw
+    // (`QvpDefaults.aspectSlack`, 15%) turned out to be the actual cause
+    // of the leftover space this was working around, not anything a
+    // wrapper here could fix -- see `quran_engine_android_backend.dart`
+    // and `third_party/qvp_flutter/PATCHES.md`. Any space still visible
+    // beyond that is the genuine, unavoidable consequence of the printed
+    // page's own aspect ratio differing from the device's -- the engine
+    // already computes the true maximum uniform scale that shows the
+    // entire page, uncropped and undistorted, and centers it.
+    return page.buildView(
+      ink: widget.colors.text,
+      paper: widget.colors.background,
+      onWordHit: widget.onWordTap,
+      onDecorationHit: widget.onWordTap,
     );
   }
 }

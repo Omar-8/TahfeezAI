@@ -6,9 +6,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/core_providers.dart';
 import '../../../core/theme/app_breakpoints.dart';
+import '../../../core/ui/full_bleed_content.dart';
 import '../../../quran/domain/models/mushaf_token_models.dart';
 import '../../../wbw/presentation/word_detail_sheet.dart';
-import 'mushaf_page_render_model.dart';
+import '../application/mushaf_appearance_controller.dart';
+import '../application/mushaf_quran_engine_providers.dart';
+import '../domain/mushaf_appearance.dart';
+import 'mushaf_token_hit_rect.dart';
 import 'mushaf_page_view.dart';
 
 /// A [MaterialScrollBehavior] that additionally accepts mouse-drag input.
@@ -119,9 +123,55 @@ class _MushafPagerState extends ConsumerState<MushafPager> {
 
   @override
   void dispose() {
+    _releaseFullBleed();
     if (_twoPageSpread != null) _controller.dispose();
     _webFocusNode.dispose();
     super.dispose();
+  }
+
+  // Requests the shell's full content area while this pager renders a
+  // two-page spread, and releases it otherwise. Deliberately driven from the
+  // pager rather than a whole-screen wrapper: verse-by-verse mode never hosts
+  // this pager (it stays in the app shell's reading column), a single-page
+  // Mushaf view has no fixed-aspect surface worth expanding, and only the
+  // spread — two fixed-aspect pages that the reading cap only ever squeezes —
+  // earns full-bleed. Schedules the change after the current frame because
+  // the shell is very likely mid-build while this is called and mutating a
+  // provider it watches during build is not allowed; compares against the
+  // last reported value so a frame that rebuilds for unrelated reasons (e.g.
+  // keyboard focus, browser zoom) does not re-notify.
+  bool _reportedFullBleed = false;
+  // Cached so dispose may release without touching `ref` (Riverpod forbids
+  // reading providers from `State.dispose`); the keepAlive notifier is
+  // stable for the container's lifetime.
+  FullBleedContent? _fullBleedNotifier;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _fullBleedNotifier ??= ref.read(fullBleedContentProvider.notifier);
+  }
+
+  void _syncFullBleed(bool wantsFullBleed) {
+    if (_reportedFullBleed == wantsFullBleed) return;
+    _reportedFullBleed = wantsFullBleed;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final notifier = _fullBleedNotifier!;
+      if (wantsFullBleed) {
+        notifier.request();
+      } else {
+        notifier.release();
+      }
+    });
+  }
+
+  void _releaseFullBleed() {
+    if (!_reportedFullBleed) return;
+    _reportedFullBleed = false;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fullBleedNotifier?.release();
+    });
   }
 
   void _animateToAdjacentIndex(int direction) {
@@ -204,15 +254,96 @@ class _MushafPagerState extends ConsumerState<MushafPager> {
     );
   }
 
-  Widget _bordered(BuildContext context, Widget child) {
+  /// Web-only page framing: a visibly heavier border than a typical Material
+  /// outline (this page is a printed-document surface, not app chrome), and
+  /// inner padding between that border and the page content itself, filled
+  /// with the Mushaf's own current appearance background — never a fixed
+  /// theme/Material color — so the framed area reads as part of the page,
+  /// not as app-level surface poking through around it.
+  static const _webBorderWidth = 5.0;
+  static const _webPagePadding = EdgeInsets.zero;
+  static const _webGutterWidth = 50.0;
+  static const _webOuterPadding = EdgeInsets.zero;
+  static const _webSpreadOuterPadding = EdgeInsets.only(bottom: 10);
+
+  Widget _bordered(
+    BuildContext context,
+    Widget child,
+    Color background, {
+    double? aspectRatio,
+  }) {
     final outline = Theme.of(context).colorScheme.outlineVariant;
-    return Container(
-      decoration: BoxDecoration(
-        border: Border.all(color: outline),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: child,
+    // Frame chrome that must be counted when fitting the page box into the
+    // space this frame is handed: the border on both axes plus any inner
+    // padding (currently zero). Wrapping the page in an `AspectRatio`
+    // *inside* the Container alone was not enough here: `AspectRatio` sizes
+    // to the largest aspect-correct box the loose constraints allow -- the
+    // height-bound one -- so when a spread half was narrower than the page's
+    // natural width, the page took its width from the tall axis and carried
+    // the 2px border beyond the half, overflowing the scroll viewport and
+    // clipping the page's outer edges (with the hidden sliver only
+    // reachable by swiping). Fitting the page box against (maxWidth/maxHeight
+    // minus the chrome) first makes the frame hug the page *and* guarantees
+    // it never exceeds the space actually available, at any window size.
+    final borderChrome = _webBorderWidth * 2;
+    final horizontalChrome = borderChrome + _webPagePadding.horizontal;
+    final verticalChrome = borderChrome + _webPagePadding.vertical;
+    // Keying the frame's size to the page's own true aspect ratio (via
+    // [mushafEnginePageAspectRatioProvider]) is what makes the border hug
+    // the printed page rather than framing the whole viewport box -- a
+    // fixed-aspect-ratio page rendered with the engine's uniform
+    // fit-to-box `renderFit` otherwise leaves the paper-colored space at
+    // the viewport's left/right (or top/bottom) letterboxing *between*
+    // the page and the border, no matter how little padding is set. Until
+    // the ratio resolves (async engine load), the frame still spans the
+    // viewport, then snaps tightly around the page.
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final maxW = (constraints.maxWidth - horizontalChrome).clamp(
+          0.0,
+          double.infinity,
+        );
+        final maxH = (constraints.maxHeight - verticalChrome).clamp(
+          0.0,
+          double.infinity,
+        );
+        double pageWidth;
+        double pageHeight;
+        if (aspectRatio == null) {
+          pageWidth = maxW;
+          pageHeight = maxH;
+        } else {
+          pageWidth = maxW;
+          pageHeight = pageWidth / aspectRatio;
+          if (pageHeight > maxH) {
+            pageHeight = maxH;
+            pageWidth = pageHeight * aspectRatio;
+          }
+        }
+        return Container(
+          width: pageWidth + borderChrome + _webPagePadding.horizontal,
+          height: pageHeight + borderChrome + _webPagePadding.vertical,
+          padding: _webPagePadding,
+          decoration: BoxDecoration(
+            color: background,
+            border: Border.all(color: outline, width: _webBorderWidth),
+            borderRadius: BorderRadius.circular(6),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: SizedBox(width: pageWidth, height: pageHeight, child: child),
+        );
+      },
+    );
+  }
+
+  // Helper for the web frame: reads the loaded engine page's real aspect
+  // ratio for a page number, or null when the ratio isn't available yet (the
+  // content widget hasn't finished loading that page) -- callers then
+  // degrade to the un-keyed frame rather than crashing.
+  double? _mushafAspectRatio(int pageNumber, bool isWeb) {
+    if (!isWeb) return null;
+    return ref.watch(
+      mushafPageAspectRatiosProvider.select((ratios) => ratios[pageNumber]),
     );
   }
 
@@ -224,7 +355,21 @@ class _MushafPagerState extends ConsumerState<MushafPager> {
     final useTwoPageSpread =
         breakpoint.isAtLeastTablet && isLandscape && size.width > 700;
     _ensureController(useTwoPageSpread);
+    _syncFullBleed(useTwoPageSpread);
     final isWeb = ref.watch(platformCapabilitiesProvider).isWeb;
+    // Web-only, and intentionally *read* (not just watched-and-ignored):
+    // a browser zoom (Ctrl/Cmd +/- ; also the browser's zoom-on-wheel) is a
+    // devicePixelRatio change that leaves MediaQuery.size untouched, so it
+    // would otherwise not rebuild this page's engine views at all and the
+    // canvas' last `renderFit` CSS size would sit stale -- cutting pages at
+    // 100% yet fitting them at 125%, exactly the reported symptom. Reading
+    // it here makes the whole pager (and every keyed page frame it builds,
+    // and through them the web bridge's `renderFit` re-pin) rebuild on
+    // every metrics change, so a zoom always re-derives the fit from the
+    // *current* ratio instead of a previous one.
+    final appearanceColors = ref
+        .watch(mushafAppearanceControllerProvider)
+        .colors;
 
     if (!useTwoPageSpread) {
       _itemCount = widget.pageCount;
@@ -259,15 +404,33 @@ class _MushafPagerState extends ConsumerState<MushafPager> {
             onWordTap: (hitRect) => _showWordInfo(context, hitRect),
             isCurrentPage: pageNumber == _currentPageNumber,
           );
-          return Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 480),
-              child: isWeb ? _bordered(context, page) : page,
-            ),
+          // No width cap here: the Mushaf page is a fixed-aspect-ratio
+          // printed-page facsimile (`AspectRatio` inside
+          // `QuranEngineMushafPageContent`), not reflowable text, so an
+          // arbitrary max width only ever shrinks it below what the
+          // available height already bounds it to -- it never protects
+          // against anything. A phone's own width rarely exceeds ~430
+          // logical px, so a 480 cap never visibly bound there, but on any
+          // wider viewport (tablets, and virtually every Web browser
+          // window) it forced the page into a narrow, needlessly margined
+          // column instead of letting it use the space actually available.
+          final framed = Center(
+            child: isWeb
+                ? _bordered(
+                    context,
+                    page,
+                    appearanceColors.background,
+                    aspectRatio: _mushafAspectRatio(pageNumber, isWeb),
+                  )
+                : page,
           );
+          return isWeb
+              ? Padding(padding: _webOuterPadding, child: framed)
+              : framed;
         },
       );
-      return isWeb ? _wrapForWeb(pageView) : pageView;
+      final content = isWeb ? _wrapForWeb(pageView) : pageView;
+      return content;
     }
 
     final spreadCount = (widget.pageCount / 2).ceil();
@@ -309,16 +472,65 @@ class _MushafPagerState extends ConsumerState<MushafPager> {
                 onWordTap: (hitRect) => _showWordInfo(context, hitRect),
               )
             : const SizedBox.shrink();
-        return Row(
+        final row = Row(
           children: [
-            Expanded(child: isWeb ? _bordered(context, rightPage) : rightPage),
-            if (isWeb) const SizedBox(width: 24),
-            Expanded(child: isWeb ? _bordered(context, leftPage) : leftPage),
+            Expanded(
+              child: isWeb
+                  // Direction-aware Align (not Center, and not an absolute
+                  // `centerRight`) is what lets `_bordered`'s container size
+                  // to the aspect-keyed page (loose constraints) while
+                  // pushing each page toward the spread's center/spine in
+                  // *both* text directions: under RTL (Arabic locale) an
+                  // absolute right/left alignment would push the two pages
+                  // outward to the screen edges instead, clipping their
+                  // outer sides. The first Row child's spine side is its
+                  // end; the second child's is its start.
+                  ? Align(
+                      alignment: AlignmentDirectional.centerEnd,
+                      child: _bordered(
+                        context,
+                        rightPage,
+                        appearanceColors.background,
+                        aspectRatio: _mushafAspectRatio(rightPageNumber, isWeb),
+                      ),
+                    )
+                  : rightPage,
+            ),
+            if (isWeb)
+              SizedBox(
+                width: _webGutterWidth,
+                // The gutter between a two-page spread's pages is part of
+                // the printed-page surface, not app chrome — it must track
+                // the Mushaf's own current appearance background exactly
+                // like each page's own paper color, never a fixed
+                // Material/theme color that would visibly mismatch on
+                // every appearance other than whichever one was hardcoded.
+                child: ColoredBox(color: appearanceColors.background),
+              ),
+            Expanded(
+              child: isWeb
+                  ? Align(
+                      alignment: AlignmentDirectional.centerStart,
+                      child: _bordered(
+                        context,
+                        leftPage,
+                        appearanceColors.background,
+                        aspectRatio: leftPageNumber <= widget.pageCount
+                            ? _mushafAspectRatio(leftPageNumber, isWeb)
+                            : null,
+                      ),
+                    )
+                  : leftPage,
+            ),
           ],
         );
+        return isWeb
+          ? Padding(padding: _webSpreadOuterPadding, child: row)
+          : row;
       },
     );
-    return isWeb ? _wrapForWeb(pageView) : pageView;
+    final content = isWeb ? _wrapForWeb(pageView) : pageView;
+    return content;
   }
 
   void _showWordInfo(BuildContext context, MushafTokenHitRect hitRect) {

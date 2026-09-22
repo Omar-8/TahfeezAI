@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/ui/full_bleed_content.dart';
 import '../application/mushaf_appearance_controller.dart';
 import '../application/mushaf_page_providers.dart';
 import '../domain/mushaf_appearance.dart';

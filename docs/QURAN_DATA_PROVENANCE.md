@@ -808,8 +808,22 @@ document was produced this way and is re-checked by
 | Surah-name calligraphy font (`suracon.ttf`) | AlfaazPlus/QuranApp | Imported + verified for all 114 surahs; **the active Surah-header-name mechanism**; `SHIP_BLOCKED_LICENSE`; not committed to git |
 | Verse-by-verse Quran text font (`uthmanic_hafs.ttf` / `UthmanicHafs_V22.ttf`) | AlfaazPlus/QuranApp + QUL (identical file) | Imported + verified; validated defect-free when paired with its own QPC Hafs script (§17); **wired into verse-by-verse rendering**; `SHIP_BLOCKED_LICENSE` |
 | Verse-by-verse Quran display script (QPC Hafs word-by-word) | QUL | Vendored, fully audited (83,668 words, 100% match against QPC V2's own word IDs), and **imported + wired into verse-by-verse rendering** (6,235 of 6,236 ayahs; 37:130 excluded, a genuine word-segmentation difference); `SHIP_BLOCKED_LICENSE` (§17) |
+| Mushaf page rendering — QCF V2 glyph font (§8) | QUL | **Removed.** The QPC V2 renderer that loaded this font was deleted (`docs/QURAN_ENGINE_MIGRATION.md`); no longer bundled in any build |
+| Mushaf page rendering — Quran Engine page corpus | Quran.ws (`quran-ws/quran-engine`) | Imported (full 604-page corpus); `SHIP_BLOCKED_LICENSE` — **same unresolved status as the QCF V2 font it replaced, but shipped anyway in every build including release**, by explicit, recorded product-owner decision. See `docs/QURAN_ENGINE_MIGRATION.md` §10 for exactly what was communicated and accepted, and `docs/THIRD_PARTY_RESOURCES.md` for the resource-register entry. This is the one deliberate exception to this table's otherwise-consistent "`SHIP_BLOCKED_LICENSE` means not shipped" pattern. |
 
 ## Release checklist — QUL resource redistribution
+
+**One exception to this whole checklist, recorded here so it is never missed**: the Quran
+Engine Mushaf page corpus (`assets/quran/quran_engine/pages/`, Tahfeez's production Mushaf
+rendering backend since `docs/QURAN_ENGINE_MIGRATION.md`) carries the exact same
+`SHIP_BLOCKED_LICENSE` status as every resource below, but **is** bundled in real release
+builds on both Android and Web, with no `kReleaseMode` gate and no build-flavor exclusion.
+This was a deliberate, informed decision by the product owner, made only after the specific
+redistribution risk was explained and explicitly accepted — see
+`docs/QURAN_ENGINE_MIGRATION.md` §10 for the exact exchange. It does not resolve this
+resource's license status, and it does not change how every *other* resource in this
+checklist must still be handled: the rule below ("no build should reach public distribution
+until cleared") still applies to everything else in this file.
 
 **Do not mark any of these "YES" without source documentation** (an email, a QUL account
 license page, or written confirmation from Tarteel AI/Digital Khadeeja Foundation) — never
@@ -832,20 +846,26 @@ separate, explicit confirmation.
       compatible, imported, and **wired into verse-by-verse rendering**; blocked on
       license, not on data quality
 - [ ] If any of the above is unresolved: `pubspec.yaml`'s gated asset lines
-      (`assets/quran/mushaf/kfgqpc_v2.json`, `assets/quran/manifests/qpc_v2_fonts.json`,
-      `assets/quran/fonts/qpc_v2/`, `assets/quran/manifests/surah_header_glyphs.json`,
-      `assets/quran/fonts/qcf_surah_header/`, `assets/quran/manifests/quran_common_font.json`,
-      `assets/quran/manifests/suracon_glyphs.json`, `assets/quran/manifests/uthmanic_hafs_font.json`,
-      `assets/quran/fonts/quranapp/`, `assets/quran/quran_display/qpc_hafs_display_words.json`)
-      have been removed, or moved behind a build flavor
-      that a public release build does not include — the `kReleaseMode` code-level
-      refusal in `BundledDatasetSeeder`/`qpcPageFontManifestProvider`/
-      `surahHeaderGlyphManifestProvider`/`quranCommonFontManifestProvider`/
-      `suraconGlyphManifestProvider`/`uthmanicHafsFontManifestProvider`/
-      `qpcHafsDisplayManifestProvider` is **not sufficient by itself** (see §8's note on
-      the 204.9MB test release AAB that still contained these assets)
+      (`assets/quran/mushaf/kfgqpc_v2.json`, `assets/quran/manifests/uthmanic_hafs_font.json`,
+      `assets/quran/fonts/quranapp/uthmanic_hafs.ttf`,
+      `assets/quran/quran_display/qpc_hafs_display_words.json`) have been removed, or moved
+      behind a build flavor that a public release build does not include — the
+      `kReleaseMode` code-level refusal in `BundledDatasetSeeder`/
+      `uthmanicHafsFontManifestProvider`/`qpcHafsDisplayManifestProvider` is **not
+      sufficient by itself** (see §8's note on the 204.9MB test release AAB that still
+      contained similar gated assets, back when the now-removed QPC V2 font package was
+      still declared). The QPC V2 font/manifest lines this bullet used to also list
+      (`assets/quran/manifests/qpc_v2_fonts.json`, `assets/quran/fonts/qpc_v2/`,
+      `assets/quran/manifests/surah_header_glyphs.json`, `assets/quran/fonts/qcf_surah_header/`,
+      `assets/quran/manifests/quran_common_font.json`, `assets/quran/manifests/suracon_glyphs.json`)
+      have since been removed from `pubspec.yaml` entirely, along with the renderer that
+      loaded them (`docs/QURAN_ENGINE_MIGRATION.md`) — moot now, not merely unchecked.
+      **`assets/quran/quran_engine/pages/` is deliberately NOT on this list** — see the
+      exception note above this checklist.
 - [ ] A `flutter build appbundle --release` (or `ipa`) intended for real distribution has
-      been inspected to confirm the gated assets are actually absent, not just unused
+      been inspected to confirm the gated assets above are actually absent, not just unused
+      (this does not apply to the Quran Engine corpus, which is expected to be present —
+      see the exception note above)
 
 Until every applicable box above is checked, no build of Tahfeez produced from this
 codebase should be uploaded to the Play Store, App Store, or any other public

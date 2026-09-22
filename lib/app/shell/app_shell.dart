@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/localization/generated/app_localizations.dart';
 import '../../core/theme/app_breakpoints.dart';
 import '../../core/theme/components/components.dart';
 import '../../core/theme/tahfeez_content_widths.dart';
+import '../../core/ui/full_bleed_content.dart';
 import 'mini_player_region.dart';
 
 /// Tahfeez's main app shell: the persistent chrome around Home/Quran/Search.
@@ -30,16 +32,32 @@ import 'mini_player_region.dart';
 /// Quran destination a Tahfeez-owned "raised, filled circle" emphasis
 /// (`core/theme/components/tahfeez_primary_nav_bar.dart`) rather than a
 /// clone of the reference app's own center-pill artwork.
-class AppShell extends StatelessWidget {
-  const AppShell({super.key, required this.navigationShell});
+class AppShell extends ConsumerWidget {
+  const AppShell({
+    super.key,
+    required this.navigationShell,
+    required this.currentLocation,
+  });
 
   final StatefulNavigationShell navigationShell;
 
+  /// The active branch's matched location (passed in by `appRouter`).
+  final String currentLocation;
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final breakpoint = TahfeezBreakpoint.of(context);
     final scheme = Theme.of(context).colorScheme;
+    // The full-width exception is owned by the active Mushaf pager. Gate it
+    // to the Quran branch because StatefulShellRoute keeps inactive branches
+    // mounted; this prevents a spread in the retained Quran branch from
+    // widening Home/Search while still covering both standalone and in-reader
+    // Mushaf routes.
+    final fullBleed = _isStandaloneMushafRoute(currentLocation) ||
+        (navigationShell.currentIndex == 1 &&
+            currentLocation != '/quran' &&
+        ref.watch(fullBleedContentProvider));
 
     final items = [
       TahfeezPrimaryNavItem(
@@ -69,7 +87,17 @@ class AppShell extends StatelessWidget {
 
     final content = Column(
       children: [
-        Expanded(child: _ConstrainedContent(child: navigationShell)),
+        Expanded(
+          // The wrapper is kept in place (rather than swapped out) so the
+          // branch `Navigator` subtree keeps its element identity — only the
+          // constraint changes, which relayouts without rebuilding state.
+          child: _ConstrainedContent(
+            maxWidth: fullBleed
+                ? double.infinity
+                : TahfeezContentWidth.maxReading,
+            child: navigationShell,
+          ),
+        ),
         const _ConstrainedContent(child: MiniPlayerRegion()),
       ],
     );
@@ -112,6 +140,14 @@ class AppShell extends StatelessWidget {
     );
   }
 
+  bool _isStandaloneMushafRoute(String location) {
+    final segments = Uri.tryParse(location)?.pathSegments;
+    return segments != null &&
+        segments.length >= 3 &&
+        segments[0] == 'quran' &&
+        segments[1] == 'page';
+  }
+
   /// Matches the phone's own system navigation bar to whatever color
   /// [TahfeezPrimaryNavigationBar]/[TahfeezPrimaryNavigationRail] paint
   /// their own background with (`scheme.surfaceContainer`), and picks
@@ -138,25 +174,36 @@ class AppShell extends StatelessWidget {
   }
 }
 
-/// Caps content at [TahfeezContentWidth.maxReading], matching
+/// Caps content at [maxWidth] (defaulting to
+/// [TahfeezContentWidth.maxReading]), matching
 /// `TahfeezResponsiveScaffold`'s own "do not stretch the phone layout across
 /// large screens" rule — reimplemented here (rather than reusing that
 /// widget directly) because the shell's per-destination Quran emphasis
 /// needs the bespoke [TahfeezPrimaryNavigationBar]/[TahfeezPrimaryNavigationRail]
 /// treatment that generic component doesn't offer.
+///
+/// [maxWidth] is `double.infinity` while a screen holds
+/// `fullBleedContentProvider`, which lets that branch fill the available
+/// content area instead of the reading column.
 class _ConstrainedContent extends StatelessWidget {
-  const _ConstrainedContent({required this.child});
+  const _ConstrainedContent({
+    required this.child,
+    this.maxWidth = TahfeezContentWidth.maxReading,
+  });
 
   final Widget child;
+  final double maxWidth;
 
   @override
   Widget build(BuildContext context) {
+    if (maxWidth == double.infinity) {
+      return SizedBox(width: double.infinity, child: child);
+    }
+
     return Align(
       alignment: Alignment.topCenter,
       child: ConstrainedBox(
-        constraints: const BoxConstraints(
-          maxWidth: TahfeezContentWidth.maxReading,
-        ),
+        constraints: BoxConstraints(maxWidth: maxWidth),
         child: child,
       ),
     );

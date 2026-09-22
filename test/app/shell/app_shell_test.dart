@@ -4,7 +4,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tahfeez_ai/app/app.dart';
 import 'package:tahfeez_ai/core/audio/audio_controller.dart';
 import 'package:tahfeez_ai/core/localization/locale_controller.dart';
+import 'package:tahfeez_ai/core/routing/app_router.dart';
 import 'package:tahfeez_ai/core/theme/components/components.dart';
+import 'package:tahfeez_ai/core/theme/tahfeez_content_widths.dart';
+import 'package:tahfeez_ai/core/ui/full_bleed_content.dart';
+import 'package:tahfeez_ai/features/home/presentation/home_screen.dart';
+import 'package:tahfeez_ai/features/mushaf/presentation/mushaf_reader_screen.dart';
+import 'package:tahfeez_ai/features/quran/presentation/quran_index_screen.dart';
 
 import '../../test_helpers/fake_audio_controller.dart';
 import '../../test_helpers/widget_test_overrides.dart';
@@ -130,5 +136,44 @@ void main() {
     await controller.stop();
     await tester.pumpAndSettle();
     expect(find.byType(TahfeezMiniPlayerShell), findsNothing);
+  });
+
+  testWidgets('the Mushaf spread is the only screen that can escape the cap', (
+    tester,
+  ) async {
+    setDesktopSize(tester);
+    await tester.pumpWidget(app());
+    await tester.pumpAndSettle();
+
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(TahfeezApp)),
+    );
+    final router = container.read(appRouterProvider);
+
+    // The normal shell stays capped.
+    expect(
+      tester.getSize(find.byType(HomeScreen)).width,
+      TahfeezContentWidth.maxReading,
+    );
+
+    router.go('/quran/page/1/1');
+    await tester.pumpAndSettle();
+    expect(find.byType(MushafReaderScreen), findsOneWidget);
+
+    // The spread request widens the active Mushaf page while it is mounted.
+    container.read(fullBleedContentProvider.notifier).request();
+    await tester.pumpAndSettle();
+    expect(
+      tester.getSize(find.byType(MushafReaderScreen)).width,
+      greaterThan(TahfeezContentWidth.maxReading),
+    );
+
+    router.go('/quran');
+    await tester.pumpAndSettle();
+    expect(find.byType(QuranIndexScreen), findsOneWidget);
+    expect(
+      tester.getSize(find.byType(QuranIndexScreen)).width,
+      TahfeezContentWidth.maxReading,
+    );
   });
 }

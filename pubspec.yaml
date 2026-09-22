@@ -54,8 +54,24 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   dynamic_color: ^1.9.0
+  # Overridden below (dependency_overrides) to a local, patched copy —
+  # this version constraint is kept in sync with that copy's own
+  # provenance (third_party/qvp_flutter/PATCHES.md), not actually
+  # resolved from pub.dev while the override is active.
   qvp_flutter: ^0.2.2
   web: ^1.1.1
+
+# A locally-vendored, minimally-patched copy of qvp_flutter 0.2.2 —
+# exposes QvpViewLayout.maxAspectSlack (already a real, documented,
+# already-engine-supported parameter one level down, at QvpLayoutSpec;
+# QvpPageView's own convenience layout object just never let a caller
+# set it, hard-coding QvpDefaults.aspectSlack/1.15 unconditionally).
+# Nothing else about the package is modified — no native code, no other
+# behavior. Full provenance, the exact patch, and the removal condition:
+# third_party/qvp_flutter/PATCHES.md.
+dependency_overrides:
+  qvp_flutter:
+    path: third_party/qvp_flutter
 
 dev_dependencies:
   flutter_test:
@@ -115,44 +131,38 @@ flutter:
     - assets/quran/tafsir/ar_muyassar.json
 
     # DEVELOPMENT-ONLY, LICENSE-GATED — see docs/QURAN_DATA_PROVENANCE.md
-    # §7/§7a/§8 and the release checklist there. The real Mushaf
-    # line/token dataset and the real QPC V2 per-page fonts (604 files,
-    # ~200MB uncompressed) are declared here so local/debug builds can
-    # actually render the authentic Mushaf; lib/quran/data/import/
-    # bundled_dataset_seeder.dart and
-    # lib/features/mushaf/application/qpc_page_font_providers.dart both
-    # refuse to import/load this content when kReleaseMode is true, so the
-    # app itself never displays it in a release build even if these bytes
-    # are physically present. That refusal does NOT remove the bytes from
-    # a naively-built release package — a true public release must also
-    # strip or flavor-gate these three asset lines before shipping; do not
-    # mark the release checklist's redistribution items "cleared" without
-    # verified upstream permission.
+    # §7/§7a/§8 and the release checklist there. This is the Mushaf
+    # line/token *structural* dataset (which Surah/Juz a page opens on,
+    # word-by-word layout metadata) — independent of which engine actually
+    # draws Mushaf page glyphs (Quran Engine, since
+    # docs/QURAN_ENGINE_MIGRATION.md) and still consulted for that
+    # structural data (e.g. `MushafPageTitle`). The former QPC V2 *font*
+    # glyph package this block also used to declare
+    # (`assets/quran/manifests/qpc_v2_fonts.json`,
+    # `assets/quran/fonts/qpc_v2/`) was removed with that renderer — no
+    # code loads it any more. lib/quran/data/import/
+    # bundled_dataset_seeder.dart refuses to import this dataset when
+    # kReleaseMode is true, so the app itself never displays it in a
+    # release build even if these bytes are physically present. That
+    # refusal does NOT remove the bytes from a naively-built release
+    # package — a true public release must also strip or flavor-gate this
+    # asset line before shipping; do not mark the release checklist's
+    # redistribution items "cleared" without verified upstream permission.
     - assets/quran/mushaf/kfgqpc_v2.json
-    - assets/quran/manifests/qpc_v2_fonts.json
-    - assets/quran/fonts/qpc_v2/
 
-    # The QUL Surah Header decorative color font — kept only as an unused
-    # development resource (docs/QURAN_DATA_PROVENANCE.md §10): no longer
-    # wired into the active Mushaf renderer (superseded by
-    # quran_common.ttf/suracon.ttf below), but not deleted pending a
-    # decision on whether to remove it entirely. Same
+    # The verse-by-verse reader's own Arabic display font ("KFGQPC HAFS
+    # Uthmanic Script" / QUL's `UthmanicHafs_V22.ttf`) — unrelated to the
+    # Mushaf renderer (Quran Engine draws Mushaf-mode pages from its own
+    # vendored page corpus below, not from this font). Same
     # development-only/license-gated treatment as the block above.
-    # lib/features/mushaf/application/surah_header_font_providers.dart
-    # refuses to load this in kReleaseMode.
-    - assets/quran/manifests/surah_header_glyphs.json
-    - assets/quran/fonts/qcf_surah_header/
-
-    # QuranApp-style special-line fonts (Bismillah + Surah header),
-    # vendored from a local AlfaazPlus/QuranApp checkout — same
-    # development-only/license-gated treatment as the blocks above (see
-    # docs/QURAN_DATA_PROVENANCE.md §12/§13).
-    # lib/features/mushaf/application/quranapp_special_font_providers.dart
-    # refuses to load these in kReleaseMode.
-    - assets/quran/manifests/quran_common_font.json
-    - assets/quran/manifests/suracon_glyphs.json
+    # lib/features/reader/application/uthmanic_hafs_font_providers.dart
+    # refuses to load this in kReleaseMode. The sibling `quran_common.ttf`/
+    # `suracon.ttf` files this directory used to also declare were the
+    # former QPC V2 Mushaf renderer's own special-line fonts, removed with
+    # it — this now names the one remaining file directly rather than the
+    # whole directory, so those unused files never get bundled either.
     - assets/quran/manifests/uthmanic_hafs_font.json
-    - assets/quran/fonts/quranapp/
+    - assets/quran/fonts/quranapp/uthmanic_hafs.ttf
 
     # The QPC Hafs display-word manifest (verse-by-verse mode's Quran text
     # display) — real, fully validated QUL text (every ayah in it is
@@ -163,17 +173,21 @@ flutter:
     # to load this in kReleaseMode.
     - assets/quran/quran_display/qpc_hafs_display_words.json
 
-    # Quran Engine's own KFGQPC-derived Mushaf page corpus
-    # (feature/quran-engine-migration — docs/QURAN_ENGINE_MIGRATION.md),
-    # vendored from Quran.ws's CDN release (tool/quran_engine/README.md).
-    # Same development-only/license-gated treatment as every block above:
-    # this corpus's public redistribution is unresolved, exactly like QPC
-    # V2's is — a different technical delivery mechanism for material with
-    # the same underlying KFGQPC provenance question, not a separate
-    # license. lib/features/mushaf/data/quran_engine/
-    # quran_engine_android_backend.dart refuses to load this in
-    # kReleaseMode. Only the six representative pages (1, 2, 42, 106, 302,
-    # 604) are vendored — never the full 604-page corpus.
+    # Quran Engine's own KFGQPC-derived Mushaf page corpus (the full,
+    # real 604-page set — structurally validated by
+    # tool/quran_engine/verify_all_pages_structural.mjs), vendored from
+    # Quran.ws's CDN release (tool/quran_engine/README.md). Quran Engine
+    # is Tahfeez's production Mushaf rendering backend
+    # (docs/QURAN_ENGINE_MIGRATION.md) and is now bundled and loaded in
+    # every build, including release — by explicit product decision, this
+    # corpus is no longer kReleaseMode-gated the way every other block on
+    # this page still is. This corpus's public redistribution remains
+    # unresolved, exactly like QPC V2's was (a different technical
+    # delivery mechanism for material with the same underlying KFGQPC
+    # provenance question, not a separate license) — that decision was
+    # made deliberately, with that risk understood, not because the
+    # provenance question was resolved. See
+    # docs/QURAN_ENGINE_MIGRATION.md's licensing section.
     - assets/quran/quran_engine/pages/
 
   # An image asset can refer to one or more resolution-specific "variants", see

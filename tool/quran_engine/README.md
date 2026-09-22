@@ -23,13 +23,13 @@ Pinned upstream:
   copies it alongside the pinned `web/qvp.js` into `web/quran_engine/`.
   Requires a Rust toolchain with the `wasm32-unknown-unknown` target
   (`rustup target add wasm32-unknown-unknown`).
-- `fetch_page_data.sh` — downloads the representative pages (1, 2, 42, 106,
-  302, 604) plus `atlas.qva` from the pinned data release, verifying each
-  file's SHA-256 against the release's own `manifest.json` before writing
-  it to `assets/quran/quran_engine/pages/`. Refuses to write any file that
-  fails verification. **Only these six pages are vendored** — not the full
-  604-page corpus (see `docs/QURAN_ENGINE_MIGRATION.md`'s licensing
-  section for why bundling the full corpus is not yet cleared).
+- `fetch_page_data.sh` — downloads page data from the pinned data release,
+  verifying each file's SHA-256 against the release's own `manifest.json`
+  before writing it to `assets/quran/quran_engine/pages/`. Refuses to
+  write any file that fails verification. Defaults to six representative
+  pages (1, 2, 42, 106, 302, 604) plus `atlas.qva`; `--all` fetches the
+  full 604-page corpus. **The full corpus is what Tahfeez ships** — see
+  "Asset gating" below.
 
 Both scripts are idempotent and never touch the production QPC V2
 assets/renderer.
@@ -44,11 +44,17 @@ the engine itself, not something to fall into by default.
 
 ## Asset gating
 
-`assets/quran/quran_engine/pages/` is gated in `pubspec.yaml` exactly like
-every other KFGQPC-derived Mushaf resource
-(`docs/QURAN_DATA_PROVENANCE.md`'s release checklist): declared for
-local/debug builds only, refused at `kReleaseMode` by
-`mushafQuranEngineBackendProvider`'s own asset loading, and must be
-stripped (or moved behind a build flavor) before any real release build —
-the code-level refusal alone does not remove the bytes from a naively
-built release package.
+**Unlike every other KFGQPC-derived Mushaf resource in this codebase**,
+`assets/quran/quran_engine/pages/` (the full 604-page corpus) is declared
+in `pubspec.yaml` for every build, including release, and is bundled on
+both Android and Web with no `kReleaseMode` refusal — Quran Engine is
+Tahfeez's production Mushaf rendering backend
+(`docs/QURAN_ENGINE_MIGRATION.md`), and rendering Mushaf pages at all
+requires this corpus. This corpus's public redistribution status is
+exactly as unresolved as QPC V2's was; shipping it anyway in real release
+builds was a deliberate product decision, made only after the specific
+risk was explained and explicitly accepted — see
+`docs/QURAN_ENGINE_MIGRATION.md`'s licensing section and
+`docs/THIRD_PARTY_RESOURCES.md` for the full record. That decision does
+not resolve the underlying provenance question; it only changes whether
+the app ships the bytes while that question stays open.

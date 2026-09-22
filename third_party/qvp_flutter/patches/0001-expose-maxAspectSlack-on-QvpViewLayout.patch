@@ -1,0 +1,92 @@
+--- /home/omar/.pub-cache/hosted/pub.dev/qvp_flutter-0.2.2/lib/src/page_view.dart	2026-09-20 22:00:50.976703447 +0200
++++ lib/src/page_view.dart	2026-09-21 11:29:59.449456650 +0200
+@@ -23,18 +23,64 @@
+ 
+ @immutable
+ class QvpViewLayout {
+-  const QvpViewLayout({this.padTop = 24, this.padBottom = 24, this.padSide = 16, this.lineSpacing = 1, this.fillHeight = false, this.gridLines = 0});
++  // ── Tahfeez patch (qvp_flutter 0.2.2 → third_party/qvp_flutter) ──
++  // `toSpec()` below used to hard-code `maxAspectSlack: QvpDefaults.aspectSlack`
++  // (1.15), with no constructor parameter to override it, even though the
++  // lower-level `QvpLayoutSpec` this builds already accepts any value
++  // (`0` documented as "no bound") and the native engine already honors
++  // it — confirmed by reading `QvpLayoutSpec.maxAspectSlack`'s own doc
++  // comment in engine.dart and its straight FFI pass-through in
++  // `QvpPage._writeSpec`/`layout()` (nothing in this Dart wrapper computes
++  // or clamps anything using this value itself). So this ceiling was a
++  // widget-level default becoming an unconditional limit, not an engine
++  // limitation. Tahfeez's Mushaf pages need to use the actual available
++  // viewport at whatever aspect ratio it has (see
++  // docs/QURAN_ENGINE_MIGRATION.md's "Mushaf page display" notes) without
++  // being held to within 15% of the page's own printed width — this one
++  // field is now a normal, nullable constructor parameter, named to match
++  // `QvpLayoutSpec.maxAspectSlack` exactly, defaulting to `null` (meaning
++  // "use the upstream default", unchanged from 0.2.2's own behavior) so
++  // every existing call site keeps its exact original behavior unless it
++  // opts in. See third_party/qvp_flutter/PATCHES.md for the full record.
++  const QvpViewLayout({
++    this.padTop = 24,
++    this.padBottom = 24,
++    this.padSide = 16,
++    this.lineSpacing = 1,
++    this.fillHeight = false,
++    this.gridLines = 0,
++    this.maxAspectSlack,
++  });
+   final double padTop, padBottom, padSide, lineSpacing;
+   final bool fillHeight;
+   final int gridLines;
+ 
+-  QvpViewLayout copyWith({double? padTop, double? padBottom, double? padSide, double? lineSpacing, bool? fillHeight, int? gridLines}) => QvpViewLayout(
++  /// `null` (the default) keeps upstream's own built-in behavior
++  /// (`QvpDefaults.aspectSlack`, 1.15 — the content is never wider than
++  /// `viewportH · pageW / pageH · 1.15`). An explicit `0` removes that
++  /// ceiling entirely ("no bound", per `QvpLayoutSpec.maxAspectSlack`'s
++  /// own doc comment) — the engine still computes and owns the resulting
++  /// uniform scale/centering, this only changes the ceiling passed into
++  /// that existing, already-supported parameter.
++  final double? maxAspectSlack;
++
++  QvpViewLayout copyWith({
++    double? padTop,
++    double? padBottom,
++    double? padSide,
++    double? lineSpacing,
++    bool? fillHeight,
++    int? gridLines,
++    double? maxAspectSlack,
++  }) =>
++      QvpViewLayout(
+         padTop: padTop ?? this.padTop,
+         padBottom: padBottom ?? this.padBottom,
+         padSide: padSide ?? this.padSide,
+         lineSpacing: lineSpacing ?? this.lineSpacing,
+         fillHeight: fillHeight ?? this.fillHeight,
+         gridLines: gridLines ?? this.gridLines,
++        maxAspectSlack: maxAspectSlack ?? this.maxAspectSlack,
+       );
+ 
+   QvpLayoutSpec toSpec(double viewportW, double viewportH) => QvpLayoutSpec(
+@@ -47,7 +93,7 @@
+         lineSpacing: lineSpacing,
+         fillHeight: fillHeight,
+         gridLines: gridLines,
+-        maxAspectSlack: QvpDefaults.aspectSlack,
++        maxAspectSlack: maxAspectSlack ?? QvpDefaults.aspectSlack,
+       );
+ 
+   @override
+@@ -58,10 +104,11 @@
+       other.padSide == padSide &&
+       other.lineSpacing == lineSpacing &&
+       other.fillHeight == fillHeight &&
+-      other.gridLines == gridLines;
++      other.gridLines == gridLines &&
++      other.maxAspectSlack == maxAspectSlack;
+ 
+   @override
+-  int get hashCode => Object.hash(padTop, padBottom, padSide, lineSpacing, fillHeight, gridLines);
++  int get hashCode => Object.hash(padTop, padBottom, padSide, lineSpacing, fillHeight, gridLines, maxAspectSlack);
+ }
+ 
+ /// Pan / zoom on top of the engine layout. `view px = offsetX + layout px * scale`.

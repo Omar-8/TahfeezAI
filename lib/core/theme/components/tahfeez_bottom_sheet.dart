@@ -2,6 +2,42 @@ import 'package:flutter/material.dart';
 
 import '../app_spacing.dart';
 
+/// Tracks whether a Tahfeez modal bottom sheet is currently open, plus a
+/// short cooldown just after one closes. Flutter Web's platform-view
+/// compositing does not reliably stop a native DOM listener on an
+/// underlying platform view (e.g. Quran Engine's Mushaf-page `<canvas>`,
+/// `quran_engine_web_bridge.dart`) from also receiving the same physical
+/// click that opens or dismisses a Flutter-painted overlay above it — a
+/// real, reproduced bug, not a theoretical one: selecting a Mushaf
+/// appearance option (or dismissing the sheet afterward) could also
+/// register as a word tap on the page underneath and pop open the
+/// word-detail sheet unintentionally. [isActive] is checked by that
+/// canvas click listener before it acts on a click.
+class TahfeezModalSheetActivity {
+  TahfeezModalSheetActivity._();
+
+  static int _openCount = 0;
+  static DateTime? _lastClosedAt;
+
+  /// Long enough to cover the same click event's dispatch to an
+  /// underlying platform view, short enough that a deliberate word tap
+  /// immediately after closing a sheet still works normally.
+  static const _cooldown = Duration(milliseconds: 350);
+
+  static bool get isActive {
+    if (_openCount > 0) return true;
+    final closedAt = _lastClosedAt;
+    return closedAt != null && DateTime.now().difference(closedAt) < _cooldown;
+  }
+
+  static void _opened() => _openCount++;
+
+  static void _closed() {
+    _openCount = _openCount > 0 ? _openCount - 1 : 0;
+    _lastClosedAt = DateTime.now();
+  }
+}
+
 /// Shows a Tahfeez modal bottom sheet with a consistent drag handle, header,
 /// and safe-area padding.
 ///
@@ -15,7 +51,8 @@ Future<T?> showTahfeezModalBottomSheet<T>({
   String? title,
   required WidgetBuilder builder,
 }) {
-  return showModalBottomSheet<T>(
+  TahfeezModalSheetActivity._opened();
+  final result = showModalBottomSheet<T>(
     context: context,
     isScrollControlled: true,
     builder: (context) => SafeArea(
@@ -51,4 +88,6 @@ Future<T?> showTahfeezModalBottomSheet<T>({
       ),
     ),
   );
+  result.whenComplete(TahfeezModalSheetActivity._closed);
+  return result;
 }

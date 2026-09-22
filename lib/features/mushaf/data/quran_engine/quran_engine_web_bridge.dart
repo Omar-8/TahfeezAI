@@ -24,6 +24,8 @@ import 'dart:ui_web' as ui_web;
 
 import 'package:web/web.dart' as web;
 
+import '../../../../core/theme/components/tahfeez_bottom_sheet.dart';
+
 /// `window.QVP`, read via `getProperty` rather than a top-level `@JS('QVP')
 /// external` getter — the latter produced a bare, stack-trace-free
 /// `NoSuchMethodError` at runtime in the POC (caught by actually running
@@ -129,6 +131,16 @@ class QuranEngineWebPage {
       canvas.addEventListener(
         'click',
         (web.MouseEvent event) {
+          // A real, reproduced bug: this canvas has its own native DOM
+          // click listener (see the comment above), which Flutter's own
+          // modal-barrier hit-testing does not reliably suppress while a
+          // sheet (e.g. the Mushaf appearance sheet) is open or has just
+          // closed above it — the same physical click that selects an
+          // appearance option or dismisses the sheet could also reach
+          // here and open the word-detail popup. Ignored while any
+          // Tahfeez modal sheet is active, plus a short cooldown after it
+          // closes (`TahfeezModalSheetActivity`).
+          if (TahfeezModalSheetActivity.isActive) return;
           _onTap?.call(event.offsetX.toDouble(), event.offsetY.toDouble());
         }.toJS,
       );
@@ -197,14 +209,33 @@ class QuranEngineWebPage {
       return;
     }
     _pendingRender = null;
-    canvas.width = (widthPx * devicePixelRatio).round();
-    canvas.height = (heightPx * devicePixelRatio).round();
+    // Browser zoom and Flutter layout can hand platform views fractional
+    // CSS-pixel sizes. If the backing canvas rounds those dimensions down
+    // but the renderer still computes its fit against the larger fractional
+    // box, the outer page art can be clipped by a pixel or more. Allocate
+    // enough backing pixels, then render against the exact logical size that
+    // backing store represents.
+    canvas.width = (widthPx * devicePixelRatio).ceil();
+    canvas.height = (heightPx * devicePixelRatio).ceil();
+    final renderWidthPx = canvas.width / devicePixelRatio;
+    final renderHeightPx = canvas.height / devicePixelRatio;
+    // Pin the canvas element's on-screen (CSS) size to the widget's layout
+    // box. The factory already sets `style.width/height: 100%`, which is
+    // identical *if* Flutter Web places the platform view at exactly the
+    // widget's size -- but HtmlElementView placement at devicePixelRatio
+    // != 1 is a known source of mismatch, and a canvas rendered larger
+    // than its layout slot spills past the page frame and the spread's
+    // edges (visible as "page art cut at the sides", reachable by pan/
+    // scroll). Stating the size in pixels makes it impossible for the DOM
+    // canvas to display anything other than the exact box the layout gave.
+    canvas.style.width = '${widthPx.toStringAsFixed(2)}px';
+    canvas.style.height = '${heightPx.toStringAsFixed(2)}px';
 
     _page.callMethod('setDefaultInk'.toJS, inkColorInt.toJS);
 
-    final scale = (heightPx / height).clamp(0.0, widthPx / width);
-    final ox = (widthPx - width * scale) / 2;
-    final oy = (heightPx - height * scale) / 2;
+    final scale = (renderHeightPx / height).clamp(0.0, renderWidthPx / width);
+    final ox = (renderWidthPx - width * scale) / 2;
+    final oy = (renderHeightPx - height * scale) / 2;
     _lastView = (scale: scale, ox: ox, oy: oy);
 
     final rendererCtor = _qvp.getProperty('CanvasRenderer'.toJS) as JSFunction;

@@ -5,9 +5,9 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/quran_text_style.dart';
 import '../../../../quran/application/bismillah_text.dart';
 import '../../../mushaf/application/mushaf_appearance_controller.dart';
-import '../../../mushaf/application/quranapp_special_font_providers.dart';
 import '../../../mushaf/domain/mushaf_appearance.dart';
 import '../../application/quran_display_providers.dart';
+import '../../application/uthmanic_hafs_font_providers.dart';
 
 /// Al-Fatiha's first ayah's id (chapter 1, verse 1) -- the Bismillah's
 /// canonical source (see `bismillah_text.dart`'s own doc comment), reused

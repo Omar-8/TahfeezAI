@@ -17,7 +17,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:tahfeez_ai/features/mushaf/application/quranapp_special_font_providers.dart';
+import 'package:tahfeez_ai/features/reader/application/uthmanic_hafs_font_providers.dart';
 import 'package:tahfeez_ai/features/reader/application/quran_display_providers.dart';
 
 // (chapterNo, verseNo, ayahId, label, real canonical words) for each

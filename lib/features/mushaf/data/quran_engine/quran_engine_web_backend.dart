@@ -9,46 +9,50 @@ import '../../../../quran/domain/models/mushaf_token_models.dart';
 import '../../../../quran/domain/models/quran_refs.dart';
 import '../../domain/quran_engine/quran_engine_mushaf_backend.dart';
 import '../../domain/quran_engine_ref_adapter.dart';
-import '../../presentation/mushaf_page_render_model.dart';
+import '../../presentation/mushaf_token_hit_rect.dart';
 import 'quran_engine_web_bridge.dart';
 
 /// Web implementation of [QuranEngineMushafBackend], promoted from the
 /// `poc/quran-engine` branch's evaluation
 /// (`docs/poc/QURAN_ENGINE_POC.md`) to production quality: hits translate
 /// through the shared [QuranEngineRefAdapter] and canonical
-/// [WordRef]/[VerseRef] instead of the POC's own experimental key type,
-/// and page delivery follows the exact same "unconfigured by default, HTTP
-/// fetch via [NetworkClient], dedicated not-configured exception" pattern
-/// [WebQpcPageFontManager] already established for the QPC V2 renderer's
-/// own Web font delivery
-/// (`lib/features/mushaf/data/web_qpc_page_font_manager.dart`).
+/// [WordRef]/[VerseRef] instead of the POC's own experimental key type.
 ///
-/// Never fetches the full 604-page corpus — only the page a caller
-/// actually asks for, plus a small preload window (see [preloadAround]).
-/// Relies on ordinary browser HTTP caching for repeat visits; no custom
-/// IndexedDB/OPFS cache is implemented (not measured to be necessary).
+/// **Page delivery, by explicit product decision, now defaults to the
+/// bundled, same-origin Flutter asset path** (Flutter Web serves pubspec
+/// `assets:` under `assets/assets/...`) — a plain `flutter build web`
+/// bundles the Quran Engine page corpus like any other pubspec asset (the
+/// former `tool/build_web.dart` wrapper that staged it out of Web builds
+/// was removed once that exclusion was deliberately reversed), so it
+/// "just works" wherever the Flutter Web app itself is deployed, with no
+/// separate hosting/CDN required. `QURAN_ENGINE_PAGE_BASE_URL` remains
+/// available to point at a different (e.g. future dedicated CDN) location
+/// instead, but is no longer required to be set. The page corpus's KFGQPC
+/// redistribution status remains unresolved regardless of delivery
+/// mechanism (see `docs/QURAN_ENGINE_MIGRATION.md`'s licensing section) —
+/// this decision does not change that legal status, only where the bytes
+/// are actually served from.
 class QuranEngineWebBackend implements QuranEngineMushafBackend {
   QuranEngineWebBackend({
-    required this.pageBaseUrl,
+    required String? pageBaseUrl,
     required this.networkClient,
     required this.logger,
-  });
+  }) : pageBaseUrl = (pageBaseUrl == null || pageBaseUrl.trim().isEmpty)
+           ? _defaultSameOriginPageBaseUrl
+           : pageBaseUrl;
 
-  /// `QURAN_ENGINE_PAGE_BASE_URL`'s resolved value — `null`/empty means
-  /// "not configured", never a hard-coded public default. Quran Engine's
-  /// page corpus carries the same unresolved KFGQPC redistribution status
-  /// as Tahfeez's existing QPC V2 fonts — this must never point at a
-  /// public CDN by default.
-  final String? pageBaseUrl;
+  /// The bundled corpus's own path under Flutter Web's asset-serving
+  /// convention — same-origin, no external URL needed.
+  static const _defaultSameOriginPageBaseUrl =
+      'assets/assets/quran/quran_engine/pages';
+
+  final String pageBaseUrl;
   final NetworkClient networkClient;
   final AppLogger logger;
 
   QuranEngineWebBridge? _bridge;
   final Set<int> _loaded = {};
   final Map<int, Future<QuranEngineMushafPage>> _inFlight = {};
-
-  bool get _isConfigured =>
-      pageBaseUrl != null && pageBaseUrl!.trim().isNotEmpty;
 
   QuranEngineWebBridge get _requireBridge {
     final bridge = _bridge;
@@ -69,14 +73,6 @@ class QuranEngineWebBackend implements QuranEngineMushafBackend {
 
   @override
   Future<QuranEngineMushafPage> loadPage(int pageNumber) {
-    if (!_isConfigured) {
-      final exception = QuranEngineWebDeliveryNotConfiguredException(
-        pageNumber,
-      );
-      logger.debug(exception.toString(), tag: 'QuranEngineWebBackend');
-      return Future.error(exception);
-    }
-
     final existing = _inFlight[pageNumber];
     if (existing != null) return existing;
 
@@ -114,9 +110,9 @@ class QuranEngineWebBackend implements QuranEngineMushafBackend {
   }
 
   String _pageUrl(int pageNumber) {
-    final base = pageBaseUrl!.endsWith('/')
-        ? pageBaseUrl!.substring(0, pageBaseUrl!.length - 1)
-        : pageBaseUrl!;
+    final base = pageBaseUrl.endsWith('/')
+        ? pageBaseUrl.substring(0, pageBaseUrl.length - 1)
+        : pageBaseUrl;
     final key = pageNumber.toString().padLeft(3, '0');
     return '$base/$key.qvp';
   }
@@ -129,7 +125,6 @@ class QuranEngineWebBackend implements QuranEngineMushafBackend {
 
   @override
   Future<void> preloadAround(int pageNumber, {int radius = 1}) async {
-    if (!_isConfigured) return;
     for (var distance = 1; distance <= radius; distance++) {
       for (final neighbor in [pageNumber - distance, pageNumber + distance]) {
         if (neighbor < 1 || neighbor > 604) continue;

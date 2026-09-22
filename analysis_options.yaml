@@ -15,6 +15,11 @@ analyzer:
     - android/**
     - ios/**
     - web/**
+    # Vendored, minimally-patched third-party package
+    # (third_party/qvp_flutter/PATCHES.md) -- its own example app/tests
+    # are upstream's code, not Tahfeez's, and shouldn't be linted against
+    # this project's own rules.
+    - third_party/**
 
 linter:
   # The lint rules applied to this project can be customized in the

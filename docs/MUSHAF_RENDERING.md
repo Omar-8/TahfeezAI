@@ -1,10 +1,25 @@
-# Tahfeez AI — Mushaf Rendering Architecture
+# Tahfeez AI — Mushaf Rendering Architecture (SUPERSEDED — describes the removed QPC V2 renderer)
 
-This document covers how a printed Mushaf page actually reaches the screen: the
-layout/token data pipeline, and the QPC V2 page-specific font system layered on top of
-it. For where the underlying data comes from and its license status, see
-`docs/QURAN_DATA_PROVENANCE.md` §7/§7a/§8 — this document is about the runtime
-architecture, not provenance.
+**This document is historical.** It describes the QPC V2 `CustomPainter`-based
+line-shaping renderer (`MushafPageLayoutEngine`/`MushafPageRenderModel`/`MushafPagePainter`
+and the page-specific `QpcPageFontManager`) that was Tahfeez's Mushaf rendering backend
+through Milestone 9C. That renderer, and every file this document describes below, **has
+since been deleted in full** and replaced by Quran Engine
+(`quran-ws/quran-engine`) as Tahfeez's only Mushaf rendering backend — see
+`docs/QURAN_ENGINE_MIGRATION.md`, whose §2 has the current architecture diagram and whose
+§8a records exactly what was removed. Nothing below this notice reflects the current
+codebase; it is kept only as a record of the design this migration replaced, since the
+shaping-cost/caching decisions it documents (shape once per line, cache the render model,
+one `CustomPainter` per page) were real, deliberate engineering choices worth preserving
+the reasoning for, even though the specific classes no longer exist.
+
+For where the Mushaf-mode Quran text/layout data itself comes from and its license
+status (independent of which engine renders it), see `docs/QURAN_DATA_PROVENANCE.md`
+§7/§7a/§8.
+
+---
+
+*Original document follows, describing the now-removed QPC V2 renderer:*
 
 ## 1. The rendering pipeline
 

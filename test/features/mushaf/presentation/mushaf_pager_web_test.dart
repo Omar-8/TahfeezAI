@@ -14,6 +14,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tahfeez_ai/core/core_providers.dart';
 import 'package:tahfeez_ai/core/platform/platform_capabilities.dart';
+import 'package:tahfeez_ai/features/mushaf/application/mushaf_quran_engine_providers.dart';
 import 'package:tahfeez_ai/features/mushaf/presentation/mushaf_pager.dart';
 import 'package:tahfeez_ai/quran/application/quran_script_code.dart';
 import 'package:tahfeez_ai/quran/data/import/quran_dataset_importer.dart';
@@ -42,6 +43,19 @@ class _FakePlatformCapabilities implements PlatformCapabilities {
   bool get supportsNativeFileStorage => !isWeb;
 }
 
+// Stands in for a loaded engine page's published aspect ratio, without
+// needing a real engine backend under test.
+class _FixedAspectRatios extends MushafPageAspectRatios {
+  _FixedAspectRatios(this.ratio);
+
+  final double ratio;
+
+  @override
+  Map<int, double> build() => {
+    for (var page = 1; page <= 5; page++) page: ratio,
+  };
+}
+
 void main() {
   Future<QuranDatabase> buildDb() async {
     final db = QuranDatabase(NativeDatabase.memory());
@@ -53,6 +67,7 @@ void main() {
     QuranDatabase db, {
     required bool isWeb,
     required ValueChanged<int> onPageChanged,
+    double? pageAspectRatio,
   }) {
     return ProviderScope(
       overrides: [
@@ -61,6 +76,10 @@ void main() {
         platformCapabilitiesProvider.overrideWithValue(
           _FakePlatformCapabilities(isWeb: isWeb),
         ),
+        if (pageAspectRatio != null)
+          mushafPageAspectRatiosProvider.overrideWith(
+            () => _FixedAspectRatios(pageAspectRatio),
+          ),
       ],
       child: MaterialApp(
         home: Scaffold(
@@ -115,7 +134,7 @@ void main() {
             (w.decoration! as BoxDecoration).border != null,
       );
       final gapNative = find.byWidgetPredicate(
-        (w) => w is SizedBox && w.width == 24,
+        (w) => w is SizedBox && w.child is ColoredBox,
       );
       expect(borderedNative, findsNothing);
       expect(gapNative, findsNothing);
@@ -130,11 +149,66 @@ void main() {
             (w.decoration! as BoxDecoration).border != null,
       );
       final gapWeb = find.byWidgetPredicate(
-        (w) => w is SizedBox && w.width == 24,
+        (w) => w is SizedBox && w.child is ColoredBox,
       );
       // Both pages of the spread (page 1 and page 2) are bordered.
       expect(borderedWeb, findsNWidgets(2));
       expect(gapWeb, findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'web: the page frame is keyed to the engine page aspect ratio so the '
+    'border hugs the printed page and never overflows its half of the '
+    'spread; native is not wrapped',
+    (tester) async {
+      final db = await buildDb();
+      addTearDown(db.close);
+      await useSpreadViewport(tester);
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      final pageViewport =
+          tester.view.physicalSize / tester.view.devicePixelRatio;
+
+      await tester.pumpWidget(
+        wrap(db, isWeb: false, onPageChanged: (_) {}, pageAspectRatio: 0.7),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byType(AspectRatio), findsNothing);
+
+      await tester.pumpWidget(
+        wrap(db, isWeb: true, onPageChanged: (_) {}, pageAspectRatio: 0.7),
+      );
+      await tester.pumpAndSettle();
+      // Both pages of the spread are aspect-keyed, so each bordered frame
+      // sizes to the printed page rather than the whole viewport box...
+      final borderedWeb = find.byWidgetPredicate(
+        (w) =>
+            w is Container &&
+            w.decoration is BoxDecoration &&
+            (w.decoration! as BoxDecoration).border != null,
+      );
+      expect(borderedWeb, findsNWidgets(2));
+      for (final element in borderedWeb.evaluate()) {
+        // With the page's aspect ratio exactly preserved inside the frame
+        // (page box = frame minus its 2px border on each side), the frame
+        // hugs the printed page rather than the whole viewport box -- and is
+        // kept inside the space actually available, so the page can never be
+        // clipped at the outer edges of the spread.
+        final rect = tester.getRect(
+          find.byWidgetPredicate(
+            (w) => w is Container && identical(w, element.widget),
+          ),
+        );
+        expect((rect.width - 4) / (rect.height - 4), closeTo(0.7, 0.001));
+        expect(rect.left, greaterThanOrEqualTo(0));
+        expect(rect.right, lessThanOrEqualTo(pageViewport.width));
+        expect(rect.top, greaterThanOrEqualTo(0));
+        expect(rect.bottom, lessThanOrEqualTo(pageViewport.height));
+      }
     },
   );
 

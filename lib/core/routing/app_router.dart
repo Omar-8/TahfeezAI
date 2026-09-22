@@ -21,8 +21,13 @@ GoRouter appRouter(Ref ref) {
     initialLocation: AppRoutes.home,
     routes: [
       StatefulShellRoute.indexedStack(
-        builder: (context, state, navigationShell) =>
-            AppShell(navigationShell: navigationShell),
+        builder: (context, state, navigationShell) => AppShell(
+          navigationShell: navigationShell,
+          // The shell needs the *active* branch's location (see
+          // `fullBleedContentProvider` on why it may only honor a spread's
+          // width request while the Quran branch is on screen).
+          currentLocation: state.uri.path,
+        ),
         branches: [
           StatefulShellBranch(
             routes: [

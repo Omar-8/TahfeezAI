@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/core_providers.dart';
@@ -10,6 +11,34 @@ import '../data/quran_engine/quran_engine_web_backend_stub.dart'
 import '../domain/quran_engine/quran_engine_mushaf_backend.dart';
 
 part 'mushaf_quran_engine_providers.g.dart';
+
+/// Known aspect ratios of loaded Quran Engine pages, keyed by page number.
+///
+/// The engine page corpus renders every page as one fixed-size bitmap, so a
+/// page's real [QuranEngineMushafPage.aspectRatio] is all the web Mushaf
+/// pager needs to size its page frame tightly around the printed page
+/// instead of around the whole viewport box (see `MushafPager._bordered`).
+///
+/// This is a publish/read channel only: `QuranEngineMushafPageContent`
+/// publishes a page's ratio here once it has loaded it, and `MushafPager`
+/// reads it back. Page loading and disposal stay owned solely by the content
+/// widget — a second load path here (loading the page just to read its ratio,
+/// then disposing it) could race the content's own load and dispose the very
+/// page it is rendering.
+class MushafPageAspectRatios extends Notifier<Map<int, double>> {
+  @override
+  Map<int, double> build() => const {};
+
+  void report(int pageNumber, double aspectRatio) {
+    if (state[pageNumber] == aspectRatio) return;
+    state = {...state, pageNumber: aspectRatio};
+  }
+}
+
+final mushafPageAspectRatiosProvider =
+    NotifierProvider<MushafPageAspectRatios, Map<int, double>>(
+      MushafPageAspectRatios.new,
+    );
 
 /// The Web Quran Engine page-delivery endpoint's base URL, resolved once
 /// at compile time via `--dart-define=QURAN_ENGINE_PAGE_BASE_URL=…` —

@@ -776,10 +776,9 @@ packages:
   qvp_flutter:
     dependency: "direct main"
     description:
-      name: qvp_flutter
-      sha256: c1759454d01aab613632608bd33b6013c992a9e3be702e4dd4ec37dfe8d60eef
-      url: "https://pub.dev"
-    source: hosted
+      path: "third_party/qvp_flutter"
+      relative: true
+    source: path
     version: "0.2.2"
   recase:
     dependency: transitive

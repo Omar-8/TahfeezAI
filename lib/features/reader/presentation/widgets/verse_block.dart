@@ -12,7 +12,7 @@ import '../../../../quran/domain/models/translation_models.dart';
 import '../../../../quran/presentation/translation_block.dart';
 import '../../../../wbw/presentation/word_detail_sheet.dart';
 import '../../../mushaf/application/mushaf_appearance_controller.dart';
-import '../../../mushaf/application/quranapp_special_font_providers.dart';
+import '../../application/uthmanic_hafs_font_providers.dart';
 import '../../../mushaf/domain/mushaf_appearance.dart';
 import '../../application/quran_display_providers.dart';
 import 'verse_share_sheet.dart';
