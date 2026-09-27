@@ -33,6 +33,11 @@ migrate_working_dir/
 /build/
 /coverage/
 
+# Gradle's own local build cache -- machine-specific, non-deterministic,
+# never something to track (applies under third_party/ too, e.g. a vendored
+# package's own android/ and example/android/ folders).
+.gradle/
+
 # Symbolication related
 app.*.symbols
 
