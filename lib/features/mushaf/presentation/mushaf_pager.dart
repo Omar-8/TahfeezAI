@@ -123,7 +123,8 @@ class _MushafPagerState extends ConsumerState<MushafPager> {
 
   @override
   void dispose() {
-    _releaseFullBleed();
+    _requestedFullBleed = false;
+    _scheduleFullBleedApply();
     if (_twoPageSpread != null) _controller.dispose();
     _webFocusNode.dispose();
     super.dispose();
@@ -135,15 +136,13 @@ class _MushafPagerState extends ConsumerState<MushafPager> {
   // this pager (it stays in the app shell's reading column), a single-page
   // Mushaf view has no fixed-aspect surface worth expanding, and only the
   // spread — two fixed-aspect pages that the reading cap only ever squeezes —
-  // earns full-bleed. Schedules the change after the current frame because
-  // the shell is very likely mid-build while this is called and mutating a
-  // provider it watches during build is not allowed; compares against the
-  // last reported value so a frame that rebuilds for unrelated reasons (e.g.
-  // keyboard focus, browser zoom) does not re-notify.
-  bool _reportedFullBleed = false;
-  // Cached so dispose may release without touching `ref` (Riverpod forbids
-  // reading providers from `State.dispose`); the keepAlive notifier is
-  // stable for the container's lifetime.
+  // earns full-bleed.
+  bool _requestedFullBleed = false;
+  bool _appliedFullBleed = false;
+  bool _applyScheduled = false;
+  // Cached (never touched via `ref` at callback time, since `ref` is invalid
+  // once the element unmounts) so the deferred apply below can still mutate
+  // the keepAlive notifier afterwards.
   FullBleedContent? _fullBleedNotifier;
 
   @override
@@ -152,25 +151,33 @@ class _MushafPagerState extends ConsumerState<MushafPager> {
     _fullBleedNotifier ??= ref.read(fullBleedContentProvider.notifier);
   }
 
-  void _syncFullBleed(bool wantsFullBleed) {
-    if (_reportedFullBleed == wantsFullBleed) return;
-    _reportedFullBleed = wantsFullBleed;
+  /// Applies [_requestedFullBleed] to the shell's latch after the current
+  /// frame. Riverpod forbids mutating a provider from a widget life-cycle
+  /// (`build`/`dispose`/...), so the mutation is deferred a frame and
+  /// coalesced to at most one pending apply. The apply is best-effort
+  /// bookkeeping: in production the app-root `ProviderScope` outlives this
+  /// pager, so it always finds a live container; a test that swaps out the
+  /// whole `ProviderScope` can dispose it before the apply runs — then the
+  /// latch belongs to a dead container and there is nothing left to hold or
+  /// release (the exception, if any, is deliberately swallowed).
+  void _scheduleFullBleedApply() {
+    if (_applyScheduled) return;
+    _applyScheduled = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      final notifier = _fullBleedNotifier!;
-      if (wantsFullBleed) {
-        notifier.request();
-      } else {
-        notifier.release();
+      _applyScheduled = false;
+      if (_appliedFullBleed == _requestedFullBleed) return;
+      final notifier = _fullBleedNotifier;
+      if (notifier == null) return;
+      _appliedFullBleed = _requestedFullBleed;
+      try {
+        if (_requestedFullBleed) {
+          notifier.request();
+        } else {
+          notifier.release();
+        }
+      } catch (_) {
+        // Container/ref torn down between scheduling and apply.
       }
-    });
-  }
-
-  void _releaseFullBleed() {
-    if (!_reportedFullBleed) return;
-    _reportedFullBleed = false;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _fullBleedNotifier?.release();
     });
   }
 
@@ -265,12 +272,25 @@ class _MushafPagerState extends ConsumerState<MushafPager> {
   static const _webGutterWidth = 50.0;
   static const _webOuterPadding = EdgeInsets.zero;
   static const _webSpreadOuterPadding = EdgeInsets.only(bottom: 10);
+  // Small page number printed over the web frame's bottom border: centred
+  // horizontally, riding in a paper-coloured chip that cleanly covers the
+  // border rule where it sits -- scaled with the page so it stays
+  // proportional whether the spread is on a small tablet or a large desktop
+  // window. The number is overlaid, never reserved from the page box.
+  static const _webPageNumberMinFontSize = 10.0;
+  static const _webPageNumberMaxFontSize = 14.0;
+  // Strip (positioning box) height as a multiple of the font size: the
+  // number's own line plus breathing room so the centred chip covers the
+  // border band nicely on both sides.
+  static const _webPageNumberStripFactor = 1.8;
 
   Widget _bordered(
     BuildContext context,
     Widget child,
     Color background, {
     double? aspectRatio,
+    String? label,
+    Color? labelColor,
   }) {
     final outline = Theme.of(context).colorScheme.outlineVariant;
     // Frame chrome that must be counted when fitting the page box into the
@@ -320,17 +340,91 @@ class _MushafPagerState extends ConsumerState<MushafPager> {
             pageWidth = pageHeight * aspectRatio;
           }
         }
+        // A page number, when present, is printed over the frame's own
+        // surface at the very bottom: horizontally centered and riding the
+        // frame's outer bottom edge, so it reads as a small caption that
+        // "cuts" the rule and sits just below it. It is *not* laid out as a
+        // reserved strip -- the page box keeps the full height the verses
+        // always had, so every pixel of the number's framing is given back
+        // to the text. The strip height is only used to center the caption.
+        final labelFontSize = label == null
+            ? 0.0
+            : (pageHeight * 0.018).clamp(
+                _webPageNumberMinFontSize,
+                _webPageNumberMaxFontSize,
+              );
+        final labelBoxHeight = label == null
+            ? 0.0
+            : labelFontSize * _webPageNumberStripFactor;
         return Container(
           width: pageWidth + borderChrome + _webPagePadding.horizontal,
-          height: pageHeight + borderChrome + _webPagePadding.vertical,
+          height: pageHeight + verticalChrome,
           padding: _webPagePadding,
           decoration: BoxDecoration(
             color: background,
             border: Border.all(color: outline, width: _webBorderWidth),
             borderRadius: BorderRadius.circular(6),
           ),
-          clipBehavior: Clip.antiAlias,
-          child: SizedBox(width: pageWidth, height: pageHeight, child: child),
+          clipBehavior: Clip.none,
+          child: label == null
+              ? SizedBox(
+                  key: const ValueKey('mushaf-page-box'),
+                  width: pageWidth,
+                  height: pageHeight,
+                  child: child,
+                )
+              : Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    SizedBox(
+                      key: const ValueKey('mushaf-page-box'),
+                      width: pageWidth,
+                      height: pageHeight,
+                      child: child,
+                    ),
+                    // The caption box sits just below the border rule: its vertical
+                    // center lands a hair (`2`) under the frame's outer
+                    // bottom edge, so the number chip covers the border
+                    // stroke cleanly while reading as hanging slightly under
+                    // the rule rather than resting on it.
+                    Positioned(
+                      left: 0,
+                      right: 0,
+                      bottom: -2 - labelBoxHeight / 2,
+                      child: SizedBox(
+                        key: const ValueKey('mushaf-page-number-box'),
+                        height: labelBoxHeight,
+                        child: Center(
+                          // The number rides in a small chip filled with the
+                          // frame's own paper color, centred on the border
+                          // rule: the chip *covers* the border stroke where
+                          // it sits (looks like the rule is cleanly cut), and
+                          // its colour keeps it reading as part of the page
+                          // rather than a floating label.
+                          child: Container(
+                            key: const ValueKey('mushaf-page-number-chip'),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 3,
+                            ),
+                            decoration: BoxDecoration(
+                              color: background,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              label,
+                              style: TextStyle(
+                                fontSize: labelFontSize,
+                                height: 1.0,
+                                color: labelColor,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
         );
       },
     );
@@ -355,7 +449,8 @@ class _MushafPagerState extends ConsumerState<MushafPager> {
     final useTwoPageSpread =
         breakpoint.isAtLeastTablet && isLandscape && size.width > 700;
     _ensureController(useTwoPageSpread);
-    _syncFullBleed(useTwoPageSpread);
+    _requestedFullBleed = useTwoPageSpread;
+    _scheduleFullBleedApply();
     final isWeb = ref.watch(platformCapabilitiesProvider).isWeb;
     // Web-only, and intentionally *read* (not just watched-and-ignored):
     // a browser zoom (Ctrl/Cmd +/- ; also the browser's zoom-on-wheel) is a
@@ -472,61 +567,82 @@ class _MushafPagerState extends ConsumerState<MushafPager> {
                 onWordTap: (hitRect) => _showWordInfo(context, hitRect),
               )
             : const SizedBox.shrink();
-        final row = Row(
-          children: [
-            Expanded(
-              child: isWeb
-                  // Direction-aware Align (not Center, and not an absolute
-                  // `centerRight`) is what lets `_bordered`'s container size
-                  // to the aspect-keyed page (loose constraints) while
-                  // pushing each page toward the spread's center/spine in
-                  // *both* text directions: under RTL (Arabic locale) an
-                  // absolute right/left alignment would push the two pages
-                  // outward to the screen edges instead, clipping their
-                  // outer sides. The first Row child's spine side is its
-                  // end; the second child's is its start.
-                  ? Align(
-                      alignment: AlignmentDirectional.centerEnd,
-                      child: _bordered(
-                        context,
-                        rightPage,
-                        appearanceColors.background,
-                        aspectRatio: _mushafAspectRatio(rightPageNumber, isWeb),
-                      ),
-                    )
-                  : rightPage,
-            ),
-            if (isWeb)
-              SizedBox(
-                width: _webGutterWidth,
-                // The gutter between a two-page spread's pages is part of
-                // the printed-page surface, not app chrome — it must track
-                // the Mushaf's own current appearance background exactly
-                // like each page's own paper color, never a fixed
-                // Material/theme color that would visibly mismatch on
-                // every appearance other than whichever one was hardcoded.
-                child: ColoredBox(color: appearanceColors.background),
+        // A physical Mushaf opens right-to-left: the lower-numbered page sits
+        // on the right. `Row` puts its first child on the left under LTR, so
+        // the row is laid out RTL explicitly -- otherwise, in an LTR locale,
+        // page 1 (Al-Fatiha) lands on the left. The Align widgets below are
+        // direction-aware, so they keep pushing each page toward the spine.
+        final row = Directionality(
+          textDirection: TextDirection.rtl,
+          child: Row(
+            children: [
+              Expanded(
+                child: isWeb
+                    // Direction-aware Align (not Center, and not an absolute
+                    // `centerRight`) is what lets `_bordered`'s container size
+                    // to the aspect-keyed page (loose constraints) while
+                    // pushing each page toward the spread's center/spine in
+                    // *both* text directions: under RTL (Arabic locale) an
+                    // absolute right/left alignment would push the two pages
+                    // outward to the screen edges instead, clipping their
+                    // outer sides. The first Row child's spine side is its
+                    // end; the second child's is its start.
+                    ? Align(
+                        alignment: AlignmentDirectional.centerEnd,
+                        child: _bordered(
+                          context,
+                          rightPage,
+                          appearanceColors.background,
+                          aspectRatio: _mushafAspectRatio(
+                            rightPageNumber,
+                            isWeb,
+                          ),
+                          // Each frame is labelled with its own page's number (page 1 on
+                          // the right, page 2 on the left).
+                          label: rightPageNumber <= widget.pageCount
+                              ? '$rightPageNumber'
+                              : null,
+                          labelColor: appearanceColors.text,
+                        ),
+                      )
+                    : rightPage,
               ),
-            Expanded(
-              child: isWeb
-                  ? Align(
-                      alignment: AlignmentDirectional.centerStart,
-                      child: _bordered(
-                        context,
-                        leftPage,
-                        appearanceColors.background,
-                        aspectRatio: leftPageNumber <= widget.pageCount
-                            ? _mushafAspectRatio(leftPageNumber, isWeb)
-                            : null,
-                      ),
-                    )
-                  : leftPage,
-            ),
-          ],
+              if (isWeb)
+                SizedBox(
+                  width: _webGutterWidth,
+                  // The gutter between a two-page spread's pages is part of
+                  // the printed-page surface, not app chrome — it must track
+                  // the Mushaf's own current appearance background exactly
+                  // like each page's own paper color, never a fixed
+                  // Material/theme color that would visibly mismatch on
+                  // every appearance other than whichever one was hardcoded.
+                  child: ColoredBox(color: appearanceColors.background),
+                ),
+              Expanded(
+                child: isWeb
+                    ? Align(
+                        alignment: AlignmentDirectional.centerStart,
+                        child: _bordered(
+                          context,
+                          leftPage,
+                          appearanceColors.background,
+                          aspectRatio: leftPageNumber <= widget.pageCount
+                              ? _mushafAspectRatio(leftPageNumber, isWeb)
+                              : null,
+                          label: leftPageNumber <= widget.pageCount
+                              ? '$leftPageNumber'
+                              : null,
+                          labelColor: appearanceColors.text,
+                        ),
+                      )
+                    : leftPage,
+              ),
+            ],
+          ),
         );
         return isWeb
-          ? Padding(padding: _webSpreadOuterPadding, child: row)
-          : row;
+            ? Padding(padding: _webSpreadOuterPadding, child: row)
+            : row;
       },
     );
     final content = isWeb ? _wrapForWeb(pageView) : pageView;

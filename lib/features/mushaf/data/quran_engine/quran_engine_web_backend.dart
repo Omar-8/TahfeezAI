@@ -154,7 +154,15 @@ class QuranEngineWebBackend implements QuranEngineMushafBackend {
 }
 
 class QuranEngineWebPageAdapter implements QuranEngineMushafPage {
-  QuranEngineWebPageAdapter({required this.pageNumber, required this.page});
+  QuranEngineWebPageAdapter({required this.pageNumber, required this.page}) {
+    if (_biggerTextPages.contains(pageNumber)) page.textZoom = _biggerTextZoom;
+  }
+
+  /// Al-Fatiha's page and the start of Al-Baqara print little text on a full
+  /// page canvas, so it looks small next to other pages. Their text is drawn
+  /// slightly larger; the frame and page size are unchanged.
+  static const _biggerTextPages = {1, 2};
+  static const _biggerTextZoom = 1.3;
 
   final QuranEngineWebPage page;
 

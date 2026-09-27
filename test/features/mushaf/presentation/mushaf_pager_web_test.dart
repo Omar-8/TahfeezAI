@@ -192,23 +192,70 @@ void main() {
             (w.decoration! as BoxDecoration).border != null,
       );
       expect(borderedWeb, findsNWidgets(2));
+      final labelByFrameDx = <double, String>{};
       for (final element in borderedWeb.evaluate()) {
-        // With the page's aspect ratio exactly preserved inside the frame
-        // (page box = frame minus its 2px border on each side), the frame
-        // hugs the printed page rather than the whole viewport box -- and is
-        // kept inside the space actually available, so the page can never be
-        // clipped at the outer edges of the spread.
-        final rect = tester.getRect(
-          find.byWidgetPredicate(
-            (w) => w is Container && identical(w, element.widget),
-          ),
+        final frame = find.byWidgetPredicate(
+          (w) => w is Container && identical(w, element.widget),
         );
-        expect((rect.width - 4) / (rect.height - 4), closeTo(0.7, 0.001));
+        final rect = tester.getRect(frame);
+        final deco = (element.widget as Container).decoration! as BoxDecoration;
+        final borderWidth = (deco.border as Border?)?.top.width ?? 0;
+        // ...the whole frame still stays inside the space actually available,
+        // so the page can never be clipped at the outer edges of the spread.
         expect(rect.left, greaterThanOrEqualTo(0));
         expect(rect.right, lessThanOrEqualTo(pageViewport.width));
         expect(rect.top, greaterThanOrEqualTo(0));
         expect(rect.bottom, lessThanOrEqualTo(pageViewport.height));
+        // And the aspect-keyed *page box* inside that frame keeps the page's
+        // true aspect -- that is what makes the border hug the printed page.
+        final pageBox = tester.getRect(
+          find.descendant(
+            of: frame,
+            matching: find.byKey(const ValueKey('mushaf-page-box')),
+          ),
+        );
+        expect(pageBox.width / pageBox.height, closeTo(0.7, 0.001));
+        // The small page number is printed at the very bottom, riding the
+        // border rule.
+        final label = find.descendant(
+          of: frame,
+          matching: find.byWidgetPredicate(
+            (w) => w is Text && (w.data == '1' || w.data == '2'),
+          ),
+        );
+        expect(label, findsOneWidget);
+        labelByFrameDx[rect.center.dx] = tester.widget<Text>(label).data ?? '';
+        final chipFinder = find.descendant(
+          of: frame,
+          matching: find.byKey(const ValueKey('mushaf-page-number-chip')),
+        );
+        final chipBox = tester.getRect(chipFinder);
+        // The number chip is centred on the border rule...
+        expect(chipBox.center.dx, closeTo(rect.center.dx, 1.0));
+        expect(
+          (chipBox.center.dy - (rect.bottom - borderWidth / 2)).abs(),
+          lessThanOrEqualTo(borderWidth),
+        );
+        // ...is tall enough to *cover* the whole border stroke (rising above
+        // it and reaching past the frame's bottom edge), so the rule reads
+        // as cleanly cut where the number sits -- not just drawn over...
+        expect(chipBox.top, lessThanOrEqualTo(rect.bottom - borderWidth));
+        expect(chipBox.bottom, greaterThanOrEqualTo(rect.bottom));
+        // ...and shares the frame's paper colour, so the covered rule looks
+        // like a cut in the border rather than a floating label.
+        final chipDeco =
+            (tester.widget<Container>(chipFinder).decoration! as BoxDecoration);
+        expect(chipDeco.color, deco.color);
       }
+      // Each frame shows its own page's number, and the lower-numbered page
+      // sits on the right (a Mushaf opens right-to-left, regardless of the
+      // ambient text direction) -- so the left frame shows '2' and the right
+      // frame shows '1'.
+      expect(labelByFrameDx, hasLength(2));
+      final minDx = labelByFrameDx.keys.reduce((a, b) => a < b ? a : b);
+      final maxDx = labelByFrameDx.keys.reduce((a, b) => a > b ? a : b);
+      expect(labelByFrameDx[minDx], '2');
+      expect(labelByFrameDx[maxDx], '1');
     },
   );
 

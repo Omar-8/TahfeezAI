@@ -1,3 +1,10 @@
+@Skip(
+  'Verse-by-verse mode is disabled and its display data is no longer '
+  'bundled (see verseByVerseModeEnabledProvider and pubspec.yaml); re-add '
+  'the assets and remove this skip if the mode is re-enabled.',
+)
+library;
+
 // The visual comparison this milestone's audit calls for, rendered through
 // real Flutter/Skia (never just font/cmap inspection): the same
 // representative ayahs as (A) VerseBlock's real canonical-text/system-font

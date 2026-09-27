@@ -18,6 +18,7 @@ import '../../mushaf/presentation/mushaf_reader_options_sheet.dart';
 import '../../mushaf/presentation/mushaf_translation_sheet.dart';
 import '../application/reader_preferences_controller.dart';
 import '../application/reader_session_controller.dart';
+import '../application/verse_mode_feature.dart';
 import '../domain/reader_layout_item.dart';
 import '../domain/reader_mode.dart';
 import 'widgets/bismillah_divider.dart';
@@ -88,6 +89,11 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
   int? _mushafId;
   int? _mushafPageNumber;
   bool _resolvingMushafPage = false;
+
+  // Set when no Mushaf page can be resolved (no Mushaf dataset installed, or
+  // a location with no start ayah), so the reader says so instead of
+  // spinning forever.
+  bool _mushafUnavailable = false;
 
   @override
   void initState() {
@@ -184,6 +190,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
     final mushaf = await repository.getMushaf(scriptCode: scriptCode);
     if (mushaf == null) {
       _resolvingMushafPage = false;
+      if (mounted) setState(() => _mushafUnavailable = true);
       return;
     }
     final pageNumber =
@@ -214,13 +221,56 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
   /// instead, specifically so it re-resolves fresh every time rather than
   /// reusing a stale page from an earlier visit to this mode.
   Future<void> _ensureMushafPageResolvedOnce() async {
-    if (_mushafPageNumber != null || _resolvingMushafPage) return;
+    if (_mushafPageNumber != null ||
+        _resolvingMushafPage ||
+        _mushafUnavailable) {
+      return;
+    }
+    if (!ref.read(verseByVerseModeEnabledProvider)) {
+      // Mushaf-only: the start ayah comes straight from the location. The
+      // verse-by-verse session below loads a whole chapter's words and
+      // translations, which this mode never displays.
+      final startAyahId = await _startAyahIdFor(_location);
+      if (startAyahId == null) {
+        if (mounted) setState(() => _mushafUnavailable = true);
+        return;
+      }
+      await _resolveMushafPageForAyah(startAyahId);
+      if (mounted && !_recordedInitialLocation && _mushafPageNumber != null) {
+        _recordedInitialLocation = true;
+        ref
+            .read(recentQuranLocationControllerProvider.notifier)
+            .record(_location);
+      }
+      return;
+    }
     final session = await ref.read(readerSessionProvider(_location).future);
     final ayahId =
         session.scrollToAyahId ??
         session.items.whereType<ReaderVerseItem>().firstOrNull?.ayah.ayah.id;
     if (ayahId == null) return;
     await _resolveMushafPageForAyah(ayahId);
+  }
+
+  /// The first ayah of [location], without loading any reading session.
+  Future<int?> _startAyahIdFor(QuranLocation location) async {
+    final repository = ref.read(quranRepositoryProvider);
+    switch (location) {
+      case QuranLocationSurah(:final surahNo):
+        return surahNo * 1000 + 1;
+      case QuranLocationAyah(:final chapterNo, :final verseNo):
+        return chapterNo * 1000 + verseNo;
+      case QuranLocationAyahRange(:final chapterNo, :final fromVerseNo):
+        return chapterNo * 1000 + fromVerseNo;
+      case QuranLocationJuz(:final juzNo):
+        final first = (await repository.getJuz(juzNo))?.ranges.firstOrNull;
+        return first == null ? null : first.surahNo * 1000 + first.startAyahNo;
+      case QuranLocationHizb(:final hizbNo):
+        final first = (await repository.getHizb(hizbNo))?.ranges.firstOrNull;
+        return first == null ? null : first.surahNo * 1000 + first.startAyahNo;
+      case QuranLocationPage():
+        return null;
+    }
   }
 
   /// The reverse direction: resolves the ayah to scroll to in verse-by-verse
@@ -395,6 +445,17 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (!ref.watch(verseByVerseModeEnabledProvider)) {
+      // Mushaf-only: never build the verse-by-verse session.
+      _ensureMushafPageResolvedOnce();
+      return _MushafModeScaffold(
+        mushafId: _mushafId,
+        pageNumber: _mushafPageNumber,
+        unavailable: _mushafUnavailable,
+        onSwitchMode: _switchMode,
+        onPageChanged: _onMushafPageChanged,
+      );
+    }
     final sessionAsync = ref.watch(readerSessionProvider(_location));
     final readerMode = ref.watch(readerModePreferenceControllerProvider);
     final arabicVisible = ref.watch(
@@ -423,6 +484,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
       return _MushafModeScaffold(
         mushafId: _mushafId,
         pageNumber: _mushafPageNumber,
+        unavailable: _mushafUnavailable,
         onSwitchMode: _switchMode,
         onPageChanged: _onMushafPageChanged,
       );
@@ -527,12 +589,14 @@ class _MushafModeScaffold extends ConsumerWidget {
   const _MushafModeScaffold({
     required this.mushafId,
     required this.pageNumber,
+    this.unavailable = false,
     required this.onSwitchMode,
     required this.onPageChanged,
   });
 
   final int? mushafId;
   final int? pageNumber;
+  final bool unavailable;
   final ValueChanged<ReaderMode> onSwitchMode;
   final ValueChanged<int> onPageChanged;
 
@@ -553,20 +617,21 @@ class _MushafModeScaffold extends ConsumerWidget {
             ? const Text('Mushaf', overflow: TextOverflow.ellipsis)
             : MushafPageTitle(mushafId: mushafId!, pageNumber: pageNumber!),
         actions: [
-          ReaderModeSwitch(
-            mode: ReaderMode.mushaf,
-            onSwitchToMode: onSwitchMode,
-            // This segment's own "Translation mode" stub (a whole separate
-            // reading mode, permanently disabled/coming-soon) is a
-            // different thing from the real per-page translation sheet
-            // below -- still hidden here regardless: Mushaf mode's app bar
-            // is the tightest on space (title + mode switch + translation +
-            // Appearance all need to fit), and a permanently-disabled stub
-            // is the first thing worth dropping to give the live
-            // Surah/page/Juz title room before it truncates.
-            showTranslationSegment: false,
-            compact: true,
-          ),
+          if (ref.watch(verseByVerseModeEnabledProvider))
+            ReaderModeSwitch(
+              mode: ReaderMode.mushaf,
+              onSwitchToMode: onSwitchMode,
+              // This segment's own "Translation mode" stub (a whole separate
+              // reading mode, permanently disabled/coming-soon) is a
+              // different thing from the real per-page translation sheet
+              // below -- still hidden here regardless: Mushaf mode's app bar
+              // is the tightest on space (title + mode switch + translation +
+              // Appearance all need to fit), and a permanently-disabled stub
+              // is the first thing worth dropping to give the live
+              // Surah/page/Juz title room before it truncates.
+              showTranslationSegment: false,
+              compact: true,
+            ),
           // The real per-page translation/tafsir sheet
           // (`showMushafTranslationSheet`) -- printed-page fidelity means
           // translation text never renders inside the 15-line body itself,
@@ -600,7 +665,9 @@ class _MushafModeScaffold extends ConsumerWidget {
           ),
         ],
       ),
-      body: mushafId == null || pageNumber == null
+      body: unavailable && (mushafId == null || pageNumber == null)
+          ? _unavailable(colors.secondaryText)
+          : mushafId == null || pageNumber == null
           ? Center(
               child:
                   mushafAsync?.when(

@@ -4,6 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:tahfeez_ai/features/reader/presentation/reader_screen.dart';
 import 'package:tahfeez_ai/core/localization/generated/app_localizations.dart';
 import 'package:tahfeez_ai/core/routing/quran_location_routing.dart';
 import 'package:tahfeez_ai/features/quran/presentation/quran_index_screen.dart';
@@ -135,11 +136,10 @@ void main() {
       await tester.tap(find.text('Test Chapter One'));
       await tester.pumpAndSettle();
 
-      // Navigates to the real Reader (Milestone 6), not a stub: its app
-      // bar shows the location and its chapter-info card shows the real
-      // chapter name loaded from the (synthetic) dataset.
-      expect(find.text('Surah 1'), findsOneWidget);
-      expect(find.text('Test Chapter One'), findsOneWidget);
+      // Navigates to the real Reader, not a stub. (The reader is
+      // Mushaf-only -- verse-by-verse mode is disabled -- so its body
+      // isn't asserted here, only that the tap opened the Reader.)
+      expect(find.byType(ReaderScreen), findsOneWidget);
     });
 
     testWidgets('the Juz tab lists the fixture\'s one Juz', (tester) async {
@@ -180,7 +180,7 @@ void main() {
       await tester.tap(find.text('Go'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Ayah 1:3'), findsOneWidget);
+      expect(find.byType(ReaderScreen), findsOneWidget);
     });
 
     testWidgets('Go to Ayah rejects an out-of-range verse', (tester) async {

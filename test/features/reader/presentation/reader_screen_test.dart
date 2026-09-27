@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tahfeez_ai/features/reader/application/verse_mode_feature.dart';
 import 'package:tahfeez_ai/core/localization/generated/app_localizations.dart';
 import 'package:tahfeez_ai/features/reader/application/reader_preferences_controller.dart';
 import 'package:tahfeez_ai/features/reader/domain/reader_mode.dart';
@@ -48,6 +49,7 @@ void main() {
   }) {
     return ProviderScope(
       overrides: [
+        verseByVerseModeEnabledProvider.overrideWithValue(true),
         quranDatabaseProvider.overrideWith((ref) => db),
         quranScriptCodeProvider.overrideWith((ref) => testScriptCode),
         readerModePreferenceControllerProvider.overrideWith(

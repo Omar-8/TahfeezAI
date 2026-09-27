@@ -2,6 +2,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/storage/storage_providers.dart';
 import '../domain/reader_mode.dart';
+import 'verse_mode_feature.dart';
 
 part 'reader_preferences_controller.g.dart';
 
@@ -82,6 +83,9 @@ class ArabicTextVisiblePreferenceController
 class ReaderModePreferenceController extends _$ReaderModePreferenceController {
   @override
   ReaderMode build() {
+    // Verse-by-verse mode is disabled (see verseByVerseModeEnabledProvider):
+    // always Mushaf, and don't even read the stored preference.
+    if (!ref.watch(verseByVerseModeEnabledProvider)) return ReaderMode.mushaf;
     _restore();
     return ReaderMode.mushaf;
   }
@@ -99,6 +103,7 @@ class ReaderModePreferenceController extends _$ReaderModePreferenceController {
   }
 
   Future<void> setMode(ReaderMode mode) async {
+    if (!ref.read(verseByVerseModeEnabledProvider)) return;
     state = mode;
     await ref
         .read(browserStorageProvider)

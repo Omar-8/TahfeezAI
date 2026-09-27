@@ -233,9 +233,21 @@ class QuranEngineWebPage {
 
     _page.callMethod('setDefaultInk'.toJS, inkColorInt.toJS);
 
-    final scale = (renderHeightPx / height).clamp(0.0, renderWidthPx / width);
-    final ox = (renderWidthPx - width * scale) / 2;
-    final oy = (renderHeightPx - height * scale) / 2;
+    var scale = (renderHeightPx / height).clamp(0.0, renderWidthPx / width);
+    var ox = (renderWidthPx - width * scale) / 2;
+    var oy = (renderHeightPx - height * scale) / 2;
+    if (textZoom != 1.0) {
+      // Scale the drawing about the artwork's own center, so the text grows
+      // in place. The page box/frame is unchanged; the artwork on these
+      // pages is small enough that the zoomed text stays inside it.
+      final c = _artworkCenter();
+      if (c != null) {
+        final cx = ox + c.x * scale, cy = oy + c.y * scale;
+        scale *= textZoom;
+        ox = cx - c.x * scale;
+        oy = cy - c.y * scale;
+      }
+    }
     _lastView = (scale: scale, ox: ox, oy: oy);
 
     final rendererCtor = _qvp.getProperty('CanvasRenderer'.toJS) as JSFunction;
@@ -245,6 +257,22 @@ class QuranEngineWebPage {
       ..setProperty('ox'.toJS, ox.toJS)
       ..setProperty('oy'.toJS, oy.toJS);
     renderer.callMethod('draw'.toJS, _page, viewObj, devicePixelRatio.toJS);
+  }
+
+  /// Extra uniform scale applied to the printed text only (not the frame)
+  /// when rendering; 1.0 = none. Used for the short opening pages.
+  double textZoom = 1.0;
+
+  ({double x, double y})? _artworkCenter() {
+    final t = _qvp.getProperty('T'.toJS) as JSObject;
+    final target = t.callMethod('page'.toJS) as JSObject;
+    final opts = JSObject()
+      ..setProperty('pad'.toJS, 0.toJS)
+      ..setProperty('keepAyahMarks'.toJS, true.toJS);
+    final box = _page.callMethod('cropBox'.toJS, target, opts) as JSObject?;
+    if (box == null) return null;
+    double n(String k) => (box.getProperty(k.toJS) as JSNumber).toDartDouble;
+    return (x: (n('x0') + n('x1')) / 2, y: (n('y0') + n('y1')) / 2);
   }
 
   ({double scale, double ox, double oy})? _lastView;

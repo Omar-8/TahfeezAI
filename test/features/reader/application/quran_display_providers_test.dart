@@ -1,3 +1,10 @@
+@Skip(
+  'Verse-by-verse mode is disabled and its display data is no longer '
+  'bundled (see verseByVerseModeEnabledProvider and pubspec.yaml); re-add '
+  'the assets and remove this skip if the mode is re-enabled.',
+)
+library;
+
 // Exercises QuranDisplayRepository/qpcHafsDisplayManifestProvider against
 // the REAL bundled asset (assets/quran/quran_display/
 // qpc_hafs_display_words.json) -- proving the manifest this milestone

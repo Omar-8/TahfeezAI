@@ -1,3 +1,10 @@
+@Skip(
+  'Verse-by-verse mode is disabled and its display data is no longer '
+  'bundled (see verseByVerseModeEnabledProvider and pubspec.yaml); re-add '
+  'the assets and remove this skip if the mode is re-enabled.',
+)
+library;
+
 // Exercises VerseBlock's Arabic-text rendering against the real QPC Hafs
 // display-word manifest and the real uthmanic_hafs.ttf font -- proving the
 // whole "QPC Hafs display text + QPC Hafs font, with a correct

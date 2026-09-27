@@ -620,14 +620,11 @@ either platform:
       build web --release` output (§8a/§9).
 - [x] `flutter analyze` clean, `flutter test` 353/353, `dart format`
       clean, after the full removal (§8a).
-- [ ] **Android live re-verification through the production Reader UI**
-      against this final state — still not done (no device/emulator
-      connected during either implementation pass; per explicit
-      instruction, not blocked on, but not claimed as done either). The
-      POC proved the same underlying `qvp_flutter` integration on real
-      hardware, and this pass's Web-level/build-level verification found
-      nothing backend-specific to Android that changed, but neither
-      stands in for an actual on-device check.
+- [x] **Android live re-verification through the production Reader UI** —
+      done in a later pass, on a real connected device (§12): real screen
+      captures, real `adb logcat` measurements of `fitScale`/gap values
+      before and after the `lineSpacing` fix, and a real word-tap →
+      word-detail-sheet check across pages 1–8.
 - [ ] **Light/Warm/Sepia/Black appearance verification** against Quran
       Engine — only Dark was ever exercised live, and only on Web.
 - [ ] **iOS** — explicitly out of scope for this milestone. No
@@ -665,3 +662,71 @@ They are the honest remainder of the migration's original, broader
 acceptance criteria (full theme coverage, Android live re-verification,
 golden tests, the other docs) — real gaps, tracked here rather than
 silently dropped, but not gates on the decision that was actually made.
+
+## 12. After merge to `main` — three more real-device-driven changes
+
+Found and fixed on a real connected Android device, and mirrored to Web
+where the same issue existed, in the pass immediately before merging this
+branch:
+
+- **Pages 1 and 2 look small next to every other page.** Real, measured
+  cause, not a guess: `page.cropBounds(T.page())` shows their printed
+  artwork (Al-Fatiha; the start of Al-Baqara) is only ~62% of the page
+  width and ~30–35% of its height — a normal 15-line page is 95–98% on
+  both. Every page renders at the same page-canvas scale, so a page with
+  less content on it looks smaller. Fixed, by explicit product-owner
+  choice, only for these two pages (not a general "zoom to content"
+  rule): the printed text is drawn 30% larger about its own center —
+  `_biggerTextZoom`/`_biggerTextPages` in `quran_engine_android_backend
+  .dart`, and `textZoom`/`_biggerTextPages` in the Web bridge/backend.
+  The engine's own page fit (size, position, border) is untouched on
+  both platforms; word taps, highlights and masks read the same
+  transform the drawing uses (`QvpViewController` on Android,
+  `_lastView` on Web), so they stay aligned with what's drawn. Two
+  earlier approaches were tried and reverted before this one: zooming
+  the whole *frame* to the artwork's own aspect ratio (visually wrong —
+  a differently-shaped frame stood out next to every other page's), and
+  cropping/panning to the artwork bounds at the page's normal scale (also
+  reverted on Web per explicit feedback, in favor of the simpler
+  same-frame, bigger-text approach). Not verified: on-device on Web
+  (checked in principle against the real page geometry, not against a
+  running browser); on-device hit-testing specifically on the zoomed
+  Android pages (the transform is proven correct by construction — same
+  controller drives paint and hit-test — but not tapped and confirmed).
+- **On Web, a two-page spread showed Al-Fatiha (page 1) on the left, not
+  the right.** Cause: the spread's `Row` placed its first child (page 1)
+  on the left under the ambient left-to-right text direction; a physical
+  Mushaf opens right-to-left regardless of UI locale. Fixed by wrapping
+  that `Row` in an explicit `Directionality(textDirection: TextDirection
+  .rtl)` in `mushaf_pager.dart`; the existing direction-aware `Align`
+  widgets already push each page toward the spine correctly once the
+  row itself reads right-to-left. Each frame's page-number label was
+  also corrected to show its own page's number (it previously showed the
+  other page's number, which only read correctly while the pages
+  themselves were on the wrong sides).
+- **Verse-by-verse mode disabled and hidden, on both platforms**, by
+  explicit product decision — Tahfeez is Mushaf-only until further
+  notice. Gated behind one new flag, `verseByVerseModeEnabledProvider`
+  (`lib/features/reader/application/verse_mode_feature.dart`), default
+  `false`: the mode switch and the disabled "Translation mode" stub are
+  hidden from the app bar, a persisted verse-by-verse preference from an
+  earlier install is ignored, and — the real performance point, not just
+  a visibility one — opening a Surah in Mushaf mode no longer builds the
+  verse-by-verse reading session at all (that session batch-loads a
+  whole chapter's canonical words and translations; Mushaf mode only
+  ever needed one ayah id from it, to resolve a starting page). A new
+  `_startAyahIdFor` resolves that directly from the `QuranLocation`
+  instead. The verse-by-verse font/display assets (`uthmanic_hafs.ttf`,
+  its manifest, and the 2.1MB QPC Hafs display-word manifest) were
+  removed from `pubspec.yaml`'s `assets:` accordingly — none of them are
+  reachable while the flag is off. The verse-by-verse code itself
+  (`reader_session_controller.dart`, `verse_block.dart`, etc.) is
+  untouched, not deleted, so re-enabling the mode later is a one-line
+  flag flip plus restoring those three asset lines; three test files
+  that specifically exercise the now-unreachable display data are
+  `@Skip`-marked with that reasoning stated in the skip message, not
+  deleted.
+
+All three verified via `flutter analyze` (clean), `flutter test` (full
+suite passing), `dart format --set-exit-if-changed .` (clean), and real
+`flutter build apk --release` / `flutter build web --release` output.

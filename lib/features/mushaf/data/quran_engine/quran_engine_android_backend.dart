@@ -136,7 +136,18 @@ class QuranEngineAndroidPage implements QuranEngineMushafPage {
   /// limit Tahfeez is imposing.
   static const _maxAspectSlack = 0.0;
 
+  /// Al-Fatiha's page and the start of Al-Baqara print little text on a full
+  /// page canvas, so it looks small next to other pages. Their text is drawn
+  /// slightly larger about its own center; the page fit is unchanged.
+  static const _biggerTextPages = {1, 2};
+  static const _biggerTextZoom = 1.3;
+
   final QvpPage page;
+
+  /// Stable across rebuilds of the same loaded page — [buildView] runs on
+  /// every rebuild, and a fresh controller each time would drop any zoom
+  /// applied to it.
+  final QvpViewController _viewController = QvpViewController();
 
   @override
   final int pageNumber;
@@ -152,8 +163,32 @@ class QuranEngineAndroidPage implements QuranEngineMushafPage {
     ValueChanged<MushafTokenHitRect>? onDecorationHit,
     VoidCallback? onEmptyHit,
   }) {
+    final view = _buildQvpPageView(
+      ink: ink,
+      paper: paper,
+      onWordHit: onWordHit,
+      onDecorationHit: onDecorationHit,
+      onEmptyHit: onEmptyHit,
+    );
+    if (!_biggerTextPages.contains(pageNumber)) return view;
+    return _ZoomTextInPlace(
+      page: page,
+      controller: _viewController,
+      zoom: _biggerTextZoom,
+      child: view,
+    );
+  }
+
+  Widget _buildQvpPageView({
+    required Color ink,
+    required Color paper,
+    ValueChanged<MushafTokenHitRect>? onWordHit,
+    ValueChanged<MushafTokenHitRect>? onDecorationHit,
+    VoidCallback? onEmptyHit,
+  }) {
     return QvpPageView(
       page: page,
+      controller: _viewController,
       paper: paper,
       defaultInk: ink,
       layout: const QvpViewLayout(
@@ -254,7 +289,10 @@ class QuranEngineAndroidPage implements QuranEngineMushafPage {
   void unmask() => page.unmask();
 
   @override
-  void dispose() => page.dispose();
+  void dispose() {
+    _viewController.dispose();
+    page.dispose();
+  }
 
   /// [T.word] expects the engine's own page-local word-array index — not
   /// the same number as a [WordRef.wordIndex] (word-in-ayah). Resolved via
@@ -270,5 +308,122 @@ class QuranEngineAndroidPage implements QuranEngineMushafPage {
       );
     }
     return index;
+  }
+}
+
+/// Scales a [QvpPageView]'s printed text by [zoom] about the artwork's own
+/// center, leaving the page fit (and so the page's size and position in the
+/// viewport) as the engine computed it. It adjusts the same
+/// [QvpViewController] the view paints and hit-tests through, so word taps,
+/// highlights and masks stay aligned with what is drawn.
+///
+/// `QvpPageView` re-fits and resets the controller whenever its size
+/// changes and on double-tap, so this re-applies on a size/page change and
+/// whenever the controller drifts from the target. It always starts from the
+/// engine's own fit (`layout.fitScale/fitX/fitY`), so re-applying is
+/// idempotent.
+class _ZoomTextInPlace extends StatefulWidget {
+  const _ZoomTextInPlace({
+    required this.page,
+    required this.controller,
+    required this.zoom,
+    required this.child,
+  });
+
+  final QvpPage page;
+  final QvpViewController controller;
+  final double zoom;
+  final Widget child;
+
+  @override
+  State<_ZoomTextInPlace> createState() => _ZoomTextInPlaceState();
+}
+
+class _ZoomTextInPlaceState extends State<_ZoomTextInPlace> {
+  Size? _lastSize;
+  QvpPage? _lastPage;
+  bool _applying = false;
+  bool _scheduled = false;
+  ({double scale, double x, double y})? _target;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.controller.addListener(_onControllerChanged);
+  }
+
+  @override
+  void didUpdateWidget(covariant _ZoomTextInPlace oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller) {
+      oldWidget.controller.removeListener(_onControllerChanged);
+      widget.controller.addListener(_onControllerChanged);
+      _target = null;
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(_onControllerChanged);
+    super.dispose();
+  }
+
+  void _onControllerChanged() {
+    final target = _target;
+    if (_applying || target == null) return;
+    final c = widget.controller;
+    if ((c.scale - target.scale).abs() > 1e-3 ||
+        (c.offsetX - target.x).abs() > 0.5 ||
+        (c.offsetY - target.y).abs() > 0.5) {
+      _schedule();
+    }
+  }
+
+  void _schedule() {
+    if (_scheduled) return;
+    _scheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scheduled = false;
+      if (mounted) _apply();
+    });
+  }
+
+  void _apply() {
+    final layout = widget.page.currentLayout;
+    final art = widget.page.cropBounds(T.page(), pad: 0);
+    if (layout == null || art == null) return;
+
+    // Artwork center in layout space, and where the engine's own fit (the
+    // controller's default state) puts it on screen.
+    final cx = layout.offsetX + (art.x0 + art.x1) / 2 * layout.scale;
+    final cy = layout.offsetY + (art.y0 + art.y1) / 2 * layout.scale;
+    final baseScale = layout.fitScale;
+    final vx = layout.fitX + baseScale * cx;
+    final vy = layout.fitY + baseScale * cy;
+
+    final scale = baseScale * widget.zoom;
+    final x = vx - scale * cx;
+    final y = vy - scale * cy;
+    _target = (scale: scale, x: x, y: y);
+
+    _applying = true;
+    widget.controller.set(scale: scale, offsetX: x, offsetY: y);
+    _applying = false;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final size = Size(constraints.maxWidth, constraints.maxHeight);
+        if (size != _lastSize || !identical(widget.page, _lastPage)) {
+          _lastSize = size;
+          _lastPage = widget.page;
+          _target = null;
+          _schedule();
+        }
+        return widget.child;
+      },
+    );
   }
 }
