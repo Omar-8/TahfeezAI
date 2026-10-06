@@ -271,13 +271,18 @@ class _QuranEngineMushafPageContentState
     return page.buildView(
       ink: widget.colors.text,
       paper: widget.colors.background,
-      // A word hidden by hide mode must not be revealed by its word sheet.
+      // A word hidden on the page must not be revealed by its word sheet:
+      // hidden as the page shows it — by a recitation's own reveals while
+      // one runs (hide mode catches up only when it ends), else by hide mode.
       onWordHit: onWordTap == null
           ? null
           : (hit) {
-              final hidden = ref
-                  .read(mushafHideModeProvider)
-                  .isWordHidden(widget.pageNumber, hit.sourceTokenId);
+              final applied = _appliedOverlay;
+              final hidden = applied != null
+                  ? applied.$1.contains(hit.sourceTokenId)
+                  : ref
+                        .read(mushafHideModeProvider)
+                        .isWordHidden(widget.pageNumber, hit.sourceTokenId);
               if (!hidden) onWordTap(hit);
             },
       onDecorationHit: widget.onWordTap,

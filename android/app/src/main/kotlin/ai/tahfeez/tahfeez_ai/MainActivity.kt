@@ -1,5 +1,12 @@
 package ai.tahfeez.tahfeez_ai
 
+import android.content.Context
+import android.media.AudioManager
+import android.media.ToneGenerator
+import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
 import android.view.WindowManager
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -33,9 +40,49 @@ class MainActivity : FlutterActivity() {
                     result.notImplemented()
                 }
             }
+        // A recitation mistake noticed: a short vibration (the device's
+        // vibrator, not the touch-feedback setting) or a soft beep.
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "tahfeez/alert")
+            .setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "vibrate" -> {
+                        val ms = (call.arguments as? Int ?: 120).toLong()
+                        vibrator()?.let { v ->
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                v.vibrate(VibrationEffect.createOneShot(ms, VibrationEffect.DEFAULT_AMPLITUDE))
+                            } else {
+                                @Suppress("DEPRECATION")
+                                v.vibrate(ms)
+                            }
+                        }
+                        result.success(null)
+                    }
+                    "beep" -> {
+                        val gen = tones ?: ToneGenerator(AudioManager.STREAM_NOTIFICATION, 35)
+                            .also { tones = it }
+                        gen.startTone(ToneGenerator.TONE_PROP_BEEP, 120)
+                        result.success(null)
+                    }
+                    else -> result.notImplemented()
+                }
+            }
     }
 
+    /** A short, soft beep for a recitation mistake (created on first use). */
+    private var tones: ToneGenerator? = null
+
+    private fun vibrator(): Vibrator? =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            (getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as? VibratorManager)
+                ?.defaultVibrator
+        } else {
+            @Suppress("DEPRECATION")
+            getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
+        }
+
     override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {
+        tones?.release()
+        tones = null
         liveSpeech?.dispose()
         liveSpeech = null
         super.cleanUpFlutterEngine(flutterEngine)

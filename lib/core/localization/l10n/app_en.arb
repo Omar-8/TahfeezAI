@@ -556,5 +556,9 @@
         "type": "String"
       }
     }
-  }
+  },
+  "recAlert": "Mistake alert",
+  "recAlertOff": "Off",
+  "recAlertVibrate": "Vibrate",
+  "recAlertSound": "Sound"
 }

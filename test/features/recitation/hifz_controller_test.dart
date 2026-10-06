@@ -1,5 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tahfeez_ai/ai/acoustic/quran_acoustic_verifier.dart';
+import 'package:tahfeez_ai/features/recitation/application/acoustic_verification_controller.dart';
+import 'package:tahfeez_ai/quran/domain/models/quran_refs.dart';
 import 'package:tahfeez_ai/ai/hifz/hifz_judge.dart';
 import 'package:tahfeez_ai/ai/speech/live_quran_recognizer.dart';
 import 'package:tahfeez_ai/core/storage/browser_storage.dart';
@@ -42,6 +45,7 @@ void main() {
   late ProviderContainer container;
   late ProviderSubscription<HifzState> hifzListener;
   late int vibrations;
+  late int beeps;
 
   HifzState hifz() => container.read(hifzControllerProvider);
   RecitationSessionController session() =>
@@ -84,6 +88,7 @@ void main() {
   }) async {
     recognizer = FakeRecognizer();
     vibrations = 0;
+    beeps = 0;
     container = ProviderContainer(
       overrides: [
         recitationAudioSourceFactoryProvider.overrideWithValue(
@@ -95,6 +100,8 @@ void main() {
         quranWordCorpusProvider.overrideWith((ref) async => corpus),
         browserStorageProvider.overrideWithValue(_MemoryStorage()),
         hifzHapticsProvider.overrideWithValue(() => vibrations++),
+        hifzBeepProvider.overrideWithValue(() => beeps++),
+        acousticVerificationControllerProvider.overrideWith(_Acoustic.new),
       ],
     );
     addTearDown(container.dispose);
@@ -162,6 +169,55 @@ void main() {
       expect(vibrations, 0);
     },
   );
+
+  test('with the sound alert a mistake beeps, not vibrates', () async {
+    const kursiVerse = (chapterNo: 2, verseNo: 255);
+    await setUpHifz(from: kursiVerse, to: kursiVerse);
+    container
+        .read(hifzSettingsProvider.notifier)
+        .update(
+          container
+              .read(hifzSettingsProvider)
+              .copyWith(alert: MistakeAlert.sound),
+        );
+    final upTo = kursi.substring(0, kursi.indexOf('خلفهم'));
+    await recite('$upToخلفنا ولا يحيطون');
+    expect((beeps, vibrations), (1, 0));
+  });
+
+  test('a pronunciation mistake on a recited word alerts once', () async {
+    const kursiVerse = (chapterNo: 2, verseNo: 255);
+    await setUpHifz(from: kursiVerse, to: kursiVerse);
+    await recite(kursi.split(' ').take(5).join(' '));
+    final word = corpus.words[corpus.verseStartPosition(kursiVerse)! + 1].ref;
+    final acoustic = container.read(
+      acousticVerificationControllerProvider.notifier,
+    ) as _Acoustic;
+    acoustic.put({
+      word: const AcousticWordResult(RecitationErrorType.wrongVowel, []),
+    });
+    await pumpEventQueue();
+    expect(vibrations, 1);
+    // The same mistake again (the ayah's check confirming it): no repeat.
+    acoustic.put({
+      word: const AcousticWordResult(RecitationErrorType.wrongVowel, []),
+    });
+    await pumpEventQueue();
+    expect(vibrations, 1);
+  });
+
+  test('a saved vibrate switch becomes the vibrate alert', () {
+    expect(HifzSettings.fromJson({'vibrate': false}).alert, MistakeAlert.off);
+    expect(
+      HifzSettings.fromJson({'vibrate': true}).alert,
+      MistakeAlert.vibrate,
+    );
+    expect(
+      HifzSettings.fromJson(HifzSettings(alert: MistakeAlert.sound).toJson())
+          .alert,
+      MistakeAlert.sound,
+    );
+  });
 
   test('wrong word: held with a mistake mark and a vibration, then '
       'self-corrected', () async {
@@ -470,4 +526,13 @@ void main() {
       );
     });
   });
+}
+
+/// The pronunciation check's results, set by the test.
+class _Acoustic extends AcousticVerificationController {
+  @override
+  AcousticVerificationState build() => const AcousticVerificationState();
+
+  void put(Map<WordRef, AcousticWordResult> words) =>
+      state = AcousticVerificationState(words: words);
 }

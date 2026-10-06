@@ -2,6 +2,8 @@
     <!-- Live recitation sessions (Milestone R1). Requested at runtime the
          first time the user taps the Mushaf microphone button. -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <!-- A short vibration when a recitation mistake is noticed (Hifz). -->
+    <uses-permission android:name="android.permission.VIBRATE" />
     <!-- Online services: speech recognition, acoustic verification. -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <application

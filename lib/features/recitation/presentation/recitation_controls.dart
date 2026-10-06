@@ -900,11 +900,35 @@ class _HifzSettingsSheet extends ConsumerWidget {
               (v) => settings.copyWith(showMistakes: v),
             ),
             if (android)
-              toggle(
-                AppLocalizations.of(context).recVibrate,
-                AppLocalizations.of(context).recVibrateSub,
-                settings.vibrate,
-                (v) => settings.copyWith(vibrate: v),
+              ListTile(
+                key: const ValueKey('hifz-mistake-alert'),
+                title: Text(AppLocalizations.of(context).recAlert),
+                subtitle: Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: SegmentedButton<MistakeAlert>(
+                    segments: [
+                      for (final (a, label) in [
+                        (
+                          MistakeAlert.off,
+                          AppLocalizations.of(context).recAlertOff,
+                        ),
+                        (
+                          MistakeAlert.vibrate,
+                          AppLocalizations.of(context).recAlertVibrate,
+                        ),
+                        (
+                          MistakeAlert.sound,
+                          AppLocalizations.of(context).recAlertSound,
+                        ),
+                      ])
+                        ButtonSegment(value: a, label: Text(label)),
+                    ],
+                    selected: {settings.alert},
+                    showSelectedIcon: false,
+                    onSelectionChanged: (s) =>
+                        controller.update(settings.copyWith(alert: s.first)),
+                  ),
+                ),
               ),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),

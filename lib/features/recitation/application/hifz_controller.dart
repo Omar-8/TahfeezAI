@@ -31,13 +31,16 @@ import 'mushaf_recitation_target.dart';
 import 'quran_match_controller.dart' show quranWordCorpusProvider;
 import 'recitation_session_controller.dart';
 
+/// How a mistake noticed during recitation is signalled (Android).
+enum MistakeAlert { off, vibrate, sound }
+
 /// Configurable Hifz feedback.
 class HifzSettings {
   const HifzSettings({
     this.strict = true,
     this.highlightCurrent = true,
     this.showMistakes = true,
-    this.vibrate = true,
+    this.alert = MistakeAlert.vibrate,
     this.colorWords = true,
     this.tajweed = true,
   });
@@ -55,8 +58,8 @@ class HifzSettings {
   /// Mark wrong, skipped and uncertain words.
   final bool showMistakes;
 
-  /// Vibrate on a mistake (Android).
-  final bool vibrate;
+  /// Vibrate or beep on a mistake (Android).
+  final MistakeAlert alert;
 
   /// Colour recited words: correct green, skipped yellow, wrong red.
   final bool colorWords;
@@ -65,23 +68,23 @@ class HifzSettings {
     bool? strict,
     bool? highlightCurrent,
     bool? showMistakes,
-    bool? vibrate,
+    MistakeAlert? alert,
     bool? colorWords,
     bool? tajweed,
   }) => HifzSettings(
     strict: strict ?? this.strict,
     highlightCurrent: highlightCurrent ?? this.highlightCurrent,
     showMistakes: showMistakes ?? this.showMistakes,
-    vibrate: vibrate ?? this.vibrate,
+    alert: alert ?? this.alert,
     colorWords: colorWords ?? this.colorWords,
     tajweed: tajweed ?? this.tajweed,
   );
 
-  Map<String, bool> toJson() => {
+  Map<String, Object> toJson() => {
     'strict': strict,
     'highlightCurrent': highlightCurrent,
     'showMistakes': showMistakes,
-    'vibrate': vibrate,
+    'alert': alert.name,
     'colorWords': colorWords,
     'tajweed': tajweed,
   };
@@ -94,7 +97,10 @@ class HifzSettings {
       strict: read('strict', true),
       highlightCurrent: read('highlightCurrent', true),
       showMistakes: read('showMistakes', true),
-      vibrate: read('vibrate', true),
+      // (Saved before the alert choice: a vibrate switch.)
+      alert:
+          MistakeAlert.values.asNameMap()[json['alert']] ??
+          (read('vibrate', true) ? MistakeAlert.vibrate : MistakeAlert.off),
       colorWords: read('colorWords', true),
       tajweed: read('tajweed', true),
     );
@@ -137,9 +143,21 @@ final hifzSettingsProvider =
     );
 
 /// Vibrates on a mistake; overridden in tests.
+/// A short vibration for a mistake (Android: the device's vibrator — the
+/// touch-feedback setting MIUI and others often turn down is not used).
 final hifzHapticsProvider = Provider<void Function()>((ref) {
   final android = ref.watch(platformCapabilitiesProvider).isAndroid;
-  return android ? () => unawaited(HapticFeedback.vibrate()) : () {};
+  const channel = MethodChannel('tahfeez/alert');
+  return android
+      ? () => unawaited(channel.invokeMethod<void>('vibrate', 120))
+      : () {};
+});
+
+/// A short, soft beep for a mistake (Android).
+final hifzBeepProvider = Provider<void Function()>((ref) {
+  final android = ref.watch(platformCapabilitiesProvider).isAndroid;
+  const channel = MethodChannel('tahfeez/alert');
+  return android ? () => unawaited(channel.invokeMethod<void>('beep')) : () {};
 });
 
 /// A chosen memorization range (whole ayahs, inclusive).
@@ -269,7 +287,18 @@ class HifzController extends Notifier<HifzState> {
     });
     // Pronunciation verdicts from the acoustic verifier colour words too.
     ref.listen(acousticVerificationControllerProvider, (previous, next) {
-      if (!identical(previous?.words, next.words)) _updateOverlay();
+      if (identical(previous?.words, next.words)) return;
+      _updateOverlay();
+      // A pronunciation mistake newly heard on a recited word: alert too.
+      final judge = _judge;
+      if (judge == null) return;
+      _alert([
+        for (final MapEntry(key: w, value: r) in next.words.entries)
+          if (r.isMistake &&
+              !(previous?.words[w]?.isMistake ?? false) &&
+              judge.revealed.contains(judge.corpus.positionOf(w)))
+            w,
+      ]);
     });
     ref.listen(mushafHideModeProvider, (previous, next) {
       if (previous?.enabled == next.enabled) return;
@@ -460,6 +489,7 @@ class HifzController extends Notifier<HifzState> {
   /// word not yet uncovered on the visible page; with the page visible,
   /// wherever the reciter turns out to start.
   void _begin() {
+    _alerted.clear();
     _heardAt.clear();
     _correctedAt.clear();
     // A new recitation: the last one's colours go.
@@ -661,13 +691,33 @@ class HifzController extends Notifier<HifzState> {
     if (events.isEmpty && state.active && judge.reviewing == reviewBefore) {
       return;
     }
-    final settings = ref.read(hifzSettingsProvider);
-    final mistake = events.any(
-      (e) => e.verdict == HifzVerdict.wrong || e.verdict == HifzVerdict.skipped,
-    );
-    if (mistake && settings.vibrate) ref.read(hifzHapticsProvider)();
+    final mistakes = [
+      for (final e in events)
+        if ((e.verdict == HifzVerdict.wrong ||
+                e.verdict == HifzVerdict.skipped) &&
+            e.ref != null)
+          e.ref!,
+    ];
+    if (mistakes.isNotEmpty) _alert(mistakes);
     _publish(events, running: true);
     _followPage();
+  }
+
+  /// Words a mistake alert was given for (once each per recitation).
+  final _alerted = <WordRef>{};
+
+  /// Signals a mistake on [words] — vibration or a beep, as set — once
+  /// per word.
+  void _alert(Iterable<WordRef> words) {
+    if (!state.running || !words.any(_alerted.add)) return;
+    switch (ref.read(hifzSettingsProvider).alert) {
+      case MistakeAlert.vibrate:
+        ref.read(hifzHapticsProvider)();
+      case MistakeAlert.sound:
+        ref.read(hifzBeepProvider)();
+      case MistakeAlert.off:
+        break;
+    }
   }
 
   /// What was heard in place of each word marked wrong, and the words
