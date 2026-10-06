@@ -858,6 +858,7 @@ class AcousticVerificationController
     const order = [
       RecitationErrorType.wrongLetter,
       RecitationErrorType.shaddaError,
+      RecitationErrorType.qalqalaMissing,
       RecitationErrorType.wrongVowel,
       RecitationErrorType.sukunError,
       RecitationErrorType.missingVowel,

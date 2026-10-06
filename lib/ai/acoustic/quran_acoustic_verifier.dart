@@ -14,6 +14,10 @@ enum RecitationErrorType {
   sukunError,
   shaddaError,
 
+  /// A qalqala letter (ق ط ب ج د with sukun or at a stop) said without its
+  /// echo (tajweed).
+  qalqalaMissing,
+
   /// The evidence is too weak either way.
   uncertain,
 
@@ -28,7 +32,8 @@ enum RecitationErrorType {
       this == wrongVowel ||
       this == missingVowel ||
       this == sukunError ||
-      this == shaddaError;
+      this == shaddaError ||
+      this == qalqalaMissing;
 }
 
 /// Sounds whose evidence is naturally weak, or easily confused with a
@@ -118,7 +123,14 @@ class AcousticThresholds {
     this.context = 2,
     this.sounds = const {},
     this.tajweed = true,
+    this.qalqalaError = 3,
   });
+
+  /// With [tajweed]: a qalqala letter's echo missing needs "said without
+  /// it" to beat "said with it" by this much. (On QDAT's expert labels for
+  /// the stop on «ٱلْغُيُوبِ», the margin was above 2 for 95% of readers who
+  /// left the echo out and 5% of those who did it.)
+  final double qalqalaError;
 
   /// Judge tajweed: a merged or hidden nūn / mīm (idghām, ikhfāʾ, iqlāb)
   /// said plainly is a mistake. Off: only the letters and vowels count.
@@ -162,6 +174,7 @@ class AcousticThresholds {
     int? pauseFrames,
     Map<SoundGroup, SoundMargins>? sounds,
     bool? tajweed,
+    double? qalqalaError,
   }) => AcousticThresholds(
     error: error ?? this.error,
     letterError: letterError ?? this.letterError,
@@ -173,6 +186,7 @@ class AcousticThresholds {
     context: context,
     sounds: sounds ?? this.sounds,
     tajweed: tajweed ?? this.tajweed,
+    qalqalaError: qalqalaError ?? this.qalqalaError,
   );
 
   /// The expected pronunciation must beat every alternative by this much
@@ -554,6 +568,10 @@ class QuranAcousticVerifier {
     for (var k = 0; k < expected.length; k++) {
       final t = expected[k];
       final span = spans[k];
+      if (thresholds.tajweed && t.optional && t.token == _qalqalaEcho) {
+        out.add(_qalqala(frames, expected, spans, labels, k));
+        continue;
+      }
       if (span == null) {
         out.add(
           t.unitFinalVowel
@@ -666,6 +684,42 @@ class QuranAcousticVerifier {
       );
     }
     return out;
+  }
+
+  static final _qalqalaEcho = phoneticClassOf('ڇ');
+
+  /// A qalqala letter's echo: the frames around it said with the echo or
+  /// without — a mistake if clearly without.
+  PhonemeVerdict _qalqala(
+    AcousticFrames frames,
+    List<PhoneticToken> expected,
+    List<FrameSpan?> spans,
+    List<int> labels,
+    int k,
+  ) {
+    final t = expected[k];
+    final (lo, hi, f0, f1) = _window(spans, k, frames.frames);
+    final before = [
+      for (var i = lo; i < k; i++)
+        if (spans[i] != null) labels[i],
+    ];
+    final after = [
+      for (var i = k + 1; i <= hi; i++)
+        if (spans[i] != null) labels[i],
+    ];
+    final local = frames.slice(f0, f1);
+    final llr =
+        ctcLogProbability(local, [...before, ...after]) -
+        ctcLogProbability(local, [...before, t.token, ...after]);
+    return PhonemeVerdict(
+      token: t,
+      type: llr >= thresholds.qalqalaError
+          ? RecitationErrorType.qalqalaMissing
+          : RecitationErrorType.correct,
+      span: spans[k],
+      likelihoodRatio: llr,
+      observed: llr >= thresholds.qalqalaError ? 'NO_QALQALA' : null,
+    );
   }
 
   /// A unit-final vowel not heard before a pause is fine (waqf) — unless a

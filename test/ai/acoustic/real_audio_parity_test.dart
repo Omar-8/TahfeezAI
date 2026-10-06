@@ -20,6 +20,7 @@ const _names = {
   'MISSING_VOWEL': RecitationErrorType.missingVowel,
   'SUKUN_ERROR': RecitationErrorType.sukunError,
   'SHADDA_ERROR': RecitationErrorType.shaddaError,
+  'QALQALA_MISSING': RecitationErrorType.qalqalaMissing,
   'UNCERTAIN': RecitationErrorType.uncertain,
   'PAUSE': RecitationErrorType.pause,
   'SKIPPED': RecitationErrorType.skipped,

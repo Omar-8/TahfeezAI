@@ -234,6 +234,26 @@ void main() {
     );
   });
 
+  test('a qalqala letter without its echo is a tajweed mistake', () {
+    // 112:3 «لَمْ يَلِدْ وَلَمْ يُولَدْ»: the stop on د — with its echo
+    // (ڇ) and without.
+    final expected = reference.ayah(112003);
+    final k = expected.lastIndexWhere((t) => t.symbol == 'ڇ');
+    final withEcho = [for (final t in expected) t.token];
+    final without = [...withEcho]..removeAt(k);
+    final heard = verifier.verify(clearFrames(withEcho), expected);
+    expect(heard[k].type, RecitationErrorType.correct);
+    final missing = verifier.verify(clearFrames(without), expected);
+    expect(missing[k].type, RecitationErrorType.qalqalaMissing);
+    expect(
+      const QuranAcousticVerifier(
+        thresholds: AcousticThresholds(tajweed: false),
+      ).verify(clearFrames(without), expected).where((v) => v.type.isError),
+      isEmpty,
+      reason: 'tajweed off',
+    );
+  });
+
   test('stopping inside a joined unit is a stop, not a mistake', () {
     // 2:7 «غِشَٰوَةٌ ۖ وَلَهُمْ»: in flow one unit (the tanween merges into the
     // و); stopping after غِشَٰوَةٌ (a waqf mark) it is said «غِشَاوَه», and

@@ -248,6 +248,8 @@ class Thresholds:
     correct: float = 1.0     # expected must win by this much to be CORRECT
     pause_frames: int = 6    # blank run after a unit counting as a pause (240 ms)
     context: int = 2         # neighbouring tokens in the local window
+    tajweed: bool = True     # judge tajweed (as the Dart AcousticThresholds)
+    qalqala_error: float = 3.0  # a qalqala echo missing: margin of "without"
 
 
 def _window(tokens, spans, k, ctx, T):
@@ -323,6 +325,18 @@ def verify(logp, tokens, spans, th: Thresholds = Thresholds()):
     verdicts = []
     for k, t in enumerate(tokens):
         sp = spans[k]
+        if th.tajweed and t.optional and t.label == ID['ڇ']:
+            # a qalqala letter's echo: said with it, or clearly without
+            lo, hi, f0, f1 = _window(tokens, spans, k, th.context, T)
+            before = [tokens[i].label for i in range(lo, k) if spans[i] is not None]
+            after = [tokens[i].label for i in range(k + 1, hi + 1) if spans[i] is not None]
+            seg_lp = logp[f0:f1 + 1]
+            llr = ctc_logprob(seg_lp, before + after) - ctc_logprob(seg_lp, before + [t.label] + after)
+            missing = llr >= th.qalqala_error
+            verdicts.append(Verdict(k, t, 'QALQALA_MISSING' if missing else 'CORRECT',
+                                    tuple(sp) if sp else None, 0.0, '', llr,
+                                    'NO_QALQALA' if missing else ''))
+            continue
         if sp is None:
             if not t.unit_final_vowel:
                 verdicts.append(Verdict(k, t, 'SKIPPED', None, 0.0))

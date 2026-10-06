@@ -540,5 +540,13 @@
   "recIqlab": "iqlāb: before «ب» the nūn becomes a hidden «م», with ghunnah",
   "recIkhfaShafawi": "ikhfāʾ shafawī: the «م» before «ب» is hidden with ghunnah",
   "recTajweed": "Tajweed",
-  "recTajweedSub": "Check tajweed rules too (idghām, ikhfāʾ, iqlāb). Off: only letters and vowels."
+  "recTajweedSub": "Check tajweed rules too (idghām, ikhfāʾ, iqlāb). Off: only letters and vowels.",
+  "recQalqala": "qalqala: «{letter}» with sukun needs its echo (a slight bounce)",
+  "@recQalqala": {
+    "placeholders": {
+      "letter": {
+        "type": "String"
+      }
+    }
+  }
 }

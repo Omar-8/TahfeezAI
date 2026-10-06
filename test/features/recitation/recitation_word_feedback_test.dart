@@ -206,6 +206,20 @@ void main() {
       HifzStatusStrip.describe(e('۾ (م)', 'م'), ar),
       'إخفاء شفوي: تُخفى الميم قبل الباء بغنّة',
     );
+    expect(
+      HifzStatusStrip.describe(
+        const RecitationError(
+          word: _word,
+          letter: 3,
+          type: RecitationErrorType.qalqalaMissing,
+          expected: 'ڇ (د)',
+          observed: 'NO_QALQALA',
+          likelihoodRatio: 8,
+        ),
+        ar,
+      ),
+      'قلقلة: «د» الساكنة تُقلقَل (نبرة خفيفة)',
+    );
   });
 
   testWidgets('nothing for a word recited correctly or not recited', (
