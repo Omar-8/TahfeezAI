@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../../../core/localization/generated/app_localizations.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_spacing.dart';
@@ -20,7 +23,7 @@ void showMushafTranslationSheet(
 }) {
   showTahfeezModalBottomSheet(
     context: context,
-    title: 'Translation & tafsir',
+    title: AppLocalizations.of(context).readerTranslationTafsir,
     builder: (context) =>
         _MushafTranslationSheetBody(mushafId: mushafId, pageNumber: pageNumber),
   );
@@ -45,11 +48,11 @@ class _MushafTranslationSheetBody extends ConsumerWidget {
     return translationsAsync.when(
       data: (translationsByAyahId) {
         if (translationsByAyahId.isEmpty) {
-          return const Padding(
+          return Padding(
             padding: EdgeInsets.only(bottom: 24),
             child: TahfeezEmptyView(
               icon: Icons.translate_outlined,
-              message: 'No active translations to show for this page. Select translations from the Reader options.',
+              message: AppLocalizations.of(context).readerNoPageTranslations,
             ),
           );
         }
@@ -85,7 +88,7 @@ class _MushafTranslationSheetBody extends ConsumerWidget {
                         chapterNo: chapterNo,
                         verseNo: verseNo,
                       ),
-                      child: const Text('Tafsir'),
+                      child: Text(AppLocalizations.of(context).readerTafsir),
                     ),
                   ],
                 ),
@@ -100,8 +103,8 @@ class _MushafTranslationSheetBody extends ConsumerWidget {
         );
       },
       loading: () => const TahfeezLoadingView(),
-      error: (_, _) => const TahfeezErrorView(
-        message: 'Could not load translations for this page.',
+      error: (_, _) => TahfeezErrorView(
+        message: AppLocalizations.of(context).readerPageTranslationsError,
       ),
     );
   }

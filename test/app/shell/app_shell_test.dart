@@ -46,7 +46,7 @@ void main() {
     expect(find.byType(TahfeezPrimaryNavigationRail), findsNothing);
     expect(find.text('Home'), findsOneWidget);
     expect(find.text('Quran'), findsOneWidget);
-    expect(find.text('Search'), findsOneWidget);
+    expect(find.text('Settings'), findsOneWidget);
   });
 
   testWidgets('tapping a destination switches the shell body', (tester) async {
@@ -65,14 +65,10 @@ void main() {
     expect(find.byType(TabBar), findsOneWidget);
     expect(find.text('Surah'), findsOneWidget);
 
-    await tester.tap(find.text('Search'));
+    await tester.tap(find.text('Settings'));
     await tester.pumpAndSettle();
-    expect(
-      find.text(
-        'This will appear automatically once a Quran dataset is added to the app.',
-      ),
-      findsOneWidget,
-    );
+    expect(find.text('Language'), findsOneWidget);
+    expect(find.text('App theme'), findsOneWidget);
 
     await tester.tap(find.text('Home'));
     await tester.pumpAndSettle();
@@ -116,7 +112,16 @@ void main() {
     );
     expect(find.text('الرئيسية'), findsOneWidget);
     expect(find.text('القرآن'), findsOneWidget);
-    expect(find.text('بحث'), findsOneWidget);
+    expect(find.text('الإعدادات'), findsOneWidget);
+
+    // The Quran page, in Arabic too: its title, tabs and empty state.
+    await tester.tap(find.text('القرآن'));
+    await tester.pumpAndSettle();
+    expect(find.text('القرآن'), findsNWidgets(2)); // the tab and the title
+    for (final tab in ['السور', 'الأجزاء', 'الأحزاب', 'الصفحات']) {
+      expect(find.text(tab), findsOneWidget);
+    }
+    expect(find.text('Surah'), findsNothing);
   });
 
   testWidgets('reserves mini-player space only while a track is active', (

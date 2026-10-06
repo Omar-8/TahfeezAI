@@ -1,8 +1,14 @@
 import 'dart:async' show unawaited;
 
+import '../../../core/localization/generated/app_localizations.dart';
+
+import 'package:flutter/foundation.dart' show mapEquals, setEquals;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../application/mushaf_hide_mode.dart';
+import '../application/mushaf_page_verses.dart';
+import '../application/mushaf_word_overlay.dart';
 import '../application/mushaf_quran_engine_providers.dart';
 import '../domain/mushaf_appearance.dart';
 import '../domain/quran_engine/quran_engine_mushaf_backend.dart';
@@ -41,6 +47,94 @@ class _QuranEngineMushafPageContentState
   Object? _loadError;
   bool _loading = false;
 
+  /// The hide-mode state last applied to [_page], so changes to other
+  /// pages' reveal progress don't re-apply this one.
+  ({bool hidden, int revealed})? _appliedMask;
+
+  /// The word overlay (Hifz mode) last applied: hidden engine word indices
+  /// and marks. `null` while no overlay is on this page.
+  (Set<int>, Map<int, MushafWordMark>)? _appliedOverlay;
+
+  /// Bands behind the next word; ink colours on recited words.
+  static const _markStyles = {
+    MushafWordMark.current: (color: Color(0x552F80ED), ink: false),
+    MushafWordMark.mistake: (color: Color(0x77E53935), ink: false),
+    MushafWordMark.correct: (color: Color(0xFF43A047), ink: true),
+    MushafWordMark.skipped: (color: Color(0xFFE0A800), ink: true),
+    MushafWordMark.wrong: (color: Color(0xFFD32F2F), ink: true),
+    MushafWordMark.tashkeel: (color: Color(0xFFEF6C00), ink: true),
+    MushafWordMark.uncertain: (color: Color(0xFFFBC02D), ink: true),
+  };
+
+  /// Applies whichever mask is active: a word overlay (Hifz mode) wins
+  /// over hide mode.
+  void _applyMasks() {
+    final page = _page;
+    if (page == null) return;
+    final overlay = ref.read(mushafWordOverlayProvider);
+    if (overlay != null) {
+      final refs = page.wordRefs;
+      final hideMode = ref.read(mushafHideModeProvider);
+      final uncovered = hideMode.revealedOn(widget.pageNumber);
+      final hidden = <int>{
+        for (var i = 0; i < refs.length; i++)
+          if (overlay.followHideMode
+              ? hideMode.enabled && i >= uncovered
+              : overlay.isHidden(refs[i]))
+            i,
+      };
+      final marks = <int, MushafWordMark>{
+        for (var i = 0; i < refs.length; i++)
+          if (overlay.marks.containsKey(refs[i])) i: overlay.marks[refs[i]]!,
+      };
+      final applied = _appliedOverlay;
+      if (applied != null &&
+          setEquals(applied.$1, hidden) &&
+          mapEquals(applied.$2, marks)) {
+        return;
+      }
+      page.setHiddenWords(hidden);
+      page.setWordHighlights([
+        for (final MapEntry(key: i, value: mark) in marks.entries)
+          (
+            word: i,
+            color: _markStyles[mark]!.color,
+            ink: _markStyles[mark]!.ink,
+          ),
+      ]);
+      _appliedOverlay = (hidden, marks);
+      _appliedMask = null;
+      return;
+    }
+    if (_appliedOverlay != null) {
+      page.setHiddenWords(const {});
+      page.clearHighlights();
+      _appliedOverlay = null;
+      _appliedMask = null;
+    }
+    _applyMask(ref.read(mushafHideModeProvider));
+  }
+
+  void _applyMask(MushafHideModeState hideMode) {
+    final page = _page;
+    if (page == null) return;
+    final wanted = (
+      hidden: hideMode.enabled,
+      revealed: hideMode.enabled ? hideMode.revealedOn(widget.pageNumber) : 0,
+    );
+    if (wanted == _appliedMask) return;
+    // A page that was never masked needs no unmasking.
+    if (_appliedMask == null && !wanted.hidden) {
+      _appliedMask = wanted;
+      return;
+    }
+    page.setMemorizationMask(
+      hidden: wanted.hidden,
+      revealedWords: wanted.revealed,
+    );
+    _appliedMask = wanted;
+  }
+
   @override
   void didUpdateWidget(covariant QuranEngineMushafPageContent oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -48,6 +142,8 @@ class _QuranEngineMushafPageContentState
       setState(() {
         _page = null;
         _loadError = null;
+        _appliedMask = null;
+        _appliedOverlay = null;
       });
       _load();
     }
@@ -67,12 +163,34 @@ class _QuranEngineMushafPageContentState
       ref
           .read(mushafPageAspectRatiosProvider.notifier)
           .report(widget.pageNumber, page.aspectRatio);
+      final hideMode = ref.read(mushafHideModeProvider.notifier);
+      hideMode.reportPageWords(
+        widget.pageNumber,
+        wordCount: page.wordCount,
+        ayahBoundaries: page.ayahWordBoundaries,
+      );
+      final words = page.wordRefs;
+      if (words.isNotEmpty) {
+        ref.read(mushafPageWordRangesProvider.notifier).report(
+          widget.pageNumber,
+          (first: words.first, last: words.last),
+        );
+      }
+      final span = page.verseSpan;
+      if (span != null) {
+        ref
+            .read(mushafPageVersesProvider.notifier)
+            .report(widget.pageNumber, span);
+      }
       final previous = _page;
       if (previous != null) backend.disposePage(previous);
       setState(() {
         _backend = backend;
         _page = page;
+        _appliedMask = null;
+        _appliedOverlay = null;
       });
+      _applyMasks();
       // Fire-and-forget: never awaited, never allowed to affect the page
       // actually on screen.
       unawaited(backend.preloadAround(widget.pageNumber));
@@ -94,6 +212,8 @@ class _QuranEngineMushafPageContentState
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(mushafHideModeProvider, (_, _) => _applyMasks());
+    ref.listen(mushafWordOverlayProvider, (_, _) => _applyMasks());
     if (_page == null && _loadError == null) {
       // Fire-and-forget: harmless to call every build (a no-op once a
       // load is in flight or complete) -- the same pattern
@@ -106,7 +226,7 @@ class _QuranEngineMushafPageContentState
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Text(
-            'This page could not be rendered.',
+            AppLocalizations.of(context).readerPageError,
             textAlign: TextAlign.center,
             style: TextStyle(color: widget.colors.secondaryText),
           ),
@@ -147,10 +267,19 @@ class _QuranEngineMushafPageContentState
     // page's own aspect ratio differing from the device's -- the engine
     // already computes the true maximum uniform scale that shows the
     // entire page, uncropped and undistorted, and centers it.
+    final onWordTap = widget.onWordTap;
     return page.buildView(
       ink: widget.colors.text,
       paper: widget.colors.background,
-      onWordHit: widget.onWordTap,
+      // A word hidden by hide mode must not be revealed by its word sheet.
+      onWordHit: onWordTap == null
+          ? null
+          : (hit) {
+              final hidden = ref
+                  .read(mushafHideModeProvider)
+                  .isWordHidden(widget.pageNumber, hit.sourceTokenId);
+              if (!hidden) onWordTap(hit);
+            },
       onDecorationHit: widget.onWordTap,
     );
   }

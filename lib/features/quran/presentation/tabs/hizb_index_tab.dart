@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../../../../core/localization/generated/app_localizations.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_spacing.dart';
@@ -20,9 +23,10 @@ class HizbIndexTab extends ConsumerWidget {
     return hizbList.when(
       data: (units) {
         if (units.isEmpty) {
-          return const TahfeezEmptyView(
+          return TahfeezEmptyView(
             icon: Icons.menu_book_outlined,
-            message: 'This will appear automatically once a Quran dataset is added to the app.',
+            message: AppLocalizations.of(context)
+                .homeQuranDatasetUnavailableBody,
           );
         }
         return ListView.builder(
@@ -34,9 +38,10 @@ class HizbIndexTab extends ConsumerWidget {
               padding: const EdgeInsets.only(bottom: TahfeezSpacing.sm),
               child: TahfeezQuranSectionCard(
                 number: unit.unitNo,
-                title: 'Hizb ${unit.unitNo}',
-                subtitle:
-                    'Starts at Surah ${unit.start.surahNo}, Ayah ${unit.start.startAyahNo}',
+                title: AppLocalizations.of(context)
+                    .homeContinueReadingHizb(unit.unitNo),
+                subtitle: AppLocalizations.of(context)
+                    .quranStartsAt(unit.start.surahNo, unit.start.startAyahNo),
                 onTap: () => onSelect(QuranLocation.hizb(unit.unitNo)),
               ),
             );
@@ -44,9 +49,9 @@ class HizbIndexTab extends ConsumerWidget {
         );
       },
       loading: () => const TahfeezLoadingView(),
-      error: (_, _) => const TahfeezEmptyView(
+      error: (_, _) => TahfeezEmptyView(
         icon: Icons.menu_book_outlined,
-        message: 'This will appear automatically once a Quran dataset is added to the app.',
+        message: AppLocalizations.of(context).homeQuranDatasetUnavailableBody,
       ),
     );
   }

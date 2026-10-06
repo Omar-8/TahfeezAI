@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../../../../core/localization/generated/app_localizations.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/components/components.dart';
@@ -16,7 +19,7 @@ import '../../../../quran/application/quran_script_code.dart';
 void showQuranScriptSheet(BuildContext context) {
   showTahfeezModalBottomSheet(
     context: context,
-    title: 'Quran script',
+    title: AppLocalizations.of(context).readerQuranScript,
     builder: (context) => const _QuranScriptSheetBody(),
   );
 }
@@ -34,9 +37,10 @@ class _QuranScriptSheetBody extends ConsumerWidget {
       child: scripts.when(
         data: (scripts) {
           if (scripts.isEmpty) {
-            return const TahfeezEmptyView(
+            return TahfeezEmptyView(
               icon: Icons.font_download_outlined,
-              message: 'This will appear automatically once a Quran dataset is added to the app.',
+              message: AppLocalizations.of(context)
+                  .homeQuranDatasetUnavailableBody,
             );
           }
           return Wrap(
@@ -55,8 +59,8 @@ class _QuranScriptSheetBody extends ConsumerWidget {
           );
         },
         loading: () => const TahfeezLoadingView(),
-        error: (_, _) => const TahfeezErrorView(
-          message: 'Could not load available Quran scripts.',
+        error: (_, _) => TahfeezErrorView(
+          message: AppLocalizations.of(context).readerScriptsError,
         ),
       ),
     );

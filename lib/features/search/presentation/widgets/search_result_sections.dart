@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../quran/domain/models/quran_location.dart';
+import '../../../../core/localization/generated/app_localizations.dart';
 import '../../../../core/routing/quran_location_routing.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/components/components.dart';
@@ -39,13 +41,13 @@ class SearchResultSections extends StatelessWidget {
       children: [
         if (results.quickLinks.isNotEmpty)
           _Section(
-            title: 'Quick links',
+            title: AppLocalizations.of(context).searchQuickLinks,
             icon: Icons.bolt_outlined,
             children: [
               for (final hit in results.quickLinks)
                 if (hit is QuickLinkSearchHit)
                   TahfeezListRow(
-                    title: hit.label,
+                    title: _quickLinkLabel(context, hit.location),
                     leading: const Icon(Icons.arrow_forward),
                     onTap: () => onResultTap(hit),
                   ),
@@ -53,21 +55,22 @@ class SearchResultSections extends StatelessWidget {
           ),
         if (results.surahHits.isNotEmpty)
           _Section(
-            title: 'Surahs',
+            title: AppLocalizations.of(context).searchSurahs,
             icon: Icons.menu_book_outlined,
             children: [
               for (final hit in results.surahHits)
                 if (hit is SurahSearchHit)
                   TahfeezListRow(
                     title: hit.matchedName,
-                    subtitle: 'Surah ${hit.surahNo}',
+                    subtitle: AppLocalizations.of(context)
+                        .homeContinueReadingSurah(hit.surahNo),
                     onTap: () => onResultTap(hit),
                   ),
             ],
           ),
         if (results.arabicHits.isNotEmpty)
           _Section(
-            title: 'Quran text',
+            title: AppLocalizations.of(context).searchQuranText,
             icon: Icons.auto_stories_outlined,
             children: [
               for (final hit in results.arabicHits)
@@ -77,7 +80,7 @@ class SearchResultSections extends StatelessWidget {
           ),
         if (results.translationHits.isNotEmpty)
           _Section(
-            title: 'Translations',
+            title: AppLocalizations.of(context).searchTranslations,
             icon: Icons.translate_outlined,
             children: [
               for (final hit in results.translationHits)
@@ -213,4 +216,28 @@ class _TranslationResultRow extends StatelessWidget {
       ),
     );
   }
+}
+
+/// A quick link's label in the UI language: "Go to 2:255", "Go to Surah 18".
+String _quickLinkLabel(BuildContext context, QuranLocation location) {
+  final l10n = AppLocalizations.of(context);
+  final place = switch (location) {
+    QuranLocationAyah(:final chapterNo, :final verseNo) =>
+      '$chapterNo:$verseNo',
+    QuranLocationAyahRange(
+      :final chapterNo,
+      :final fromVerseNo,
+      :final toVerseNo,
+    ) =>
+      '$chapterNo:$fromVerseNo-$toVerseNo',
+    QuranLocationSurah(:final surahNo) => l10n.homeContinueReadingSurah(
+      surahNo,
+    ),
+    QuranLocationJuz(:final juzNo) => l10n.homeContinueReadingJuz(juzNo),
+    QuranLocationHizb(:final hizbNo) => l10n.homeContinueReadingHizb(hizbNo),
+    QuranLocationPage(:final pageNumber) => l10n.homeContinueReadingPage(
+      pageNumber,
+    ),
+  };
+  return l10n.searchGoTo(place);
 }

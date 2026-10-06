@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../../core/localization/generated/app_localizations.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -44,16 +47,18 @@ class TafsirReaderScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Tafsir · $chapterNo:$verseNo'),
+        title: Text(
+          AppLocalizations.of(context).tafsirTitle('$chapterNo:$verseNo'),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.text_fields),
-            tooltip: 'Text size',
+            tooltip: AppLocalizations.of(context).tafsirTextSizeTooltip,
             onPressed: () => _showTextSizeSheet(context, ref),
           ),
           IconButton(
             icon: const Icon(Icons.menu_book_outlined),
-            tooltip: 'Tafsir library',
+            tooltip: AppLocalizations.of(context).packsTafsirLibrary,
             onPressed: () => showTafsirPacksSheet(context),
           ),
         ],
@@ -72,7 +77,7 @@ class TafsirReaderScreen extends ConsumerWidget {
   void _showTextSizeSheet(BuildContext context, WidgetRef ref) {
     showTahfeezModalBottomSheet(
       context: context,
-      title: 'Tafsir text size',
+      title: AppLocalizations.of(context).tafsirTextSize,
       builder: (context) => Padding(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
         child: Consumer(
@@ -102,10 +107,10 @@ class _NoTafsirSelected extends StatelessWidget {
   Widget build(BuildContext context) {
     return TahfeezEmptyView(
       icon: Icons.menu_book_outlined,
-      message: 'Install and select a tafsir to read commentary here.',
+      message: AppLocalizations.of(context).tafsirInstall,
       action: TextButton(
         onPressed: () => showTafsirPacksSheet(context),
-        child: const Text('Browse tafsirs'),
+        child: Text(AppLocalizations.of(context).tafsirBrowse),
       ),
     );
   }
@@ -141,10 +146,9 @@ class _TafsirContent extends ConsumerWidget {
         children: [
           verseTextAsync.when(
             data: (text) => text == null
-                ? const TahfeezEmptyView(
+                ? TahfeezEmptyView(
                     icon: Icons.menu_book_outlined,
-                    message:
-                        'No commentary for this verse in the active tafsir.',
+                    message: AppLocalizations.of(context).tafsirNoCommentary,
                   )
                 : Text(
                     text.text,
@@ -157,8 +161,9 @@ class _TafsirContent extends ConsumerWidget {
                     ),
                   ),
             loading: () => const TahfeezLoadingView(),
-            error: (_, _) =>
-                const TahfeezErrorView(message: 'Could not load this tafsir.'),
+            error: (_, _) => TahfeezErrorView(
+              message: AppLocalizations.of(context).tafsirLoadError,
+            ),
           ),
           workAsync.when(
             data: (work) => work == null
@@ -208,7 +213,7 @@ class _PrevNextBar extends ConsumerWidget {
                 }
               },
               icon: const Icon(Icons.chevron_left),
-              label: const Text('Previous'),
+              label: Text(AppLocalizations.of(context).commonPrevious),
             ),
             const Spacer(),
             TextButton.icon(
@@ -219,7 +224,7 @@ class _PrevNextBar extends ConsumerWidget {
                 }
               },
               icon: const Icon(Icons.chevron_right),
-              label: const Text('Next'),
+              label: Text(AppLocalizations.of(context).commonNext),
               iconAlignment: IconAlignment.end,
             ),
           ],

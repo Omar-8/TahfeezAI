@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../../../../core/localization/generated/app_localizations.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/localization/locale_controller.dart';
@@ -32,7 +35,9 @@ class ChapterInfoCard extends ConsumerWidget {
           spacing: TahfeezSpacing.xs,
           children: [
             Text(
-              localization.value?.name ?? 'Surah ${surah.surahNo}',
+              localization.value?.name ??
+                  AppLocalizations.of(context)
+                      .homeContinueReadingSurah(surah.surahNo),
               style: Theme.of(context).textTheme.titleLarge,
             ),
             if (localization.value?.meaning case final meaning?)
@@ -43,7 +48,7 @@ class ChapterInfoCard extends ConsumerWidget {
               ),
             const SizedBox(height: TahfeezSpacing.xs),
             Text(
-              '${surah.revelationType == RevelationType.meccan ? 'Meccan' : 'Medinan'} · ${surah.ayahCount} ayahs',
+              '${surah.revelationType == RevelationType.meccan ? AppLocalizations.of(context).quranMeccan : AppLocalizations.of(context).quranMedinan} · ${AppLocalizations.of(context).homeFeaturedAyahCount(surah.ayahCount)}',
               style: Theme.of(context).textTheme.bodySmall
                   ?.copyWith(color: scheme.onSurfaceVariant),
             ),

@@ -60,6 +60,7 @@ dependencies:
   # resolved from pub.dev while the override is active.
   qvp_flutter: ^0.2.2
   web: ^1.1.1
+  record: ^7.1.1
 
 # A locally-vendored, minimally-patched copy of qvp_flutter 0.2.2 —
 # exposes QvpViewLayout.maxAspectSlack (already a real, documented,
@@ -75,6 +76,10 @@ dependency_overrides:
 
 dev_dependencies:
   flutter_test:
+    sdk: flutter
+  # On-device checks (e.g. live recognition against a real engine) —
+  # never part of the app.
+  integration_test:
     sdk: flutter
 
   # The "flutter_lints" package below contains a set of recommended lints to
@@ -129,6 +134,9 @@ flutter:
     - assets/quran/translations/en_rowwad.json
     - assets/quran/translations/de_rowwad.json
     - assets/quran/tafsir/ar_muyassar.json
+    # Expected Hafs pronunciation of every ayah for acoustic verification —
+    # tool/acoustic_verification/build_reference.py.
+    - assets/quran/recitation/phonetic_reference_hafs.json
 
     # DEVELOPMENT-ONLY, LICENSE-GATED — see docs/QURAN_DATA_PROVENANCE.md
     # §7/§7a/§8 and the release checklist there. This is the Mushaf

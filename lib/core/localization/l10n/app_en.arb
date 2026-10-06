@@ -90,5 +90,434 @@
     }
   },
 
-  "miniPlayerDefaultTitle": "Now playing"
+  "miniPlayerDefaultTitle": "Now playing",
+
+  "navSettings": "Settings",
+  "homeDailyAyahOpen": "Read in context",
+  "homeContinueReadingAction": "Continue",
+  "homeContinueReadingPage": "Page {page}",
+  "@homeContinueReadingPage": {
+    "placeholders": {
+      "page": {
+        "type": "int"
+      }
+    }
+  },
+  "homeContinueReadingJuz": "Juz {juz}",
+  "@homeContinueReadingJuz": {
+    "placeholders": {
+      "juz": {
+        "type": "int"
+      }
+    }
+  },
+  "homeContinueReadingHizb": "Hizb {hizb}",
+  "@homeContinueReadingHizb": {
+    "placeholders": {
+      "hizb": {
+        "type": "int"
+      }
+    }
+  },
+  "homeContinueReadingSurah": "Surah {surahNo}",
+  "@homeContinueReadingSurah": {
+    "placeholders": {
+      "surahNo": {
+        "type": "int"
+      }
+    }
+  },
+  "homeContinueReadingLastRecitation": "Last recitation: {place}",
+  "@homeContinueReadingLastRecitation": {
+    "placeholders": {
+      "place": {
+        "type": "String"
+      }
+    }
+  },
+  "homeMemorizationStart": "Recite from the Mushaf",
+  "homeMemorizationEmpty": "Open the Mushaf and recite: Tahfeez follows you word by word and marks what needs another look.",
+  "homeMemorizationWeek": "This week: {sessions} sessions · {minutes} min",
+  "@homeMemorizationWeek": {
+    "placeholders": {
+      "sessions": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "homeMemorizationRecent": "Recent sessions",
+  "homeMemorizationMinutes": "{minutes} min",
+  "@homeMemorizationMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "homeFeaturedAyahCount": "{count} ayahs",
+  "@homeFeaturedAyahCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "homeFeaturedFriday": "Friday",
+  "homeFeaturedNight": "Before sleep",
+  "settingsTitle": "Settings",
+  "settingsLanguage": "Language",
+  "settingsLanguageSystem": "System default",
+  "settingsAppearance": "Appearance",
+  "settingsThemeSystem": "System",
+  "settingsThemeLight": "Light",
+  "settingsThemeDark": "Dark",
+
+  "quranTitle": "Quran",
+  "quranTabSurah": "Surah",
+  "quranTabJuz": "Juz",
+  "quranTabHizb": "Hizb",
+  "quranTabPage": "Page",
+  "quranJumpBack": "Jump back in",
+  "quranGoToAyah": "Go to Ayah",
+  "quranStartsAt": "Starts at Surah {surahNo}, Ayah {ayahNo}",
+  "@quranStartsAt": {
+    "placeholders": {
+      "surahNo": {
+        "type": "int"
+      },
+      "ayahNo": {
+        "type": "int"
+      }
+    }
+  },
+  "quranEnterChapterVerse": "Enter a chapter and verse number.",
+  "quranInvalidChapterVerse": "That chapter/verse combination is invalid.",
+  "quranChapter": "Chapter",
+  "quranVerse": "Verse",
+  "quranGo": "Go",
+  "quranEnterPage": "Enter a page number.",
+  "quranPageOutOfRange": "That page number is out of range.",
+  "quranMushafPages": "This Mushaf has {count} pages.",
+  "@quranMushafPages": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "quranGoToPage": "Go to page",
+  "quranFilterChapters": "Filter chapters",
+  "quranFilterAll": "All",
+  "quranMeccanCount": "Meccan ({count})",
+  "@quranMeccanCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "quranMedinanCount": "Medinan ({count})",
+  "@quranMedinanCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "quranSearchChapters": "Search chapters",
+  "quranClear": "Clear",
+  "quranShowingLastFirst": "Showing last chapter first",
+  "quranShowLastFirst": "Show last chapter first",
+  "quranNoChaptersMatch": "No chapters match your search.",
+  "quranMeccan": "Meccan",
+  "quranMedinan": "Medinan",
+
+  "searchRecent": "Recent searches",
+  "searchClearAll": "Clear all",
+  "searchRemove": "Remove",
+  "searchFilters": "Search filters",
+  "searchArabicText": "Arabic Quran text",
+  "searchSurahNames": "Surah names",
+  "searchTranslations": "Translations",
+  "searchNoTranslations": "No translations installed yet.",
+  "searchTranslationsError": "Could not load translations.",
+  "searchQuickLinks": "Quick links",
+  "searchSurahs": "Surahs",
+  "searchQuranText": "Quran text",
+  "searchHint": "Search the Quran",
+  "searchVoice": "Voice search",
+  "searchTry": "Try a verse (2:255), a range (2:255-257), a chapter number, or a Surah name.",
+  "searchNoResults": "No results for \"{query}\".",
+  "@searchNoResults": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "searchError": "Something went wrong while searching.",
+  "searchGoTo": "Go to {place}",
+  "@searchGoTo": {
+    "placeholders": {
+      "place": {
+        "type": "String"
+      }
+    }
+  },
+
+  "recMicNeeded": "Microphone access is needed to listen to your recitation.",
+  "recStopped": "Recitation stopped.",
+  "recStart": "Start recitation",
+  "recStarting": "Starting…",
+  "recPaused": "Paused",
+  "recSaving": "Saving…",
+  "recListening": "Listening…",
+  "recResume": "Resume",
+  "recPause": "Pause",
+  "recStop": "Stop",
+  "recHifzSettings": "Hifz settings",
+  "recRevealAyah": "Reveal next ayah",
+  "recRevealWord": "Reveal next word",
+  "recShowAyahs": "Show ayahs",
+  "recHideAyahs": "Hide ayahs",
+  "recHideWord": "Hide previous word",
+  "recHideAyah": "Hide previous ayah",
+  "recFatha": "fatha",
+  "recDamma": "damma",
+  "recKasra": "kasra",
+  "recSukunName": "sukun",
+  "recExpectedHeard": "{expected} expected, {heard} heard",
+  "@recExpectedHeard": {
+    "placeholders": {
+      "expected": {
+        "type": "String"
+      },
+      "heard": {
+        "type": "String"
+      }
+    }
+  },
+  "recNotHeard": "{expected} not heard",
+  "@recNotHeard": {
+    "placeholders": {
+      "expected": {
+        "type": "String"
+      }
+    }
+  },
+  "recSukunExpected": "sukun on {letter} expected, {heard} heard",
+  "@recSukunExpected": {
+    "placeholders": {
+      "letter": {
+        "type": "String"
+      },
+      "heard": {
+        "type": "String"
+      }
+    }
+  },
+  "recShaddaMissing": "shadda on {letter} not heard",
+  "@recShaddaMissing": {
+    "placeholders": {
+      "letter": {
+        "type": "String"
+      }
+    }
+  },
+  "recShaddaExtra": "no shadda on {letter} expected",
+  "@recShaddaExtra": {
+    "placeholders": {
+      "letter": {
+        "type": "String"
+      }
+    }
+  },
+  "recUnclear": "unclear",
+  "recRangeComplete": "Range complete",
+  "recWrongWord": "Wrong word — recite it again",
+  "recSkippedWord": "Skipped a word — go back",
+  "recPronunciation": "Pronunciation {word}: {detail}",
+  "@recPronunciation": {
+    "placeholders": {
+      "word": {
+        "type": "String"
+      },
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "recGoingBack": "Going back · next: {word}",
+  "@recGoingBack": {
+    "placeholders": {
+      "word": {
+        "type": "String"
+      }
+    }
+  },
+  "recNext": "Next: {word}",
+  "@recNext": {
+    "placeholders": {
+      "word": {
+        "type": "String"
+      }
+    }
+  },
+  "recStoppedShort": "Stopped",
+  "recHifzMode": "Hifz mode",
+  "recStrict": "Strict",
+  "recStrictSub": "A wrong or skipped word must be corrected before continuing",
+  "recHighlight": "Highlight the next word",
+  "recHighlightSub": "Mark where to continue reciting",
+  "recColour": "Colour recited words",
+  "recColourSub": "Correct green, skipped yellow, wrong red",
+  "recShowMistakes": "Show mistakes",
+  "recShowMistakesSub": "Mark wrong and skipped words",
+  "recVibrate": "Vibrate on mistakes",
+  "recVibrateSub": "A short vibration when a mistake is detected",
+  "recRangeDefault": "Range: from the visible page to the end of the surah",
+  "recRange": "Range: {from} – {to}",
+  "@recRange": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      }
+    }
+  },
+  "recFrom": "From",
+  "recTo": "To",
+  "recUseVisible": "Use the visible page",
+  "readerShare": "Share",
+  "readerCopy": "Copy",
+  "readerCopied": "Copied {reference}",
+  "@readerCopied": {
+    "placeholders": {
+      "reference": {
+        "type": "String"
+      }
+    }
+  },
+  "readerPlay": "Play",
+  "readerBookmark": "Bookmark",
+  "readerTafsir": "Tafsir",
+  "readerQuranScript": "Quran script",
+  "readerScriptsError": "Could not load available Quran scripts.",
+  "readerTranslationTafsir": "Translation & tafsir",
+  "readerNoPageTranslations": "No active translations to show for this page. Select translations from the Reader options.",
+  "readerPageTranslationsError": "Could not load translations for this page.",
+  "readerOptions": "Reader options",
+  "readerContinuous": "Continuous scrolling",
+  "readerContinuousSub": "Automatically continue into the next chapter",
+  "readerShowArabic": "Show Arabic text",
+  "readerSelected": "{count} selected",
+  "@readerSelected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "readerTafsirSub": "Language, active work",
+  "readerWbw": "Word by word",
+  "readerWbwSub": "Language packs, translation, transliteration",
+  "readerMushaf": "Mushaf",
+  "readerVerseByVerse": "Verse by verse",
+  "readerTranslation": "Translation",
+  "readerPageError": "This page could not be rendered.",
+  "mushafAppearance": "Mushaf appearance",
+  "readerAyahRef": "Ayah {ref}",
+  "@readerAyahRef": {
+    "placeholders": {
+      "ref": {
+        "type": "String"
+      }
+    }
+  },
+
+  "packsNoTranslations": "No translations available yet.",
+  "packsActive": "{name} (active)",
+  "@packsActive": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "packsTafsirLibrary": "Tafsir library",
+  "packsNoTafsir": "No tafsir works available yet.",
+  "packsTafsirError": "Could not load tafsir works.",
+  "packsNoWbw": "No word-by-word language packs available yet.",
+  "packsWbwError": "Could not load word-by-word language packs.",
+  "footnoteTitle": "Footnote {marker}",
+  "@footnoteTitle": {
+    "placeholders": {
+      "marker": {
+        "type": "String"
+      }
+    }
+  },
+  "verseNotOffline": "This verse is not available offline yet.",
+  "verseLoadError": "Could not load this verse.",
+  "goToVerse": "Go to verse",
+  "commonCancel": "Cancel",
+  "commonUpdate": "Update",
+  "commonRetry": "Retry",
+  "commonPrevious": "Previous",
+  "commonNext": "Next",
+  "tafsirTitle": "Tafsir · {ref}",
+  "@tafsirTitle": {
+    "placeholders": {
+      "ref": {
+        "type": "String"
+      }
+    }
+  },
+  "tafsirTextSizeTooltip": "Text size",
+  "tafsirTextSize": "Tafsir text size",
+  "tafsirInstall": "Install and select a tafsir to read commentary here.",
+  "tafsirBrowse": "Browse tafsirs",
+  "tafsirNoCommentary": "No commentary for this verse in the active tafsir.",
+  "tafsirLoadError": "Could not load this tafsir.",
+  "wordDetails": "Word details",
+  "wordRef": "Ayah {ref} · Word {n}",
+  "@wordRef": {
+    "placeholders": {
+      "ref": {
+        "type": "String"
+      },
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "wordPlayAudio": "Play word audio",
+  "wordInstall": "Install a word-by-word language pack to see translations here.",
+  "wordBrowsePacks": "Browse language packs",
+  "wordNoData": "No word-by-word data for this word yet.",
+  "recFeedbackTitle": "From your recitation",
+  "recFeedbackOnLetter": "On «{letter}»: {detail}",
+  "@recFeedbackOnLetter": {
+    "placeholders": {
+      "letter": {
+        "type": "String"
+      },
+      "detail": {
+        "type": "String"
+      }
+    }
+  },
+  "recFeedbackWrongWord": "A different word was heard here.",
+  "recFeedbackSkipped": "This word was skipped.",
+  "recFeedbackPronunciation": "A pronunciation mistake was heard in this word.",
+  "settingsAppTheme": "App theme",
+  "settingsQuranTheme": "Quran page theme",
+  "settingsThemeWarm": "Warm",
+  "settingsThemeSepia": "Sepia",
+  "settingsThemeBlack": "Black"
 }

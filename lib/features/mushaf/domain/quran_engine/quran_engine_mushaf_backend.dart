@@ -88,5 +88,45 @@ abstract class QuranEngineMushafPage {
 
   void unmask();
 
+  /// Memorization "hide" mode: hides every word on the page — ayah-end
+  /// markers/numbers, Surah headers and other decorations stay visible —
+  /// then uncovers the first [revealedWords] words in reading order
+  /// (starting from the first word of the page's first ayah).
+  /// `hidden: false` shows the whole page again. Idempotent: callers pass
+  /// the full desired state every time.
+  void setMemorizationMask({required bool hidden, int revealedWords = 0});
+
+  /// Number of words on this page — the most [setMemorizationMask] can
+  /// reveal.
+  int get wordCount;
+
+  /// Where each ayah on this page ends, as a count of the page's words in
+  /// reading order: for the first ayah on the page, the second, and so
+  /// on — e.g. `[4, 21, 58]`. The last entry equals [wordCount].
+  List<int> get ayahWordBoundaries;
+
+  /// The first and last ayah with words on this page, from the engine's own
+  /// per-word surah/ayah data; `null` for a page without words.
+  ({VerseRef first, VerseRef last})? get verseSpan;
+
+  /// This page's words as canonical refs, in the engine's reading order:
+  /// index i is the engine's page-local word index i.
+  List<WordRef> get wordRefs;
+
+  /// Hides exactly the page words at the [hidden] engine word indices;
+  /// every other word, and every ayah marker/decoration, stays visible.
+  /// Replaces any previous mask (including [setMemorizationMask]'s).
+  void setHiddenWords(Set<int> hidden);
+
+  /// Highlights the page word at engine index [wordIndex] with a band of
+  /// [color] — drawn even where the word itself is hidden. Returns the
+  /// highlight handle.
+  int highlightWordAt(int wordIndex, {required Color color});
+
+  /// Replaces every highlight on the page at once: for each engine word
+  /// index, a [color] either as a band behind the word or, with `ink`, on
+  /// the word's own letters. One repaint for the whole set.
+  void setWordHighlights(List<({int word, Color color, bool ink})> highlights);
+
   void dispose();
 }

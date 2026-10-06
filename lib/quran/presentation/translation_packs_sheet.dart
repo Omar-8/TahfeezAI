@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../../core/localization/generated/app_localizations.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/downloads/resource_download_status.dart';
@@ -18,7 +21,7 @@ import '../application/translation_selection_controller.dart';
 void showTranslationPacksSheet(BuildContext context) {
   showTahfeezModalBottomSheet(
     context: context,
-    title: 'Translations',
+    title: AppLocalizations.of(context).searchTranslations,
     builder: (context) => const _TranslationPacksSheetBody(),
   );
 }
@@ -34,11 +37,11 @@ class _TranslationPacksSheetBody extends ConsumerWidget {
     return library.when(
       data: (statuses) {
         if (statuses.isEmpty) {
-          return const Padding(
+          return Padding(
             padding: EdgeInsets.only(bottom: 24),
             child: TahfeezEmptyView(
               icon: Icons.translate_outlined,
-              message: 'No translations available yet.',
+              message: AppLocalizations.of(context).packsNoTranslations,
             ),
           );
         }
@@ -51,7 +54,8 @@ class _TranslationPacksSheetBody extends ConsumerWidget {
             final isActive = activeSlugs.contains(status.book.slug);
             return TahfeezResourceRow(
               title: isActive
-                  ? '${status.book.displayName} (active)'
+                  ? AppLocalizations.of(context)
+                        .packsActive(status.book.displayName)
                   : status.book.displayName,
               subtitle: status.book.languageCode,
               state: _rowState(status.state),
@@ -61,8 +65,9 @@ class _TranslationPacksSheetBody extends ConsumerWidget {
         );
       },
       loading: () => const TahfeezLoadingView(),
-      error: (_, _) =>
-          const TahfeezErrorView(message: 'Could not load translations.'),
+      error: (_, _) => TahfeezErrorView(
+        message: AppLocalizations.of(context).searchTranslationsError,
+      ),
     );
   }
 

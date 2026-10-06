@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../../../core/localization/generated/app_localizations.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/localization/locale_controller.dart';
@@ -49,7 +52,10 @@ class MushafPageTitle extends ConsumerWidget {
     final baseColor = DefaultTextStyle.of(context).style.color;
 
     if (bundle == null) {
-      return Text('Page $pageNumber', overflow: TextOverflow.ellipsis);
+      return Text(
+        AppLocalizations.of(context).homeContinueReadingPage(pageNumber),
+        overflow: TextOverflow.ellipsis,
+      );
     }
 
     final surahNo = surahNoOverride ?? _firstSurahNo(bundle);
@@ -68,8 +74,9 @@ class MushafPageTitle extends ConsumerWidget {
               ?.name;
 
     final subtitleParts = <String>[
-      'Page $pageNumber',
-      if (bundle.juzNo != null) 'Juz ${bundle.juzNo}',
+      AppLocalizations.of(context).homeContinueReadingPage(pageNumber),
+      if (bundle.juzNo != null)
+        AppLocalizations.of(context).homeContinueReadingJuz(bundle.juzNo!),
     ];
 
     // Two lines (Surah name, then page/Juz), not one long joined string:
@@ -82,7 +89,11 @@ class MushafPageTitle extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          localizedName ?? (surahNo != null ? 'Surah $surahNo' : 'Mushaf'),
+          localizedName ??
+              (surahNo != null
+                  ? AppLocalizations.of(context)
+                        .homeContinueReadingSurah(surahNo)
+                  : AppLocalizations.of(context).readerMushaf),
           style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,

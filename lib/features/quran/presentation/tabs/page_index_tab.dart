@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../../../../core/localization/generated/app_localizations.dart';
+
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -35,7 +38,7 @@ class _PageIndexTabState extends ConsumerState<PageIndexTab> {
   Future<void> _go(int mushafId) async {
     final pageNumber = int.tryParse(_controller.text);
     if (pageNumber == null) {
-      setState(() => _error = 'Enter a page number.');
+      setState(() => _error = AppLocalizations.of(context).quranEnterPage);
       return;
     }
     final repository = ref.read(quranRepositoryProvider);
@@ -44,7 +47,7 @@ class _PageIndexTabState extends ConsumerState<PageIndexTab> {
       pageNumber: pageNumber,
     );
     if (!valid) {
-      setState(() => _error = 'That page number is out of range.');
+      setState(() => _error = AppLocalizations.of(context).quranPageOutOfRange);
       return;
     }
     setState(() => _error = null);
@@ -60,9 +63,10 @@ class _PageIndexTabState extends ConsumerState<PageIndexTab> {
       child: mushaf.when(
         data: (mushaf) {
           if (mushaf == null) {
-            return const TahfeezEmptyView(
+            return TahfeezEmptyView(
               icon: Icons.menu_book_outlined,
-              message: 'This will appear automatically once a Quran dataset is added to the app.',
+              message: AppLocalizations.of(context)
+                  .homeQuranDatasetUnavailableBody,
             );
           }
           return Column(
@@ -70,7 +74,7 @@ class _PageIndexTabState extends ConsumerState<PageIndexTab> {
             spacing: TahfeezSpacing.md,
             children: [
               Text(
-                'This Mushaf has ${mushaf.pageCount} pages.',
+                AppLocalizations.of(context).quranMushafPages(mushaf.pageCount),
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               TextField(
@@ -78,22 +82,22 @@ class _PageIndexTabState extends ConsumerState<PageIndexTab> {
                 keyboardType: TextInputType.number,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 decoration: InputDecoration(
-                  labelText: 'Go to page',
+                  labelText: AppLocalizations.of(context).quranGoToPage,
                   errorText: _error,
                 ),
                 onSubmitted: (_) => _go(mushaf.id),
               ),
               FilledButton(
                 onPressed: () => _go(mushaf.id),
-                child: const Text('Go'),
+                child: Text(AppLocalizations.of(context).quranGo),
               ),
             ],
           );
         },
         loading: () => const TahfeezLoadingView(),
-        error: (_, _) => const TahfeezEmptyView(
+        error: (_, _) => TahfeezEmptyView(
           icon: Icons.menu_book_outlined,
-          message: 'This will appear automatically once a Quran dataset is added to the app.',
+          message: AppLocalizations.of(context).homeQuranDatasetUnavailableBody,
         ),
       ),
     );

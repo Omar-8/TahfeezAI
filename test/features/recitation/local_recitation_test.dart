@@ -1,0 +1,630 @@
+import 'dart:async';
+import 'dart:math';
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:tahfeez_ai/ai/acoustic/acoustic_frame_stream.dart';
+import 'package:tahfeez_ai/ai/acoustic/quran_acoustic_verifier.dart';
+import 'package:tahfeez_ai/ai/acoustic/quran_phonetic_reference.dart';
+import 'package:tahfeez_ai/ai/acoustic/acoustic_model_manifest.dart';
+import 'package:tahfeez_ai/ai/acoustic/local_quran_acoustic_model.dart';
+import 'package:tahfeez_ai/ai/acoustic/quran_acoustic_model.dart';
+import 'package:tahfeez_ai/ai/acoustic/remote_acoustic_model.dart';
+import 'package:tahfeez_ai/ai/acoustic/screen_awake.dart';
+import 'package:tahfeez_ai/ai/hifz/hifz_judge.dart';
+import 'package:tahfeez_ai/ai/speech/unavailable_live_recognizer.dart';
+import 'package:tahfeez_ai/core/storage/browser_storage.dart';
+import 'package:tahfeez_ai/core/storage/storage_providers.dart';
+import 'package:tahfeez_ai/features/mushaf/application/mushaf_page_verses.dart';
+import 'package:tahfeez_ai/features/recitation/application/acoustic_position_providers.dart';
+import 'package:tahfeez_ai/features/recitation/application/acoustic_verification_controller.dart';
+import 'package:tahfeez_ai/features/recitation/application/hifz_controller.dart';
+import 'package:tahfeez_ai/features/recitation/application/live_recognition_controller.dart';
+import 'package:tahfeez_ai/features/recitation/application/local_acoustic_inference_controller.dart';
+import 'package:tahfeez_ai/features/recitation/application/mushaf_recitation_target.dart';
+import 'package:tahfeez_ai/features/recitation/application/quran_match_controller.dart';
+import 'package:tahfeez_ai/features/recitation/application/recitation_ai_config.dart';
+import 'package:tahfeez_ai/features/recitation/application/recitation_providers.dart';
+import 'package:tahfeez_ai/features/recitation/application/recitation_session_controller.dart';
+import 'package:tahfeez_ai/quran/domain/models/quran_location.dart';
+
+import '../../ai/acoustic/local_quran_acoustic_model_test.dart'
+    show manifestJson;
+import '../../ai/acoustic/acoustic_test_support.dart';
+import '../../ai/matching/corpus_fixture.dart';
+import '../../ai/matching/position_fixture_support.dart';
+import 'recitation_session_controller_test.dart'
+    show FakeAudioSource, FakeRepository, FakeStore;
+
+/// Offline, on the device: what an Android build with
+/// `TAHFEEZ_OFFLINE_RECITATION=true` resolves to.
+final offlineAndroid = resolveRecitationAiConfig(
+  backendName: '',
+  positionName: '',
+  comparator: false,
+  offline: true,
+  android: true,
+  release: false,
+);
+
+class _MemoryStorage implements BrowserStorage {
+  final values = <String, Object>{};
+  @override
+  Future<String?> getString(String key) async => values[key] as String?;
+  @override
+  Future<void> setString(String key, String value) async => values[key] = value;
+  @override
+  Future<bool?> getBool(String key) async => values[key] as bool?;
+  @override
+  Future<void> setBool(String key, bool value) async => values[key] = value;
+  @override
+  Future<void> remove(String key) async => values.remove(key);
+}
+
+/// Frame `i` of each run carries `i` in its blank column, so a test can
+/// see which part of a window was kept.
+class _FakeModel extends LocalQuranAcousticModel {
+  final runs = <int>[];
+
+  /// Called during each run (audio arriving meanwhile).
+  void Function()? during;
+
+  @override
+  Future<LocalAcousticModelStatus> status() async => LocalAcousticModelStatus(
+    LocalAcousticModelState.present,
+    path: '/fake',
+    manifest: AcousticModelManifest.fromJson(manifestJson()),
+  );
+
+  @override
+  Future<AcousticModelLoad> load() async => const AcousticModelLoad(
+    provider: AcousticExecutionProvider.cpu,
+    loadTime: Duration(milliseconds: 5),
+  );
+
+  @override
+  Future<AcousticFrames> run(Float32List samples) async {
+    runs.add(samples.length);
+    if (during case final during?) {
+      during();
+      await Future<void>.delayed(Duration.zero);
+    }
+    final n = samples.length ~/ 640;
+    final lp = Float32List(n * 43);
+    for (var i = 0; i < n; i++) {
+      lp[i * 43] = i.toDouble();
+    }
+    return AcousticFrames(
+      frames: n,
+      classes: 43,
+      logProbs: lp,
+      frameDuration: const Duration(milliseconds: 40),
+    );
+  }
+
+  @override
+  Future<AcousticDeviceStats?> deviceStats() async => null;
+}
+
+class _FakeScreen implements ScreenAwake {
+  final calls = <bool>[];
+  @override
+  Future<void> keepOn(bool on) async => calls.add(on);
+}
+
+/// Recorded frames as the pipeline's store, and noise as its audio (the
+/// verifier reads both).
+class _RecordedInference extends _ReplayInference {
+  _RecordedInference(this.recorded, {this.stored = false});
+
+  final AcousticFrames recorded;
+
+  /// The frames are in [store] too, as the pipeline would have computed
+  /// them (for the quick per-word checks).
+  final bool stored;
+  final requests = <(int, int)>[];
+
+  @override
+  LocalAcousticInferenceState build() {
+    final rng = Random(1);
+    final bytes = Uint8List(recorded.frames * 640 * 2);
+    final view = ByteData.sublistView(bytes);
+    for (var i = 0; i < bytes.length ~/ 2; i++) {
+      view.setInt16(i * 2, rng.nextInt(4000) - 2000, Endian.little);
+    }
+    pcm.addPcm16(bytes);
+    if (stored) store.add(TimedAcousticFrames(0, recorded));
+    return super.build();
+  }
+
+  @override
+  Future<TimedAcousticFrames?> framesFor(
+    int from,
+    int to, {
+    Duration timeout = const Duration(seconds: 30),
+  }) async {
+    final first = (from + 639) ~/ 640, last = to ~/ 640;
+    requests.add((first, last));
+    return TimedAcousticFrames(first, recorded.slice(first, last - 1));
+  }
+}
+
+/// A model run over a piece: the recorded frames of the audio it was given
+/// (found by its samples in the session's audio, which is unique noise).
+class _RecordedModel extends _FakeModel {
+  _RecordedModel(this.inference);
+  final _RecordedInference inference;
+
+  /// The stream frames of every run: (first, one past the last).
+  final pieces = <(int, int)>[];
+
+  @override
+  Future<AcousticFrames> run(Float32List samples) async {
+    final all = inference.pcm.samples(0, inference.pcm.written);
+    var at = -1;
+    for (var i = 0; i + 8 <= all.length && at < 0; i++) {
+      var same = true;
+      for (var k = 0; k < 8 && same; k++) {
+        same = all[i + k] == samples[k];
+      }
+      if (same) at = i;
+    }
+    expect(at, isNot(-1), reason: 'the piece is session audio');
+    final first = (at + 639) ~/ 640;
+    final n = samples.length ~/ 640;
+    final last = (first + n).clamp(first + 1, inference.recorded.frames);
+    pieces.add((first, last));
+    return inference.recorded.slice(first, last - 1);
+  }
+}
+
+/// Publishes recorded frames instead of running a model.
+class _ReplayInference extends LocalAcousticInferenceController {
+  _ReplayInference();
+
+  final out = StreamController<TimedAcousticFrames>.broadcast();
+
+  @override
+  LocalAcousticInferenceState build() => const LocalAcousticInferenceState();
+
+  @override
+  Stream<TimedAcousticFrames> get frames => out.stream;
+}
+
+void main() {
+  group('recitation AI configuration', () {
+    test('Android defaults to the on-device model and tracker', () {
+      final c = resolveRecitationAiConfig(
+        backendName: '',
+        positionName: '',
+        comparator: false,
+        offline: false,
+        android: true,
+        release: true,
+      );
+      expect(c.acoustic, QuranAcousticBackend.local);
+      expect(c.position, RecitationPositionSource.acoustic);
+      expect(c.speechRecognizerRuns, isFalse, reason: 'no Google');
+      expect(c.violation, isNull);
+    });
+
+    test('the web keeps the speech recognizer; no local model yet', () {
+      final dev = resolveRecitationAiConfig(
+        backendName: '',
+        positionName: '',
+        comparator: false,
+        offline: false,
+        android: false,
+        release: false,
+      );
+      expect(dev.acoustic, QuranAcousticBackend.remoteDevelopment);
+      expect(dev.position, RecitationPositionSource.speechRecognizer);
+      final release = resolveRecitationAiConfig(
+        backendName: '',
+        positionName: '',
+        comparator: false,
+        offline: false,
+        android: false,
+        release: true,
+      );
+      expect(release.acoustic, QuranAcousticBackend.disabled);
+    });
+
+    test('offline refuses the remote model, Google and the comparator', () {
+      final c = resolveRecitationAiConfig(
+        backendName: 'remote',
+        positionName: 'speech',
+        comparator: true,
+        offline: true,
+        android: false,
+        release: false,
+      );
+      expect(c.acoustic, QuranAcousticBackend.disabled);
+      expect(c.speechRecognizerRuns, isFalse);
+      expect(c.speechComparator, isFalse);
+      expect(c.violation, contains('remote acoustic model'));
+      expect(c.violation, contains('speech recognizer'));
+      expect(c.violation, contains('comparator'));
+    });
+
+    test('the Google comparator runs beside the acoustic tracker', () {
+      final c = resolveRecitationAiConfig(
+        backendName: 'local',
+        positionName: '',
+        comparator: true,
+        offline: false,
+        android: true,
+        release: false,
+      );
+      expect(c.position, RecitationPositionSource.acoustic);
+      expect(c.speechRecognizerRuns, isTrue);
+    });
+
+    test('offline Android: no recognizer, no remote model', () {
+      final container = ProviderContainer(
+        overrides: [
+          recitationAiConfigProvider.overrideWithValue(offlineAndroid),
+        ],
+      );
+      addTearDown(container.dispose);
+      expect(
+        container.read(liveQuranRecognizerFactoryProvider)(),
+        isA<UnavailableLiveRecognizer>(),
+      );
+      expect(
+        container.read(quranAcousticModelProvider),
+        isA<LocalQuranAcousticModel>(),
+      );
+      expect(
+        container.read(quranAcousticModelProvider),
+        isNot(isA<RemoteAcousticModel>()),
+      );
+    });
+  });
+
+  group('LocalAcousticInferenceController', () {
+    late FakeAudioSource mic;
+    late _FakeModel model;
+    late _FakeScreen screen;
+    late ProviderContainer container;
+    final chunks = <TimedAcousticFrames>[];
+
+    RecitationSessionController session() =>
+        container.read(recitationSessionControllerProvider.notifier);
+    LocalAcousticInferenceController inference() =>
+        container.read(localAcousticInferenceControllerProvider.notifier);
+
+    setUp(() async {
+      mic = FakeAudioSource();
+      model = _FakeModel();
+      screen = _FakeScreen();
+      chunks.clear();
+      container = ProviderContainer(
+        overrides: [
+          recitationAiConfigProvider.overrideWithValue(offlineAndroid),
+          recitationAudioSourceFactoryProvider.overrideWithValue(() => mic),
+          recitationRecordingStoreProvider.overrideWithValue(FakeStore()),
+          recitationSessionRepositoryProvider.overrideWithValue(
+            FakeRepository(),
+          ),
+          localQuranAcousticModelProvider.overrideWithValue(model),
+          screenAwakeProvider.overrideWithValue(screen),
+          // These tests check the pipeline at 2 s hops with 1 s of context.
+          acousticWindowingProvider.overrideWithValue(
+            const AcousticWindowing(),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+      container.listen(localAcousticInferenceControllerProvider, (_, _) {});
+      inference().frames.listen(chunks.add);
+      await pumpEventQueue();
+      expect(
+        container.read(localAcousticInferenceControllerProvider).ready,
+        isTrue,
+      );
+      await session().start(startLocation: const QuranLocation.page(1, 440));
+      await pumpEventQueue();
+    });
+
+    Future<void> speak(double seconds) async {
+      for (var t = 0.0; t < seconds; t += 0.5) {
+        mic.emitSeconds(0.5, value: 3);
+        await pumpEventQueue();
+      }
+    }
+
+    test('one pipeline: contiguous, deduplicated, bounded windows', () async {
+      await speak(12);
+      // Frames up to 1 s before the live edge, never a gap or a repeat.
+      var next = 0;
+      for (final c in chunks) {
+        expect(c.start, next);
+        next = c.end;
+      }
+      expect(next, greaterThanOrEqualTo((12 - 1 - 2) * 25));
+      expect(next, lessThanOrEqualTo((12 - 1) * 25));
+      // Each window ran ≤ 6 s new + 1 s each side, and kept its middle:
+      // after the first, kept frames start 25 frames (1 s) into the run.
+      expect(model.runs.every((n) => n <= 8 * 16000), isTrue);
+      expect(chunks.first.frames.at(0, 0), 0);
+      for (final c in chunks.skip(1)) {
+        expect(c.frames.at(0, 0), 25);
+      }
+      final state = container.read(localAcousticInferenceControllerProvider);
+      expect(state.windows, chunks.length);
+      expect(state.rtf, isNotNull);
+    });
+
+    test('pausing computes the tail at once and marks it last', () async {
+      await speak(5);
+      session().pause();
+      await pumpEventQueue(times: 50);
+      expect(chunks.last.last, isTrue);
+      expect(chunks.last.end, 5 * 25);
+      // The screen stays on while listening (off, the app is moved to the
+      // slow cores), and is released on pause.
+      expect(screen.calls, [true, false]);
+    });
+
+    test(
+      'a pause in speech computes up to it at once, then hops resume',
+      () async {
+        // 0.1 s of a 400 Hz tone (speech), or of silence.
+        void emit(bool loud) {
+          final pcm = ByteData(3200);
+          for (var t = 0; t < 1600; t++) {
+            final x = loud ? (8000 * sin(2 * pi * 400 * t / 16000)).round() : 0;
+            pcm.setInt16(t * 2, x, Endian.little);
+          }
+          mic.mic!.add(pcm.buffer.asUint8List());
+        }
+
+        Future<void> say(double seconds, {required bool loud}) async {
+          for (var t = 0.0; t < seconds - 1e-9; t += 0.1) {
+            emit(loud);
+            await pumpEventQueue();
+          }
+        }
+
+        await say(5, loud: true); // speech…
+        // …then silence, with audio arriving while the model runs.
+        model.during = () => emit(false);
+        final before = model.runs.length;
+        await say(0.5, loud: false);
+        // The stop was heard (0.3 s of quiet): the audio up to it is
+        // computed and marked last, without waiting for the context after it.
+        debugPrint(
+          [for (final c in chunks) "${c.start}-${c.end}${c.last ? "L" : ""}"]
+              .join(" "),
+        );
+        final mark = chunks.lastIndexWhere((c) => c.last);
+        expect(mark, isNot(-1));
+        expect(chunks[mark].end, inInclusiveRange(5 * 25, 5 * 25 + 10));
+        await say(4, loud: false);
+        // Not chasing the live edge: 4.5 s of audio, a few windows (2 s hops).
+        expect(model.runs.length - before, lessThanOrEqualTo(5));
+        var next = 0;
+        for (final c in chunks) {
+          expect(c.start, next);
+          next = c.end;
+        }
+      },
+    );
+
+    test('the verifier reuses the computed frames', () async {
+      await speak(8);
+      final runsBefore = model.runs.length;
+      final reused = await inference().framesFor(16000, 4 * 16000);
+      expect(reused!.start, 25);
+      expect(reused.frames.frames, 75);
+      expect(model.runs.length, runsBefore, reason: 'no model run');
+    });
+  });
+
+  group('Hifz on the device, Google off', () {
+    final corpus = loadTestCorpus();
+    late ProviderContainer container;
+    late _ReplayInference inference;
+
+    HifzState hifz() => container.read(hifzControllerProvider);
+
+    Future<void> setUpHifz({
+      bool range = true,
+      ({int chapterNo, int verseNo})? to,
+      _RecordedInference? recorded,
+    }) async {
+      inference = recorded ?? _ReplayInference();
+      container = ProviderContainer(
+        overrides: [
+          recitationAiConfigProvider.overrideWithValue(offlineAndroid),
+          recitationAudioSourceFactoryProvider.overrideWithValue(
+            FakeAudioSource.new,
+          ),
+          recitationRecordingStoreProvider.overrideWithValue(FakeStore()),
+          recitationSessionRepositoryProvider.overrideWithValue(
+            FakeRepository(),
+          ),
+          quranWordCorpusProvider.overrideWith((ref) async => corpus),
+          quranPhonemeResourcesProvider.overrideWith(
+            (ref) async => loadTestPhonemes(),
+          ),
+          localAcousticInferenceControllerProvider.overrideWith(
+            () => inference,
+          ),
+          quranAcousticModelProvider.overrideWithValue(
+            recorded == null ? null : _RecordedModel(recorded),
+          ),
+          quranPhoneticReferenceProvider.overrideWith(
+            (ref) async => loadTestReference(),
+          ),
+          browserStorageProvider.overrideWithValue(_MemoryStorage()),
+          hifzHapticsProvider.overrideWithValue(() {}),
+        ],
+      );
+      addTearDown(container.dispose);
+      // Page 42 (2:253–2:256) is on screen.
+      final first = corpus.verseStartPosition((chapterNo: 2, verseNo: 253))!;
+      final last = corpus.verseEndPosition((chapterNo: 2, verseNo: 256))!;
+      container
+          .read(mushafRecitationTargetProvider.notifier)
+          .show('screen', const QuranLocation.page(1, 42));
+      container.read(mushafPageWordRangesProvider.notifier).report(42, (
+        first: corpus.words[first].ref,
+        last: corpus.words[last].ref,
+      ));
+      container.listen(liveRecognitionControllerProvider, (_, _) {});
+      container.listen(hifzControllerProvider, (_, _) {});
+      container.listen(acousticVerificationControllerProvider, (_, _) {});
+      await container.read(quranWordCorpusProvider.future);
+      await container.read(quranPhonemeResourcesProvider.future);
+      if (range) {
+        container.read(hifzControllerProvider.notifier).setRange((
+          from: (chapterNo: 36, verseNo: 1),
+          to: to ?? (chapterNo: 36, verseNo: 5),
+        ));
+      }
+      await container
+          .read(recitationSessionControllerProvider.notifier)
+          .start(startLocation: const QuranLocation.page(1, 42));
+      await pumpEventQueue();
+    }
+
+    Future<void> play(String scenario) async {
+      final s = PositionScenario.all()[scenario]!;
+      final frames = s.frames();
+      var start = 0;
+      for (final (i, end) in s.chunkEnds.indexed) {
+        inference.out.add(
+          TimedAcousticFrames(
+            start,
+            frames.slice(start, end - 1),
+            last: i == s.chunkEnds.length - 1,
+          ),
+        );
+        start = end;
+        await pumpEventQueue();
+      }
+    }
+
+    test('a range test: false start, self-correction, completion', () async {
+      await setUpHifz();
+      expect(
+        container.read(liveRecognitionControllerProvider).recognizerName,
+        'None',
+        reason: 'Google is off',
+      );
+      await play('self_correction');
+      expect(hifz().counts[HifzVerdict.skipped], 1);
+      expect(hifz().counts[HifzVerdict.selfCorrected], 1);
+      expect(hifz().counts[HifzVerdict.wrong], 0);
+      expect(hifz().completed, isTrue);
+    });
+
+    test('every ayah is checked for pronunciation, on a run over its own '
+        'audio with margin', () async {
+      final frames = PositionScenario.all()['page_start']!.frames();
+      final recorded = _RecordedInference(frames);
+      await setUpHifz(to: (chapterNo: 36, verseNo: 8), recorded: recorded);
+      await play('page_start');
+      for (var i = 0; i < 200; i++) {
+        await pumpEventQueue();
+        final a = container.read(acousticVerificationControllerProvider);
+        if (a.pending == 0 && a.words.length >= 37) break;
+      }
+      final acoustic = container.read(acousticVerificationControllerProvider);
+      // All 8 ayahs (37 words) judged — none skipped for want of audio.
+      expect(acoustic.words.length, 37);
+      expect(acoustic.words.keys.map((w) => w.ayahId).toSet(), {
+        for (var v = 1; v <= 8; v++) 36000 + v,
+      });
+      // Each ayah ran the model once over its own audio (a whole-piece run,
+      // as calibrated), not on the streaming windows' frames.
+      final model =
+          container.read(quranAcousticModelProvider)! as _RecordedModel;
+      expect(model.pieces.length, greaterThanOrEqualTo(8));
+      expect(recorded.requests, isEmpty);
+      // Clean recitation: (almost) nothing flagged.
+      final flagged = acoustic.words.values.where((w) => w.isMistake).length;
+      expect(flagged, lessThanOrEqualTo(2));
+      expect(
+        acoustic.words.values.where(
+          (w) => w.type == RecitationErrorType.correct,
+        ),
+        hasLength(greaterThan(30)),
+      );
+    });
+
+    test('a clear mistake is marked once the next word begins, then '
+        'confirmed by its ayah\'s check', () async {
+      // 36:2 «وَٱلْقُرْءَانِ» said with ك for its ق (the first ق heard).
+      final clean = PositionScenario.all()['page_start']!.frames();
+      final q = phoneticClassOf('ق'), k = phoneticClassOf('ك');
+      final said = Float32List.fromList(clean.logProbs);
+      final c = clean.classes;
+      var f = 0;
+      while (_argmax(said, f, c) != q) {
+        f++;
+      }
+      for (; _argmax(said, f, c) == q; f++) {
+        final (a, b) = (said[f * c + q], said[f * c + k]);
+        said[f * c + q] = b;
+        said[f * c + k] = a;
+      }
+      final recorded = _RecordedInference(
+        AcousticFrames(
+          frames: clean.frames,
+          classes: c,
+          logProbs: said,
+          frameDuration: clean.frameDuration,
+        ),
+        stored: true,
+      );
+      await setUpHifz(to: (chapterNo: 36, verseNo: 8), recorded: recorded);
+      const word = (ayahId: 36002, wordIndex: 0);
+      // The word's verdicts as they come.
+      final seen = <AcousticWordResult>[];
+      container.listen(acousticVerificationControllerProvider, (_, next) {
+        final w = next.words[word];
+        if (w != null && (seen.isEmpty || seen.last != w)) seen.add(w);
+      });
+      await play('page_start');
+      for (var i = 0; i < 200; i++) {
+        await pumpEventQueue();
+        final a = container.read(acousticVerificationControllerProvider);
+        if (a.pending == 0 && a.words.length >= 37) break;
+      }
+      // First an early mark, then the ayah's check confirms it…
+      expect(
+        [for (final w in seen) (w.type, w.provisional)],
+        [
+          (RecitationErrorType.wrongLetter, true),
+          (RecitationErrorType.wrongLetter, false),
+        ],
+      );
+      // …and decides every word.
+      final a = container.read(acousticVerificationControllerProvider);
+      expect(a.words.values.where((w) => w.provisional), isEmpty);
+      expect(a.words, hasLength(37));
+    });
+
+    test('page visible: the reciter is located from the audio', () async {
+      await setUpHifz(range: false);
+      await play('wrong_page'); // Al-Kahf, with page 42 on screen
+      expect(hifz().first, (ayahId: 18001, wordIndex: 0));
+      expect(hifz().counts[HifzVerdict.correct], 51);
+      expect(hifz().counts[HifzVerdict.wrong], 0);
+    });
+  });
+}
+
+int _argmax(Float32List logProbs, int frame, int classes) {
+  var best = 0;
+  for (var i = 1; i < classes; i++) {
+    if (logProbs[frame * classes + i] > logProbs[frame * classes + best]) {
+      best = i;
+    }
+  }
+  return best;
+}

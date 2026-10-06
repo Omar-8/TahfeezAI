@@ -6,6 +6,7 @@
 // native/mobile behavior is provably untouched (asserted directly below by
 // re-running several of the same gestures with `isWeb: false` and
 // confirming they do nothing).
+import 'package:tahfeez_ai/core/localization/generated/app_localizations.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -68,6 +69,7 @@ void main() {
     required bool isWeb,
     required ValueChanged<int> onPageChanged,
     double? pageAspectRatio,
+    Locale? locale,
   }) {
     return ProviderScope(
       overrides: [
@@ -82,6 +84,9 @@ void main() {
           ),
       ],
       child: MaterialApp(
+        locale: locale,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(
           body: MushafPager(
             mushafId: mushafTestMushafId,
@@ -364,4 +369,31 @@ void main() {
       expect(webPages, [2]);
     },
   );
+
+  testWidgets('pages read right to left in every UI language', (tester) async {
+    final db = await buildDb();
+    addTearDown(db.close);
+    await useSinglePageViewport(tester);
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+    for (final locale in const [Locale('en'), Locale('ar')]) {
+      final pages = <int>[];
+      await tester.pumpWidget(
+        wrap(db, isWeb: false, onPageChanged: pages.add, locale: locale),
+      );
+      await tester.pumpAndSettle();
+      // Like a physical Mushaf: the next page comes in from the left, so
+      // a drag to the right turns forward…
+      await tester.drag(find.byType(PageView), const Offset(300, 0));
+      await tester.pumpAndSettle();
+      expect(pages, [2], reason: '$locale');
+      // …and a drag to the left turns back.
+      await tester.drag(find.byType(PageView), const Offset(-300, 0));
+      await tester.pumpAndSettle();
+      expect(pages, [2, 1], reason: '$locale');
+      await tester.pumpWidget(const SizedBox.shrink());
+    }
+  });
 }

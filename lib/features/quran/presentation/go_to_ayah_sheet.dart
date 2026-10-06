@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../../../core/localization/generated/app_localizations.dart';
+
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -13,7 +16,7 @@ import '../../../quran/quran_providers.dart';
 Future<QuranLocation?> showGoToAyahSheet(BuildContext context) {
   return showTahfeezModalBottomSheet<QuranLocation>(
     context: context,
-    title: 'Go to Ayah',
+    title: AppLocalizations.of(context).quranGoToAyah,
     builder: (context) => const _GoToAyahForm(),
   );
 }
@@ -41,7 +44,9 @@ class _GoToAyahFormState extends ConsumerState<_GoToAyahForm> {
     final chapterNo = int.tryParse(_chapterController.text);
     final verseNo = int.tryParse(_verseController.text);
     if (chapterNo == null || verseNo == null) {
-      setState(() => _error = 'Enter a chapter and verse number.');
+      setState(
+        () => _error = AppLocalizations.of(context).quranEnterChapterVerse,
+      );
       return;
     }
     final repository = ref.read(quranRepositoryProvider);
@@ -50,7 +55,9 @@ class _GoToAyahFormState extends ConsumerState<_GoToAyahForm> {
       verseNo: verseNo,
     ));
     if (!valid) {
-      setState(() => _error = 'That chapter/verse combination is invalid.');
+      setState(
+        () => _error = AppLocalizations.of(context).quranInvalidChapterVerse,
+      );
       return;
     }
     if (!mounted) return;
@@ -79,7 +86,9 @@ class _GoToAyahFormState extends ConsumerState<_GoToAyahForm> {
                   controller: _chapterController,
                   keyboardType: TextInputType.number,
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  decoration: const InputDecoration(labelText: 'Chapter'),
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context).quranChapter,
+                  ),
                 ),
               ),
               Expanded(
@@ -88,7 +97,9 @@ class _GoToAyahFormState extends ConsumerState<_GoToAyahForm> {
                   controller: _verseController,
                   keyboardType: TextInputType.number,
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  decoration: const InputDecoration(labelText: 'Verse'),
+                  decoration: InputDecoration(
+                    labelText: AppLocalizations.of(context).quranVerse,
+                  ),
                 ),
               ),
             ],
@@ -98,7 +109,10 @@ class _GoToAyahFormState extends ConsumerState<_GoToAyahForm> {
               _error!,
               style: TextStyle(color: Theme.of(context).colorScheme.error),
             ),
-          FilledButton(onPressed: _go, child: const Text('Go')),
+          FilledButton(
+            onPressed: _go,
+            child: Text(AppLocalizations.of(context).quranGo),
+          ),
         ],
       ),
     );

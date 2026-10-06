@@ -60,6 +60,32 @@ class _FakePage implements QuranEngineMushafPage {
   void revealNext([int count = 1]) {}
   @override
   void unmask() {}
+
+  @override
+  void setMemorizationMask({required bool hidden, int revealedWords = 0}) {}
+
+  @override
+  int get wordCount => 0;
+
+  @override
+  List<int> get ayahWordBoundaries => const [];
+
+  @override
+  ({VerseRef first, VerseRef last})? get verseSpan => null;
+
+  @override
+  List<WordRef> get wordRefs => const [];
+
+  @override
+  void setWordHighlights(
+    List<({int word, Color color, bool ink})> highlights,
+  ) {}
+
+  @override
+  void setHiddenWords(Set<int> hidden) {}
+
+  @override
+  int highlightWordAt(int wordIndex, {required Color color}) => 0;
   @override
   void dispose() {}
 }

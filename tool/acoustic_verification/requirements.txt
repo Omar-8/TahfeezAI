@@ -1,0 +1,11 @@
+# Quran Acoustic Verification tooling and model server (CPU).
+# Install with ./setup.sh (creates .venv here).
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.14.0+cpu
+transformers==4.57.6          # quran-muaalem breaks on transformers 5
+quran-muaalem==0.2.2
+quran-transcript==0.6.4
+numpy==2.5.3
+librosa==1.0.0
+soundfile==0.14.0
+onnxruntime==1.30.0

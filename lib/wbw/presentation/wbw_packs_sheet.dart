@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../../core/localization/generated/app_localizations.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/downloads/resource_download_status.dart';
@@ -18,7 +21,7 @@ import '../application/wbw_preferences_controller.dart';
 void showWbwPacksSheet(BuildContext context) {
   showTahfeezModalBottomSheet(
     context: context,
-    title: 'Word by word',
+    title: AppLocalizations.of(context).readerWbw,
     builder: (context) => const _WbwPacksSheetBody(),
   );
 }
@@ -34,11 +37,11 @@ class _WbwPacksSheetBody extends ConsumerWidget {
     return library.when(
       data: (statuses) {
         if (statuses.isEmpty) {
-          return const Padding(
+          return Padding(
             padding: EdgeInsets.only(bottom: 24),
             child: TahfeezEmptyView(
               icon: Icons.translate_outlined,
-              message: 'No word-by-word language packs available yet.',
+              message: AppLocalizations.of(context).packsNoWbw,
             ),
           );
         }
@@ -51,7 +54,8 @@ class _WbwPacksSheetBody extends ConsumerWidget {
             final isActive = status.pack.id == selectedPackId;
             return TahfeezResourceRow(
               title: isActive
-                  ? '${status.pack.displayName} (active)'
+                  ? AppLocalizations.of(context)
+                        .packsActive(status.pack.displayName)
                   : status.pack.displayName,
               subtitle: status.pack.languageCode,
               state: _rowState(status.state),
@@ -61,9 +65,8 @@ class _WbwPacksSheetBody extends ConsumerWidget {
         );
       },
       loading: () => const TahfeezLoadingView(),
-      error: (_, _) => const TahfeezErrorView(
-        message: 'Could not load word-by-word language packs.',
-      ),
+      error: (_, _) =>
+          TahfeezErrorView(message: AppLocalizations.of(context).packsWbwError),
     );
   }
 

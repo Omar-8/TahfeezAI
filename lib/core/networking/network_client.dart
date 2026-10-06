@@ -32,6 +32,17 @@ abstract class NetworkClient {
   /// there is no platform filesystem to [download] to (Web has none), so
   /// the caller (not this client) decides what to do with the bytes.
   Future<Response<List<int>>> getBytes(String path, {CancelToken? cancelToken});
+
+  /// Posts [bytes] as the request body and returns the raw response body
+  /// — for optional online services that exchange binary data (e.g. audio
+  /// in, acoustic model output back).
+  Future<Response<List<int>>> postBytes(
+    String path,
+    List<int> bytes, {
+    String contentType = 'application/octet-stream',
+    Duration? timeout,
+    CancelToken? cancelToken,
+  });
 }
 
 class DioNetworkClient implements NetworkClient {
@@ -63,6 +74,28 @@ class DioNetworkClient implements NetworkClient {
       urlPath,
       savePath,
       onReceiveProgress: onReceiveProgress,
+      cancelToken: cancelToken,
+    );
+  }
+
+  @override
+  Future<Response<List<int>>> postBytes(
+    String path,
+    List<int> bytes, {
+    String contentType = 'application/octet-stream',
+    Duration? timeout,
+    CancelToken? cancelToken,
+  }) {
+    return _dio.post<List<int>>(
+      path,
+      data: Stream.fromIterable([bytes]),
+      options: Options(
+        responseType: ResponseType.bytes,
+        contentType: contentType,
+        headers: {Headers.contentLengthHeader: bytes.length},
+        sendTimeout: timeout,
+        receiveTimeout: timeout,
+      ),
       cancelToken: cancelToken,
     );
   }

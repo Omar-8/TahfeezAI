@@ -216,6 +216,62 @@ class QuranEngineWebPageAdapter implements QuranEngineMushafPage {
   void unmask() => page.unmask();
 
   @override
+  void setMemorizationMask({required bool hidden, int revealedWords = 0}) =>
+      page.setMemorizationMask(hidden: hidden, revealedWords: revealedWords);
+
+  @override
+  int get wordCount => page.wordCount;
+
+  @override
+  List<int> get ayahWordBoundaries => page.ayahWordBoundaries;
+
+  @override
+  ({VerseRef first, VerseRef last})? get verseSpan {
+    final span = page.verseSpan;
+    if (span == null) return null;
+    return (
+      first: (chapterNo: span.firstSurah, verseNo: span.firstAyah),
+      last: (chapterNo: span.lastSurah, verseNo: span.lastAyah),
+    );
+  }
+
+  @override
+  late final List<WordRef> wordRefs = [
+    for (final (surah, ayah, word) in page.wordKeys)
+      (
+        ayahId: QuranEngineRefAdapter.ayahIdOf(surahNo: surah, ayahNo: ayah),
+        wordIndex: word - 1,
+      ),
+  ];
+
+  @override
+  void setHiddenWords(Set<int> hidden) => page.setHiddenWords(hidden);
+
+  @override
+  void setWordHighlights(
+    List<({int word, Color color, bool ink})> highlights,
+  ) => page.setWordHighlights([
+    for (final h in highlights)
+      (word: h.word, rgba: _rgba(h.color), ink: h.ink),
+  ]);
+
+  /// qvp.js colours are 0xRRGGBBAA.
+  static int _rgba(Color color) {
+    final argb = color.toARGB32();
+    return ((argb & 0xffffff) << 8) | (argb >>> 24);
+  }
+
+  @override
+  int highlightWordAt(int wordIndex, {required Color color}) {
+    final argb = color.toARGB32();
+    // qvp.js colours are 0xRRGGBBAA.
+    return page.highlightWordRgba(
+      wordIndex,
+      ((argb & 0xffffff) << 8) | (argb >>> 24),
+    );
+  }
+
+  @override
   void dispose() => page.dispose();
 
   /// [QuranEngineWebPage.highlightWord]/`.maskWord` expect the engine's

@@ -10,6 +10,7 @@ import '../../../core/ui/full_bleed_content.dart';
 import '../../../quran/domain/models/mushaf_token_models.dart';
 import '../../../wbw/presentation/word_detail_sheet.dart';
 import '../application/mushaf_appearance_controller.dart';
+import '../application/mushaf_page_turn.dart';
 import '../application/mushaf_quran_engine_providers.dart';
 import '../domain/mushaf_appearance.dart';
 import 'mushaf_token_hit_rect.dart';
@@ -449,6 +450,13 @@ class _MushafPagerState extends ConsumerState<MushafPager> {
     final useTwoPageSpread =
         breakpoint.isAtLeastTablet && isLandscape && size.width > 700;
     _ensureController(useTwoPageSpread);
+    // Page-turn requests from the shell's bottom bar (hide mode's buttons at
+    // either end of a page) — only for the pager on screen.
+    ref.listen(mushafPageTurnRequestsProvider, (_, request) {
+      if (request != null && (ModalRoute.of(context)?.isCurrent ?? true)) {
+        _animateToAdjacentIndex(request.direction);
+      }
+    });
     _requestedFullBleed = useTwoPageSpread;
     _scheduleFullBleedApply();
     final isWeb = ref.watch(platformCapabilitiesProvider).isWeb;
@@ -465,6 +473,10 @@ class _MushafPagerState extends ConsumerState<MushafPager> {
     final appearanceColors = ref
         .watch(mushafAppearanceControllerProvider)
         .colors;
+
+    // The page's own content keeps the app's text direction; only the
+    // pager's page order is fixed (see [_rightToLeft]).
+    final appDirection = Directionality.of(context);
 
     if (!useTwoPageSpread) {
       _itemCount = widget.pageCount;
@@ -519,12 +531,17 @@ class _MushafPagerState extends ConsumerState<MushafPager> {
                   )
                 : page,
           );
-          return isWeb
-              ? Padding(padding: _webOuterPadding, child: framed)
-              : framed;
+          return Directionality(
+            textDirection: appDirection,
+            child: isWeb
+                ? Padding(padding: _webOuterPadding, child: framed)
+                : framed,
+          );
         },
       );
-      final content = isWeb ? _wrapForWeb(pageView) : pageView;
+      final content = isWeb
+          ? _wrapForWeb(_rightToLeft(pageView))
+          : _rightToLeft(pageView);
       return content;
     }
 
@@ -640,14 +657,27 @@ class _MushafPagerState extends ConsumerState<MushafPager> {
             ],
           ),
         );
-        return isWeb
-            ? Padding(padding: _webSpreadOuterPadding, child: row)
-            : row;
+        return Directionality(
+          textDirection: appDirection,
+          child: isWeb
+              ? Padding(padding: _webSpreadOuterPadding, child: row)
+              : row,
+        );
       },
     );
-    final content = isWeb ? _wrapForWeb(pageView) : pageView;
+    final content = isWeb
+        ? _wrapForWeb(_rightToLeft(pageView))
+        : _rightToLeft(pageView);
     return content;
   }
+
+  /// The pager in a left-to-right frame, so `reverse: true` always reads
+  /// right to left like a physical Mushaf (the next page comes in from the
+  /// left). A horizontal [PageView] follows the ambient text direction, and
+  /// under an RTL locale (Arabic) `reverse` would flip it back to left to
+  /// right — the Mushaf's page order must not depend on the UI language.
+  Widget _rightToLeft(Widget pageView) =>
+      Directionality(textDirection: TextDirection.ltr, child: pageView);
 
   void _showWordInfo(BuildContext context, MushafTokenHitRect hitRect) {
     // Only a real Quran word has canonical identity to look up — an

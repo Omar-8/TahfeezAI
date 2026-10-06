@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import '../../../core/localization/generated/app_localizations.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -76,13 +78,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           focusNode: _focusNode,
           textInputAction: TextInputAction.search,
           decoration: InputDecoration(
-            hintText: 'Search the Quran',
+            hintText: AppLocalizations.of(context).searchHint,
             border: InputBorder.none,
             suffixIcon: _controller.text.isEmpty
                 ? null
                 : IconButton(
                     icon: const Icon(Icons.close),
-                    tooltip: 'Clear',
+                    tooltip: AppLocalizations.of(context).quranClear,
                     onPressed: () => _runSearch(''),
                   ),
           ),
@@ -92,21 +94,22 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.mic_none_outlined),
-            tooltip: 'Voice search',
+            tooltip: AppLocalizations.of(context).searchVoice,
             onPressed: () => showComingSoon(context),
           ),
           IconButton(
             icon: const Icon(Icons.tune),
-            tooltip: 'Search filters',
+            tooltip: AppLocalizations.of(context).searchFilters,
             onPressed: () => showSearchFilterSheet(context),
           ),
         ],
       ),
       body: SafeArea(
         child: !hasDataset
-            ? const TahfeezEmptyView(
+            ? TahfeezEmptyView(
                 icon: Icons.search_outlined,
-                message: 'This will appear automatically once a Quran dataset is added to the app.',
+                message: AppLocalizations.of(context)
+                    .homeQuranDatasetUnavailableBody,
               )
             : _committedQuery.trim().isEmpty
             ? _EmptyQueryBody(onSelectHistory: _runSearch)
@@ -136,7 +139,7 @@ class _EmptyQueryBody extends StatelessWidget {
               spacing: TahfeezSpacing.xs,
               children: [
                 Text(
-                  'Try a verse (2:255), a range (2:255-257), a chapter number, or a Surah name.',
+                  AppLocalizations.of(context).searchTry,
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
               ],
@@ -163,7 +166,7 @@ class _ResultsBody extends ConsumerWidget {
         if (results.isEmpty) {
           return TahfeezEmptyView(
             icon: Icons.search_off_outlined,
-            message: 'No results for "$query".',
+            message: AppLocalizations.of(context).searchNoResults(query),
           );
         }
         return SingleChildScrollView(
@@ -176,9 +179,8 @@ class _ResultsBody extends ConsumerWidget {
         );
       },
       loading: () => const TahfeezLoadingView(),
-      error: (_, _) => const TahfeezErrorView(
-        message: 'Something went wrong while searching.',
-      ),
+      error: (_, _) =>
+          TahfeezErrorView(message: AppLocalizations.of(context).searchError),
     );
   }
 }

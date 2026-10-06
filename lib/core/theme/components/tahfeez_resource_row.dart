@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../localization/generated/app_localizations.dart';
 import '../app_spacing.dart';
 import '../tahfeez_icon_sizes.dart';
 import 'tahfeez_download_progress_row.dart';
@@ -105,14 +106,14 @@ class TahfeezResourceRow extends StatelessWidget {
       case TahfeezResourceRowState.outdated:
         return FilledButton.tonal(
           onPressed: onAction,
-          child: const Text('Update'),
+          child: Text(AppLocalizations.of(context).commonUpdate),
         );
       case TahfeezResourceRowState.failed:
         return IconButton(
           icon: Icon(Icons.error_outline, color: scheme.error),
           iconSize: TahfeezIconSize.lg,
           onPressed: onAction,
-          tooltip: 'Retry',
+          tooltip: AppLocalizations.of(context).commonRetry,
         );
       case TahfeezResourceRowState.downloading:
       case TahfeezResourceRowState.deleting:

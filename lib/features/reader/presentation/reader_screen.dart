@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../../../core/localization/generated/app_localizations.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_spacing.dart';
@@ -16,6 +19,7 @@ import '../../mushaf/presentation/mushaf_pager.dart';
 import '../../mushaf/presentation/mushaf_page_title.dart';
 import '../../mushaf/presentation/mushaf_reader_options_sheet.dart';
 import '../../mushaf/presentation/mushaf_translation_sheet.dart';
+import '../../recitation/presentation/recitation_controls.dart';
 import '../application/reader_preferences_controller.dart';
 import '../application/reader_session_controller.dart';
 import '../application/verse_mode_feature.dart';
@@ -509,7 +513,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
         // that first resolution completes (or if no Mushaf dataset is
         // installed at all).
         title: _mushafId == null || _mushafPageNumber == null
-            ? Text(_titleFor(_location))
+            ? Text(_titleFor(_location, AppLocalizations.of(context)))
             : MushafPageTitle(
                 mushafId: _mushafId!,
                 pageNumber: _mushafPageNumber!,
@@ -525,7 +529,7 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
           ReaderModeSwitch(mode: readerMode, onSwitchToMode: _switchMode),
           IconButton(
             icon: const Icon(Icons.tune),
-            tooltip: 'Reader options',
+            tooltip: AppLocalizations.of(context).readerOptions,
             onPressed: () => showReaderOptionsSheet(context),
           ),
         ],
@@ -541,9 +545,9 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
               .toggleSelection(ayahId),
         ),
         loading: () => const TahfeezLoadingView(),
-        error: (_, _) => const TahfeezEmptyView(
+        error: (_, _) => TahfeezEmptyView(
           icon: Icons.menu_book_outlined,
-          message: 'This will appear automatically once a Quran dataset is added to the app.',
+          message: AppLocalizations.of(context).homeQuranDatasetUnavailableBody,
         ),
       ),
       bottomNavigationBar: session != null && session.selectedAyahIds.isNotEmpty
@@ -614,7 +618,10 @@ class _MushafModeScaffold extends ConsumerWidget {
         foregroundColor: colors.text,
         titleSpacing: 0,
         title: mushafId == null || pageNumber == null
-            ? const Text('Mushaf', overflow: TextOverflow.ellipsis)
+            ? Text(
+                AppLocalizations.of(context).readerMushaf,
+                overflow: TextOverflow.ellipsis,
+              )
             : MushafPageTitle(mushafId: mushafId!, pageNumber: pageNumber!),
         actions: [
           if (ref.watch(verseByVerseModeEnabledProvider))
@@ -640,7 +647,7 @@ class _MushafModeScaffold extends ConsumerWidget {
           // "Reader options" button's own availability.
           IconButton(
             icon: const Icon(Icons.translate_outlined),
-            tooltip: 'Translation & tafsir',
+            tooltip: AppLocalizations.of(context).readerTranslationTafsir,
             onPressed: mushafId == null || pageNumber == null
                 ? null
                 : () => showMushafTranslationSheet(
@@ -658,52 +665,65 @@ class _MushafModeScaffold extends ConsumerWidget {
           // verse-by-verse-only `reader_options_sheet.dart` sheet (which
           // this scaffold never renders while active, so anything gated
           // to Mushaf mode there would be unreachable dead code).
+          // Hifz mode's feedback settings, beside the reader's own.
+          const HifzSettingsButton(),
           IconButton(
             icon: const Icon(Icons.tune),
-            tooltip: 'Reader options',
+            tooltip: AppLocalizations.of(context).readerOptions,
             onPressed: () => showMushafReaderOptionsSheet(context),
           ),
         ],
       ),
-      body: unavailable && (mushafId == null || pageNumber == null)
-          ? _unavailable(colors.secondaryText)
-          : mushafId == null || pageNumber == null
-          ? Center(
-              child:
-                  mushafAsync?.when(
-                    data: (_) =>
-                        CircularProgressIndicator(color: colors.secondaryText),
-                    loading: () =>
-                        CircularProgressIndicator(color: colors.secondaryText),
-                    error: (_, _) => _unavailable(colors.secondaryText),
-                  ) ??
-                  CircularProgressIndicator(color: colors.secondaryText),
-            )
-          : mushafAsync!.when(
-              data: (mushaf) {
-                if (mushaf == null) return _unavailable(colors.secondaryText);
-                return MushafPager(
-                  key: ValueKey('mushaf-pager-${mushaf.id}'),
-                  mushafId: mushaf.id,
-                  pageCount: mushaf.pageCount,
-                  initialPageNumber: pageNumber!,
-                  onPageChanged: onPageChanged,
-                );
-              },
-              loading: () => Center(
-                child: CircularProgressIndicator(color: colors.secondaryText),
+      // Reports the page on screen to the app shell's recitation bar.
+      body: RecitationMushafAnchor(
+        location: mushafId == null || pageNumber == null
+            ? null
+            : QuranLocation.page(mushafId!, pageNumber!),
+        child: unavailable && (mushafId == null || pageNumber == null)
+            ? _unavailable(context, colors.secondaryText)
+            : mushafId == null || pageNumber == null
+            ? Center(
+                child:
+                    mushafAsync?.when(
+                      data: (_) => CircularProgressIndicator(
+                        color: colors.secondaryText,
+                      ),
+                      loading: () => CircularProgressIndicator(
+                        color: colors.secondaryText,
+                      ),
+                      error: (_, _) =>
+                          _unavailable(context, colors.secondaryText),
+                    ) ??
+                    CircularProgressIndicator(color: colors.secondaryText),
+              )
+            : mushafAsync!.when(
+                data: (mushaf) {
+                  if (mushaf == null) {
+                    return _unavailable(context, colors.secondaryText);
+                  }
+                  return MushafPager(
+                    key: ValueKey('mushaf-pager-${mushaf.id}'),
+                    mushafId: mushaf.id,
+                    pageCount: mushaf.pageCount,
+                    initialPageNumber: pageNumber!,
+                    onPageChanged: onPageChanged,
+                  );
+                },
+                loading: () => Center(
+                  child: CircularProgressIndicator(color: colors.secondaryText),
+                ),
+                error: (_, _) => _unavailable(context, colors.secondaryText),
               ),
-              error: (_, _) => _unavailable(colors.secondaryText),
-            ),
+      ),
     );
   }
 
-  Widget _unavailable(Color color) {
+  Widget _unavailable(BuildContext context, Color color) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Text(
-          'This will appear automatically once a Quran dataset is added to the app.',
+          AppLocalizations.of(context).homeQuranDatasetUnavailableBody,
           textAlign: TextAlign.center,
           style: TextStyle(color: color),
         ),
@@ -712,20 +732,25 @@ class _MushafModeScaffold extends ConsumerWidget {
   }
 }
 
-String _titleFor(QuranLocation location) {
+String _titleFor(QuranLocation location, AppLocalizations l10n) {
   return switch (location) {
-    QuranLocationSurah(:final surahNo) => 'Surah $surahNo',
-    QuranLocationAyah(:final chapterNo, :final verseNo) =>
-      'Ayah $chapterNo:$verseNo',
+    QuranLocationSurah(:final surahNo) => l10n.homeContinueReadingSurah(
+      surahNo,
+    ),
+    QuranLocationAyah(:final chapterNo, :final verseNo) => l10n.readerAyahRef(
+      '$chapterNo:$verseNo',
+    ),
     QuranLocationAyahRange(
       :final chapterNo,
       :final fromVerseNo,
       :final toVerseNo,
     ) =>
-      'Ayah $chapterNo:$fromVerseNo-$toVerseNo',
-    QuranLocationJuz(:final juzNo) => 'Juz $juzNo',
-    QuranLocationHizb(:final hizbNo) => 'Hizb $hizbNo',
-    QuranLocationPage(:final pageNumber) => 'Page $pageNumber',
+      l10n.readerAyahRef('$chapterNo:$fromVerseNo-$toVerseNo'),
+    QuranLocationJuz(:final juzNo) => l10n.homeContinueReadingJuz(juzNo),
+    QuranLocationHizb(:final hizbNo) => l10n.homeContinueReadingHizb(hizbNo),
+    QuranLocationPage(:final pageNumber) => l10n.homeContinueReadingPage(
+      pageNumber,
+    ),
   };
 }
 
@@ -747,9 +772,9 @@ class _ReaderBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (state.items.isEmpty) {
-      return const TahfeezEmptyView(
+      return TahfeezEmptyView(
         icon: Icons.menu_book_outlined,
-        message: 'This will appear automatically once a Quran dataset is added to the app.',
+        message: AppLocalizations.of(context).homeQuranDatasetUnavailableBody,
       );
     }
 
@@ -818,12 +843,17 @@ class _SelectionBar extends StatelessWidget {
           ),
           child: Row(
             children: [
-              Expanded(child: Text('$count selected')),
-              TextButton(onPressed: onClear, child: const Text('Clear')),
+              Expanded(
+                child: Text(AppLocalizations.of(context).readerSelected(count)),
+              ),
+              TextButton(
+                onPressed: onClear,
+                child: Text(AppLocalizations.of(context).quranClear),
+              ),
               FilledButton.icon(
                 onPressed: onShare,
                 icon: const Icon(Icons.ios_share_outlined),
-                label: const Text('Share'),
+                label: Text(AppLocalizations.of(context).readerShare),
               ),
             ],
           ),

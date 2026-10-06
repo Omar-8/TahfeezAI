@@ -8,9 +8,10 @@ import '../../core/theme/app_breakpoints.dart';
 import '../../core/theme/components/components.dart';
 import '../../core/theme/tahfeez_content_widths.dart';
 import '../../core/ui/full_bleed_content.dart';
+import '../../features/recitation/presentation/recitation_controls.dart';
 import 'mini_player_region.dart';
 
-/// Tahfeez's main app shell: the persistent chrome around Home/Quran/Search.
+/// Tahfeez's main app shell: the persistent chrome around Home/Quran/Settings.
 ///
 /// **Navigation architecture decision (Milestone 4)**: a shell-based
 /// `go_router` model (`StatefulShellRoute.indexedStack`, wired in
@@ -58,6 +59,9 @@ class AppShell extends ConsumerWidget {
         (navigationShell.currentIndex == 1 &&
             currentLocation != '/quran' &&
         ref.watch(fullBleedContentProvider));
+    // While a Mushaf is open (or a recitation session runs), the live
+    // recitation bar takes the place of the Home/Quran/Settings navigation.
+    final recitationBar = ref.watch(recitationBarVisibleProvider);
 
     final items = [
       TahfeezPrimaryNavItem(
@@ -72,9 +76,9 @@ class AppShell extends ConsumerWidget {
         isPrimary: true,
       ),
       TahfeezPrimaryNavItem(
-        icon: Icons.search_outlined,
-        selectedIcon: Icons.search,
-        label: l10n.navSearch,
+        icon: Icons.settings_outlined,
+        selectedIcon: Icons.settings,
+        label: l10n.navSettings,
       ),
     ];
 
@@ -113,10 +117,12 @@ class AppShell extends ConsumerWidget {
         value: _systemNavigationBarStyle(scheme),
         child: Scaffold(
           body: content,
-          bottomNavigationBar: TahfeezPrimaryNavigationBar(
-            items: items,
-            selectedIndex: navigationShell.currentIndex,
-            onDestinationSelected: onDestinationSelected,
+          bottomNavigationBar: RecitationBottomBar(
+            navigation: TahfeezPrimaryNavigationBar(
+              items: items,
+              selectedIndex: navigationShell.currentIndex,
+              onDestinationSelected: onDestinationSelected,
+            ),
           ),
         ),
       );
@@ -127,15 +133,26 @@ class AppShell extends ConsumerWidget {
       child: Scaffold(
         body: Row(
           children: [
-            TahfeezPrimaryNavigationRail(
-              items: items,
-              selectedIndex: navigationShell.currentIndex,
-              onDestinationSelected: onDestinationSelected,
-            ),
-            const VerticalDivider(width: 1),
+            // Swapped in place (not removed) so `content` keeps its
+            // position, and with it the branch Navigator's state.
+            if (recitationBar)
+              const SizedBox.shrink()
+            else
+              TahfeezPrimaryNavigationRail(
+                items: items,
+                selectedIndex: navigationShell.currentIndex,
+                onDestinationSelected: onDestinationSelected,
+              ),
+            if (recitationBar)
+              const SizedBox.shrink()
+            else
+              const VerticalDivider(width: 1),
             Expanded(child: content),
           ],
         ),
+        bottomNavigationBar: recitationBar
+            ? const RecitationBottomBar(navigation: SizedBox.shrink())
+            : null,
       ),
     );
   }

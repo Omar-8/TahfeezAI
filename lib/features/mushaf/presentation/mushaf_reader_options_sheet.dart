@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../../../core/localization/generated/app_localizations.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/components/components.dart';
@@ -18,7 +21,7 @@ import 'mushaf_appearance_sheet.dart';
 void showMushafReaderOptionsSheet(BuildContext context) {
   showTahfeezModalBottomSheet(
     context: context,
-    title: 'Reader options',
+    title: AppLocalizations.of(context).readerOptions,
     builder: (context) => const _MushafReaderOptionsBody(),
   );
 }
@@ -34,7 +37,7 @@ class _MushafReaderOptionsBody extends ConsumerWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         ListTile(
-          title: const Text('Appearance'),
+          title: Text(AppLocalizations.of(context).settingsAppearance),
           subtitle: Text(appearance.label),
           trailing: const Icon(Icons.chevron_right),
           onTap: () => showMushafAppearanceSheet(context),

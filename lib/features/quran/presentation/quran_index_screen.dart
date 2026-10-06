@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../core/localization/generated/app_localizations.dart';
+import '../../../core/routing/app_routes.dart';
 
 import '../../../core/routing/quran_location_routing.dart';
 import '../../../core/theme/components/components.dart';
@@ -52,7 +56,7 @@ class _QuranIndexScreenState extends ConsumerState<QuranIndexScreen>
 
     return Scaffold(
       appBar: TahfeezAppBar(
-        title: const Text('Quran'),
+        title: Text(AppLocalizations.of(context).quranTitle),
         centerTitle: false,
         actions: [
           // Beside the page-jump ("Go to Ayah") button, not a full-width
@@ -62,13 +66,18 @@ class _QuranIndexScreenState extends ConsumerState<QuranIndexScreen>
           if (recent != null)
             IconButton(
               icon: const Icon(Icons.history),
-              tooltip: 'Jump back in',
+              tooltip: AppLocalizations.of(context).quranJumpBack,
               onPressed: () => goToQuranLocation(context, recent),
             ),
           IconButton(
             icon: const Icon(Icons.pin_outlined),
-            tooltip: 'Go to Ayah',
+            tooltip: AppLocalizations.of(context).quranGoToAyah,
             onPressed: _goToAyah,
+          ),
+          IconButton(
+            icon: const Icon(Icons.search),
+            tooltip: AppLocalizations.of(context).navSearch,
+            onPressed: () => context.go(AppRoutes.search),
           ),
         ],
       ),
@@ -76,11 +85,11 @@ class _QuranIndexScreenState extends ConsumerState<QuranIndexScreen>
         children: [
           TabBar(
             controller: _tabController,
-            tabs: const [
-              Tab(text: 'Surah'),
-              Tab(text: 'Juz'),
-              Tab(text: 'Hizb'),
-              Tab(text: 'Page'),
+            tabs: [
+              Tab(text: AppLocalizations.of(context).quranTabSurah),
+              Tab(text: AppLocalizations.of(context).quranTabJuz),
+              Tab(text: AppLocalizations.of(context).quranTabHizb),
+              Tab(text: AppLocalizations.of(context).quranTabPage),
             ],
           ),
           Expanded(

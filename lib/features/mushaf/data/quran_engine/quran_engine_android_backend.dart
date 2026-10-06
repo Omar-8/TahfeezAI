@@ -289,6 +289,81 @@ class QuranEngineAndroidPage implements QuranEngineMushafPage {
   void unmask() => page.unmask();
 
   @override
+  void setMemorizationMask({required bool hidden, int revealedWords = 0}) {
+    // `QvpPage` is a ChangeNotifier: `QvpPageView` repaints on each call.
+    page.unmask();
+    if (!hidden) return;
+    page.mask(T.page(), 'hide');
+    if (revealedWords > 0) page.unmaskNext(revealedWords);
+  }
+
+  @override
+  int get wordCount => page.words.length;
+
+  @override
+  late final List<int> ayahWordBoundaries = [
+    for (var i = 1; i <= page.words.length; i++)
+      if (i == page.words.length ||
+          page.words[i].surah != page.words[i - 1].surah ||
+          page.words[i].ayah != page.words[i - 1].ayah)
+        i,
+  ];
+
+  @override
+  ({VerseRef first, VerseRef last})? get verseSpan => page.words.isEmpty
+      ? null
+      : (
+          first: (
+            chapterNo: page.words.first.surah,
+            verseNo: page.words.first.ayah,
+          ),
+          last: (
+            chapterNo: page.words.last.surah,
+            verseNo: page.words.last.ayah,
+          ),
+        );
+
+  @override
+  late final List<WordRef> wordRefs = [
+    for (final w in page.words)
+      (
+        ayahId: QuranEngineRefAdapter.ayahIdOf(
+          surahNo: w.surah,
+          ayahNo: w.ayah,
+        ),
+        wordIndex: w.word - 1,
+      ),
+  ];
+
+  @override
+  void setHiddenWords(Set<int> hidden) {
+    // `QvpPage` is a ChangeNotifier: `QvpPageView` repaints on each call.
+    page.unmask();
+    if (hidden.isEmpty) return;
+    page.mask(T.page(), 'hide');
+    for (var i = 0; i < page.words.length; i++) {
+      if (!hidden.contains(i)) page.unmaskWord(i);
+    }
+  }
+
+  @override
+  void setWordHighlights(List<({int word, Color color, bool ink})> highlights) {
+    page.clearHighlights();
+    for (final h in highlights) {
+      page.highlight(
+        T.word(h.word),
+        h.ink
+            ? QvpHighlightStyle(mode: 'ink', ink: h.color)
+            : QvpHighlightStyle(band: h.color),
+      );
+    }
+  }
+
+  @override
+  int highlightWordAt(int wordIndex, {required Color color}) =>
+      page.highlight(T.word(wordIndex), QvpHighlightStyle(band: color));
+
+  @override
   void dispose() {
     _viewController.dispose();
     page.dispose();

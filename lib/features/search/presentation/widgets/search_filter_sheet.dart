@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../../../../core/localization/generated/app_localizations.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/downloads/resource_download_status.dart';
@@ -14,7 +17,7 @@ import '../../application/search_filters_controller.dart';
 void showSearchFilterSheet(BuildContext context) {
   showTahfeezModalBottomSheet(
     context: context,
-    title: 'Search filters',
+    title: AppLocalizations.of(context).searchFilters,
     builder: (context) => const _SearchFilterSheetBody(),
   );
 }
@@ -38,20 +41,23 @@ class _SearchFilterSheetBody extends ConsumerWidget {
         children: [
           SwitchListTile(
             contentPadding: EdgeInsets.zero,
-            title: const Text('Arabic Quran text'),
+            title: Text(AppLocalizations.of(context).searchArabicText),
             value: filters.includeArabicText,
             onChanged: (value) =>
                 controller.update(filters.copyWith(includeArabicText: value)),
           ),
           SwitchListTile(
             contentPadding: EdgeInsets.zero,
-            title: const Text('Surah names'),
+            title: Text(AppLocalizations.of(context).searchSurahNames),
             value: filters.includeSurahs,
             onChanged: (value) =>
                 controller.update(filters.copyWith(includeSurahs: value)),
           ),
           const SizedBox(height: TahfeezSpacing.sm),
-          Text('Translations', style: Theme.of(context).textTheme.labelLarge),
+          Text(
+            AppLocalizations.of(context).searchTranslations,
+            style: Theme.of(context).textTheme.labelLarge,
+          ),
           const SizedBox(height: TahfeezSpacing.xs),
           installedTranslations.when(
             data: (statuses) {
@@ -62,7 +68,7 @@ class _SearchFilterSheetBody extends ConsumerWidget {
                     status.book.slug,
               ];
               if (installedSlugs.isEmpty) {
-                return const Text('No translations installed yet.');
+                return Text(AppLocalizations.of(context).searchNoTranslations);
               }
               return Wrap(
                 spacing: TahfeezSpacing.xs,
@@ -93,7 +99,8 @@ class _SearchFilterSheetBody extends ConsumerWidget {
               );
             },
             loading: () => const TahfeezLoadingView(),
-            error: (_, _) => const Text('Could not load translations.'),
+            error: (_, _) =>
+                Text(AppLocalizations.of(context).searchTranslationsError),
           ),
         ],
       ),

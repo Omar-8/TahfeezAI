@@ -199,6 +199,8 @@ class QuranEngineWebPage {
     double devicePixelRatio,
     int inkColorInt,
   ) {
+    _lastRender = () =>
+        renderFit(widthPx, heightPx, devicePixelRatio, inkColorInt);
     final canvas = _canvas;
     if (canvas == null) {
       // The platform view hasn't mounted yet — save these params and
@@ -332,7 +334,60 @@ class QuranEngineWebPage {
     ) as JSNumber).toDartInt;
   }
 
-  void clearHighlights() => _page.callMethod('clearHighlights'.toJS);
+  void clearHighlights() {
+    _page.callMethod('clearHighlights'.toJS);
+    _redraw();
+  }
+
+  /// (surah, ayah, 1-based word) of every page word, in engine order.
+  late final List<(int, int, int)> wordKeys = [
+    for (final w in (_page.getProperty<JSArray<JSObject>>('words'.toJS)).toDart)
+      (
+        (w.getProperty<JSNumber>('surah'.toJS)).toDartInt,
+        (w.getProperty<JSNumber>('ayah'.toJS)).toDartInt,
+        (w.getProperty<JSNumber>('word'.toJS)).toDartInt,
+      ),
+  ];
+
+  /// See `QuranEngineMushafPage.setHiddenWords`.
+  void setHiddenWords(Set<int> hidden) {
+    _page.callMethod('unmask'.toJS);
+    if (hidden.isNotEmpty) {
+      final t = _qvp.getProperty('T'.toJS) as JSObject;
+      _page.callMethod('mask'.toJS, t.callMethod('page'.toJS), 'hide'.toJS);
+      for (var i = 0; i < wordKeys.length; i++) {
+        if (!hidden.contains(i)) _page.callMethod('revealWord'.toJS, i.toJS);
+      }
+    }
+    _redraw();
+  }
+
+  /// Replaces every highlight at once, with a single repaint: each word
+  /// [rgba]-coloured (0xRRGGBBAA) as a band, or on its letters with `ink`.
+  void setWordHighlights(List<({int word, int rgba, bool ink})> highlights) {
+    _page.callMethod('clearHighlights'.toJS);
+    for (final h in highlights) {
+      final style = JSObject()
+        ..setProperty('mode'.toJS, (h.ink ? 'ink' : 'band').toJS)
+        ..setProperty((h.ink ? 'ink' : 'band').toJS, h.rgba.toJS);
+      _page.callMethod('highlight'.toJS, _wordTarget(h.word), style);
+    }
+    _redraw();
+  }
+
+  /// A band highlight of [rgba] (0xRRGGBBAA) on the page word at [wordIndex].
+  int highlightWordRgba(int wordIndex, int rgba) {
+    final style = JSObject()
+      ..setProperty('mode'.toJS, 'band'.toJS)
+      ..setProperty('band'.toJS, rgba.toJS);
+    final handle = (_page.callMethod(
+      'highlight'.toJS,
+      _wordTarget(wordIndex),
+      style,
+    ) as JSNumber).toDartInt;
+    _redraw();
+    return handle;
+  }
 
   void maskWord(int wordIndex, {String mode = 'hide'}) =>
       _mask(_wordTarget(wordIndex), mode);
@@ -344,6 +399,59 @@ class QuranEngineWebPage {
       _page.callMethod('mask'.toJS, target, mode.toJS);
 
   void unmask() => _page.callMethod('unmask'.toJS);
+
+  /// The most recent [renderFit] request, replayed by [_redraw] when page
+  /// state (masks) changes without a layout change.
+  void Function()? _lastRender;
+
+  void _redraw() => _lastRender?.call();
+
+  int get wordCount => (_page.getProperty<JSNumber>('nWords'.toJS)).toDartInt;
+
+  /// See `QuranEngineMushafPage.ayahWordBoundaries`; read from `qvp.js`'s
+  /// per-word `surah`/`ayah` fields.
+  late final List<int> ayahWordBoundaries = () {
+    final words = (_page.getProperty<JSArray<JSObject>>('words'.toJS)).toDart;
+    String ayahOf(JSObject w) =>
+        '${(w.getProperty<JSNumber>('surah'.toJS)).toDartInt}:'
+        '${(w.getProperty<JSNumber>('ayah'.toJS)).toDartInt}';
+    final keys = [for (final w in words) ayahOf(w)];
+    return [
+      for (var i = 1; i <= keys.length; i++)
+        if (i == keys.length || keys[i] != keys[i - 1]) i,
+    ];
+  }();
+
+  /// First and last (surah, ayah) with words on this page, or `null`.
+  late final ({int firstSurah, int firstAyah, int lastSurah, int lastAyah})?
+  verseSpan = () {
+    final words = (_page.getProperty<JSArray<JSObject>>('words'.toJS)).toDart;
+    if (words.isEmpty) return null;
+    int field(JSObject w, String name) =>
+        (w.getProperty<JSNumber>(name.toJS)).toDartInt;
+    return (
+      firstSurah: field(words.first, 'surah'),
+      firstAyah: field(words.first, 'ayah'),
+      lastSurah: field(words.last, 'surah'),
+      lastAyah: field(words.last, 'ayah'),
+    );
+  }();
+
+  /// See `QuranEngineMushafPage.setMemorizationMask`. In this `qvp.js`
+  /// build the mask-based calls are `mask(T.page(), 'hide')` +
+  /// `revealNext(n)` (Android's `qvp_flutter` names the latter
+  /// `unmaskNext`) — not the greyed-page `revealStart` session.
+  void setMemorizationMask({required bool hidden, int revealedWords = 0}) {
+    _page.callMethod('unmask'.toJS);
+    if (hidden) {
+      final t = _qvp.getProperty('T'.toJS) as JSObject;
+      _page.callMethod('mask'.toJS, t.callMethod('page'.toJS), 'hide'.toJS);
+      if (revealedWords > 0) {
+        _page.callMethod('revealNext'.toJS, revealedWords.toJS);
+      }
+    }
+    _redraw();
+  }
 
   bool _revealStarted = false;
 

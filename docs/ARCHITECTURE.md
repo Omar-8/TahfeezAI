@@ -1876,3 +1876,637 @@ this layering rather than bypassing it. When it is built, canonical word
 identity/tap-targets/audio-highlighting must keep reading from `QuranRepository`'s
 `AyahWord`, never from the QPC Hafs script's own `word` column (that script counts
 ayah-end markers as words, so its count does not match `AyahWord`'s).
+
+## 26. Live Recitation Audio Session (Milestone R1)
+
+`lib/features/recitation/` captures a continuous recitation session from the Mushaf — the audio
+half of the future AI boundary (§10). There is **no speech recognition or mistake detection**
+yet; this milestone only produces the audio a recognizer will consume.
+
+- **Domain**: `RecitationSession` (id, start/end time, active duration, recording reference,
+  starting `QuranLocation` — serialized with `quranLocationPath`), `RecitationAudioFormat`
+  (PCM16LE, 16 kHz mono by default), `RecitationAudioSource` (permission, open/close the
+  microphone as a PCM stream), `RecitationRecordingStore`/`RecitationRecordingSink` (one recording
+  per session), `RecitationSessionRepository` (session metadata).
+- **Data**: `RecordPackageAudioSource` wraps `package:record`'s stream mode — Android
+  `AudioRecord`, Web `getUserMedia` + AudioWorklet. Recordings are written as WAV: on Android
+  streamed to `<app support dir>/recitations/<id>.wav` (header patched on close, flat memory); on
+  the Web buffered in memory and handed back as a `Blob` object URL (conditional export in
+  `platform_recitation_recording_store.dart`). Session metadata is a JSON list in
+  `BrowserStorage` (capped at 200).
+- **Application**: `RecitationSessionController` (`recitationSessionControllerProvider`,
+  auto-dispose, kept alive by the shell's recitation bar) runs idle → starting → listening ⇄ paused
+  → stopping. The microphone opens once
+  and **stays open through pauses**; pausing just stops recording and forwarding chunks, so resume
+  is instant and never re-prompts. Duration and the on-screen timer are derived from bytes
+  actually recorded, so they always match the recording. Leaving the Mushaf does not end a
+  running session — the bar stays until the user stops it; if the provider is ever disposed
+  mid-session, the session is finished and saved. `liveAudio` (a broadcast
+  `Stream<Uint8List>` in `liveFormat`) is the hook a streaming `RecitationRecognizer` subscribes to
+  next milestone.
+- **Presentation**: the Mushaf screens' app bars are untouched. Both Mushaf bodies
+  (`reader_screen.dart`'s `_MushafModeScaffold`, `MushafReaderScreen`) are wrapped in a
+  pass-through `RecitationMushafAnchor` that reports the page on screen
+  (`mushafRecitationTargetProvider`). While a Mushaf is open — or a session is still running —
+  `recitationBarVisibleProvider` is true and `AppShell` replaces its Home/Quran/Search navigation
+  with `RecitationBottomBar`: a mic "start" button before a session, then "Listening…"/"Paused",
+  the timer, pause/resume and stop. On wide layouts the side rail is hidden in place and the same
+  bar sits at the bottom. The controller stays alive with the shell and only creates the recorder
+  on the first start. Hidden unless `recitationSupportedProvider` (Android or Web).
+- **Limitations**: iOS deliberately unsupported for now. Web recordings live only for the page's
+  lifetime (object URL; durable web storage waits for the IndexedDB/OPFS strategy in §7) and are
+  held in memory (~115 MB per hour); the Web mic needs a secure context (HTTPS or localhost).
+  Recording runs in the foreground only — no Android foreground service, so the OS may cut the mic
+  if the app is backgrounded for long.
+
+## 27. Streaming Quran Recitation Recognition (Milestone R2)
+
+Plain streaming Arabic speech-to-text over the R1 live session. **No Quran alignment, word
+highlighting or mistake detection** — transcripts are diagnostics only, and never treated as Quran
+text.
+
+- **Boundary** (`lib/ai/speech/live_quran_recognizer.dart`): `LiveQuranRecognizer` takes a
+  `LiveAudioInput` (PCM16LE stream + format) and emits `LiveRecognitionEvent`s —
+  `LivePartialTranscript` (replaces the previous partial), `LiveFinalTranscript` (one finished
+  segment), `LiveRecognizerStatusChanged`, `LiveRecognitionError`. Engines are chosen in exactly one
+  place, `liveQuranRecognizerFactoryProvider`; nothing else knows which engine runs.
+- **Android** — `AndroidSpeechLiveRecognizer` + `LiveSpeechRecognizerChannel.kt` (method channel
+  `tahfeez/live_speech`, event channel `tahfeez/live_speech/events`) drive the platform
+  `SpeechRecognizer`. On API 33+ the session's PCM is written into a pipe passed as
+  `EXTRA_AUDIO_SOURCE` with `EXTRA_SEGMENTED_SESSION`, so one microphone serves both the recording
+  and recognition; segments are restarted automatically. Below API 33 the recognizer opens the mic
+  itself (untested; may contend with the recording). `preferOnDevice` selects
+  `createOnDeviceSpeechRecognizer` where available (wired, not yet verified).
+- **Web** — `WebSpeechLiveRecognizer` (conditional import) replays the session's PCM into a
+  `MediaStreamTrack` (Web Audio, `_PcmTrack`) and calls `SpeechRecognition.start(track)`; browsers
+  that ignore the track argument fall back to their own mic capture. `WebSpeechResultTracker`
+  (browser-free, unit-tested) turns the cumulative result list into partial/final events. Browser
+  session ends are restarted until stop.
+- **Application** — `LiveRecognitionController` starts the engine whenever the R1 session is
+  *listening* and stops it on pause/stop (a pause finalizes the segment in progress). It only
+  subscribes to the session's `liveAudio` broadcast, so the R1 recording is unchanged. It
+  re-publishes engine events on `events` for the next milestone, and keeps a diagnostics summary
+  (latest partial/final, counts, status, latency). `RecognitionLatencyTracker` runs a small energy
+  VAD over the same PCM: *first-partial latency* = voice onset → first partial; *final latency* =
+  voice end → final.
+- **Gating** — `liveRecognitionEnabledProvider` and `liveRecognitionDevPanelEnabledProvider` are
+  `!kReleaseMode`: release builds neither recognize nor upload audio until a user-facing feature
+  consumes transcripts. The dev panel (`RecognitionDevPanel`) sits above the recording controls in
+  the shell's recitation bar during a session.
+- **Verification** — `integration_test/live_recognition_android_test.dart` feeds a real
+  recitation through the Android engine at real-time pace on a device; the Web path was verified in
+  Chrome end-to-end through the running app. See `docs/THIRD_PARTY_RESOURCES.md` for the two
+  recognition services' provenance/privacy entries.
+
+## 28. Mushaf hide mode (memorization)
+
+An eye toggle in the shell's recitation bar hides every word on the open Mushaf page(s) while
+ayah-end markers/numbers, Surah headers and the ۞ sign stay visible; a "reveal next word" button
+then uncovers words one at a time in reading order, starting from the first word of the page's
+first ayah (in a two-page spread it continues onto the facing page).
+
+- **Engine** — `QuranEngineMushafPage.setMemorizationMask(hidden:, revealedWords:)` uses Quran
+  Engine's own mask API: `mask(T.page(), 'hide')`, then `unmaskNext(n)` (Android `qvp_flutter`) /
+  `revealNext(n)` (Web `qvp.js`). Hiding only restyles glyph paths — no Quran text is changed or
+  re-rendered by Tahfeez. Verified against the real engine binary that on page 42 all 147 words'
+  paths are hidden and every ayah-number/ornament path is not, and that the first reveal is
+  `2:253:1`. The Web bridge replays its last render after a mask change; Android's `QvpPage`
+  repaints itself (it is a `ChangeNotifier`).
+- **State** — `mushafHideModeProvider` (`lib/features/mushaf/application/mushaf_hide_mode.dart`):
+  enabled flag, per-page reveal counts, and per-page word counts reported by each rendered page.
+  In-memory only; toggling restarts every page fully hidden. Each
+  `QuranEngineMushafPageContent` applies only its own page's state.
+- **Reveal by ayah** — each page also reports `ayahWordBoundaries` (where each ayah ends, in page
+  words, from the engine's per-word surah/ayah); "reveal next ayah" jumps the page's reveal count
+  to the next boundary (finishing a partly revealed ayah first).
+- **Taps** — `QuranEngineMushafPageContent` drops word taps on hidden words
+  (`isWordHidden`: engine word index ≥ the page's reveal count), so the word sheet can't expose
+  them. Ayah-marker taps are unaffected.
+- **Page turns** — once everything on screen is uncovered, both reveal buttons turn to the next
+  page (or spread) via `mushafPageTurnRequestsProvider`, which the on-screen `MushafPager` listens
+  to; the new page starts fully hidden. They disable only at the end of the Mushaf's last page.
+- **Going back** — "hide previous word/ayah" mirror the reveal buttons (`hideLastWord`,
+  `hideLastAyah`: back to the start of the current ayah, or the whole previous ayah). Once
+  everything on screen is hidden they turn to the previous page/spread, which arrives fully
+  uncovered (`revealPagesFully`, clamped when the page reports its word count) — disabled at the
+  start of page 1.
+- **Layout** — buttons are mirrored around the eye: `[reveal ayah][reveal word][eye][hide word]
+  [hide ayah]`. While recording with hide mode on and less than 480 px, the hide buttons take a
+  row of their own above the recording controls. On the web the bar's controls are centered as
+  one group; on Android they stay spread to the edges.
+- **UI** — `MushafHideControls` (reveal ayah, reveal word, eye) in `RecitationBottomBar`, shown
+  whenever a Mushaf page is open, both before and during a recitation session.
+
+## 29. Real-Time Quran Stream Matcher (Milestone R3)
+
+Microphone → `LiveQuranRecognizer` (§27) → `QuranStreamMatcher` → canonical `WordRef`.
+The matcher uses Tahfeez's existing `WordRef`/`VerseRef` identities only — no new Quran identity
+model — and never modifies or displays canonical text from its match keys.
+
+- **Corpus** (`lib/ai/matching/quran_word_corpus.dart`) — every canonical word (Tanzil Uthmani,
+  the only script shipped) in reading order, addressed by position so matching crosses ayah and
+  surah boundaries. Built once in the app by `quranWordCorpusProvider`
+  (`QuranRepository.getAllWordsForScript`; verse = stable ayah id `chapter*1000+verse`).
+- **Normalization** (`quran_match_normalizer.dart`) — recognizers write everyday spelling, the
+  corpus is Uthmani. Two keys per word: diacritics/Quranic marks removed, superscript alef made
+  a real alef, hamza/alef forms and ة/ى folded («ٱلسَّمَٰوَٰتِ» → `السماوات`); and an alef-free
+  skeleton («هَٰذَا» ≈ «هذا»). Similarity = best of key/skeleton edit similarity, strict for
+  1–2-letter words, tolerant of an added/dropped «ال» on longer words. The 30 muqaṭṭaʿāt openings
+  also carry their spoken letter names («يسٓ» ≈ «ياسين», «الٓمٓ» ≈ «الف لام ميم»).
+- **Streaming alignment** (`quran_stream_matcher.dart`) — each partial re-aligns its whole
+  segment (Viterbi) against a moving window around the current position: progression, skips
+  (≤6), repeats, short jumps back (≤8), restarts from an ayah start (≤60 words back), extra words
+  (fillers, recognition noise), and 2–4 recognized words merging into one canonical word
+  («يا ايها» → «يَٰٓأَيُّهَا», spelled letters, words split by the recognizer). Events are
+  emitted once per recognized word when it can no longer change; the last word of each final is
+  carried into the next segment (recognizers split words across segments: «الحكي» | «م …») and
+  flushed when recitation pauses/stops.
+- **Locating** — the visible page (engine-reported `mushafPageVersesProvider`) is only a hint:
+  nothing is emitted until ≥3 words place the reciter clearly (the best location beats the
+  runner-up by a margin), since many openings recur («الله لا اله الا هو», «الحمد لله الذي»).
+  The search widens page → nearby (±600 words) → whole Quran. Mid-session, a segment that stops
+  fitting triggers the same search.
+- **Events** — `CurrentWord`, `WordConfirmed` (`corrected` after a self-correction),
+  `WordSkipped`, `WordRepeated`, `PossibleMistake` (possible only: recognition errors look the
+  same), `MatchRelocated`. `QuranMatchController` republishes them on `events`; nothing is scored,
+  stored or highlighted yet. Development log (`debugPrint`, non-release): recognized text →
+  matched words → current WordRef → confidence; the dev panel shows the current position.
+- **Performance** — typed-array grids, a cross-update similarity cache and reuse of the previous
+  partial's rows: ~0.4 ms median per update, ~5–8 ms for a 50-word segment (JIT, desktop).
+- **Accuracy** — `test/ai/matching/quran_stream_matcher_accuracy_test.dart` replays real Chrome
+  recognizer output (`test/fixtures/asr/`) for 8 passages / 425 words: 98.4% of words confirmed,
+  0 confirmed at a wrong position, whether the visible page is the recited one or elsewhere.
+  `quran_stream_matcher_cases_test.dart` covers skips, repeats, fillers, backtracking,
+  self-correction, rewritten partials, relocation and restarting an ayah.
+
+## 30. Live Hifz Mode (Milestone R5)
+
+A memorization test on top of live recitation (R1–R3) and Quran Engine's own masking API. Word
+sequence only — no Tajweed or makhraj scoring.
+
+- **Judge** (`lib/ai/hifz/hifz_judge.dart`, pure Dart) — consumes the matcher's per-word
+  `WordHeard` events (R3's matcher now emits one per stable recognized word, including unplaced
+  "extra" words, and can `start(trustAnchor: true)` because the range start is known) and keeps
+  its own *expected word*. Verdicts: `correct`, `skipped`, `wrong`, `extra`, `repeated`,
+  `selfCorrected`, `uncertain`. Only the expected word, recited correctly, advances and is
+  revealed. **Strict** (default): a wrong or skipped word becomes a pending mistake that holds the
+  test until the reciter recites the expected word (→ `selfCorrected`). **Lenient**: the mistake
+  is marked, the word revealed, the test moves on. An unplaced word standing exactly where the
+  expected word was counts as `wrong`, not `skipped`. `uncertain` = the heard word equals the
+  expected one once similar-sounding letters are folded (ط/ت, ص/س, ض/د, ظ/ذ/ز, ق/ك, ح/ه, ع/ا …) —
+  a recognition or pronunciation matter, deliberately not judged; a structurally different word
+  (e.g. a wrong pronoun suffix) is `wrong`.
+- **Controller** (`hifz_controller.dart`) — every recitation session is a Hifz test (no
+  switch). Hiding is optional and follows hide mode's eye: with it on, words ahead are hidden and
+  the test starts at the first word not yet uncovered on the visible page (hide-mode progress
+  carries in, and back out when the session stops); with the page visible, the matcher locates
+  where the reciter starts and only the next word is marked. The settings button and hide mode's
+  reveal/hide buttons stay in the bar during a test and drive it: revealing without reciting
+  marks words `skipped`; hiding back expects them again (pages turn both ways). The matcher's
+  *provisional* report of the word still being heard reveals a clearly correct word at once,
+  without waiting for the next one (its later stable report is not judged twice). A chosen range
+  (settings sheet: whole ayahs of one surah) overrides the start; by default the test runs on
+  across surahs (to the end of the Quran). With the eye on, every word not revealed is hidden, on
+  every page. Recited words are coloured (correct green, skipped yellow, wrong or self-corrected
+  red; `colorWords` setting); words revealed by hand before the test are not. Turning pages by
+  hand re-targets the test to the new pages (hide on: their first hidden word; page visible:
+  wherever the reciter is found next). Leaving the Mushaf, or opening another surah/screen, ends
+  the session. It runs its own matcher + judge over the live recognition stream, flushes
+  on pause/stop, turns the page whenever the expected word leaves the visible page/spread, and
+  vibrates on a new mistake (Android, `HapticFeedback.vibrate`; `hifzHapticsProvider`).
+- **Page feedback** — the controller publishes a `MushafWordOverlay` (`mushaf_word_overlay.dart`,
+  Mushaf feature, recitation-agnostic): range, revealed words, marks. Each page maps it to engine
+  word indices (`QuranEngineMushafPage.wordRefs`) and applies `setHiddenWords` (mask page, reveal
+  the rest word by word) plus colored band highlights (`highlightWordAt`) — drawn even over hidden
+  words. Only the word to recite next is marked: blue, or red while a mistake on it awaits
+  correction (other mistakes are recorded and counted, not drawn). The overlay takes precedence over hide
+  mode while set.
+- **Settings** (`HifzSettings`, persisted in `BrowserStorage`): strict, highlight next word, show
+  mistakes, vibrate (Android only). The status strip above the controls shows the next word or a
+  pending mistake ("Wrong word — recite it again", "Skipped a word — go back") and counts.
+- **Limits** — gated with recognition (debug/profile builds). Strictness applies from the next
+  test. Recognition noise can still produce a `wrong` verdict on a correctly recited word (a real
+  recognizer error is indistinguishable from a recitation one); the strict hold then needs the word
+  repeated.
+- **Recordings** — sessions are no longer recorded or saved by default
+  (`recitationKeepRecordingsProvider`, false): the microphone is only listened to live. The R1
+  recording/storage code remains, switched off.
+
+## 31. Quran Acoustic Verification
+
+Verifies the reciter's **audio** against the expected Hafs pronunciation. The Google/Android
+recognizer is kept only for coarse position ("where are we?"); this answers "was it pronounced
+correctly?". Tashkeel is never inferred from recognizer text.
+
+**Local-first (since §32).** The acoustic model runs **on the device** (Android, ONNX Runtime),
+and the reciter's position comes from its frames rather than from Google. The server below is kept
+for **development and reference only**. An earlier phase ran the model only on the server ("online
+by decision"); that decision is reversed. The reference, alignment, verification and UI were always
+in the app behind `QuranAcousticModel`, so only the model's location changed.
+
+- **Server** (`tool/acoustic_verification/server.py`): `POST /v1/frames` takes PCM16LE 16 kHz
+  mono and returns float32 frames × 43 log-probabilities (`X-Frames`, `X-Classes`,
+  `X-Model-Ms`). It uses 20 s chunks with 2 s overlap and CORS headers. Run it with
+  `python server.py --port 8790 [--model teacher|onnx:<path>]`.
+- **App**:
+  - `RemoteAcousticModel`: `NetworkClient.postBytes`.
+  - `acousticServerUrlProvider`: `--dart-define=TAHFEEZ_ACOUSTIC_URL`, default
+    `http://127.0.0.1:8790`; empty turns it off.
+  - `AcousticVerificationController`:
+    - subscribes to the session's `liveAudio` (the same capture as recognition);
+    - sends audio **per ayah**. When the recognizer's position (`recitationPositionProvider`,
+      published by the Hifz test) moves into the next ayah, it waits 1 s for the last word's
+      tail, then sends that ayah's audio: from 3 s before its first recognized word (8 s when
+      the reciter was just found), taken from a 90 s ring buffer of the session's PCM, at most
+      45 s. So nothing is sent for audio the recognizer found no Quran words in.
+    - sends a long ayah in 20 s pieces, but only while Quran words keep being recognized
+      (within 4 s). Pausing or stopping sends the part said so far.
+    - candidates are the ayah's words plus 3 before and 6 after. Only the piece's own words are
+      stored. A first/last unit is dropped only when it reaches within 0.3 s of an open edge of
+      the audio.
+    - locates the utterance among them (`QuranAcousticVerifier.locate`: forced alignment with a
+      free start and end at unit boundaries, rejected when the path costs > 0.6 nats/frame more
+      than unconstrained decoding);
+    - verifies it and stores a result per WordRef. Units at a mid-speech cut are left for the
+      next utterance.
+- **Mushaf**: recited words the judge accepted are marked `MushafWordMark.tashkeel` (orange ink)
+  when the audio found a mistake, and `uncertain` (yellow, brighter than skipped) when it could not confirm; Google's
+  own verdicts (wrong word, skipped) still win. The status strip names the mistake ("Pronunciation
+  68:38:4: fatha expected, kasra heard"); the dev panel shows utterances, mistakes and latency.
+- **Measured in Chrome** (Alafasy 68:37 and 68:38 with his real «لِمَا» spliced in for «لَمَا»,
+  through the fake microphone):
+  - Google accepted every word.
+  - The verifier marked 68:38:4 WRONG_VOWEL (kasra, llr 7.5) about 1.7 s after the utterance
+    ended; 1.5–1.7 s of that was the model, running on this laptop's CPU.
+  - 68:37 was verified clean.
+  - With the two ayahs run together (no pause), both ayahs were verified with two server calls
+    in all, and the mistake was flagged ~2.5 s after the recognizer finished the ayah.
+
+```
+microphone PCM (one capture) ─┬─ coarse ASR → QuranStreamMatcher → WordRef
+                              └─ QuranAcousticModel → CTC frames ─┐
+expected WordRefs → QuranPhoneticReference → expected tokens ─────┴─ forced alignment
+                                                                     → local rescoring
+                                                                     → PhonemeVerdict / RecitationError
+```
+
+- **Phonetic reference** (`lib/ai/acoustic/quran_phonetic_reference.dart`,
+  `assets/quran/recitation/phonetic_reference_hafs.json`, built by
+  `tool/acoustic_verification/build_reference.py` with the MIT `quran-transcript` phonetizer).
+  - One token per sound: letters, the three short vowels, long vowels and ghunna (length not
+    judged), and qalqala/sakt markers (optional). A shadda is a doubled consonant (two tokens).
+  - Each token maps back to its WordRef, the base letter within the word, and the Uthmani
+    character it comes from. Word counts and letters are checked against Tahfeez's own dataset
+    for all 6,236 ayahs (551,252 tokens). Our WordRef/VerseRef stay the identity, and the Quran
+    database is untouched.
+  - Each sound unit also has its **pause forms**, produced by the phonetizer on the text cut there:
+    - waqf, when the reciter stops after the unit: tanween dropped, ta marbuta as ه, final vowel
+      silent, qalqala;
+    - ibtida, when the reciter starts with it: hamzat al-wasl pronounced.
+- **Acoustic model** (`QuranAcousticModel`, `quran_acoustic_model.dart`): an interface. Audio in
+  (16 kHz mono float), frame-level log-probabilities out (40 ms frames, 43 classes, class 0 =
+  CTC blank). Nothing else depends on a particular model.
+- **Forced alignment** (`ctc.dart`): CTC Viterbi over *expected* tokens only (blank, token, blank,
+  …), with optional tokens that may be skipped. `ctcLogProbability` is the full forward-algorithm
+  probability.
+- **Verifier** (`quran_acoustic_verifier.dart`):
+  1. Align, find the reciter's pauses, and for each unit next to a pause let the audio choose
+     between its flowing and its pause form (whichever has the higher CTC probability). Then
+     align again.
+  2. For every expected sound, rescore the frames around it (±2 aligned tokens) with the
+     expected tokens and with each alternative:
+     - the other short vowels → WRONG_VOWEL (FATHA / KASRA / DAMMA);
+     - no vowel → MISSING_VOWEL;
+     - a vowel after a sakin letter → SUKUN_ERROR;
+     - a missing or extra doubled consonant → SHADDA_ERROR;
+     - every other consonant → WRONG_LETTER.
+  3. Decide on the best alternative's log-likelihood margin over the expected tokens: ≥ 2.0 is a
+     mistake, ≤ −1.0 is CORRECT, anything in between is **UNCERTAIN**. The thresholds are
+     configurable (`AcousticThresholds`); a separate one for letters.
+  4. A word-final vowel dropped at a pause is fine (PAUSE). A *different* vowel said just before
+     a pause is still checked.
+  - Every decision comes from the model's probabilities; weak evidence is never a mistake.
+  - `errors()` locates the results as `RecitationError` (WordRef, letter, expected, heard, audio
+    time).
+- **Prototype and tools** (`tool/acoustic_verification/`):
+  - `acoustic.py`: the Python reference implementation. The Dart port matches it verdict for
+    verdict on real audio (`test/ai/acoustic/real_audio_parity_test.dart`).
+  - `verify_audio.py`: verifies any recording and prints the expected sequence, the alignment and
+    the scores.
+  - `export_model.py`: ONNX export.
+
+**Evaluation** (real audio, MIT model `obadx/muaalem-model-v3_2`, threshold 2.0):
+
+- **Real mistakes.** Minimal pairs found in the Quran text, 30 per type. Alafasy's real recording
+  of one word is spliced in where the other is expected, and scored against the unspliced
+  recording as control.
+
+  | Mistake | Right type found | Uncertain | Missed | Control word flagged |
+  |---|---|---|---|---|
+  | fatha ↔ damma | 100% | 0% | 0% | 0% |
+  | damma ↔ kasra | 90% | 7% | 3% | 0% |
+  | fatha ↔ kasra | 73% (83% any error) | 7% | 10% | 3% |
+  | missing shadda | 93% | 3% | 3% | 3% |
+  | extra shadda | 93% | 0% | 7% | 0% |
+  | wrong consonant | 97% | 0% | 0% | 3% |
+  | sukun (vowel added) | 23% | 47% | 23% | 0% |
+  | missing vowel | 7% (20% any error) | 43% | 37% | 0% |
+
+  Sukun and missing-vowel cases are mostly word-final connecting vowels («مِنْ» / «مِنَ»,
+  «هُمْ» / «هُمُ»). These are short and blended in the source recordings, so they land in the
+  uncertain band.
+- **Correct recitation**, 66 ayahs (425 words) per reciter; words wrongly flagged / uncertain:
+
+  | Reciter | Flagged | Uncertain |
+  |---|---|---|
+  | Alafasy | 1.9% | 3.3% |
+  | Husary (in the model's training data) | 1.4% | 4.2% |
+  | Karim Mansoori (non-native) | 3.3% | 7.3% |
+  | Parhizgar (non-native) | 2.8% | 4.7% |
+
+  The AGPL `hifzguide-muaalem-mini` flags 3–17% of correct words, so it was not adopted.
+- **Speed.**
+  - The Dart alignment and verification cost ~0.06% of real time (758 s of audio in 0.45 s).
+  - The model dominates. As 4-bit ONNX (504 MB, 99.6% verdict agreement), 8 s of audio takes:
+
+    | Runtime | Threads | Time |
+    |---|---|---|
+    | Laptop CPU | 4 | 2.0 s |
+    | Laptop CPU | 1 | 5.2 s |
+    | ONNX Runtime Web | 1 | 23.7 s |
+    | ONNX Runtime Web | 4 | 6.7 s (needs cross-origin isolation) |
+
+  - Long audio must be chunked (≤ 20 s): the model's memory grows with the square of the audio
+    length, and a 60 s input exhausted 13 GB.
+- **Limits.**
+  - The mistakes are the reciter's own pronunciations spliced in, not learners.
+  - The evaluation ayahs are short.
+  - The model is not yet on a device: it is too large and too slow for the web today, and
+    unmeasured on Android phones.
+
+## 32. Fully Offline Recitation (on-device acoustic model and position tracking)
+
+Recitation AI runs **on the device, with no network**: one microphone, one model, one stream of
+frames. That stream drives both "where is the reciter?" and "was it pronounced correctly?". Google
+and Web Speech are not needed; they remain only as an optional developer comparator.
+
+```
+microphone (RecitationSessionController.liveAudio, one capture; recordings off)
+  └─ LocalAcousticInferenceController
+       PcmRing (90 s, 80 Hz high-pass)
+       → AcousticWindowing (≥2 s new audio, ≤6 s, 1 s context each side)
+       → LocalQuranAcousticModel (ONNX Runtime Android, session loaded once)
+       → AcousticFrameStore (90 s; overlap deduplicated; stream-timestamped)
+       → frames (broadcast)
+            ├─ LocalQuranPositionTracker → WordHeard … → HifzController / HifzJudge (unchanged)
+            └─ AcousticVerificationController → framesFor(piece) → QuranAcousticVerifier (unchanged)
+```
+
+### Configuration (`recitation_ai_config.dart`)
+
+| `--dart-define` | Values | Default |
+|---|---|---|
+| `TAHFEEZ_ACOUSTIC_BACKEND` | `local`, `remote`, `disabled` | Android: `local`. Web: `remote` in development builds, `disabled` in release |
+| `TAHFEEZ_POSITION_SOURCE` | `acoustic`, `speech` | `acoustic` with the local backend, otherwise `speech` |
+| `TAHFEEZ_SPEECH_COMPARATOR` | `true` | off. Runs Google / Web Speech beside the acoustic tracker; its position appears in the dev panel's "Quran" line and drives nothing |
+| `TAHFEEZ_OFFLINE_RECITATION` | `true` | off. Forbids the remote model, the speech recognizer, the comparator and any recitation audio over HTTP |
+| `TAHFEEZ_ACOUSTIC_PROVIDER` | `cpu`, `xnnpack`, `nnapi` | `cpu` |
+| `TAHFEEZ_ACOUSTIC_THREADS` | intra-op threads | ONNX Runtime's choice |
+
+When `TAHFEEZ_OFFLINE_RECITATION=true`:
+
+- A configuration that asks for anything forbidden is resolved without it, and the recitation bar
+  shows the violation in red.
+- `ensureRecitationNetworkAllowed` throws `OfflineRecitationViolation` at the network edges
+  (`RemoteAcousticModel.run`, starting a real recognizer), so a mistake fails loudly instead of
+  silently.
+
+### The model on the device
+
+- **Model boundary.**
+  - `LocalQuranAcousticModel implements QuranAcousticModel` (Dart) talks to
+    `QuranAcousticModelChannel.kt` over the `tahfeez/quran_acoustic_model` channel. No ONNX type
+    crosses it.
+  - Its methods are `status`, `load` (once; reused), `run`, `stats` and `unload`.
+  - The ONNX Runtime session, execution provider (CPU, XNNPACK or NNAPI) and threads stay on the
+    Kotlin side.
+- **Compatibility manifest.**
+  - Every model file has a `quran_acoustic.json` beside it (`AcousticModelManifest`): format 1,
+    16 kHz, 43 classes in the app's vocabulary order, 40 ms frames, maximum window, SHA-256, size,
+    licence, and an experimental flag.
+  - The app refuses a model whose manifest doesn't match, or whose size or SHA-256 doesn't match
+    the file.
+  - The hash is computed once per size and modification time (`files/models/verified.txt`).
+  - **Swapping in a distilled student is a file swap plus its manifest**: no code changes.
+  - `tool/acoustic_verification/model_manifest.py <model.onnx>` writes the manifest.
+- **Never bundled.**
+  - The 504 MB and 385.7 MB models are not assets and are not in the AAB or APK.
+  - Development devices sideload one (below).
+  - Without a model, the recitation bar says so ("No acoustic model installed — looked in …"), and
+    nothing is followed.
+- **Size.** ONNX Runtime 1.30.0 is the only new native dependency. Release builds ship it for
+  **arm64-v8a only**: a 386 MB, 606M-parameter model is not viable on 32-bit ARM, and x86_64 is
+  emulators and Chromebooks. Debug and profile builds keep every ABI, and elsewhere the model
+  reports "needs a 64-bit ARM device".
+
+  | Build | Before | After |
+  |---|---|---|
+  | AAB, release | 115.1 MB | 144.3 MB |
+  | arm64 download | — | +12.4 MB (`libonnxruntime.so`: 33.0 MB installed, 12.4 MB compressed) |
+
+  The rest of the AAB growth is the library's debug-symbol copy (phones never download it) and
+  the 6.45 MB phonetic reference asset. With every ABI, the AAB was 195.7 MB. The planned
+  reduction is a reduced-operator ONNX Runtime build for this model's operators only.
+
+#### Sideloading the development model (exact commands)
+
+Package `ai.tahfeez.tahfeez_ai`. The app looks first in its external files directory, which
+`adb push` can write, then in its internal files directory (`run-as`, debug builds only).
+
+```sh
+# On the development machine (model files are gitignored: tool/acoustic_verification/model_work/artifacts)
+cd tool/acoustic_verification
+python3 model_manifest.py model_work/artifacts/optimized_int4_b32.onnx \
+    --id muaalem-v3_2-int4-b32 --out /tmp/tahfeez_model
+cp model_work/artifacts/optimized_int4_b32.onnx /tmp/tahfeez_model/quran_acoustic.onnx
+
+# Install the app once first, so its directory exists
+flutter run --profile -d <device>     # or: flutter install
+
+adb shell mkdir -p /sdcard/Android/data/ai.tahfeez.tahfeez_ai/files/models
+adb push /tmp/tahfeez_model/quran_acoustic.onnx /sdcard/Android/data/ai.tahfeez.tahfeez_ai/files/models/
+adb push /tmp/tahfeez_model/quran_acoustic.json /sdcard/Android/data/ai.tahfeez.tahfeez_ai/files/models/
+adb shell ls -l /sdcard/Android/data/ai.tahfeez.tahfeez_ai/files/models/
+
+# If adb can't write there (some OEM builds), a debug build can use internal storage:
+adb push /tmp/tahfeez_model/quran_acoustic.* /data/local/tmp/
+adb shell run-as ai.tahfeez.tahfeez_ai mkdir -p files/models
+adb shell run-as ai.tahfeez.tahfeez_ai cp /data/local/tmp/quran_acoustic.onnx /data/local/tmp/quran_acoustic.json files/models/
+```
+
+- The SHA-256 is checked on the first load: about 2–5 s on a phone for 386 MB, then cached.
+- Uninstalling the app deletes the model.
+- Release builds aren't debuggable, so for them only the external directory works.
+
+### Inference pipeline (`local_acoustic_inference_controller.dart`)
+
+- **Single consumer of the microphone.** The verifier's own copy of the audio became the
+  pipeline's `PcmRing`, so nothing is decoded twice and sample positions agree exactly.
+- **Windows.**
+  - The model runs one window at a time.
+  - Frame *j* covers samples 640·j to 640·(j+1); measured: N samples give ⌊N/640⌋ frames.
+  - Only a window's middle is kept. Context needed (40 s of continuous recitation, frame agreement
+    with one run over the whole 40 s):
+
+    | Context per side | Agreement |
+    |---|---|
+    | none | 90.8% |
+    | 0.5 s | 92.3% |
+    | 1 s | 93.9% |
+    | 1.5–2 s, or 6–8 s windows | 94.0–94.3% |
+
+    So: 1 s context, a 2 s hop.
+  - Windows are elastic: a device that falls behind runs longer windows (up to 6 s new audio),
+    which wastes less on overlap, instead of falling further back.
+  - Audio older than the ring is skipped and counted (`droppedSeconds`).
+  - Pausing or stopping computes the tail at once and marks its chunk `last`.
+- **Frames** (`TimedAcousticFrames`) carry their stream frame index; the store deduplicates
+  overlaps and refuses gaps.
+- **Frame reuse.** `framesFor(fromSample, toSample)` returns the stored frames, waiting for any not
+  yet computed. The verifier checks an ayah piece on the tracker's frames instead of running the
+  model again (the remote backend still runs its own).
+  - Measured with the app's Dart verifier on the 292-clip screening benchmark, at thresholds 2.0:
+
+    | Verifier input | Mistakes, right type | Correct words flagged | Uncertain | Model runs |
+    |---|---|---|---|---|
+    | A run over the whole piece (before) | 69% | 2.9% | 4.9% | 1× (plus the tracker's) |
+    | The tracker's frames only | 71% | 4.4% | 6.7% | 0× extra |
+    | The tracker's frames with a 4 s hop and 2 s context (same compute, +2–3 s latency) | 70% | 3.4% | 4.2% | 0× extra |
+    | **The tracker's frames, a mistake confirmed by a whole-piece run** (used) | **70%** | **2.1%** | 4.7% | only pieces with a flag |
+
+    The tracker's windows (4–8 s) give the model less context than a whole ayah does, so they
+    flag more correct words.
+  - So a piece with a mistake is run again on its own audio (`runInPieces`: ≤ 20 s runs,
+    overlapping 2 s). A mistake stands only if both runs hear it; in one run only, it becomes
+    uncertain.
+  - That costs a second run for the flagged pieces only: about a quarter of correct ayahs, at a
+    4% word flag rate.
+- **Measurements** are kept in state and shown in the dev panel's "On-device" line:
+  - load time, RTF, last window and its run time, lag;
+  - follow latency (from a word's end being received to its placement) and locate latency (from
+    the first speech to the reciter located);
+  - peak PSS.
+  - Every 10 s it also logs CPU time, battery level, current and temperature.
+
+### Position from the frames (`LocalQuranPositionTracker`)
+
+- **Contract.** It implements `RecitationPositionMatcher` (`start`, `setFocus`, `flush`), as
+  `QuranStreamMatcher` now does, and emits the same `QuranMatchEvent`s. `HifzController` changed
+  only in choosing the matcher and feeding it frames instead of transcripts; `HifzJudge`, overlays,
+  haptics and settings are unchanged.
+- **Following.**
+  - The frames since the last placed word are CTC force-aligned to the expected next 12 words,
+    ending anywhere.
+  - A word is placed when every sound unit it belongs to is finished: «يس» is two units, and
+    some units hold two words.
+  - If the audio doesn't fit straight on, the alignment may start up to 8 words back (a repeat)
+    or ahead (a skip).
+- **Speech before what fits** is explained, in this order:
+  1. The isti'adha or a surah's opening basmala is passed over, unless that text is where the
+     reciter is.
+  2. Words that fit on their own (a false start) are placed, so going back reads as a correction.
+  3. Otherwise it is an extra word.
+- **Repeats** are believed only if they fit well (≤ 0.8 nats/frame) and hold at least 4 sounds. A
+  held vowel or a fragment otherwise passes for the last short word. A word's held closing sound
+  (madd at a pause) is absorbed into it.
+- **Locating** happens at the start, and when 2.4 s of speech won't fit around the expected word.
+  It never brute-forces:
+  1. The frames are greedily decoded to phoneme symbols (repeats merged, markers dropped).
+  2. The symbols are looked up in `QuranPhonemeIndex`: 5-grams over the whole Quran's expected
+     pronunciation (≈ 450k symbols, ~3.6 MB, built in a background isolate in about 1 s),
+     voting for where the sequence starts.
+  3. Search order: the visible page, then ±300 words, then the whole Quran.
+  4. Only the few candidates are scored by CTC alignment.
+  5. A place is taken only if it fits within that area's limit (page 0.8, nearby 0.7, Quran 0.5)
+     and better than any *different* passage by 0.15 — unless it is in a nearer area.
+  6. Identical passages (55:13 and 55:16) stay unresolved until more audio tells them apart.
+     Uncertain beats confidently wrong.
+- **Costs** are nats per frame: how much less likely the frames are under the expected
+  pronunciation than under the model's best reading. Correct continuations cost 0.0–0.5; other
+  passages 0.9 and more.
+
+### Accuracy (real recitation, `test/fixtures/acoustic/position`)
+
+The 13 scenarios are composed from four reciters' recordings and streamed through the model
+exactly as the app does: frames are stored; the audio is not.
+
+| Scenario | Placed correctly | Wrong | Unresolved | Hifz verdicts | Locate |
+|---|---|---|---|---|---|
+| start of page (36:1–8) | 37/37 | 0 | 0 | 37 correct | page, 6.9 s |
+| mid-ayah start (36:3 from 40%) | 14/16 | 0 | 2 (the cut words) | 14 correct | page, 6.9 s |
+| 8 ayahs below the page start | 46/46 | 0 | 0 | 46 correct, 1 extra | page, 5.6 s |
+| wrong page (Al-Kahf, Ya-Sin on screen) | 51/51 | 0 | 0 | 51 correct, 2 repeated (a real waqf/ibtida restart) | Quran, 10.8 s; opening basmala passed over |
+| repeated phrase + context (55:13–16) | 19/19 | 0 | 0 | 19 correct | page, 13.0 s (waits for 55:14) |
+| repeated phrase alone (55:16) | 0/4 | 0 | 4 (correctly refuses to guess) | — | — |
+| skip (36:3 skipped) | 9/9 | 0 | 0 | skipped 1 (strict: held) | anchored |
+| repeat (36:3 twice) | 9/9 | 0 | 0 | 9 correct, 3 repeated | anchored |
+| restart Al-Fatiha after 1:4 | 29/29 | 0 | 0 | 29 correct, 13 repeated; isti'adha passed over | anchored |
+| false start of 36:5, then 36:4 | 12/12 | 0 | 0 | skipped 1 → self-corrected 1 | anchored |
+| long pauses + a fragment (112) | 15/15 | 0 | 0 | 15 correct, 1 extra | anchored |
+| Al-Fatiha → Al-Baqarah | 32/32 | 0 | 0 | 32 correct | anchored |
+| noise only | — | 0 | — | nothing placed | — |
+
+- **Totals:** 273/279 recited words placed, **0 wrong** placements, and no false sequence
+  mistakes. Mean follow latency is 1.6–2.2 s of algorithm time: the 2 s hop plus 1 s context,
+  less the part of the hop already past. Device model time comes on top.
+- **Held out.** The same 13 scenarios with every scenario given another reciter (tuning was done
+  on the stored set): 271/279 placed, **0 wrong**, 0 false sequence mistakes.
+  - 1 genuine repeat word reported as an extra sound.
+  - 1 restart word missed.
+  - 2 words of the repeated-phrase case dropped while it was still ambiguous.
+- **Comparison with Google + `QuranStreamMatcher`** on the same audio needs Google's service and
+  the phone. It is part of the device acceptance run below, through
+  `TAHFEEZ_SPEECH_COMPARATOR=true`.
+
+### Web
+
+There is no on-device model on the web yet. 386 MB is not deliverable to a browser, and ONNX
+Runtime Web ran 8 s of audio in 6.7–23.7 s on a laptop (§31). The web keeps Web Speech + the
+remote development server; **offline AI on the web is pending**. Nothing in the pipeline is
+Android-specific except `LocalQuranAcousticModel`'s channel: a future `LocalQuranAcousticModelWeb`
+(ONNX Runtime Web / WebGPU with a distilled student) implements the same interface. The tracker,
+index, windowing and verifier are pure Dart and already compile for the web.
+
+### Device acceptance (airplane mode) and measurements
+
+On-device numbers are recorded only from a real phone. The benchmark is
+`integration_test/acoustic_model_android_test.dart`: the sideloaded model plus a sideloaded
+recitation, `tool/acoustic_verification/device_bench_audio.py` →
+`<external files>/models/bench.pcm`, streamed at real-time pace through the app's own classes,
+with no network:
+
+```sh
+flutter test integration_test/acoustic_model_android_test.dart -d <id> \
+  --dart-define=ACOUSTIC_PROVIDER=cpu [--dart-define=ACOUSTIC_THREADS=4] [--dart-define=ACOUSTIC_MINUTES=10]
+```
+
+It logs:
+
+- device cores, load (hash and session) time;
+- per-window model time (median / p90 / max), RTF and maximum lag;
+- locate and follow latency, and tracker time per chunk;
+- CPU share, peak PSS, battery level and temperature before and after.
+
+The app run (`flutter run --profile --dart-define=TAHFEEZ_OFFLINE_RECITATION=true`) shows the same
+in the dev panel.
+
+### Current limitations
+
+- **The model is too large to ship.** It is 385.7 MB and 606M parameters, needs a 64-bit ARM
+  phone with several GB of RAM, and its speed on phones is not yet measured (laptop: RTF ≈ 0.4–0.6
+  at 8 threads with this windowing). The plan is to distil a student (§ model-shrinking work,
+  `tool/acoustic_verification/model_work`), clear its training-audio rights, and swap it in as a
+  file plus manifest.
+- Position tracking adds 2–3 s of algorithmic latency (window hop + right context) over Google's
+  partial results. A shorter hop costs more model time; the trade-off is measured on the device.
+- Distillation, further teacher optimisation and a web model are out of this milestone.

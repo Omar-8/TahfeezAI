@@ -7,6 +7,7 @@ import '../core/localization/generated/app_localizations.dart';
 import '../core/localization/locale_controller.dart';
 import '../core/localization/supported_locales.dart';
 import '../core/routing/app_router.dart';
+import '../core/theme/app_surface_tone.dart';
 import '../core/theme/app_theme.dart';
 import '../core/theme/theme_controller.dart';
 
@@ -24,6 +25,7 @@ class TahfeezApp extends ConsumerWidget {
     final themeMode = ref.watch(themeModeControllerProvider);
     final family = ref.watch(themeFamilyControllerProvider);
     final useDynamicColor = ref.watch(dynamicColorPreferenceControllerProvider);
+    final tone = ref.watch(appSurfaceToneProvider);
     final localeOverride = ref.watch(localeControllerProvider);
     final router = ref.watch(appRouterProvider);
 
@@ -53,8 +55,8 @@ class TahfeezApp extends ConsumerWidget {
           onGenerateTitle: (context) => AppLocalizations.of(context).appName,
           debugShowCheckedModeBanner: false,
           themeMode: themeMode,
-          theme: buildTahfeezTheme(lightScheme),
-          darkTheme: buildTahfeezTheme(darkScheme),
+          theme: buildTahfeezTheme(tone.apply(lightScheme)),
+          darkTheme: buildTahfeezTheme(tone.apply(darkScheme)),
           locale: localeOverride,
           supportedLocales: kTahfeezSupportedLocales,
           localizationsDelegates: const [

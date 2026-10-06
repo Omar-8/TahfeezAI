@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../../../../core/localization/generated/app_localizations.dart';
+
 import 'package:flutter/services.dart';
 
 import '../../../../core/theme/app_spacing.dart';
@@ -15,7 +18,7 @@ import '../../../../core/theme/components/components.dart';
 void showVerseShareSheet(BuildContext context, String shareText) {
   showTahfeezModalBottomSheet(
     context: context,
-    title: 'Share',
+    title: AppLocalizations.of(context).readerShare,
     builder: (context) => _VerseShareBody(shareText: shareText),
   );
 }
@@ -41,7 +44,7 @@ class _VerseShareBody extends StatelessWidget {
           TahfeezCard(child: Text(shareText)),
           FilledButton.icon(
             icon: const Icon(Icons.copy_outlined),
-            label: const Text('Copy'),
+            label: Text(AppLocalizations.of(context).readerCopy),
             onPressed: () async {
               await Clipboard.setData(ClipboardData(text: shareText));
               if (context.mounted) Navigator.of(context).pop();

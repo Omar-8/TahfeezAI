@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../localization/generated/app_localizations.dart';
 import '../app_spacing.dart';
 import '../tahfeez_icon_sizes.dart';
 
@@ -108,7 +109,7 @@ class TahfeezErrorView extends StatelessWidget {
             if (onRetry != null)
               FilledButton.tonal(
                 onPressed: onRetry,
-                child: const Text('Retry'),
+                child: Text(AppLocalizations.of(context).commonRetry),
               ),
           ],
         ),

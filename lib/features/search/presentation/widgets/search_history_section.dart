@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../../../../core/localization/generated/app_localizations.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_spacing.dart';
@@ -24,11 +27,11 @@ class SearchHistorySection extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         TahfeezSectionHeader(
-          title: 'Recent searches',
+          title: AppLocalizations.of(context).searchRecent,
           icon: Icons.history,
           onViewAll: () =>
               ref.read(searchHistoryControllerProvider.notifier).clear(),
-          viewAllLabel: 'Clear all',
+          viewAllLabel: AppLocalizations.of(context).searchClearAll,
         ),
         const SizedBox(height: TahfeezSpacing.sm),
         for (final entry in history)
@@ -37,7 +40,7 @@ class SearchHistorySection extends ConsumerWidget {
             leading: const Icon(Icons.history),
             trailing: IconButton(
               icon: const Icon(Icons.close, size: 18),
-              tooltip: 'Remove',
+              tooltip: AppLocalizations.of(context).searchRemove,
               onPressed: () => ref
                   .read(searchHistoryControllerProvider.notifier)
                   .remove(entry.query),

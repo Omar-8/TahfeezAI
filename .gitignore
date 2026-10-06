@@ -149,3 +149,15 @@ web/quran_engine/
 # Generated output of tool/quran_engine/verify_all_pages_structural.mjs —
 # a local run artifact, not source; the script itself is committed.
 tool/quran_engine/structural_test_results.json
+
+# Python environment of tool/acoustic_verification (./setup.sh)
+tool/acoustic_verification/.venv/
+
+# Model-shrinking experiments: candidate models and benchmark data (large, not app assets)
+tool/acoustic_verification/model_work/artifacts/
+
+# Reduced ONNX Runtime, built locally (tool/onnxruntime/build_reduced.sh)
+/android/app/src/main/jniLibs-ort/
+/tool/acoustic_verification/model_work/data_*/
+/tool/acoustic_verification/model_work/runs/
+/tool/acoustic_verification/model_work/fp32*/

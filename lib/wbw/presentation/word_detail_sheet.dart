@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../../core/localization/generated/app_localizations.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_spacing.dart';
@@ -8,6 +11,7 @@ import '../../core/theme/quran_text_style.dart';
 import '../../core/ui/coming_soon.dart';
 import '../../features/mushaf/application/mushaf_appearance_controller.dart';
 import '../../features/mushaf/domain/mushaf_appearance.dart';
+import '../../features/recitation/presentation/recitation_word_feedback.dart';
 import '../../quran/application/canonical_ayah_word_text.dart';
 import '../../quran/domain/models/quran_refs.dart';
 import '../application/active_wbw_pack.dart';
@@ -37,7 +41,7 @@ import 'wbw_packs_sheet.dart';
 void showWordDetailSheet(BuildContext context, {required WordRef wordRef}) {
   showTahfeezModalBottomSheet(
     context: context,
-    title: 'Word details',
+    title: AppLocalizations.of(context).wordDetails,
     builder: (context) => _WordDetailSheetBody(wordRef: wordRef),
   );
 }
@@ -78,7 +82,8 @@ class _WordDetailSheetBody extends ConsumerWidget {
         spacing: TahfeezSpacing.md,
         children: [
           Text(
-            'Ayah $chapterNo:$verseNo · Word ${wordRef.wordIndex + 1}',
+            AppLocalizations.of(context)
+                .wordRef('$chapterNo:$verseNo', wordRef.wordIndex + 1),
             style: Theme.of(context).textTheme.labelMedium
                 ?.copyWith(color: scheme.onSurfaceVariant),
           ),
@@ -91,6 +96,11 @@ class _WordDetailSheetBody extends ConsumerWidget {
               style: quranTextStyle(color: quranTextColor),
             ),
           ),
+          // What the last recitation found wrong in this word, if anything.
+          RecitationWordFeedback(
+            wordRef: wordRef,
+            wordText: arabicTextAsync.value,
+          ),
           activePack.when(
             data: (pack) => pack == null
                 ? _noActivePackHint(context)
@@ -102,7 +112,7 @@ class _WordDetailSheetBody extends ConsumerWidget {
             children: [
               IconButton(
                 icon: const Icon(Icons.volume_up_outlined),
-                tooltip: 'Play word audio',
+                tooltip: AppLocalizations.of(context).wordPlayAudio,
                 onPressed: wordAudioEnabled
                     ? () => showComingSoon(context)
                     : null,
@@ -117,13 +127,13 @@ class _WordDetailSheetBody extends ConsumerWidget {
   Widget _noActivePackHint(BuildContext context) {
     return TahfeezEmptyView(
       icon: Icons.translate_outlined,
-      message: 'Install a word-by-word language pack to see translations here.',
+      message: AppLocalizations.of(context).wordInstall,
       action: TextButton(
         onPressed: () {
           Navigator.of(context).pop();
           showWbwPacksSheet(context);
         },
-        child: const Text('Browse language packs'),
+        child: Text(AppLocalizations.of(context).wordBrowsePacks),
       ),
     );
   }
@@ -158,7 +168,7 @@ class _WbwWordContent extends ConsumerWidget {
             ((!showTranslation || word.translation == null) &&
                 (!showTransliteration || word.transliteration == null))) {
           return Text(
-            'No word-by-word data for this word yet.',
+            AppLocalizations.of(context).wordNoData,
             style: Theme.of(context).textTheme.bodyMedium
                 ?.copyWith(color: scheme.onSurfaceVariant),
           );

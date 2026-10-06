@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/localization/generated/app_localizations.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/ui/coming_soon.dart';
 import '../../domain/reader_mode.dart';
@@ -82,14 +83,18 @@ class ReaderModeSwitch extends StatelessWidget {
       children: [
         segment(
           Icons.view_agenda_outlined,
-          'Verse by verse',
+          AppLocalizations.of(context).readerVerseByVerse,
           ReaderMode.verseByVerse,
         ),
-        segment(Icons.menu_book_outlined, 'Mushaf', ReaderMode.mushaf),
+        segment(
+          Icons.menu_book_outlined,
+          AppLocalizations.of(context).readerMushaf,
+          ReaderMode.mushaf,
+        ),
         if (showTranslationSegment)
           segment(
             Icons.translate_outlined,
-            'Translation',
+            AppLocalizations.of(context).readerTranslation,
             ReaderMode.translation,
           ),
       ],

@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+
+import '../../../core/localization/generated/app_localizations.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/components/components.dart';
+import '../../settings/presentation/theme_choices.dart';
 import '../application/mushaf_appearance_controller.dart';
 import '../domain/mushaf_appearance.dart';
 
@@ -10,7 +14,7 @@ import '../domain/mushaf_appearance.dart';
 void showMushafAppearanceSheet(BuildContext context) {
   showTahfeezModalBottomSheet(
     context: context,
-    title: 'Mushaf appearance',
+    title: AppLocalizations.of(context).mushafAppearance,
     builder: (context) => const _MushafAppearanceBody(),
   );
 }
@@ -30,7 +34,9 @@ class _MushafAppearanceBody extends ConsumerWidget {
         children: [
           for (final appearance in MushafAppearance.values)
             ChoiceChip(
-              label: Text(appearance.label),
+              label: Text(
+                mushafAppearanceName(appearance, AppLocalizations.of(context)),
+              ),
               selected: appearance == selected,
               onSelected: (_) => ref
                   .read(mushafAppearanceControllerProvider.notifier)

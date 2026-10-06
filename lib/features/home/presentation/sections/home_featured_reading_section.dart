@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/localization/generated/app_localizations.dart';
+import '../../../../core/routing/quran_location_routing.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/components/components.dart';
-import '../../../../core/ui/coming_soon.dart';
+import '../../../../quran/domain/models/quran_location.dart';
 import '../../application/home_providers.dart';
 
-/// Home's "featured Quran reading" section
-/// (`docs/reference/11_HOME_SPEC.md` §5): a horizontal rail of curated
-/// chapters. Renders an unavailable-resource state instead of any chapter
-/// card while no Quran dataset is installed (see
-/// `home_providers.dart`'s doc comments).
+/// Home's "Featured Reading": a horizontal rail of curated chapters, each
+/// opening the chapter. Al-Kahf leads on Fridays and Al-Mulk in the evening,
+/// marked as such. An unavailable-resource state while no Quran dataset is
+/// installed.
 class HomeFeaturedReadingSection extends ConsumerWidget {
   const HomeFeaturedReadingSection({super.key});
 
@@ -47,13 +47,26 @@ class HomeFeaturedReadingSection extends ConsumerWidget {
                     const SizedBox(width: TahfeezSpacing.sm),
                 itemBuilder: (context, index) {
                   final chapter = list[index];
+                  final count = l10n.homeFeaturedAyahCount(
+                    chapter.surah.ayahCount,
+                  );
+                  final occasion = switch (chapter.occasion) {
+                    FeaturedOccasion.friday => l10n.homeFeaturedFriday,
+                    FeaturedOccasion.night => l10n.homeFeaturedNight,
+                    null => null,
+                  };
                   return SizedBox(
                     width: 240,
                     child: TahfeezQuranSectionCard(
                       number: chapter.surah.surahNo,
-                      title: chapter.name ?? 'Surah ${chapter.surah.surahNo}',
-                      subtitle: '${chapter.surah.ayahCount} ayahs',
-                      onTap: () => showComingSoon(context),
+                      title:
+                          chapter.name ??
+                          l10n.homeContinueReadingSurah(chapter.surah.surahNo),
+                      subtitle: occasion == null ? count : '$occasion · $count',
+                      onTap: () => goToQuranLocation(
+                        context,
+                        QuranLocation.surah(chapter.surah.surahNo),
+                      ),
                     ),
                   );
                 },

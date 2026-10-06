@@ -6,6 +6,7 @@ import '../../app/shell/app_shell.dart';
 import '../../features/home/presentation/home_screen.dart';
 import '../../features/quran/presentation/quran_index_screen.dart';
 import '../../features/search/presentation/search_screen.dart';
+import '../../features/settings/presentation/settings_screen.dart';
 import '../theme/gallery/component_gallery_screen.dart';
 import 'app_routes.dart';
 import 'quran_location_routing.dart';
@@ -42,15 +43,21 @@ GoRouter appRouter(Ref ref) {
               GoRoute(
                 path: AppRoutes.quran,
                 builder: (context, state) => const QuranIndexScreen(),
-                routes: quranLocationRoutes(),
+                routes: [
+                  ...quranLocationRoutes(),
+                  GoRoute(
+                    path: 'search',
+                    builder: (context, state) => const SearchScreen(),
+                  ),
+                ],
               ),
             ],
           ),
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: AppRoutes.search,
-                builder: (context, state) => const SearchScreen(),
+                path: AppRoutes.settings,
+                builder: (context, state) => const SettingsScreen(),
               ),
             ],
           ),

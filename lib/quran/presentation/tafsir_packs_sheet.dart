@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../../core/localization/generated/app_localizations.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/downloads/resource_download_status.dart';
@@ -15,7 +18,7 @@ import '../application/tafsir_selection_controller.dart';
 void showTafsirPacksSheet(BuildContext context) {
   showTahfeezModalBottomSheet(
     context: context,
-    title: 'Tafsir library',
+    title: AppLocalizations.of(context).packsTafsirLibrary,
     builder: (context) => const _TafsirPacksSheetBody(),
   );
 }
@@ -31,11 +34,11 @@ class _TafsirPacksSheetBody extends ConsumerWidget {
     return library.when(
       data: (statuses) {
         if (statuses.isEmpty) {
-          return const Padding(
+          return Padding(
             padding: EdgeInsets.only(bottom: 24),
             child: TahfeezEmptyView(
               icon: Icons.menu_book_outlined,
-              message: 'No tafsir works available yet.',
+              message: AppLocalizations.of(context).packsNoTafsir,
             ),
           );
         }
@@ -48,7 +51,8 @@ class _TafsirPacksSheetBody extends ConsumerWidget {
             final isActive = status.work.id == activeTafsirId;
             return TahfeezResourceRow(
               title: isActive
-                  ? '${status.work.displayName} (active)'
+                  ? AppLocalizations.of(context)
+                        .packsActive(status.work.displayName)
                   : status.work.displayName,
               subtitle: status.work.languageCode,
               state: _rowState(status.state),
@@ -58,8 +62,9 @@ class _TafsirPacksSheetBody extends ConsumerWidget {
         );
       },
       loading: () => const TahfeezLoadingView(),
-      error: (_, _) =>
-          const TahfeezErrorView(message: 'Could not load tafsir works.'),
+      error: (_, _) => TahfeezErrorView(
+        message: AppLocalizations.of(context).packsTafsirError,
+      ),
     );
   }
 

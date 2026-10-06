@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../localization/generated/app_localizations.dart';
 import '../app_spacing.dart';
 
 /// A single resource's download progress: title, a linear progress bar (or
@@ -49,7 +50,7 @@ class TahfeezDownloadProgressRow extends StatelessWidget {
                 IconButton(
                   icon: const Icon(Icons.close, size: 18),
                   onPressed: onCancel,
-                  tooltip: 'Cancel',
+                  tooltip: AppLocalizations.of(context).commonCancel,
                   visualDensity: VisualDensity.compact,
                 ),
             ],

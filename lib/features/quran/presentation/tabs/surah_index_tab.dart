@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../../../../core/localization/generated/app_localizations.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_spacing.dart';
@@ -85,7 +88,7 @@ class _SurahIndexTabState extends ConsumerState<SurahIndexTab> {
 
     showTahfeezModalBottomSheet<void>(
       context: context,
-      title: 'Filter chapters',
+      title: AppLocalizations.of(context).quranFilterChapters,
       builder: (context) => StatefulBuilder(
         builder: (context, setSheetState) {
           void select(_RevelationFilter value) {
@@ -99,17 +102,19 @@ class _SurahIndexTabState extends ConsumerState<SurahIndexTab> {
               spacing: TahfeezSpacing.sm,
               children: [
                 TahfeezFilterChip(
-                  label: 'All',
+                  label: AppLocalizations.of(context).quranFilterAll,
                   selected: _filter == _RevelationFilter.all,
                   onSelected: (_) => select(_RevelationFilter.all),
                 ),
                 TahfeezFilterChip(
-                  label: 'Meccan ($meccanCount)',
+                  label: AppLocalizations.of(context)
+                      .quranMeccanCount(meccanCount),
                   selected: _filter == _RevelationFilter.meccan,
                   onSelected: (_) => select(_RevelationFilter.meccan),
                 ),
                 TahfeezFilterChip(
-                  label: 'Medinan ($medinanCount)',
+                  label: AppLocalizations.of(context)
+                      .quranMedinanCount(medinanCount),
                   selected: _filter == _RevelationFilter.medinan,
                   onSelected: (_) => select(_RevelationFilter.medinan),
                 ),
@@ -170,7 +175,8 @@ class _SurahIndexTabState extends ConsumerState<SurahIndexTab> {
                       // constrained separately, already looked centered.
                       textAlignVertical: TextAlignVertical.center,
                       decoration: InputDecoration(
-                        hintText: 'Search chapters',
+                        hintText: AppLocalizations.of(context)
+                            .quranSearchChapters,
                         border: InputBorder.none,
                         isDense: true,
                         contentPadding: const EdgeInsets.symmetric(
@@ -191,7 +197,8 @@ class _SurahIndexTabState extends ConsumerState<SurahIndexTab> {
                                   Icons.close,
                                   color: scheme.onSurfaceVariant,
                                 ),
-                                tooltip: 'Clear',
+                                tooltip: AppLocalizations.of(context)
+                                    .quranClear,
                                 onPressed: () {
                                   _searchController.clear();
                                   setState(() => _query = '');
@@ -221,7 +228,7 @@ class _SurahIndexTabState extends ConsumerState<SurahIndexTab> {
                   ),
                   child: IconButton(
                     onPressed: _showFilterSheet,
-                    tooltip: 'Filter chapters',
+                    tooltip: AppLocalizations.of(context).quranFilterChapters,
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints.tightFor(
                       width: _searchBarHeight,
@@ -256,8 +263,8 @@ class _SurahIndexTabState extends ConsumerState<SurahIndexTab> {
                   child: IconButton(
                     onPressed: () => setState(() => _reversed = !_reversed),
                     tooltip: _reversed
-                        ? 'Showing last chapter first'
-                        : 'Show last chapter first',
+                        ? AppLocalizations.of(context).quranShowingLastFirst
+                        : AppLocalizations.of(context).quranShowLastFirst,
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints.tightFor(
                       width: _searchBarHeight,
@@ -280,15 +287,16 @@ class _SurahIndexTabState extends ConsumerState<SurahIndexTab> {
             data: (all) {
               final filtered = _apply(all);
               if (all.isEmpty) {
-                return const TahfeezEmptyView(
+                return TahfeezEmptyView(
                   icon: Icons.menu_book_outlined,
-                  message: 'This will appear automatically once a Quran dataset is added to the app.',
+                  message: AppLocalizations.of(context)
+                      .homeQuranDatasetUnavailableBody,
                 );
               }
               if (filtered.isEmpty) {
-                return const TahfeezEmptyView(
+                return TahfeezEmptyView(
                   icon: Icons.search_off,
-                  message: 'No chapters match your search.',
+                  message: AppLocalizations.of(context).quranNoChaptersMatch,
                 );
               }
               return ListView.builder(
@@ -299,11 +307,15 @@ class _SurahIndexTabState extends ConsumerState<SurahIndexTab> {
                 itemBuilder: (context, index) {
                   final indexed = filtered[index];
                   final subtitleParts = [
-                    '${indexed.surah.ayahCount} ayahs',
+                    AppLocalizations.of(context)
+                        .homeFeaturedAyahCount(indexed.surah.ayahCount),
                     indexed.surah.revelationType == RevelationType.meccan
-                        ? 'Meccan'
-                        : 'Medinan',
-                    if (indexed.arabicName != null) indexed.arabicName!,
+                        ? AppLocalizations.of(context).quranMeccan
+                        : AppLocalizations.of(context).quranMedinan,
+                    // The Arabic name, unless it is already the title.
+                    if (indexed.arabicName != null &&
+                        indexed.arabicName != indexed.localizedName)
+                      indexed.arabicName!,
                   ];
                   return Padding(
                     padding: const EdgeInsets.only(bottom: TahfeezSpacing.sm),
@@ -311,7 +323,8 @@ class _SurahIndexTabState extends ConsumerState<SurahIndexTab> {
                       number: indexed.surah.surahNo,
                       title:
                           indexed.localizedName ??
-                          'Surah ${indexed.surah.surahNo}',
+                          AppLocalizations.of(context)
+                              .homeContinueReadingSurah(indexed.surah.surahNo),
                       subtitle: subtitleParts.join(' · '),
                       onTap: () => widget.onSelect(
                         QuranLocation.surah(indexed.surah.surahNo),
@@ -322,9 +335,10 @@ class _SurahIndexTabState extends ConsumerState<SurahIndexTab> {
               );
             },
             loading: () => const TahfeezLoadingView(),
-            error: (_, _) => const TahfeezEmptyView(
+            error: (_, _) => TahfeezEmptyView(
               icon: Icons.menu_book_outlined,
-              message: 'This will appear automatically once a Quran dataset is added to the app.',
+              message: AppLocalizations.of(context)
+                  .homeQuranDatasetUnavailableBody,
             ),
           ),
         ),

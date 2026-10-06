@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+
+import '../../../core/localization/generated/app_localizations.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../quran/domain/models/quran_location.dart';
+import '../../recitation/presentation/recitation_controls.dart';
 import '../application/mushaf_appearance_controller.dart';
 import '../application/mushaf_page_providers.dart';
 import '../domain/mushaf_appearance.dart';
@@ -55,7 +60,7 @@ class _MushafReaderScreenState extends ConsumerState<MushafReaderScreen> {
           // never renders inside the 15-line page itself.
           IconButton(
             icon: const Icon(Icons.translate_outlined),
-            tooltip: 'Translation & tafsir',
+            tooltip: AppLocalizations.of(context).readerTranslationTafsir,
             onPressed: () => showMushafTranslationSheet(
               context,
               mushafId: widget.mushafId,
@@ -67,30 +72,36 @@ class _MushafReaderScreenState extends ConsumerState<MushafReaderScreen> {
           // `showMushafReaderOptionsSheet` so Appearance/Quran text
           // boldness can never drift out of sync between them again (see
           // that sheet's own doc comment for the real bug this fixes).
+          // Hifz mode's feedback settings, beside the reader's own.
+          const HifzSettingsButton(),
           IconButton(
             icon: const Icon(Icons.tune),
-            tooltip: 'Reader options',
+            tooltip: AppLocalizations.of(context).readerOptions,
             onPressed: () => showMushafReaderOptionsSheet(context),
           ),
         ],
       ),
-      body: mushafAsync.when(
-        data: (mushaf) {
-          if (mushaf == null) {
-            return _unavailable(colors.secondaryText);
-          }
-          return MushafPager(
-            mushafId: mushaf.id,
-            pageCount: mushaf.pageCount,
-            initialPageNumber: widget.initialPageNumber,
-            onPageChanged: (pageNumber) =>
-                setState(() => _currentPageNumber = pageNumber),
-          );
-        },
-        loading: () => Center(
-          child: CircularProgressIndicator(color: colors.secondaryText),
+      // Reports the page on screen to the app shell's recitation bar.
+      body: RecitationMushafAnchor(
+        location: QuranLocation.page(widget.mushafId, _currentPageNumber),
+        child: mushafAsync.when(
+          data: (mushaf) {
+            if (mushaf == null) {
+              return _unavailable(colors.secondaryText);
+            }
+            return MushafPager(
+              mushafId: mushaf.id,
+              pageCount: mushaf.pageCount,
+              initialPageNumber: widget.initialPageNumber,
+              onPageChanged: (pageNumber) =>
+                  setState(() => _currentPageNumber = pageNumber),
+            );
+          },
+          loading: () => Center(
+            child: CircularProgressIndicator(color: colors.secondaryText),
+          ),
+          error: (_, _) => _unavailable(colors.secondaryText),
         ),
-        error: (_, _) => _unavailable(colors.secondaryText),
       ),
     );
   }
@@ -100,7 +111,7 @@ class _MushafReaderScreenState extends ConsumerState<MushafReaderScreen> {
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Text(
-          'This will appear automatically once a Quran dataset is added to the app.',
+          AppLocalizations.of(context).homeQuranDatasetUnavailableBody,
           textAlign: TextAlign.center,
           style: TextStyle(color: color),
         ),

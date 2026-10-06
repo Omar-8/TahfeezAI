@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../../../../core/localization/generated/app_localizations.dart';
+
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -62,8 +65,11 @@ class VerseBlock extends ConsumerWidget {
 
   void _copyReference(BuildContext context) {
     Clipboard.setData(ClipboardData(text: _reference));
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text('Copied $_reference')));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(AppLocalizations.of(context).readerCopied(_reference)),
+      ),
+    );
   }
 
   void _openTafsir(BuildContext context) {
@@ -194,22 +200,22 @@ class VerseBlock extends ConsumerWidget {
                 actions: [
                   TahfeezVerseAction(
                     icon: Icons.play_circle_outline,
-                    tooltip: 'Play',
+                    tooltip: AppLocalizations.of(context).readerPlay,
                     onPressed: () => showComingSoon(context),
                   ),
                   TahfeezVerseAction(
                     icon: Icons.bookmark_border,
-                    tooltip: 'Bookmark',
+                    tooltip: AppLocalizations.of(context).readerBookmark,
                     onPressed: () => showComingSoon(context),
                   ),
                   TahfeezVerseAction(
                     icon: Icons.menu_book_outlined,
-                    tooltip: 'Tafsir',
+                    tooltip: AppLocalizations.of(context).readerTafsir,
                     onPressed: () => _openTafsir(context),
                   ),
                   TahfeezVerseAction(
                     icon: Icons.ios_share_outlined,
-                    tooltip: 'Share',
+                    tooltip: AppLocalizations.of(context).readerShare,
                     onPressed: () => showVerseShareSheet(
                       context,
                       '$_reference\n\n$_arabicText',

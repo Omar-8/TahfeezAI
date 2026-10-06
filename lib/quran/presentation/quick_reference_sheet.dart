@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../../core/localization/generated/app_localizations.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -61,9 +64,9 @@ class _QuickReferenceBody extends ConsumerWidget {
         children: [
           wordsAsync.when(
             data: (words) => words.isEmpty
-                ? const TahfeezEmptyView(
+                ? TahfeezEmptyView(
                     icon: Icons.menu_book_outlined,
-                    message: 'This verse is not available offline yet.',
+                    message: AppLocalizations.of(context).verseNotOffline,
                   )
                 : Directionality(
                     textDirection: TextDirection.rtl,
@@ -82,8 +85,9 @@ class _QuickReferenceBody extends ConsumerWidget {
                     ),
                   ),
             loading: () => const TahfeezLoadingView(),
-            error: (_, _) =>
-                const TahfeezErrorView(message: 'Could not load this verse.'),
+            error: (_, _) => TahfeezErrorView(
+              message: AppLocalizations.of(context).verseLoadError,
+            ),
           ),
           FilledButton.tonal(
             onPressed: () {
@@ -93,7 +97,7 @@ class _QuickReferenceBody extends ConsumerWidget {
                 QuranLocation.ayah(verse.chapterNo, verse.verseNo),
               );
             },
-            child: const Text('Go to verse'),
+            child: Text(AppLocalizations.of(context).goToVerse),
           ),
         ],
       ),

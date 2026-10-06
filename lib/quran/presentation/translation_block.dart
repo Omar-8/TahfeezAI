@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../core/localization/generated/app_localizations.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/components/components.dart';
 import '../domain/models/translation_models.dart';
@@ -111,7 +112,7 @@ class TranslationBlock extends StatelessWidget {
   void _showFootnote(BuildContext context, TranslationFootnote footnote) {
     showTahfeezModalBottomSheet(
       context: context,
-      title: 'Footnote ${footnote.marker}',
+      title: AppLocalizations.of(context).footnoteTitle("${footnote.marker}"),
       builder: (context) => Padding(
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
         child: Text(footnote.text),
