@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/localization/generated/app_localizations.dart';
+import '../../../core/routing/app_routes.dart';
 import '../../../core/localization/locale_controller.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/components/components.dart';
@@ -97,6 +99,18 @@ class SettingsScreen extends ConsumerWidget {
                     },
                   ),
               ],
+            ),
+          ),
+          const SizedBox(height: TahfeezSpacing.lg),
+          TahfeezCard(
+            child: ListTile(
+              key: const ValueKey('settings-about'),
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.info_outline),
+              title: Text(l10n.aboutTitle),
+              subtitle: Text(l10n.aboutSubtitle),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push(AppRoutes.about),
             ),
           ),
         ],

@@ -1,3 +1,5 @@
+import '../features/settings/presentation/about_screen.dart';
+
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -33,6 +35,8 @@ import 'bootstrap_gate.dart';
 /// gets a chance to read from the database before seeding completes: the
 /// real app widget tree ([TahfeezApp]) simply doesn't build until then.
 Future<void> bootstrap() async {
+  // The credited sources' notices on Flutter's licence page.
+  registerCreditLicences();
   WidgetsFlutterBinding.ensureInitialized();
   // Without this, `AnnotatedRegion<SystemUiOverlayStyle>`'s
   // `systemNavigationBarColor` has no effect on some Android versions/skins

@@ -6,6 +6,7 @@ import '../../app/shell/app_shell.dart';
 import '../../features/home/presentation/home_screen.dart';
 import '../../features/quran/presentation/quran_index_screen.dart';
 import '../../features/search/presentation/search_screen.dart';
+import '../../features/settings/presentation/about_screen.dart';
 import '../../features/settings/presentation/settings_screen.dart';
 import '../theme/gallery/component_gallery_screen.dart';
 import 'app_routes.dart';
@@ -58,6 +59,12 @@ GoRouter appRouter(Ref ref) {
               GoRoute(
                 path: AppRoutes.settings,
                 builder: (context, state) => const SettingsScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'about',
+                    builder: (context, state) => const AboutScreen(),
+                  ),
+                ],
               ),
             ],
           ),

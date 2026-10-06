@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -5,6 +6,8 @@ import 'package:tahfeez_ai/app/app.dart';
 import 'package:tahfeez_ai/core/localization/locale_controller.dart';
 import 'package:tahfeez_ai/core/theme/app_surface_tone.dart';
 import 'package:tahfeez_ai/core/theme/theme_controller.dart';
+import 'package:tahfeez_ai/features/settings/domain/credits.dart';
+import 'package:tahfeez_ai/features/settings/presentation/about_screen.dart';
 
 import '../../test_helpers/widget_test_overrides.dart';
 
@@ -70,5 +73,39 @@ void main() {
     await tester.tap(find.text('لغة النظام')); // back to the system language
     await tester.pumpAndSettle();
     expect(container.read(localeControllerProvider), isNull);
+  });
+
+  testWidgets('About lists every source with its licence, and the licences', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    registerCreditLicences();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: tahfeezWidgetTestOverrides(),
+        child: const TahfeezApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Settings'));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(find.text('About'), 200);
+    await tester.tap(find.text('About'));
+    await tester.pumpAndSettle();
+    expect(find.text('The Quran text'), findsOneWidget);
+    // Every source is listed, scrolling down the page.
+    for (final c in credits) {
+      await tester.scrollUntilVisible(find.text(c.name), 300);
+      expect(find.text(c.name), findsOneWidget);
+    }
+    expect(find.textContaining('Licence:'), findsWidgets);
+    // Flutter's licence page carries the sources' notices.
+    final notices = await LicenseRegistry.licenses
+        .where((l) => l.packages.any((p) => p.startsWith('Tahfeez:')))
+        .length;
+    expect(notices, credits.length);
   });
 }

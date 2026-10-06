@@ -559,5 +559,27 @@
   },
   "recAlert": "Mistake alert",
   "recAlertVibrate": "Vibrate",
-  "recAlertSound": "Sound"
+  "recAlertSound": "Sound",
+  "aboutTitle": "About",
+  "aboutSubtitle": "Sources, credits and licences",
+  "aboutVersion": "Version {version}",
+  "@aboutVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "aboutIntro": "Tahfeez helps you read and memorize the Quran, following your recitation on the device. It is built on the work of the people and projects below, with thanks.",
+  "aboutLicences": "Licences",
+  "aboutGroupQuran": "The Quran text",
+  "aboutGroupTranslations": "Translations and tafsir",
+  "aboutGroupMushaf": "The Mushaf and fonts",
+  "aboutGroupAi": "Recitation AI",
+  "aboutGroupData": "Training and test data",
+  "aboutGroupSoftware": "Software",
+  "aboutBy": "By",
+  "aboutLicence": "Licence:",
+  "aboutCite": "Cite:",
+  "aboutCopied": "Link copied"
 }

@@ -248,5 +248,20 @@
   "recMaddShort": "مدّ: أطِل «{letter}» (٤–٦ حركات هنا)",
   "recAlert": "التنبيه عند الخطأ",
   "recAlertVibrate": "اهتزاز",
-  "recAlertSound": "صوت"
+  "recAlertSound": "صوت",
+  "aboutTitle": "حول التطبيق",
+  "aboutSubtitle": "المصادر والشكر والتراخيص",
+  "aboutVersion": "الإصدار {version}",
+  "aboutIntro": "يعينك تحفيظ على قراءة القرآن الكريم وحفظه، ويتابع تلاوتك على جهازك. وهو قائم على جهود الأشخاص والمشاريع الآتية، فلهم جزيل الشكر.",
+  "aboutLicences": "التراخيص",
+  "aboutGroupQuran": "نصّ القرآن الكريم",
+  "aboutGroupTranslations": "الترجمات والتفسير",
+  "aboutGroupMushaf": "المصحف والخطوط",
+  "aboutGroupAi": "الذكاء الاصطناعي للتلاوة",
+  "aboutGroupData": "بيانات التدريب والاختبار",
+  "aboutGroupSoftware": "البرمجيات",
+  "aboutBy": "من",
+  "aboutLicence": "الترخيص:",
+  "aboutCite": "يُستشهد بـ:",
+  "aboutCopied": "نُسخ الرابط"
 }
