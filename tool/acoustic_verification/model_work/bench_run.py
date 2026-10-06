@@ -21,7 +21,11 @@ model, tag = sys.argv[1], sys.argv[2]
 screen = '--screen' in sys.argv
 stream = '--stream' in sys.argv
 threads = int(sys.argv[sys.argv.index('--threads') + 1]) if '--threads' in sys.argv else os.cpu_count()
-CHUNK, OVERLAP, HOP = 16000 * 20, 16000 * 2, 640
+# Longest single run and the overlap between runs (the app's runInPieces);
+# PIECE_S / PIECE_OVERLAP_S try other limits.
+CHUNK = int(float(os.environ.get('PIECE_S', 20)) * 16000)
+OVERLAP = int(float(os.environ.get('PIECE_OVERLAP_S', 2)) * 16000)
+HOP = 640
 
 t0 = time.time()
 if model == 'torch':
