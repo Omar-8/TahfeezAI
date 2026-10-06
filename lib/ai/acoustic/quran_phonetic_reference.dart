@@ -18,6 +18,9 @@ final Map<String, int> _classOf = {
 
 int phoneticClassOf(String symbol) => _classOf[symbol]!;
 
+/// [symbol]'s class, or `null` if it has none.
+int? phoneticClassOrNull(String symbol) => _classOf[symbol];
+
 /// The three short vowels.
 enum ShortVowel {
   fatha('َ'),

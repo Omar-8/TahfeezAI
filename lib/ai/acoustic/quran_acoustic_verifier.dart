@@ -117,7 +117,12 @@ class AcousticThresholds {
     this.pauseFrames = 6,
     this.context = 2,
     this.sounds = const {},
+    this.tajweed = true,
   });
+
+  /// Judge tajweed: a merged or hidden nūn / mīm (idghām, ikhfāʾ, iqlāb)
+  /// said plainly is a mistake. Off: only the letters and vowels count.
+  final bool tajweed;
 
   /// Per [SoundGroup], its extra margins.
   final Map<SoundGroup, SoundMargins> sounds;
@@ -156,6 +161,7 @@ class AcousticThresholds {
     double? correct,
     int? pauseFrames,
     Map<SoundGroup, SoundMargins>? sounds,
+    bool? tajweed,
   }) => AcousticThresholds(
     error: error ?? this.error,
     letterError: letterError ?? this.letterError,
@@ -166,6 +172,7 @@ class AcousticThresholds {
     pauseFrames: pauseFrames ?? this.pauseFrames,
     context: context,
     sounds: sounds ?? this.sounds,
+    tajweed: tajweed ?? this.tajweed,
   );
 
   /// The expected pronunciation must beat every alternative by this much
@@ -569,7 +576,10 @@ class QuranAcousticVerifier {
         if (rival[c] > rival[best]) best = c;
       }
       final competitor = quranPhoneticVocabulary[best];
-      final alternatives = _alternatives(expected, k);
+      final alternatives = [
+        for (final a in _alternatives(expected, k))
+          if (thresholds.tajweed || !a.tajweed) a,
+      ];
       if (alternatives.isEmpty) {
         out.add(
           PhonemeVerdict(
@@ -816,13 +826,22 @@ class QuranAcousticVerifier {
                 RecitationErrorType.wrongLetter,
                 quranPhoneticVocabulary[plain],
                 [plain],
+                tajweed: true,
               ),
             ];
     }
     if (t.kind != PhoneticTokenKind.consonant) return const [];
+    // A letter another merged into (idghām: «مَن يَقُولُ» as «مَيَّقُولُ»):
+    // said as that letter, or single, is a tajweed mistake.
+    final merged = _mergedFrom(t);
     if (t.geminate) {
-      return const [
-        _Alternative(RecitationErrorType.shaddaError, 'NO_SHADDA', []),
+      return [
+        _Alternative(
+          RecitationErrorType.shaddaError,
+          'NO_SHADDA',
+          const [],
+          tajweed: merged != null,
+        ),
       ];
     }
     final next = k + 1 < ts.length ? ts[k + 1] : null;
@@ -844,6 +863,7 @@ class QuranAcousticVerifier {
             RecitationErrorType.wrongLetter,
             quranPhoneticVocabulary[c],
             [c],
+            tajweed: c == merged,
           ),
       if (!followsVowel && !doubled && !qalqala)
         for (final v in ShortVowel.values)
@@ -872,9 +892,28 @@ int? _plainOfHidden(PhoneticToken t) {
   return null;
 }
 
+/// For a letter that another merged into (idghām), the letter merged — a
+/// nūn for a tanween; `null` for any other token.
+int? _mergedFrom(PhoneticToken t) {
+  final s = t.sourceChar;
+  if ('ًٌٍ'.contains(s)) return phoneticClassOf('ن');
+  if (s != t.symbol && consonantTokens.contains(phoneticClassOrNull(s))) {
+    return phoneticClassOrNull(s);
+  }
+  return null;
+}
+
 class _Alternative {
-  const _Alternative(this.type, this.observed, this.tokens);
+  const _Alternative(
+    this.type,
+    this.observed,
+    this.tokens, {
+    this.tajweed = false,
+  });
   final RecitationErrorType type;
   final String observed;
   final List<int> tokens;
+
+  /// A tajweed mistake (not judged with tajweed off).
+  final bool tajweed;
 }

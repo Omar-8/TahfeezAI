@@ -17,6 +17,7 @@ import '../../../ai/matching/local_quran_position_tracker.dart'
 import '../../../core/core_providers.dart';
 import '../../../quran/domain/models/quran_refs.dart';
 import 'local_acoustic_inference_controller.dart';
+import 'hifz_controller.dart' show hifzSettingsProvider;
 import 'recitation_ai_config.dart';
 import 'recitation_position.dart';
 import 'quran_match_controller.dart' show quranWordCorpusProvider;
@@ -354,6 +355,14 @@ class AcousticVerificationController
   final _quickVerifier = const QuranAcousticVerifier(
     thresholds: quickThresholds,
   );
+
+  /// [verifier] judging tajweed or not, as the Hifz settings say.
+  QuranAcousticVerifier _withTajweed(QuranAcousticVerifier verifier) =>
+      ref.read(hifzSettingsProvider).tajweed
+      ? verifier
+      : QuranAcousticVerifier(
+          thresholds: verifier.thresholds.copyWith(tajweed: false),
+        );
 
   @override
   AcousticVerificationState build() {
@@ -701,7 +710,7 @@ class AcousticVerificationController
       for (final t in span.tokens)
         if (t.unit >= lo && t.unit <= hi) t,
     ];
-    final verifier = job.quick ? _quickVerifier : _verifier;
+    final verifier = _withTajweed(job.quick ? _quickVerifier : _verifier);
     final verdicts = verifier.verify(
       frames,
       expected,

@@ -188,6 +188,52 @@ void main() {
     }
   });
 
+  test('with tajweed off, only the letters and vowels are judged', () {
+    const plain = QuranAcousticVerifier(
+      thresholds: AcousticThresholds(tajweed: false),
+    );
+    // 2:10: ikhfāʾ and iqlāb said with a plain nūn — fine with tajweed off.
+    final ayah10 = reference.ayah(2010);
+    for (final hidden in ['ں', '۾']) {
+      final k = ayah10.indexWhere((t) => t.symbol == hidden);
+      final said = [for (final t in ayah10) t.token];
+      said[k] = phoneticClassOf('ن');
+      expect(
+        plain.verify(clearFrames(said), ayah10)[k].type.isError,
+        isFalse,
+        reason: hidden,
+      );
+    }
+    // 2:7 «غِشَٰوَةٌ وَلَهُمْ» joined, the tanween's nūn said (no idghām).
+    final ayah7 = reference.ayah(2007);
+    final merged = ayah7.indexWhere(
+      (t) =>
+          t.kind == PhoneticTokenKind.consonant &&
+          t.sourceChar == 'ٌ' &&
+          t.symbol == 'و' &&
+          !t.geminate,
+    );
+    final said7 = [for (final t in ayah7) t.token];
+    said7[merged] = phoneticClassOf('ن');
+    expect(
+      plain.verify(clearFrames(said7), ayah7).where((v) => v.type.isError),
+      isEmpty,
+    );
+    expect(
+      verifier.verify(clearFrames(said7), ayah7).where((v) => v.type.isError),
+      isNotEmpty,
+      reason: 'with tajweed on, it is a mistake',
+    );
+    // A wrong letter is still a mistake.
+    final k = ayah7.indexWhere((t) => t.symbol == 'خ');
+    final wrong = [for (final t in ayah7) t.token];
+    wrong[k] = phoneticClassOf('ح');
+    expect(
+      plain.verify(clearFrames(wrong), ayah7)[k].type,
+      RecitationErrorType.wrongLetter,
+    );
+  });
+
   test('stopping inside a joined unit is a stop, not a mistake', () {
     // 2:7 «غِشَٰوَةٌ ۖ وَلَهُمْ»: in flow one unit (the tanween merges into the
     // و); stopping after غِشَٰوَةٌ (a waqf mark) it is said «غِشَاوَه», and

@@ -39,7 +39,12 @@ class HifzSettings {
     this.showMistakes = true,
     this.vibrate = true,
     this.colorWords = true,
+    this.tajweed = true,
   });
+
+  /// Judge tajweed in the pronunciation check (idghām, ikhfāʾ, iqlāb …);
+  /// off, only the letters and vowels.
+  final bool tajweed;
 
   /// Mistakes hold the test until corrected (see [HifzConfig.strict]).
   final bool strict;
@@ -62,12 +67,14 @@ class HifzSettings {
     bool? showMistakes,
     bool? vibrate,
     bool? colorWords,
+    bool? tajweed,
   }) => HifzSettings(
     strict: strict ?? this.strict,
     highlightCurrent: highlightCurrent ?? this.highlightCurrent,
     showMistakes: showMistakes ?? this.showMistakes,
     vibrate: vibrate ?? this.vibrate,
     colorWords: colorWords ?? this.colorWords,
+    tajweed: tajweed ?? this.tajweed,
   );
 
   Map<String, bool> toJson() => {
@@ -76,6 +83,7 @@ class HifzSettings {
     'showMistakes': showMistakes,
     'vibrate': vibrate,
     'colorWords': colorWords,
+    'tajweed': tajweed,
   };
 
   static HifzSettings fromJson(Object? json) {
@@ -88,6 +96,7 @@ class HifzSettings {
       showMistakes: read('showMistakes', true),
       vibrate: read('vibrate', true),
       colorWords: read('colorWords', true),
+      tajweed: read('tajweed', true),
     );
   }
 }

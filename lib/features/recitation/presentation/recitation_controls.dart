@@ -880,6 +880,12 @@ class _HifzSettingsSheet extends ConsumerWidget {
               (v) => settings.copyWith(colorWords: v),
             ),
             toggle(
+              AppLocalizations.of(context).recTajweed,
+              AppLocalizations.of(context).recTajweedSub,
+              settings.tajweed,
+              (v) => settings.copyWith(tajweed: v),
+            ),
+            toggle(
               AppLocalizations.of(context).recShowMistakes,
               AppLocalizations.of(context).recShowMistakesSub,
               settings.showMistakes,
