@@ -50,7 +50,7 @@ const _learnerSounds = {
   SoundGroup.shadda: SoundMargins(uncertain: 2),
   SoundGroup.reducedVowel: SoundMargins(error: 1, uncertain: 2),
   SoundGroup.finalVowel: SoundMargins(error: 2, uncertain: 2),
-  SoundGroup.qalqala: SoundMargins(uncertain: 2),
+  SoundGroup.qalqala: SoundMargins(error: 2, uncertain: 4),
   SoundGroup.nasal: SoundMargins(uncertain: 2),
   SoundGroup.throat: SoundMargins(uncertain: 2),
 };

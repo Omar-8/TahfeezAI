@@ -320,12 +320,15 @@ class AcousticVerificationController
 
   /// Sounds whose evidence is naturally weak in learners' correct
   /// recitation: their extra margins. A vowel reduced to almost nothing is
-  /// a mistake only with clearer evidence (+1, a unit's last vowel +2).
+  /// a mistake only with clearer evidence (+1, a unit's last vowel +2). A
+  /// qalqala letter with sukun or at a stop (its echo blurs it): +2 / +4 —
+  /// on QDAT's amateur recitations judged good, its false mistakes 1.4 ->
+  /// 0.8%, uncertain 6.3 -> 4.9%, with test mistakes found unchanged.
   static const learnerSounds = {
     SoundGroup.shadda: SoundMargins(uncertain: 2),
     SoundGroup.reducedVowel: SoundMargins(error: 1, uncertain: 2),
     SoundGroup.finalVowel: SoundMargins(error: 2, uncertain: 2),
-    SoundGroup.qalqala: SoundMargins(uncertain: 2),
+    SoundGroup.qalqala: SoundMargins(error: 2, uncertain: 4),
     SoundGroup.nasal: SoundMargins(uncertain: 2),
     SoundGroup.throat: SoundMargins(uncertain: 2),
   };
