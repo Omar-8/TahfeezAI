@@ -12,6 +12,15 @@ double _logAdd(double a, double b) {
   return a + math.log(1 + math.exp(b - a));
 }
 
+/// Sounds whose length varies — the long vowels (madd: ا ۦ ۥ) and the
+/// nasal (ghunnah: ں). The model spells a long one as the symbol repeated
+/// with blanks between (a six-count madd: ا _ ا _ ا …), while the expected
+/// pronunciation has it once (its length is not judged): one such token may
+/// take the symbol again after a blank.
+final Set<int> stretchableTokens = {
+  for (final c in const ['ا', 'ۦ', 'ۥ', 'ں']) phoneticClassOf(c),
+};
+
 /// Frames a token was aligned to (inclusive).
 typedef FrameSpan = ({int start, int end});
 
@@ -58,6 +67,10 @@ CtcAlignment ctcForcedAlign(
     if (i >= 2 && labels[i] != ctcBlank && labels[i] != labels[i - 2]) {
       preds[i].add(i - 2);
     }
+  }
+  // A stretchable token, after the blank that follows it, again.
+  for (var i = 1; i + 1 < s; i += 2) {
+    if (stretchableTokens.contains(labels[i])) preds[i].add(i + 1);
   }
   for (var k = 0; k < n; k++) {
     if (!opt[k]) continue;
@@ -141,6 +154,9 @@ double ctcLogProbability(AcousticFrames frames, List<int> tokens) {
       if (i >= 1) v = _logAdd(v, a[i - 1]);
       if (i >= 2 && ext[i] != ctcBlank && ext[i] != ext[i - 2]) {
         v = _logAdd(v, a[i - 2]);
+      }
+      if (i.isOdd && i + 1 < s && stretchableTokens.contains(ext[i])) {
+        v = _logAdd(v, a[i + 1]);
       }
       next[i] = v + frames.at(f, ext[i]);
     }

@@ -42,7 +42,15 @@ class MushafWordOverlay {
     this.marks = const {},
     this.hideUnrevealed = true,
     this.followHideMode = false,
+    this.heard = const {},
+    this.corrected = const {},
   });
+
+  /// For a word marked wrong: what was heard in its place (phonetic).
+  final Map<WordRef, String> heard;
+
+  /// Words said wrong at first, then corrected.
+  final Set<WordRef> corrected;
 
   /// Words are hidden as hide mode hides them, not by [revealed] — a
   /// finished recitation's colours, kept on a page the reciter may go on
@@ -68,6 +76,8 @@ class MushafWordOverlay {
       other.last == last &&
       other.hideUnrevealed == hideUnrevealed &&
       other.followHideMode == followHideMode &&
+      mapEquals(other.heard, heard) &&
+      setEquals(other.corrected, corrected) &&
       setEquals(other.revealed, revealed) &&
       mapEquals(other.marks, marks);
 

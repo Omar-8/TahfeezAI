@@ -40,6 +40,7 @@ void main() {
   final corpus = loadTestCorpus();
   late FakeRecognizer recognizer;
   late ProviderContainer container;
+  late ProviderSubscription<HifzState> hifzListener;
   late int vibrations;
 
   HifzState hifz() => container.read(hifzControllerProvider);
@@ -117,7 +118,7 @@ void main() {
         ..setRevealed({42: revealedOnPage});
     }
     container.listen(liveRecognitionControllerProvider, (_, _) {});
-    container.listen(hifzControllerProvider, (_, _) {});
+    hifzListener = container.listen(hifzControllerProvider, (_, _) {});
     await container.read(quranWordCorpusProvider.future);
     final settings = container.read(hifzSettingsProvider.notifier);
     settings.update(
@@ -261,6 +262,33 @@ void main() {
     container.read(mushafHideModeProvider.notifier).toggle();
     await pumpEventQueue();
     expect(container.read(mushafWordOverlayProvider), isNull);
+  });
+
+  test('leaving the Mushaf clears the colours', () async {
+    const kursiVerse = (chapterNo: 2, verseNo: 255);
+    await setUpHifz(from: kursiVerse, to: kursiVerse);
+    await recite(kursi.split(' ').take(5).join(' '));
+    await session().stop();
+    await pumpEventQueue();
+    expect(container.read(mushafWordOverlayProvider), isNotNull);
+    // Nothing watches the test any more (the Mushaf closed): it goes, and
+    // its colours with it.
+    hifzListener.close();
+    await pumpEventQueue();
+    expect(container.read(mushafWordOverlayProvider), isNull);
+  });
+
+  test('a wrong word keeps what was heard in its place', () async {
+    const kursiVerse = (chapterNo: 2, verseNo: 255);
+    await setUpHifz(from: kursiVerse, to: kursiVerse, strict: false);
+    final start = corpus.verseStartPosition(kursiVerse)!;
+    await recite(
+      kursi.replaceFirst('الحي', 'العلي').split(' ').take(15).join(' '),
+    );
+    final overlay = container.read(mushafWordOverlayProvider)!;
+    final wrong = corpus.words[start + 5].ref;
+    expect(overlay.marks[wrong], MushafWordMark.wrong);
+    expect(overlay.heard[wrong], isNotEmpty);
   });
 
   test("a new recitation clears the last one's colours", () async {

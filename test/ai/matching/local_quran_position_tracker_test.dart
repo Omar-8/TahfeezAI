@@ -114,7 +114,11 @@ void main() {
       expect(repeat.verdicts[HifzVerdict.correct], 9);
       final (restart, _) = run('restart');
       expect(restart.verdicts[HifzVerdict.correct], 29);
-      expect(restart.verdicts[HifzVerdict.repeated], 13);
+      // The restart's basmala (1:1) is passed over as the opening formula
+      // (madd now fits exactly, so it beats re-reading the words), then
+      // 1:2 onwards repeats — none of it a mistake.
+      expect(restart.verdicts[HifzVerdict.repeated], 8);
+      expect(restart.log, contains(startsWith('passed over 1:1:1')));
       expect(restart.log, contains(startsWith('passed over 16:98:5')));
     });
 

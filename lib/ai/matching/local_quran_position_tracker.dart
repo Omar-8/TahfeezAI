@@ -719,7 +719,11 @@ class LocalQuranPositionTracker implements RecitationPositionMatcher {
           arg = c;
         }
       }
-      excess[f] = top - window.at(f, label[f]);
+      // A stretched madd / ghunnah holds blanks between its repeats.
+      final fit = stretchableTokens.contains(label[f])
+          ? math.max(window.at(f, label[f]), window.at(f, ctcBlank))
+          : window.at(f, label[f]);
+      excess[f] = top - fit;
       if (f < start && arg != ctcBlank) prefixSpeech++;
       if (f > alignedEnd) {
         if (arg != ctcBlank) {

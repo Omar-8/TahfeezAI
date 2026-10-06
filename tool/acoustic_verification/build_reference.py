@@ -22,7 +22,9 @@ Per ayah (strings of one character per token):
      tokens from the unit's end (w, b: all for b) or start (i), and put
      these tokens there instead. The ayah's last unit may also have "c"
      (continuing into the next ayah without stopping, an end edit) and its
-     first unit "j" (joined on from the previous ayah, a start edit).
+     first unit "j" (joined on from the previous ayah, a start edit). A unit
+     of several words may have "s": {k: [n, t, w, l, c, f]} — the whole unit
+     (n tokens) as said when the reciter stops inside it, after word k.
 
 Usage: python build_reference.py <repo root>
 """
@@ -30,7 +32,7 @@ import json, os, sys, unicodedata
 from multiprocessing import Pool
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from acoustic import Aya, has_letter, join_forms, reference, unit_variants  # noqa: E402
+from acoustic import Aya, has_letter, join_forms, reference, unit_splits, unit_variants  # noqa: E402
 
 LETTERS = lambda w: [c for c in w if ("ء" <= c <= "ي" or c in "ٱٰ") and c != "ـ"]
 
@@ -83,6 +85,11 @@ def build(key):
         c=''.join(t.uth_char for t in toks),
         f=''.join(chr(64 + flag(t)) for t in toks),
     )
+    # Stopping inside a unit of several words: the whole unit replaced.
+    for u, splits in unit_splits(uth, toks).items():
+        n = len([t for t in toks if t.unit == u])
+        variants.setdefault(str(u), {})['s'] = {
+            str(k): [n] + enc(pick) for k, pick in splits.items()}
     # Joined to the neighbouring ayahs of the same surah (wasl).
     def end_edit(default, pick):
         n = 0

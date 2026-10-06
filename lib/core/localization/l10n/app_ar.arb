@@ -235,5 +235,7 @@
   "settingsAppTheme": "مظهر التطبيق",
   "settingsThemeWarm": "دافئ",
   "settingsThemeSepia": "بُنّي",
-  "settingsThemeBlack": "أسود"
+  "settingsThemeBlack": "أسود",
+  "recFeedbackHeardInstead": "سُمع بدلًا منها: «{heard}»",
+  "recFeedbackCorrected": "قيلت خطأً أولًا ثم صُحِّحت."
 }

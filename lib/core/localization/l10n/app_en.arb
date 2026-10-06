@@ -518,5 +518,14 @@
   "settingsAppTheme": "App theme",
   "settingsThemeWarm": "Warm",
   "settingsThemeSepia": "Sepia",
-  "settingsThemeBlack": "Black"
+  "settingsThemeBlack": "Black",
+  "recFeedbackHeardInstead": "Heard instead: «{heard}»",
+  "@recFeedbackHeardInstead": {
+    "placeholders": {
+      "heard": {
+        "type": "String"
+      }
+    }
+  },
+  "recFeedbackCorrected": "Said wrong at first, then corrected."
 }

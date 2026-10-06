@@ -231,9 +231,17 @@ class HifzController extends Notifier<HifzState> {
 
   @override
   HifzState build() {
+    // The page's colours belong to this controller: leaving the Mushaf
+    // (which disposes it) clears them, and so does finding a finished
+    // recitation's left over when it starts.
+    final overlay = ref.read(mushafWordOverlayProvider.notifier);
+    if (ref.read(mushafWordOverlayProvider)?.followHideMode ?? false) {
+      Future.microtask(() => overlay.set(null));
+    }
     ref.onDispose(() {
       unawaited(_recognition?.cancel());
       unawaited(_frames?.cancel());
+      Future.microtask(() => overlay.set(null));
     });
     ref.listen(quranWordCorpusProvider, (_, next) {
       _corpus = next.value;
@@ -378,6 +386,8 @@ class HifzController extends Notifier<HifzState> {
             revealed: s.revealed,
             marks: marks,
             hideUnrevealed: ref.read(mushafHideModeProvider).enabled,
+            heard: Map.of(_heardAt),
+            corrected: Set.of(_correctedAt),
           ),
         );
   }
@@ -413,6 +423,8 @@ class HifzController extends Notifier<HifzState> {
             },
             hideUnrevealed: false,
             followHideMode: true,
+            heard: Map.of(_heardAt),
+            corrected: Set.of(_correctedAt),
           ),
         );
   }
@@ -439,6 +451,8 @@ class HifzController extends Notifier<HifzState> {
   /// word not yet uncovered on the visible page; with the page visible,
   /// wherever the reciter turns out to start.
   void _begin() {
+    _heardAt.clear();
+    _correctedAt.clear();
     // A new recitation: the last one's colours go.
     if (_results) {
       _results = false;
@@ -647,7 +661,21 @@ class HifzController extends Notifier<HifzState> {
     _followPage();
   }
 
+  /// What was heard in place of each word marked wrong, and the words
+  /// corrected after a mistake — shown in a word's detail sheet.
+  final _heardAt = <WordRef, String>{};
+  final _correctedAt = <WordRef>{};
+
   void _publish(List<HifzEvent> events, {bool? running}) {
+    for (final e in events) {
+      final ref = e.ref;
+      if (ref == null) continue;
+      if (e.verdict == HifzVerdict.wrong && e.heard != null) {
+        _heardAt[ref] = e.heard!;
+      } else if (e.verdict == HifzVerdict.selfCorrected) {
+        _correctedAt.add(ref);
+      }
+    }
     final judge = _judge!;
     final corpus = judge.corpus;
     final recent = [...state.recent, ...events];

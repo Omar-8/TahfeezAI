@@ -104,6 +104,16 @@ def reference(uthmani: str) -> list[Token]:
 
 # ---------------------------------------------------------------- alignment
 
+# Sounds whose length varies (madd ا ۦ ۥ, ghunnah ں): the model spells a
+# long one as the symbol repeated with blanks between; one expected token may
+# take the symbol again after a blank (as lib/ai/acoustic/ctc.dart).
+STRETCH = True
+
+
+def _stretchable(label):
+    return STRETCH and label in {ID['ا'], ID['ۦ'], ID['ۥ'], ID['ں']}
+
+
 def _states(tokens):
     """CTC states: blank, tok0, blank, tok1, ..., blank."""
     labels = []
@@ -130,6 +140,10 @@ def align(logp: np.ndarray, tokens: list[Token], optional_mask=None):
             preds[s].append(s - 1)
         if s >= 2 and labels[s] != BLANK and labels[s] != labels[s - 2]:
             preds[s].append(s - 2)
+    # a stretchable token, after the blank that follows it, again
+    for s in range(1, S - 1, 2):
+        if _stretchable(labels[s]):
+            preds[s].append(s + 1)
     # skipping optional token k (state 2k+1): its surroundings connect
     for k, o in enumerate(opt):
         if not o:
@@ -202,11 +216,13 @@ def ctc_logprob(logp: np.ndarray, labels: list[int]) -> float:
     skip = np.zeros(S, bool)
     for s in range(2, S):
         skip[s] = ext[s] != BLANK and ext[s] != ext[s - 2]
+    back = np.array([s % 2 == 1 and s + 1 < S and _stretchable(ext[s]) for s in range(S)])
     for t in range(1, T):
         prev1 = np.concatenate([[NEG], a[:-1]])
         prev2 = np.concatenate([[NEG, NEG], a[:-2]])
         prev2 = np.where(skip, prev2, NEG)
-        a = np.logaddexp(np.logaddexp(a, prev1), prev2) + logp[t, ext_a]
+        nxt = np.where(back, np.concatenate([a[1:], [NEG]]), NEG)
+        a = np.logaddexp(np.logaddexp(np.logaddexp(a, prev1), prev2), nxt) + logp[t, ext_a]
     return float(np.logaddexp(a[-1], a[-2]) if S > 1 else a[-1])
 
 
@@ -390,6 +406,45 @@ def _letter_tokens(uthmani):
     return toks
 
 
+def unit_splits(uthmani: str, tokens: list[Token]):
+    """Per sound unit of several words (joined in flow, e.g. by idgham across
+    a word boundary), its pronunciation when the reciter stops inside it,
+    after word k: {unit: {k: tokens}} — the words up to k as said at a stop
+    (from the phonetizer on the ayah cut after k, so their start keeps its
+    context) and the rest as started afresh (on the ayah from word k + 1).
+    A split whose parts don't cover exactly the unit's words is left out."""
+    parts = _letter_tokens(uthmani)
+    units = {}
+    for t in tokens:
+        units.setdefault(t.unit, []).append(t)
+    out = {}
+    for u, ts in units.items():
+        words = sorted({t.word for t in ts})
+        if len(words) < 2:
+            continue
+        default = [(t.label, t.geminate) for t in ts]
+        for k in words[:-1]:
+            left_text = ' '.join(tok for tok, w in parts if 0 <= w <= k)
+            right_text = ' '.join(tok for tok, w in parts if w > k)
+            try:
+                left, right = reference(left_text), reference(right_text)
+            except Exception:
+                continue
+            left = [t for t in left if t.unit == left[-1].unit]
+            right = [t for t in right if t.unit == 0]
+            for t in right:
+                t.word += k + 1
+            if (sorted({t.word for t in left}) != [w for w in words if w <= k]
+                    or sorted({t.word for t in right}) != [w for w in words if w > k]):
+                continue
+            pick = left + right
+            for t in pick:
+                t.unit = u
+            if [(t.label, t.geminate) for t in pick] != default:
+                out.setdefault(u, {})[k] = pick
+    return out
+
+
 def unit_variants(uthmani: str, tokens: list[Token]):
     """Per sound unit, its pronunciation when the reciter stops after it
     (waqf), starts with it (ibtida), or both — from the phonetizer itself,
@@ -440,8 +495,22 @@ def _unit_spans(tokens, spans):
     return first, last
 
 
+STOP_INSIDE_FRAMES = 8  # a stop inside a unit: 320 ms of silence at least
+
+
+def _pause_within(logp, f0, f1, th):
+    """A run of max(th.pause_frames, STOP_INSIDE_FRAMES) frames in f0+1..f1-1
+    where nothing beats the blank (as the Dart verifier's _pauseWithin)."""
+    run = 0
+    for f in range(f0 + 1, f1):
+        run = run + 1 if logp[f].max() <= logp[f, BLANK] else 0
+        if run >= max(th.pause_frames, STOP_INSIDE_FRAMES):
+            return True
+    return False
+
+
 def verify_ayah(logp, tokens, variants, th: Thresholds = Thresholds(),
-                open_start=False, open_end=False):
+                open_start=False, open_end=False, splits=None):
     """Two passes: align, find the reciter's pauses, switch the units around
     each pause to their waqf / ibtida forms, align again and verify.
     Returns (tokens used, spans, verdicts)."""
@@ -464,6 +533,7 @@ def verify_ayah(logp, tokens, variants, th: Thresholds = Thresholds(),
         by_unit.setdefault(t.unit, []).append(t)
     order = sorted(by_unit)
     for n, u in enumerate(order):
+        split_after = None
         v = variants.get(u, {})
         kind = ('both' if u in starts and u in pause_after else
                 'waqf' if u in pause_after else 'ibtida' if u in starts else None)
@@ -485,18 +555,42 @@ def verify_ayah(logp, tokens, variants, th: Thresholds = Thresholds(),
             paused = ctc_logprob(seg, ctx_before + [t.label for t in ts] + ctx_after)
             if paused <= flow:
                 ts = None
+        # Stopping inside a unit of several words: its split forms, where a
+        # pause was heard inside it (unit_splits; as the Dart verifier).
+        if splits and u in splits and u in first and _pause_within(logp, first[u], last[u], th):
+            prev_u = order[n - 1] if n > 0 else None
+            next_u = order[n + 1] if n + 1 < len(order) else None
+            f0 = first[prev_u] if prev_u in first else first[u]
+            f1 = last[next_u] if next_u in last else last[u]
+            f0, f1 = max(0, f0 - 2), min(T - 1, f1 + 2)
+            ctx_before = [t.label for t in by_unit.get(prev_u, [])]
+            ctx_after = [t.label for t in by_unit.get(next_u, [])]
+            seg = logp[f0:f1 + 1]
+            score = lambda xs: ctc_logprob(seg, ctx_before + [t.label for t in xs] + ctx_after)
+            best = score(ts if ts is not None else by_unit[u])
+            for k_, pick in splits[u].items():
+                sc = score(pick)
+                if sc > best:
+                    best, ts, split_after = sc, pick, k_
         if ts is not None:
-            fv = [t for t in by_unit[u] if t.unit_final_vowel]
-            if u in pause_after and fv:
-                final_vowel[u] = fv[0]
+            if split_after is not None:
+                # stopped inside the unit after word k: its last vowel dropped
+                of_word = [t for t in by_unit[u] if t.word == split_after]
+                if of_word and of_word[-1].kind == 'vowel' and of_word[-1].label in SHORT:
+                    final_vowel[u] = (of_word[-1], split_after)
+            else:
+                fv = [t for t in by_unit[u] if t.unit_final_vowel]
+                if u in pause_after and fv:
+                    final_vowel[u] = (fv[0], None)
             chosen += [Token(**{**t.__dict__}) for t in ts]
         else:
             chosen += by_unit[u]
     spans = align_with_waqf(logp, chosen, th)
     verdicts = verify(logp, chosen, spans, th)
     # A different vowel said just before a pause is still a mistake.
-    for u, vowel in final_vowel.items():
-        ks = [k for k, t in enumerate(chosen) if t.unit == u and spans[k] is not None]
+    for u, (vowel, last_word) in final_vowel.items():
+        ks = [k for k, t in enumerate(chosen) if t.unit == u and spans[k] is not None
+              and (last_word is None or t.word <= last_word)]
         if not ks:
             continue
         k = ks[-1]

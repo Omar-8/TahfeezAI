@@ -124,7 +124,13 @@ class PhoneticSpan {
 /// into the next ayah ([wasl]); its first unit, by default as started
 /// afresh, may be joined on from the previous ayah ([joined]).
 class PauseForms {
-  const PauseForms({this.waqf, this.ibtida, this.wasl, this.joined});
+  const PauseForms({
+    this.waqf,
+    this.ibtida,
+    this.wasl,
+    this.joined,
+    this.splits = const {},
+  });
 
   /// (tokens dropped from the unit's end, tokens put there instead).
   final (int, List<PhoneticToken>)? waqf;
@@ -138,6 +144,12 @@ class PauseForms {
   /// An ayah's first unit said on from the previous ayah (a start edit).
   final (int, List<PhoneticToken>)? joined;
 
+  /// A unit of several words (joined in flow, e.g. by idgham across a word
+  /// boundary) as said when the reciter stops inside it, after word k (its
+  /// index in the ayah): the whole unit — the words up to k at a stop, the
+  /// rest started afresh.
+  final Map<int, List<PhoneticToken>> splits;
+
   PauseForms withUnit(int unit) {
     (int, List<PhoneticToken>)? move((int, List<PhoneticToken>)? f) =>
         f == null ? null : (f.$1, [for (final t in f.$2) t.withUnit(unit)]);
@@ -146,6 +158,10 @@ class PauseForms {
       ibtida: move(ibtida),
       wasl: move(wasl),
       joined: move(joined),
+      splits: {
+        for (final MapEntry(:key, :value) in splits.entries)
+          key: [for (final t in value) t.withUnit(unit)],
+      },
     );
   }
 
@@ -294,6 +310,11 @@ class QuranPhoneticReference {
             ibtida: form(m['i'], unit),
             wasl: form(m['c'], unit),
             joined: form(m['j'], unit),
+            splits: {
+              for (final MapEntry(:key, :value)
+                  in ((m['s'] as Map?) ?? const {}).entries)
+                int.parse(key as String): form(value, unit)!.$2,
+            },
           );
         }(),
     };

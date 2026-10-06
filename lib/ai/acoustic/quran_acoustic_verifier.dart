@@ -303,7 +303,9 @@ class QuranAcousticVerifier {
     };
     final order = byUnit.keys.toList()..sort();
     final chosen = <PhoneticToken>[];
-    final finalVowel = <int, PhoneticToken>{};
+    // Per unit, a vowel dropped at a stop and the last word said before it
+    // (null: the unit's end) — checked below for a different vowel said.
+    final finalVowel = <int, (PhoneticToken, int?)>{};
     for (var n = 0; n < order.length; n++) {
       final u = order[n];
       final unit = byUnit[u]!;
@@ -324,6 +326,15 @@ class QuranAcousticVerifier {
               if (e || b)
                 forms.apply(unit, stop: s, start: st, end: e, begin: b),
       ].where((o) => !_sameTokens(o, unit)).toList();
+      // Stopping inside a unit of several words (after a word whose
+      // ending joins the next in flow): only where a pause was heard
+      // inside it, so in flow the joined form is the one judged.
+      if (forms != null &&
+          forms.splits.isNotEmpty &&
+          first.containsKey(u) &&
+          _pauseWithin(frames, first[u]!, last[u]!)) {
+        options.addAll(forms.splits.values);
+      }
       List<PhoneticToken>? candidate;
       if (options.isNotEmpty && !first.containsKey(u)) {
         candidate = options.first;
@@ -359,9 +370,25 @@ class QuranAcousticVerifier {
         chosen.addAll(unit);
         continue;
       }
-      if (stop) {
+      // Stopped inside the unit, after word k: that word's last vowel (in
+      // flow) was dropped at the stop.
+      final splitAfter = forms?.splits.entries
+          .where((e) => identical(e.value, candidate))
+          .firstOrNull
+          ?.key;
+      if (splitAfter != null) {
+        final ofWord = [
+          for (final x in unit)
+            if (x.word.wordIndex == splitAfter) x,
+        ];
+        if (ofWord.isNotEmpty &&
+            ofWord.last.kind == PhoneticTokenKind.vowel &&
+            ShortVowel.ofToken(ofWord.last.token) != null) {
+          finalVowel[u] = (ofWord.last, splitAfter);
+        }
+      } else if (stop) {
         for (final x in unit) {
-          if (x.unitFinalVowel) finalVowel[u] = x;
+          if (x.unitFinalVowel) finalVowel[u] = (x, null);
         }
       }
       chosen.addAll(candidate);
@@ -369,10 +396,14 @@ class QuranAcousticVerifier {
     spans = _alignWithWaqf(frames, chosen);
     final out = _verifyAligned(frames, chosen, spans);
     // A different vowel said just before a pause is still a mistake.
-    for (final MapEntry(key: u, value: vowel) in finalVowel.entries) {
+    for (final MapEntry(key: u, value: (vowel, lastWord))
+        in finalVowel.entries) {
       final ks = [
         for (var k = 0; k < chosen.length; k++)
-          if (chosen[k].unit == u && spans[k] != null) k,
+          if (chosen[k].unit == u &&
+              spans[k] != null &&
+              (lastWord == null || chosen[k].word.wordIndex <= lastWord))
+            k,
       ];
       if (ks.isEmpty) continue;
       final k = ks.last;
@@ -471,6 +502,29 @@ class QuranAcousticVerifier {
       hi = candidates[k].unit;
     }
     return lo == null ? null : (lo, hi!);
+  }
+
+  /// A stop inside a sound unit: at least this many silent frames (320 ms;
+  /// a reciter's stop is longer than the 160 ms that separates units, and
+  /// shorter gaps inside a joined unit are too often just the audio).
+  static const stopInsideFrames = 8;
+
+  /// Whether frames [from]..[to] hold a stop: a run of at least
+  /// [stopInsideFrames] (and [AcousticThresholds.pauseFrames]) frames where
+  /// nothing but the blank is likely.
+  bool _pauseWithin(AcousticFrames frames, int from, int to) {
+    var run = 0;
+    for (var f = from + 1; f < to; f++) {
+      var blank = true;
+      for (var c = 1; c < frames.classes && blank; c++) {
+        if (frames.at(f, c) > frames.at(f, ctcBlank)) blank = false;
+      }
+      run = blank ? run + 1 : 0;
+      if (run >= math.max(thresholds.pauseFrames, stopInsideFrames)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   static bool _sameTokens(List<PhoneticToken> a, List<PhoneticToken> b) {

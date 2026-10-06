@@ -27,12 +27,20 @@ class RecitationWordFeedback extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final mark = ref.watch(mushafWordOverlayProvider)?.marks[wordRef];
+    final overlay = ref.watch(mushafWordOverlayProvider);
+    final mark = overlay?.marks[wordRef];
     final l10n = AppLocalizations.of(context);
     final List<String> lines;
     switch (mark) {
       case MushafWordMark.wrong:
-        lines = [l10n.recFeedbackWrongWord];
+        final heard = overlay!.heard[wordRef];
+        lines = [
+          if (overlay.corrected.contains(wordRef)) l10n.recFeedbackCorrected,
+          if (heard != null && readablePhonetic(heard).isNotEmpty)
+            l10n.recFeedbackHeardInstead(readablePhonetic(heard))
+          else if (!overlay.corrected.contains(wordRef))
+            l10n.recFeedbackWrongWord,
+        ];
       case MushafWordMark.skipped:
         lines = [l10n.recFeedbackSkipped];
       case MushafWordMark.tashkeel:
@@ -107,6 +115,16 @@ class RecitationWordFeedback extends ConsumerWidget {
   static String _capital(String s) =>
       s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);
 }
+
+/// The phonetic script the recognizer hears in (Quran Phonetic Script),
+/// made readable as plain Arabic: its long-vowel and nasal signs as
+/// letters, its tajweed markers (qalqala, sakt, imala …) left out.
+String readablePhonetic(String heard) => heard
+    .replaceAll('ۦ', 'ي')
+    .replaceAll('ۥ', 'و')
+    .replaceAll('ں', 'ن')
+    .replaceAll(RegExp('[ڇؙۜ۾ٲـ۪]'), '')
+    .trim();
 
 /// The base letters of an Uthmani word, in order — the positions the
 /// phonetic reference counts a mistake's letter in (`build_reference.py`:

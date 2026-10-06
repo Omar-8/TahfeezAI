@@ -168,6 +168,36 @@ void main() {
     );
   });
 
+  test('stopping inside a joined unit is a stop, not a mistake', () {
+    // 2:7 «غِشَٰوَةٌ ۖ وَلَهُمْ»: in flow one unit (the tanween merges into the
+    // و); stopping after غِشَٰوَةٌ (a waqf mark) it is said «غِشَاوَه», and
+    // «وَلَهُمْ» starts afresh.
+    final expected = reference.words(2007, 8, 9);
+    final unit = expected.first.unit;
+    final forms = reference.pauseForms(2007);
+    final pauses = {
+      for (final e in forms.entries)
+        if (expected.any((t) => t.unit == e.key)) e.key: e.value,
+    };
+    final split = forms[unit]!.splits[8]!;
+    final heard = [for (final t in split) t.token];
+    final cut = split.indexWhere((t) => t.word.wordIndex == 9);
+    final stopped = verifier.verify(
+      clearFrames(heard, pauseAfter: cut),
+      expected,
+      pauses: pauses,
+    );
+    expect(stopped.where((v) => v.type.isError), isEmpty);
+    // The same sounds with no pause between them are judged as said in
+    // flow, where «غِشَاوَه» is wrong.
+    final flowing = verifier.verify(
+      clearFrames(heard),
+      expected,
+      pauses: pauses,
+    );
+    expect(flowing.where((v) => v.type.isError), isNotEmpty);
+  });
+
   test('a unit-final vowel dropped at a pause is a pause, not a mistake', () {
     final heard = said();
     final k = expected.indexWhere(
