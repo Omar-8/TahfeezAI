@@ -392,9 +392,31 @@ class LocalQuranPositionTracker implements RecitationPositionMatcher {
       }
     }
     if (nearOk) {
+      var fit = near;
+      // Going back to words said identically in more than one place nearby
+      // («وَإِذَا» opening 2:13, 2:14 and again within 2:14): which one is
+      // not known from them alone — wait for the next word, which tells.
+      // At a pause nothing more is coming: the nearest.
+      if (near.firstWord < next) {
+        final others = _sameWordsAt(near, first, next);
+        if (others.isNotEmpty) {
+          if (!flush) {
+            _log(
+              'back to ${_fmt(near.firstWord)} or '
+              '${others.map(_fmt).join(', ')}: waiting for the next word',
+            );
+            return const [];
+          }
+          final nearest = [near.firstWord, ...others].reduce(math.max);
+          if (nearest != near.firstWord) {
+            final f = _align(resources, window, nearest, last, flexible: true);
+            if (f != null && _usable(f, config.followCost)) fit = f;
+          }
+        }
+      }
       return [
-        ..._explainPrefix(resources, window, near, first, last, from),
-        ..._emit(near, from, flush),
+        ..._explainPrefix(resources, window, fit, first, last, from),
+        ..._emit(fit, from, flush),
       ];
     }
     // Something not the text, then the text again: a wrong word, then the
@@ -419,6 +441,21 @@ class LocalQuranPositionTracker implements RecitationPositionMatcher {
       'trailing ${near?.trailingSpeech}',
     );
     return null;
+  }
+
+  /// Other places in [first]..[next] where [fit]'s words (all of them, in
+  /// order) are the same words — where the audio fits just as well.
+  List<int> _sameWordsAt(_Fit fit, int first, int next) {
+    final n = fit.lastWord - fit.firstWord + 1;
+    String key(int p) => corpus.words[p].key;
+    return [
+      for (var q = first; q + n - 1 < next + n && q <= next; q++)
+        if (q != fit.firstWord &&
+            q + n - 1 < corpus.length &&
+            [for (var i = 0; i < n; i++) key(q + i)].join(' ') ==
+                [for (var i = 0; i < n; i++) key(fit.firstWord + i)].join(' '))
+          q,
+    ];
   }
 
   /// The window from a gap in the speech on (a word's worth of speech before

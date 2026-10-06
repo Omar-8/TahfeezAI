@@ -299,6 +299,49 @@ void main() {
       expect(heard.last, (ayahId: 107001, wordIndex: 3));
     });
 
+    test('going back to words found in several places waits for the next '
+        'word', () {
+      // 2:14 up to «شَيَٰطِينِهِمْ», then back to «وَإِذَا خَلَوْا۟» (its 7th word)
+      // to say it again. «وَإِذَا» alone also opens 2:13 and 2:14: only
+      // «خَلَوْا۟» after it says which — not 2:13's start.
+      final ref = loadTestReference();
+      List<int> said(int ayah, int from, int to) => [
+        for (final t in ref.words(ayah, from, to)) t.token,
+        ...List.filled(6, 0),
+      ];
+      final tracker = LocalQuranPositionTracker(corpus, loadTestPhonemes)
+        ..start(anchor: pos(2, 14, 1), trustAnchor: true);
+      // A pause after «وَإِذَا» (the app flushes the tracker there).
+      final parts = [said(2014, 0, 9), said(2014, 6, 6), said(2014, 7, 11)];
+      final heard = <WordRef?>[];
+      var at = 0;
+      for (final (i, part) in parts.indexed) {
+        final frames = clearFrames(part);
+        for (var f = 0; f < frames.frames; f += 4) {
+          final to = math.min(frames.frames, f + 4);
+          heard.addAll(
+            tracker
+                .onFrames(TimedAcousticFrames(at + f, frames.slice(f, to - 1)))
+                .whereType<WordHeard>()
+                .map((h) => h.ref),
+          );
+        }
+        at += frames.frames;
+        if (i > 0) {
+          heard.addAll(
+            tracker.flush().whereType<WordHeard>().map((h) => h.ref),
+          );
+        }
+      }
+      expect(heard.where((r) => r?.ayahId == 2013), isEmpty);
+      expect(
+        heard.where((r) => r == (ayahId: 2014, wordIndex: 7)),
+        hasLength(2),
+        reason: '«خَلَوْا۟» said twice',
+      );
+      expect(heard.last, (ayahId: 2014, wordIndex: 11));
+    });
+
     test('noise is never placed', () {
       final (r, _) = run('not_quran');
       expect(r.events, isEmpty);
