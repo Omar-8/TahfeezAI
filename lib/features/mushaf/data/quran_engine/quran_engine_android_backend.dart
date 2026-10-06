@@ -191,13 +191,20 @@ class QuranEngineAndroidPage implements QuranEngineMushafPage {
       controller: _viewController,
       paper: paper,
       defaultInk: ink,
-      layout: const QvpViewLayout(
+      layout: QvpViewLayout(
         lineSpacing: _lineSpacing,
         padSide: _padSide,
         padTop: _padTopBottom,
         padBottom: _padTopBottom,
         maxAspectSlack: _maxAspectSlack,
+        // A full page's lines spread over the whole height the screen
+        // gives it (no band of empty paper under the last line). The short
+        // opening pages keep their own spacing (see [_biggerTextPages]).
+        fillHeight: !_biggerTextPages.contains(pageNumber),
       ),
+      // No drop shadow under the page: on light paper it showed as a grey
+      // band below the last line; the page is the screen, not a sheet on it.
+      paperShadow: false,
       // `QvpPageView` defaults to `panZoomEnabled: true` — a drag *anywhere*
       // on the widget, including the empty letterboxed space around the
       // fitted page (still part of its hit-test area even though nothing
