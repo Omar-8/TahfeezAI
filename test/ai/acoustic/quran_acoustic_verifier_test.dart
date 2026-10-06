@@ -254,6 +254,37 @@ void main() {
     );
   });
 
+  test('a madd of four counts held for two is a tajweed mistake', () {
+    // 5:109 «قَالُوا۟ لَا عِلْمَ لَنَآ إِنَّكَ …»: each madd held its count (the
+    // model repeats a long vowel as it is held), then «لَنَآ»'s four-count
+    // madd cut to one beat.
+    final expected = reference.words(5109, 7, 14);
+    final k = expected.indexWhere(
+      (t) => t.kind == PhoneticTokenKind.long && t.count == 4,
+    );
+    List<int> said({required bool cut}) => [
+      for (var i = 0; i < expected.length; i++)
+        if (expected[i].kind == PhoneticTokenKind.long)
+          ...List.filled(
+            cut && i == k ? 1 : expected[i].count,
+            expected[i].token,
+          )
+        else
+          expected[i].token,
+    ];
+    final held = verifier.verify(clearFrames(said(cut: false)), expected);
+    expect(held[k].type, isNot(RecitationErrorType.maddShort));
+    final cut = verifier.verify(clearFrames(said(cut: true)), expected);
+    expect(cut[k].type, RecitationErrorType.maddShort);
+    expect(
+      const QuranAcousticVerifier(
+        thresholds: AcousticThresholds(tajweed: false),
+      ).verify(clearFrames(said(cut: true)), expected)[k].type,
+      isNot(RecitationErrorType.maddShort),
+      reason: 'tajweed off',
+    );
+  });
+
   test('stopping inside a joined unit is a stop, not a mistake', () {
     // 2:7 «غِشَٰوَةٌ ۖ وَلَهُمْ»: in flow one unit (the tanween merges into the
     // و); stopping after غِشَٰوَةٌ (a waqf mark) it is said «غِشَاوَه», and

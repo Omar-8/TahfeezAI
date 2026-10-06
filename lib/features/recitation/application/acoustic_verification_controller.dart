@@ -859,6 +859,7 @@ class AcousticVerificationController
       RecitationErrorType.wrongLetter,
       RecitationErrorType.shaddaError,
       RecitationErrorType.qalqalaMissing,
+      RecitationErrorType.maddShort,
       RecitationErrorType.wrongVowel,
       RecitationErrorType.sukunError,
       RecitationErrorType.missingVowel,

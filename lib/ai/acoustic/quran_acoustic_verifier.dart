@@ -18,6 +18,9 @@ enum RecitationErrorType {
   /// echo (tajweed).
   qalqalaMissing,
 
+  /// A madd of four or six harakat held clearly shorter (tajweed).
+  maddShort,
+
   /// The evidence is too weak either way.
   uncertain,
 
@@ -33,7 +36,8 @@ enum RecitationErrorType {
       this == missingVowel ||
       this == sukunError ||
       this == shaddaError ||
-      this == qalqalaMissing;
+      this == qalqalaMissing ||
+      this == maddShort;
 }
 
 /// Sounds whose evidence is naturally weak, or easily confused with a
@@ -565,9 +569,30 @@ class QuranAcousticVerifier {
   ) {
     final labels = [for (final t in expected) t.token];
     final out = <PhonemeVerdict>[];
+    final beat = thresholds.tajweed ? _beat(expected, spans) : null;
     for (var k = 0; k < expected.length; k++) {
       final t = expected[k];
       final span = spans[k];
+      // A long madd held clearly short, against the reciter's own beat.
+      if (beat != null &&
+          span != null &&
+          t.kind == PhoneticTokenKind.long &&
+          t.count >= 4 &&
+          _plainOfHidden(t) == null) {
+        final beats = (span.end - span.start + 1) / beat;
+        if (beats < maddShortShare * t.count) {
+          out.add(
+            PhonemeVerdict(
+              token: t,
+              type: RecitationErrorType.maddShort,
+              span: span,
+              likelihoodRatio: beats,
+              observed: '${beats.round()}',
+            ),
+          );
+          continue;
+        }
+      }
       if (thresholds.tajweed && t.optional && t.token == _qalqalaEcho) {
         out.add(_qalqala(frames, expected, spans, labels, k));
         continue;
@@ -687,6 +712,38 @@ class QuranAcousticVerifier {
   }
 
   static final _qalqalaEcho = phoneticClassOf('ڇ');
+
+  /// A madd of 4 or 6 harakat is short when held for less than this share
+  /// of its length, in the reciter's own beats. (On QDAT's expert labels
+  /// for the 4-count madd of «لَنَآ إِنَّكَ»: flagged 1.9% of readers who
+  /// held it, 50% of those heard to cut it short; 0.75 caught 57% but
+  /// flagged more professional recitation.)
+  static const maddShortShare = 0.65;
+
+  /// The reciter's beat (one haraka, in frames): half the median length of
+  /// the two-count madds aligned here that a short vowel follows in their
+  /// unit (one before a stop is often held longer); `null` with fewer than
+  /// two of them.
+  static double? _beat(List<PhoneticToken> expected, List<FrameSpan?> spans) {
+    bool beforeVowel(int k) => expected
+        .skip(k + 1)
+        .takeWhile((u) => u.unit == expected[k].unit)
+        .any((u) => u.kind == PhoneticTokenKind.vowel);
+    final halves = <double>[
+      for (var k = 0; k < expected.length; k++)
+        if (expected[k].kind == PhoneticTokenKind.long &&
+            expected[k].count == 2 &&
+            _plainOfHidden(expected[k]) == null &&
+            spans[k] != null &&
+            beforeVowel(k))
+          (spans[k]!.end - spans[k]!.start + 1) / 2,
+    ]..sort();
+    if (halves.length < 2) return null;
+    final mid = halves.length ~/ 2;
+    return halves.length.isOdd
+        ? halves[mid]
+        : (halves[mid - 1] + halves[mid]) / 2;
+  }
 
   /// A qalqala letter's echo: the frames around it said with the echo or
   /// without — a mistake if clearly without.

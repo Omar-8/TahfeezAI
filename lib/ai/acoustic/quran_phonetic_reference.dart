@@ -69,7 +69,12 @@ class PhoneticToken {
     required this.sourceChar,
     this.geminate = false,
     this.unitFinalVowel = false,
+    this.count = 1,
   });
+
+  /// Its length in harakat where it has one: a madd (long vowel) or a
+  /// ghunnah (geminate nasal); 1 otherwise.
+  final int count;
 
   /// Class in [quranPhoneticVocabulary].
   final int token;
@@ -108,6 +113,7 @@ class PhoneticToken {
     sourceChar: sourceChar,
     geminate: geminate,
     unitFinalVowel: unitFinalVowel,
+    count: count,
   );
 }
 
@@ -326,9 +332,14 @@ class QuranPhoneticReference {
   List<PhoneticToken> _decode(int ayahId) {
     final row = _ayahs[ayahId];
     if (row == null) return const [];
-    return _tokens(ayahId, [
-      for (final k in const ['t', 'w', 'l', 'c', 'f']) row[k]! as String,
-    ], units: row['u']! as String);
+    return _tokens(
+      ayahId,
+      [
+        for (final k in const ['t', 'w', 'l', 'c', 'f']) row[k]! as String,
+      ],
+      units: row['u']! as String,
+      counts: row['n'] as String?,
+    );
   }
 
   /// Tokens from their encoded fields (t, w, l, c, f); the unit of each
@@ -338,6 +349,7 @@ class QuranPhoneticReference {
     List<String> fields, {
     String? units,
     int unit = 0,
+    String? counts,
   }) {
     final t = fields[0].runes.toList();
     final w = fields[1].runes.toList();
@@ -345,6 +357,7 @@ class QuranPhoneticReference {
     final c = fields[3].runes.toList();
     final f = fields[4].runes.toList();
     final u = units?.runes.toList();
+    final n = counts?.runes.toList();
     return [
       for (var i = 0; i < t.length; i++)
         () {
@@ -364,6 +377,7 @@ class QuranPhoneticReference {
             sourceChar: String.fromCharCode(c[i]),
             geminate: flags & 16 != 0,
             unitFinalVowel: flags & 32 != 0,
+            count: n == null ? 1 : n[i] - 48,
           );
         }(),
     ];

@@ -21,6 +21,7 @@ const _names = {
   'SUKUN_ERROR': RecitationErrorType.sukunError,
   'SHADDA_ERROR': RecitationErrorType.shaddaError,
   'QALQALA_MISSING': RecitationErrorType.qalqalaMissing,
+  'MADD_SHORT': RecitationErrorType.maddShort,
   'UNCERTAIN': RecitationErrorType.uncertain,
   'PAUSE': RecitationErrorType.pause,
   'SKIPPED': RecitationErrorType.skipped,

@@ -660,6 +660,10 @@ class HifzStatusStrip extends StatelessWidget {
                 e.observed == 'NO_SHADDA'))) {
       return l10n.recIdgham(expected);
     }
+    if (e.type == RecitationErrorType.maddShort) {
+      final sign = e.expected.split(' ').first;
+      return l10n.recMaddShort(const {'ۦ': 'ي', 'ۥ': 'و'}[sign] ?? sign);
+    }
     if (e.type == RecitationErrorType.qalqalaMissing) {
       // The echo's mark is listed on its letter (in its source).
       return l10n.recQalqala(source ?? expected);

@@ -16,6 +16,8 @@ Per ayah (strings of one character per token):
   c  source Uthmani character
   f  flags            chr(64 + mask): 1 vowel, 2 long, 4 consonant,
                       8 marker (optional), 16 geminate, 32 unit-final vowel
+  n  repeat count     chr(48 + n): a madd's (long) or ghunnah's (geminate)
+                      length in harakat; 1 otherwise
   v  per sound unit, its forms at a pause, from the phonetizer on the text
      cut there: {unit: {"w": waqf (stopping after it), "i": ibtida
      (starting with it), "b": both}}, each [drop, t, w, l, c, f] — drop
@@ -84,6 +86,8 @@ def build(key):
         l=''.join(chr(48 + t.letter) for t in toks),
         c=''.join(t.uth_char for t in toks),
         f=''.join(chr(64 + flag(t)) for t in toks),
+        # each token's repeat count (a madd's / ghunnah's length in harakat)
+        n=''.join(chr(48 + min(t.count, 9)) for t in toks),
     )
     # Stopping inside a unit of several words: the whole unit replaced.
     for u, splits in unit_splits(uth, toks).items():

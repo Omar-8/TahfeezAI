@@ -548,5 +548,13 @@
         "type": "String"
       }
     }
+  },
+  "recMaddShort": "madd: hold «{letter}» longer (4–6 counts here)",
+  "@recMaddShort": {
+    "placeholders": {
+      "letter": {
+        "type": "String"
+      }
+    }
   }
 }

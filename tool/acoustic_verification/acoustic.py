@@ -43,6 +43,9 @@ class Token:
     optional: bool = False
     unit_final_vowel: bool = False
     wasl_hamza: bool = False  # optional hamzat-wasl onset after a pause
+    count: int = 1          # the phonetizer's repeat count: a madd's or a
+                            # ghunnah's length in harakat (on the long / the
+                            # geminate token)
 
     @property
     def sym(self):
@@ -88,11 +91,12 @@ def reference(uthmani: str) -> list[Token]:
         if lab in MARKERS:
             tokens.append(Token(lab, kind='marker', optional=True, **base))
         elif lab in VOWELISH:
-            tokens.append(Token(lab, kind='vowel' if lab in SHORT else 'long', **base))
+            tokens.append(Token(lab, kind='vowel' if lab in SHORT else 'long',
+                                count=j - i, **base))
         else:
             tokens.append(Token(lab, kind='consonant', **base))
-            if j - i >= 2:  # shadda / geminate
-                tokens.append(Token(lab, kind='consonant', geminate=True, **base))
+            if j - i >= 2:  # shadda / geminate (its count: the ghunnah's length)
+                tokens.append(Token(lab, kind='consonant', geminate=True, count=j - i, **base))
         i = j
     # unit-final short vowels: dropped at a pause (waqf)
     for k, t in enumerate(tokens):
@@ -319,12 +323,38 @@ def _alternatives(tokens, spans, k):
     return out
 
 
+MADD_SHORT_SHARE = 0.65  # a 4- or 6-count madd held for less than this share
+
+
+def _beat(tokens, spans):
+    """The reciter's beat (one haraka, frames): half the median length of
+    the two-count madds aligned that a vowel follows in their unit (one
+    before a stop is often held longer); None with fewer than two (as the
+    Dart verifier's _beat)."""
+    def before_vowel(k):  # a short vowel follows in its unit (not before a stop)
+        return any(u.kind == 'vowel' for u in tokens[k + 1:] if u.unit == tokens[k].unit)
+    halves = sorted((spans[k][1] - spans[k][0] + 1) / 2 for k, t in enumerate(tokens)
+                    if t.kind == 'long' and t.count == 2 and _plain_of_hidden(t) is None
+                    and spans[k] is not None and before_vowel(k))
+    if len(halves) < 2:
+        return None
+    mid = len(halves) // 2
+    return halves[mid] if len(halves) % 2 else (halves[mid - 1] + halves[mid]) / 2
+
+
 def verify(logp, tokens, spans, th: Thresholds = Thresholds()):
     T = len(logp)
     post = np.exp(logp)
     verdicts = []
+    beat = _beat(tokens, spans) if th.tajweed else None
     for k, t in enumerate(tokens):
         sp = spans[k]
+        if (beat is not None and sp is not None and t.kind == 'long' and t.count >= 4
+                and _plain_of_hidden(t) is None):
+            beats = (sp[1] - sp[0] + 1) / beat
+            if beats < MADD_SHORT_SHARE * t.count:
+                verdicts.append(Verdict(k, t, 'MADD_SHORT', tuple(sp), 0.0, '', beats, str(round(beats))))
+                continue
         if th.tajweed and t.optional and t.label == ID['ڇ']:
             # a qalqala letter's echo: said with it, or clearly without
             lo, hi, f0, f1 = _window(tokens, spans, k, th.context, T)
