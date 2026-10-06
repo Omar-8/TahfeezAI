@@ -32,7 +32,21 @@ import 'quran_match_controller.dart' show quranWordCorpusProvider;
 import 'recitation_session_controller.dart';
 
 /// How a mistake noticed during recitation is signalled (Android).
-enum MistakeAlert { off, vibrate, sound }
+enum MistakeAlert {
+  off,
+  vibrate,
+  sound,
+  both;
+
+  bool get vibrates => this == vibrate || this == both;
+  bool get beeps => this == sound || this == both;
+
+  /// The alert that vibrates and / or beeps.
+  static MistakeAlert of({required bool vibrate, required bool sound}) =>
+      vibrate
+      ? (sound ? both : MistakeAlert.vibrate)
+      : (sound ? MistakeAlert.sound : off);
+}
 
 /// Configurable Hifz feedback.
 class HifzSettings {
@@ -710,14 +724,9 @@ class HifzController extends Notifier<HifzState> {
   /// per word.
   void _alert(Iterable<WordRef> words) {
     if (!state.running || !words.any(_alerted.add)) return;
-    switch (ref.read(hifzSettingsProvider).alert) {
-      case MistakeAlert.vibrate:
-        ref.read(hifzHapticsProvider)();
-      case MistakeAlert.sound:
-        ref.read(hifzBeepProvider)();
-      case MistakeAlert.off:
-        break;
-    }
+    final alert = ref.read(hifzSettingsProvider).alert;
+    if (alert.vibrates) ref.read(hifzHapticsProvider)();
+    if (alert.beeps) ref.read(hifzBeepProvider)();
   }
 
   /// What was heard in place of each word marked wrong, and the words

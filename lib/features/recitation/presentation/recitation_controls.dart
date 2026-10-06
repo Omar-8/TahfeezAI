@@ -778,7 +778,13 @@ Future<void> showHifzSettingsSheet(BuildContext context) {
   return showModalBottomSheet<void>(
     context: context,
     showDragHandle: true,
-    builder: (context) => const _HifzSettingsSheet(),
+    // The whole screen's height: every setting in view, not half of them.
+    isScrollControlled: true,
+    useSafeArea: true,
+    builder: (context) => const FractionallySizedBox(
+      heightFactor: 1,
+      child: _HifzSettingsSheet(),
+    ),
   );
 }
 
@@ -905,28 +911,37 @@ class _HifzSettingsSheet extends ConsumerWidget {
                 title: Text(AppLocalizations.of(context).recAlert),
                 subtitle: Padding(
                   padding: const EdgeInsets.only(top: 8),
+                  // Vibrate and sound, each on or off: both, one, or none.
                   child: SegmentedButton<MistakeAlert>(
+                    multiSelectionEnabled: true,
+                    emptySelectionAllowed: true,
                     segments: [
-                      for (final (a, label) in [
-                        (
-                          MistakeAlert.off,
-                          AppLocalizations.of(context).recAlertOff,
-                        ),
-                        (
-                          MistakeAlert.vibrate,
+                      ButtonSegment(
+                        value: MistakeAlert.vibrate,
+                        icon: const Icon(Icons.vibration),
+                        label: Text(
                           AppLocalizations.of(context).recAlertVibrate,
                         ),
-                        (
-                          MistakeAlert.sound,
-                          AppLocalizations.of(context).recAlertSound,
-                        ),
-                      ])
-                        ButtonSegment(value: a, label: Text(label)),
+                      ),
+                      ButtonSegment(
+                        value: MistakeAlert.sound,
+                        icon: const Icon(Icons.volume_up_outlined),
+                        label: Text(AppLocalizations.of(context).recAlertSound),
+                      ),
                     ],
-                    selected: {settings.alert},
+                    selected: {
+                      if (settings.alert.vibrates) MistakeAlert.vibrate,
+                      if (settings.alert.beeps) MistakeAlert.sound,
+                    },
                     showSelectedIcon: false,
-                    onSelectionChanged: (s) =>
-                        controller.update(settings.copyWith(alert: s.first)),
+                    onSelectionChanged: (s) => controller.update(
+                      settings.copyWith(
+                        alert: MistakeAlert.of(
+                          vibrate: s.contains(MistakeAlert.vibrate),
+                          sound: s.contains(MistakeAlert.sound),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ),

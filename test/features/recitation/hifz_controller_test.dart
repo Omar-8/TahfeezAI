@@ -185,6 +185,27 @@ void main() {
     expect((beeps, vibrations), (1, 0));
   });
 
+  test('with both alerts a mistake vibrates and beeps', () async {
+    const kursiVerse = (chapterNo: 2, verseNo: 255);
+    await setUpHifz(from: kursiVerse, to: kursiVerse);
+    container
+        .read(hifzSettingsProvider.notifier)
+        .update(
+          container
+              .read(hifzSettingsProvider)
+              .copyWith(alert: MistakeAlert.both),
+        );
+    final upTo = kursi.substring(0, kursi.indexOf('خلفهم'));
+    await recite('$upToخلفنا ولا يحيطون');
+    expect((beeps, vibrations), (1, 1));
+    expect(
+      HifzSettings.fromJson(
+        const HifzSettings(alert: MistakeAlert.both).toJson(),
+      ).alert,
+      MistakeAlert.both,
+    );
+  });
+
   test('a pronunciation mistake on a recited word alerts once', () async {
     const kursiVerse = (chapterNo: 2, verseNo: 255);
     await setUpHifz(from: kursiVerse, to: kursiVerse);

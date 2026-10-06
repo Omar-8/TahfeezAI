@@ -247,7 +247,6 @@
   "recQalqala": "قلقلة: «{letter}» الساكنة تُقلقَل (نبرة خفيفة)",
   "recMaddShort": "مدّ: أطِل «{letter}» (٤–٦ حركات هنا)",
   "recAlert": "التنبيه عند الخطأ",
-  "recAlertOff": "إيقاف",
   "recAlertVibrate": "اهتزاز",
   "recAlertSound": "صوت"
 }
