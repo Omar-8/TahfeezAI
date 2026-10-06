@@ -641,6 +641,18 @@ class HifzStatusStrip extends StatelessWidget {
       'ِ' => l10n.recKasra,
       _ => expected,
     };
+    // Idgham: a nūn (sākinah or a tanween's) merged into the next letter,
+    // that letter doubled — heard as a nūn, or the letter single.
+    final source = RegExp(r'\((.+)\)').firstMatch(e.expected)?.group(1);
+    final fromNun =
+        source != null &&
+        ('ًٌٍ'.contains(source) || (source == 'ن' && expected != 'ن'));
+    if (fromNun &&
+        ((e.type == RecitationErrorType.wrongLetter && e.observed == 'ن') ||
+            (e.type == RecitationErrorType.shaddaError &&
+                e.observed == 'NO_SHADDA'))) {
+      return l10n.recIdgham(expected);
+    }
     return switch (e.type) {
       RecitationErrorType.wrongVowel => l10n.recExpectedHeard(
         vowelName,

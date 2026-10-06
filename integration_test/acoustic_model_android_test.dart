@@ -79,7 +79,19 @@ void main() {
     } catch (e) {
       _log('${DateTime.now()} raw status failed: $e');
     }
-    final status = await model.status();
+    // Installing the test app clears its files: the model may be pushed
+    // only now — wait for it (and the recitation).
+    var status = await model.status();
+    for (var i = 0; i < 90 && !status.usable; i++) {
+      await Future<void>.delayed(const Duration(seconds: 2));
+      status = await model.status();
+    }
+    final pcmFile = File(
+      '${(await getExternalStorageDirectory())!.path}/models/bench.pcm',
+    );
+    for (var i = 0; i < 30 && !pcmFile.existsSync(); i++) {
+      await Future<void>.delayed(const Duration(seconds: 2));
+    }
     _log('model: $status');
     expect(status.usable, isTrue, reason: '$status');
     final before = await model.deviceStats();

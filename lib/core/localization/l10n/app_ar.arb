@@ -237,5 +237,6 @@
   "settingsThemeSepia": "بُنّي",
   "settingsThemeBlack": "أسود",
   "recFeedbackHeardInstead": "سُمع بدلًا منها: «{heard}»",
-  "recFeedbackCorrected": "قيلت خطأً أولًا ثم صُحِّحت."
+  "recFeedbackCorrected": "قيلت خطأً أولًا ثم صُحِّحت.",
+  "recIdgham": "إدغام: تُدغَم النون في «{letter}» (أو قِف قبلها)"
 }

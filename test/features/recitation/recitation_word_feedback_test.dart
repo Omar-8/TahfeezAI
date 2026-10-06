@@ -30,6 +30,34 @@ class _Heard extends AcousticVerificationController {
   );
 }
 
+class _Idgham extends AcousticVerificationController {
+  static const _word = (ayahId: 2007, wordIndex: 8);
+
+  @override
+  AcousticVerificationState build() => const AcousticVerificationState(
+    words: {
+      _word: AcousticWordResult(RecitationErrorType.wrongLetter, [
+        RecitationError(
+          word: _word,
+          letter: 5,
+          type: RecitationErrorType.wrongLetter,
+          expected: 'و (ٌ)',
+          observed: 'ن',
+          likelihoodRatio: 12,
+        ),
+        RecitationError(
+          word: _word,
+          letter: 5,
+          type: RecitationErrorType.shaddaError,
+          expected: 'و (ٌ)',
+          observed: 'NO_SHADDA',
+          likelihoodRatio: 6,
+        ),
+      ]),
+    },
+  );
+}
+
 void main() {
   Future<void> show(
     WidgetTester tester,
@@ -116,6 +144,48 @@ void main() {
     expect(find.text('سُمع بدلًا منها: «ءَلعَلِي»'), findsOneWidget);
     await show(tester, MushafWordMark.wrong, corrected: const {_word});
     expect(find.text('Said wrong at first, then corrected.'), findsOneWidget);
+  });
+
+  testWidgets('a tanween said in full before و is explained as idgham, once', (
+    tester,
+  ) async {
+    // 2:7 «غِشَٰوَةٌ وَلَهُمْ» joined, its tanween's nūn heard: two errors on
+    // the merged و (a nūn heard, the doubled و single) — one idgham.
+    const word = (ayahId: 2007, wordIndex: 8);
+    final container = ProviderContainer(
+      overrides: [
+        acousticVerificationControllerProvider.overrideWith(_Idgham.new),
+      ],
+    );
+    addTearDown(container.dispose);
+    container
+        .read(mushafWordOverlayProvider.notifier)
+        .set(
+          const MushafWordOverlay(
+            first: word,
+            last: word,
+            marks: {word: MushafWordMark.tashkeel},
+            hideUnrevealed: false,
+          ),
+        );
+    for (final (locale, text) in [
+      ('en', 'Idgham: the nūn merges into «و» (or stop before it)'),
+      ('ar', 'إدغام: تُدغَم النون في «و» (أو قِف قبلها)'),
+    ]) {
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp(
+            locale: Locale(locale),
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: const Scaffold(body: RecitationWordFeedback(wordRef: word)),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.textContaining(text), findsOneWidget, reason: locale);
+    }
   });
 
   testWidgets('nothing for a word recited correctly or not recited', (

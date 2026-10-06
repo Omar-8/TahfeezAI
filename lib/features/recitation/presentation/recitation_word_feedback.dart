@@ -55,10 +55,12 @@ class RecitationWordFeedback extends ConsumerWidget {
         ];
         lines = errors.isEmpty
             ? [l10n.recFeedbackPronunciation]
-            : [
-                for (final e in errors.take(3))
+            : {
+                // (one mistake may show as two: a nūn heard and the
+                // merged letter single — the same idgham)
+                for (final e in errors)
                   _onLetter(e, l10n, HifzStatusStrip.describe(e, l10n)),
-              ];
+              }.take(3).toList();
       default:
         return const SizedBox.shrink();
     }

@@ -527,5 +527,13 @@
       }
     }
   },
-  "recFeedbackCorrected": "Said wrong at first, then corrected."
+  "recFeedbackCorrected": "Said wrong at first, then corrected.",
+  "recIdgham": "idgham: the nūn merges into «{letter}» (or stop before it)",
+  "@recIdgham": {
+    "placeholders": {
+      "letter": {
+        "type": "String"
+      }
+    }
+  }
 }
