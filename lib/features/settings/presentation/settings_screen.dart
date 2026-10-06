@@ -7,15 +7,13 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/components/components.dart';
 import '../../../core/theme/app_surface_tone.dart';
 import '../../../core/theme/theme_controller.dart';
-import '../../mushaf/application/mushaf_appearance_controller.dart';
-import '../../mushaf/domain/mushaf_appearance.dart';
 import 'theme_choices.dart';
 
-/// The Settings tab: the app's language, the app's theme and the Quran
-/// page's theme — the two themes independent, so they can be mixed. Every
-/// choice is persisted by its controller ([LocaleController],
-/// [ThemeModeController] with [AppSurfaceToneController],
-/// [MushafAppearanceController]) and applies at once.
+/// The Settings tab: the app's language and theme (the Quran page's own
+/// theme is chosen in the Mushaf, independently, so the two can be mixed).
+/// Every choice is persisted by its controller ([LocaleController],
+/// [ThemeModeController] with [AppSurfaceToneController]) and applies at
+/// once.
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
@@ -28,7 +26,6 @@ class SettingsScreen extends ConsumerWidget {
       ref.watch(themeModeControllerProvider),
       ref.watch(appSurfaceToneProvider),
     );
-    final quranTheme = ref.watch(mushafAppearanceControllerProvider);
 
     Widget group(String title, IconData icon, Widget child) => Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -98,31 +95,6 @@ class SettingsScreen extends ConsumerWidget {
                           .read(appSurfaceToneProvider.notifier)
                           .setTone(choice.tone);
                     },
-                  ),
-              ],
-            ),
-          ),
-          const SizedBox(height: TahfeezSpacing.lg),
-          group(
-            l10n.settingsQuranTheme,
-            Icons.menu_book_outlined,
-            Wrap(
-              key: const ValueKey('settings-quran-theme'),
-              spacing: TahfeezSpacing.sm,
-              runSpacing: TahfeezSpacing.sm,
-              children: [
-                for (final appearance in MushafAppearance.values)
-                  ChoiceChip(
-                    avatar: ThemeSwatch(
-                      paper: appearance.colors.background,
-                      ink: appearance.colors.text,
-                    ),
-                    label: Text(mushafAppearanceName(appearance, l10n)),
-                    selected: appearance == quranTheme,
-                    showCheckmark: false,
-                    onSelected: (_) => ref
-                        .read(mushafAppearanceControllerProvider.notifier)
-                        .setAppearance(appearance),
                   ),
               ],
             ),

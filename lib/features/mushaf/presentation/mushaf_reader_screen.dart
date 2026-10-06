@@ -72,6 +72,8 @@ class _MushafReaderScreenState extends ConsumerState<MushafReaderScreen> {
           // `showMushafReaderOptionsSheet` so Appearance/Quran text
           // boldness can never drift out of sync between them again (see
           // that sheet's own doc comment for the real bug this fixes).
+          // Recording: a red dot while a recitation session runs.
+          const RecordingDot(),
           // Hifz mode's feedback settings, beside the reader's own.
           const HifzSettingsButton(),
           IconButton(

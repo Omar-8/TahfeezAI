@@ -75,7 +75,7 @@ void main() {
           builder: (context, open, _) => Scaffold(
             appBar: AppBar(
               title: const Text('Top bar'),
-              actions: const [HifzSettingsButton()],
+              actions: const [RecordingDot(), HifzSettingsButton()],
             ),
             body: open
                 ? const RecitationMushafAnchor(
@@ -215,7 +215,6 @@ void main() {
     expect(tester.takeException(), isNull, reason: 'no overflow');
     final stopY = tester.getCenter(find.byTooltip('Stop')).dy;
     for (final tip in [
-      'Listening…',
       'Reveal next ayah',
       'Reveal next word',
       'Show ayahs',
@@ -289,15 +288,29 @@ void main() {
     }
 
     await toggleKeepsEye();
+    final before = tester.getRect(find.byTooltip('Hide ayahs'));
     await tester.tap(find.byTooltip('Start recitation'));
     await tester.pumpAndSettle();
+    expect(
+      tester.getRect(find.byTooltip('Hide ayahs')),
+      before,
+      reason: 'the eye stays put as recording starts',
+    );
+    // Recording is shown by a dot in the app bar, not in the bar.
+    expect(
+      find.descendant(
+        of: find.byType(AppBar),
+        matching: find.byTooltip('Listening…'),
+      ),
+      findsOneWidget,
+    );
     await toggleKeepsEye();
 
     // Recording, with every hide button showing: still one row.
     await tester.tap(find.byTooltip('Hide ayahs'));
     await tester.pumpAndSettle();
     final row = tester.getCenter(find.byTooltip('Stop')).dy;
-    for (final tip in ['Listening…', 'Reveal next ayah', 'Show ayahs']) {
+    for (final tip in ['Reveal next ayah', 'Show ayahs']) {
       expect(tester.getCenter(find.byTooltip(tip)).dy, closeTo(row, 1));
     }
     expect(tester.takeException(), isNull, reason: 'no overflow');

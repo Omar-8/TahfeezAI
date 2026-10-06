@@ -665,6 +665,8 @@ class _MushafModeScaffold extends ConsumerWidget {
           // verse-by-verse-only `reader_options_sheet.dart` sheet (which
           // this scaffold never renders while active, so anything gated
           // to Mushaf mode there would be unreachable dead code).
+          // Recording: a red dot while a recitation session runs.
+          const RecordingDot(),
           // Hifz mode's feedback settings, beside the reader's own.
           const HifzSettingsButton(),
           IconButton(

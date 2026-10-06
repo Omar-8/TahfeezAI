@@ -95,8 +95,8 @@ class _RecitationMushafAnchorState
 
 /// The app shell's bottom bar while a Mushaf is open: replaces the
 /// Home/Quran/Settings [navigation] with the live-recitation bar, one row —
-/// a start button before a session, then a recording indicator,
-/// pause/resume and stop while one runs, with the hide-mode controls
+/// a start button before a session, stop and pause/resume while one runs
+/// (its [RecordingDot] is in the app bar), with the hide-mode controls
 /// beside them. Shows [navigation] otherwise.
 ///
 /// Also reports permission-denied/error/saved outcomes as snackbars.
@@ -275,10 +275,11 @@ class _SessionControls extends ConsumerWidget {
         state.phase == RecitationPhase.listening ||
         state.phase == RecitationPhase.paused;
     final centered = ref.watch(platformCapabilitiesProvider).isWeb;
-    // The reveal/hide buttons scale down rather than overflow a narrow
-    // phone. On Android they fill in from the eye's side of the space
-    // between the indicator and the eye, so the eye and the transport
-    // buttons never move; the web keeps everything together in the middle.
+    // Laid out like the bar before a session: stop and pause where the mic
+    // was, the reveal/hide buttons filling in from the eye's side (scaled
+    // down rather than overflowing a narrow phone), the eye at the end — so
+    // the eye never moves, recording or not. The web keeps them together in
+    // the middle.
     const steps = FittedBox(
       fit: BoxFit.scaleDown,
       child: MushafHideControls(part: MushafHideControlsPart.steps),
@@ -288,19 +289,16 @@ class _SessionControls extends ConsumerWidget {
           ? MainAxisAlignment.center
           : MainAxisAlignment.start,
       children: [
-        RecordingIndicator(phase: state.phase),
-        if (centered) ...[
-          const SizedBox(width: _centeredGroupGap),
-          const Flexible(child: steps),
-        ] else
-          const Expanded(
-            child: Align(
-              alignment: AlignmentDirectional.centerEnd,
-              child: steps,
-            ),
+        IconButton.filled(
+          style: IconButton.styleFrom(
+            backgroundColor: scheme.error,
+            foregroundColor: scheme.onError,
           ),
-        const MushafHideControls(part: MushafHideControlsPart.pinned),
-        SizedBox(width: centered ? 8 : 4),
+          icon: const Icon(Icons.stop_rounded),
+          tooltip: l10n.recStop,
+          onPressed: canControl ? controller.stop : null,
+        ),
+        const SizedBox(width: 8),
         if (state.phase == RecitationPhase.paused)
           IconButton.filledTonal(
             icon: const Icon(Icons.play_arrow_rounded),
@@ -313,36 +311,36 @@ class _SessionControls extends ConsumerWidget {
             tooltip: l10n.recPause,
             onPressed: canControl ? controller.pause : null,
           ),
-        const SizedBox(width: 8),
-        IconButton.filled(
-          style: IconButton.styleFrom(
-            backgroundColor: scheme.error,
-            foregroundColor: scheme.onError,
+        if (centered) ...[
+          const SizedBox(width: _centeredGroupGap),
+          const Flexible(child: steps),
+        ] else
+          const Expanded(
+            child: Align(
+              alignment: AlignmentDirectional.centerEnd,
+              child: steps,
+            ),
           ),
-          icon: const Icon(Icons.stop_rounded),
-          tooltip: l10n.recStop,
-          onPressed: canControl ? controller.stop : null,
-        ),
+        const MushafHideControls(part: MushafHideControlsPart.pinned),
       ],
     );
   }
 }
 
-/// That the microphone is recording: a red mic that pulses a few times as
-/// recording starts or resumes, then stays lit — dimmed while paused,
-/// starting or saving. (Not pulsing on: redrawing the bar all the time
-/// would cost the phone work the recognition needs.) Says so — its tooltip
-/// and semantics — in words.
-class RecordingIndicator extends StatefulWidget {
-  const RecordingIndicator({super.key, required this.phase});
-
-  final RecitationPhase phase;
+/// That the microphone is recording, for a Mushaf screen's app bar: a red
+/// dot while a session runs — pulsing a few times as recording starts or
+/// resumes, then steady (not pulsing on: redrawing all the time would cost
+/// the phone work the recognition needs), dimmed while paused, starting or
+/// saving. Says so — its tooltip and semantics — in words. Nothing outside
+/// a session.
+class RecordingDot extends ConsumerStatefulWidget {
+  const RecordingDot({super.key});
 
   @override
-  State<RecordingIndicator> createState() => _RecordingIndicatorState();
+  ConsumerState<RecordingDot> createState() => _RecordingDotState();
 }
 
-class _RecordingIndicatorState extends State<RecordingIndicator>
+class _RecordingDotState extends ConsumerState<RecordingDot>
     with SingleTickerProviderStateMixin {
   static const _pulses = 3;
 
@@ -352,35 +350,24 @@ class _RecordingIndicatorState extends State<RecordingIndicator>
     value: 1,
   );
 
-  bool get _listening => widget.phase == RecitationPhase.listening;
-
-  @override
-  void initState() {
-    super.initState();
-    if (_listening) _start();
-  }
-
-  @override
-  void didUpdateWidget(RecordingIndicator oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    final was = oldWidget.phase == RecitationPhase.listening;
-    if (_listening && !was) _start();
-    if (!_listening) {
-      _pulse
-        ..stop()
-        ..value = 1;
-    }
-  }
-
   /// Fades out and back [_pulses] times, ending lit.
   Future<void> _start() async {
-    for (var i = 0; i < _pulses && mounted && _listening; i++) {
+    for (var i = 0; i < _pulses && mounted; i++) {
       try {
         await _pulse.reverse(from: 1).orCancel;
         await _pulse.forward().orCancel;
       } on TickerCanceled {
         return;
       }
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    if (ref.read(recitationSessionControllerProvider).phase ==
+        RecitationPhase.listening) {
+      _start();
     }
   }
 
@@ -392,33 +379,47 @@ class _RecordingIndicatorState extends State<RecordingIndicator>
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(recitationSessionControllerProvider, (previous, next) {
+      final listening = next.phase == RecitationPhase.listening;
+      if (listening && previous?.phase != RecitationPhase.listening) {
+        _start();
+      } else if (!listening) {
+        _pulse
+          ..stop()
+          ..value = 1;
+      }
+    });
+    final session = ref.watch(recitationSessionControllerProvider);
+    if (!session.isActive) return const SizedBox.shrink();
     final scheme = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context);
-    final label = switch (widget.phase) {
+    final label = switch (session.phase) {
       RecitationPhase.starting => l10n.recStarting,
       RecitationPhase.paused => l10n.recPaused,
       RecitationPhase.stopping => l10n.recSaving,
       _ => l10n.recListening,
     };
-    final color = _listening
-        ? scheme.error
-        : scheme.onSurface.withValues(alpha: 0.38);
+    final listening = session.phase == RecitationPhase.listening;
     return Tooltip(
       message: label,
       child: Semantics(
-        key: const ValueKey('recording-indicator'),
+        key: const ValueKey('recording-dot'),
         label: label,
         liveRegion: true,
-        child: FadeTransition(
-          opacity: Tween(begin: 0.3, end: 1.0).animate(_pulse),
-          child: Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: color.withValues(alpha: 0.14),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: FadeTransition(
+            opacity: Tween(begin: 0.3, end: 1.0).animate(_pulse),
+            child: Container(
+              width: 12,
+              height: 12,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: listening
+                    ? scheme.error
+                    : scheme.onSurface.withValues(alpha: 0.38),
+              ),
             ),
-            child: Icon(Icons.mic_rounded, color: color),
           ),
         ),
       ),

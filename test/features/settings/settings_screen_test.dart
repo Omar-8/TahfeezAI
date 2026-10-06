@@ -5,8 +5,6 @@ import 'package:tahfeez_ai/app/app.dart';
 import 'package:tahfeez_ai/core/localization/locale_controller.dart';
 import 'package:tahfeez_ai/core/theme/app_surface_tone.dart';
 import 'package:tahfeez_ai/core/theme/theme_controller.dart';
-import 'package:tahfeez_ai/features/mushaf/application/mushaf_appearance_controller.dart';
-import 'package:tahfeez_ai/features/mushaf/domain/mushaf_appearance.dart';
 
 import '../../test_helpers/widget_test_overrides.dart';
 
@@ -37,10 +35,6 @@ void main() {
       of: find.byKey(const ValueKey('settings-app-theme')),
       matching: find.text(name),
     );
-    Finder quranTheme(String name) => find.descendant(
-      of: find.byKey(const ValueKey('settings-quran-theme')),
-      matching: find.text(name),
-    );
     await tester.tap(appTheme('Dark'));
     await tester.pumpAndSettle();
     expect(container.read(themeModeControllerProvider), ThemeMode.dark);
@@ -58,19 +52,6 @@ void main() {
       const Color(0xFF000000),
     );
 
-    // The Quran page's theme is its own: sepia pages in a black app.
-    final before = container.read(mushafAppearanceControllerProvider);
-    await tester.ensureVisible(quranTheme('Sepia'));
-    await tester.tap(quranTheme('Sepia'));
-    await tester.pumpAndSettle();
-    expect(before, isNot(MushafAppearance.sepia));
-    expect(
-      container.read(mushafAppearanceControllerProvider),
-      MushafAppearance.sepia,
-    );
-    expect(container.read(themeModeControllerProvider), ThemeMode.dark);
-    expect(container.read(appSurfaceToneProvider), AppSurfaceTone.black);
-
     // Warm: a light theme again.
     await tester.tap(appTheme('Warm'));
     await tester.pumpAndSettle();
@@ -84,7 +65,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(container.read(localeControllerProvider), const Locale('ar'));
     expect(find.text('اللغة'), findsOneWidget); // "Language", now in Arabic
-    expect(find.text('داكن'), findsNWidgets(2)); // "Dark", for both themes
+    expect(find.text('داكن'), findsOneWidget); // "Dark"
 
     await tester.tap(find.text('لغة النظام')); // back to the system language
     await tester.pumpAndSettle();
