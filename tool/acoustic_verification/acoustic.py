@@ -275,10 +275,24 @@ def _window(tokens, spans, k, ctx, T):
     return lo, hi, f0, f1
 
 
+def _plain_of_hidden(t):
+    """The plain letter a hidden nasal is said as without its rule (as the
+    Dart verifier's _plainOfHidden): ں as ن; ۾ as م where it hides a mīm,
+    else as ن (iqlāb)."""
+    if t.label == ID['ں']:
+        return ID['ن']
+    if t.label == ID['۾']:
+        return ID['م'] if t.uth_char == 'م' else ID['ن']
+    return None
+
+
 def _alternatives(tokens, spans, k):
     """(kind, observed, replacement label list for token k) alternatives."""
     t = tokens[k]
     out = []
+    plain = _plain_of_hidden(t) if t.kind == 'long' else None
+    if plain is not None:
+        return [('WRONG_LETTER', VOCAB[plain], [plain])]
     if t.kind == 'vowel' and t.label in SHORT:
         for v in SHORT:
             if v != t.label:
@@ -335,7 +349,8 @@ def verify(logp, tokens, spans, th: Thresholds = Thresholds()):
         seg[:, t.label] = 0
         seg[:, BLANK] = 0
         comp = VOCAB[int(seg.mean(0).argmax())]
-        if t.kind in ('long', 'marker') or t.label not in SHORT and t.kind == 'vowel':
+        hidden = t.kind == 'long' and _plain_of_hidden(t) is not None
+        if (t.kind in ('long', 'marker') and not hidden) or t.label not in SHORT and t.kind == 'vowel':
             verdicts.append(Verdict(k, t, 'CORRECT', tuple(sp), conf, comp))
             continue
         lo, hi, f0, f1 = _window(tokens, spans, k, th.context, T)

@@ -805,6 +805,20 @@ class QuranAcousticVerifier {
         const _Alternative(RecitationErrorType.missingVowel, 'SUKUN', []),
       ];
     }
+    // A hidden nūn or mīm (ghunnah): ikhfāʾ «ں», iqlāb or ikhfāʾ shafawī
+    // «۾» — said as a plain, clear «ن» / «م» instead.
+    if (t.kind == PhoneticTokenKind.long) {
+      final plain = _plainOfHidden(t);
+      return plain == null
+          ? const []
+          : [
+              _Alternative(
+                RecitationErrorType.wrongLetter,
+                quranPhoneticVocabulary[plain],
+                [plain],
+              ),
+            ];
+    }
     if (t.kind != PhoneticTokenKind.consonant) return const [];
     if (t.geminate) {
       return const [
@@ -844,6 +858,18 @@ class QuranAcousticVerifier {
         ]),
     ];
   }
+}
+
+/// The plain letter a hidden nasal would be said as without its rule: the
+/// ikhfāʾ nasal «ں» as «ن»; «۾» as «م» where it hides a mīm (ikhfāʾ
+/// shafawī), else as «ن» (iqlāb of a nūn or tanween). `null` for other
+/// tokens.
+int? _plainOfHidden(PhoneticToken t) {
+  if (t.symbol == 'ں') return phoneticClassOf('ن');
+  if (t.symbol == '۾') {
+    return phoneticClassOf(t.sourceChar == 'م' ? 'م' : 'ن');
+  }
+  return null;
 }
 
 class _Alternative {

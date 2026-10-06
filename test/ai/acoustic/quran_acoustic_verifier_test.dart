@@ -168,6 +168,26 @@ void main() {
     );
   });
 
+  test('a hidden nūn said plainly is a mistake: ikhfāʾ and iqlāb', () {
+    // 2:10 «فِى قُلُوبِهِم مَّرَضٌ فَزَادَهُمُ … عَذَابٌ أَلِيمٌۢ بِمَا»: the
+    // tanween of مَرَضٌ hidden before ف (ں), that of أَلِيمٌ turned to a
+    // hidden mīm before ب (۾).
+    final expected = reference.ayah(2010);
+    for (final hidden in ['ں', '۾']) {
+      final k = expected.indexWhere((t) => t.symbol == hidden);
+      final said = [for (final t in expected) t.token];
+      expect(
+        verifier.verify(clearFrames(said), expected)[k].type,
+        RecitationErrorType.correct,
+        reason: '$hidden said as written',
+      );
+      said[k] = phoneticClassOf('ن');
+      final v = verifier.verify(clearFrames(said), expected)[k];
+      expect(v.type, RecitationErrorType.wrongLetter, reason: hidden);
+      expect(v.observed, 'ن');
+    }
+  });
+
   test('stopping inside a joined unit is a stop, not a mistake', () {
     // 2:7 «غِشَٰوَةٌ ۖ وَلَهُمْ»: in flow one unit (the tanween merges into the
     // و); stopping after غِشَٰوَةٌ (a waqf mark) it is said «غِشَاوَه», and

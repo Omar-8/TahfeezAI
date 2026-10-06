@@ -5,6 +5,7 @@ import 'package:tahfeez_ai/ai/acoustic/quran_acoustic_verifier.dart';
 import 'package:tahfeez_ai/core/localization/generated/app_localizations.dart';
 import 'package:tahfeez_ai/features/mushaf/application/mushaf_word_overlay.dart';
 import 'package:tahfeez_ai/features/recitation/application/acoustic_verification_controller.dart';
+import 'package:tahfeez_ai/features/recitation/presentation/recitation_controls.dart';
 import 'package:tahfeez_ai/features/recitation/presentation/recitation_word_feedback.dart';
 import 'package:tahfeez_ai/quran/domain/models/quran_refs.dart';
 
@@ -186,6 +187,25 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.textContaining(text), findsOneWidget, reason: locale);
     }
+  });
+
+  test('ikhfāʾ, iqlāb and ikhfāʾ shafawī mistakes are named', () async {
+    final en = await AppLocalizations.delegate.load(const Locale('en'));
+    final ar = await AppLocalizations.delegate.load(const Locale('ar'));
+    RecitationError e(String expected, String heard) => RecitationError(
+      word: _word,
+      letter: 0,
+      type: RecitationErrorType.wrongLetter,
+      expected: expected,
+      observed: heard,
+      likelihoodRatio: 9,
+    );
+    expect(HifzStatusStrip.describe(e('ں (ٌ)', 'ن'), en), en.recIkhfa);
+    expect(HifzStatusStrip.describe(e('۾ (ۢ)', 'ن'), ar), ar.recIqlab);
+    expect(
+      HifzStatusStrip.describe(e('۾ (م)', 'م'), ar),
+      'إخفاء شفوي: تُخفى الميم قبل الباء بغنّة',
+    );
   });
 
   testWidgets('nothing for a word recited correctly or not recited', (

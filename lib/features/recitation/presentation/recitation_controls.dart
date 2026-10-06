@@ -647,6 +647,13 @@ class HifzStatusStrip extends StatelessWidget {
     final fromNun =
         source != null &&
         ('ًٌٍ'.contains(source) || (source == 'ن' && expected != 'ن'));
+    // A hidden nūn / mīm said plainly: ikhfāʾ «ں», iqlāb or ikhfāʾ
+    // shafawī «۾».
+    if (e.type == RecitationErrorType.wrongLetter) {
+      if (expected == 'ں' && e.observed == 'ن') return l10n.recIkhfa;
+      if (expected == '۾' && e.observed == 'م') return l10n.recIkhfaShafawi;
+      if (expected == '۾' && e.observed == 'ن') return l10n.recIqlab;
+    }
     if (fromNun &&
         ((e.type == RecitationErrorType.wrongLetter && e.observed == 'ن') ||
             (e.type == RecitationErrorType.shaddaError &&
