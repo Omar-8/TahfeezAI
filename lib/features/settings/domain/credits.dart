@@ -188,6 +188,37 @@ const credits = <Credit>[
         'Iqra’Eval: A Shared Task on Qur’anic Pronunciation Assessment '
         '(ArabicNLP 2025)',
   ),
+  Credit(
+    group: CreditGroup.data,
+    name: 'Qur’anic Universal Ayahs',
+    owner: 'QUD Technologies',
+    licence: 'CC BY 4.0',
+    url: 'https://huggingface.co/datasets/QUD-Technologies/quranic-universal-ayahs',
+    useEn: 'Training the recitation model (many more reciters, Ḥafṣ)',
+    useAr: 'تدريب نموذج التلاوة (قرّاء أكثر، رواية حفص)',
+  ),
+  Credit(
+    group: CreditGroup.data,
+    name: 'Tadabur: A Large-Scale Quran Audio Dataset',
+    owner: 'Faisal Alherran',
+    licence: 'CC BY-NC 4.0 (non-commercial)',
+    url: 'https://huggingface.co/datasets/FaisaI/tadabur',
+    useEn: 'Training the recitation model (hundreds of reciters)',
+    useAr: 'تدريب نموذج التلاوة (مئات القرّاء)',
+    citation: 'Tadabur: A Large-Scale Quran Audio Dataset, arXiv:2604.18932',
+  ),
+  Credit(
+    group: CreditGroup.data,
+    name: 'Iqra_train (Iqra’Eval)',
+    owner: 'Iqra’Eval / ArabicSpeech',
+    licence: 'Not stated by the dataset; used with credit',
+    url: 'https://huggingface.co/datasets/IqraEval/Iqra_train',
+    useEn: 'Training the recitation model (everyday readers of the Quran)',
+    useAr: 'تدريب نموذج التلاوة (قرّاء غير محترفين)',
+    citation:
+        'Iqra’Eval: A Shared Task on Qur’anic Pronunciation Assessment '
+        '(ArabicNLP 2025)',
+  ),
   // ── Software ──
   Credit(
     group: CreditGroup.software,

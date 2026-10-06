@@ -190,7 +190,7 @@ def main():
         nonlocal shard, n_shard
         if not shard:
             return
-        np.savez(os.path.join(a.out, f'shard_{9000 + 300 * a.part + n_shard:04d}.npz'),
+        np.savez(os.path.join(a.out, f'shard_{9000 + 100 * a.part + n_shard:04d}.npz'),
                  audio=np.concatenate([x for x, _, _ in shard]).astype(np.int16),
                  offsets=np.cumsum([0] + [len(x) for x, _, _ in shard]),
                  targets=np.array([[] for _ in shard] + [None], dtype=object)[:-1],
