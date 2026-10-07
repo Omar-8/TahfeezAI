@@ -694,10 +694,16 @@ class AcousticVerificationController
     final runs = await Future.wait([
       _framesOf(model, job),
       if (confirm && _inference == null && job.samples.length > _shift * 10)
-        model.run(Float32List.sublistView(job.samples, _shift)),
+        model
+            .run(Float32List.sublistView(job.samples, _shift))
+            .then<AcousticFrames?>((f) => f),
     ]);
     final frames = runs.first;
     if (!ref.mounted) return;
+    if (frames == null) {
+      _log('piece no longer held: not checked');
+      return;
+    }
     final located = _verifier.locate(frames, span.tokens);
     if (located == null) {
       if (job.quick) return;
@@ -710,7 +716,11 @@ class AcousticVerificationController
       for (final t in span.tokens)
         if (t.unit >= lo && t.unit <= hi) t,
     ];
-    final verifier = _withTajweed(job.quick ? _quickVerifier : _verifier);
+    // A streaming model's frames are as good for one word as for its ayah:
+    // its quick check is judged as fully.
+    final verifier = _withTajweed(
+      job.quick && !_streaming ? _quickVerifier : _verifier,
+    );
     final verdicts = verifier.verify(
       frames,
       expected,
@@ -775,6 +785,28 @@ class AcousticVerificationController
     RecitationError? mistake;
     // Poor audio: nothing heard in it is held against the reciter.
     final trusted = job.quality.problem == null;
+    if (job.quick && _streaming) {
+      // Streaming: every word's verdict is shown as soon as it is heard
+      // (correct, uncertain or a mistake), until its ayah's check confirms
+      // or replaces it — never over that check's own verdict.
+      if (!trusted) return;
+      for (final MapEntry(key: word, value: vs) in byWord.entries) {
+        final existing = state.words[word];
+        if (existing != null && !existing.provisional) continue;
+        final worst = _worst(vs);
+        final errors = verifier.errors(vs, frames.frameDuration);
+        words[word] = AcousticWordResult(worst, errors, provisional: true);
+        if (worst.isError) {
+          mistake = errors.firstWhere((e) => e.type.isError);
+        }
+      }
+      _log('word ${byWord.keys.map(_ref).join(' ')}: ${mistake ?? 'fine'}');
+      state = state.copyWith(
+        words: words,
+        lastMistake: mistake ?? state.lastMistake,
+      );
+      return;
+    }
     if (job.quick) {
       // Only a clear mistake is shown early, and never over the ayah's
       // own verdict.
@@ -848,11 +880,28 @@ class AcousticVerificationController
   /// windows' frames saved that run but judged words on frames computed with
   /// little context, which made many more words uncertain.)
   ///
-  /// A quick check's frames are given.
-  Future<AcousticFrames> _framesOf(QuranAcousticModel model, _Job job) =>
-      job.frames != null
-      ? Future.value(job.frames)
-      : runInPieces(model, job.samples);
+  /// A streaming model's frames are already final where the tracker heard
+  /// them: the piece is read from them, with no run of its own (`null` if
+  /// the store no longer holds it). A quick check's frames are given.
+  Future<AcousticFrames?> _framesOf(QuranAcousticModel model, _Job job) {
+    if (job.frames != null) return Future.value(job.frames);
+    if (_streaming) {
+      const spf = 640;
+      return Future.value(
+        _inference!.store.slice(job.start ~/ spf, job.end ~/ spf)?.frames,
+      );
+    }
+    return runInPieces(model, job.samples);
+  }
+
+  /// The on-device model streams (v3): its frames are final as they come,
+  /// so a word's own check is its full check.
+  bool get _streaming =>
+      _inference != null &&
+      switch (_model) {
+        LocalQuranAcousticModel(:final stream) => stream != null,
+        _ => false,
+      };
 
   static RecitationErrorType _worst(List<PhonemeVerdict> vs) {
     const order = [

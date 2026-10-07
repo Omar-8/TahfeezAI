@@ -68,6 +68,27 @@ class AcousticFrameStore {
     return slice(from, _end);
   }
 
+  /// Writes [chunk]'s frames, replacing any stored at the same positions
+  /// (a streaming model's provisional tail, computed when the audio paused
+  /// mid-chunk, replaced by the chunk's final frames). Returns the frames
+  /// written. A chunk may not leave a gap after [end].
+  TimedAcousticFrames put(TimedAcousticFrames chunk) {
+    if (chunk.frames.classes != classes) {
+      throw ArgumentError('Expected $classes classes');
+    }
+    if (chunk.start > _end) {
+      throw StateError('Gap in frames: ${chunk.start} after $_end');
+    }
+    final from = math.max(chunk.start, start);
+    for (var f = from; f < chunk.end; f++) {
+      final row = (f % capacity) * classes;
+      final src = (f - chunk.start) * classes;
+      _data.setRange(row, row + classes, chunk.frames.logProbs, src);
+    }
+    _end = math.max(_end, chunk.end);
+    return slice(from, chunk.end)!;
+  }
+
   /// Frames [from]..[to] (exclusive) as one block, or `null` when any of
   /// them is not stored (not computed yet, or already dropped).
   TimedAcousticFrames? slice(int from, int to) {

@@ -107,6 +107,45 @@ class _FakeModel extends LocalQuranAcousticModel {
   Future<AcousticDeviceStats?> deviceStats() async => null;
 }
 
+/// A streaming model (v3): 1.28 s chunks with 240 samples after each; each
+/// run's frames carry whether it was committed (blank log-prob 1) or a
+/// provisional look at a partial chunk (-1).
+class _FakeStreamingModel extends _FakeModel {
+  final commits = <bool>[];
+  var resets = 0;
+
+  @override
+  AcousticStreamConfig get stream => const AcousticStreamConfig(
+    chunkSamples: 20480,
+    overlapSamples: 240,
+    chunkSeconds: 1.28,
+    leftSeconds: 5.12,
+  );
+
+  @override
+  Future<void> streamReset() async => resets++;
+
+  @override
+  Future<AcousticFrames> streamRun(
+    Float32List samples, {
+    bool commit = true,
+  }) async {
+    runs.add(samples.length);
+    commits.add(commit);
+    const n = 32;
+    final lp = Float32List(n * 43);
+    for (var i = 0; i < n; i++) {
+      lp[i * 43] = commit ? 1 : -1;
+    }
+    return AcousticFrames(
+      frames: n,
+      classes: 43,
+      logProbs: lp,
+      frameDuration: const Duration(milliseconds: 40),
+    );
+  }
+}
+
 class _FakeScreen implements ScreenAwake {
   final calls = <bool>[];
   @override
@@ -420,6 +459,91 @@ void main() {
       expect(reused!.start, 25);
       expect(reused.frames.frames, 75);
       expect(model.runs.length, runsBefore, reason: 'no model run');
+    });
+  });
+
+  group('LocalAcousticInferenceController, streaming model', () {
+    late FakeAudioSource mic;
+    late _FakeStreamingModel model;
+    late ProviderContainer container;
+    final chunks = <TimedAcousticFrames>[];
+
+    RecitationSessionController session() =>
+        container.read(recitationSessionControllerProvider.notifier);
+    LocalAcousticInferenceController inference() =>
+        container.read(localAcousticInferenceControllerProvider.notifier);
+
+    setUp(() async {
+      mic = FakeAudioSource();
+      model = _FakeStreamingModel();
+      chunks.clear();
+      container = ProviderContainer(
+        overrides: [
+          recitationAiConfigProvider.overrideWithValue(offlineAndroid),
+          recitationAudioSourceFactoryProvider.overrideWithValue(() => mic),
+          recitationRecordingStoreProvider.overrideWithValue(FakeStore()),
+          recitationSessionRepositoryProvider.overrideWithValue(
+            FakeRepository(),
+          ),
+          localQuranAcousticModelProvider.overrideWithValue(model),
+          screenAwakeProvider.overrideWithValue(_FakeScreen()),
+        ],
+      );
+      addTearDown(container.dispose);
+      container.listen(localAcousticInferenceControllerProvider, (_, _) {});
+      inference().frames.listen(chunks.add);
+      await pumpEventQueue();
+      await session().start(startLocation: const QuranLocation.page(1, 440));
+      await pumpEventQueue();
+    });
+
+    Future<void> speak(double seconds) async {
+      for (var t = 0.0; t < seconds - 1e-9; t += 0.5) {
+        mic.emitSeconds(0.5, value: 3);
+        await pumpEventQueue();
+      }
+    }
+
+    test(
+      'each chunk of audio is run once, as soon as it has arrived',
+      () async {
+        await speak(6);
+        expect(model.resets, 1);
+        // 6 s: four whole 1.28 s chunks (each needs 240 samples after it).
+        expect(model.runs, List.filled(4, 20480 + 240));
+        expect(model.commits, everyElement(isTrue));
+        var next = 0;
+        for (final c in chunks) {
+          expect(c.start, next);
+          expect(c.frames.frames, 32);
+          expect(c.last, isFalse);
+          next = c.end;
+        }
+        expect(inference().store.end, 4 * 32);
+      },
+    );
+
+    test('a paused session computes its partial chunk provisionally, then the '
+        'real chunk replaces it', () async {
+      await speak(5);
+      session().pause();
+      await pumpEventQueue(times: 50);
+      // 3 whole chunks (3.84 s), then 1.16 s of a fourth, provisional.
+      expect(model.commits, [true, true, true, false]);
+      expect(chunks.last.last, isTrue);
+      expect(chunks.last.start, 3 * 32);
+      expect(chunks.last.end, 5 * 25);
+      expect(inference().store.slice(96, 125)!.frames.at(0, 0), -1);
+      session().resume();
+      await pumpEventQueue();
+      await speak(2);
+      // The same chunk, now whole and committed: its frames replace the
+      // provisional ones; the timeline stays the recitation's.
+      expect(model.commits.skip(4), everyElement(isTrue));
+      final store = inference().store;
+      expect(store.slice(96, 128)!.frames.at(0, 0), 1);
+      expect(store.slice(96, 128)!.frames.at(28, 0), 1);
+      expect(model.resets, 1, reason: 'same session: state kept');
     });
   });
 

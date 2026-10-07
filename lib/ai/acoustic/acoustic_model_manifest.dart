@@ -19,6 +19,7 @@ class AcousticModelManifest {
     required this.bytes,
     this.licence,
     this.experimental = false,
+    this.stream,
   });
 
   /// The manifest format Tahfeez reads.
@@ -48,6 +49,11 @@ class AcousticModelManifest {
       bytes: field<int>('bytes'),
       licence: json['licence'] as String?,
       experimental: json['experimental'] == true,
+      stream: switch (json['stream']) {
+        final Map<String, Object?> s => AcousticStreamConfig.fromJson(s),
+        null => null,
+        _ => throw const FormatException('Model manifest: "stream" invalid'),
+      },
     );
   }
 
@@ -69,6 +75,9 @@ class AcousticModelManifest {
   /// Not cleared for distribution (see `docs/THIRD_PARTY_RESOURCES.md`).
   final bool experimental;
 
+  /// A streaming model's chunking, or `null` for a model run on windows.
+  final AcousticStreamConfig? stream;
+
   /// Why Tahfeez can't use a model with this manifest, or `null`.
   String? get incompatibility {
     if (format != currentFormat) return 'manifest format $format';
@@ -88,4 +97,45 @@ class AcousticModelManifest {
     sampleRate: sampleRate,
     frameDuration: Duration(milliseconds: frameMs),
   );
+}
+
+/// How a streaming model is fed (`stream` in the manifest): chunk by chunk,
+/// each run taking [chunkSamples] of new audio and the [overlapSamples]
+/// after it, with the model's state carried from run to run on the
+/// platform side. Each chunk's frames are final: no frame is computed twice.
+class AcousticStreamConfig {
+  const AcousticStreamConfig({
+    required this.chunkSamples,
+    required this.overlapSamples,
+    required this.chunkSeconds,
+    required this.leftSeconds,
+  });
+
+  factory AcousticStreamConfig.fromJson(Map<String, Object?> json) {
+    T field<T>(String key) {
+      final value = json[key];
+      if (value is! T) {
+        throw FormatException(
+          'Model manifest: "stream.$key" missing or invalid',
+        );
+      }
+      return value;
+    }
+
+    return AcousticStreamConfig(
+      chunkSamples: field<int>('chunk_samples'),
+      overlapSamples: field<int>('overlap_samples'),
+      chunkSeconds: field<num>('chunk_s').toDouble(),
+      leftSeconds: field<num>('left_s').toDouble(),
+    );
+  }
+
+  /// New audio per run (a whole number of 40 ms frames).
+  final int chunkSamples;
+
+  /// Audio after the chunk each run also needs (the last fbank frames').
+  final int overlapSamples;
+
+  /// The look-ahead (one chunk) and the past the model remembers.
+  final double chunkSeconds, leftSeconds;
 }

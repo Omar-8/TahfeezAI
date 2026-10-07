@@ -43,6 +43,19 @@ class QuranAcousticModelChannel private constructor(
     private var session: OrtSession? = null
     private var loadedProvider: String? = null
 
+    /**
+     * A streaming model's state (manifest "stream"): one direct buffer per
+     * state input, the ONNX tensor reading it, the output that replaces it
+     * after each chunk, and its starting values.
+     */
+    private class StreamSlot(
+        val name: String,
+        val buffer: FloatBuffer,
+        val tensor: OnnxTensor,
+        val initial: FloatArray?,
+    )
+    private var stream: List<StreamSlot>? = null
+
     companion object {
         private const val MODEL = "quran_acoustic.onnx"
         private const val MANIFEST = "quran_acoustic.json"
@@ -78,6 +91,11 @@ class QuranAcousticModelChannel private constructor(
                         call.argument<Int>("threads") ?: 0,
                     )
                     "run" -> run(call.argument<FloatArray>("samples")!!)
+                    "streamReset" -> { streamReset(); null }
+                    "streamRun" -> streamRun(
+                        call.argument<FloatArray>("samples")!!,
+                        call.argument<Boolean>("commit") ?: true,
+                    )
                     "unload" -> { close(); null }
                     "stats" -> stats()
                     else -> {
@@ -175,6 +193,10 @@ class QuranAcousticModelChannel private constructor(
         session = environment.createSession(model.absolutePath, options)
         env = environment
         loadedProvider = provider
+        manifest.optJSONObject("stream")?.let {
+            stream = streamSlots(environment, it)
+            streamReset()
+        }
         val now = SystemClock.elapsedRealtime()
         return mapOf(
             "provider" to provider,
@@ -236,6 +258,91 @@ class QuranAcousticModelChannel private constructor(
         }
     }
 
+    /** The state buffers a streaming manifest describes (shapes, starting values). */
+    private fun streamSlots(environment: OrtEnvironment, config: JSONObject): List<StreamSlot> {
+        val shapes = config.getJSONObject("state")
+        val initial = config.optJSONObject("initial") ?: JSONObject()
+        return shapes.keys().asSequence().toList().sortedBy { order(it) }.map { name ->
+            val dims = shapes.getJSONArray(name).let { a -> LongArray(a.length()) { a.getLong(it) } }
+            val size = dims.fold(1L) { n, d -> n * d }.toInt()
+            val buffer = java.nio.ByteBuffer.allocateDirect(size * 4)
+                .order(java.nio.ByteOrder.nativeOrder()).asFloatBuffer()
+            val start = initial.optJSONArray(name)?.let { flat(it) }
+            StreamSlot(name, buffer, OnnxTensor.createTensor(environment, buffer, dims), start)
+        }
+    }
+
+    /** The graph's state order (stream_model.STATE); unknown names last. */
+    private fun order(name: String) = listOf("sums", "count", "kv", "conv", "akv", "aconv", "valid")
+        .indexOf(name).let { if (it < 0) 99 else it }
+
+    private fun flat(a: org.json.JSONArray): FloatArray {
+        val out = ArrayList<Float>()
+        fun walk(x: Any) {
+            if (x is org.json.JSONArray) for (i in 0 until x.length()) walk(x.get(i))
+            else out.add((x as Number).toFloat())
+        }
+        walk(a)
+        return out.toFloatArray()
+    }
+
+    /** A new recitation: the state back to its starting values. */
+    private fun streamReset() {
+        val slots = stream ?: throw IllegalStateException("Not a streaming model")
+        for (slot in slots) {
+            slot.buffer.clear()
+            val start = slot.initial
+            if (start != null) {
+                slot.buffer.put(start)
+            } else {
+                while (slot.buffer.hasRemaining()) slot.buffer.put(0f)
+            }
+            slot.buffer.rewind()
+        }
+    }
+
+    /**
+     * One chunk of a streaming model: [samples] (the chunk and the 240 samples
+     * after it) with the state; with [commit], the state is replaced by the
+     * graph's new one (without: a provisional look at a partial chunk, the
+     * state left as it was).
+     */
+    private fun streamRun(samples: FloatArray, commit: Boolean): Map<String, Any?> {
+        val s = session ?: throw IllegalStateException("Acoustic model not loaded")
+        val slots = stream ?: throw IllegalStateException("Not a streaming model")
+        val started = SystemClock.elapsedRealtime()
+        val cpuStarted = Process.getElapsedCpuTime()
+        OnnxTensor.createTensor(
+            env!!,
+            FloatBuffer.wrap(samples),
+            longArrayOf(1, samples.size.toLong()),
+        ).use { input ->
+            val inputs = HashMap<String, OnnxTensor>()
+            inputs["samples"] = input
+            for (slot in slots) inputs[slot.name] = slot.tensor
+            s.run(inputs).use { out ->
+                val tensor = out.get("log_probs").get() as OnnxTensor
+                val shape = tensor.info.shape
+                val buffer = tensor.floatBuffer
+                val logProbs = FloatArray(buffer.remaining())
+                buffer.get(logProbs)
+                if (commit) for (slot in slots) {
+                    val next = (out.get("${slot.name}_out").get() as OnnxTensor).floatBuffer
+                    slot.buffer.clear()
+                    slot.buffer.put(next)
+                    slot.buffer.rewind()
+                }
+                return mapOf(
+                    "frames" to shape[1].toInt(),
+                    "classes" to shape[2].toInt(),
+                    "logProbs" to logProbs,
+                    "ms" to (SystemClock.elapsedRealtime() - started),
+                    "cpuMs" to (Process.getElapsedCpuTime() - cpuStarted),
+                )
+            }
+        }
+    }
+
     /** Memory, CPU time, battery and temperature, for measurements. */
     private fun stats(): Map<String, Any?> {
         val memory = Debug.MemoryInfo().also { Debug.getMemoryInfo(it) }
@@ -258,6 +365,8 @@ class QuranAcousticModelChannel private constructor(
     }
 
     private fun close() {
+        stream?.forEach { it.tensor.close() }
+        stream = null
         session?.close()
         session = null
         loadedProvider = null

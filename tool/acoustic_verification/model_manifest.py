@@ -5,6 +5,7 @@ The app only loads a model whose manifest matches what it expects (format,
 SHA-256 and size match the file — see lib/ai/acoustic/acoustic_model_manifest.dart.
 
   python3 model_manifest.py <model.onnx> [--id ID] [--max-window 20] [--out DIR]
+      [--stream stream.json]   # a streaming model (model_work/stream_model.py --export)
 """
 import argparse, hashlib, json, re
 from pathlib import Path
@@ -24,6 +25,7 @@ def main():
     p.add_argument('--id')
     p.add_argument('--max-window', type=float, default=20)
     p.add_argument('--out')
+    p.add_argument('--stream', help="a streaming export's stream.json: chunking and state")
     a = p.parse_args()
     model = Path(a.model)
     digest = hashlib.sha256()
@@ -45,6 +47,12 @@ def main():
         'licence': 'MIT (obadx/muaalem-model-v3_2); training audio rights unverified',
         'experimental': True,
     }
+    if a.stream:
+        # Chunk by chunk with the state carried (see the app's StreamingAcousticModel):
+        # chunk_samples of audio and overlap_samples after it per run.
+        cfg = json.loads(Path(a.stream).read_text('utf-8'))
+        manifest['stream'] = {k: cfg[k] for k in
+                              ('chunk_s', 'left_s', 'chunk_samples', 'overlap_samples', 'state', 'initial')}
     out = Path(a.out) if a.out else model.parent
     out.mkdir(parents=True, exist_ok=True)
     (out / 'quran_acoustic.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=1), 'utf-8')

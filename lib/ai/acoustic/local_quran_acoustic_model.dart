@@ -275,6 +275,45 @@ class LocalQuranAcousticModel implements QuranAcousticModel {
     );
   }
 
+  /// A streaming model's chunking (its manifest's), or `null`.
+  AcousticStreamConfig? get stream => _manifest?.stream;
+
+  /// A streaming model: its state back to the start (a new recitation).
+  Future<void> streamReset() async {
+    await load();
+    await _channel.invokeMethod<void>('streamReset');
+  }
+
+  /// A streaming model: one chunk ([AcousticStreamConfig.chunkSamples] of
+  /// audio and the [AcousticStreamConfig.overlapSamples] after it), the
+  /// state carried on from the previous chunk. Its frames are final.
+  /// [commit] `false`: a provisional look at a partial chunk (the audio
+  /// stopped mid-chunk), the state left as it was for the real chunk.
+  Future<AcousticFrames> streamRun(
+    Float32List samples, {
+    bool commit = true,
+  }) async {
+    await load();
+    final raw = (await _channel.invokeMapMethod<Object?, Object?>('streamRun', {
+      'samples': samples,
+      'commit': commit,
+    }))!;
+    final frames = raw['frames']! as int;
+    final classes = raw['classes']! as int;
+    final logProbs = raw['logProbs']! as Float32List;
+    if (classes != _manifest!.classes || logProbs.length != frames * classes) {
+      throw StateError('Model returned $frames x $classes frames');
+    }
+    lastRunTime = Duration(milliseconds: raw['ms']! as int);
+    lastCpuTime = Duration(milliseconds: raw['cpuMs']! as int);
+    return AcousticFrames(
+      frames: frames,
+      classes: classes,
+      logProbs: logProbs,
+      frameDuration: info.frameDuration,
+    );
+  }
+
   Future<AcousticDeviceStats?> deviceStats() async {
     try {
       final raw = await _channel.invokeMapMethod<Object?, Object?>('stats');

@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../ai/acoustic/acoustic_frame_stream.dart';
+import '../../../ai/acoustic/acoustic_model_manifest.dart';
 import '../../../ai/acoustic/local_quran_acoustic_model.dart';
 import '../../../ai/acoustic/pause_detector.dart';
 import '../../../ai/acoustic/pcm_ring.dart';
@@ -189,6 +190,12 @@ class LocalAcousticInferenceController
   int? _pauseAt;
   PauseDetector _pauses = PauseDetector();
 
+  /// A streaming model (its manifest's `stream`): the next chunk's first
+  /// stream sample, and whether the model's state must start afresh first
+  /// (a new session, or audio lost behind the ring).
+  int _streamNext = 0;
+  bool _streamFresh = true;
+
   /// When each received piece of audio arrived: (end sample, time).
   final _arrivals = <(int, DateTime)>[];
   int? _firstSpeechFrame;
@@ -268,6 +275,8 @@ class LocalAcousticInferenceController
         _generation++;
         pcm.reset();
         store.reset();
+        _streamNext = 0;
+        _streamFresh = true;
         _arrivals.clear();
         _firstSpeechFrame = null;
         state = LocalAcousticInferenceState(
@@ -333,6 +342,11 @@ class LocalAcousticInferenceController
     _busy = true;
     final generation = _generation;
     try {
+      final stream = model.stream;
+      if (stream != null) {
+        await _pumpStream(model, stream, generation);
+        return;
+      }
       while (ref.mounted && generation == _generation) {
         final pauseAt = _pauseAt;
         final flush = _flushPending || pauseAt != null;
@@ -429,6 +443,110 @@ class LocalAcousticInferenceController
       }
     } finally {
       _busy = false;
+    }
+  }
+
+  /// A streaming model: each chunk of audio once, as soon as it (and the
+  /// little audio after it the model needs) has arrived; its frames are
+  /// final. A pause in the recitation needs nothing special — the
+  /// microphone goes on, so the chunk holding the pause completes within a
+  /// chunk's time, and is marked [TimedAcousticFrames.last]. When the
+  /// session itself pauses or stops mid-chunk, that partial chunk is
+  /// computed provisionally (padded with silence, the model's state kept),
+  /// and replaced by its final frames if the recitation resumes.
+  Future<void> _pumpStream(
+    LocalQuranAcousticModel model,
+    AcousticStreamConfig config,
+    int generation,
+  ) async {
+    final spf = _windowing.samplesPerFrame;
+    final need = config.chunkSamples + config.overlapSamples;
+    while (ref.mounted && generation == _generation) {
+      final flush = _flushPending;
+      final written = pcm.written;
+      if (_streamNext < pcm.oldest) {
+        // Fell behind the ring: skip what it no longer holds, afresh.
+        final resume = (pcm.oldest + spf - 1) ~/ spf * spf;
+        final skipped = resume ~/ spf - store.end;
+        if (skipped > 0) {
+          store.add(
+            TimedAcousticFrames(
+              store.end,
+              _silence(skipped, model.info.frameDuration),
+            ),
+          );
+          state = state.copyWith(
+            droppedSeconds: state.droppedSeconds + skipped * 0.04,
+          );
+        }
+        _streamNext = resume;
+        _streamFresh = true;
+      }
+      final full = written >= _streamNext + need;
+      if (!full && !(flush && written - _streamNext >= spf)) {
+        if (flush) {
+          _flushPending = false;
+          _markPause();
+        }
+        break;
+      }
+      if (_streamFresh) {
+        // Only now, with a chunk to run: a model loaded before the session
+        // is not reset twice.
+        await model.streamReset();
+        _streamFresh = false;
+        if (!ref.mounted || generation != _generation) break;
+      }
+      final take = full ? need : written - _streamNext;
+      final samples = Float32List(need)
+        ..setAll(0, pcm.samples(_streamNext, _streamNext + take));
+      final started = DateTime.now();
+      final AcousticFrames out;
+      try {
+        out = await model.streamRun(samples, commit: full);
+      } catch (e) {
+        if (ref.mounted) state = state.copyWith(error: () => 'Model: $e');
+        break;
+      }
+      if (!ref.mounted || generation != _generation) break;
+      final took = DateTime.now().difference(started);
+      final first = _streamNext ~/ spf;
+      // A provisional chunk keeps only the frames its real audio reached.
+      final keep = full ? out.frames : math.min(out.frames, take ~/ spf);
+      if (keep <= 0) break;
+      final added = store.put(
+        TimedAcousticFrames(first, out.slice(0, keep - 1)),
+      );
+      if (full) _streamNext += config.chunkSamples;
+      final pauseAt = _pauseAt;
+      final paused = pauseAt != null && (first + keep) * spf >= pauseAt;
+      if (paused) _pauseAt = null;
+      if (!full) _flushPending = false;
+      _noteSpeech(added);
+      _out.add(
+        TimedAcousticFrames(added.start, added.frames, last: !full || paused),
+      );
+      state = state.copyWith(
+        windows: state.windows + 1,
+        audioSeconds: state.audioSeconds + keep * 0.04,
+        modelSeconds: state.modelSeconds + took.inMicroseconds / 1e6,
+        lastWindow: Duration(milliseconds: take * 1000 ~/ 16000),
+        lastRun: took,
+        lag: Duration(
+          milliseconds: (pcm.written - store.end * spf) * 1000 ~/ 16000,
+        ),
+        error: () => null,
+      );
+      if (!full) break;
+    }
+  }
+
+  /// Marks a pause for the consumers, even if no frames were left.
+  void _markPause() {
+    final end = store.end;
+    final tail = store.slice(math.max(store.start, end - 1), end);
+    if (tail != null) {
+      _out.add(TimedAcousticFrames(tail.start, tail.frames, last: true));
     }
   }
 
