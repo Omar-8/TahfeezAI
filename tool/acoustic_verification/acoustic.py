@@ -326,14 +326,37 @@ def _alternatives(tokens, spans, k):
 MADD_SHORT_SHARE = 0.65  # a 4- or 6-count madd held for less than this share
 
 
-def _beat(tokens, spans):
+HELD_FLOOR = 0.15  # a long sound still heard: its probability at least this
+HELD_GAP = 3       # frames it may drop below that and come back
+
+
+def _held(post, tokens, spans, k):
+    """A long sound's length in frames: its aligned span, extended while the
+    sound keeps coming back (probability >= HELD_FLOOR, at most HELD_GAP
+    frames between) up to the next sound's span. A streaming model fires
+    fewer CTC spikes in a long madd than a whole-clip one but still hears
+    it (as the Dart verifier's _held)."""
+    s, e = spans[k]
+    nxt = next((spans[i][0] for i in range(k + 1, len(tokens)) if spans[i] is not None), len(post))
+    lab, last, gap = tokens[k].label, e, 0
+    for f in range(e + 1, nxt):
+        if post[f, lab] >= HELD_FLOOR:
+            last, gap = f, 0
+        else:
+            gap += 1
+            if gap > HELD_GAP:
+                break
+    return last - s + 1
+
+
+def _beat(post, tokens, spans):
     """The reciter's beat (one haraka, frames): half the median length of
     the two-count madds aligned that a vowel follows in their unit (one
     before a stop is often held longer); None with fewer than two (as the
     Dart verifier's _beat)."""
     def before_vowel(k):  # a short vowel follows in its unit (not before a stop)
         return any(u.kind == 'vowel' for u in tokens[k + 1:] if u.unit == tokens[k].unit)
-    halves = sorted((spans[k][1] - spans[k][0] + 1) / 2 for k, t in enumerate(tokens)
+    halves = sorted(_held(post, tokens, spans, k) / 2 for k, t in enumerate(tokens)
                     if t.kind == 'long' and t.count == 2 and _plain_of_hidden(t) is None
                     and spans[k] is not None and before_vowel(k))
     if len(halves) < 2:
@@ -346,12 +369,12 @@ def verify(logp, tokens, spans, th: Thresholds = Thresholds()):
     T = len(logp)
     post = np.exp(logp)
     verdicts = []
-    beat = _beat(tokens, spans) if th.tajweed else None
+    beat = _beat(post, tokens, spans) if th.tajweed else None
     for k, t in enumerate(tokens):
         sp = spans[k]
         if (beat is not None and sp is not None and t.kind == 'long' and t.count >= 4
                 and _plain_of_hidden(t) is None):
-            beats = (sp[1] - sp[0] + 1) / beat
+            beats = _held(post, tokens, spans, k) / beat
             if beats < MADD_SHORT_SHARE * t.count:
                 verdicts.append(Verdict(k, t, 'MADD_SHORT', tuple(sp), 0.0, '', beats, str(round(beats))))
                 continue

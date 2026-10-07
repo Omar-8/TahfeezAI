@@ -569,7 +569,7 @@ class QuranAcousticVerifier {
   ) {
     final labels = [for (final t in expected) t.token];
     final out = <PhonemeVerdict>[];
-    final beat = thresholds.tajweed ? _beat(expected, spans) : null;
+    final beat = thresholds.tajweed ? _beat(frames, expected, spans) : null;
     for (var k = 0; k < expected.length; k++) {
       final t = expected[k];
       final span = spans[k];
@@ -579,7 +579,7 @@ class QuranAcousticVerifier {
           t.kind == PhoneticTokenKind.long &&
           t.count >= 4 &&
           _plainOfHidden(t) == null) {
-        final beats = (span.end - span.start + 1) / beat;
+        final beats = _held(frames, expected, spans, k) / beat;
         if (beats < maddShortShare * t.count) {
           out.add(
             PhonemeVerdict(
@@ -720,11 +720,54 @@ class QuranAcousticVerifier {
   /// flagged more professional recitation.)
   static const maddShortShare = 0.65;
 
+  /// A long sound still heard: its probability at least this, …
+  static const heldFloor = 0.15;
+
+  /// … dropping below it for at most this many frames before it returns.
+  static const heldGap = 3;
+
+  /// A long sound's length in frames: its aligned span, extended while the
+  /// sound keeps coming back ([heldFloor], gaps up to [heldGap]) up to the
+  /// next sound's span. A streaming model fires fewer CTC spikes in a long
+  /// madd than a whole-clip model does, but still hears it (QDAT's
+  /// separate madd, held by the reciter: flagged 2.9% by span, 0.8% so;
+  /// the whole-clip model unchanged at 0.5%).
+  static int _held(
+    AcousticFrames frames,
+    List<PhoneticToken> expected,
+    List<FrameSpan?> spans,
+    int k,
+  ) {
+    final span = spans[k]!;
+    var next = frames.frames;
+    for (var i = k + 1; i < expected.length; i++) {
+      if (spans[i] case final s?) {
+        next = s.start;
+        break;
+      }
+    }
+    final floor = math.log(heldFloor);
+    var last = span.end, gap = 0;
+    for (var f = span.end + 1; f < next; f++) {
+      if (frames.at(f, expected[k].token) >= floor) {
+        last = f;
+        gap = 0;
+      } else if (++gap > heldGap) {
+        break;
+      }
+    }
+    return last - span.start + 1;
+  }
+
   /// The reciter's beat (one haraka, in frames): half the median length of
   /// the two-count madds aligned here that a short vowel follows in their
   /// unit (one before a stop is often held longer); `null` with fewer than
   /// two of them.
-  static double? _beat(List<PhoneticToken> expected, List<FrameSpan?> spans) {
+  static double? _beat(
+    AcousticFrames frames,
+    List<PhoneticToken> expected,
+    List<FrameSpan?> spans,
+  ) {
     bool beforeVowel(int k) => expected
         .skip(k + 1)
         .takeWhile((u) => u.unit == expected[k].unit)
@@ -736,7 +779,7 @@ class QuranAcousticVerifier {
             _plainOfHidden(expected[k]) == null &&
             spans[k] != null &&
             beforeVowel(k))
-          (spans[k]!.end - spans[k]!.start + 1) / 2,
+          _held(frames, expected, spans, k) / 2,
     ]..sort();
     if (halves.length < 2) return null;
     final mid = halves.length ~/ 2;

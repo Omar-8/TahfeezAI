@@ -1,4 +1,7 @@
+import 'dart:math';
+
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tahfeez_ai/ai/acoustic/quran_acoustic_model.dart';
 import 'package:tahfeez_ai/ai/acoustic/quran_acoustic_verifier.dart';
 import 'package:tahfeez_ai/ai/acoustic/quran_phonetic_reference.dart';
 
@@ -284,6 +287,54 @@ void main() {
       reason: 'tajweed off',
     );
   });
+
+  test(
+    'a madd heard in fewer spikes is still held while its vowel returns',
+    () {
+      // As a streaming model hears «لَنَآ»'s four-count madd: one clear spike,
+      // the vowel returning under the blank at each later beat. Still heard
+      // (probability 0.3), it is held its four counts; gone (0.05), cut short.
+      final expected = reference.words(5109, 7, 14);
+      final k = expected.indexWhere(
+        (t) => t.kind == PhoneticTokenKind.long && t.count == 4,
+      );
+      final said = [
+        for (var i = 0; i < expected.length; i++)
+          if (expected[i].kind == PhoneticTokenKind.long)
+            ...List.filled(expected[i].count, expected[i].token)
+          else
+            expected[i].token,
+      ];
+      var at = 0; // the madd's first spike in [said]
+      for (var i = 0; i < k; i++) {
+        at += expected[i].kind == PhoneticTokenKind.long
+            ? expected[i].count
+            : 1;
+      }
+      AcousticFrames ghosts(double p) {
+        final f = clearFrames(said);
+        final classes = f.classes;
+        final alif = expected[k].token;
+        // clearFrames: a blank, then each token twice and a blank.
+        for (var r = 1; r < 4; r++) {
+          for (final frame in [1 + 3 * (at + r), 2 + 3 * (at + r)]) {
+            f.logProbs[frame * classes + ctcBlank] = 0;
+            f.logProbs[frame * classes + alif] = log(p);
+          }
+        }
+        return f;
+      }
+
+      expect(
+        verifier.verify(ghosts(0.3), expected)[k].type,
+        isNot(RecitationErrorType.maddShort),
+      );
+      expect(
+        verifier.verify(ghosts(0.05), expected)[k].type,
+        RecitationErrorType.maddShort,
+      );
+    },
+  );
 
   test('stopping inside a joined unit is a stop, not a mistake', () {
     // 2:7 «غِشَٰوَةٌ ۖ وَلَهُمْ»: in flow one unit (the tanween merges into the
