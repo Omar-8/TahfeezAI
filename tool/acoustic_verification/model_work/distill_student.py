@@ -692,9 +692,15 @@ def train(a):
     best = state.get('best', float('inf')) if a.resume and os.path.exists(ck) else float('inf')
     while step < a.steps:
         items, coded = next(it)
+        if a.stream and a.stream_chunks:
+            import streaming
+            lo, hi = (float(x) for x in a.stream_chunks.split(','))
+            streaming.CHUNK_OVERRIDE['s'] = rng.uniform(lo, hi)
         kl, ctc, hid = losses(t, s, fe, items, a.temperature, a.ctc_weight, a.augment, coded,
                               DEPTH.get(a.size) if a.hidden > 0 else None, rng, a.pool_share,
                               a.crop)
+        if a.stream and a.stream_chunks:
+            streaming.CHUNK_OVERRIDE['s'] = None
         loss = kl + a.ctc_weight * ctc + a.hidden * hid
         # Clip mode: an unusually hard batch is learned from, scaled down to the cap,
         # rather than skipped (the skip mode left two whole shards unlearned).
@@ -799,6 +805,9 @@ def main():
     p.add_argument('--stream', default='',
                    help='chunk_s,left_s: the student attends to its own chunk and the past only '
                         '(streaming.py); the teacher keeps full attention')
+    p.add_argument('--stream-chunks', default='',
+                   help='lo,hi: with --stream, each training batch uses a chunk length drawn from '
+                        '[lo, hi] s (validation: the --stream chunk)')
     p.add_argument('--pool', action='store_true',
                    help="use the codec pool (stage 'pool') for degraded clips")
     p.add_argument('--pool-share', type=float, default=0.7,

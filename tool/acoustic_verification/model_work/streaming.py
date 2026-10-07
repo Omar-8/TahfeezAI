@@ -28,6 +28,12 @@ def chunk_bias(n, chunk, left, device, dtype):
     return bias.masked_fill(~seen, torch.finfo(dtype).min)[None, None]
 
 
+# Dynamic chunks (training): when set, every masked layer uses this chunk length (s)
+# instead of the one given to enable(): a student trained on varying chunks copes with
+# any of them, and the app could pick its look-ahead at run time.
+CHUNK_OVERRIDE = {'s': None}
+
+
 def enable(model, chunk_s, left_s):
     """Chunk masks on every self-attention layer of [model] (an instance, in place)."""
     n = 0
@@ -40,8 +46,10 @@ def enable(model, chunk_s, left_s):
         chunk, left = max(1, round(chunk_s / step)), round(left_s / step)
         orig = m.forward
 
-        def forward(self, hidden_states, attention_mask=None, *args, _orig=orig, _c=chunk, _l=left, **kw):
-            b = chunk_bias(hidden_states.shape[1], _c, _l, hidden_states.device, hidden_states.dtype)
+        def forward(self, hidden_states, attention_mask=None, *args, _orig=orig, _c=chunk, _l=left,
+                    _step=step, **kw):
+            c = _c if CHUNK_OVERRIDE['s'] is None else max(1, round(CHUNK_OVERRIDE['s'] / _step))
+            b = chunk_bias(hidden_states.shape[1], c, _l, hidden_states.device, hidden_states.dtype)
             if attention_mask is not None:
                 b = torch.clamp(attention_mask + b, min=torch.finfo(b.dtype).min)
             return _orig(hidden_states, b, *args, **kw)
