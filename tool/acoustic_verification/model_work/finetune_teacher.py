@@ -32,6 +32,21 @@ def labelled(dirs, prefix='shard_'):
     return out
 
 
+def nasal(target):
+    """Whether a transcript holds nasal tajweed: a hidden noon or meem, or a ghunnah
+    (a noon or meem held two counts or more)."""
+    hidden = {ds.ID['ں'], ds.ID['۾']}
+    run, prev = 0, None
+    for i in target:
+        if i in hidden:
+            return True
+        run = run + 1 if i == prev else 1
+        if run >= 2 and i in (ds.ID['ن'], ds.ID['م']):
+            return True
+        prev = i
+    return False
+
+
 def batches(items, max_audio_s, rng):
     while True:
         rng.shuffle(items)
@@ -68,6 +83,10 @@ def main():
     p.add_argument('--freeze', type=int, default=12, help='lower encoder layers kept frozen')
     p.add_argument('--max-audio', type=float, default=120)
     p.add_argument('--seed', type=int, default=0)
+    p.add_argument('--no-nasal', action='store_true',
+                   help='leave out amateur clips with nasal tajweed (ikhfa, idgham, ghunnah): their '
+                        '"correct" labels judge vowels only, and teach the teacher to accept a plain noon '
+                        'where ikhfa is due')
     p.add_argument('--held', nargs='*', default=[],
                    help='held-out mistake shards (spliced, other reciters): validated beside the amateur '
                         'clips, and the best step is chosen on the sum of the two losses')
@@ -89,6 +108,8 @@ def main():
           f'{sum(q.numel() for q in model.parameters()) / 1e6:.0f}M', flush=True)
     pro = labelled(a.data)
     ama = labelled(a.amateur)
+    if a.no_nasal:
+        ama = [c for c in ama if not nasal(c[1])]
     rng.shuffle(ama)
     held = ama[:max(20, len(ama) // 10)]
     ama = ama[len(held):]
