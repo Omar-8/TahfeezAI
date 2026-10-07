@@ -34,6 +34,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ART = os.path.join(HERE, 'artifacts')
 ROOT = os.path.abspath(os.path.join(HERE, '..', '..', '..'))
 from build_calibration import ID, ref  # noqa: E402
+from distill_student import sounds_of, spoken  # noqa: E402
 
 SURAH = {'Al-Faatihah': 1, 'Al-Ikhlas': 112, 'An-Nas': 114, 'Ayat al-Kursi': 2,
          'Al-Kafiroon': 109, 'Al-Falaq': 113, 'Al-Kauthar': 108, 'Al-Asr': 103,
@@ -78,12 +79,10 @@ def matcher():
 
 
 def target(aid):
-    """The ayah's expected pronunciation, recited alone (stopping at its end)."""
-    r = ref[str(aid)]
-    toks = [ID[c] for c, f in zip(r['t'], r['f']) if not (ord(f) - 64) & 8]
-    if (ord(r['f'][-1]) - 64) & 32:
-        toks = toks[:-1]
-    return toks
+    """The ayah's expected pronunciation, recited alone (stopping at its end), in the
+    training transcripts' format (distill_student.spoken: madd and ghunnah lengths
+    written out, qalqala marked)."""
+    return spoken(sounds_of(ref[str(aid)]))
 
 
 def main():

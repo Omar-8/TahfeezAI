@@ -16,7 +16,6 @@ Word boundaries come from the teacher's forced alignment.
 """
 import argparse, collections, json, os, random, subprocess, urllib.request
 import numpy as np
-import onnxruntime as ort
 
 from calibration_pairs import CONS, VOWELS, calibration_ayahs, edits, words_of
 
@@ -32,7 +31,8 @@ CATEGORIES = ['vowel_DAMMA_FATHA', 'vowel_DAMMA_KASRA', 'vowel_FATHA_KASRA', 'co
               'shadda_missing', 'shadda_extra', 'sukun', 'missing_vowel']
 HOP = 640
 
-ref = json.load(open(os.path.join(ROOT, 'assets/quran/recitation/phonetic_reference_hafs.json')))['ayahs']
+_REF = os.path.join(ROOT, 'assets/quran/recitation/phonetic_reference_hafs.json')
+ref = json.load(open(_REF if os.path.exists(_REF) else os.path.join(HERE, 'phonetic_reference_hafs.json')))['ayahs']
 VOCAB = ['', 'ء', 'ب', 'ت', 'ث', 'ج', 'ح', 'خ', 'د', 'ذ', 'ر', 'ز', 'س', 'ش', 'ص', 'ض', 'ط', 'ظ',
          'ع', 'غ', 'ف', 'ق', 'ك', 'ل', 'م', 'ن', 'ه', 'و', 'ي', 'ا', 'ۦ', 'ۥ', 'َ', 'ُ', 'ِ', '۪', 'ـ',
          'ٲ', 'ڇ', 'ں', '۾', 'ۜ', 'ؙ']
@@ -56,6 +56,7 @@ def audio(folder, aid):
 
 class Teacher:
     def __init__(self, path):
+        import onnxruntime as ort
         so = ort.SessionOptions(); so.intra_op_num_threads = os.cpu_count()
         self.s = ort.InferenceSession(path, so)
 

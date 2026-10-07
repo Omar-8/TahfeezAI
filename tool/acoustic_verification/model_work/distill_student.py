@@ -45,6 +45,23 @@ VOCAB = ['', 'ء', 'ب', 'ت', 'ث', 'ج', 'ح', 'خ', 'د', 'ذ', 'ر', 'ز', '
          'ط', 'ظ', 'ع', 'غ', 'ف', 'ق', 'ك', 'ل', 'م', 'ن', 'ه', 'و', 'ي', 'ا', 'ۦ', 'ۥ',
          'َ', 'ُ', 'ِ', '۪', 'ـ', 'ٲ', 'ڇ', 'ں', '۾', 'ۜ', 'ؙ']
 ID = {c: i for i, c in enumerate(VOCAB) if c}
+
+
+def sounds_of(row):
+    """(symbol, count, word) per token of a phonetic_reference_hafs.json ayah row,
+    markers (qalqala ڇ, sakt ۜ) included: the ayah recited alone."""
+    return [(c, int(n), ord(w) - 48) for c, n, w in zip(row['t'], row['n'], row['w'])]
+
+
+def spoken(sounds):
+    """Class ids in the training transcripts' format (muaalem-annotated): a madd or a
+    ghunnah written once per haraka (aa, nnnn); a geminate's second token, which
+    carries the whole length in the reference, adds the rest of it."""
+    out, prev = [], None
+    for c, n, *_ in sounds:
+        out += [ID[c]] * (n - 1 if c == prev and n > 1 else n)
+        prev = c
+    return out
 DEV = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 

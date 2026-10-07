@@ -68,6 +68,9 @@ def main():
     p.add_argument('--freeze', type=int, default=12, help='lower encoder layers kept frozen')
     p.add_argument('--max-audio', type=float, default=120)
     p.add_argument('--seed', type=int, default=0)
+    p.add_argument('--held', nargs='*', default=[],
+                   help='held-out mistake shards (spliced, other reciters): validated beside the amateur '
+                        'clips, and the best step is chosen on the sum of the two losses')
     a = p.parse_args()
     rng = random.Random(a.seed)
     t = ds.load_teacher()
@@ -89,22 +92,27 @@ def main():
     rng.shuffle(ama)
     held = ama[:max(20, len(ama) // 10)]
     ama = ama[len(held):]
-    print(f'{len(pro)} professional, {len(ama)} amateur, {len(held)} held-out amateur clips',
-          flush=True)
+    held_mis = labelled(a.held)
+    print(f'{len(pro)} professional, {len(ama)} amateur, {len(held)} held-out amateur clips, '
+          f'{len(held_mis)} held-out mistake clips', flush=True)
     opt = torch.optim.AdamW(trainable, lr=a.lr, weight_decay=0.01)
     sched = torch.optim.lr_scheduler.LambdaLR(
         opt, lambda s: min(1.0, (s + 1) / 100) * max(0.05, 1 - s / a.steps))
     gp, ga = batches(pro, a.max_audio, rng), batches(ama, a.max_audio / 2, rng)
 
+    def loss_on(clips):
+        with torch.no_grad():
+            return float(np.mean([ctc(model, fe, clips[i:i + 8]).item() for i in range(0, len(clips), 8)]))
+
     def held_loss():
         model.eval()
-        with torch.no_grad():
-            v = [ctc(model, fe, held[i:i + 8]).item() for i in range(0, len(held), 8)]
+        v = loss_on(held)
+        m = loss_on(held_mis) if held_mis else 0.0
         model.train()
-        return float(np.mean(v))
+        return v + m, v, m
 
-    best = held_loss()
-    print(f'step 0 held-out amateur ctc {best:.3f}', flush=True)
+    best, v, m = held_loss()
+    print(f'step 0 held-out amateur ctc {v:.3f} mistakes {m:.3f}', flush=True)
     torch.save(model.state_dict(), a.out)
     t0 = time.time()
     for step in range(1, a.steps + 1):
@@ -119,12 +127,12 @@ def main():
         if step % 50 == 0:
             print(f'step {step} ctc {loss.item():.3f} {(time.time() - t0) / 3600:.2f} h', flush=True)
         if step % 250 == 0:
-            v = held_loss()
+            total, v, m = held_loss()
             mark = ''
-            if v < best:
-                best, mark = v, ' (best, saved)'
+            if total < best:
+                best, mark = total, ' (best, saved)'
                 torch.save(model.state_dict(), a.out)
-            print(f'VAL step {step} held-out amateur ctc {v:.3f}{mark}', flush=True)
+            print(f'VAL step {step} held-out amateur ctc {v:.3f} mistakes {m:.3f}{mark}', flush=True)
     print('done', a.out, flush=True)
 
 
