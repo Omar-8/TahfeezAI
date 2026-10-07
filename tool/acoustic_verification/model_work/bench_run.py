@@ -75,8 +75,28 @@ else:
     import onnxruntime as ort
     so = ort.SessionOptions(); so.intra_op_num_threads = threads
     s = ort.InferenceSession(model, so)
-    def run(w):
-        return s.run(None, {'waveform': w[None].astype(np.float32)})[0][0]
+    if os.environ.get('STREAM_CFG'):
+        # A stateful streaming export (stream_model.py): the whole clip chunk by chunk,
+        # its state carried, as the app runs it.
+        cfg = json.load(open(os.environ['STREAM_CFG']))
+        names = ['sums', 'count', 'kv', 'conv', 'akv', 'aconv', 'valid']
+        def run(w):
+            st = {k: np.zeros(cfg['state'][k], np.float32) for k in names}
+            st['sums'] = np.array(cfg['initial']['sums'], np.float32)
+            st['count'] = np.array(cfg['initial']['count'], np.float32)
+            hop, outs, start = cfg['chunk_samples'], [], 0
+            while start + 400 <= len(w):
+                seg = w[start:start + hop + cfg['overlap_samples']]
+                n = ((len(seg) - 400) // 160 + 1) // 2 * 2
+                if n == 0:
+                    break
+                res = s.run(None, dict(samples=seg[:160 * (n - 1) + 400][None].astype(np.float32), **st))
+                outs.append(res[0][0]); st = dict(zip(names, res[1:]))
+                start += hop
+            return np.concatenate(outs) if outs else np.zeros((0, 43), np.float32)
+    else:
+        def run(w):
+            return s.run(None, {'waveform': w[None].astype(np.float32)})[0][0]
 load_s = time.time() - t0
 
 def streamed(w):
@@ -106,6 +126,8 @@ def streamed(w):
 def frames(w):
     if stream:
         return streamed(w)
+    if os.environ.get('STREAM_CFG'):
+        return run(w)
     if len(w) <= CHUNK:
         return run(w)
     parts, start = [], 0

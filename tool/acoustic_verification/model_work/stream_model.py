@@ -196,6 +196,125 @@ def run_stream(fbank, enc, st, wave, chunk):
     return np.concatenate(outs)
 
 
+class StreamStep(nn.Module):
+    """One chunk: audio and state in, log-probabilities and state out (the exported graph)."""
+
+    def __init__(self, fbank, enc):
+        super().__init__()
+        self.fbank, self.enc = fbank, enc
+
+    def forward(self, samples, sums, count, kv, conv, akv, aconv, valid):
+        feats, sums, count = self.fbank(samples, sums, count)
+        lp, kv, conv, akv, aconv, valid = self.enc(feats, kv, conv, akv, aconv, valid)
+        return lp, sums, count, kv, conv, akv, aconv, valid
+
+
+STATE = ['sums', 'count', 'kv', 'conv', 'akv', 'aconv', 'valid']
+
+
+def gemm_to_matmul(model):
+    """Gemm(A, W, b, transB) with constant W -> MatMul(A, W^T) + Add(b): the 4-bit
+    quantiser (MatMulNBits) only takes MatMul."""
+    import onnx
+    from onnx import helper, numpy_helper
+    inits = {t.name: t for t in model.graph.initializer}
+    nodes, n = [], 0
+    for node in model.graph.node:
+        attrs = {a.name: helper.get_attribute_value(a) for a in node.attribute}
+        if (node.op_type != 'Gemm' or node.input[1] not in inits or attrs.get('transA', 0)
+                or attrs.get('alpha', 1.0) != 1.0 or attrs.get('beta', 1.0) != 1.0):
+            nodes.append(node)
+            continue
+        w = numpy_helper.to_array(inits[node.input[1]])
+        if attrs.get('transB', 0):
+            w = w.T
+        wname = node.input[1] + '_mm'
+        model.graph.initializer.append(numpy_helper.from_array(np.ascontiguousarray(w), wname))
+        mid = node.output[0] + '_mm'
+        nodes.append(helper.make_node('MatMul', [node.input[0], wname], [mid] if len(node.input) > 2 else [node.output[0]],
+                                      name=node.name + '_MatMul'))
+        if len(node.input) > 2:
+            nodes.append(helper.make_node('Add', [mid, node.input[2]], [node.output[0]], name=node.name + '_Add'))
+        n += 1
+    del model.graph.node[:]
+    model.graph.node.extend(nodes)
+    used = {i for nd in model.graph.node for i in nd.input}
+    keep = [t for t in model.graph.initializer if t.name in used]
+    del model.graph.initializer[:]
+    model.graph.initializer.extend(keep)
+    return n
+
+
+def export(run_dir, out_dir, chunk_s, left_s):
+    import onnx
+    net, fe = load_student(run_dir)
+    C, L = round(chunk_s / 0.02), round(left_s / 0.02)
+    enc, fbank = StreamEncoder(net, C, L).eval(), StreamFbank(fe).eval()
+    step = StreamStep(fbank, enc).eval()
+    st = initial_state(enc, os.path.join(HERE, 'fbank_prior.json'))
+    samples = torch.zeros(1, 320 * C + 240)
+    args = (samples,) + tuple(st[k] for k in STATE)
+    os.makedirs(out_dir, exist_ok=True)
+    out = os.path.join(out_dir, 'model.onnx')
+    with torch.no_grad():
+        torch.onnx.export(step, args, out, input_names=['samples'] + STATE,
+                          output_names=['log_probs'] + [k + '_out' for k in STATE],
+                          dynamic_axes={'samples': {1: 'n'}, 'log_probs': {1: 'frames'}},
+                          opset_version=17, dynamo=False)
+    m = onnx.load(out, load_external_data=True)
+    print('Gemm -> MatMul:', gemm_to_matmul(m))
+    onnx.save(m, out, save_as_external_data=True, all_tensors_to_one_file=True, location='model.onnx.data')
+    json.dump(dict(chunk_s=chunk_s, left_s=left_s, chunk_frames=C, left_frames=L,
+                   chunk_samples=320 * C, overlap_samples=240,
+                   state={k: list(v.shape) for k, v in st.items()},
+                   initial={'sums': st['sums'].tolist(), 'count': st['count'].tolist()}),
+              open(os.path.join(out_dir, 'stream.json'), 'w'), indent=1)
+    print('exported', out)
+
+
+def run_onnx(sess, st, wave, chunk):
+    """As run_stream, on the exported graph (onnxruntime)."""
+    hop = 320 * chunk
+    outs, start = [], 0
+    st = {k: v.numpy().astype(np.float32) for k, v in st.items()}
+    while start + 400 <= len(wave):
+        seg = wave[start:start + hop + 240]
+        n = ((len(seg) - 400) // 160 + 1) // 2 * 2
+        if n == 0:
+            break
+        seg = seg[:160 * (n - 1) + 400]
+        res = sess.run(None, dict(samples=seg[None].astype(np.float32), **st))
+        outs.append(res[0][0])
+        st = dict(zip(STATE, res[1:]))
+        start += hop
+    return np.concatenate(outs)
+
+
+if __name__ == '__main__' and '--export' in sys.argv:
+    # python stream_model.py <run dir> --export <out dir> [--chunk 1.28 --left 5.12]
+    # then checks the graph (onnxruntime) against the PyTorch chunk loop on real clips
+    import onnxruntime as ort
+    run, out = sys.argv[1], sys.argv[sys.argv.index('--export') + 1]
+    chunk_s = float(sys.argv[sys.argv.index('--chunk') + 1]) if '--chunk' in sys.argv else 1.28
+    left_s = float(sys.argv[sys.argv.index('--left') + 1]) if '--left' in sys.argv else 5.12
+    export(run, out, chunk_s, left_s)
+    net, fe = load_student(run)
+    C, L = round(chunk_s / 0.02), round(left_s / 0.02)
+    enc, fbank = StreamEncoder(net, C, L).eval(), StreamFbank(fe).eval()
+    sess = ort.InferenceSession(os.path.join(out, 'model.onnx'))
+    z = np.load(os.path.join(HERE, 'artifacts', 'retasy_audio.npz'))
+    worst = 0
+    for k in z.files[:60:6]:
+        w = z[k].astype(np.float32)
+        if np.abs(w).max() > 2:
+            w = w / 32767
+        a = run_stream(fbank, enc, initial_state(enc, os.path.join(HERE, 'fbank_prior.json')), w, C)
+        b = run_onnx(sess, initial_state(enc, os.path.join(HERE, 'fbank_prior.json')), w, C)
+        d = float(np.abs(a - b).max()); worst = max(worst, d)
+        print(f'{len(w) / 16000:5.1f} s: {len(a)} frames, onnx vs torch max diff {d:.2e}')
+    print('WORST', worst)
+    sys.exit(0)
+
 if __name__ == '__main__':
     import streaming
     from gpu_fbank import GpuFbank
