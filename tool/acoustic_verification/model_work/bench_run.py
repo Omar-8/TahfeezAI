@@ -87,7 +87,7 @@ else:
             hop, outs, start = cfg['chunk_samples'], [], 0
             while start + 400 <= len(w):
                 seg = w[start:start + hop + cfg['overlap_samples']]
-                n = ((len(seg) - 400) // 160 + 1) // 2 * 2
+                n = ((len(seg) - 400) // 160 + 1) // 4 * 4   # whole 40 ms frames
                 if n == 0:
                     break
                 res = s.run(None, dict(samples=seg[:160 * (n - 1) + 400][None].astype(np.float32), **st))

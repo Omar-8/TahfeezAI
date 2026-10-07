@@ -54,8 +54,12 @@ class StreamFbank(nn.Module):
         f = torch.cat([f[:, :1] * 0.03, f[:, 1:] - 0.97 * f[:, :-1]], dim=1)
         re, im = f @ self.cos, f @ self.sin
         m = torch.log(torch.clamp((re * re + im * im) @ self.mel, min=1.192092955078125e-07))
-        s1 = sums[0] + torch.cumsum(m, 0)
-        s2 = sums[1] + torch.cumsum(m * m, 0)
+        # running sums as a product with a lower-triangular matrix (the app's
+        # reduced ONNX Runtime has no CumSum)
+        r = torch.arange(frames)
+        tri = (r[:, None] >= r[None, :]).to(m.dtype)
+        s1 = sums[0] + tri @ m
+        s2 = sums[1] + tri @ (m * m)
         k = count + torch.arange(1, frames + 1, dtype=m.dtype)[:, None]
         mean = s1 / k
         var = s2 / k - mean * mean
@@ -147,7 +151,8 @@ class StreamEncoder(nn.Module):
             h = norm(x).transpose(0, 1)[None]                        # (1, D, T)
             h = torch.cat([last[None], h], 2)                        # previous frame first
             keep = h[0, :, -1:]
-            h = F.pad(h, (0, T % 2))     # an odd (final) chunk: the whole clip's zero padding
+            # T is even: the app pads every chunk to its full length, and a
+            # final partial chunk here is cut to whole 40 ms frames (run_stream)
             # kernel 3, stride 2 as one matrix product over each output's three input frames
             h = h[0].transpose(0, 1)                                 # (1 + T', D)
             n = (h.shape[0] - 3) // 2 + 1
@@ -184,7 +189,7 @@ def run_stream(fbank, enc, st, wave, chunk):
     with torch.no_grad():
         while start + 400 <= len(wave):
             seg = wave[start:start + hop + 240]
-            n = ((len(seg) - 400) // 160 + 1) // 2 * 2               # whole stacked frames
+            n = ((len(seg) - 400) // 160 + 1) // 4 * 4               # whole 40 ms frames
             if n == 0:
                 break
             seg = seg[:160 * (n - 1) + 400]
@@ -263,6 +268,15 @@ def export(run_dir, out_dir, chunk_s, left_s):
                           opset_version=17, dynamo=False)
     m = onnx.load(out, load_external_data=True)
     print('Gemm -> MatMul:', gemm_to_matmul(m))
+    # Only operators the app's reduced ONNX Runtime has (tool/onnxruntime).
+    cfg = os.path.join(HERE, '..', '..', 'onnxruntime', 'required_ops.config')
+    have = set()
+    for line in open(cfg):
+        if line.startswith('ai.onnx;'):
+            have |= set(line.strip().split(';')[2].split(','))
+    missing = sorted({n.op_type for n in m.graph.node if n.domain in ('', 'ai.onnx')} - have)
+    if missing:
+        sys.exit(f'operators the app runtime lacks: {missing}')
     onnx.save(m, out, save_as_external_data=True, all_tensors_to_one_file=True, location='model.onnx.data')
     json.dump(dict(chunk_s=chunk_s, left_s=left_s, chunk_frames=C, left_frames=L,
                    chunk_samples=320 * C, overlap_samples=240,
@@ -279,7 +293,7 @@ def run_onnx(sess, st, wave, chunk):
     st = {k: v.numpy().astype(np.float32) for k, v in st.items()}
     while start + 400 <= len(wave):
         seg = wave[start:start + hop + 240]
-        n = ((len(seg) - 400) // 160 + 1) // 2 * 2
+        n = ((len(seg) - 400) // 160 + 1) // 4 * 4
         if n == 0:
             break
         seg = seg[:160 * (n - 1) + 400]
@@ -333,10 +347,11 @@ if __name__ == '__main__':
     for w in clips:
         if np.abs(w).max() > 2:
             w = w / 32767
-        if ((len(w) - 400) // 160 + 1) % 2:
-            # as the app's export: whole stacked frames only (the extractor's padding of an
-            # odd last frame leaks into the adapter's last chunk; the app never has it)
-            w = w[:len(w) - 160]
+        extra = ((len(w) - 400) // 160 + 1) % 4
+        if extra:
+            # as the app: whole 40 ms frames only (the extractor's padding of an odd
+            # last frame leaks into the adapter's last chunk; the app never has it)
+            w = w[:len(w) - 160 * extra]
         a, mk = g.batch([w], prior)
         with torch.no_grad():
             ref = F.log_softmax(masked(input_features=a, attention_mask=mk, return_dict=False)[0]['phonemes'][0], -1).numpy()
