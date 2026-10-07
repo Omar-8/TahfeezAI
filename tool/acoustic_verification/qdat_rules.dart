@@ -1,7 +1,7 @@
 // QDAT's tajweed labels against the app's verdicts on the words they are
 // about (5:109): ikhfāʾ in «أَنتَ» (word 13), the shaddah's ghunnah in «إِنَّكَ»
 // (word 12), the separate madd in «لَنَآ» (word 11):
-//   dart run tool/acoustic_verification/qdat_rules.dart <tag>
+//   dart run tool/acoustic_verification/qdat_rules.dart <tag> [--nasal E/U] [--hidden E/U]
 // For each rule: of the clips where the experts heard it applied / missed,
 // how many have that word flagged (M) or uncertain (?).
 import 'dart:convert';
@@ -29,7 +29,15 @@ void main(List<String> args) {
   ) as List).cast<Map<String, Object?>>();
   final bytes = File('$_art/results/qdat_${args[0]}.f32').readAsBytesSync();
   final all = bytes.buffer.asFloat32List(0, bytes.length ~/ 4);
-  const verifier = QuranAcousticVerifier(
+  // --nasal E/U: the nasal sounds' margins (error / uncertain) to try.
+  final nasalArg = args.contains('--nasal')
+      ? args[args.indexOf('--nasal') + 1].split('/').map(double.parse).toList()
+      : <double>[0, 2];
+  // --hidden E/U: the hidden nūn / mīm's (ikhfāʾ, iqlāb) margins to try.
+  final hiddenArg = args.contains('--hidden')
+      ? args[args.indexOf('--hidden') + 1].split('/').map(double.parse).toList()
+      : <double>[0, 0];
+  final verifier = QuranAcousticVerifier(
     thresholds: AcousticThresholds(
       error: 4,
       letterError: 4,
@@ -43,8 +51,15 @@ void main(List<String> args) {
         SoundGroup.reducedVowel: SoundMargins(error: 1, uncertain: 2),
         SoundGroup.finalVowel: SoundMargins(error: 2, uncertain: 2),
         SoundGroup.qalqala: SoundMargins(error: 2, uncertain: 4),
-        SoundGroup.nasal: SoundMargins(uncertain: 2),
+        SoundGroup.nasal: SoundMargins(
+          error: nasalArg[0],
+          uncertain: nasalArg[1],
+        ),
         SoundGroup.throat: SoundMargins(uncertain: 2),
+        SoundGroup.hiddenNasal: SoundMargins(
+          error: hiddenArg[0],
+          uncertain: hiddenArg[1],
+        ),
       },
     ),
   );

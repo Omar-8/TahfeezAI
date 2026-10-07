@@ -65,6 +65,10 @@ enum SoundGroup {
   /// ن and م heard as each other.
   nasal,
 
+  /// A hidden nūn or mīm (ikhfāʾ, iqlāb: «ں», «۾») heard as a plain, clear
+  /// «ن» / «م» — a nasalisation a streaming model judges with less context.
+  hiddenNasal,
+
   /// The throat letters (ء ع ح ه خ غ) heard as each other.
   throat;
 
@@ -84,6 +88,7 @@ enum SoundGroup {
         return t.unitFinalVowel ? finalVowel : reducedVowel;
       case RecitationErrorType.wrongLetter when heard != null:
         final a = t.symbol, b = quranPhoneticVocabulary[heard];
+        if ('ں۾'.contains(a) && 'نم'.contains(b)) return hiddenNasal;
         if (_pairs.contains('$a$b') || _pairs.contains('$b$a')) {
           return heavyLight;
         }
