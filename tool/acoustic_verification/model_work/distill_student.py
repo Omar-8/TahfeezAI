@@ -301,15 +301,19 @@ def make_student(teacher_model, size):
 _gpu_fbank = None
 
 
-def featurize(fe, items):
+STUDENT_CAUSAL = None   # streaming students (--stream): running feature normalisation
+
+
+def featurize(fe, items, causal=None):
     # On a GPU the features are computed there (gpu_fbank.py, checked against the
     # extractor): on one CPU core they took most of each step and left the GPU idle.
+    # [causal]: running normalisation (gpu_fbank.GpuFbank.one), on any device.
     global _gpu_fbank
-    if DEV == 'cuda':
+    if DEV == 'cuda' or causal is not None:
         if _gpu_fbank is None:
             from gpu_fbank import GpuFbank
             _gpu_fbank = GpuFbank(fe, DEV)
-        return _gpu_fbank.batch([x for x, _ in items])
+        return _gpu_fbank.batch([x for x, _ in items], causal)
     f = fe([x for x, _ in items], sampling_rate=16000, return_tensors='pt', padding=True)
     return f['input_features'].to(DEV), f['attention_mask'].to(DEV)
 
@@ -530,9 +534,13 @@ def losses(teacher, student, fe, items, T, ctc_w, aug=0.0, coded=None, layers=No
     if crop > 0:
         # Short-context training: the student hears windows, the teacher whole clips.
         s_items, starts, cropped = crop_views(items, crop, rng)
-        xs, smask = featurize(fe, augment(s_items, aug, rng, None, pool_share, items) if aug > 0 else s_items)
+        xs, smask = featurize(fe, augment(s_items, aug, rng, None, pool_share, items) if aug > 0 else s_items,
+                              STUDENT_CAUSAL)
     else:
-        xs = featurize(fe, augment(items, aug, rng, coded, pool_share, items))[0] if aug > 0 else x
+        if aug > 0:
+            xs = featurize(fe, augment(items, aug, rng, coded, pool_share, items), STUDENT_CAUSAL)[0]
+        else:
+            xs = x if STUDENT_CAUSAL is None else featurize(fe, items, STUDENT_CAUSAL)[0]
         smask, starts, cropped = mask, None, None
     hid = layers is not None and crop == 0
     with torch.no_grad():
@@ -636,6 +644,13 @@ def train(a):
     ema.load_state_dict(s.state_dict())
     for p in ema.parameters():
         p.requires_grad_(False)
+    if a.stream:
+        import streaming
+        global STUDENT_CAUSAL
+        STUDENT_CAUSAL = streaming.prior(os.path.join(HERE, 'fbank_prior.json'), DEV)
+        chunk_s, left_s = streaming.parse(a.stream)
+        print(f'streaming student: chunk {chunk_s} s, left {left_s} s,',
+              streaming.enable(s, chunk_s, left_s), streaming.enable(ema, chunk_s, left_s), 'attention layers')
     opt = torch.optim.AdamW(s.parameters(), lr=a.lr, betas=(0.9, 0.98), weight_decay=0.01)
     warm = max(1, a.steps // 25)
     sched = torch.optim.lr_scheduler.LambdaLR(
@@ -781,6 +796,9 @@ def main():
                    help='shard name prefix to repeat, and how often: e.g. shard_99=8')
     p.add_argument('--crop', type=float, default=0.0,
                    help='share of clips the student hears as a short window (short-context training)')
+    p.add_argument('--stream', default='',
+                   help='chunk_s,left_s: the student attends to its own chunk and the past only '
+                        '(streaming.py); the teacher keeps full attention')
     p.add_argument('--pool', action='store_true',
                    help="use the codec pool (stage 'pool') for degraded clips")
     p.add_argument('--pool-share', type=float, default=0.7,

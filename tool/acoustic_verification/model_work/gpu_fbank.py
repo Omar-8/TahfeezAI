@@ -22,7 +22,10 @@ class GpuFbank(torch.nn.Module):
         self.offsets = torch.arange(400, device=device)
         self.device = device
 
-    def one(self, wave):
+    def one(self, wave, causal=None):
+        """[causal]: (prior mean (80,), prior variance (80,), prior weight in frames):
+        each frame normalised by the statistics of the frames up to it, started from the
+        prior (streaming.py), instead of the whole clip's."""
         x = wave * 32768.0
         frames = (x.shape[0] - 400) // 160 + 1
         f = x[torch.arange(frames, device=self.device)[:, None] * 160 + self.offsets[None, :]]
@@ -30,13 +33,21 @@ class GpuFbank(torch.nn.Module):
         f = torch.cat([f[:, :1] * 0.03, f[:, 1:] - 0.97 * f[:, :-1]], dim=1)
         re, im = f @ self.cos, f @ self.sin
         m = torch.log(torch.clamp((re * re + im * im) @ self.mel, min=1.192092955078125e-07))
+        if isinstance(causal, str) and causal == 'raw':
+            return m                                          # unnormalised log-mel
+        if causal is not None:
+            mu0, var0, n0 = causal
+            k = torch.arange(1, m.shape[0] + 1, device=m.device, dtype=m.dtype)[:, None] + n0
+            mean = (n0 * mu0 + torch.cumsum(m, 0)) / k
+            var = (n0 * (var0 + mu0 * mu0) + torch.cumsum(m * m, 0)) / k - mean * mean
+            return (m - mean) / torch.sqrt(torch.clamp(var, min=0) + 1e-7)
         mean = m.mean(dim=0, keepdim=True)
         var = ((m - mean) ** 2).sum(dim=0, keepdim=True) / (m.shape[0] - 1)
         return (m - mean) / torch.sqrt(var + 1e-7)            # (frames, 80)
 
-    def batch(self, waves):
+    def batch(self, waves, causal=None):
         """(input_features (B, T/2, 160), attention_mask (B, T/2)) like the extractor."""
-        mels = [self.one(torch.from_numpy(np.asarray(w, dtype=np.float32)).to(self.device))
+        mels = [self.one(torch.from_numpy(np.asarray(w, dtype=np.float32)).to(self.device), causal)
                 for w in waves]
         longest = max(m.shape[0] for m in mels)
         longest += longest % 2

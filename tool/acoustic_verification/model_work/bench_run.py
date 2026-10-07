@@ -43,6 +43,34 @@ if model == 'torch':
         f = m.processor([w], sampling_rate=16000, return_tensors='pt').to(dev)
         with torch.no_grad():
             return F.log_softmax(m.model(**f, return_dict=False)[0]['phonemes'][0], -1).float().cpu().numpy()
+elif model.startswith('student:'):
+    # A distilled student's PyTorch weights (a run dir); STREAM=chunk_s,left_s gives it
+    # streaming.py's chunk masks.
+    import torch, torch.nn.functional as F
+    from quran_muaalem import Muaalem
+    torch.set_num_threads(threads)
+    dev = 'cuda' if torch.cuda.is_available() else 'cpu'
+    m = Muaalem(model_name_or_path='obadx/muaalem-model-v3_2', device='cpu', dtype=torch.float32)
+    d = model.split(':', 1)[1]
+    net = m.model.__class__(m.model.config.__class__.from_pretrained(d))
+    net.load_state_dict(torch.load(os.path.join(d, 'student.pt'), map_location='cpu'))
+    net.to(dev).eval()
+    causal = None
+    if os.environ.get('STREAM'):
+        import streaming
+        from gpu_fbank import GpuFbank
+        print('streaming', os.environ['STREAM'], streaming.enable(net, *streaming.parse(os.environ['STREAM'])),
+              'attention layers', file=sys.stderr)
+        fbank = GpuFbank(getattr(m.processor, 'feature_extractor', m.processor), dev)
+        causal = streaming.prior(os.path.join(HERE, 'fbank_prior.json'), dev)
+    def run(w):
+        if causal is not None:
+            x, mask = fbank.batch([w], causal)
+            f = dict(input_features=x, attention_mask=mask)
+        else:
+            f = m.processor([w], sampling_rate=16000, return_tensors='pt').to(dev)
+        with torch.no_grad():
+            return F.log_softmax(net(**f, return_dict=False)[0]['phonemes'][0], -1).float().cpu().numpy()
 else:
     import onnxruntime as ort
     so = ort.SessionOptions(); so.intra_op_num_threads = threads
