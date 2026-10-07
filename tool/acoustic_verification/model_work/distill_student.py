@@ -38,7 +38,8 @@ import torch.nn.functional as F
 HERE = os.path.dirname(os.path.abspath(__file__))
 # Depth students keep the teacher's width and copy these of its 24 layers (plus the
 # feature projection, adapter and phoneme head), so they start from its pre-training.
-DEPTH = {'d6': [0, 4, 8, 13, 18, 23], 'd8': [0, 3, 6, 9, 12, 15, 19, 23]}
+DEPTH = {'d6': [0, 4, 8, 13, 18, 23], 'd8': [0, 3, 6, 9, 12, 15, 19, 23],
+         'd10': [0, 2, 5, 7, 10, 12, 15, 17, 20, 23]}
 SIZES = {'s150': (640, 16, 10), 's100': (512, 16, 8), 's75': (512, 12, 8),
          's50': (384, 16, 6), 's25': (256, 16, 4)}
 VOCAB = ['', 'ء', 'ب', 'ت', 'ث', 'ج', 'ح', 'خ', 'د', 'ذ', 'ر', 'ز', 'س', 'ش', 'ص', 'ض',
