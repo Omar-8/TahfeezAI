@@ -142,6 +142,6 @@ perf = dict(tag=tag, model=model, threads=threads, cases=len(out), load_s=round(
             peak_rss_mb=round(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024),
             audio_s=round(secs, 1), infer_s=round(infer, 1), rtf=round(infer / secs, 3),
             eight_s_audio_s=round(t8, 2),
-            size_mb=round(os.path.getsize(model) / 1e6, 1) if model != 'torch' else None)
+            size_mb=round(os.path.getsize(model) / 1e6, 1) if os.path.isfile(model) else None)
 json.dump(perf, open(os.path.join(ART, 'results', tag + '.perf.json'), 'w'))
 print(json.dumps(perf))
