@@ -18,11 +18,11 @@ Alafasy, Husary), any ayah in blocked_ayahs.json, clips outside 1-20 s, and clip
 teacher cannot align to the expected Hafs pronunciation (mean per-frame cost >
 MAX_COST: another riwayah, wrong ayah, noise).
 """
-import argparse, collections, glob, io, json, os, random, re, subprocess, unicodedata
+import argparse, collections, glob, io, json, os, random, re, shutil, subprocess, unicodedata
 import numpy as np
 import torch
 import torchaudio
-from huggingface_hub import HfApi, hf_hub_download
+from huggingface_hub import HfApi
 import pyarrow.parquet as pq
 
 import distill_student as ds
@@ -45,6 +45,30 @@ def find(*names):
             if os.path.exists(p):
                 return p
     raise FileNotFoundError(names)
+
+
+def download(repo, f, cache):
+    """A dataset file via aria2c (8 connections; resumed and retried), else curl: the hub
+    client's single-connection downloads stall or crawl on some machines."""
+    path = os.path.join(cache, repo.replace('/', '--'), f)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    if os.path.exists(path):
+        return path
+    url = f'https://huggingface.co/datasets/{repo}/resolve/main/{f}'
+    auth = ['-H', f'Authorization: Bearer {os.environ["HF_TOKEN"]}'] if os.environ.get('HF_TOKEN') else []
+    for _ in range(30):
+        if shutil.which('aria2c'):
+            r = subprocess.run(['aria2c', '-q', '-x', '8', '-s', '8', '-c', '--max-tries=5',
+                                '--lowest-speed-limit=50K', '--allow-overwrite=true', '--auto-file-renaming=false',
+                                *[f'--header={h}' for h in auth[1::2]],
+                                '-d', os.path.dirname(path), '-o', os.path.basename(path) + '.part', url])
+        else:
+            r = subprocess.run(['curl', '-sfL', '-C', '-', '--speed-limit', '200000', '--speed-time', '30',
+                                *auth, '-o', path + '.part', url])
+        if r.returncode == 0:
+            os.rename(path + '.part', path)
+            return path
+    raise RuntimeError(f'download failed: {f}')
 
 
 def decode(cell):
@@ -129,13 +153,13 @@ def qud_rows(a, rng):
     names = sorted(n for n in by if not n.startswith(QUD_EXCLUDED))[a.part::a.parts]
     for name in names:
         f = rng.choice(sorted(by[name]))
-        path = hf_hub_download(REPO['qud'], f, repo_type='dataset', cache_dir=a.cache)
+        path = download(REPO['qud'], f, a.cache)
         for batch in pq.ParquetFile(path).iter_batches(batch_size=64, columns=['audio', 'surah', 'ayah']):
             for row in batch.to_pylist():
                 if rng.random() > a.keep:
                     continue
                 yield name, row['surah'] * 1000 + row['ayah'], None, None, row['audio']
-        os.remove(os.path.realpath(path))
+        os.remove(path)
 
 
 def tadabur_rows(a, rng):
@@ -144,15 +168,16 @@ def tadabur_rows(a, rng):
                    if f.startswith('data/train-') and f.endswith('.parquet'))
     pick = sorted(rng.sample(files, a.files))[a.part::a.parts]
     for f in pick:
-        path = hf_hub_download(REPO['tadabur'], f, repo_type='dataset', cache_dir=a.cache)
+        path = download(REPO['tadabur'], f, a.cache)
         pf = pq.ParquetFile(path)
         cols = [c for c in ('audio', 'reciter_id', 'surah_id', 'ayah_id') if c in pf.schema_arrow.names]
         for batch in pf.iter_batches(batch_size=64, columns=cols):
             for row in batch.to_pylist():
                 if row['reciter_id'] in TADABUR_EXCLUDED:
                     continue
-                yield f'tadabur_{row["reciter_id"]}', row['surah_id'] * 1000 + row['ayah_id'], None, None, row['audio']
-        os.remove(os.path.realpath(path))
+                # surah_id counts from 0 ("وَٱلْفَجْرِ" is surah_id 88)
+                yield f'tadabur_{row["reciter_id"]}', (row['surah_id'] + 1) * 1000 + row['ayah_id'], None, None, row['audio']
+        os.remove(path)
 
 
 def iqra_rows(a, rng):
@@ -161,14 +186,14 @@ def iqra_rows(a, rng):
     files = sorted(f for f in api.list_repo_files(REPO['iqra'], repo_type='dataset')
                    if f.startswith('data/train-') and f.endswith('.parquet'))[a.part::a.parts]
     for f in files:
-        path = hf_hub_download(REPO['iqra'], f, repo_type='dataset', cache_dir=a.cache)
+        path = download(REPO['iqra'], f, a.cache)
         for batch in pq.ParquetFile(path).iter_batches(batch_size=64, columns=['audio', 'tashkeel_sentence', 'sentence']):
             for row in batch.to_pylist():
                 hit = spans.get(skeleton(row['tashkeel_sentence'] or row['sentence'] or ''))
                 if hit:
                     aid, lo, hi = hit
                     yield 'iqra', aid, lo, hi, row['audio']
-        os.remove(os.path.realpath(path))
+        os.remove(path)
 
 
 def main():
@@ -211,7 +236,7 @@ def main():
     for who, aid, lo, hi, cell in rows:
         if total >= a.hours * 3600:
             break
-        if who != last and last is not None:
+        if who != last and last is not None and a.source == 'qud':     # tadabur is shuffled
             print(last, dict(stats[last]), round(hours[last] / 3600, 2), 'h', flush=True)
             log.write(f'{last} {dict(stats[last])} {hours[last] / 3600:.2f} h\n'); log.flush()
         last = who
@@ -236,9 +261,10 @@ def main():
         hours[who] += len(w) / 16000; total += len(w) / 16000
         if len(shard) == a.shard_clips:
             flush()
-    if last is not None:
+    if last is not None and a.source == 'qud':
         log.write(f'{last} {dict(stats[last])} {hours[last] / 3600:.2f} h\n')
     flush()
+    log.write(f'{a.source} {sum(stats.values(), collections.Counter())} {total / 3600:.2f} h, {len(hours)} speakers\n')
     json.dump({k: dict(v, hours=round(hours[k] / 3600, 2)) for k, v in stats.items()},
               open(os.path.join(a.out, f'{a.source}_stats_{a.part}.json'), 'w'), indent=1)
     print('done', a.source, a.part, round(total / 3600, 2), 'h', n_shard, 'shards')

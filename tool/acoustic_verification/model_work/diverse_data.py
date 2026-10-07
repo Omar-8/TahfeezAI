@@ -176,6 +176,10 @@ def main():
     p.add_argument('--part', type=int, default=0)
     p.add_argument('--parts', type=int, default=1, help='split the reciters over parallel builders')
     p.add_argument('--shard-clips', type=int, default=2000)
+    p.add_argument('--first-shard', type=int, default=0,
+                   help='number of this part\'s first shard (continuing a run)')
+    p.add_argument('--skip-done', action='store_true',
+                   help='skip the reciters already in this part\'s log (continuing a run)')
     a = p.parse_args()
     os.makedirs(a.out, exist_ok=True)
     ref = json.load(open(os.path.join(HERE, 'phonetic_reference_hafs.json')))['ayahs']
@@ -183,7 +187,7 @@ def main():
     counts = {s: sum(1 for k in ref if int(k) // 1000 == s) for s in range(1, 115)}
     t = ds.load_teacher()
     fe = getattr(t.processor, 'feature_extractor', t.processor)
-    shard, n_shard, stats = [], 0, {}
+    shard, n_shard, stats = [], a.first_shard, {}
     log = open(os.path.join(a.out, f'diverse_{a.part}.log'), 'a')
 
     def flush():
@@ -199,6 +203,10 @@ def main():
 
     rng = random.Random(0)
     todo = sorted(reciters().items())[a.part::a.parts]
+    if a.skip_done:
+        logp = os.path.join(a.out, f'diverse_{a.part}.log')
+        done = {l.split(' {')[0] for l in open(logp)} if os.path.exists(logp) else set()
+        todo = [r for r in todo if r[0] not in done]
     for name, (server, surahs) in todo:
         limit = (a.hours_non_native or a.hours_per_reciter) if name in NON_NATIVE else a.hours_per_reciter
         got, kept = 0.0, 0
@@ -266,7 +274,7 @@ def main():
         stats[name] = dict(hours=round(got / 3600, 2), kept=kept, **why)
         print(name, stats[name], flush=True); log.write(f'{name} {stats[name]}\n'); log.flush()
     flush()
-    json.dump(stats, open(os.path.join(a.out, f'diverse_stats_{a.part}.json'), 'w'), indent=1)
+    json.dump(stats, open(os.path.join(a.out, f'diverse_stats_{a.part}_{a.first_shard}.json'), 'w'), indent=1)
     print('done', round(sum(v['hours'] for v in stats.values()), 2), 'h')
 
 
