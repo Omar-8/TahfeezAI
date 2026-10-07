@@ -290,6 +290,9 @@ class AcousticVerificationController
   bool _busy = false;
   String? _sessionId;
   int _generation = 0;
+
+  /// The reciter's beat this session (for madds a word's own check judges).
+  final _beat = BeatMeter();
   final _verifier = const QuranAcousticVerifier(
     thresholds: calibratedThresholds,
   );
@@ -400,6 +403,7 @@ class AcousticVerificationController
       if (id != _sessionId) {
         _sessionId = id;
         _generation++; // a new session: drop the old one's audio
+        _beat.reset();
         _queue.clear();
         if (_inference == null) _pcm.reset();
         _ayahStart = 0;
@@ -730,6 +734,7 @@ class AcousticVerificationController
       },
       openStart: job.openStart,
       openEnd: job.openEnd,
+      beat: _beat,
     );
     // Only this piece's own words, and none cut off where the audio was
     // cut: the first / last unit is dropped only if it reaches within

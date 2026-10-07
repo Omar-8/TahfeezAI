@@ -336,6 +336,39 @@ void main() {
     },
   );
 
+  test('a word checked alone judges its madd against the session beat', () {
+    // 5:109: the whole stretch sets the beat (its two-count madds); then
+    // «لَنَآ» alone, its four-count madd cut to one beat, holds no two-count
+    // madd of its own — judged only with the session's beat.
+    final stretch = reference.words(5109, 7, 14);
+    List<int> said(List<PhoneticToken> ts, {int? cut}) => [
+      for (var i = 0; i < ts.length; i++)
+        if (ts[i].kind == PhoneticTokenKind.long)
+          ...List.filled(i == cut ? 1 : ts[i].count, ts[i].token)
+        else
+          ts[i].token,
+    ];
+    final meter = BeatMeter();
+    verifier.verify(clearFrames(said(stretch)), stretch, beat: meter);
+    expect(meter.value, isNotNull);
+    final word = reference.words(5109, 10, 10);
+    final k = word.indexWhere(
+      (t) => t.kind == PhoneticTokenKind.long && t.count == 4,
+    );
+    final cut = clearFrames(said(word, cut: k));
+    expect(
+      verifier.verify(cut, word, openStart: true, openEnd: true)[k].type,
+      isNot(RecitationErrorType.maddShort),
+      reason: 'no beat of its own',
+    );
+    expect(
+      verifier
+          .verify(cut, word, openStart: true, openEnd: true, beat: meter)[k]
+          .type,
+      RecitationErrorType.maddShort,
+    );
+  });
+
   test('stopping inside a joined unit is a stop, not a mistake', () {
     // 2:7 «غِشَٰوَةٌ ۖ وَلَهُمْ»: in flow one unit (the tanween merges into the
     // و); stopping after غِشَٰوَةٌ (a waqf mark) it is said «غِشَاوَه», and

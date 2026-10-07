@@ -305,6 +305,7 @@ class QuranAcousticVerifier {
     Map<int, PauseForms> pauses = const {},
     bool openStart = false,
     bool openEnd = false,
+    BeatMeter? beat,
   }) {
     if (expected.isEmpty) return const [];
     final t = frames.frames;
@@ -424,7 +425,7 @@ class QuranAcousticVerifier {
       chosen.addAll(candidate);
     }
     spans = _alignWithWaqf(frames, chosen);
-    final out = _verifyAligned(frames, chosen, spans);
+    final out = _verifyAligned(frames, chosen, spans, beat);
     // A different vowel said just before a pause is still a mistake.
     for (final MapEntry(key: u, value: (vowel, lastWord))
         in finalVowel.entries) {
@@ -571,10 +572,15 @@ class QuranAcousticVerifier {
     AcousticFrames frames,
     List<PhoneticToken> expected,
     List<FrameSpan?> spans,
+    BeatMeter? meter,
   ) {
     final labels = [for (final t in expected) t.token];
     final out = <PhonemeVerdict>[];
-    final beat = thresholds.tajweed ? _beat(frames, expected, spans) : null;
+    // The reciter's beat: this audio's own, else the session's so far (a
+    // word's own check rarely holds the two madds a beat needs).
+    final own = thresholds.tajweed ? _beat(frames, expected, spans) : null;
+    if (own != null) meter?.add(own);
+    final beat = thresholds.tajweed ? own ?? meter?.value : null;
     for (var k = 0; k < expected.length; k++) {
       final t = expected[k];
       final span = spans[k];
@@ -1075,4 +1081,28 @@ class _Alternative {
 
   /// A tajweed mistake (not judged with tajweed off).
   final bool tajweed;
+}
+
+/// The reciter's beat (one haraka, in frames) across a session: each check
+/// whose audio holds enough two-count madds adds its own; a check with too
+/// few of them — a single word's — judges madds against the recent median.
+class BeatMeter {
+  final _recent = <double>[];
+
+  /// The median of the recent beats, or `null` before any.
+  double? get value {
+    if (_recent.isEmpty) return null;
+    final sorted = [..._recent]..sort();
+    final mid = sorted.length ~/ 2;
+    return sorted.length.isOdd
+        ? sorted[mid]
+        : (sorted[mid - 1] + sorted[mid]) / 2;
+  }
+
+  void add(double beat) {
+    _recent.add(beat);
+    if (_recent.length > 9) _recent.removeAt(0);
+  }
+
+  void reset() => _recent.clear();
 }
