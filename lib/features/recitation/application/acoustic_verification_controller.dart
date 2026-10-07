@@ -800,7 +800,9 @@ class AcousticVerificationController
           mistake = errors.firstWhere((e) => e.type.isError);
         }
       }
-      _log('word ${byWord.keys.map(_ref).join(' ')}: ${mistake ?? 'fine'}');
+      if (byWord.isNotEmpty) {
+        _log('word ${byWord.keys.map(_ref).join(' ')}: ${mistake ?? 'fine'}');
+      }
       state = state.copyWith(
         words: words,
         lastMistake: mistake ?? state.lastMistake,
@@ -886,9 +888,17 @@ class AcousticVerificationController
   Future<AcousticFrames?> _framesOf(QuranAcousticModel model, _Job job) {
     if (job.frames != null) return Future.value(job.frames);
     if (_streaming) {
+      // Up to what has been computed: the piece's margin after its last
+      // word may still be in the chunk being heard.
       const spf = 640;
+      final store = _inference!.store;
       return Future.value(
-        _inference!.store.slice(job.start ~/ spf, job.end ~/ spf)?.frames,
+        store
+            .slice(
+              math.max(job.start ~/ spf, store.start),
+              math.min(job.end ~/ spf, store.end),
+            )
+            ?.frames,
       );
     }
     return runInPieces(model, job.samples);
