@@ -593,8 +593,8 @@ class RecitationProgressBar extends ConsumerWidget {
           );
   }
 
-  /// How far into its surah the reciter is: up to the word last recited (a
-  /// Hifz test) or revealed (hide mode), else the last word on screen.
+  /// How much of the page (or spread) on screen is done: up to the word last
+  /// recited (a Hifz test) or revealed (hide mode); none otherwise.
   static double? _readingProgress(WidgetRef ref, QuranLocationPage location) {
     final corpus = ref.watch(quranWordCorpusProvider).value;
     if (corpus == null || corpus.length == 0) return null;
@@ -616,9 +616,7 @@ class RecitationProgressBar extends ConsumerWidget {
         : null;
     final hide = ref.watch(mushafHideModeProvider);
     int? done;
-    var finished = false;
     if (hifz != null && hifz.active) {
-      finished = hifz.completed;
       final next = hifz.completed ? null : hifz.expected;
       done = next != null
           ? switch (corpus.positionOf(next)) {
@@ -633,13 +631,10 @@ class RecitationProgressBar extends ConsumerWidget {
       }
       done = pageFirst + revealed - 1;
     } else {
-      done = pageLast;
+      done = pageFirst - 1;
     }
     if (done == null) return null;
-    // The surah of the word to recite (or reveal) next, on screen — or, a
-    // test over, of its last word.
-    final of = finished ? done : (done + 1).clamp(pageFirst, pageLast);
-    return surahProgress(corpus, done, of: of);
+    return pageProgress(done, first: pageFirst, last: pageLast);
   }
 
   /// A running loop: its progress, its segments, and in words where it is;
@@ -664,16 +659,12 @@ class RecitationProgressBar extends ConsumerWidget {
   }
 }
 
-/// The share of a surah — [of]'s (a corpus position) — recited up to corpus
-/// position [done].
-double surahProgress(QuranWordCorpus corpus, int done, {required int of}) {
-  final chapter = corpus.words[of.clamp(0, corpus.length - 1)].verse.chapterNo;
-  final start = corpus.verseStartPosition((chapterNo: chapter, verseNo: 1));
-  if (start == null) return 0;
-  final next = corpus.verseStartPosition((chapterNo: chapter + 1, verseNo: 1));
-  final end = (next ?? corpus.length) - 1;
-  return ((done - start + 1) / (end - start + 1)).clamp(0.0, 1.0);
-}
+/// The share of the words [first]..[last] (corpus positions: the page on
+/// screen) done up to corpus position [done].
+double pageProgress(int done, {required int first, required int last}) =>
+    last < first
+    ? 0
+    : ((done - first + 1) / (last - first + 1)).clamp(0.0, 1.0);
 
 /// How far a running loop has come (0–1), and the segments a progress
 /// line shows it in: its repetitions (whole range) or its ayahs (ayah by

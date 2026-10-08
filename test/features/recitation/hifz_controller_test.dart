@@ -573,15 +573,11 @@ void main() {
     });
   });
 
-  test("the progress line: the share of the surah recited", () {
-    final fatihaEnd = corpus.verseEndPosition((chapterNo: 1, verseNo: 7))!;
-    final baqara = fatihaEnd + 1;
-    expect(surahProgress(corpus, -1, of: 0), 0, reason: 'nothing yet');
-    expect(surahProgress(corpus, fatihaEnd ~/ 2, of: 0), closeTo(0.5, 0.05));
-    expect(surahProgress(corpus, fatihaEnd, of: fatihaEnd), 1);
-    // At the start of the next surah, none of it.
-    expect(surahProgress(corpus, fatihaEnd, of: baqara), 0);
-    expect(surahProgress(corpus, baqara, of: baqara), greaterThan(0));
+  test('the progress line: the share of the page done', () {
+    expect(pageProgress(9, first: 10, last: 19), 0, reason: 'nothing yet');
+    expect(pageProgress(14, first: 10, last: 19), 0.5);
+    expect(pageProgress(19, first: 10, last: 19), 1);
+    expect(pageProgress(40, first: 10, last: 19), 1, reason: 'past it');
   });
 
   group('loop recitation', () {
