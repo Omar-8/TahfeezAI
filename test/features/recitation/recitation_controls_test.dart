@@ -588,6 +588,30 @@ void main() {
     );
   });
 
+  testWidgets('the loop and Hifz settings sheets stay below the app bar', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 640);
+    tester.view.devicePixelRatio = 1;
+    tester.view.padding = const FakeViewPadding(top: 24);
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(app(devPanel: false));
+    await tester.pumpAndSettle();
+    final appBarBottom = tester.getBottomLeft(find.byType(AppBar)).dy;
+    for (final tip in ['Loop recitation', 'Hifz settings']) {
+      await tester.tap(find.byTooltip(tip));
+      await tester.pumpAndSettle();
+      expect(
+        tester.getTopLeft(find.byType(BottomSheet)).dy,
+        greaterThanOrEqualTo(appBarBottom),
+        reason: tip,
+      );
+      await tester.tapAt(const Offset(200, 10));
+      await tester.pumpAndSettle();
+      expect(find.byType(BottomSheet), findsNothing, reason: tip);
+    }
+  });
+
   testWidgets('a thin line over the page shows where it is in the Mushaf', (
     tester,
   ) async {

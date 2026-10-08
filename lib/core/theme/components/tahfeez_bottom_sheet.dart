@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../app_spacing.dart';
@@ -38,8 +40,22 @@ class TahfeezModalSheetActivity {
   }
 }
 
+/// Constraints keeping a modal sheet opened from [context] below the app
+/// bar of the screen it was opened from (its nearest [Scaffold]'s, status
+/// bar included): as tall as its content, never over the screen's header.
+/// Without an app bar, below the status bar.
+BoxConstraints sheetBelowAppBar(BuildContext context) {
+  final view = View.of(context);
+  final screen = view.physicalSize.height / view.devicePixelRatio;
+  final top =
+      Scaffold.maybeOf(context)?.appBarMaxHeight ??
+      view.padding.top / view.devicePixelRatio;
+  return BoxConstraints(maxHeight: math.max(0, screen - top));
+}
+
 /// Shows a Tahfeez modal bottom sheet with a consistent drag handle, header,
-/// and safe-area padding.
+/// and safe-area padding — below the app bar ([sheetBelowAppBar]) unless
+/// [constraints] say otherwise.
 ///
 /// `docs/DESIGN_DIRECTION.md` keeps "bottom-sheet interaction for secondary
 /// actions" as a KEEP-worthy pattern from the reference app
@@ -56,7 +72,7 @@ Future<T?> showTahfeezModalBottomSheet<T>({
   final result = showModalBottomSheet<T>(
     context: context,
     isScrollControlled: true,
-    constraints: constraints,
+    constraints: constraints ?? sheetBelowAppBar(context),
     builder: (context) => SafeArea(
       child: Padding(
         padding: const EdgeInsets.only(top: TahfeezSpacing.sm),

@@ -565,7 +565,12 @@ class QuranAcousticVerifier {
   /// Whether frames [from]..[to] hold a stop: a run of at least
   /// [stopInsideFrames] (and [AcousticThresholds.pauseFrames]) frames where
   /// nothing but the blank is likely.
-  bool _pauseWithin(AcousticFrames frames, int from, int to) {
+  bool _pauseWithin(AcousticFrames frames, int from, int to) =>
+      pauseBetween(frames, from, to);
+
+  /// Whether the reciter stopped between frames [from] and [to] (as
+  /// [_pauseWithin]): e.g. between two ayahs, said joined or not.
+  bool pauseBetween(AcousticFrames frames, int from, int to) {
     var run = 0;
     for (var f = from + 1; f < to; f++) {
       var blank = true;

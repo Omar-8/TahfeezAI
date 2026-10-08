@@ -556,15 +556,41 @@ class AcousticVerificationController
           (w.ref.ayahId != piece.last.ref.ayahId ||
               !_after(w.ref, piece.last.ref) ||
               w.end - piece.first.start > _maxPieceFrames)) {
-        _sendPlaced(piece, paused: false);
+        // On into the next ayah without stopping: the ayah's end is said
+        // in flow (لِّلْمُصَلِّينَ ٱلَّذِينَ: its ن with fatha, the hamza
+        // after it not said) — not judged as a stop and a fresh start.
+        final joined = _joined(piece.last, w);
+        _sendPlaced(piece, paused: false, joinedEnd: joined);
         _piece = [];
+        _pieceJoinedStart = joined;
       }
+      if (_piece.isEmpty && piece.isEmpty) _pieceJoinedStart = false;
       _piece.add(w);
     }
     if (event.paused && _piece.isNotEmpty) {
       _sendPlaced(_piece, paused: true);
       _piece = [];
     }
+    if (event.paused) _pieceJoinedStart = false;
+  }
+
+  /// The piece being placed began joined to the ayah before it.
+  bool _pieceJoinedStart = false;
+
+  /// Whether [next] (in the next ayah) was said straight after [last], with
+  /// no stop between them — read from the frames around the gap.
+  bool _joined(WordPlacement last, WordPlacement next) {
+    final corpus = ref.read(quranWordCorpusProvider).value;
+    final store = _inference?.store;
+    if (corpus == null || store == null) return false;
+    final a = corpus.positionOf(last.ref), b = corpus.positionOf(next.ref);
+    if (a == null || b != a + 1) return false;
+    final frames = store.slice(
+      math.max(store.start, last.end - 2),
+      math.min(store.end, next.start + 3),
+    );
+    if (frames == null) return false;
+    return !_verifier.pauseBetween(frames.frames, -1, frames.frames.frames);
   }
 
   /// [a] comes after [b] in the Quran.
@@ -572,7 +598,11 @@ class AcousticVerificationController
       a.ayahId > b.ayahId ||
       (a.ayahId == b.ayahId && a.wordIndex > b.wordIndex);
 
-  void _sendPlaced(List<WordPlacement> words, {required bool paused}) {
+  void _sendPlaced(
+    List<WordPlacement> words, {
+    required bool paused,
+    bool joinedEnd = false,
+  }) {
     final corpus = ref.read(quranWordCorpusProvider).value;
     if (corpus == null) return;
     final first = corpus.positionOf(words.first.ref);
@@ -598,8 +628,8 @@ class AcousticVerificationController
         from: (first - _lookBack).clamp(0, corpus.length - 1),
         to: (last + _lookAhead).clamp(0, corpus.length - 1),
         // Cut mid-ayah only where the piece starts or ends inside one.
-        openStart: words.first.ref.wordIndex != 0,
-        openEnd: !paused && last != ayahEnd,
+        openStart: words.first.ref.wordIndex != 0 || _pieceJoinedStart,
+        openEnd: (!paused && last != ayahEnd) || joinedEnd,
         pass: _pass,
       ),
     );

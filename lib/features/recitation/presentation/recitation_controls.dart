@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/core_providers.dart';
+import '../../../core/theme/components/tahfeez_bottom_sheet.dart';
 import '../../../core/ui/full_bleed_content.dart';
 import '../../../quran/domain/models/quran_location.dart';
 import '../../../quran/domain/models/quran_refs.dart';

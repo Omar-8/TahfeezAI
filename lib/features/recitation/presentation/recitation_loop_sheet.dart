@@ -52,20 +52,7 @@ class HifzLoopButton extends ConsumerWidget {
 Future<void> showRecitationLoopSheet(BuildContext context) {
   return showTahfeezModalBottomSheet<void>(
     context: context,
-    constraints: sheetBelowAppBar(context),
     builder: (context) => const _RecitationLoopSheet(),
-  );
-}
-
-/// A Mushaf screen's sheets: as tall as their content, never over the app
-/// bar (or the progress line under it) — the page's header stays in view.
-BoxConstraints sheetBelowAppBar(BuildContext context) {
-  final view = View.of(context);
-  final statusBar = view.padding.top / view.devicePixelRatio;
-  final height = MediaQuery.sizeOf(context).height;
-  return BoxConstraints(
-    maxHeight:
-        height - statusBar - kToolbarHeight - RecitationProgressBar.height,
   );
 }
 
