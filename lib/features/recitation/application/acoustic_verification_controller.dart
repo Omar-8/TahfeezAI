@@ -708,7 +708,12 @@ class AcousticVerificationController
       _log('piece no longer held: not checked');
       return;
     }
-    final located = _verifier.locate(frames, span.tokens);
+    // Located among the candidate words; failing that (a piece recited with
+    // mistakes may fit them too poorly to be found), the words the tracker
+    // placed it as — judged, not skipped: the worse a short ayah was said,
+    // the likelier it was to go unchecked.
+    final located =
+        _verifier.locate(frames, span.tokens) ?? _placedUnits(span, job);
     if (located == null) {
       if (job.quick) return;
       _log('piece not found among ${span.tokens.length} tokens');
@@ -932,6 +937,20 @@ class AcousticVerificationController
         LocalQuranAcousticModel(:final stream) => stream != null,
         _ => false,
       };
+
+  /// The sound units of the words the tracker placed [job] as, or `null`
+  /// when it has none among [span] (a piece sent without placements).
+  (int, int)? _placedUnits(PhoneticSpan span, _Job job) {
+    int? lo, hi;
+    for (final t in span.tokens) {
+      if (!job.targets.contains(t.word)) continue;
+      lo = lo == null ? t.unit : math.min(lo, t.unit);
+      hi = hi == null ? t.unit : math.max(hi, t.unit);
+    }
+    if (lo == null || hi == null) return null;
+    _log('piece placed as ${job.targets.map(_ref).join(' ')} (not located)');
+    return (lo, hi);
+  }
 
   /// A word heard said as another: one mistake naming both (their
   /// Uthmani text), in place of its sounds' own verdicts.
