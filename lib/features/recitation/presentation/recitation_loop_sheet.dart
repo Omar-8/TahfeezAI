@@ -4,15 +4,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/localization/generated/app_localizations.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/components/components.dart';
+import '../../../ai/matching/quran_word_corpus.dart';
 import '../../../core/ui/full_bleed_content.dart';
 import '../../../quran/domain/models/quran_location.dart';
 import '../../../quran/domain/models/quran_refs.dart';
 import '../../mushaf/application/mushaf_hide_mode.dart';
+import '../../mushaf/application/mushaf_page_providers.dart';
 import '../../mushaf/application/mushaf_page_verses.dart';
 import '../../quran/application/quran_index_providers.dart';
 import '../application/hifz_controller.dart';
 import '../application/live_recognition_controller.dart';
 import '../application/mushaf_recitation_target.dart';
+import '../application/quran_match_controller.dart'
+    show quranWordCorpusProvider;
 import '../application/recitation_session_controller.dart';
 
 /// Loop recitation, for a Mushaf screen's app bar: opens [showRecitationLoopSheet]
@@ -511,64 +515,180 @@ class _Stepper extends StatelessWidget {
   }
 }
 
-/// A running loop's progress, beside the recording controls: the ayah (ayah
-/// by ayah) and which time it is being recited.
-class RecitationLoopProgress extends ConsumerWidget {
-  const RecitationLoopProgress({super.key});
+/// A thin progress line under a Mushaf screen's app bar, drawn over the
+/// page's top edge (it takes none of its height): where the page on screen
+/// is in the Mushaf — or, while a loop runs, how far the loop has come, cut
+/// into its repetitions (whole range) or ayahs (ayah by ayah).
+class RecitationProgressBar extends ConsumerWidget {
+  const RecitationProgressBar({super.key, required this.location});
+
+  final QuranLocation? location;
+
+  static const height = 3.0;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (!ref.watch(liveRecognitionEnabledProvider)) {
-      return const SizedBox.shrink();
-    }
-    final hifz = ref.watch(hifzControllerProvider);
-    final loop = hifz.loop;
-    if (loop == null || hifz.repetition == 0) return const SizedBox.shrink();
-    final l10n = AppLocalizations.of(context);
+    final location = this.location;
+    if (location is! QuranLocationPage) return const SizedBox.shrink();
     final scheme = Theme.of(context).colorScheme;
+    final loop = ref.watch(liveRecognitionEnabledProvider)
+        ? _loopProgress(ref, AppLocalizations.of(context))
+        : null;
+    final double value;
+    var segments = 1;
+    String? semantics;
+    if (loop != null) {
+      (value, segments, semantics) = loop;
+    } else {
+      final pages = ref
+          .watch(mushafByIdProvider(location.mushafId))
+          .value
+          ?.pageCount;
+      if (pages == null || pages <= 0) return const SizedBox.shrink();
+      final spread = ref.watch(fullBleedContentProvider);
+      final last =
+          firstVisiblePage(location.pageNumber, spread: spread) +
+          (spread ? 1 : 0);
+      value = (last / pages).clamp(0.0, 1.0);
+    }
+    final bar = TweenAnimationBuilder<double>(
+      tween: Tween(end: value),
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOut,
+      builder: (context, v, _) => CustomPaint(
+        key: ValueKey(loop == null ? 'reading-progress' : 'loop-progress'),
+        size: const Size.fromHeight(height),
+        painter: _ProgressPainter(
+          value: v,
+          segments: segments,
+          fill: scheme.primary,
+          track: scheme.primary.withValues(alpha: 0.18),
+          rtl: Directionality.of(context) == TextDirection.rtl,
+        ),
+      ),
+    );
+    return semantics == null
+        ? ExcludeSemantics(child: bar)
+        : Semantics(
+            label: AppLocalizations.of(context).recLoop,
+            value: semantics,
+            child: bar,
+          );
+  }
+
+  /// A running loop: its progress, its segments, and in words where it is;
+  /// `null` without one.
+  static (double, int, String)? _loopProgress(
+    WidgetRef ref,
+    AppLocalizations l10n,
+  ) {
+    final hifz = ref.watch(hifzControllerProvider);
+    final corpus = ref.watch(quranWordCorpusProvider).value;
+    final loop = hifz.loop;
+    final progress = corpus == null ? null : loopProgress(hifz, corpus);
+    if (loop == null || progress == null) return null;
     final ayah = hifz.loopAyah;
-    final text = hifz.completed
+    final where = hifz.completed
         ? l10n.recLoopComplete
         : [
             if (ayah != null) '${ayah.chapterNo}:${ayah.verseNo}',
             l10n.recLoopProgress(hifz.repetition, loop.count),
           ].join(' · ');
-    // Beside the pause button; nothing (no gap either) without a loop, so
-    // the bar's other buttons never move.
-    return Container(
-      key: const ValueKey('loop-progress'),
-      margin: const EdgeInsetsDirectional.only(start: TahfeezSpacing.sm),
-      constraints: const BoxConstraints(maxWidth: 140),
-      padding: const EdgeInsets.symmetric(
-        horizontal: TahfeezSpacing.smPlus,
-        vertical: TahfeezSpacing.xs + 2,
-      ),
-      decoration: BoxDecoration(
-        color: scheme.secondaryContainer,
-        borderRadius: BorderRadius.circular(TahfeezRadii.pill),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            hifz.completed ? Icons.check_rounded : Icons.repeat_rounded,
-            size: 16,
-            color: scheme.onSecondaryContainer,
-          ),
-          const SizedBox(width: TahfeezSpacing.xs),
-          Flexible(
-            child: Text(
-              text,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: scheme.onSecondaryContainer,
-                fontFeatures: const [FontFeature.tabularFigures()],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+    return (progress.value, progress.segments, where);
   }
+}
+
+/// How far a running loop has come (0–1), and the segments a progress
+/// line shows it in: its repetitions (whole range) or its ayahs (ayah by
+/// ayah). `null` without a loop under way.
+({double value, int segments})? loopProgress(
+  HifzState hifz,
+  QuranWordCorpus corpus,
+) {
+  final loop = hifz.loop, range = hifz.range;
+  if (loop == null || range == null || hifz.repetition == 0) return null;
+  if (hifz.completed) return (value: 1, segments: 1);
+  // How much of this repetition has been recited.
+  final first = hifz.first == null ? null : corpus.positionOf(hifz.first!);
+  final last = hifz.last == null ? null : corpus.positionOf(hifz.last!);
+  final words = first == null || last == null ? 0 : last - first + 1;
+  final within = words == 0 ? 0.0 : hifz.revealed.length / words;
+  final done = hifz.repetition - 1 + within.clamp(0.0, 1.0);
+  if (loop.mode == HifzLoopMode.range) {
+    return (value: done / loop.count, segments: loop.count);
+  }
+  // Ayah by ayah: the ayahs before this one, each recited count times.
+  final from = corpus.verseStartPosition(range.from);
+  final to = corpus.verseEndPosition(range.to);
+  final ayah = hifz.loopAyah;
+  final at = ayah == null ? null : corpus.verseStartPosition(ayah);
+  if (from == null || to == null || at == null) return null;
+  var ayahs = 0, before = 0;
+  for (var p = from; p <= to; p++) {
+    if (p == from || corpus.words[p].verse != corpus.words[p - 1].verse) {
+      ayahs++;
+      if (p < at) before++;
+    }
+  }
+  return (
+    value: (before * loop.count + done) / (ayahs * loop.count),
+    segments: ayahs,
+  );
+}
+
+class _ProgressPainter extends CustomPainter {
+  const _ProgressPainter({
+    required this.value,
+    required this.segments,
+    required this.fill,
+    required this.track,
+    required this.rtl,
+  });
+
+  final double value;
+  final int segments;
+  final Color fill, track;
+  final bool rtl;
+
+  /// Segments narrower than this are drawn as one line.
+  static const _minSegment = 12.0;
+  static const _gap = 2.0;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final n = size.width / segments >= _minSegment ? segments : 1;
+    final width = (size.width - _gap * (n - 1)) / n;
+    final radius = Radius.circular(size.height / 2);
+    final filled = value.clamp(0.0, 1.0) * n;
+    for (var k = 0; k < n; k++) {
+      final start = k * (width + _gap);
+      final left = rtl ? size.width - start - width : start;
+      final rect = Rect.fromLTWH(left, 0, width, size.height);
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(rect, radius),
+        Paint()..color = track,
+      );
+      final part = (filled - k).clamp(0.0, 1.0);
+      if (part <= 0) continue;
+      final w = width * part;
+      final fillRect = Rect.fromLTWH(
+        rtl ? rect.right - w : left,
+        0,
+        w,
+        size.height,
+      );
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(fillRect, radius),
+        Paint()..color = fill,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_ProgressPainter old) =>
+      old.value != value ||
+      old.segments != segments ||
+      old.fill != fill ||
+      old.track != track ||
+      old.rtl != rtl;
 }

@@ -41,7 +41,8 @@ final recitationBarVisibleProvider = Provider.autoDispose<bool>((ref) {
 
 /// Wraps a Mushaf screen's body and reports [location] (the page on
 /// screen) to the app shell's recitation bar for as long as it is mounted.
-/// Lays out [child] exactly as-is.
+/// Lays out [child] exactly as-is, with a [RecitationProgressBar] drawn over
+/// its top edge.
 class RecitationMushafAnchor extends ConsumerStatefulWidget {
   const RecitationMushafAnchor({
     super.key,
@@ -92,7 +93,20 @@ class _RecitationMushafAnchorState
   }
 
   @override
-  Widget build(BuildContext context) => widget.child;
+  Widget build(BuildContext context) => Stack(
+    // The page laid out exactly as without the bar, which is drawn over its
+    // top edge.
+    fit: StackFit.passthrough,
+    children: [
+      widget.child,
+      PositionedDirectional(
+        top: 0,
+        start: 0,
+        end: 0,
+        child: RecitationProgressBar(location: widget.location),
+      ),
+    ],
+  );
 }
 
 /// The app shell's bottom bar while a Mushaf is open: replaces the
@@ -313,8 +327,6 @@ class _SessionControls extends ConsumerWidget {
             tooltip: l10n.recPause,
             onPressed: canControl ? controller.pause : null,
           ),
-        // Loop recitation: which time, of which ayah.
-        const RecitationLoopProgress(),
         if (centered) ...[
           const SizedBox(width: _centeredGroupGap),
           const Flexible(child: steps),

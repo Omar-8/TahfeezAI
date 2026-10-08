@@ -588,6 +588,22 @@ void main() {
     );
   });
 
+  testWidgets('a thin line over the page shows where it is in the Mushaf', (
+    tester,
+  ) async {
+    await tester.pumpWidget(app());
+    await tester.pumpAndSettle();
+    final line = find.byKey(const ValueKey('reading-progress'));
+    expect(tester.getSize(line).height, 3);
+    expect(
+      tester.getTopLeft(line).dy,
+      tester.getTopLeft(find.text('mushaf body')).dy,
+      reason: 'over the page, taking none of its height',
+    );
+    final painter = tester.widget<CustomPaint>(line).painter as dynamic;
+    expect(painter.value, closeTo(5 / 604, 1e-9));
+  });
+
   testWidgets('loop recitation: chosen in its sheet, started from it, ended '
       'with the session', (tester) async {
     tester.view.physicalSize = const Size(400, 1600);

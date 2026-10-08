@@ -18,6 +18,7 @@ import 'package:tahfeez_ai/features/recitation/application/quran_match_controlle
 import 'package:tahfeez_ai/features/recitation/application/recitation_providers.dart';
 import 'package:tahfeez_ai/features/recitation/application/recitation_session_controller.dart';
 import 'package:tahfeez_ai/features/recitation/application/recitation_position.dart';
+import 'package:tahfeez_ai/features/recitation/presentation/recitation_loop_sheet.dart';
 import 'package:tahfeez_ai/quran/domain/models/quran_location.dart';
 import 'package:tahfeez_ai/quran/domain/repositories/quran_repository.dart';
 import 'package:tahfeez_ai/quran/quran_providers.dart';
@@ -574,6 +575,7 @@ void main() {
         loop: const HifzLoop(mode: HifzLoopMode.eachAyah, count: 2),
       );
       expect((hifz().repetition, hifz().loopAyah), (1, kursiVerse));
+      expect(loopProgress(hifz(), corpus), (value: 0.0, segments: 2));
       final next = corpus
           .words[corpus.verseStartPosition((chapterNo: 2, verseNo: 256))!]
           .ref;
@@ -595,6 +597,8 @@ void main() {
         isTrue,
       );
       expect(container.read(recitationPassProvider), 1);
+      // One of four recitations (2 ayahs × 2) done.
+      expect(loopProgress(hifz(), corpus), (value: 0.25, segments: 2));
 
       await recite(kursi);
       await pauseAndResume();
@@ -603,6 +607,7 @@ void main() {
         (1, (chapterNo: 2, verseNo: 256)),
       );
       expect(hifz().expected, next);
+      expect(loopProgress(hifz(), corpus)?.value, 0.5);
       expect(
         container.read(mushafWordOverlayProvider)!.isHidden(kursiFirst),
         isFalse,
@@ -617,6 +622,7 @@ void main() {
       expect(hifz().running, isFalse);
       expect(hifz().repetition, 2);
       expect(container.read(recitationPassProvider), 3);
+      expect(loopProgress(hifz(), corpus)?.value, 1);
     });
 
     test('whole range: recited again from its start; the session end ends '
@@ -631,7 +637,10 @@ void main() {
       await pauseAndResume();
       expect(hifz().repetition, 2);
       expect(hifz().expected, kursiFirst);
-      await recite(kursi);
+      expect(loopProgress(hifz(), corpus), (value: 0.5, segments: 2));
+      await recite(kursi.split(' ').take(25).join(' '));
+      expect(loopProgress(hifz(), corpus)?.value, closeTo(0.75, 0.02));
+      await recite(kursi.split(' ').skip(25).join(' '));
       session().pause();
       await pumpEventQueue();
       expect(hifz().completed, isTrue);
