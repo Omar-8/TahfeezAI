@@ -41,15 +41,22 @@ class TahfeezModalSheetActivity {
 }
 
 /// Constraints keeping a modal sheet opened from [context] below the app
-/// bar of the screen it was opened from (its nearest [Scaffold]'s, status
-/// bar included): as tall as its content, never over the screen's header.
-/// Without an app bar, below the status bar.
+/// bar of the screen it was opened from (its nearest [Scaffold]'s): as tall
+/// as its content, never over the screen's header. Without an app bar,
+/// below the status bar. For a sheet on the root navigator (the whole
+/// screen's height), as [showTahfeezModalBottomSheet] opens them.
 BoxConstraints sheetBelowAppBar(BuildContext context) {
   final view = View.of(context);
   final screen = view.physicalSize.height / view.devicePixelRatio;
-  final top =
-      Scaffold.maybeOf(context)?.appBarMaxHeight ??
-      view.padding.top / view.devicePixelRatio;
+  var top = view.padding.top / view.devicePixelRatio;
+  final scaffold = Scaffold.maybeOf(context);
+  final box = scaffold?.context.findRenderObject();
+  final appBar = scaffold?.appBarMaxHeight;
+  if (box is RenderBox && box.hasSize && appBar != null) {
+    // Where the app bar's bottom is on screen (the scaffold may sit inside
+    // a shell, below other bars).
+    top = math.max(top, box.localToGlobal(Offset.zero).dy + appBar);
+  }
   return BoxConstraints(maxHeight: math.max(0, screen - top));
 }
 
@@ -72,6 +79,9 @@ Future<T?> showTahfeezModalBottomSheet<T>({
   final result = showModalBottomSheet<T>(
     context: context,
     isScrollControlled: true,
+    // Over the whole app (a shell's bottom bar included), not inside the
+    // tab's own navigator, where that bar would cover its bottom.
+    useRootNavigator: true,
     constraints: constraints ?? sheetBelowAppBar(context),
     builder: (context) => SafeArea(
       child: Padding(

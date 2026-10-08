@@ -802,6 +802,7 @@ Future<void> showHifzSettingsSheet(BuildContext context) {
     // app bar.
     isScrollControlled: true,
     useSafeArea: true,
+    useRootNavigator: true,
     constraints: sheetBelowAppBar(context),
     builder: (context) => const _HifzSettingsSheet(),
   );
