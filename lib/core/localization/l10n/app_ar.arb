@@ -264,5 +264,21 @@
   "aboutLicence": "الترخيص:",
   "aboutCite": "يُستشهد بـ:",
   "aboutCopied": "نُسخ الرابط",
-  "recSaidOtherWord": "قلتَ «{word}» هنا بدلًا من هذه الكلمة"
+  "recSaidOtherWord": "قلتَ «{word}» هنا بدلًا من هذه الكلمة",
+  "recLoop": "تكرار التلاوة",
+  "recLoopOrder": "التكرار",
+  "recLoopRange": "المقطع كاملًا",
+  "recLoopEachAyah": "كل آية",
+  "recLoopRangeSub": "اتلُ المقطع كاملًا، ثم ابدأ من أول آية فيه.",
+  "recLoopEachAyahSub": "اتلُ كل آية العدد المختار من المرات، ثم انتقل إلى التي بعدها.",
+  "recLoopSurah": "السورة",
+  "recLoopAyah": "الآية",
+  "recLoopAyahCount": "{count, plural, =1{آية واحدة} =2{آيتان} few{{count} آيات} other{{count} آية}}",
+  "recLoopTimes": "عدد المرات",
+  "recLoopTimesRangeSub": "كم مرة تتلو المقطع",
+  "recLoopTimesAyahSub": "كم مرة تتلو كل آية",
+  "recLoopStart": "ابدأ التلاوة",
+  "recLoopProgress": "{current} من {total}",
+  "recLoopComplete": "اكتمل التكرار",
+  "recLoopHint": "في كل مرة يُختبر المقطع من جديد، ويُخفى مرة أخرى إن كان وضع الإخفاء مفعّلًا."
 }

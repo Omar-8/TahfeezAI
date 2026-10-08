@@ -21,3 +21,20 @@ final recitationPositionProvider =
     NotifierProvider<RecitationPositionController, WordRef?>(
       RecitationPositionController.new,
     );
+
+/// Which pass over the recitation the Hifz test is on: `0` at a session's
+/// start, one more each time a loop starts its range (or ayah) again — so
+/// pronunciation verdicts are told apart from the same words' verdicts in
+/// an earlier repetition.
+class RecitationPassController extends Notifier<int> {
+  @override
+  int build() => 0;
+
+  void set(int pass) {
+    if (pass != state) state = pass;
+  }
+}
+
+final recitationPassProvider = NotifierProvider<RecitationPassController, int>(
+  RecitationPassController.new,
+);

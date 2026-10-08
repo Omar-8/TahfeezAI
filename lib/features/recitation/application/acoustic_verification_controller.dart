@@ -74,7 +74,12 @@ final acousticConfirmProvider = Provider<bool>((ref) => false);
 
 /// How one recited word sounded.
 class AcousticWordResult {
-  const AcousticWordResult(this.type, this.errors, {this.provisional = false});
+  const AcousticWordResult(
+    this.type,
+    this.errors, {
+    this.provisional = false,
+    this.pass = 0,
+  });
 
   /// [RecitationErrorType.correct], [RecitationErrorType.uncertain], or the
   /// most serious mistake heard in the word.
@@ -86,6 +91,10 @@ class AcousticWordResult {
   /// An early verdict from the word's quick check, until its ayah's check
   /// confirms or replaces it.
   final bool provisional;
+
+  /// The Hifz test's pass the word was recited in (a loop recites the same
+  /// words again; see `recitationPassProvider`).
+  final int pass;
 
   bool get isMistake => type.isError;
 }
@@ -203,6 +212,7 @@ class _Job {
     required this.to,
     required this.openStart,
     required this.openEnd,
+    required this.pass,
     this.frames,
   }) : quality = AudioQuality.of(samples);
 
@@ -220,6 +230,9 @@ class _Job {
 
   /// The audio was cut mid-recitation on that side.
   final bool openStart, openEnd;
+
+  /// The Hifz test's pass the audio was recited in.
+  final int pass;
 
   /// A quick check's: frames already computed (the tracker's), so no
   /// model run, and only strong mistakes reported.
@@ -290,6 +303,10 @@ class AcousticVerificationController
   bool _busy = false;
   String? _sessionId;
   int _generation = 0;
+
+  /// The Hifz test's pass being recited: on the device, as the placements
+  /// say (they arrive after the test has moved on); otherwise as published.
+  int _pass = 0;
 
   /// The reciter's beat this session (for madds a word's own check judges).
   final _beat = BeatMeter();
@@ -403,6 +420,7 @@ class AcousticVerificationController
         recitationPositionProvider,
         (previous, next) => _onPosition(previous, next),
       );
+      ref.listen<int>(recitationPassProvider, (_, next) => _pass = next);
     }
     return const AcousticVerificationState();
   }
@@ -421,6 +439,7 @@ class AcousticVerificationController
         _ayahFirstWord = null;
         _lastSent = 0;
         _piece = [];
+        _pass = _inference == null ? ref.read(recitationPassProvider) : 0;
         state = const AcousticVerificationState(active: true);
       }
       _start();
@@ -518,8 +537,15 @@ class AcousticVerificationController
   /// (or the reciter goes back, or pauses), on exactly the frames its
   /// words were heard in — not on the last seconds of audio, which the
   /// tracker's lag would make the wrong seconds.
-  void _onPlacements(({List<WordPlacement> words, bool paused}) event) {
+  void _onPlacements(WordPlacements event) {
     if (_audio == null && !event.paused) return;
+    if (event.pass != _pass) {
+      // A loop started again: the words of the last pass are checked as
+      // recited in it.
+      if (_piece.isNotEmpty) _sendPlaced(_piece, paused: false);
+      _piece = [];
+      _pass = event.pass;
+    }
     for (final w in event.words) {
       final piece = _piece;
       // Placed: the tracker has heard past its end. A quick check on the
@@ -574,6 +600,7 @@ class AcousticVerificationController
         // Cut mid-ayah only where the piece starts or ends inside one.
         openStart: words.first.ref.wordIndex != 0,
         openEnd: !paused && last != ayahEnd,
+        pass: _pass,
       ),
     );
     if (_queue.length > 4) _queue.removeAt(0);
@@ -609,6 +636,7 @@ class AcousticVerificationController
       to: (at + 2).clamp(0, corpus.length - 1),
       openStart: true,
       openEnd: true,
+      pass: _pass,
       frames: frames.frames,
     );
     final generation = _generation;
@@ -668,6 +696,7 @@ class AcousticVerificationController
         to: (lastWord + _lookAhead).clamp(0, corpus.length - 1),
         openStart: openStart || from > start,
         openEnd: openEnd,
+        pass: _pass,
       ),
     );
     if (_queue.length > 4) _queue.removeAt(0); // falling behind: drop oldest
@@ -821,14 +850,20 @@ class AcousticVerificationController
       // or replaces it — never over that check's own verdict.
       if (!trusted) return;
       for (final MapEntry(key: word, value: vs) in byWord.entries) {
-        final existing = state.words[word];
-        if (existing != null && !existing.provisional) continue;
+        if (!_mayReplace(state.words[word], job.pass, provisional: true)) {
+          continue;
+        }
         final swap = _swapError(swaps[word], frames.frameDuration);
         final worst = swap?.type ?? _worst(vs);
         final errors = swap != null
             ? [swap]
             : verifier.errors(vs, frames.frameDuration);
-        words[word] = AcousticWordResult(worst, errors, provisional: true);
+        words[word] = AcousticWordResult(
+          worst,
+          errors,
+          provisional: true,
+          pass: job.pass,
+        );
         if (worst.isError) {
           mistake = errors.firstWhere((e) => e.type.isError);
         }
@@ -848,12 +883,17 @@ class AcousticVerificationController
       if (!trusted) return;
       for (final MapEntry(key: word, value: vs) in byWord.entries) {
         final worst = _worst(vs);
-        final existing = state.words[word];
-        if (!worst.isError || (existing != null && !existing.provisional)) {
+        if (!worst.isError ||
+            !_mayReplace(state.words[word], job.pass, provisional: true)) {
           continue;
         }
         final errors = verifier.errors(vs, frames.frameDuration);
-        words[word] = AcousticWordResult(worst, errors, provisional: true);
+        words[word] = AcousticWordResult(
+          worst,
+          errors,
+          provisional: true,
+          pass: job.pass,
+        );
         mistake = errors.firstWhere((e) => e.type.isError);
       }
       _log(
@@ -868,11 +908,15 @@ class AcousticVerificationController
     // The ayah's check decides: an early mark on a word it has no verdict
     // for (cut at the piece's edge) is withdrawn.
     for (final word in job.targets) {
-      if (!byWord.containsKey(word) && words[word]?.provisional == true) {
+      if (!byWord.containsKey(word) &&
+          words[word]?.provisional == true &&
+          words[word]?.pass == job.pass) {
         words.remove(word);
       }
     }
     for (final MapEntry(key: word, value: vs) in byWord.entries) {
+      // Recited again since (a loop): that repetition's verdict stands.
+      if (!_mayReplace(words[word], job.pass)) continue;
       final swap = _swapError(swaps[word], frames.frameDuration);
       final errors = swap != null
           ? [swap]
@@ -886,7 +930,7 @@ class AcousticVerificationController
           !(other?.isError ?? false)) {
         worst = RecitationErrorType.uncertain;
       }
-      words[word] = AcousticWordResult(worst, errors);
+      words[word] = AcousticWordResult(worst, errors, pass: job.pass);
       if (worst.isError) {
         mistake = errors.firstWhere((e) => e.type.isError);
       }
@@ -948,6 +992,19 @@ class AcousticVerificationController
         LocalQuranAcousticModel(:final stream) => stream != null,
         _ => false,
       };
+
+  /// Whether a verdict from [pass] may replace [existing]: never one from a
+  /// later pass (the word recited again), and a [provisional] one never
+  /// the same pass's ayah check.
+  static bool _mayReplace(
+    AcousticWordResult? existing,
+    int pass, {
+    bool provisional = false,
+  }) {
+    if (existing == null || existing.pass < pass) return true;
+    if (existing.pass > pass) return false;
+    return !provisional || existing.provisional;
+  }
 
   /// The sound units of the words the tracker placed [job] as, or `null`
   /// when it has none among [span] (a piece sent without placements).

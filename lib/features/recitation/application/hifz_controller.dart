@@ -17,6 +17,7 @@ import '../../../core/storage/storage_providers.dart';
 import '../../../core/ui/full_bleed_content.dart';
 import '../../../quran/domain/models/quran_location.dart';
 import '../../../quran/domain/models/quran_refs.dart';
+import '../../../quran/quran_providers.dart';
 import '../../mushaf/application/mushaf_hide_mode.dart';
 import '../../mushaf/application/mushaf_page_turn.dart';
 import '../../mushaf/application/mushaf_page_verses.dart';
@@ -177,6 +178,30 @@ final hifzBeepProvider = Provider<void Function()>((ref) {
 /// A chosen memorization range (whole ayahs, inclusive).
 typedef HifzRange = ({VerseRef from, VerseRef to});
 
+/// How a loop repeats its range.
+enum HifzLoopMode {
+  /// The whole range, then from its first ayah again.
+  range,
+
+  /// Each ayah the set number of times, then the next.
+  eachAyah,
+}
+
+/// Loop recitation: the range recited [count] times — whole, or ayah by
+/// ayah ([mode]) — each time tested afresh (with hide mode on, hidden
+/// again).
+class HifzLoop {
+  const HifzLoop({this.mode = HifzLoopMode.eachAyah, this.count = 3});
+
+  final HifzLoopMode mode;
+  final int count;
+
+  static const maxCount = 99;
+
+  HifzLoop copyWith({HifzLoopMode? mode, int? count}) =>
+      HifzLoop(mode: mode ?? this.mode, count: count ?? this.count);
+}
+
 class HifzState {
   const HifzState({
     this.range,
@@ -191,6 +216,9 @@ class HifzState {
     this.counts = const {},
     this.recent = const [],
     this.completed = false,
+    this.loop,
+    this.repetition = 0,
+    this.loopAyah,
   });
 
   /// The range chosen, or `null` for "from the visible page to the end of
@@ -218,7 +246,19 @@ class HifzState {
 
   /// The latest few judgements, newest last.
   final List<HifzEvent> recent;
+
+  /// The range (with a loop, the whole loop) has been recited.
   final bool completed;
+
+  /// Loop recitation over [range], or `null`.
+  final HifzLoop? loop;
+
+  /// Which time the loop's range (or [loopAyah]) is being recited, from 1;
+  /// `0` before a loop starts.
+  final int repetition;
+
+  /// Looping ayah by ayah: the ayah being recited.
+  final VerseRef? loopAyah;
 
   /// Whether a test's masks are on the page (running or just finished).
   bool get active => first != null && last != null;
@@ -229,20 +269,26 @@ class HifzState {
       compareWordRefs(ref, last!) <= 0 &&
       !revealed.contains(ref);
 
-  HifzState copyWith({HifzRange? Function()? range, bool? running}) =>
-      HifzState(
-        range: range == null ? this.range : range(),
-        running: running ?? this.running,
-        first: first,
-        last: last,
-        revealed: revealed,
-        marked: marked,
-        expected: expected,
-        pending: pending,
-        counts: counts,
-        recent: recent,
-        completed: completed,
-      );
+  HifzState copyWith({
+    HifzRange? Function()? range,
+    bool? running,
+    HifzLoop? Function()? loop,
+  }) => HifzState(
+    range: range == null ? this.range : range(),
+    running: running ?? this.running,
+    first: first,
+    last: last,
+    revealed: revealed,
+    marked: marked,
+    expected: expected,
+    pending: pending,
+    counts: counts,
+    recent: recent,
+    completed: completed,
+    loop: loop == null ? this.loop : loop(),
+    repetition: repetition,
+    loopAyah: loopAyah,
+  );
 }
 
 /// Milestone R5: Live Hifz Mode — a memorization test over live
@@ -306,13 +352,20 @@ class HifzController extends Notifier<HifzState> {
       // A pronunciation mistake newly heard on a recited word: alert too.
       final judge = _judge;
       if (judge == null) return;
-      _alert([
-        for (final MapEntry(key: w, value: r) in next.words.entries)
-          if (r.isMistake &&
-              !(previous?.words[w]?.isMistake ?? false) &&
-              judge.revealed.contains(judge.corpus.positionOf(w)))
-            w,
-      ]);
+      // (A loop's previous repetition, checked once the next has begun:
+      // its words were recited.)
+      for (final MapEntry(key: w, value: r) in next.words.entries) {
+        final before = previous?.words[w];
+        if (!r.isMistake ||
+            (before != null && before.isMistake && before.pass == r.pass)) {
+          continue;
+        }
+        if (r.pass < _pass ||
+            (r.pass == _pass &&
+                judge.revealed.contains(judge.corpus.positionOf(w)))) {
+          _alert([w], pass: r.pass);
+        }
+      }
     });
     ref.listen(mushafHideModeProvider, (previous, next) {
       if (previous?.enabled == next.enabled) return;
@@ -350,13 +403,37 @@ class HifzController extends Notifier<HifzState> {
 
   void setRange(HifzRange? range) => state = state.copyWith(range: () => range);
 
+  /// The range chosen before a loop (restored when its session ends).
+  HifzRange? _rangeBeforeLoop;
+
+  /// The loop last started, for the loop sheet to offer again.
+  HifzLoop lastLoop = const HifzLoop();
+
+  /// Loops [range] in the next recitation session (started right after);
+  /// the session's end ends the loop.
+  void setLoop(HifzRange range, HifzLoop loop) {
+    if (state.running) return;
+    if (state.loop == null) _rangeBeforeLoop = state.range;
+    lastLoop = loop;
+    state = state.copyWith(range: () => range, loop: () => loop);
+  }
+
+  /// The pass being recited: one more each time a loop starts again (see
+  /// [recitationPassProvider]).
+  int _pass = 0;
+
+  void _setPass(int pass) {
+    _pass = pass;
+    ref.read(recitationPassProvider.notifier).set(pass);
+  }
+
   /// Reveals the expected word (or the rest of its ayah) without it being
   /// recited — it counts as skipped.
   void revealNext({bool wholeAyah = false}) {
     final judge = _judge;
     if (judge == null) return;
     _publish(judge.revealManually(wholeAyah: wholeAyah));
-    _followPage();
+    if (!_loopOn()) _followPage();
   }
 
   /// Hides the last revealed word (or back to the start of its ayah) and
@@ -380,7 +457,11 @@ class HifzController extends Notifier<HifzState> {
     _syncToHideMode();
     _matcher = null;
     _locating = false;
-    state = HifzState(range: state.range);
+    // A loop lasts one session.
+    state = HifzState(
+      range: state.loop != null ? _rangeBeforeLoop : state.range,
+    );
+    _loopEnd = null;
     _results = _judge != null && ref.read(hifzSettingsProvider).colorWords;
     if (_results) {
       _updateOverlay();
@@ -419,7 +500,10 @@ class HifzController extends Notifier<HifzState> {
               // Only a mistake is marked: "uncertain" (the on-device model
               // could not tell) was a fifth of a good reciter's words on
               // the phone — noise, not feedback.
-              _ => _pronunciationMark(acoustic[judge.corpus.words[p].ref]),
+              _ => _pronunciationMark(
+                acoustic[judge.corpus.words[p].ref],
+                _pass,
+              ),
             },
       // Going back over revealed words: the band follows the reciter.
       if (reviewing != null && settings.highlightCurrent)
@@ -434,8 +518,11 @@ class HifzController extends Notifier<HifzState> {
         .set(
           MushafWordOverlay(
             first: s.first!,
-            last: s.last!,
-            revealed: s.revealed,
+            // Looping ayah by ayah: the ayahs still to come stay hidden too.
+            last: _loopEnd ?? s.last!,
+            revealed: _loopDone.isEmpty
+                ? s.revealed
+                : {..._loopDone, ...s.revealed},
             marks: marks,
             hideUnrevealed: ref.read(mushafHideModeProvider).enabled,
             heard: Map.of(_heardAt),
@@ -445,8 +532,10 @@ class HifzController extends Notifier<HifzState> {
   }
 
   /// A recited word's colour from its pronunciation check.
-  static MushafWordMark _pronunciationMark(AcousticWordResult? a) =>
-      a != null && a.isMistake
+  /// (Only [pass]'s verdict: a loop's earlier repetitions of the word are
+  /// not this one.)
+  static MushafWordMark _pronunciationMark(AcousticWordResult? a, int pass) =>
+      a != null && a.isMistake && a.pass == pass
       ? MushafWordMark.tashkeel
       : MushafWordMark.correct;
 
@@ -470,7 +559,10 @@ class HifzController extends Notifier<HifzState> {
                     HifzVerdict.skipped => MushafWordMark.skipped,
                     HifzVerdict.wrong ||
                     HifzVerdict.selfCorrected => MushafWordMark.wrong,
-                    _ => _pronunciationMark(acoustic[corpus.words[p].ref]),
+                    _ => _pronunciationMark(
+                      acoustic[corpus.words[p].ref],
+                      _pass,
+                    ),
                   },
             },
             hideUnrevealed: false,
@@ -495,7 +587,10 @@ class HifzController extends Notifier<HifzState> {
     // (The acoustic tracker flushes once the paused audio's last frames
     // arrive — see [_onFrames].)
     // Session over: back to the normal page.
-    if (!session.isActive && (state.active || _locating)) _clear();
+    if (!session.isActive &&
+        (state.active || _locating || state.loop != null)) {
+      _clear();
+    }
     _listening = listening;
   }
 
@@ -503,6 +598,9 @@ class HifzController extends Notifier<HifzState> {
   /// word not yet uncovered on the visible page; with the page visible,
   /// wherever the reciter turns out to start.
   void _begin() {
+    _setPass(0);
+    _loopEnd = null;
+    _loopDone.clear();
     _alerted.clear();
     _heardAt.clear();
     _correctedAt.clear();
@@ -522,7 +620,17 @@ class HifzController extends Notifier<HifzState> {
       final start = corpus.verseStartPosition(chosen.from);
       final end = corpus.verseEndPosition(chosen.to);
       if (start != null && end != null && end >= start) {
-        _startJudge(start, end);
+        final loop = state.loop;
+        if (loop?.mode == HifzLoopMode.eachAyah) {
+          _loopEnd = corpus.words[end].ref;
+          _startJudge(start, corpus.verseEndPosition(chosen.from)!);
+        } else {
+          _startJudge(start, end);
+        }
+        if (loop != null) {
+          state = _withLoop(state, 1, chosen.from);
+        }
+        _showWord(corpus.words[start].ref);
       }
       return;
     }
@@ -660,9 +768,15 @@ class HifzController extends Notifier<HifzState> {
     if (out.any((e) => e is MatchRelocated) && _judge == null) {
       _inference?.recordLocated();
     }
+    // (Placed in this pass, even if a loop starts the next one now.)
+    final pass = _pass;
     _judgeAll(out);
     if (tracker.placements.isNotEmpty || chunk.last) {
-      _inference?.recordPlacements([...tracker.placements], paused: chunk.last);
+      _inference?.recordPlacements(
+        [...tracker.placements],
+        paused: chunk.last,
+        pass: pass,
+      );
       tracker.placements.clear();
     }
     final placed = tracker.lastPlacedFrame;
@@ -714,16 +828,18 @@ class HifzController extends Notifier<HifzState> {
     ];
     if (mistakes.isNotEmpty) _alert(mistakes);
     _publish(events, running: true);
-    _followPage();
+    if (!_loopOn()) _followPage();
   }
 
-  /// Words a mistake alert was given for (once each per recitation).
-  final _alerted = <WordRef>{};
+  /// Words a mistake alert was given for (once each per recitation — with
+  /// a loop, per repetition).
+  final _alerted = <(int, WordRef)>{};
 
   /// Signals a mistake on [words] — vibration or a beep, as set — once
   /// per word.
-  void _alert(Iterable<WordRef> words) {
-    if (!state.running || !words.any(_alerted.add)) return;
+  void _alert(Iterable<WordRef> words, {int? pass}) {
+    final p = pass ?? _pass;
+    if (!state.running || !words.map((w) => (p, w)).any(_alerted.add)) return;
     final alert = ref.read(hifzSettingsProvider).alert;
     if (alert.vibrates) ref.read(hifzHapticsProvider)();
     if (alert.beeps) ref.read(hifzBeepProvider)();
@@ -764,8 +880,142 @@ class HifzController extends Notifier<HifzState> {
       counts: Map.of(judge.counts),
       recent: recent.length > 5 ? recent.sublist(recent.length - 5) : recent,
       completed: judge.completed,
+      loop: state.loop,
+      repetition: state.repetition,
+      loopAyah: state.loopAyah,
     );
     _updateOverlay();
+  }
+
+  /// [s] at repetition [repetition] of the loop ([ayah] for ayah by ayah).
+  static HifzState _withLoop(HifzState s, int repetition, VerseRef ayah) =>
+      HifzState(
+        range: s.range,
+        running: s.running,
+        first: s.first,
+        last: s.last,
+        revealed: s.revealed,
+        marked: s.marked,
+        expected: s.expected,
+        reviewing: s.reviewing,
+        pending: s.pending,
+        counts: s.counts,
+        recent: s.recent,
+        completed: s.completed,
+        loop: s.loop,
+        repetition: repetition,
+        loopAyah: s.loop?.mode == HifzLoopMode.eachAyah ? ayah : null,
+      );
+
+  /// Looping ayah by ayah: the loop's last word (the overlay keeps the
+  /// ayahs after the current one hidden up to it).
+  WordRef? _loopEnd;
+
+  /// Looping ayah by ayah: the words of the ayahs done (shown in hide mode).
+  final _loopDone = <WordRef>{};
+
+  /// After each judged batch: a loop whose range (or ayah) has just been
+  /// recited starts it again, or moves on to the next ayah. Returns whether
+  /// a loop is running (it then turns the page itself).
+  bool _loopOn() {
+    final loop = state.loop, range = state.range, judge = _judge;
+    final corpus = _corpus;
+    if (loop == null || range == null || judge == null || corpus == null) {
+      return false;
+    }
+    if (!judge.completed) {
+      _followPage();
+      return true;
+    }
+    var repetition = state.repetition + 1;
+    var ayah = state.loopAyah ?? range.from;
+    if (repetition > loop.count) {
+      final last = corpus.verseEndPosition(range.to);
+      final next = corpus.verseEndPosition(ayah)! + 1;
+      if (loop.mode == HifzLoopMode.range || last == null || next > last) {
+        return true; // the loop is done
+      }
+      ayah = corpus.words[next].verse;
+      repetition = 1;
+    }
+    final start = loop.mode == HifzLoopMode.range
+        ? corpus.verseStartPosition(range.from)
+        : corpus.verseStartPosition(ayah);
+    final end = loop.mode == HifzLoopMode.range
+        ? corpus.verseEndPosition(range.to)
+        : corpus.verseEndPosition(ayah);
+    if (start == null || end == null) return true;
+    if (loop.mode == HifzLoopMode.eachAyah && ayah != state.loopAyah) {
+      // On to the next ayah: the ones done stay shown.
+      for (var p = judge.start; p <= judge.end; p++) {
+        _loopDone.add(corpus.words[p].ref);
+      }
+    }
+    _again(judge, start, end);
+    state = _withLoop(state, repetition, ayah);
+    // Going back to the start is this position's page turn.
+    if (_showWord(corpus.words[start].ref)) _turnedFor = start;
+    return true;
+  }
+
+  /// Tests [start]..[end] afresh, the next pass: the reciter, who may
+  /// already be a word or two into it, is followed from the end of the last
+  /// pass's final word.
+  void _again(HifzJudge finished, int start, int end) {
+    final corpus = finished.corpus;
+    _judge = HifzJudge(
+      corpus,
+      start: start,
+      end: end,
+      config: HifzConfig(strict: ref.read(hifzSettingsProvider).strict),
+    );
+    _setPass(_pass + 1);
+    _heardAt.clear();
+    _correctedAt.clear();
+    _turnedFor = null;
+    final matcher = _matcher;
+    if (matcher is LocalQuranPositionTracker) {
+      // Its placements past the finished pass's last word are the new
+      // pass's words, placed as whatever follows the range: dropped, and
+      // their frames followed again.
+      final lastRef = corpus.words[finished.end].ref;
+      final at = matcher.placements.lastIndexWhere((w) => w.ref == lastRef);
+      final from = at < 0 ? null : matcher.placements[at].end + 1;
+      if (at >= 0) {
+        matcher.placements.removeRange(at + 1, matcher.placements.length);
+      }
+      matcher.start(anchor: start, trustAnchor: true, from: from);
+    } else {
+      matcher?.start(anchor: start, trustAnchor: true);
+    }
+    _publish(const [], running: true);
+  }
+
+  /// Shows the page holding [word] if it is not on screen (a loop going
+  /// back to its start). Returns whether the page is to change.
+  bool _showWord(WordRef word) {
+    final pages = _visiblePages();
+    final location = ref.read(mushafRecitationTargetProvider)?.location;
+    if (pages == null || location is! QuranLocationPage) return false;
+    final ranges = ref.read(mushafPageWordRangesProvider);
+    final first = ranges[pages.$1], last = ranges[pages.$2];
+    if (first != null &&
+        last != null &&
+        compareWordRefs(word, first.first) >= 0 &&
+        compareWordRefs(word, last.last) <= 0) {
+      return false;
+    }
+    // The pages on screen are about to change by request, not by the
+    // reciter's hand: the test stays where it is.
+    _seenPages = null;
+    unawaited(() async {
+      final page = await ref
+          .read(quranRepositoryProvider)
+          .getPageForAyah(mushafId: location.mushafId, ayahId: word.ayahId);
+      if (page == null || !ref.mounted) return;
+      ref.read(mushafPageTurnRequestsProvider.notifier).toPage(page);
+    }());
+    return true;
   }
 
   /// Turns the page when the expected word has moved off what is shown —

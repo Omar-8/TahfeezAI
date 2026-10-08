@@ -17,7 +17,10 @@ import 'package:tahfeez_ai/features/recitation/application/mushaf_recitation_tar
 import 'package:tahfeez_ai/features/recitation/application/quran_match_controller.dart';
 import 'package:tahfeez_ai/features/recitation/application/recitation_providers.dart';
 import 'package:tahfeez_ai/features/recitation/application/recitation_session_controller.dart';
+import 'package:tahfeez_ai/features/recitation/application/recitation_position.dart';
 import 'package:tahfeez_ai/quran/domain/models/quran_location.dart';
+import 'package:tahfeez_ai/quran/domain/repositories/quran_repository.dart';
+import 'package:tahfeez_ai/quran/quran_providers.dart';
 
 import '../../ai/matching/corpus_fixture.dart';
 import '../../ai/matching/quran_stream_matcher_cases_test.dart' show kursi;
@@ -85,6 +88,7 @@ void main() {
     bool strict = true,
     bool hideMode = true,
     int revealedOnPage = 0,
+    HifzLoop? loop,
   }) async {
     recognizer = FakeRecognizer();
     vibrations = 0;
@@ -102,6 +106,7 @@ void main() {
         hifzHapticsProvider.overrideWithValue(() => vibrations++),
         hifzBeepProvider.overrideWithValue(() => beeps++),
         acousticVerificationControllerProvider.overrideWith(_Acoustic.new),
+        quranRepositoryProvider.overrideWithValue(_Pages()),
       ],
     );
     addTearDown(container.dispose);
@@ -133,10 +138,12 @@ void main() {
     );
     // No switch: every recitation session is a Hifz test.
     if (from != null && to != null) {
-      container.read(hifzControllerProvider.notifier).setRange((
-        from: from,
-        to: to,
-      ));
+      final controller = container.read(hifzControllerProvider.notifier);
+      if (loop != null) {
+        controller.setLoop((from: from, to: to), loop);
+      } else {
+        controller.setRange((from: from, to: to));
+      }
     }
     await session().start(startLocation: const QuranLocation.page(1, 42));
     await pumpEventQueue();
@@ -547,6 +554,182 @@ void main() {
       );
     });
   });
+
+  group('loop recitation', () {
+    const kursiVerse = (chapterNo: 2, verseNo: 255);
+    final kursiFirst = corpus.words[corpus.verseStartPosition(kursiVerse)!].ref;
+
+    /// Pausing flushes the held last word; resuming goes on reciting.
+    Future<void> pauseAndResume() async {
+      session().pause();
+      await pumpEventQueue();
+      session().resume();
+      await pumpEventQueue();
+    }
+
+    test('each ayah: recited the set number of times, then the next', () async {
+      await setUpHifz(
+        from: kursiVerse,
+        to: (chapterNo: 2, verseNo: 256),
+        loop: const HifzLoop(mode: HifzLoopMode.eachAyah, count: 2),
+      );
+      expect((hifz().repetition, hifz().loopAyah), (1, kursiVerse));
+      final next = corpus
+          .words[corpus.verseStartPosition((chapterNo: 2, verseNo: 256))!]
+          .ref;
+      expect(
+        container.read(mushafWordOverlayProvider)!.isHidden(next),
+        isTrue,
+        reason: 'the ayahs still to come are hidden too',
+      );
+
+      await recite(kursi);
+      await pauseAndResume();
+      // Again: hidden and tested afresh.
+      expect((hifz().repetition, hifz().loopAyah), (2, kursiVerse));
+      expect(hifz().running, isTrue);
+      expect(hifz().revealed, isEmpty);
+      expect(hifz().counts[HifzVerdict.correct], 0);
+      expect(
+        container.read(mushafWordOverlayProvider)!.isHidden(kursiFirst),
+        isTrue,
+      );
+      expect(container.read(recitationPassProvider), 1);
+
+      await recite(kursi);
+      await pauseAndResume();
+      expect(
+        (hifz().repetition, hifz().loopAyah),
+        (1, (chapterNo: 2, verseNo: 256)),
+      );
+      expect(hifz().expected, next);
+      expect(
+        container.read(mushafWordOverlayProvider)!.isHidden(kursiFirst),
+        isFalse,
+        reason: 'an ayah done is shown',
+      );
+
+      for (var k = 0; k < 2; k++) {
+        await recite(spoken(2, 256));
+        await pauseAndResume();
+      }
+      expect(hifz().completed, isTrue);
+      expect(hifz().running, isFalse);
+      expect(hifz().repetition, 2);
+      expect(container.read(recitationPassProvider), 3);
+    });
+
+    test('whole range: recited again from its start; the session end ends '
+        'the loop', () async {
+      await setUpHifz(
+        from: kursiVerse,
+        to: kursiVerse,
+        loop: const HifzLoop(mode: HifzLoopMode.range, count: 2),
+      );
+      expect(hifz().loopAyah, isNull);
+      await recite(kursi);
+      await pauseAndResume();
+      expect(hifz().repetition, 2);
+      expect(hifz().expected, kursiFirst);
+      await recite(kursi);
+      session().pause();
+      await pumpEventQueue();
+      expect(hifz().completed, isTrue);
+      expect(
+        container.read(mushafPageTurnRequestsProvider),
+        isNull,
+        reason: 'its start is on the page',
+      );
+
+      await session().stop();
+      await pumpEventQueue();
+      expect(hifz().loop, isNull);
+      expect(hifz().range, isNull, reason: 'the range chosen before');
+    });
+
+    test("a repetition's pronunciation verdicts are its own", () async {
+      await setUpHifz(
+        from: kursiVerse,
+        to: kursiVerse,
+        loop: const HifzLoop(mode: HifzLoopMode.range, count: 3),
+      );
+      await recite(kursi);
+      await pauseAndResume();
+      final acoustic = container.read(
+        acousticVerificationControllerProvider.notifier,
+      ) as _Acoustic;
+      // The first repetition's check, arriving once the second has begun:
+      // alerted, but not marked on the second.
+      acoustic.put({
+        kursiFirst: const AcousticWordResult(
+          RecitationErrorType.wrongVowel,
+          [],
+        ),
+      });
+      await pumpEventQueue();
+      expect(vibrations, 1);
+      await recite(kursi.split(' ').take(5).join(' '));
+      final marks = container.read(mushafWordOverlayProvider)!.marks;
+      expect(marks[kursiFirst], MushafWordMark.correct);
+
+      acoustic.put({
+        kursiFirst: const AcousticWordResult(
+          RecitationErrorType.wrongVowel,
+          [],
+          pass: 1,
+        ),
+      });
+      await pumpEventQueue();
+      expect(vibrations, 2);
+      expect(
+        container.read(mushafWordOverlayProvider)!.marks[kursiFirst],
+        MushafWordMark.tashkeel,
+      );
+    });
+
+    test('a range ending on a later page goes back to its start', () async {
+      await setUpHifz(
+        from: (chapterNo: 2, verseNo: 256),
+        to: (chapterNo: 2, verseNo: 257),
+        loop: const HifzLoop(mode: HifzLoopMode.range, count: 2),
+      );
+      await recite(spoken(2, 256));
+      // The page turned to 43, where 2:257 is.
+      final p43First = corpus.verseStartPosition((chapterNo: 2, verseNo: 257))!;
+      container
+          .read(mushafRecitationTargetProvider.notifier)
+          .show('screen', const QuranLocation.page(1, 43));
+      container.read(mushafPageWordRangesProvider.notifier).report(43, (
+        first: corpus.words[p43First].ref,
+        last: corpus
+            .words[corpus.verseEndPosition((chapterNo: 2, verseNo: 257))!]
+            .ref,
+      ));
+      await pumpEventQueue();
+      await recite(spoken(2, 257));
+      await pauseAndResume();
+      expect(hifz().repetition, 2);
+      expect(container.read(mushafPageTurnRequestsProvider)?.page, 42);
+      expect(
+        hifz().expected,
+        corpus
+            .words[corpus.verseStartPosition((chapterNo: 2, verseNo: 256))!]
+            .ref,
+      );
+    });
+  });
+}
+
+/// Page lookups: every ayah is on page 42.
+class _Pages implements QuranRepository {
+  @override
+  Future<int?> getPageForAyah({
+    required int mushafId,
+    required int ayahId,
+  }) async => 42;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 /// The pronunciation check's results, set by the test.

@@ -194,6 +194,23 @@ class _MushafPagerState extends ConsumerState<MushafPager> {
     );
   }
 
+  /// Shows [pageNumber] (its spread in two-page mode): an adjacent index
+  /// turns as a swipe would, a farther one jumps there at once — passing
+  /// through every page between would report each as visited.
+  void _goToPage(int pageNumber) {
+    if (!_controller.hasClients) return;
+    final current = _controller.page?.round() ?? _lastSettledIndex ?? 0;
+    final target =
+        ((_twoPageSpread ?? false) ? (pageNumber - 1) ~/ 2 : pageNumber - 1)
+            .clamp(0, _itemCount - 1);
+    if (target == current) return;
+    if ((target - current).abs() == 1) {
+      _animateToAdjacentIndex(target - current);
+    } else {
+      _controller.jumpToPage(target);
+    }
+  }
+
   /// Left/right arrow keys move one page-index at a time. The pager reads
   /// right-to-left (`reverse: true`, matching a physical Mushaf: the
   /// lower-numbered/earlier page is on the right), so Left advances to the
@@ -454,7 +471,11 @@ class _MushafPagerState extends ConsumerState<MushafPager> {
     // either end of a page) — only for the pager on screen.
     ref.listen(mushafPageTurnRequestsProvider, (_, request) {
       if (request != null && (ModalRoute.of(context)?.isCurrent ?? true)) {
-        _animateToAdjacentIndex(request.direction);
+        if (request.page case final page?) {
+          _goToPage(page);
+        } else {
+          _animateToAdjacentIndex(request.direction);
+        }
       }
     });
     _requestedFullBleed = useTwoPageSpread;

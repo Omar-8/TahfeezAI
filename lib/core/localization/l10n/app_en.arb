@@ -588,5 +588,32 @@
     "placeholders": {
       "word": { "type": "String" }
     }
-  }
+  },
+  "recLoop": "Loop recitation",
+  "recLoopOrder": "Repeat",
+  "recLoopRange": "Whole range",
+  "recLoopEachAyah": "Each ayah",
+  "recLoopRangeSub": "Recite the whole range, then start again from its first ayah.",
+  "recLoopEachAyahSub": "Recite each ayah the chosen number of times, then move on to the next.",
+  "recLoopSurah": "Surah",
+  "recLoopAyah": "Ayah",
+  "recLoopAyahCount": "{count, plural, =1{1 ayah} other{{count} ayahs}}",
+  "@recLoopAyahCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "recLoopTimes": "Times",
+  "recLoopTimesRangeSub": "How many times to recite the range",
+  "recLoopTimesAyahSub": "How many times to recite each ayah",
+  "recLoopStart": "Start reciting",
+  "recLoopProgress": "{current} of {total}",
+  "@recLoopProgress": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+  "recLoopComplete": "Loop complete",
+  "recLoopHint": "Each time, the range is tested afresh — with hide mode on, hidden again."
 }

@@ -20,6 +20,9 @@ import 'package:tahfeez_ai/features/mushaf/application/mushaf_page_verses.dart';
 import 'package:tahfeez_ai/features/recitation/application/acoustic_position_providers.dart';
 import 'package:tahfeez_ai/features/recitation/application/acoustic_verification_controller.dart';
 import 'package:tahfeez_ai/features/recitation/application/hifz_controller.dart';
+import 'package:tahfeez_ai/features/recitation/application/recitation_position.dart';
+import 'package:tahfeez_ai/quran/quran_providers.dart';
+import 'package:tahfeez_ai/quran/domain/repositories/quran_repository.dart';
 import 'package:tahfeez_ai/features/recitation/application/live_recognition_controller.dart';
 import 'package:tahfeez_ai/features/recitation/application/local_acoustic_inference_controller.dart';
 import 'package:tahfeez_ai/features/recitation/application/mushaf_recitation_target.dart';
@@ -558,6 +561,7 @@ void main() {
       bool range = true,
       ({int chapterNo, int verseNo})? to,
       _RecordedInference? recorded,
+      HifzLoop? loop,
     }) async {
       inference = recorded ?? _ReplayInference();
       container = ProviderContainer(
@@ -585,6 +589,7 @@ void main() {
           ),
           browserStorageProvider.overrideWithValue(_MemoryStorage()),
           hifzHapticsProvider.overrideWithValue(() {}),
+          quranRepositoryProvider.overrideWithValue(_NoPages()),
         ],
       );
       addTearDown(container.dispose);
@@ -604,10 +609,16 @@ void main() {
       await container.read(quranWordCorpusProvider.future);
       await container.read(quranPhonemeResourcesProvider.future);
       if (range) {
-        container.read(hifzControllerProvider.notifier).setRange((
+        final chosen = (
           from: (chapterNo: 36, verseNo: 1),
           to: to ?? (chapterNo: 36, verseNo: 5),
-        ));
+        );
+        final controller = container.read(hifzControllerProvider.notifier);
+        if (loop != null) {
+          controller.setLoop(chosen, loop);
+        } else {
+          controller.setRange(chosen);
+        }
       }
       await container
           .read(recitationSessionControllerProvider.notifier)
@@ -615,14 +626,14 @@ void main() {
       await pumpEventQueue();
     }
 
-    Future<void> play(String scenario) async {
+    Future<void> play(String scenario, {int at = 0}) async {
       final s = PositionScenario.all()[scenario]!;
       final frames = s.frames();
       var start = 0;
       for (final (i, end) in s.chunkEnds.indexed) {
         inference.out.add(
           TimedAcousticFrames(
-            start,
+            at + start,
             frames.slice(start, end - 1),
             last: i == s.chunkEnds.length - 1,
           ),
@@ -644,6 +655,25 @@ void main() {
       expect(hifz().counts[HifzVerdict.selfCorrected], 1);
       expect(hifz().counts[HifzVerdict.wrong], 0);
       expect(hifz().completed, isTrue);
+    });
+
+    test('a loop: the range followed again from its start', () async {
+      await setUpHifz(
+        to: (chapterNo: 36, verseNo: 8),
+        loop: const HifzLoop(mode: HifzLoopMode.range, count: 2),
+      );
+      await play('page_start');
+      expect(hifz().repetition, 2);
+      expect(hifz().expected, (ayahId: 36001, wordIndex: 0));
+      expect(hifz().running, isTrue);
+      // The same recitation again, later in the session.
+      await play(
+        'page_start',
+        at: PositionScenario.all()['page_start']!.chunkEnds.last,
+      );
+      expect(hifz().completed, isTrue);
+      expect(hifz().counts[HifzVerdict.correct], 37);
+      expect(container.read(recitationPassProvider), 1);
     });
 
     test('every ayah is checked for pronunciation, on a run over its own '
@@ -751,4 +781,16 @@ int _argmax(Float32List logProbs, int frame, int classes) {
     }
   }
   return best;
+}
+
+/// Page lookups: none (the range's start page is not looked for).
+class _NoPages implements QuranRepository {
+  @override
+  Future<int?> getPageForAyah({
+    required int mushafId,
+    required int ayahId,
+  }) async => null;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

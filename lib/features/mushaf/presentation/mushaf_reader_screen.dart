@@ -74,7 +74,9 @@ class _MushafReaderScreenState extends ConsumerState<MushafReaderScreen> {
           // that sheet's own doc comment for the real bug this fixes).
           // Recording: a red dot while a recitation session runs.
           const RecordingDot(),
-          // Hifz mode's feedback settings, beside the reader's own.
+          // Loop recitation, and Hifz mode's feedback settings, beside the
+          // reader's own.
+          const HifzLoopButton(),
           const HifzSettingsButton(),
           IconButton(
             icon: const Icon(Icons.tune),

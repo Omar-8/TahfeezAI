@@ -667,7 +667,9 @@ class _MushafModeScaffold extends ConsumerWidget {
           // to Mushaf mode there would be unreachable dead code).
           // Recording: a red dot while a recitation session runs.
           const RecordingDot(),
-          // Hifz mode's feedback settings, beside the reader's own.
+          // Loop recitation, and Hifz mode's feedback settings, beside the
+          // reader's own.
+          const HifzLoopButton(),
           const HifzSettingsButton(),
           IconButton(
             icon: const Icon(Icons.tune),

@@ -175,11 +175,17 @@ class LocalQuranPositionTracker implements RecitationPositionMatcher {
   bool get locked => _locked;
   WordRef? get current => _current == null ? null : corpus.words[_current!].ref;
 
+  /// Follows the reciter from [anchor] (trusted: no locating first). The
+  /// frames already heard are passed over — or, with [from], those from that
+  /// stream frame on are followed too (a loop starting its range again while
+  /// the reciter is already a word or two into it).
   @override
-  void start({int? anchor, bool trustAnchor = false}) {
+  void start({int? anchor, bool trustAnchor = false, int? from}) {
     _cursor = anchor;
     _locked = trustAnchor && anchor != null;
-    _mark = _frames.end;
+    _mark = from == null
+        ? _frames.end
+        : from.clamp(_frames.start, _frames.end).toInt();
     _emittedMax = -1;
     _current = null;
     _placedWords.clear();

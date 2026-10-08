@@ -16,6 +16,11 @@ import '../../../ai/matching/local_quran_position_tracker.dart'
 import 'recitation_ai_config.dart';
 import 'recitation_session_controller.dart';
 
+/// Words the position tracker placed, with their frames: [paused], the
+/// audio paused after them; [pass], the Hifz test's pass they were recited
+/// in (see `recitationPassProvider`).
+typedef WordPlacements = ({List<WordPlacement> words, bool paused, int pass});
+
 /// The on-device model, loaded once per app run and reused.
 /// `TAHFEEZ_ACOUSTIC_PROVIDER` = `cpu` (default) | `xnnpack` | `nnapi`;
 /// `TAHFEEZ_ACOUSTIC_THREADS` = intra-op threads (0: ONNX Runtime's
@@ -204,17 +209,18 @@ class LocalAcousticInferenceController
   /// Frames as they are computed (deduplicated, in stream order).
   Stream<TimedAcousticFrames> get frames => _out.stream;
 
-  final _placed =
-      StreamController<({List<WordPlacement> words, bool paused})>.broadcast();
+  final _placed = StreamController<WordPlacements>.broadcast();
 
   /// Words the position tracker placed, with their frames; [paused]: the
   /// audio paused after them. The verifier checks each ayah on exactly
   /// these frames.
-  Stream<({List<WordPlacement> words, bool paused})> get placements =>
-      _placed.stream;
+  Stream<WordPlacements> get placements => _placed.stream;
 
-  void recordPlacements(List<WordPlacement> words, {bool paused = false}) =>
-      _placed.add((words: words, paused: paused));
+  void recordPlacements(
+    List<WordPlacement> words, {
+    bool paused = false,
+    int pass = 0,
+  }) => _placed.add((words: words, paused: paused, pass: pass));
 
   /// The sample count, after each piece of audio received.
   Stream<int> get progress => _progress.stream;

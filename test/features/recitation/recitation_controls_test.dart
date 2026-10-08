@@ -19,6 +19,8 @@ import 'package:tahfeez_ai/features/recitation/application/recitation_providers.
 import 'package:tahfeez_ai/features/recitation/domain/recitation_audio_source.dart';
 import 'package:tahfeez_ai/features/recitation/presentation/recitation_controls.dart';
 import 'package:tahfeez_ai/quran/domain/models/quran_location.dart';
+import 'package:tahfeez_ai/quran/domain/models/surah_models.dart';
+import 'package:tahfeez_ai/features/quran/application/quran_index_providers.dart';
 
 import 'live_recognition_controller_test.dart' show FakeRecognizer;
 import 'recitation_session_controller_test.dart'
@@ -54,6 +56,25 @@ void main() {
         liveQuranRecognizerFactoryProvider.overrideWithValue(() => recognizer),
         liveRecognitionEnabledProvider.overrideWithValue(true),
         liveRecognitionDevPanelEnabledProvider.overrideWithValue(devPanel),
+        indexedSurahsProvider.overrideWith(
+          (ref) async => [
+            for (final (n, ayahs, name) in const [
+              (1, 7, 'Al-Fatiha'),
+              (2, 286, 'Al-Baqara'),
+            ])
+              IndexedSurah(
+                surah: Surah(
+                  surahNo: n,
+                  ayahCount: ayahs,
+                  revelationOrder: n,
+                  rukusCount: 1,
+                  revelationType: RevelationType.meccan,
+                ),
+                arabicName: null,
+                localizedName: name,
+              ),
+          ],
+        ),
         mushafByIdProvider(1).overrideWith(
           (ref) async => Mushaf(
             id: 1,
@@ -75,7 +96,11 @@ void main() {
           builder: (context, open, _) => Scaffold(
             appBar: AppBar(
               title: const Text('Top bar'),
-              actions: const [RecordingDot(), HifzSettingsButton()],
+              actions: const [
+                RecordingDot(),
+                HifzLoopButton(),
+                HifzSettingsButton(),
+              ],
             ),
             body: open
                 ? const RecitationMushafAnchor(
@@ -136,6 +161,7 @@ void main() {
     expect(container.read(mushafPageTurnRequestsProvider), (
       id: 2,
       direction: 1,
+      page: null,
     ));
     expect(container.read(mushafHideModeProvider).revealedOn(5), 2);
 
@@ -560,6 +586,57 @@ void main() {
       repository.saved.single.startLocation,
       const QuranLocation.page(1, 5),
     );
+  });
+
+  testWidgets('loop recitation: chosen in its sheet, started from it, ended '
+      'with the session', (tester) async {
+    tester.view.physicalSize = const Size(400, 1600);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(app(devPanel: false));
+    await tester.pumpAndSettle();
+    final container = ProviderScope.containerOf(
+      tester.element(find.text('mushaf body')),
+    );
+
+    await tester.tap(find.byTooltip('Loop recitation'));
+    await tester.pumpAndSettle();
+    // From the page's first ayah to the end of its surah (page 5 is not
+    // reported here: Al-Fatiha).
+    expect(find.text('7 ayahs'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('loop-from-ayah-plus')));
+    await tester.pumpAndSettle();
+    expect(find.text('6 ayahs'), findsOneWidget);
+    await tester.tap(find.text('Whole range'));
+    await tester.tap(find.widgetWithText(ChoiceChip, '5'));
+    await tester.pumpAndSettle();
+    expect(find.text('How many times to recite the range'), findsOneWidget);
+
+    await tester.tap(find.text('Start reciting'));
+    await tester.pumpAndSettle();
+    final hifz = container.read(hifzControllerProvider);
+    expect(hifz.loop?.mode, HifzLoopMode.range);
+    expect(hifz.loop?.count, 5);
+    expect(hifz.range, (
+      from: (chapterNo: 1, verseNo: 2),
+      to: (chapterNo: 1, verseNo: 7),
+    ));
+    expect(find.byTooltip('Listening…'), findsOneWidget);
+    final loopButton = tester.widget<IconButton>(
+      find.byKey(const ValueKey('hifz-loop')),
+    );
+    expect(loopButton.isSelected, isTrue);
+    expect(loopButton.onPressed, isNull, reason: 'not during a session');
+
+    await tester.tap(find.byTooltip('Stop'));
+    await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+    await tester.pumpAndSettle();
+    expect(container.read(hifzControllerProvider).loop, isNull);
+    expect(container.read(hifzControllerProvider).range, isNull);
+    // The sheet offers the last loop again.
+    await tester.tap(find.byTooltip('Loop recitation'));
+    await tester.pumpAndSettle();
+    expect(find.text('How many times to recite the range'), findsOneWidget);
   });
 
   testWidgets('permission denied shows a message and no session', (

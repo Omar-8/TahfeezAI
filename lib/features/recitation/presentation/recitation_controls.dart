@@ -26,8 +26,10 @@ import '../application/local_acoustic_inference_controller.dart';
 import '../application/recitation_ai_config.dart';
 import '../application/quran_match_controller.dart';
 import '../application/recitation_session_controller.dart';
+import 'recitation_loop_sheet.dart';
 
 export '../application/mushaf_recitation_target.dart';
+export 'recitation_loop_sheet.dart' show HifzLoopButton;
 
 /// Whether the app shell should replace its Home/Quran/Search navigation
 /// with [RecitationBottomBar]: a Mushaf is open, or a session is running.
@@ -311,6 +313,8 @@ class _SessionControls extends ConsumerWidget {
             tooltip: l10n.recPause,
             onPressed: canControl ? controller.pause : null,
           ),
+        // Loop recitation: which time, of which ayah.
+        const RecitationLoopProgress(),
         if (centered) ...[
           const SizedBox(width: _centeredGroupGap),
           const Flexible(child: steps),
