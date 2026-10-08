@@ -404,6 +404,28 @@ void main() {
     );
   });
 
+  test('a vowel kept on «ٱلْقَارِعَةُ» at the ayah\'s stop is a mistake', () {
+    // 101:1 ends the ayah: recited alone it stops on «…عَهْ». Said in its
+    // flow form with a fatha instead («…عَتَ»), or a damma («…عَتُ»), the
+    // stop is not kept.
+    final expected = reference.words(101001, 0, 0);
+    final stop = [
+      for (final t in expected)
+        if (!t.optional) t.token,
+    ];
+    final ta = quranPhoneticVocabulary.indexOf('ت');
+    List<int> kept(ShortVowel v) => [
+      ...stop.sublist(0, stop.length - 1),
+      ta,
+      v.token,
+    ];
+    bool flagged(List<int> said) =>
+        verifier.verify(clearFrames(said), expected).any((v) => v.type.isError);
+    expect(flagged(stop), isFalse, reason: 'the stop form «…عَهْ»');
+    expect(flagged(kept(ShortVowel.fatha)), isTrue);
+    expect(flagged(kept(ShortVowel.damma)), isTrue);
+  });
+
   test('stopping inside a joined unit is a stop, not a mistake', () {
     // 2:7 «غِشَٰوَةٌ ۖ وَلَهُمْ»: in flow one unit (the tanween merges into the
     // و); stopping after غِشَٰوَةٌ (a waqf mark) it is said «غِشَاوَه», and

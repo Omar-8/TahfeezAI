@@ -459,15 +459,31 @@ class QuranAcousticVerifier {
           if (spans[i] != null) chosen[i].token,
       ];
       final local = frames.slice(f0, f1);
-      final ok = math.max(
-        ctcLogProbability(local, before),
-        ctcLogProbability(local, [...before, vowel.token]),
+      // The vowel kept on the flow form's ending too: «ٱلْقَارِعَةَ» said
+      // with its ت (not the stop's ه) and a fatha.
+      final stem = [
+        for (final x in byUnit[u]!.takeWhile((x) => !identical(x, vowel)))
+          x.token,
+      ];
+      final inUnit = [
+        for (var i = lo; i <= k; i++)
+          if (spans[i] != null && chosen[i].unit == u) i,
+      ].length;
+      final flow = [
+        for (var i = lo; i <= k; i++)
+          if (spans[i] != null && chosen[i].unit != u) chosen[i].token,
+        ...stem.sublist(math.max(0, stem.length - inUnit)),
+      ];
+      double said(int v) => math.max(
+        ctcLogProbability(local, [...before, v]),
+        ctcLogProbability(local, [...flow, v]),
       );
+      final ok = math.max(ctcLogProbability(local, before), said(vowel.token));
       var best = double.negativeInfinity;
       String? observed;
       for (final v in ShortVowel.values) {
         if (v.token == vowel.token) continue;
-        final score = ctcLogProbability(local, [...before, v.token]);
+        final score = said(v.token);
         if (score > best) {
           best = score;
           observed = v.name.toUpperCase();

@@ -682,11 +682,24 @@ def verify_ayah(logp, tokens, variants, th: Thresholds = Thresholds(),
         f1 = min(T - 1, nxt - 1, spans[k][1] + 12)
         seg = logp[f0:f1 + 1]
         before = [chosen[i].label for i in range(lo, k + 1) if spans[i] is not None]
-        ok = max(ctc_logprob(seg, before), ctc_logprob(seg, before + [vowel.label]))
+        # The vowel kept on the flow form's ending too: «ٱلْقَارِعَةَ» said with
+        # its ت (not the stop's ه) and a fatha (as the Dart verifier).
+        stem = []
+        for x in by_unit[u]:
+            if x is vowel:
+                break
+            stem.append(x.label)
+        in_unit = sum(1 for i in range(lo, k + 1) if spans[i] is not None and chosen[i].unit == u)
+        flow = [chosen[i].label for i in range(lo, k + 1)
+                if spans[i] is not None and chosen[i].unit != u] + stem[max(0, len(stem) - in_unit):]
+
+        def said(v):
+            return max(ctc_logprob(seg, before + [v]), ctc_logprob(seg, flow + [v]))
+        ok = max(ctc_logprob(seg, before), said(vowel.label))
         best, obs = -1e30, ''
         for v in SHORT:
             if v != vowel.label:
-                s_ = ctc_logprob(seg, before + [v])
+                s_ = said(v)
                 if s_ > best:
                     best, obs = s_, VOWEL_NAME[v]
         llr = best - ok
