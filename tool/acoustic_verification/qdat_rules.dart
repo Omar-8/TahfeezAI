@@ -2,6 +2,7 @@
 // about (5:109): ikhfāʾ in «أَنتَ» (word 13), the shaddah's ghunnah in «إِنَّكَ»
 // (word 12), the separate madd in «لَنَآ» (word 11):
 //   dart run tool/acoustic_verification/qdat_rules.dart <tag> [--nasal E/U] [--hidden E/U]
+//       [--pack qdath] (the held-out speakers: real_mistakes_data.py)
 // For each rule: of the clips where the experts heard it applied / missed,
 // how many have that word flagged (M) or uncertain (?).
 import 'dart:convert';
@@ -15,6 +16,8 @@ import 'package:tahfeez_ai/ai/acoustic/quran_phonetic_reference.dart';
 const _art = 'tool/acoustic_verification/model_work/artifacts';
 
 void main(List<String> args) {
+  final pi = args.indexOf('--pack');
+  final pack = pi < 0 ? 'qdat' : args[pi + 1];
   final reference = QuranPhoneticReference.fromJson(
     jsonDecode(
       File('assets/quran/recitation/phonetic_reference_hafs.json')
@@ -25,9 +28,9 @@ void main(List<String> args) {
     File('$_art/qdat_labels.json').readAsStringSync(),
   ) as Map).cast<String, Object?>();
   final meta = (jsonDecode(
-    File('$_art/results/qdat_${args[0]}.json').readAsStringSync(),
+    File('$_art/results/${pack}_${args[0]}.json').readAsStringSync(),
   ) as List).cast<Map<String, Object?>>();
-  final bytes = File('$_art/results/qdat_${args[0]}.f32').readAsBytesSync();
+  final bytes = File('$_art/results/${pack}_${args[0]}.f32').readAsBytesSync();
   final all = bytes.buffer.asFloat32List(0, bytes.length ~/ 4);
   // --nasal E/U: the nasal sounds' margins (error / uncertain) to try.
   final nasalArg = args.contains('--nasal')

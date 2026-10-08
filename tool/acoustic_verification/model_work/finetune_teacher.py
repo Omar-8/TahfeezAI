@@ -87,6 +87,10 @@ def main():
                    help='leave out amateur clips with nasal tajweed (ikhfa, idgham, ghunnah): their '
                         '"correct" labels judge vowels only, and teach the teacher to accept a plain noon '
                         'where ikhfa is due')
+    p.add_argument('--real', nargs='*', default=[],
+                   help="learners' expert-labelled clips with their mistakes in the transcript "
+                        '(real_mistakes_data.py): added to the amateur clips, nasal tajweed included '
+                        '(their labels judge it)')
     p.add_argument('--held', nargs='*', default=[],
                    help='held-out mistake shards (spliced, other reciters): validated beside the amateur '
                         'clips, and the best step is chosen on the sum of the two losses')
@@ -110,6 +114,9 @@ def main():
     ama = labelled(a.amateur)
     if a.no_nasal:
         ama = [c for c in ama if not nasal(c[1])]
+    real = labelled(a.real)
+    ama += real
+    print(f'{len(real)} real-mistake clips', flush=True)
     rng.shuffle(ama)
     held = ama[:max(20, len(ama) // 10)]
     ama = ama[len(held):]
