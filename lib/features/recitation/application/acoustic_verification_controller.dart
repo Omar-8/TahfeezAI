@@ -389,11 +389,21 @@ class AcousticVerificationController
         tajweed: tajweed,
         sukunError: _streaming ? streamingMinorError : null,
         missingVowelError: _streaming ? streamingMinorError : null,
+        qalqalaError: _streaming ? streamingQalqalaError : null,
       ),
     );
   }
 
   static const streamingMinorError = 2.0;
+
+  /// The streaming model's evidence for a missing qalqala echo is weaker
+  /// (a reciter's deliberate omissions in Al-Falaq scored 0.6-3.8 against
+  /// the old bar of 3). At 1 (`qalqala_threshold.dart v34s`): Surah Al-Ikhlas
+  /// learners' labelled misses caught 5.2 -> 9.6% (the model hears an echo
+  /// on most: weak, not missing, qalqala); flagged: the user's phone
+  /// sessions unchanged (141 letters), learners' correct clips 1.2 -> 1.7%,
+  /// professional reciters 3.8 -> 4.7%.
+  static const streamingQalqalaError = 1.0;
 
   @override
   AcousticVerificationState build() {
