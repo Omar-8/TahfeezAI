@@ -450,6 +450,8 @@ class AcousticVerificationController
         _lastSent = 0;
         _piece = [];
         _pass = _inference == null ? ref.read(recitationPassProvider) : 0;
+        _lastEnd = null;
+        _pieceFloor = null;
         state = const AcousticVerificationState(active: true);
       }
       _start();
@@ -561,7 +563,11 @@ class AcousticVerificationController
       // Placed: the tracker has heard past its end. A quick check on the
       // frames already computed, for an early mistake mark (at a pause the
       // ayah's own check follows at once).
-      if (!event.paused) _quick(w);
+      // After a stop, a word's audio starts inside the stop: the margin
+      // before it would hold the last ayah's end (ٱلرَّحِيمِ's م heard as
+      // the first of مَالِكِ's, an extra shadda).
+      final floor = _afterStop(w);
+      if (!event.paused) _quick(w, floor: floor);
       if (piece.isNotEmpty &&
           (w.ref.ayahId != piece.last.ref.ayahId ||
               !_after(w.ref, piece.last.ref) ||
@@ -575,7 +581,9 @@ class AcousticVerificationController
         _pieceJoinedStart = joined;
       }
       if (_piece.isEmpty && piece.isEmpty) _pieceJoinedStart = false;
+      if (_piece.isEmpty) _pieceFloor = floor;
       _piece.add(w);
+      _lastEnd = w.end;
     }
     if (event.paused && _piece.isNotEmpty) {
       _sendPlaced(_piece, paused: true);
@@ -586,6 +594,21 @@ class AcousticVerificationController
 
   /// The piece being placed began joined to the ayah before it.
   bool _pieceJoinedStart = false;
+
+  /// The end frame of the last word placed, and the first frame the piece
+  /// being placed may start at (inside a stop before it; `null`: no stop).
+  int? _lastEnd, _pieceFloor;
+
+  /// A stop before [w] (at least [QuranAcousticVerifier.stopInsideFrames]
+  /// between the last word placed and it): the frame halfway through it.
+  int? _afterStop(WordPlacement w) {
+    final last = _lastEnd;
+    if (last == null ||
+        w.start - last - 1 < QuranAcousticVerifier.stopInsideFrames) {
+      return null;
+    }
+    return (last + w.start) ~/ 2;
+  }
 
   /// Whether [next] (in the next ayah) was said straight after [last], with
   /// no stop between them — read from the frames around the gap.
@@ -619,10 +642,9 @@ class AcousticVerificationController
     final last = corpus.positionOf(words.last.ref);
     if (first == null || last == null) return;
     const spf = 640;
-    final start = ((words.first.start - _pieceMargin) * spf).clamp(
-      _pcm.oldest,
-      _written,
-    );
+    final start =
+        (math.max(words.first.start - _pieceMargin, _pieceFloor ?? 0) * spf)
+            .clamp(_pcm.oldest, _written);
     final end = ((words.last.end + 1 + _pieceMargin) * spf).clamp(
       start,
       _written,
@@ -638,7 +660,10 @@ class AcousticVerificationController
         from: (first - _lookBack).clamp(0, corpus.length - 1),
         to: (last + _lookAhead).clamp(0, corpus.length - 1),
         // Cut mid-ayah only where the piece starts or ends inside one.
-        openStart: words.first.ref.wordIndex != 0 || _pieceJoinedStart,
+        // (After a stop the reciter starts afresh, mid-ayah or not.)
+        openStart:
+            _pieceFloor == null &&
+            (words.first.ref.wordIndex != 0 || _pieceJoinedStart),
         openEnd: (!paused && last != ayahEnd) || joinedEnd,
         pass: _pass,
       ),
@@ -651,14 +676,17 @@ class AcousticVerificationController
   /// Checks [word] at once on the tracker's frames, from a second before it
   /// through what has been heard after it (the next word's start decides
   /// how [word] ends: joined or not).
-  void _quick(WordPlacement word) {
+  void _quick(WordPlacement word, {int? floor}) {
     final inference = _inference;
     final corpus = ref.read(quranWordCorpusProvider).value;
     if (inference == null || corpus == null) return;
     final at = corpus.positionOf(word.ref);
     if (at == null) return;
     final store = inference.store;
-    final first = math.max(store.start, word.start - _pieceMargin);
+    final first = math.max(
+      store.start,
+      math.max(word.start - _pieceMargin, floor ?? 0),
+    );
     final last = math.min(store.end, word.end + 1 + _pieceMargin);
     // Too little heard after it to judge its end yet.
     if (last - word.end < 4) return;
@@ -674,7 +702,7 @@ class AcousticVerificationController
       targets: {word.ref},
       from: (at - _lookBack).clamp(0, corpus.length - 1),
       to: (at + 2).clamp(0, corpus.length - 1),
-      openStart: true,
+      openStart: floor == null,
       openEnd: true,
       pass: _pass,
       frames: frames.frames,
