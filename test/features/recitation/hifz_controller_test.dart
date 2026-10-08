@@ -441,10 +441,27 @@ void main() {
     expect(marks[corpus.words[kursiStart].ref], MushafWordMark.correct);
   });
 
+  test('page visible: the reciter is looked for on that page only', () async {
+    // Page 42 on screen; «إِنَّ ٱلْإِنسَٰنَ» also opens 100:6 and 103:2.
+    await setUpHifz(hideMode: false);
+    await recite(spoken(103, 2));
+    expect(hifz().first, isNull, reason: 'not on the page: not located');
+    await recite(spoken(2, 255));
+    expect(hifz().first?.ayahId, inInclusiveRange(2253, 2256), reason: 'on it');
+  });
+
   test('a test continues from one surah into the next', () async {
     // Al-Fātiḥah on the visible page, the page's words known.
     await setUpHifz(hideMode: false);
     final fatihaEnd = corpus.verseEndPosition((chapterNo: 1, verseNo: 7))!;
+    container.read(mushafPageWordRangesProvider.notifier).report(1, (
+      first: (ayahId: 1001, wordIndex: 0),
+      last: corpus.words[fatihaEnd].ref,
+    ));
+    container
+        .read(mushafRecitationTargetProvider.notifier)
+        .show('screen', const QuranLocation.page(1, 1));
+    await pumpEventQueue();
     final judgeless = container.read(hifzControllerProvider.notifier);
     expect(judgeless, isNotNull);
     // Recite the last ayah of Al-Fātiḥah and the start of Al-Baqarah.
@@ -554,6 +571,17 @@ void main() {
         kursiStart - page42First + 12,
       );
     });
+  });
+
+  test("the progress line: the share of the surah recited", () {
+    final fatihaEnd = corpus.verseEndPosition((chapterNo: 1, verseNo: 7))!;
+    final baqara = fatihaEnd + 1;
+    expect(surahProgress(corpus, -1, of: 0), 0, reason: 'nothing yet');
+    expect(surahProgress(corpus, fatihaEnd ~/ 2, of: 0), closeTo(0.5, 0.05));
+    expect(surahProgress(corpus, fatihaEnd, of: fatihaEnd), 1);
+    // At the start of the next surah, none of it.
+    expect(surahProgress(corpus, fatihaEnd, of: baqara), 0);
+    expect(surahProgress(corpus, baqara, of: baqara), greaterThan(0));
   });
 
   group('loop recitation', () {

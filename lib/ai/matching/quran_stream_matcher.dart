@@ -257,13 +257,17 @@ class QuranStreamMatcher implements RecitationPositionMatcher {
     _recent.clear();
   }
 
-  /// The positions shown on screen: searched first when locating.
+  /// The positions shown on screen: searched first when locating — with
+  /// [only], the only ones searched.
   @override
-  void setFocus(int start, int end) {
+  void setFocus(int start, int end, {bool only = false}) {
     _focusStart = start;
     _focusEnd = end;
     _hasFocus = true;
+    _focusOnly = only;
   }
+
+  bool _focusOnly = false;
 
   List<QuranMatchEvent> onPartial(String transcript) =>
       _process(transcript, isFinal: false);
@@ -488,19 +492,25 @@ class QuranStreamMatcher implements RecitationPositionMatcher {
     }
     bool nearHint(int s) => (s - hint).abs() <= 20;
     final tiers = <(String, bool Function(int))>[
-      (
-        'page',
-        (s) =>
-            nearHint(s) ||
-            (_hasFocus && s >= _focusStart - 20 && s <= _focusEnd + 20),
-      ),
-      ('nearby', (s) => (s - hint).abs() <= 600),
-      ('quran', (_) => true),
+      if (_hasFocus && _focusOnly)
+        ('page', (s) => s >= _focusStart && s <= _focusEnd)
+      else ...[
+        (
+          'page',
+          (s) =>
+              nearHint(s) ||
+              (_hasFocus && s >= _focusStart - 20 && s <= _focusEnd + 20),
+        ),
+        ('nearby', (s) => (s - hint).abs() <= 600),
+        ('quran', (_) => true),
+      ],
     ];
     final needed = math.min(3, keys.length);
     for (final (scope, inTier) in tiers) {
       final starts = [
-        if (scope == 'page') hint,
+        if (scope == 'page' &&
+            !(_focusOnly && (hint < _focusStart || hint > _focusEnd)))
+          hint,
         ...(votes.entries.where((e) => e.value >= 2 && inTier(e.key)).toList()
               ..sort((a, b) => b.value.compareTo(a.value)))
             .take(8)

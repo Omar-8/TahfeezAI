@@ -19,6 +19,7 @@ import 'package:tahfeez_ai/core/storage/storage_providers.dart';
 import 'package:tahfeez_ai/features/mushaf/application/mushaf_page_verses.dart';
 import 'package:tahfeez_ai/features/recitation/application/acoustic_position_providers.dart';
 import 'package:tahfeez_ai/features/recitation/application/acoustic_verification_controller.dart';
+import 'package:tahfeez_ai/features/mushaf/application/mushaf_word_overlay.dart';
 import 'package:tahfeez_ai/features/recitation/application/hifz_controller.dart';
 import 'package:tahfeez_ai/features/recitation/application/recitation_position.dart';
 import 'package:tahfeez_ai/quran/quran_providers.dart';
@@ -657,6 +658,26 @@ void main() {
       expect(hifz().completed, isTrue);
     });
 
+    test(
+      'recited words appear one after another, never several at once',
+      () async {
+        await setUpHifz(to: (chapterNo: 36, verseNo: 8));
+        var shown = 0, most = 0;
+        container.listen(mushafWordOverlayProvider, (_, next) {
+          final n = next?.revealed.length ?? 0;
+          if (n - shown > most) most = n - shown;
+          shown = n;
+        });
+        await play('page_start');
+        for (var i = 0; i < 100 && shown < hifz().revealed.length; i++) {
+          await Future<void>.delayed(const Duration(milliseconds: 50));
+        }
+        expect(hifz().revealed, hasLength(37));
+        expect(shown, 37, reason: 'all shown in the end');
+        expect(most, 1);
+      },
+    );
+
     test('a loop: the range followed again from its start', () async {
       await setUpHifz(
         to: (chapterNo: 36, verseNo: 8),
@@ -763,12 +784,11 @@ void main() {
       expect(a.words, hasLength(37));
     });
 
-    test('page visible: the reciter is located from the audio', () async {
+    test('page visible: the reciter is looked for on that page only', () async {
       await setUpHifz(range: false);
       await play('wrong_page'); // Al-Kahf, with page 42 on screen
-      expect(hifz().first, (ayahId: 18001, wordIndex: 0));
-      expect(hifz().counts[HifzVerdict.correct], 51);
-      expect(hifz().counts[HifzVerdict.wrong], 0);
+      expect(hifz().first, isNull);
+      expect(hifz().counts[HifzVerdict.correct] ?? 0, 0);
     });
   });
 }

@@ -11,8 +11,9 @@ abstract interface class RecitationPositionMatcher {
   /// then recitation starts exactly there. Resets all state.
   void start({int? anchor, bool trustAnchor = false});
 
-  /// The positions shown on screen: searched first when locating.
-  void setFocus(int start, int end);
+  /// The positions shown on screen: searched first when locating — with
+  /// [only], the only ones searched (the reciter is expected on them).
+  void setFocus(int start, int end, {bool only = false});
 
   /// Emits what is still held back; call when recitation pauses or stops.
   List<QuranMatchEvent> flush();

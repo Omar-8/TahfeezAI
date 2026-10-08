@@ -326,6 +326,7 @@ class HifzController extends Notifier<HifzState> {
       Future.microtask(() => overlay.set(null));
     }
     ref.onDispose(() {
+      _pacer?.cancel();
       unawaited(_recognition?.cancel());
       unawaited(_frames?.cancel());
       Future.microtask(() => overlay.set(null));
@@ -454,6 +455,7 @@ class HifzController extends Notifier<HifzState> {
   /// words keep their colours — verdicts still arriving for its last words
   /// included — while the page is otherwise back to normal.
   void _clear() {
+    _showHeld();
     _syncToHideMode();
     _matcher = null;
     _locating = false;
@@ -488,10 +490,14 @@ class HifzController extends Notifier<HifzState> {
     final review = judge?.reviewing;
     final reviewing = review == null ? null : judge!.corpus.words[review].ref;
     final acoustic = ref.read(acousticVerificationControllerProvider).words;
+    // Words recited but still to be shown, one after another.
+    final held = _held.toSet();
+    final next = held.isEmpty ? expected : _held.first;
     final marks = <WordRef, MushafWordMark>{
       if (settings.colorWords && judge != null)
         for (final p in judge.revealed)
-          if (!judge.given.contains(p))
+          if (!judge.given.contains(p) &&
+              !held.contains(judge.corpus.words[p].ref))
             judge.corpus.words[p].ref: switch (judge.marked[p]) {
               HifzVerdict.skipped => MushafWordMark.skipped,
               HifzVerdict.wrong ||
@@ -510,8 +516,8 @@ class HifzController extends Notifier<HifzState> {
         reviewing: MushafWordMark.current
       else if (expected != null && s.pending != null && settings.showMistakes)
         expected: MushafWordMark.mistake
-      else if (expected != null && settings.highlightCurrent)
-        expected: MushafWordMark.current,
+      else if (next != null && settings.highlightCurrent)
+        next: MushafWordMark.current,
     };
     ref
         .read(mushafWordOverlayProvider.notifier)
@@ -520,9 +526,7 @@ class HifzController extends Notifier<HifzState> {
             first: s.first!,
             // Looping ayah by ayah: the ayahs still to come stay hidden too.
             last: _loopEnd ?? s.last!,
-            revealed: _loopDone.isEmpty
-                ? s.revealed
-                : {..._loopDone, ...s.revealed},
+            revealed: {..._loopDone, ...s.revealed}.difference(held),
             marks: marks,
             hideUnrevealed: ref.read(mushafHideModeProvider).enabled,
             heard: Map.of(_heardAt),
@@ -598,6 +602,8 @@ class HifzController extends Notifier<HifzState> {
   /// word not yet uncovered on the visible page; with the page visible,
   /// wherever the reciter turns out to start.
   void _begin() {
+    _showHeld();
+    _lastBatch = null;
     _setPass(0);
     _loopEnd = null;
     _loopDone.clear();
@@ -653,7 +659,11 @@ class HifzController extends Notifier<HifzState> {
     final lastRange = ranges[pages!.$2] ?? firstRange;
     _matcher = _newMatcher()
       ..start(anchor: pageStart)
-      ..setFocus(pageStart, corpus.positionOf(lastRange.last) ?? pageStart);
+      ..setFocus(
+        pageStart,
+        corpus.positionOf(lastRange.last) ?? pageStart,
+        only: true,
+      );
     _judge = null;
     _locating = true;
     state = HifzState(range: state.range, running: true);
@@ -707,7 +717,9 @@ class HifzController extends Notifier<HifzState> {
       final corpus = _corpus;
       final from = corpus?.positionOf(ranges[pages.$1]?.first ?? _noWord);
       final to = corpus?.positionOf(ranges[pages.$2]?.last ?? _noWord);
-      if (from != null && to != null) _matcher?.setFocus(from, to);
+      if (from != null && to != null) {
+        _matcher?.setFocus(from, to, only: true);
+      }
       return;
     }
     if (judge == null || !state.running) return;
@@ -720,6 +732,8 @@ class HifzController extends Notifier<HifzState> {
     final from = corpus.positionOf(first.first);
     final to = corpus.positionOf(last.last);
     if (from == null || to == null) return;
+    // Lost and found again only on the pages on screen.
+    _matcher?.setFocus(from, to, only: true);
     if (judge.current >= from && judge.current <= to + 1) return;
     _turnedFor = null;
     final hideOn = ref.read(mushafHideModeProvider).enabled;
@@ -732,7 +746,7 @@ class HifzController extends Notifier<HifzState> {
       _relocating = true;
       _matcher = _newMatcher()
         ..start(anchor: from)
-        ..setFocus(from, to);
+        ..setFocus(from, to, only: true);
     }
   }
 
@@ -827,7 +841,7 @@ class HifzController extends Notifier<HifzState> {
           e.ref!,
     ];
     if (mistakes.isNotEmpty) _alert(mistakes);
-    _publish(events, running: true);
+    _publish(events, running: true, paced: _acousticPosition);
     if (!_loopOn()) _followPage();
   }
 
@@ -850,7 +864,57 @@ class HifzController extends Notifier<HifzState> {
   final _heardAt = <WordRef, String>{};
   final _correctedAt = <WordRef>{};
 
-  void _publish(List<HifzEvent> events, {bool? running}) {
+  /// Recited words held back from the page, in order. The streaming model
+  /// hears about 1.3 s at a time, so the tracker places two or three words
+  /// at once; they are shown one after another over the time until the
+  /// next batch, as they were said.
+  final _held = <WordRef>[];
+  Timer? _pacer;
+  DateTime? _lastBatch;
+
+  /// Holds [words] (just revealed by recitation) to show one by one.
+  void _pace(List<WordRef> words) {
+    final now = DateTime.now();
+    final last = _lastBatch;
+    _lastBatch = now;
+    if (words.isEmpty) return;
+    // The time the batch's words took to say: since the last batch.
+    final span = last == null
+        ? const Duration(milliseconds: 1000)
+        : now.difference(last);
+    final ms = span.inMilliseconds.clamp(300, 1600);
+    final showNow = _held.isEmpty;
+    _held.addAll(words);
+    if (showNow) _held.removeAt(0);
+    _pacer?.cancel();
+    if (_held.isEmpty) return;
+    final step = Duration(
+      milliseconds: (ms / (_held.length + (showNow ? 1 : 0))).round().clamp(
+        60,
+        600,
+      ),
+    );
+    _pacer = Timer.periodic(step, (timer) {
+      if (!ref.mounted) return timer.cancel();
+      if (_held.isNotEmpty) _held.removeAt(0);
+      if (_held.isEmpty) {
+        timer.cancel();
+        _pacer = null;
+        _followPage();
+      }
+      _updateOverlay();
+    });
+  }
+
+  /// Shows every held word at once.
+  void _showHeld() {
+    _pacer?.cancel();
+    _pacer = null;
+    _held.clear();
+  }
+
+  void _publish(List<HifzEvent> events, {bool? running, bool paced = false}) {
+    final shownBefore = state.revealed;
     for (final e in events) {
       final ref = e.ref;
       if (ref == null) continue;
@@ -884,6 +948,16 @@ class HifzController extends Notifier<HifzState> {
       repetition: state.repetition,
       loopAyah: state.loopAyah,
     );
+    // Recited words appear one after another; a mistake awaiting
+    // correction, a review, or words revealed by hand show at once.
+    if (paced && judge.pending == null && judge.reviewing == null) {
+      _pace([
+        for (final p in judge.revealed.toList()..sort())
+          if (!shownBefore.contains(corpus.words[p].ref)) corpus.words[p].ref,
+      ]);
+    } else {
+      _showHeld();
+    }
     _updateOverlay();
   }
 
@@ -1021,6 +1095,8 @@ class HifzController extends Notifier<HifzState> {
   /// Turns the page when the expected word has moved off what is shown —
   /// forward as recitation continues, back after hiding back.
   void _followPage() {
+    // (Once the words recited are all shown.)
+    if (_held.isNotEmpty) return;
     final judge = _judge;
     final pages = _visiblePages();
     if (judge == null || judge.completed || pages == null) return;

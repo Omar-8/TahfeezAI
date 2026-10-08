@@ -194,11 +194,16 @@ class LocalQuranPositionTracker implements RecitationPositionMatcher {
   }
 
   @override
-  void setFocus(int start, int end) {
+  void setFocus(int start, int end, {bool only = false}) {
     _focusStart = start;
     _focusEnd = end;
     _hasFocus = true;
+    _focusOnly = only;
   }
+
+  /// Locating searches the focus only (the visible page: the same words
+  /// elsewhere — «إِنَّ ٱلْإِنسَٰنَ» opens 100:6 and 103:2 — are not taken).
+  bool _focusOnly = false;
 
   /// New frames of the stream (contiguous, as [AcousticFrameStore] gives
   /// them).
@@ -570,10 +575,15 @@ class LocalQuranPositionTracker implements RecitationPositionMatcher {
     }
     // Candidates from each search area, nearest first.
     final scopes = <(String, int?, int?, double)>[
-      if (_hasFocus) ('page', _focusStart - 5, _focusEnd + 5, config.pageCost),
-      if (_cursor != null)
-        ('nearby', _cursor! - 300, _cursor! + 300, config.nearbyCost),
-      ('quran', null, null, config.quranCost),
+      if (_hasFocus && _focusOnly)
+        ('page', _focusStart, _focusEnd, config.pageCost)
+      else ...[
+        if (_hasFocus)
+          ('page', _focusStart - 5, _focusEnd + 5, config.pageCost),
+        if (_cursor != null)
+          ('nearby', _cursor! - 300, _cursor! + 300, config.nearbyCost),
+        ('quran', null, null, config.quranCost),
+      ],
     ];
     final found = <_Scored>[];
     for (final (area, (scope, lo, hi, limit)) in scopes.indexed) {

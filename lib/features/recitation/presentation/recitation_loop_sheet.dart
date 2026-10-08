@@ -52,7 +52,20 @@ class HifzLoopButton extends ConsumerWidget {
 Future<void> showRecitationLoopSheet(BuildContext context) {
   return showTahfeezModalBottomSheet<void>(
     context: context,
+    constraints: sheetBelowAppBar(context),
     builder: (context) => const _RecitationLoopSheet(),
+  );
+}
+
+/// A Mushaf screen's sheets: as tall as their content, never over the app
+/// bar (or the progress line under it) — the page's header stays in view.
+BoxConstraints sheetBelowAppBar(BuildContext context) {
+  final view = View.of(context);
+  final statusBar = view.padding.top / view.devicePixelRatio;
+  final height = MediaQuery.sizeOf(context).height;
+  return BoxConstraints(
+    maxHeight:
+        height - statusBar - kToolbarHeight - RecitationProgressBar.height,
   );
 }
 
@@ -537,9 +550,13 @@ class RecitationProgressBar extends ConsumerWidget {
     final double value;
     var segments = 1;
     String? semantics;
+    final reading = loop == null ? _readingProgress(ref, location) : null;
     if (loop != null) {
       (value, segments, semantics) = loop;
+    } else if (reading != null) {
+      value = reading;
     } else {
+      // (The words not loaded yet: the page's place in the Mushaf.)
       final pages = ref
           .watch(mushafByIdProvider(location.mushafId))
           .value
@@ -576,6 +593,55 @@ class RecitationProgressBar extends ConsumerWidget {
           );
   }
 
+  /// How far into its surah the reciter is: up to the word last recited (a
+  /// Hifz test) or revealed (hide mode), else the last word on screen.
+  static double? _readingProgress(WidgetRef ref, QuranLocationPage location) {
+    final corpus = ref.watch(quranWordCorpusProvider).value;
+    if (corpus == null || corpus.length == 0) return null;
+    final spread = ref.watch(fullBleedContentProvider);
+    final first = firstVisiblePage(location.pageNumber, spread: spread);
+    final second = spread ? first + 1 : first;
+    final ranges = ref.watch(mushafPageWordRangesProvider);
+    final firstRange = ranges[first];
+    final pageFirst = firstRange == null
+        ? null
+        : corpus.positionOf(firstRange.first);
+    final lastRange = ranges[second] ?? firstRange;
+    final pageLast = lastRange == null
+        ? null
+        : corpus.positionOf(lastRange.last);
+    if (pageFirst == null || pageLast == null) return null;
+    final hifz = ref.watch(liveRecognitionEnabledProvider)
+        ? ref.watch(hifzControllerProvider)
+        : null;
+    final hide = ref.watch(mushafHideModeProvider);
+    int? done;
+    var finished = false;
+    if (hifz != null && hifz.active) {
+      finished = hifz.completed;
+      final next = hifz.completed ? null : hifz.expected;
+      done = next != null
+          ? switch (corpus.positionOf(next)) {
+              final int p => p - 1,
+              null => null,
+            }
+          : corpus.positionOf(hifz.last!);
+    } else if (hide.enabled) {
+      var revealed = hide.revealedOn(first);
+      if (second != first && hide.fullyRevealed(first)) {
+        revealed += hide.revealedOn(second);
+      }
+      done = pageFirst + revealed - 1;
+    } else {
+      done = pageLast;
+    }
+    if (done == null) return null;
+    // The surah of the word to recite (or reveal) next, on screen — or, a
+    // test over, of its last word.
+    final of = finished ? done : (done + 1).clamp(pageFirst, pageLast);
+    return surahProgress(corpus, done, of: of);
+  }
+
   /// A running loop: its progress, its segments, and in words where it is;
   /// `null` without one.
   static (double, int, String)? _loopProgress(
@@ -596,6 +662,17 @@ class RecitationProgressBar extends ConsumerWidget {
           ].join(' · ');
     return (progress.value, progress.segments, where);
   }
+}
+
+/// The share of a surah — [of]'s (a corpus position) — recited up to corpus
+/// position [done].
+double surahProgress(QuranWordCorpus corpus, int done, {required int of}) {
+  final chapter = corpus.words[of.clamp(0, corpus.length - 1)].verse.chapterNo;
+  final start = corpus.verseStartPosition((chapterNo: chapter, verseNo: 1));
+  if (start == null) return 0;
+  final next = corpus.verseStartPosition((chapterNo: chapter + 1, verseNo: 1));
+  final end = (next ?? corpus.length) - 1;
+  return ((done - start + 1) / (end - start + 1)).clamp(0.0, 1.0);
 }
 
 /// How far a running loop has come (0–1), and the segments a progress

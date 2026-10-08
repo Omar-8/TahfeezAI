@@ -797,13 +797,12 @@ Future<void> showHifzSettingsSheet(BuildContext context) {
   return showModalBottomSheet<void>(
     context: context,
     showDragHandle: true,
-    // The whole screen's height: every setting in view, not half of them.
+    // As tall as its settings (not capped at half the screen), below the
+    // app bar.
     isScrollControlled: true,
     useSafeArea: true,
-    builder: (context) => const FractionallySizedBox(
-      heightFactor: 1,
-      child: _HifzSettingsSheet(),
-    ),
+    constraints: sheetBelowAppBar(context),
+    builder: (context) => const _HifzSettingsSheet(),
   );
 }
 

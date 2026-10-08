@@ -50,11 +50,13 @@ Future<T?> showTahfeezModalBottomSheet<T>({
   required BuildContext context,
   String? title,
   required WidgetBuilder builder,
+  BoxConstraints? constraints,
 }) {
   TahfeezModalSheetActivity._opened();
   final result = showModalBottomSheet<T>(
     context: context,
     isScrollControlled: true,
+    constraints: constraints,
     builder: (context) => SafeArea(
       child: Padding(
         padding: const EdgeInsets.only(top: TahfeezSpacing.sm),
