@@ -1,6 +1,6 @@
 // Real mistakes (QuranMB.v2: experts' annotation of what was said; pack
 // built by model_work/quranmb_pack.py), judged as the app judges them:
-//   dart run tool/acoustic_verification/real_mistakes.dart <data.json> <data.f32>
+//   dart run tool/acoustic_verification/real_mistakes.dart <data.json> <data.f32> [--minor M]
 // (any pack in the bench format: a pack without targetWords is all correct
 // words). Also counts words heard said as another word of the passage
 // (QuranAcousticVerifier.wordSwaps): on target words, and on words heard
@@ -29,13 +29,17 @@ void main(List<String> args) {
   final bytes = File(args[1]).readAsBytesSync();
   final all = bytes.buffer.asFloat32List(0, bytes.length ~/ 4);
   // The app's ayah check (AcousticVerificationController).
-  const verifier = QuranAcousticVerifier(
+  // --minor M: the sukun / missing-vowel thresholds to try (the app's: 3).
+  final minor = args.contains('--minor')
+      ? double.parse(args[args.indexOf('--minor') + 1])
+      : 3.0;
+  final verifier = QuranAcousticVerifier(
     thresholds: AcousticThresholds(
       error: 4,
       letterError: 4,
       shaddaError: 4,
-      sukunError: 3,
-      missingVowelError: 3,
+      sukunError: minor,
+      missingVowelError: minor,
       correct: -1,
       pauseFrames: 4,
       sounds: {

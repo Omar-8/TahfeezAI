@@ -188,6 +188,15 @@ const credits = <Credit>[
         'Iqra’Eval: A Shared Task on Qur’anic Pronunciation Assessment '
         '(ArabicNLP 2025)',
   ),
+  Credit(
+    group: CreditGroup.data,
+    name: 'Surah Al-Ikhlas Recitation Error Detection Dataset',
+    owner: 'Muaz Ahmad (MuazAhmad7)',
+    licence: 'CC BY 4.0',
+    url: 'https://huggingface.co/datasets/MuazAhmad7/Surah_Ikhlas-Labeled_Dataset',
+    useEn: 'Testing on learners’ qalqala and vowel mistakes',
+    useAr: 'الاختبار على أخطاء المتعلّمين في القلقلة والحركات',
+  ),
   // ── Software ──
   Credit(
     group: CreditGroup.software,
