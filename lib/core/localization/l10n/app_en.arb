@@ -581,5 +581,12 @@
   "aboutBy": "By",
   "aboutLicence": "Licence:",
   "aboutCite": "Cite:",
-  "aboutCopied": "Link copied"
+  "aboutCopied": "Link copied",
+  "recSaidOtherWord": "You said «{word}» here instead of this word",
+  "@recSaidOtherWord": {
+    "description": "A word heard said as another word of the passage (swapped, out of order, or said instead); {word} is the word heard, in Uthmani script.",
+    "placeholders": {
+      "word": { "type": "String" }
+    }
+  }
 }

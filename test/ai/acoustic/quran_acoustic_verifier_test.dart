@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tahfeez_ai/ai/acoustic/quran_acoustic_model.dart';
 import 'package:tahfeez_ai/ai/acoustic/quran_acoustic_verifier.dart';
 import 'package:tahfeez_ai/ai/acoustic/quran_phonetic_reference.dart';
+import 'package:tahfeez_ai/quran/domain/models/quran_refs.dart';
 
 import 'acoustic_test_support.dart';
 
@@ -366,6 +367,40 @@ void main() {
           .verify(cut, word, openStart: true, openEnd: true, beat: meter)[k]
           .type,
       RecitationErrorType.maddShort,
+    );
+  });
+
+  test('a word said in another word\'s place is named, not spelled', () {
+    // 103:3 «… وَتَوَاصَوْا۟ بِٱلْحَقِّ وَتَوَاصَوْا۟ بِٱلصَّبْرِ»: «بِٱلصَّبْرِ» said
+    // where «بِٱلْحَقِّ» belongs.
+    final passage = reference.words(103003, 0, 8);
+    final byWord = <WordRef, List<PhoneticToken>>{};
+    for (final t in passage) {
+      (byWord[t.word] ??= []).add(t);
+    }
+    final haqq = byWord.keys.firstWhere((w) => w.wordIndex == 6);
+    final sabr = byWord.keys.firstWhere((w) => w.wordIndex == 8);
+    final said = [
+      for (final t in passage)
+        if (t.word == haqq) ...[
+          if (t == byWord[haqq]!.first)
+            for (final u in byWord[sabr]!)
+              if (!u.optional) u.token,
+        ] else if (!t.optional)
+          t.token,
+    ];
+    final frames = clearFrames(said);
+    final verdicts = verifier.verify(frames, passage, openEnd: true);
+    final swaps = verifier.wordSwaps(frames, verdicts, byWord);
+    expect(swaps.map((s) => (s.word, s.said)), [(haqq, sabr)]);
+    // Said as written, nothing is swapped.
+    final right = clearFrames([
+      for (final t in passage)
+        if (!t.optional) t.token,
+    ]);
+    expect(
+      verifier.wordSwaps(right, verifier.verify(right, passage), byWord),
+      isEmpty,
     );
   });
 

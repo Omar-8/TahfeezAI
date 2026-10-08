@@ -1,6 +1,10 @@
 // Real mistakes (QuranMB.v2: experts' annotation of what was said; pack
 // built by model_work/quranmb_pack.py), judged as the app judges them:
 //   dart run tool/acoustic_verification/real_mistakes.dart <data.json> <data.f32>
+// (any pack in the bench format: a pack without targetWords is all correct
+// words). Also counts words heard said as another word of the passage
+// (QuranAcousticVerifier.wordSwaps): on target words, and on words heard
+// right (false).
 // Per clip with mistakes: is a mistake (or at least uncertainty) marked on a
 // word the experts heard wrong; and across all clips, words not heard wrong
 // that are flagged.
@@ -46,6 +50,8 @@ void main(List<String> args) {
   );
   var clips = 0, found = 0, noticed = 0;
   var otherWords = 0, otherFlagged = 0, otherUnsure = 0;
+  var targetSwaps = 0, otherSwaps = 0, targetWords = 0;
+  final swapped = <String>[];
   for (final m in meta) {
     final ayahId = m['ayahId']! as int;
     final expected = reference.words(
@@ -56,13 +62,14 @@ void main(List<String> args) {
     final units = {for (final t in expected) t.unit};
     final at = m['main']! as Map;
     final n = at['frames'] as int, off = at['offset'] as int;
+    final frames = AcousticFrames(
+      frames: n,
+      classes: 43,
+      logProbs: Float32List.sublistView(all, off, off + n * 43),
+      frameDuration: const Duration(milliseconds: 40),
+    );
     final vs = verifier.verify(
-      AcousticFrames(
-        frames: n,
-        classes: 43,
-        logProbs: Float32List.sublistView(all, off, off + n * 43),
-        frameDuration: const Duration(milliseconds: 40),
-      ),
+      frames,
       expected,
       pauses: {
         for (final e in reference.pauseForms(ayahId).entries)
@@ -79,6 +86,25 @@ void main(List<String> args) {
       for (final w in (m['targetWords']! as List).cast<int>())
         (ayahId: ayahId, wordIndex: w),
     };
+    final passage = <WordRef, List<PhoneticToken>>{};
+    for (final t in expected) {
+      (passage[t.word] ??= []).add(t);
+    }
+    targetWords += targets.where(byWord.containsKey).length;
+    for (final s in verifier.wordSwaps(frames, vs, passage)) {
+      if (targets.contains(s.word)) {
+        targetSwaps++;
+      } else {
+        otherSwaps++;
+        if (swapped.length < 12) {
+          swapped.add(
+            '${m['name']} ${ayahId ~/ 1000}:${ayahId % 1000}:'
+            '${s.word.wordIndex + 1} as :${s.said.wordIndex + 1} '
+            '(${s.likelihoodRatio.toStringAsFixed(1)})',
+          );
+        }
+      }
+    }
     if (targets.isNotEmpty) {
       clips++;
       final kinds = {for (final w in targets) ...?byWord[w]};
@@ -107,4 +133,11 @@ void main(List<String> args) {
     'words heard right $otherWords: flagged ${pct(otherFlagged, otherWords)}, '
     'only uncertain ${pct(otherUnsure, otherWords)}',
   );
+  stdout.writeln(
+    'said as another word: target words $targetSwaps of $targetWords, '
+    'words heard right $otherSwaps (${pct(otherSwaps, otherWords)})',
+  );
+  for (final s in swapped) {
+    stdout.writeln('  $s');
+  }
 }

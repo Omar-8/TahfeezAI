@@ -751,6 +751,15 @@ class AcousticVerificationController
     }
     final dropFirst = job.openStart && firstStart < margin;
     final dropLast = job.openEnd && lastEnd >= frames.frames - margin;
+    // A word failing on several sounds may be another word of the passage
+    // said in its place: one mistake naming it, not a run of letter swaps.
+    final passage = <WordRef, List<PhoneticToken>>{};
+    for (final t in span.tokens) {
+      (passage[t.word] ??= []).add(t);
+    }
+    final swaps = {
+      for (final s in verifier.wordSwaps(frames, verdicts, passage)) s.word: s,
+    };
     final byWord = <WordRef, List<PhonemeVerdict>>{};
     for (final v in verdicts) {
       if (!job.targets.contains(v.token.word)) continue;
@@ -798,8 +807,11 @@ class AcousticVerificationController
       for (final MapEntry(key: word, value: vs) in byWord.entries) {
         final existing = state.words[word];
         if (existing != null && !existing.provisional) continue;
-        final worst = _worst(vs);
-        final errors = verifier.errors(vs, frames.frameDuration);
+        final swap = _swapError(swaps[word], frames.frameDuration);
+        final worst = swap?.type ?? _worst(vs);
+        final errors = swap != null
+            ? [swap]
+            : verifier.errors(vs, frames.frameDuration);
         words[word] = AcousticWordResult(worst, errors, provisional: true);
         if (worst.isError) {
           mistake = errors.firstWhere((e) => e.type.isError);
@@ -845,8 +857,11 @@ class AcousticVerificationController
       }
     }
     for (final MapEntry(key: word, value: vs) in byWord.entries) {
-      final errors = _verifier.errors(vs, frames.frameDuration);
-      var worst = _worst(vs);
+      final swap = _swapError(swaps[word], frames.frameDuration);
+      final errors = swap != null
+          ? [swap]
+          : _verifier.errors(vs, frames.frameDuration);
+      var worst = swap?.type ?? _worst(vs);
       if (worst.isError && !trusted) worst = RecitationErrorType.uncertain;
       // Confirming: a mistake stands only if the second view hears one too.
       final other = second[word];
@@ -918,8 +933,30 @@ class AcousticVerificationController
         _ => false,
       };
 
+  /// A word heard said as another: one mistake naming both (their
+  /// Uthmani text), in place of its sounds' own verdicts.
+  RecitationError? _swapError(WordSwap? swap, Duration frameDuration) {
+    final corpus = ref.read(quranWordCorpusProvider).value;
+    if (swap == null || corpus == null) return null;
+    String text(WordRef r) => switch (corpus.positionOf(r)) {
+      final int p => corpus.words[p].text,
+      null => _ref(r),
+    };
+    return RecitationError(
+      word: swap.word,
+      letter: 0,
+      type: RecitationErrorType.wrongWord,
+      expected: text(swap.word),
+      observed: text(swap.said),
+      likelihoodRatio: swap.likelihoodRatio,
+      start: frameDuration * swap.span.start,
+      end: frameDuration * (swap.span.end + 1),
+    );
+  }
+
   static RecitationErrorType _worst(List<PhonemeVerdict> vs) {
     const order = [
+      RecitationErrorType.wrongWord,
       RecitationErrorType.wrongLetter,
       RecitationErrorType.shaddaError,
       RecitationErrorType.qalqalaMissing,

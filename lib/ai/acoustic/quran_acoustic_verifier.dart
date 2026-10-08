@@ -21,6 +21,11 @@ enum RecitationErrorType {
   /// A madd of four or six harakat held clearly shorter (tajweed).
   maddShort,
 
+  /// Another word of the passage said in this word's place (a word
+  /// swapped, out of order, or said instead): its sounds fit the audio
+  /// clearly better ([QuranAcousticVerifier.wordSwaps]).
+  wrongWord,
+
   /// The evidence is too weak either way.
   uncertain,
 
@@ -37,7 +42,8 @@ enum RecitationErrorType {
       this == sukunError ||
       this == shaddaError ||
       this == qalqalaMissing ||
-      this == maddShort;
+      this == maddShort ||
+      this == wrongWord;
 }
 
 /// Sounds whose evidence is naturally weak, or easily confused with a
@@ -881,6 +887,93 @@ class QuranAcousticVerifier {
   }
 
   /// The mistakes and uncertain sounds, located in the text.
+  /// A word must beat the expected one by this (log-likelihood) to be
+  /// heard in its place.
+  static const swapMargin = 4.0;
+
+  /// Words said as another word of the passage: for each word already
+  /// failing on several sounds (two letters, or three mistakes), the whole
+  /// passage ([verdicts]' sounds, in order) is scored with that word's
+  /// sounds replaced by each other word's in [candidates]; one fitting the
+  /// audio better by [swapMargin] was said instead — reported as one word,
+  /// not as a run of unlikely letter swaps. Scored over the whole passage,
+  /// not the word's own frames: a word whose alignment slipped onto its
+  /// neighbour is not "said as the neighbour", since that neighbour's
+  /// sounds are already heard where it is.
+  List<WordSwap> wordSwaps(
+    AcousticFrames frames,
+    List<PhonemeVerdict> verdicts,
+    Map<WordRef, List<PhoneticToken>> candidates,
+  ) {
+    final byWord = <WordRef, List<PhonemeVerdict>>{};
+    for (final v in verdicts) {
+      (byWord[v.token.word] ??= []).add(v);
+    }
+    List<int> sounds(Iterable<PhoneticToken> ts) => [
+      for (final t in ts)
+        if (!t.optional) t.token,
+    ];
+    bool same(List<int> a, List<int> b) {
+      if (a.length != b.length) return false;
+      for (var i = 0; i < a.length; i++) {
+        if (a[i] != b[i]) return false;
+      }
+      return true;
+    }
+
+    final order = [for (final v in verdicts) v.token];
+    double? base;
+    final out = <WordSwap>[];
+    for (final MapEntry(key: word, value: vs) in byWord.entries) {
+      final letters = vs
+          .where((v) => v.type == RecitationErrorType.wrongLetter)
+          .length;
+      final mistakes = vs.where((v) => v.type.isError).length;
+      if (letters < 2 && mistakes < 3) continue;
+      int? lo, hi;
+      for (final v in vs) {
+        final span = v.span;
+        if (span == null) continue;
+        lo = lo == null ? span.start : math.min(lo, span.start);
+        hi = hi == null ? span.end : math.max(hi, span.end);
+      }
+      if (lo == null || hi == null) continue;
+      // A word cut by the audio's edge is partly missing, not said as
+      // another (the app drops such words: cut within 0.3 s).
+      if (lo < 8 || hi >= frames.frames - 8) continue;
+      final first = order.indexWhere((t) => t.word == word);
+      final last = order.lastIndexWhere((t) => t.word == word);
+      final before = sounds(order.sublist(0, first));
+      final after = sounds(order.sublist(last + 1));
+      final own = sounds(order.sublist(first, last + 1));
+      base ??= ctcLogProbability(frames, [...before, ...own, ...after]);
+      WordRef? best;
+      var bestLlr = double.negativeInfinity;
+      for (final MapEntry(key: other, value: ts) in candidates.entries) {
+        if (other == word) continue;
+        final seq = sounds(ts);
+        if (seq.isEmpty || same(seq, own)) continue;
+        final llr =
+            ctcLogProbability(frames, [...before, ...seq, ...after]) - base;
+        if (llr > bestLlr) {
+          bestLlr = llr;
+          best = other;
+        }
+      }
+      if (best != null && bestLlr >= swapMargin) {
+        out.add(
+          WordSwap(
+            word: word,
+            said: best,
+            likelihoodRatio: bestLlr,
+            span: (start: lo, end: hi),
+          ),
+        );
+      }
+    }
+    return out;
+  }
+
   List<RecitationError> errors(
     List<PhonemeVerdict> verdicts,
     Duration frameDuration,
@@ -1105,4 +1198,22 @@ class BeatMeter {
   }
 
   void reset() => _recent.clear();
+}
+
+/// A word heard said as another word of the passage
+/// ([QuranAcousticVerifier.wordSwaps]).
+class WordSwap {
+  const WordSwap({
+    required this.word,
+    required this.said,
+    required this.likelihoodRatio,
+    required this.span,
+  });
+
+  /// The expected word, and the word heard in its place.
+  final WordRef word, said;
+
+  /// How much better [said] fits (log-likelihood).
+  final double likelihoodRatio;
+  final FrameSpan span;
 }

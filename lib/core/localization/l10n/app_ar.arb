@@ -263,5 +263,6 @@
   "aboutBy": "من",
   "aboutLicence": "الترخيص:",
   "aboutCite": "يُستشهد بـ:",
-  "aboutCopied": "نُسخ الرابط"
+  "aboutCopied": "نُسخ الرابط",
+  "recSaidOtherWord": "قلتَ «{word}» هنا بدلًا من هذه الكلمة"
 }
