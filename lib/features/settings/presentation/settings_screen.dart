@@ -12,6 +12,14 @@ import '../../../core/notifications/daily_reminder_scheduler.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../memorize/application/memorization_reminder.dart';
 import '../../../core/theme/theme_controller.dart';
+import '../../../quran/application/ayah_sheet_content.dart';
+import '../../../quran/application/tafsir_library_controller.dart';
+import '../../../quran/application/tafsir_selection_controller.dart';
+import '../../../quran/presentation/tafsir_packs_sheet.dart';
+import '../../../quran/presentation/translation_packs_sheet.dart';
+import '../../../wbw/application/wbw_preferences_controller.dart';
+import '../../../wbw/presentation/wbw_packs_sheet.dart';
+import '../../mushaf/application/mushaf_page_translations.dart';
 import 'theme_choices.dart';
 
 /// The Settings tab: the app's language and theme (the Quran page's own
@@ -153,6 +161,12 @@ class SettingsScreen extends ConsumerWidget {
               ],
             ),
           ),
+          const SizedBox(height: TahfeezSpacing.lg),
+          group(
+            l10n.readerTranslationTafsir,
+            Icons.translate_outlined,
+            const _MeaningSettings(),
+          ),
           if (reminderSupported) ...[
             const SizedBox(height: TahfeezSpacing.lg),
             group(
@@ -232,3 +246,95 @@ Color _ink(AppThemeChoice c) =>
     (c.mode == ThemeMode.dark
         ? const Color(0xFFECF2EF)
         : const Color(0xFF1C1C1C));
+
+/// Settings → Translation & tafsir: what the word and ayah sheets show.
+/// The lists of translations, tafsir and word-by-word languages are the
+/// existing pack sheets.
+class _MeaningSettings extends ConsumerWidget {
+  const _MeaningSettings();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final books = ref.watch(activeTranslationBooksProvider).value;
+    final tafsirId = ref.watch(tafsirSelectionControllerProvider);
+    final tafsirName = [
+      for (final t in ref.watch(tafsirLibraryControllerProvider).value ?? [])
+        if (t.work.id == tafsirId) t.work.displayName,
+    ].firstOrNull;
+    final content = ref.watch(ayahSheetContentProvider);
+    final transliteration = ref.watch(
+      wbwShowTransliterationPreferenceControllerProvider,
+    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ListTile(
+          key: const ValueKey('settings-translations'),
+          contentPadding: EdgeInsets.zero,
+          title: Text(l10n.searchTranslations),
+          subtitle: Text(
+            books == null || books.isEmpty
+                ? l10n.readerSelected(0)
+                : [for (final b in books.values) b.displayName].join(', '),
+          ),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => showTranslationPacksSheet(context),
+        ),
+        ListTile(
+          key: const ValueKey('settings-tafsir'),
+          contentPadding: EdgeInsets.zero,
+          title: Text(l10n.readerTafsir),
+          subtitle: Text(tafsirName ?? l10n.settingsTafsirNone),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => showTafsirPacksSheet(context),
+        ),
+        const SizedBox(height: TahfeezSpacing.sm),
+        Text(
+          l10n.settingsLongPressShows,
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+        const SizedBox(height: TahfeezSpacing.sm),
+        SegmentedButton<AyahSheetContent>(
+          key: const ValueKey('settings-ayah-sheet-content'),
+          showSelectedIcon: false,
+          segments: [
+            ButtonSegment(
+              value: AyahSheetContent.translation,
+              label: Text(l10n.settingsShowTranslation),
+            ),
+            ButtonSegment(
+              value: AyahSheetContent.tafsir,
+              label: Text(l10n.settingsShowTafsir),
+            ),
+            ButtonSegment(
+              value: AyahSheetContent.both,
+              label: Text(l10n.settingsShowBoth),
+            ),
+          ],
+          selected: {content},
+          onSelectionChanged: (s) =>
+              ref.read(ayahSheetContentProvider.notifier).set(s.first),
+        ),
+        const SizedBox(height: TahfeezSpacing.sm),
+        ListTile(
+          key: const ValueKey('settings-wbw'),
+          contentPadding: EdgeInsets.zero,
+          title: Text(l10n.readerWbw),
+          subtitle: Text(l10n.readerWbwSub),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => showWbwPacksSheet(context),
+        ),
+        SwitchListTile(
+          key: const ValueKey('settings-transliteration'),
+          contentPadding: EdgeInsets.zero,
+          title: Text(l10n.settingsTransliteration),
+          value: transliteration,
+          onChanged: (on) => ref
+              .read(wbwShowTransliterationPreferenceControllerProvider.notifier)
+              .setEnabled(on),
+        ),
+      ],
+    );
+  }
+}

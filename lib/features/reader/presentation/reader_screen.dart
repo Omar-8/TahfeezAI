@@ -19,7 +19,6 @@ import '../../mushaf/domain/mushaf_appearance.dart';
 import '../../mushaf/presentation/mushaf_pager.dart';
 import '../../mushaf/presentation/mushaf_page_title.dart';
 import '../../mushaf/presentation/mushaf_reader_options_sheet.dart';
-import '../../mushaf/presentation/mushaf_translation_sheet.dart';
 import '../../recitation/presentation/recitation_controls.dart';
 import '../application/reader_preferences_controller.dart';
 import '../application/reader_session_controller.dart';
@@ -657,23 +656,6 @@ class _MushafModeScaffold extends ConsumerWidget {
               showTranslationSegment: false,
               compact: true,
             ),
-          // The real per-page translation/tafsir sheet
-          // (`showMushafTranslationSheet`) -- printed-page fidelity means
-          // translation text never renders inside the 15-line body itself,
-          // so this is the only way to reach it from Mushaf mode. Disabled
-          // (not hidden) until a page has actually resolved, matching the
-          // "Reader options" button's own availability.
-          IconButton(
-            icon: const Icon(Icons.translate_outlined),
-            tooltip: AppLocalizations.of(context).readerTranslationTafsir,
-            onPressed: mushafId == null || pageNumber == null
-                ? null
-                : () => showMushafTranslationSheet(
-                    context,
-                    mushafId: mushafId!,
-                    pageNumber: pageNumber!,
-                  ),
-          ),
           // Same icon/tooltip as verse-by-verse mode's own settings button
           // (`Icons.tune`/"Reader options") -- the button itself stays a
           // consistent, always-visible fixture across both modes; only the

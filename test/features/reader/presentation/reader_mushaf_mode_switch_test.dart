@@ -83,10 +83,9 @@ void main() {
       expect(find.textContaining('Page 1'), findsWidgets);
       // Verse-by-verse-only chrome is gone; Mushaf-only chrome is showing.
       expect(find.text('Meccan · 7 ayahs'), findsNothing);
-      // The real per-page translation/tafsir sheet is reachable from here
-      // (translation text never renders inside the printed 15-line body
-      // itself, so this is its only route in Mushaf mode).
-      expect(find.byTooltip('Translation & tafsir'), findsOneWidget);
+      // No translation button over the Mushaf: translation and tafsir are
+      // chosen in Settings and shown in the word and ayah sheets.
+      expect(find.byTooltip('Translation & tafsir'), findsNothing);
       expect(find.byTooltip('Reader options'), findsOneWidget);
       // Surah 1's ayahs (1001-1007) are all on the fixture's page 1.
       expect(find.textContaining('Page 1'), findsWidgets);

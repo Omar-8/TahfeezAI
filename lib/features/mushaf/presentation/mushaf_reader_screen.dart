@@ -12,7 +12,6 @@ import '../domain/mushaf_appearance.dart';
 import 'mushaf_pager.dart';
 import 'mushaf_page_title.dart';
 import 'mushaf_reader_options_sheet.dart';
-import 'mushaf_translation_sheet.dart';
 
 /// Tahfeez's standalone Mushaf (paginated, printed-page-style) reader route
 /// — reached from the Quran index's Page tab, with no underlying
@@ -53,20 +52,6 @@ class _MushafReaderScreenState extends ConsumerState<MushafReaderScreen> {
           pageNumber: _currentPageNumber,
         ),
         actions: [
-          // Same real per-page translation/tafsir sheet the in-place Reader
-          // Mushaf mode offers (`reader_screen.dart`'s `_MushafModeScaffold`)
-          // -- this screen shares the same [MushafPager]/printed-page body,
-          // so it needs the same escape hatch for translation content that
-          // never renders inside the 15-line page itself.
-          IconButton(
-            icon: const Icon(Icons.translate_outlined),
-            tooltip: AppLocalizations.of(context).readerTranslationTafsir,
-            onPressed: () => showMushafTranslationSheet(
-              context,
-              mushafId: widget.mushafId,
-              pageNumber: _currentPageNumber,
-            ),
-          ),
           // Same icon/tooltip/sheet as `reader_screen.dart`'s
           // `_MushafModeScaffold` -- both Mushaf surfaces share
           // `showMushafReaderOptionsSheet` so Appearance/Quran text
