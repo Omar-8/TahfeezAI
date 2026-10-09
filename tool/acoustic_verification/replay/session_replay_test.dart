@@ -98,6 +98,7 @@ void main() {
           hifzHapticsProvider.overrideWithValue(() {}),
           hifzBeepProvider.overrideWithValue(() {}),
           quranRepositoryProvider.overrideWithValue(_NoPages()),
+          memorizationRecordDelayProvider.overrideWithValue(Duration.zero),
           memorizationRecorderProvider.overrideWithValue((_) async {}),
         ],
       );

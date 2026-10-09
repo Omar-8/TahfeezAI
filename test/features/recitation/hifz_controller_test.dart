@@ -113,6 +113,7 @@ void main() {
         hifzBeepProvider.overrideWithValue(() => beeps++),
         acousticVerificationControllerProvider.overrideWith(_Acoustic.new),
         quranRepositoryProvider.overrideWithValue(_Pages()),
+        memorizationRecordDelayProvider.overrideWithValue(Duration.zero),
         memorizationRecorderProvider.overrideWithValue(
           (attempts) async => recorded.addAll(attempts),
         ),
@@ -241,6 +242,46 @@ void main() {
     });
     await pumpEventQueue();
     expect(vibrations, 1);
+  });
+
+  test('only a confirmed pronunciation mistake alerts and is marked', () async {
+    const kursiVerse = (chapterNo: 2, verseNo: 255);
+    await setUpHifz(from: kursiVerse, to: kursiVerse);
+    await recite(kursi.split(' ').take(5).join(' '));
+    final word = corpus.words[corpus.verseStartPosition(kursiVerse)! + 1].ref;
+    final acoustic = container.read(
+      acousticVerificationControllerProvider.notifier,
+    ) as _Acoustic;
+    // A word's quick early verdict: not yet.
+    acoustic.put({
+      word: const AcousticWordResult(
+        RecitationErrorType.wrongVowel,
+        [],
+        provisional: true,
+      ),
+    });
+    await pumpEventQueue();
+    expect(vibrations, 0);
+    expect(
+      container.read(mushafWordOverlayProvider)!.marks[word],
+      MushafWordMark.correct,
+    );
+    // The ayah's check withdraws it: nothing ever shown.
+    acoustic.put({
+      word: const AcousticWordResult(RecitationErrorType.correct, []),
+    });
+    await pumpEventQueue();
+    expect(vibrations, 0);
+    // Confirmed: alerted and marked.
+    acoustic.put({
+      word: const AcousticWordResult(RecitationErrorType.wrongVowel, []),
+    });
+    await pumpEventQueue();
+    expect(vibrations, 1);
+    expect(
+      container.read(mushafWordOverlayProvider)!.marks[word],
+      MushafWordMark.tashkeel,
+    );
   });
 
   test('a saved vibrate switch becomes the vibrate alert', () {

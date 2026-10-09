@@ -36,3 +36,9 @@ final memorizationRecorderProvider =
         }
       };
     });
+
+/// How long a finished test waits before it is graded, so the last ayah's
+/// pronunciation check can confirm its verdicts; tests set none.
+final memorizationRecordDelayProvider = Provider<Duration>(
+  (ref) => const Duration(seconds: 1),
+);

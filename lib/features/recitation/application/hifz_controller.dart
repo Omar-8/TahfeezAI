@@ -383,8 +383,14 @@ class HifzController extends Notifier<HifzState> {
       // its words were recited.)
       for (final MapEntry(key: w, value: r) in next.words.entries) {
         final before = previous?.words[w];
+        // Only a confirmed mistake (the ayah's check): a word's quick early
+        // verdict is sometimes withdrawn by it.
         if (!r.isMistake ||
-            (before != null && before.isMistake && before.pass == r.pass)) {
+            r.provisional ||
+            (before != null &&
+                before.isMistake &&
+                !before.provisional &&
+                before.pass == r.pass)) {
           continue;
         }
         if (r.pass < _pass ||
@@ -565,8 +571,10 @@ class HifzController extends Notifier<HifzState> {
   /// A recited word's colour from its pronunciation check.
   /// (Only [pass]'s verdict: a loop's earlier repetitions of the word are
   /// not this one.)
+  /// (Confirmed by the ayah's check: a word's quick early verdict is
+  /// sometimes withdrawn by it.)
   static MushafWordMark _pronunciationMark(AcousticWordResult? a, int pass) =>
-      a != null && a.isMistake && a.pass == pass
+      a != null && a.isMistake && !a.provisional && a.pass == pass
       ? MushafWordMark.tashkeel
       : MushafWordMark.correct;
 
@@ -1104,24 +1112,21 @@ class HifzController extends Notifier<HifzState> {
     if (identical(_recorded, judge) || sessionId == null) return;
     _recorded = judge;
     final corpus = judge.corpus;
-    final acoustic = ref.read(acousticVerificationControllerProvider).words;
-    final words = [
+    final pass = _pass;
+    final at = ref.read(recitationClockProvider)();
+    final hidden = ref.read(mushafHideModeProvider).enabled;
+    final recorder = ref.read(memorizationRecorderProvider);
+    final settle = ref.read(memorizationRecordDelayProvider);
+    final outcomes = {
       for (final p in judge.revealed)
         if (p >= judge.start && p <= judge.end && !judge.given.contains(p))
-          TestWord(
-            corpus.words[p].ref,
-            switch (judge.marked[p]) {
-              HifzVerdict.wrong => WordOutcome.wrong,
-              HifzVerdict.skipped => WordOutcome.skipped,
-              HifzVerdict.selfCorrected => WordOutcome.selfCorrected,
-              _ => WordOutcome.correct,
-            },
-            pronunciationMistake: switch (acoustic[corpus.words[p].ref]) {
-              final a? => a.isMistake && a.pass == _pass,
-              null => false,
-            },
-          ),
-    ];
+          corpus.words[p].ref: switch (judge.marked[p]) {
+            HifzVerdict.wrong => WordOutcome.wrong,
+            HifzVerdict.skipped => WordOutcome.skipped,
+            HifzVerdict.selfCorrected => WordOutcome.selfCorrected,
+            _ => WordOutcome.correct,
+          },
+    };
     int ayahWords(int ayahId) {
       final verse = (chapterNo: ayahId ~/ 1000, verseNo: ayahId % 1000);
       final first = corpus.verseStartPosition(verse);
@@ -1129,16 +1134,41 @@ class HifzController extends Notifier<HifzState> {
       return first == null || last == null ? 0 : last - first + 1;
     }
 
-    final attempts = gradeTest(
-      words,
-      ayahWords: ayahWords,
-      sessionId: sessionId,
-      at: ref.read(recitationClockProvider)(),
-      hidden: ref.read(mushafHideModeProvider).enabled,
-    );
-    if (attempts.isNotEmpty) {
-      unawaited(ref.read(memorizationRecorderProvider)(attempts));
-    }
+    var acoustic = ref.read(acousticVerificationControllerProvider).words;
+    unawaited(() async {
+      // The last ayah's pronunciation check may still be running: graded
+      // on confirmed verdicts once it is done (or a few seconds on).
+      if (settle > Duration.zero) {
+        await Future<void>.delayed(settle);
+        for (var i = 0; i < 20 && ref.mounted; i++) {
+          if (ref.read(acousticVerificationControllerProvider).pending == 0) {
+            break;
+          }
+          await Future<void>.delayed(const Duration(milliseconds: 200));
+        }
+      }
+      if (ref.mounted) {
+        acoustic = ref.read(acousticVerificationControllerProvider).words;
+      }
+      final attempts = gradeTest(
+        [
+          for (final MapEntry(key: w, value: o) in outcomes.entries)
+            TestWord(
+              w,
+              o,
+              pronunciationMistake: switch (acoustic[w]) {
+                final a? => a.isMistake && !a.provisional && a.pass == pass,
+                null => false,
+              },
+            ),
+        ],
+        ayahWords: ayahWords,
+        sessionId: sessionId,
+        at: at,
+        hidden: hidden,
+      );
+      if (attempts.isNotEmpty) await recorder(attempts);
+    }());
   }
 
   /// Shows the page holding [word] if it is not on screen (a loop going

@@ -592,6 +592,7 @@ void main() {
           browserStorageProvider.overrideWithValue(_MemoryStorage()),
           hifzHapticsProvider.overrideWithValue(() {}),
           quranRepositoryProvider.overrideWithValue(_NoPages()),
+          memorizationRecordDelayProvider.overrideWithValue(Duration.zero),
           memorizationRecorderProvider.overrideWithValue((_) async {}),
         ],
       );

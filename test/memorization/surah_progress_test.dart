@@ -61,4 +61,53 @@ void main() {
     expect(p.tajweed, closeTo(10 / 12, 1e-9));
     expect(progress.containsKey(113), isFalse);
   });
+
+  test('progress updates as tests are recorded', () async {
+    final db = MemorizationDatabase(NativeDatabase.memory());
+    addTearDown(db.close);
+    final repo = DriftMemorizationRepository(db);
+    final container = ProviderContainer(
+      overrides: [
+        memorizationRepositoryProvider.overrideWithValue(repo),
+        indexedSurahsProvider.overrideWith(
+          (ref) async => [
+            IndexedSurah(
+              surah: const Surah(
+                surahNo: 112,
+                ayahCount: 4,
+                revelationOrder: 22,
+                rukusCount: 1,
+                revelationType: RevelationType.meccan,
+              ),
+              arabicName: null,
+              localizedName: 'Al-Ikhlas',
+            ),
+          ],
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+    container.listen(surahProgressProvider, (_, _) {});
+    AyahAttempt a(int id) => AyahAttempt(
+      ayahId: id,
+      sessionId: 's',
+      at: DateTime(2026, 10, 9),
+      grade: AyahGrade.good,
+      words: 4,
+      hidden: true,
+    );
+    await repo.recordTest([a(112001)]);
+    await pumpEventQueue();
+    expect(
+      (await container.read(surahProgressProvider.future))[112]!.memorized,
+      1,
+    );
+    await repo.recordTest([a(112002), a(112003), a(112004)]);
+    await pumpEventQueue();
+    expect(
+      (await container.read(surahProgressProvider.future))[112]!.memorized,
+      4,
+      reason: 'the surah finished',
+    );
+  });
 }

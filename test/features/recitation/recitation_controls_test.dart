@@ -43,6 +43,7 @@ void main() {
   }) {
     return ProviderScope(
       overrides: [
+        memorizationRecordDelayProvider.overrideWithValue(Duration.zero),
         memorizationRecorderProvider.overrideWithValue((_) async {}),
         recitationSupportedProvider.overrideWithValue(supported),
         // No database in widget tests: an empty canonical word list.
