@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/audio/audio_models.dart';
@@ -26,6 +27,10 @@ class NowPlaying {
   final ({int ayahId, int wordIndex})? word;
 
   bool get isWord => word != null;
+
+  /// A run of ayahs (Play from here) — what the mini player is for; a
+  /// single word or ayah plays without it.
+  bool get isRun => ayahIds.length > 1;
   int? get ayahId => isWord ? null : ayahIds[index];
 
   NowPlaying at(int i) => NowPlaying.ayahs(ayahIds, i, reciter);
@@ -123,10 +128,27 @@ class QuranAudioPlayer extends Notifier<NowPlaying?> {
   }
 
   Future<void> stop() async {
-    if (state == null) return;
     _clear();
     await ref.read(audioControllerProvider).stop();
   }
+}
+
+/// When the offline message was last shown, so repeated taps while offline
+/// show it once in a while rather than stacking.
+DateTime? _offlineShownAt;
+
+/// "Audio needs an internet connection", replacing any message showing, at
+/// most once every few seconds.
+void showListenOffline(ScaffoldMessengerState messenger, String message) {
+  final now = DateTime.now();
+  final last = _offlineShownAt;
+  if (last != null && now.difference(last) < const Duration(seconds: 4)) {
+    return;
+  }
+  _offlineShownAt = now;
+  messenger
+    ..hideCurrentSnackBar()
+    ..showSnackBar(SnackBar(content: Text(message)));
 }
 
 final quranAudioPlayerProvider =

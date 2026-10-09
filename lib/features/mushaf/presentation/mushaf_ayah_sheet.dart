@@ -251,9 +251,7 @@ class _ListenButtons extends ConsumerWidget {
     final player = ref.read(quranAudioPlayerProvider.notifier);
     Future<void> play(Future<bool> Function() start) async {
       final messenger = ScaffoldMessenger.of(context);
-      if (!await start()) {
-        messenger.showSnackBar(SnackBar(content: Text(l10n.listenOffline)));
-      }
+      if (!await start()) showListenOffline(messenger, l10n.listenOffline);
     }
 
     return Row(

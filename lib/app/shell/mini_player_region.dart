@@ -49,9 +49,8 @@ class MiniPlayerRegion extends ConsumerWidget {
       initialData: const AudioPlaybackState(),
       builder: (context, snapshot) {
         final state = snapshot.data ?? const AudioPlaybackState();
-        // A single word plays without the player bar.
-        final isActive =
-            state.durationMs != null && !(nowPlaying?.isWord ?? false);
+        // Only for a run of ayahs; a single word or ayah plays without it.
+        final isActive = nowPlaying != null && nowPlaying.isRun;
 
         return AnimatedSize(
           duration: TahfeezMotionDuration.medium,

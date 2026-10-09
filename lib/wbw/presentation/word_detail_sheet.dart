@@ -116,9 +116,7 @@ class _WordDetailSheetBody extends ConsumerWidget {
                   final played = await ref
                       .read(quranAudioPlayerProvider.notifier)
                       .playWord(wordRef.ayahId, wordRef.wordIndex);
-                  if (!played) {
-                    messenger.showSnackBar(SnackBar(content: Text(offline)));
-                  }
+                  if (!played) showListenOffline(messenger, offline);
                 },
               ),
             ],
