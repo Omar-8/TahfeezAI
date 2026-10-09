@@ -26,6 +26,7 @@ class TahfeezApp extends ConsumerWidget {
     final family = ref.watch(themeFamilyControllerProvider);
     final useDynamicColor = ref.watch(dynamicColorPreferenceControllerProvider);
     final tone = ref.watch(appSurfaceToneProvider);
+    final arabicFont = ref.watch(arabicFontControllerProvider);
     final localeOverride = ref.watch(localeControllerProvider);
     final router = ref.watch(appRouterProvider);
 
@@ -55,8 +56,14 @@ class TahfeezApp extends ConsumerWidget {
           onGenerateTitle: (context) => AppLocalizations.of(context).appName,
           debugShowCheckedModeBanner: false,
           themeMode: themeMode,
-          theme: buildTahfeezTheme(tone.apply(lightScheme)),
-          darkTheme: buildTahfeezTheme(tone.apply(darkScheme)),
+          theme: buildTahfeezTheme(
+            tone.apply(lightScheme),
+            arabicFont: arabicFont,
+          ),
+          darkTheme: buildTahfeezTheme(
+            tone.apply(darkScheme),
+            arabicFont: arabicFont,
+          ),
           locale: localeOverride,
           supportedLocales: kTahfeezSupportedLocales,
           localizationsDelegates: const [

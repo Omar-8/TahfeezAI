@@ -8,6 +8,7 @@ import '../../../core/localization/locale_controller.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/components/components.dart';
 import '../../../core/theme/app_surface_tone.dart';
+import '../../../core/theme/app_typography.dart';
 import '../../../core/theme/theme_controller.dart';
 import 'theme_choices.dart';
 
@@ -28,6 +29,7 @@ class SettingsScreen extends ConsumerWidget {
       ref.watch(themeModeControllerProvider),
       ref.watch(appSurfaceToneProvider),
     );
+    final arabicFont = ref.watch(arabicFontControllerProvider);
 
     Widget group(String title, IconData icon, Widget child) => Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -98,6 +100,46 @@ class SettingsScreen extends ConsumerWidget {
                           .setTone(choice.tone);
                     },
                   ),
+              ],
+            ),
+          ),
+          const SizedBox(height: TahfeezSpacing.lg),
+          group(
+            l10n.settingsArabicFont,
+            Icons.font_download_outlined,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              spacing: TahfeezSpacing.smPlus,
+              children: [
+                Wrap(
+                  key: const ValueKey('settings-arabic-font'),
+                  spacing: TahfeezSpacing.sm,
+                  runSpacing: TahfeezSpacing.sm,
+                  children: [
+                    for (final font in ArabicUiFont.values)
+                      ChoiceChip(
+                        key: ValueKey('settings-arabic-font-${font.name}'),
+                        // Each name in its own font.
+                        label: Text(
+                          font.arabicName,
+                          style: TextStyle(fontFamily: font.family),
+                        ),
+                        selected: font == arabicFont,
+                        showCheckmark: false,
+                        onSelected: (_) => ref
+                            .read(arabicFontControllerProvider.notifier)
+                            .setFont(font),
+                      ),
+                  ],
+                ),
+                Text(
+                  'مساء الخير · آية اليوم · متابعة القراءة',
+                  textDirection: TextDirection.rtl,
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    fontFamily: arabicFont.family,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
               ],
             ),
           ),

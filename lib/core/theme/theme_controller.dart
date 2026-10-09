@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../storage/storage_providers.dart';
+import 'app_typography.dart';
 import 'tahfeez_theme_families.dart';
 
 part 'theme_controller.g.dart';
@@ -9,6 +10,7 @@ part 'theme_controller.g.dart';
 const _themeModePrefKey = 'core.theme_mode';
 const _themeFamilyPrefKey = 'core.theme_family';
 const _dynamicColorPrefKey = 'core.use_dynamic_color';
+const _arabicFontPrefKey = 'core.arabic_font';
 
 /// Persisted [ThemeMode] selection (system/light/dark).
 ///
@@ -108,5 +110,34 @@ class DynamicColorPreferenceController
     await ref
         .read(browserStorageProvider)
         .setBool(_dynamicColorPrefKey, enabled);
+  }
+}
+
+/// Persisted [ArabicUiFont] selection; defaults to [ArabicUiFont.kufi].
+@Riverpod(keepAlive: true)
+class ArabicFontController extends _$ArabicFontController {
+  @override
+  ArabicUiFont build() {
+    _restore();
+    return ArabicUiFont.kufi;
+  }
+
+  Future<void> _restore() async {
+    final stored = await ref
+        .read(browserStorageProvider)
+        .getString(_arabicFontPrefKey);
+    for (final font in ArabicUiFont.values) {
+      if (font.name == stored && font != state) {
+        state = font;
+        return;
+      }
+    }
+  }
+
+  Future<void> setFont(ArabicUiFont font) async {
+    state = font;
+    await ref
+        .read(browserStorageProvider)
+        .setString(_arabicFontPrefKey, font.name);
   }
 }

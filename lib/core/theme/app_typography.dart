@@ -7,7 +7,21 @@ import 'package:flutter/material.dart';
 /// to render its own UI — required by this project's offline-first
 /// posture).
 const kTahfeezUiFontFamily = 'Noto Sans';
-const kTahfeezUiFontFamilyArabic = 'Noto Kufi Arabic';
+
+/// The Arabic UI typeface, chosen in Settings (Quran text never uses it).
+enum ArabicUiFont {
+  kufi('Noto Kufi Arabic', 'كوفي'),
+  almarai('Almarai', 'المراعي'),
+  tajawal('Tajawal', 'تجوال');
+
+  const ArabicUiFont(this.family, this.arabicName);
+
+  /// The `pubspec.yaml` font family.
+  final String family;
+
+  /// Its name, in Arabic.
+  final String arabicName;
+}
 
 /// Builds Tahfeez's UI [TextTheme].
 ///
@@ -18,7 +32,7 @@ const kTahfeezUiFontFamilyArabic = 'Noto Kufi Arabic';
 /// script/font/rendering pipeline introduced in the Mushaf/Reader milestones
 /// (see `docs/reference/05_MUSHAF_SPEC.md`).
 ///
-/// The UI typeface is Noto Sans, with Noto Kufi Arabic registered as a
+/// The UI typeface is Noto Sans, with the chosen [ArabicUiFont] as a
 /// [TextStyle.fontFamilyFallback] — Flutter automatically falls back to it
 /// per-glyph, so a single UI string mixing Latin and Arabic characters (a
 /// translator's name, a bilingual label) renders both scripts in their
@@ -30,7 +44,10 @@ const kTahfeezUiFontFamilyArabic = 'Noto Kufi Arabic';
 /// The size hierarchy mirrors `docs/DESIGN_DIRECTION.md`'s suggested scale:
 /// display 32-36, page title 26-30, section title 18-20, card title 16-18,
 /// body 14-16, metadata 12-13.
-TextTheme buildTahfeezTextTheme(ColorScheme scheme) {
+TextTheme buildTahfeezTextTheme(
+  ColorScheme scheme, {
+  ArabicUiFont arabic = ArabicUiFont.kufi,
+}) {
   final base = Typography.material2021(colorScheme: scheme).black
       .apply(bodyColor: scheme.onSurface, displayColor: scheme.onSurface);
 
@@ -41,7 +58,7 @@ TextTheme buildTahfeezTextTheme(ColorScheme scheme) {
   }) {
     return (from ?? const TextStyle()).copyWith(
       fontFamily: kTahfeezUiFontFamily,
-      fontFamilyFallback: const [kTahfeezUiFontFamilyArabic],
+      fontFamilyFallback: [arabic.family],
       fontSize: fontSize,
       fontWeight: fontWeight,
     );

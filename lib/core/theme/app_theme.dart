@@ -14,8 +14,11 @@ import 'tahfeez_theme_families.dart';
 /// already channelled through [ColorScheme], [TextTheme], and
 /// [TahfeezColorTokens], and every shape/elevation value below comes from a
 /// shared token rather than a locally-invented number.
-ThemeData buildTahfeezTheme(ColorScheme scheme) {
-  final textTheme = buildTahfeezTextTheme(scheme);
+ThemeData buildTahfeezTheme(
+  ColorScheme scheme, {
+  ArabicUiFont arabicFont = ArabicUiFont.kufi,
+}) {
+  final textTheme = buildTahfeezTextTheme(scheme, arabic: arabicFont);
   final cardShape = RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(TahfeezRadii.md),
   );

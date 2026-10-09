@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tahfeez_ai/app/app.dart';
 import 'package:tahfeez_ai/core/localization/locale_controller.dart';
 import 'package:tahfeez_ai/core/theme/app_surface_tone.dart';
+import 'package:tahfeez_ai/core/theme/app_typography.dart';
 import 'package:tahfeez_ai/core/theme/theme_controller.dart';
 import 'package:tahfeez_ai/features/settings/domain/credits.dart';
 import 'package:tahfeez_ai/features/settings/presentation/about_screen.dart';
@@ -64,12 +65,31 @@ void main() {
       const Color(0xFFFBF1DE),
     );
 
+    // The Arabic UI font: the app's text falls back to it.
+    expect(container.read(arabicFontControllerProvider), ArabicUiFont.kufi);
+    final tajawal = find.byKey(const ValueKey('settings-arabic-font-tajawal'));
+    await tester.ensureVisible(tajawal);
+    await tester.tap(tajawal);
+    await tester.pumpAndSettle();
+    expect(container.read(arabicFontControllerProvider), ArabicUiFont.tajawal);
+    expect(
+      Theme.of(tester.element(find.text('Language')))
+          .textTheme
+          .bodyLarge
+          ?.fontFamilyFallback,
+      ['Tajawal'],
+    );
+
+    await tester.drag(find.byType(ListView).first, const Offset(0, 2000));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('العربية'));
     await tester.pumpAndSettle();
     expect(container.read(localeControllerProvider), const Locale('ar'));
     expect(find.text('اللغة'), findsOneWidget); // "Language", now in Arabic
     expect(find.text('داكن'), findsOneWidget); // "Dark"
 
+    await tester.drag(find.byType(ListView).first, const Offset(0, 2000));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('لغة النظام')); // back to the system language
     await tester.pumpAndSettle();
     expect(container.read(localeControllerProvider), isNull);

@@ -111,8 +111,10 @@ const credits = <Credit>[
   ),
   Credit(
     group: CreditGroup.mushaf,
-    name: 'Noto Sans and Noto Kufi Arabic',
-    owner: 'The Noto Project Authors (Google Fonts)',
+    name: 'Noto Sans, Noto Kufi Arabic, Almarai and Tajawal',
+    owner:
+        'The Noto Project Authors; the Almarai Project Authors; '
+        'Boutros International (via Google Fonts)',
     licence: 'SIL Open Font License 1.1',
     url: 'https://github.com/google/fonts',
     useEn: 'The app’s text',

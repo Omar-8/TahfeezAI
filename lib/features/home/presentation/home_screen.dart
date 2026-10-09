@@ -73,12 +73,8 @@ class _HomeBrandHeader extends StatelessWidget {
           Text(
             l10n.appName,
             style: theme.textTheme.headlineMedium?.copyWith(
-              fontFamily: 'El Messiri',
-              fontWeight: FontWeight.w600,
-              // A variable font: its weight axis, set explicitly.
-              fontVariations: const [FontVariation('wght', 600)],
-              letterSpacing: 0.5,
-              height: 1.1,
+              fontWeight: FontWeight.w700,
+              height: 1.2,
             ),
           ),
           Text(

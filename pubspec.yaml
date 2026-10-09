@@ -197,10 +197,23 @@ flutter:
     - family: Noto Sans
       fonts:
         - asset: assets/fonts/NotoSans-Variable.ttf
+    # The Arabic UI fonts, one chosen in Settings (ArabicUiFont).
     - family: Noto Kufi Arabic
       fonts:
         - asset: assets/fonts/NotoKufiArabic-Variable.ttf
-    # The app's name (wordmark) only; Latin and Arabic.
-    - family: El Messiri
+    - family: Almarai
       fonts:
-        - asset: assets/fonts/ElMessiri-Variable.ttf
+        - asset: assets/fonts/Almarai-Light.ttf
+          weight: 300
+        - asset: assets/fonts/Almarai-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Almarai-Bold.ttf
+          weight: 700
+    - family: Tajawal
+      fonts:
+        - asset: assets/fonts/Tajawal-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Tajawal-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Tajawal-Bold.ttf
+          weight: 700
