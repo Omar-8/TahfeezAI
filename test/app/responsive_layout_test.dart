@@ -35,7 +35,7 @@ void main() {
 
   for (final MapEntry(key: name, value: size) in sizes.entries) {
     for (final scale in const [1.0, 1.5]) {
-      for (final locale in const ['en', 'ar']) {
+      for (final locale in const ['en', 'ar', 'de', 'ur']) {
         testWidgets('$name, text ×$scale, $locale: every main screen fits', (
           tester,
         ) async {
@@ -112,7 +112,7 @@ void main() {
     'mark what I know': (c) => showMarkKnownSheet(c),
   };
   for (final MapEntry(key: sheet, value: open) in sheets.entries) {
-    for (final locale in const ['en', 'ar']) {
+    for (final locale in const ['en', 'ar', 'de', 'ur']) {
       testWidgets('small phone, text ×1.5, $locale: the $sheet sheet fits', (
         tester,
       ) async {

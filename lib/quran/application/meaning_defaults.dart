@@ -11,6 +11,12 @@ String meaningLanguage(Ref ref) =>
     ref.read(localeControllerProvider)?.languageCode ??
     PlatformDispatcher.instance.locale.languageCode;
 
+/// The language of the surah names shown for the UI [language]: the
+/// dataset has Arabic names (also used for Urdu) and English
+/// transliterations (used for every other language).
+String surahNameLanguage(String language) =>
+    language == 'ar' || language == 'ur' ? 'ar' : 'en';
+
 /// The bundled translation shown by default for each language; none for
 /// Arabic; English for any other.
 List<String> defaultTranslationSlugs(String language) => switch (language) {

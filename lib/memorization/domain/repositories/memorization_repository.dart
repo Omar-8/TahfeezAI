@@ -24,6 +24,13 @@ abstract class MemorizationRepository {
   /// data).
   Future<void> clearAll();
 
+  /// Everything stored, as JSON-ready data (Settings → Export).
+  Future<Map<String, Object?>> exportAll();
+
+  /// Replaces everything stored with [data] from [exportAll] (Settings →
+  /// Import).
+  Future<void> importAll(Map<String, Object?> data);
+
   /// The memory of every tracked ayah, by ayah id, updated as it changes.
   Stream<Map<int, AyahMemory>> watchMemories();
 

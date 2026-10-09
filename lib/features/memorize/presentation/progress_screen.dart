@@ -24,13 +24,27 @@ class MemorizationProgressScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final map = ref.watch(progressMapProvider);
+    // The label where there is room for it beside the title (the back button,
+    // the icon and the padding take about 140 dp).
+    final theme = Theme.of(context);
+    final textScaler = MediaQuery.textScalerOf(context);
+    double width(String text, TextStyle? style) => (TextPainter(
+      text: TextSpan(text: text, style: style),
+      textDirection: Directionality.of(context),
+      textScaler: textScaler,
+      maxLines: 1,
+    )..layout()).width;
+    final labelFits =
+        width(l10n.memMarkKnown, theme.textTheme.labelLarge) +
+            width(l10n.memProgressTitle, theme.textTheme.titleLarge) +
+            140 <=
+        MediaQuery.sizeOf(context).width;
     return Scaffold(
       appBar: TahfeezAppBar(
         title: Text(l10n.memProgressTitle),
         centerTitle: false,
         actions: [
-          // The label where there is room for it beside the title.
-          if (MediaQuery.sizeOf(context).width >= 400)
+          if (labelFits)
             TextButton.icon(
               key: const ValueKey('mem-mark-known'),
               onPressed: () => showMarkKnownSheet(context),

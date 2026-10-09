@@ -90,9 +90,15 @@ void main() {
     await tester.pumpAndSettle();
     expect(container.read(ayahSheetContentProvider), AyahSheetContent.tafsir);
 
+    // The language list: each with its flag.
     await tester.drag(find.byType(ListView).first, const Offset(0, 2000));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('العربية'));
+    await tester.tap(find.byKey(const ValueKey('settings-language')));
+    await tester.pumpAndSettle();
+    for (final name in ['Deutsch', 'Français', 'Türkçe', 'اردو']) {
+      expect(find.text(name), findsWidgets);
+    }
+    await tester.tap(find.text('العربية').last);
     await tester.pumpAndSettle();
     expect(container.read(localeControllerProvider), const Locale('ar'));
     expect(find.text('اللغة'), findsOneWidget); // "Language", now in Arabic
@@ -100,7 +106,10 @@ void main() {
 
     await tester.drag(find.byType(ListView).first, const Offset(0, 2000));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('لغة النظام')); // back to the system language
+    await tester.tap(find.byKey(const ValueKey('settings-language')));
+    await tester.pumpAndSettle();
+    // Back to the system language.
+    await tester.tap(find.text('لغة النظام').last);
     await tester.pumpAndSettle();
     expect(container.read(localeControllerProvider), isNull);
   });

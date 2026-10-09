@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/localization/locale_controller.dart';
+import '../../../quran/application/meaning_defaults.dart';
 import '../../../quran/application/quran_dataset_status.dart';
 import '../../../quran/application/quran_script_code.dart';
 import '../../../quran/application/recent_quran_location.dart';
@@ -111,8 +112,9 @@ Future<DailyAyahReference?> dailyAyah(Ref ref) async {
     scriptCode: ref.watch(quranScriptCodeProvider),
   );
 
-  final languageCode =
-      ref.watch(localeControllerProvider)?.languageCode ?? 'en';
+  final languageCode = surahNameLanguage(
+    ref.watch(localeControllerProvider)?.languageCode ?? 'en',
+  );
   final localization = await repository.getSurahLocalization(
     verse.chapterNo,
     languageCode: languageCode,
@@ -181,8 +183,9 @@ Future<List<FeaturedChapterRef>> featuredReadingChapters(Ref ref) async {
   if (!installed) return const [];
 
   final repository = ref.watch(quranRepositoryProvider);
-  final languageCode =
-      ref.watch(localeControllerProvider)?.languageCode ?? 'en';
+  final languageCode = surahNameLanguage(
+    ref.watch(localeControllerProvider)?.languageCode ?? 'en',
+  );
   final chapters = <FeaturedChapterRef>[];
   for (final (surahNo, occasion) in featuredOrderFor(DateTime.now())) {
     final surah = await repository.getSurah(surahNo);

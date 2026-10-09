@@ -17,6 +17,10 @@ class EmptyMemorizationRepository implements MemorizationRepository {
   @override
   Future<void> clearAll() async {}
   @override
+  Future<Map<String, Object?>> exportAll() async => const {};
+  @override
+  Future<void> importAll(Map<String, Object?> data) async {}
+  @override
   Stream<Map<int, AyahMemory>> watchMemories() => Stream.value(const {});
   @override
   Stream<List<AyahAttempt>> watchAttemptsSince(DateTime since) =>

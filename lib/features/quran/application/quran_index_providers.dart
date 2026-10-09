@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/localization/locale_controller.dart';
+import '../../../quran/application/meaning_defaults.dart';
 import '../../../quran/application/quran_script_code.dart';
 import '../../../quran/domain/models/mushaf_models.dart';
 import '../../../quran/domain/models/navigation_models.dart';
@@ -28,8 +29,9 @@ class IndexedSurah {
 @riverpod
 Future<List<IndexedSurah>> indexedSurahs(Ref ref) async {
   final repository = ref.watch(quranRepositoryProvider);
-  final languageCode =
-      ref.watch(localeControllerProvider)?.languageCode ?? 'en';
+  final languageCode = surahNameLanguage(
+    ref.watch(localeControllerProvider)?.languageCode ?? 'en',
+  );
 
   final surahs = await repository.getAllSurahs();
   final arabicLocalizations = await repository.getAllSurahLocalizations(

@@ -1,9 +1,10 @@
 {
   "@@locale": "en",
   "appName": "TahfeezAI",
-  "homeGreetingMorning": "Good morning",
-  "homeGreetingAfternoon": "Good afternoon",
-  "homeGreetingEvening": "Good evening",
+  "homeSalam": "Assalamu alaikum wa rahmatullahi wa barakatuh",
+  "@homeSalam": {
+    "description": "Home header greeting under the app name: the full Islamic greeting, on one line."
+  },
   "@appName": {
     "description": "The application name, shown in the app bar and OS surfaces."
   },
@@ -479,6 +480,18 @@
   "settingsResetConfirmBody": "This deletes your memorization progress and plans, your recitation history and all your settings. It can't be undone. The Quran, translations and tafsir stay. TahfeezAI then closes; open it again to start fresh.",
   "settingsResetConfirm": "Reset",
   "settingsResetDone": "All data reset. Reload the app to start fresh.",
+  "settingsBackupTitle": "Your data",
+  "settingsExportTitle": "Export data",
+  "settingsExportSub": "Save your memorization progress, plans and settings to a file",
+  "settingsExportDone": "Backup saved",
+  "settingsExportFailed": "Couldn't save the backup",
+  "settingsImportTitle": "Import data",
+  "settingsImportSub": "Restore from a TahfeezAI backup file",
+  "settingsImportConfirmTitle": "Import this backup?",
+  "settingsImportConfirmBody": "Your current memorization progress, plans and settings will be replaced by the backup's. TahfeezAI then closes; open it again to continue.",
+  "settingsImportConfirm": "Import",
+  "settingsImportDone": "Backup imported. Reload the app to continue.",
+  "settingsImportFailed": "This file isn't a TahfeezAI backup",
   "settingsTafsirNone": "None",
   "settingsLongPressShows": "Long-press an ayah to see",
   "settingsShowTranslation": "Translation",

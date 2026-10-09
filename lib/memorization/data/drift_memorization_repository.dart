@@ -75,6 +75,39 @@ class DriftMemorizationRepository implements MemorizationRepository {
   });
 
   @override
+  Future<Map<String, Object?>> exportAll() async => {
+    'memorizedAyahs': [
+      for (final r in await _db.select(_db.memorizedAyahs).get()) r.toJson(),
+    ],
+    'attempts': [
+      for (final r in await _db.select(_db.attempts).get()) r.toJson(),
+    ],
+    'plans': [for (final r in await _db.select(_db.plans).get()) r.toJson()],
+  };
+
+  @override
+  Future<void> importAll(Map<String, Object?> data) {
+    List<Map<String, dynamic>> rows(String key) => [
+      for (final r in (data[key] as List? ?? const []))
+        (r as Map).cast<String, dynamic>(),
+    ];
+    return _db.transaction(() async {
+      await clearAll();
+      await _db.batch((b) {
+        b.insertAll(_db.memorizedAyahs, [
+          for (final r in rows('memorizedAyahs')) MemorizedAyahRow.fromJson(r),
+        ]);
+        b.insertAll(_db.attempts, [
+          for (final r in rows('attempts')) AttemptRow.fromJson(r),
+        ]);
+        b.insertAll(_db.plans, [
+          for (final r in rows('plans')) PlanRow.fromJson(r),
+        ]);
+      });
+    });
+  }
+
+  @override
   Stream<Map<int, AyahMemory>> watchMemories() => _db
       .select(_db.memorizedAyahs)
       .watch()

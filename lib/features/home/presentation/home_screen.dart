@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../core/localization/generated/app_localizations.dart';
 import '../../../core/theme/app_spacing.dart';
-import 'home_greeting.dart';
 import 'sections/home_daily_ayah_section.dart';
 import 'sections/home_featured_reading_section.dart';
 import 'sections/home_memorization_section.dart';
@@ -51,7 +50,7 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-/// The app's name, and below it a time-of-day greeting.
+/// The app's name, and below it the salam on one line.
 class _HomeBrandHeader extends StatelessWidget {
   const _HomeBrandHeader({required this.l10n});
 
@@ -60,11 +59,6 @@ class _HomeBrandHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final greeting = switch (homeGreetingBandForHour(DateTime.now().hour)) {
-      HomeGreetingBand.morning => l10n.homeGreetingMorning,
-      HomeGreetingBand.afternoon => l10n.homeGreetingAfternoon,
-      HomeGreetingBand.evening => l10n.homeGreetingEvening,
-    };
     return Semantics(
       header: true,
       child: Column(
@@ -77,10 +71,16 @@ class _HomeBrandHeader extends StatelessWidget {
               height: 1.2,
             ),
           ),
-          Text(
-            greeting,
-            style: theme.textTheme.bodyLarge?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+          // Shrinks rather than wraps on narrow screens or large text.
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: AlignmentDirectional.centerStart,
+            child: Text(
+              l10n.homeSalam,
+              maxLines: 1,
+              style: theme.textTheme.bodyLarge?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
             ),
           ),
         ],

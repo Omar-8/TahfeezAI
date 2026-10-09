@@ -262,6 +262,10 @@ class _Awake implements ScreenAwake {
 class _MemoryStorage implements BrowserStorage {
   @override
   Future<void> clearExcept(Set<String> keep) async {}
+  @override
+  Future<Map<String, Object?>> readAll() async => const {};
+  @override
+  Future<void> writeAll(Map<String, Object?> values) async {}
 
   final values = <String, Object>{};
   @override

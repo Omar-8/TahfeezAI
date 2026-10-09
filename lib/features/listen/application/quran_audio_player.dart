@@ -54,6 +54,11 @@ class NowPlaying {
 class QuranAudioPlayer extends Notifier<NowPlaying?> {
   StreamSubscription<AudioPlaybackState>? _sub;
 
+  final _finished = StreamController<NowPlaying>.broadcast(sync: true);
+
+  /// Each run of ayahs that played to its end (not stopped), as it ends.
+  Stream<NowPlaying> get finished => _finished.stream;
+
   @override
   NowPlaying? build() {
     final controller = ref.watch(audioControllerProvider);
@@ -85,6 +90,7 @@ class QuranAudioPlayer extends Notifier<NowPlaying?> {
     if (!playback.completed) _started = true;
     if (playback.completed && _started) {
       final last = now.isWord ? null : now.ayahIds.last;
+      if (!now.isWord) _finished.add(now);
       _clear();
       // Going on: the next surah, whole, with the same options.
       if (last != null && now.options.continueToNextSurahs) {

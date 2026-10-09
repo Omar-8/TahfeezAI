@@ -38,10 +38,10 @@ void main() {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
-    // The app's name heads the page, a greeting below it.
+    // The app's name heads the page, the salam below it.
     expect(find.text('TahfeezAI'), findsOneWidget);
     expect(
-      find.textContaining(RegExp('^Good (morning|afternoon|evening)\$')),
+      find.text('Assalamu alaikum wa rahmatullahi wa barakatuh'),
       findsOneWidget,
     );
 

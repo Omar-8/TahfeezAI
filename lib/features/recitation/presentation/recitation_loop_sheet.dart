@@ -51,9 +51,16 @@ class HifzLoopButton extends ConsumerWidget {
 
 /// Loop recitation's settings: how to repeat (the whole range, or each
 /// ayah), the range, and how many times — then starts reciting.
+/// Shown like the Hifz settings sheet: a drag handle, as tall as its
+/// content, below the app bar.
 Future<void> showRecitationLoopSheet(BuildContext context) {
-  return showTahfeezModalBottomSheet<void>(
+  return showModalBottomSheet<void>(
     context: context,
+    showDragHandle: true,
+    isScrollControlled: true,
+    useSafeArea: true,
+    useRootNavigator: true,
+    constraints: sheetBelowAppBar(context),
     builder: (context) => const _RecitationLoopSheet(),
   );
 }
@@ -176,209 +183,221 @@ class _RecitationLoopSheetState extends ConsumerState<_RecitationLoopSheet> {
       ),
     );
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(
-        TahfeezSpacing.md,
-        0,
-        TahfeezSpacing.md,
-        TahfeezSpacing.md,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: scheme.primaryContainer,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.repeat_rounded,
-                  color: scheme.onPrimaryContainer,
-                ),
-              ),
-              const SizedBox(width: TahfeezSpacing.smPlus),
-              Expanded(
-                child: Text(l10n.recLoop, style: theme.textTheme.titleLarge),
-              ),
-            ],
-          ),
-          const SizedBox(height: TahfeezSpacing.md),
-          TahfeezCard(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+    return SafeArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(
+          TahfeezSpacing.md,
+          0,
+          TahfeezSpacing.md,
+          TahfeezSpacing.md,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
               children: [
-                label(l10n.recLoopOrder),
-                SegmentedButton<HifzLoopMode>(
-                  key: const ValueKey('loop-mode'),
-                  showSelectedIcon: false,
-                  segments: [
-                    ButtonSegment(
-                      value: HifzLoopMode.eachAyah,
-                      label: Text(l10n.recLoopEachAyah),
+                Icon(Icons.repeat_rounded, size: 20, color: scheme.primary),
+                const SizedBox(width: TahfeezSpacing.sm),
+                Expanded(
+                  child: Text(
+                    l10n.recLoop,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
                     ),
-                    ButtonSegment(
-                      value: HifzLoopMode.range,
-                      label: Text(l10n.recLoopRange),
-                    ),
-                  ],
-                  selected: {_loop.mode},
-                  onSelectionChanged: (s) =>
-                      setState(() => _loop = _loop.copyWith(mode: s.first)),
-                ),
-                const SizedBox(height: TahfeezSpacing.smPlus),
-                Text(
-                  eachAyah ? l10n.recLoopEachAyahSub : l10n.recLoopRangeSub,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: scheme.onSurfaceVariant,
                   ),
                 ),
               ],
             ),
-          ),
-          const SizedBox(height: TahfeezSpacing.smPlus),
-          TahfeezCard(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                label(l10n.recFrom),
-                VersePicker(
-                  id: 'from',
-                  surahs: surahList,
-                  value: from,
-                  ayahCount: surahs[from.chapterNo]?.surah.ayahCount ?? 1,
-                  onSurah: (c) => _setFrom((chapterNo: c, verseNo: 1), surahs),
-                  onAyah: (v) =>
-                      _setFrom((chapterNo: from.chapterNo, verseNo: v), surahs),
-                ),
-                const SizedBox(height: TahfeezSpacing.md),
-                label(l10n.recTo),
-                VersePicker(
-                  id: 'to',
-                  surahs: surahList,
-                  value: to,
-                  ayahCount: surahs[to.chapterNo]?.surah.ayahCount ?? 1,
-                  onSurah: (c) => _setTo((
-                    chapterNo: c,
-                    verseNo: surahs[c]?.surah.ayahCount ?? 1,
-                  )),
-                  onAyah: (v) => _setTo((chapterNo: to.chapterNo, verseNo: v)),
-                ),
-                const SizedBox(height: TahfeezSpacing.md),
-                Center(
-                  child: Container(
-                    key: const ValueKey('loop-ayah-count'),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: TahfeezSpacing.smPlus,
-                      vertical: TahfeezSpacing.xs,
+            const SizedBox(height: TahfeezSpacing.md),
+            _Section(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  label(l10n.recLoopOrder),
+                  SegmentedButton<HifzLoopMode>(
+                    key: const ValueKey('loop-mode'),
+                    showSelectedIcon: false,
+                    segments: [
+                      ButtonSegment(
+                        value: HifzLoopMode.eachAyah,
+                        label: Text(l10n.recLoopEachAyah),
+                      ),
+                      ButtonSegment(
+                        value: HifzLoopMode.range,
+                        label: Text(l10n.recLoopRange),
+                      ),
+                    ],
+                    selected: {_loop.mode},
+                    onSelectionChanged: (s) =>
+                        setState(() => _loop = _loop.copyWith(mode: s.first)),
+                  ),
+                  const SizedBox(height: TahfeezSpacing.smPlus),
+                  Text(
+                    eachAyah ? l10n.recLoopEachAyahSub : l10n.recLoopRangeSub,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: scheme.onSurfaceVariant,
                     ),
-                    decoration: BoxDecoration(
-                      color: scheme.secondaryContainer,
-                      borderRadius: BorderRadius.circular(TahfeezRadii.pill),
-                    ),
-                    child: Text(
-                      l10n.recLoopAyahCount(_ayahCount(surahs, from, to)),
-                      style: theme.textTheme.labelLarge?.copyWith(
-                        color: scheme.onSecondaryContainer,
+                  ),
+                ],
+              ),
+            ),
+            const Divider(height: TahfeezSpacing.lg),
+            _Section(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  label(l10n.recFrom),
+                  VersePicker(
+                    id: 'from',
+                    surahs: surahList,
+                    value: from,
+                    ayahCount: surahs[from.chapterNo]?.surah.ayahCount ?? 1,
+                    onSurah: (c) =>
+                        _setFrom((chapterNo: c, verseNo: 1), surahs),
+                    onAyah: (v) => _setFrom((
+                      chapterNo: from.chapterNo,
+                      verseNo: v,
+                    ), surahs),
+                  ),
+                  const SizedBox(height: TahfeezSpacing.md),
+                  label(l10n.recTo),
+                  VersePicker(
+                    id: 'to',
+                    surahs: surahList,
+                    value: to,
+                    ayahCount: surahs[to.chapterNo]?.surah.ayahCount ?? 1,
+                    onSurah: (c) => _setTo((
+                      chapterNo: c,
+                      verseNo: surahs[c]?.surah.ayahCount ?? 1,
+                    )),
+                    onAyah: (v) =>
+                        _setTo((chapterNo: to.chapterNo, verseNo: v)),
+                  ),
+                  const SizedBox(height: TahfeezSpacing.md),
+                  Center(
+                    child: Container(
+                      key: const ValueKey('loop-ayah-count'),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: TahfeezSpacing.smPlus,
+                        vertical: TahfeezSpacing.xs,
+                      ),
+                      decoration: BoxDecoration(
+                        color: scheme.secondaryContainer,
+                        borderRadius: BorderRadius.circular(TahfeezRadii.pill),
+                      ),
+                      child: Text(
+                        l10n.recLoopAyahCount(_ayahCount(surahs, from, to)),
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          color: scheme.onSecondaryContainer,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          const SizedBox(height: TahfeezSpacing.smPlus),
-          TahfeezCard(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            l10n.recLoopTimes,
-                            style: theme.textTheme.titleSmall,
-                          ),
-                          const SizedBox(height: TahfeezSpacing.xs),
-                          Text(
-                            eachAyah
-                                ? l10n.recLoopTimesAyahSub
-                                : l10n.recLoopTimesRangeSub,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: scheme.onSurfaceVariant,
+            const Divider(height: TahfeezSpacing.lg),
+            _Section(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              l10n.recLoopTimes,
+                              style: theme.textTheme.titleSmall,
                             ),
-                          ),
-                        ],
+                            const SizedBox(height: TahfeezSpacing.xs),
+                            Text(
+                              eachAyah
+                                  ? l10n.recLoopTimesAyahSub
+                                  : l10n.recLoopTimesRangeSub,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: scheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: TahfeezSpacing.sm),
-                    CountStepper(
-                      id: 'loop-count',
-                      value: _loop.count,
-                      min: 1,
-                      max: HifzLoop.maxCount,
-                      onChanged: (n) =>
-                          setState(() => _loop = _loop.copyWith(count: n)),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: TahfeezSpacing.smPlus),
-                Wrap(
-                  spacing: TahfeezSpacing.sm,
-                  runSpacing: TahfeezSpacing.sm,
-                  children: [
-                    for (final n in const [3, 5, 7, 10, 20])
-                      ChoiceChip(
-                        label: Text('$n'),
-                        selected: _loop.count == n,
-                        showCheckmark: false,
-                        onSelected: (_) =>
+                      const SizedBox(width: TahfeezSpacing.sm),
+                      CountStepper(
+                        id: 'loop-count',
+                        value: _loop.count,
+                        min: 1,
+                        max: HifzLoop.maxCount,
+                        onChanged: (n) =>
                             setState(() => _loop = _loop.copyWith(count: n)),
                       ),
-                  ],
+                    ],
+                  ),
+                  const SizedBox(height: TahfeezSpacing.smPlus),
+                  Wrap(
+                    spacing: TahfeezSpacing.sm,
+                    runSpacing: TahfeezSpacing.sm,
+                    children: [
+                      for (final n in const [3, 5, 7, 10, 20])
+                        ChoiceChip(
+                          label: Text('$n'),
+                          selected: _loop.count == n,
+                          showCheckmark: false,
+                          onSelected: (_) =>
+                              setState(() => _loop = _loop.copyWith(count: n)),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: TahfeezSpacing.smPlus),
+            Text(
+              l10n.recLoopHint,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: TahfeezSpacing.md),
+            Row(
+              children: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text(l10n.commonCancel),
+                ),
+                const SizedBox(width: TahfeezSpacing.sm),
+                Expanded(
+                  child: FilledButton.icon(
+                    key: const ValueKey('loop-start'),
+                    style: FilledButton.styleFrom(
+                      minimumSize: const Size.fromHeight(52),
+                    ),
+                    icon: const Icon(Icons.mic_rounded),
+                    label: Text(l10n.recLoopStart),
+                    onPressed: canStart ? _start : null,
+                  ),
                 ),
               ],
             ),
-          ),
-          const SizedBox(height: TahfeezSpacing.smPlus),
-          Text(
-            l10n.recLoopHint,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: scheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: TahfeezSpacing.md),
-          Row(
-            children: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: Text(l10n.commonCancel),
-              ),
-              const SizedBox(width: TahfeezSpacing.sm),
-              Expanded(
-                child: FilledButton.icon(
-                  key: const ValueKey('loop-start'),
-                  style: FilledButton.styleFrom(
-                    minimumSize: const Size.fromHeight(52),
-                  ),
-                  icon: const Icon(Icons.mic_rounded),
-                  label: Text(l10n.recLoopStart),
-                  onPressed: canStart ? _start : null,
-                ),
-              ),
-            ],
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
+}
+
+/// One part of the loop sheet, unboxed (like the Hifz settings sheet's
+/// rows).
+class _Section extends StatelessWidget {
+  const _Section({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => child;
 }
 
 /// A surah (searchable list) and an ayah in it.

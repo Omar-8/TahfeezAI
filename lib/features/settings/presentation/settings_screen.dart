@@ -1,3 +1,5 @@
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show SystemNavigator;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,6 +9,7 @@ import '../../../core/core_providers.dart';
 import '../../../core/localization/generated/app_localizations.dart';
 import '../../../core/routing/app_routes.dart';
 import '../../../core/localization/locale_controller.dart';
+import '../../../core/localization/supported_locales.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/components/components.dart';
 import '../../../core/theme/app_surface_tone.dart';
@@ -22,6 +25,9 @@ import '../../../quran/presentation/translation_packs_sheet.dart';
 import '../../../wbw/application/wbw_preferences_controller.dart';
 import '../../mushaf/application/mushaf_page_translations.dart';
 import '../application/reset_all_data.dart';
+import '../application/user_data_backup.dart';
+import '../../../core/storage/storage_providers.dart';
+import '../../../memorization/memorization_providers.dart';
 import '../../listen/application/reciter_controller.dart';
 import '../../listen/domain/quran_audio_sources.dart';
 import '../../listen/presentation/listen_sheet.dart';
@@ -74,24 +80,37 @@ class SettingsScreen extends ConsumerWidget {
           group(
             l10n.settingsLanguage,
             Icons.translate,
-            RadioGroup<String>(
-              groupValue: locale?.languageCode ?? '',
-              onChanged: (code) => ref
-                  .read(localeControllerProvider.notifier)
-                  .setLocale(
-                    code == null || code.isEmpty ? null : Locale(code),
-                  ),
-              child: Column(
-                children: [
-                  for (final (code, label) in [
-                    ('', l10n.settingsLanguageSystem),
-                    ('en', 'English'),
-                    ('ar', 'العربية'),
+            DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                key: const ValueKey('settings-language'),
+                isExpanded: true,
+                borderRadius: BorderRadius.circular(TahfeezRadii.md),
+                value: locale?.languageCode ?? '',
+                onChanged: (code) => ref
+                    .read(localeControllerProvider.notifier)
+                    .setLocale(
+                      code == null || code.isEmpty ? null : Locale(code),
+                    ),
+                items: [
+                  for (final (code, flag, label) in [
+                    ('', '🌐', l10n.settingsLanguageSystem),
+                    ...kAppLanguages,
                   ])
-                    RadioListTile<String>(
+                    DropdownMenuItem(
                       value: code,
-                      title: Text(label, style: theme.textTheme.bodyLarge),
-                      contentPadding: EdgeInsets.zero,
+                      child: Row(
+                        spacing: TahfeezSpacing.smPlus,
+                        children: [
+                          Text(flag, style: const TextStyle(fontSize: 22)),
+                          Flexible(
+                            child: Text(
+                              label,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.bodyLarge,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                 ],
               ),
@@ -237,6 +256,31 @@ class SettingsScreen extends ConsumerWidget {
               subtitle: Text(l10n.aboutSubtitle),
               trailing: const Icon(Icons.chevron_right),
               onTap: () => context.push(AppRoutes.about),
+            ),
+          ),
+          const SizedBox(height: TahfeezSpacing.lg),
+          group(
+            l10n.settingsBackupTitle,
+            Icons.save_alt_rounded,
+            Column(
+              children: [
+                ListTile(
+                  key: const ValueKey('settings-export'),
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.upload_file_rounded),
+                  title: Text(l10n.settingsExportTitle),
+                  subtitle: Text(l10n.settingsExportSub),
+                  onTap: () => _export(context, ref),
+                ),
+                ListTile(
+                  key: const ValueKey('settings-import'),
+                  contentPadding: EdgeInsets.zero,
+                  leading: const Icon(Icons.download_rounded),
+                  title: Text(l10n.settingsImportTitle),
+                  subtitle: Text(l10n.settingsImportSub),
+                  onTap: () => _import(context, ref),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: TahfeezSpacing.lg),
@@ -393,6 +437,86 @@ Future<void> _confirmReset(BuildContext context, WidgetRef ref) async {
     await SystemNavigator.pop();
   } else {
     messenger.showSnackBar(SnackBar(content: Text(l10n.settingsResetDone)));
+  }
+}
+
+/// Saves a backup file where the user picks.
+Future<void> _export(BuildContext context, WidgetRef ref) async {
+  final l10n = AppLocalizations.of(context);
+  final messenger = ScaffoldMessenger.of(context);
+  try {
+    final now = DateTime.now();
+    final bytes = await exportUserData(
+      storage: ref.read(browserStorageProvider),
+      memorization: ref.read(memorizationRepositoryProvider),
+      now: now,
+    );
+    final date = now.toIso8601String().substring(0, 10);
+    final saved = await FilePicker.saveFile(
+      fileName: 'tahfeez-backup-$date.json',
+      bytes: bytes,
+      mimeType: 'application/json',
+    );
+    // Web downloads it; elsewhere null means cancelled.
+    if (saved == null && !kIsWeb) return;
+    messenger.showSnackBar(SnackBar(content: Text(l10n.settingsExportDone)));
+  } on Object {
+    messenger.showSnackBar(SnackBar(content: Text(l10n.settingsExportFailed)));
+  }
+}
+
+/// Picks a backup file, asks before replacing everything, then (like reset)
+/// closes the app on Android so it opens with the imported data.
+Future<void> _import(BuildContext context, WidgetRef ref) async {
+  final l10n = AppLocalizations.of(context);
+  final messenger = ScaffoldMessenger.of(context);
+  final List<int> bytes;
+  try {
+    // Any file: some Android file providers don't tag JSON as JSON. The
+    // import checks the contents.
+    final file = (await FilePicker.pickFiles()).firstOrNull;
+    if (file == null) return;
+    bytes = await file.readAsBytes();
+  } on Object {
+    messenger.showSnackBar(SnackBar(content: Text(l10n.settingsImportFailed)));
+    return;
+  }
+  if (!context.mounted) return;
+  final confirmed = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text(l10n.settingsImportConfirmTitle),
+      content: Text(l10n.settingsImportConfirmBody),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: Text(l10n.commonCancel),
+        ),
+        FilledButton(
+          key: const ValueKey('settings-import-confirm'),
+          onPressed: () => Navigator.of(context).pop(true),
+          child: Text(l10n.settingsImportConfirm),
+        ),
+      ],
+    ),
+  );
+  if (confirmed != true || !context.mounted) return;
+  final android = ref.read(platformCapabilitiesProvider).isAndroid;
+  try {
+    await ref.read(dailyReminderSchedulerProvider).cancel();
+    await importUserData(
+      bytes,
+      storage: ref.read(browserStorageProvider),
+      memorization: ref.read(memorizationRepositoryProvider),
+    );
+  } on Object {
+    messenger.showSnackBar(SnackBar(content: Text(l10n.settingsImportFailed)));
+    return;
+  }
+  if (android) {
+    await SystemNavigator.pop();
+  } else {
+    messenger.showSnackBar(SnackBar(content: Text(l10n.settingsImportDone)));
   }
 }
 

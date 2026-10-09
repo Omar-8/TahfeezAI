@@ -62,11 +62,12 @@ Future<void> showReciterSheet(BuildContext context) =>
       ),
     );
 
-/// [reciter]'s name in the UI language.
+/// [reciter]'s name in the UI language: Arabic script for Arabic and Urdu.
 String reciterName(BuildContext context, Reciter reciter) =>
-    Localizations.localeOf(context).languageCode == 'ar'
-    ? reciter.nameAr
-    : reciter.nameEn;
+    switch (Localizations.localeOf(context).languageCode) {
+      'ar' || 'ur' => reciter.nameAr,
+      _ => reciter.nameEn,
+    };
 
 class _ListenSheet extends ConsumerStatefulWidget {
   const _ListenSheet({this.from});

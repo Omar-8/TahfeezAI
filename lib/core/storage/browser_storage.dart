@@ -21,6 +21,13 @@ abstract class BrowserStorage {
   /// Removes every stored value except those under [keep] (Settings →
   /// Reset all data).
   Future<void> clearExcept(Set<String> keep);
+
+  /// Every stored value (Settings → Export).
+  Future<Map<String, Object?>> readAll();
+
+  /// Stores [values] (strings, booleans, numbers, string lists) over what is
+  /// there (Settings → Import).
+  Future<void> writeAll(Map<String, Object?> values);
 }
 
 class SharedPreferencesBrowserStorage implements BrowserStorage {
@@ -54,5 +61,29 @@ class SharedPreferencesBrowserStorage implements BrowserStorage {
     final prefs = await _prefs;
     final keys = await prefs.getKeys();
     await prefs.clear(allowList: keys.difference(keep));
+  }
+
+  @override
+  Future<Map<String, Object?>> readAll() async => (await _prefs).getAll();
+
+  @override
+  Future<void> writeAll(Map<String, Object?> values) async {
+    final prefs = await _prefs;
+    for (final MapEntry(:key, :value) in values.entries) {
+      switch (value) {
+        case final String v:
+          await prefs.setString(key, v);
+        case final bool v:
+          await prefs.setBool(key, v);
+        case final int v:
+          await prefs.setInt(key, v);
+        case final double v:
+          await prefs.setDouble(key, v);
+        case final List<Object?> v:
+          await prefs.setStringList(key, [for (final e in v) '$e']);
+        default:
+          break;
+      }
+    }
   }
 }
