@@ -250,18 +250,50 @@ def pool_batches(data_dir, max_audio_s, seed):
 
 def load_teacher():
     from quran_muaalem import Muaalem
-    m = Muaalem(model_name_or_path='obadx/muaalem-model-v3_2', device=DEV,
-                dtype=torch.bfloat16 if DEV == 'cuda' else torch.float32)
-    # TEACHER_WEIGHTS: a fine-tuned teacher (finetune_teacher.py) instead.
-    if os.environ.get('TEACHER_WEIGHTS'):
-        sd = torch.load(os.environ['TEACHER_WEIGHTS'], map_location='cpu')
-        m.model.load_state_dict(sd)
-        m.model.to(device=DEV, dtype=torch.bfloat16 if DEV == 'cuda' else torch.float32)
-        print('teacher weights:', os.environ['TEACHER_WEIGHTS'], flush=True)
-    m.model.eval()
-    for p in m.model.parameters():
-        p.requires_grad_(False)
-    return m
+    # TEACHER_WEIGHTS: a fine-tuned teacher (finetune_teacher.py) instead; several,
+    # comma-separated, are one teacher: their distributions averaged per frame.
+    paths = [w for w in os.environ.get('TEACHER_WEIGHTS', '').split(',') if w]
+    models = []
+    for path in paths or [None]:
+        m = Muaalem(model_name_or_path='obadx/muaalem-model-v3_2', device=DEV,
+                    dtype=torch.bfloat16 if DEV == 'cuda' else torch.float32)
+        if path:
+            m.model.load_state_dict(torch.load(path, map_location='cpu'))
+            m.model.to(device=DEV, dtype=torch.bfloat16 if DEV == 'cuda' else torch.float32)
+            print('teacher weights:', path, flush=True)
+        m.model.eval()
+        for p in m.model.parameters():
+            p.requires_grad_(False)
+        models.append(m)
+    if len(models) > 1:
+        models[0].model = TeacherMix([m.model for m in models])
+    return models[0]
+
+
+def _base(model):
+    """A teacher's own model (the first of a mixture): what students are built from."""
+    return model.models[0] if isinstance(model, TeacherMix) else model
+
+
+class TeacherMix(torch.nn.Module):
+    """Several teachers as one: each frame's phoneme distribution is their mixture (the
+    mean of their probabilities); hidden states and config are the first's."""
+
+    def __init__(self, models):
+        super().__init__()
+        self.models = torch.nn.ModuleList(models)
+        self.config = models[0].config
+
+    @property
+    def dtype(self):
+        return self.models[0].dtype
+
+    def forward(self, **kw):
+        outs = [m(**kw) for m in self.models]
+        lps = torch.stack([F.log_softmax(o.logits['phonemes'].float(), -1) for o in outs])
+        out = outs[0]
+        out.logits['phonemes'] = torch.logsumexp(lps, 0) - math.log(len(outs))
+        return out
 
 
 def student_config(teacher_model, size):
@@ -609,7 +641,7 @@ def losses(teacher, student, fe, items, T, ctc_w, aug=0.0, coded=None, layers=No
 def bench(a):
     t = load_teacher()
     fe = getattr(t.processor, 'feature_extractor', t.processor)
-    s = make_student(t.model, a.size).to(DEV).train()
+    s = make_student(_base(t.model), a.size).to(DEV).train()
     opt = torch.optim.AdamW(s.parameters(), lr=1e-4)
     it = codec_prefetch(batches(a.data, a.max_audio, 0), a.codec)
     if DEV == 'cuda':
@@ -640,8 +672,8 @@ def bench(a):
 def train(a):
     t = load_teacher()
     fe = getattr(t.processor, 'feature_extractor', t.processor)
-    s = make_student(t.model, a.size).to(DEV).train()
-    ema = make_student(t.model, a.size).to(DEV).eval()
+    s = make_student(_base(t.model), a.size).to(DEV).train()
+    ema = make_student(_base(t.model), a.size).to(DEV).eval()
     ema.load_state_dict(s.state_dict())
     for p in ema.parameters():
         p.requires_grad_(False)
@@ -758,7 +790,7 @@ def train(a):
                             sched=sched.state_dict(), step=step, best=best), ck + '.tmp')
             os.replace(ck + '.tmp', ck)
     torch.save(ema.state_dict(), os.path.join(a.out, 'student.pt'))
-    student_config(t.model, a.size).save_pretrained(a.out)
+    student_config(_base(t.model), a.size).save_pretrained(a.out)
     print('done', a.out)
 
 

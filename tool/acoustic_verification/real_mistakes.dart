@@ -33,11 +33,15 @@ void main(List<String> args) {
   final minor = args.contains('--minor')
       ? double.parse(args[args.indexOf('--minor') + 1])
       : 3.0;
+  // --error E: the vowel / letter / shadda thresholds to try (the app's: 4).
+  final error = args.contains('--error')
+      ? double.parse(args[args.indexOf('--error') + 1])
+      : 4.0;
   final verifier = QuranAcousticVerifier(
     thresholds: AcousticThresholds(
-      error: 4,
-      letterError: 4,
-      shaddaError: 4,
+      error: error,
+      letterError: error,
+      shaddaError: error,
       sukunError: minor,
       missingVowelError: minor,
       correct: -1,

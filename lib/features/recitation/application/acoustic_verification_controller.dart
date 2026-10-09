@@ -387,6 +387,9 @@ class AcousticVerificationController
     return QuranAcousticVerifier(
       thresholds: verifier.thresholds.copyWith(
         tajweed: tajweed,
+        error: _streaming ? streamingError : null,
+        letterError: _streaming ? streamingError : null,
+        shaddaError: _streaming ? streamingError : null,
         sukunError: _streaming ? streamingMinorError : null,
         missingVowelError: _streaming ? streamingMinorError : null,
         qalqalaError: _streaming ? streamingQalqalaError : null,
@@ -396,14 +399,18 @@ class AcousticVerificationController
 
   static const streamingMinorError = 2.0;
 
-  /// The streaming model's evidence for a missing qalqala echo is weaker
-  /// (a reciter's deliberate omissions in Al-Falaq scored 0.6-3.8 against
-  /// the old bar of 3). At 1 (`qalqala_threshold.dart v34s`): Surah Al-Ikhlas
-  /// learners' labelled misses caught 5.2 -> 9.6% (the model hears an echo
-  /// on most: weak, not missing, qalqala); flagged: the user's phone
-  /// sessions unchanged (141 letters), learners' correct clips 1.2 -> 1.7%,
-  /// professional reciters 3.8 -> 4.7%.
-  static const streamingQalqalaError = 1.0;
+  /// The streaming model v3.5 (v3.4 distilled from a teacher fine-tuned on
+  /// learners' labelled mistakes): its verdicts are less confident, so a vowel,
+  /// letter or shadda mistake needs a margin of 3.5, not 4. At the same false
+  /// flags on the user's correct recitation (6.5%), against v3.4 at 4: QuranMB
+  /// mistakes marked 67.5% (v3.4 68.8%), QDAT's held-out learners' missed ikhfa
+  /// flagged 60% (40%; correct ikhfa flagged 8.5%, 5.8%).
+  static const streamingError = 3.5;
+
+  /// A missing qalqala echo, at 2: v3.5 on the held-out Surah Al-Ikhlas learners
+  /// catches 20.8% of labelled misses, flags 2.7% of correct ones; the user's
+  /// phone sessions and professional recitation no more than at 3.
+  static const streamingQalqalaError = 2.0;
 
   @override
   AcousticVerificationState build() {

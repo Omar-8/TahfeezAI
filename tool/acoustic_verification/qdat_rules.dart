@@ -40,13 +40,17 @@ void main(List<String> args) {
   final hiddenArg = args.contains('--hidden')
       ? args[args.indexOf('--hidden') + 1].split('/').map(double.parse).toList()
       : <double>[0, 0];
+  // --error E (vowel / letter / shadda) and --minor M (sukun / missing vowel).
+  double opt(String name, double fallback) => args.contains('--$name')
+      ? double.parse(args[args.indexOf('--$name') + 1])
+      : fallback;
   final verifier = QuranAcousticVerifier(
     thresholds: AcousticThresholds(
-      error: 4,
-      letterError: 4,
-      shaddaError: 4,
-      sukunError: 3,
-      missingVowelError: 3,
+      error: opt('error', 4),
+      letterError: opt('error', 4),
+      shaddaError: opt('error', 4),
+      sukunError: opt('minor', 3),
+      missingVowelError: opt('minor', 3),
       correct: -1,
       pauseFrames: 4,
       sounds: {
