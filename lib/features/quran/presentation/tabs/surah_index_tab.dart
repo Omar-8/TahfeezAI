@@ -305,7 +305,7 @@ class _SurahIndexTabState extends ConsumerState<SurahIndexTab> {
               }
               return ListView.builder(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: TahfeezSpacing.md,
+                  horizontal: TahfeezSpacing.sm,
                 ),
                 itemCount: filtered.length,
                 itemBuilder: (context, index) {
