@@ -61,6 +61,13 @@ class DriftMemorizationRepository implements MemorizationRepository {
   }
 
   @override
+  Future<void> unmarkUnverified(Iterable<int> ayahIds) =>
+      (_db.delete(_db.memorizedAyahs)..where(
+            (t) => t.ayahId.isIn(ayahIds.toList()) & t.verified.equals(false),
+          ))
+          .go();
+
+  @override
   Stream<Map<int, AyahMemory>> watchMemories() => _db
       .select(_db.memorizedAyahs)
       .watch()

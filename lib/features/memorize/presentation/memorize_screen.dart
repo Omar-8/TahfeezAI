@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/localization/generated/app_localizations.dart';
+import '../../../core/routing/app_routes.dart';
 import '../../../core/routing/quran_location_routing.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/components/components.dart';
@@ -14,6 +16,7 @@ import '../../../quran/domain/models/quran_refs.dart';
 import '../../mushaf/application/mushaf_hide_mode.dart';
 import '../../quran/application/quran_index_providers.dart';
 import '../../recitation/application/hifz_controller.dart';
+import 'mark_known_sheet.dart';
 import 'plan_sheet.dart';
 
 /// The Memorize tab: today's memorization, the three parts of a Hifz day
@@ -46,7 +49,18 @@ class MemorizeScreen extends ConsumerWidget {
         );
 
     return Scaffold(
-      appBar: TahfeezAppBar(title: Text(l10n.memTitle), centerTitle: false),
+      appBar: TahfeezAppBar(
+        title: Text(l10n.memTitle),
+        centerTitle: false,
+        actions: [
+          IconButton(
+            key: const ValueKey('mem-open-progress'),
+            tooltip: l10n.memProgressTitle,
+            onPressed: () => context.push(AppRoutes.memorizeProgress),
+            icon: const Icon(Icons.insights_outlined),
+          ),
+        ],
+      ),
       body: plan.when(
         loading: () => const TahfeezLoadingView(),
         error: (e, _) => TahfeezEmptyView(message: '$e'),
@@ -73,6 +87,15 @@ class MemorizeScreen extends ConsumerWidget {
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                     Text(l10n.memEmptyBody),
+                    Align(
+                      alignment: AlignmentDirectional.centerStart,
+                      child: FilledButton.tonalIcon(
+                        key: const ValueKey('mem-empty-mark-known'),
+                        onPressed: () => showMarkKnownSheet(context),
+                        icon: const Icon(Icons.playlist_add_check),
+                        label: Text(l10n.memMarkKnown),
+                      ),
+                    ),
                   ],
                 ),
               )
@@ -248,7 +271,7 @@ VerseRef _verse(int ayah) => (chapterNo: ayah ~/ 1000, verseNo: ayah % 1000);
 
 /// Opens the Mushaf at [first]'s page (or [page]) with hide mode on and the
 /// Hifz test set to [first]..[last].
-Future<void> _recite(
+Future<void> reciteAyahs(
   BuildContext context,
   WidgetRef ref,
   int first,
@@ -316,7 +339,7 @@ class _NewLessonCardState extends ConsumerState<_NewLessonCard> {
       bool quiet = false,
       bool divider = true,
     }) {
-      void start() => _recite(context, ref, run.first, run.last);
+      void start() => reciteAyahs(context, ref, run.first, run.last);
       return [
         if (divider) const Divider(height: 1),
         Padding(
@@ -443,7 +466,7 @@ class _TaskList extends ConsumerWidget {
   final Map<int, String> names;
 
   Future<void> _start(BuildContext context, WidgetRef ref, RevisionTask t) =>
-      _recite(context, ref, t.first, t.last, page: t.page);
+      reciteAyahs(context, ref, t.first, t.last, page: t.page);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

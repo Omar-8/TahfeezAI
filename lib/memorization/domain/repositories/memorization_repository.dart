@@ -16,6 +16,10 @@ abstract class MemorizationRepository {
   /// are.
   Future<void> markMemorized(Iterable<int> ayahIds);
 
+  /// Undoes [markMemorized] for [ayahIds]: removes only those still marked
+  /// and never recited (unverified); a recited ayah keeps its memory.
+  Future<void> unmarkUnverified(Iterable<int> ayahIds);
+
   /// The memory of every tracked ayah, by ayah id, updated as it changes.
   Stream<Map<int, AyahMemory>> watchMemories();
 

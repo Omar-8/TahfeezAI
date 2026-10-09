@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tahfeez_ai/core/localization/generated/app_localizations.dart';
+import 'package:tahfeez_ai/features/memorize/presentation/mark_known_sheet.dart';
 import 'package:tahfeez_ai/features/memorize/presentation/memorize_screen.dart';
+import 'package:tahfeez_ai/features/memorize/presentation/progress_screen.dart';
 import 'package:tahfeez_ai/features/memorize/presentation/test_summary_sheet.dart';
 import 'package:tahfeez_ai/features/quran/application/quran_index_providers.dart';
+import 'package:tahfeez_ai/memorization/application/memorization_progress.dart';
 import 'package:tahfeez_ai/memorization/application/memorization_today.dart';
 import 'package:tahfeez_ai/memorization/domain/models/memorization_models.dart';
 import 'package:tahfeez_ai/memorization/domain/models/memorization_plan.dart';
 import 'package:tahfeez_ai/memorization/domain/plan_scheduler.dart';
+import 'package:tahfeez_ai/memorization/domain/progress_map.dart';
 import 'package:tahfeez_ai/memorization/domain/repositories/memorization_repository.dart';
 import 'package:tahfeez_ai/memorization/memorization_providers.dart';
 import 'package:tahfeez_ai/memorization/domain/today_scheduler.dart';
@@ -56,8 +61,10 @@ void main() {
     MemorizationPlan? memPlan,
     NewLesson? lesson,
     MemorizationRepository? repo,
+    List<Override> extra = const [],
   }) => ProviderScope(
     overrides: [
+      ...extra,
       todayPlanProvider.overrideWith((ref) async => plan),
       activePlanProvider.overrideWith((ref) => Stream.value(memPlan)),
       newLessonProvider.overrideWith((ref) async => lesson),
@@ -263,10 +270,128 @@ void main() {
     expect(find.text('An-Nas 3–4'), findsOneWidget);
     expect(find.text('Start'), findsOneWidget);
   });
+
+  group('progress (M4)', () {
+    final now = DateTime(2026, 10, 9, 18);
+    // Al-Ikhlas and Al-Falaq on page 603, An-Nas on 604; all juz 30.
+    final pages = <int, int>{
+      for (final s in [112, 113])
+        for (var a = 1; a <= 6; a++) s * 1000 + a: 603,
+      for (var a = 1; a <= 6; a++) 114000 + a: 604,
+    };
+    final memories = <int, AyahMemory>{
+      // Recited 9 days ago at stability 1: strength 50%.
+      for (var a = 1; a <= 4; a++)
+        112000 + a: AyahMemory(
+          ayahId: 112000 + a,
+          status: MemoryStatus.memorized,
+          stability: 1,
+          lastReviewed: now.subtract(const Duration(days: 9)),
+        ),
+      114001: const AyahMemory(
+        ayahId: 114001,
+        status: MemoryStatus.memorized,
+        verified: false,
+      ),
+    };
+    final map = ProgressMapBuilder.build(
+      memories: memories,
+      pages: pages,
+      juzOfAyah: {for (final a in pages.keys) a: 30},
+      now: now,
+    );
+    List<Override> overrides(Map<int, AyahMemory> memories) => [
+      progressMapProvider.overrideWith((ref) async => map),
+      ayahMemoriesProvider.overrideWith((ref) => Stream.value(memories)),
+      juzAyahsProvider.overrideWith(
+        (ref) async => {30: pages.keys.toList()..sort()},
+      ),
+    ];
+
+    testWidgets('the summary, every page on the map, and the weak pages', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(500, 1600);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        app(
+          const TodayPlan(),
+          extra: overrides(memories),
+          child: const MemorizationProgressScreen(),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('28% of the Quran memorized'), findsOneWidget);
+      expect(find.text('5 of 18 ayahs memorized'), findsOneWidget);
+      expect(find.text('1 ayah marked, not recited yet'), findsOneWidget);
+      expect(find.byKey(const ValueKey('mem-map-page-603')), findsOneWidget);
+      expect(find.byKey(const ValueKey('mem-map-page-604')), findsOneWidget);
+      // Page 603 at 50%: weak, revised from its memorized ayahs.
+      expect(find.byKey(const ValueKey('mem-weak-page-603')), findsOneWidget);
+      expect(find.text('Al-Ikhlas 1–4'), findsOneWidget);
+      expect(find.byKey(const ValueKey('mem-weak-page-604')), findsNothing);
+    });
+
+    testWidgets('marking what is known: checked surahs are marked, unchecked '
+        'ones unmarked', (tester) async {
+      tester.view.physicalSize = const Size(500, 1600);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final repo = _PlanRepository();
+      await tester.pumpWidget(
+        app(
+          const TodayPlan(),
+          repo: repo,
+          extra: overrides({
+            for (var a = 1; a <= 6; a++)
+              112000 + a: AyahMemory(
+                ayahId: 112000 + a,
+                status: MemoryStatus.memorized,
+              ),
+            114001: const AyahMemory(
+              ayahId: 114001,
+              status: MemoryStatus.memorized,
+            ),
+          }),
+          child: Builder(
+            builder: (context) => TextButton(
+              onPressed: () => showMarkKnownSheet(context),
+              child: const Text('open'),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+      CheckboxListTile tile(String item) =>
+          tester.widget(find.byKey(ValueKey('mark-$item')));
+      expect(tile('surah:112').value, isTrue);
+      expect(tile('surah:113').value, isFalse);
+      expect(tile('surah:114').value, isNull, reason: 'partly memorized');
+
+      await tester.tap(find.byKey(const ValueKey('mark-surah:113')));
+      await tester.tap(find.byKey(const ValueKey('mark-surah:112')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('mark-save')));
+      await tester.pumpAndSettle();
+      expect(repo.marked, {for (var a = 1; a <= 6; a++) 113000 + a});
+      expect(repo.unmarked, {for (var a = 1; a <= 6; a++) 112000 + a});
+    });
+  });
 }
 
 class _PlanRepository implements MemorizationRepository {
   MemorizationPlan? saved;
+  final marked = <int>{}, unmarked = <int>{};
+
+  @override
+  Future<void> markMemorized(Iterable<int> ayahIds) async =>
+      marked.addAll(ayahIds);
+
+  @override
+  Future<void> unmarkUnverified(Iterable<int> ayahIds) async =>
+      unmarked.addAll(ayahIds);
 
   @override
   Future<int> savePlan(MemorizationPlan plan) async {

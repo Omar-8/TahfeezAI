@@ -1,6 +1,6 @@
 # Memorization milestone (17) — plan
 
-Status: planned 2026-10-09; M1, M2 and M3 done the same day. Decisions by the product owner are marked **(decided)**.
+Status: planned 2026-10-09; M1 to M4 done the same day. Decisions by the product owner are marked **(decided)**.
 
 ## Goal
 
@@ -91,7 +91,7 @@ The constants are a starting point, to be tuned on real use (see "Later").
 3. **M3 — Plans.** *(done 2026-10-09; one active plan, its new lesson on the Memorize tab; chosen study days; more can be learned once the lesson is; a plan is stopped rather than paused)* Create / edit / pause plans in ayahs, half-pages or pages; the new lesson
    advances when its test passes (no fail); missed days roll forward. *Done when* a plan
    produces the right new lesson day by day (tests over simulated days).
-4. **M4 — Progress and starting point.** The strength map, the weak-parts list, marking
+4. **M4 — Progress and starting point.** *(done 2026-10-09; a Progress screen from the Memorize tab: the share memorized, a page-by-page strength map by juz, the weakest pages with Start; "Mark what I know" by surah or juz, unmarking only what was never recited)* The strength map, the weak-parts list, marking
    already-memorized surahs / juz / pages (unverified until recited). *Done when* marking
    works and the map reflects tests.
 5. **M5 — Home and reminders.** Home cards; an optional daily reminder (local notification,

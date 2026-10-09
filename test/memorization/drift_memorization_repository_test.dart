@@ -59,6 +59,14 @@ void main() {
     },
   );
 
+  test('unmarking removes only what is still unverified', () async {
+    await repo.recordTest([attempt(112001, AyahGrade.good, t0)]);
+    await repo.markMemorized([112001, 112002, 112003]);
+    await repo.unmarkUnverified([112001, 112002]);
+    final m = await repo.watchMemories().first;
+    expect(m.keys.toSet(), {112001, 112003});
+  });
+
   test('each ayah\'s latest result', () async {
     await repo.recordTest([
       attempt(112001, AyahGrade.fail, t0),

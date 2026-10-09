@@ -5,6 +5,7 @@ import '../../app/foundation_demo_screen.dart';
 import '../../app/shell/app_shell.dart';
 import '../../features/home/presentation/home_screen.dart';
 import '../../features/memorize/presentation/memorize_screen.dart';
+import '../../features/memorize/presentation/progress_screen.dart';
 import '../../features/quran/presentation/quran_index_screen.dart';
 import '../../features/search/presentation/search_screen.dart';
 import '../../features/settings/presentation/about_screen.dart';
@@ -64,7 +65,14 @@ GoRouter appRouter(Ref ref) {
               GoRoute(
                 path: AppRoutes.memorize,
                 builder: (context, state) => const MemorizeScreen(),
-                routes: quranLocationRoutes(),
+                routes: [
+                  ...quranLocationRoutes(),
+                  GoRoute(
+                    path: 'progress',
+                    builder: (context, state) =>
+                        const MemorizationProgressScreen(),
+                  ),
+                ],
               ),
             ],
           ),
