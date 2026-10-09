@@ -111,7 +111,7 @@ const credits = <Credit>[
   ),
   Credit(
     group: CreditGroup.mushaf,
-    name: 'Noto Sans and Noto Sans Arabic',
+    name: 'Noto Sans and Noto Kufi Arabic',
     owner: 'The Noto Project Authors (Google Fonts)',
     licence: 'SIL Open Font License 1.1',
     url: 'https://github.com/google/fonts',

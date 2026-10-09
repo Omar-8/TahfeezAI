@@ -15,7 +15,7 @@ const quranVerseFontSize = 30.0;
 /// Deliberately **not** part of [buildTahfeezTextTheme]/`app_typography.dart`
 /// — per `docs/DESIGN_DIRECTION.md`'s "UI typography and Quran typography
 /// are separate systems" rule, Quran text must never render with Tahfeez's
-/// own UI font (Noto Sans / Noto Sans Arabic).
+/// own UI font (Noto Sans / Noto Kufi Arabic).
 ///
 /// Takes [color]/[fontFamily] as plain parameters rather than reading them
 /// from a `BuildContext`/`WidgetRef` itself: [color] comes from

@@ -197,9 +197,9 @@ flutter:
     - family: Noto Sans
       fonts:
         - asset: assets/fonts/NotoSans-Variable.ttf
-    - family: Noto Sans Arabic
+    - family: Noto Kufi Arabic
       fonts:
-        - asset: assets/fonts/NotoSansArabic-Variable.ttf
+        - asset: assets/fonts/NotoKufiArabic-Variable.ttf
     # The app's name (wordmark) only; Latin and Arabic.
     - family: El Messiri
       fonts:

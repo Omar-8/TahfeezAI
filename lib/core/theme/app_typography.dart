@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 /// to render its own UI — required by this project's offline-first
 /// posture).
 const kTahfeezUiFontFamily = 'Noto Sans';
-const kTahfeezUiFontFamilyArabic = 'Noto Sans Arabic';
+const kTahfeezUiFontFamilyArabic = 'Noto Kufi Arabic';
 
 /// Builds Tahfeez's UI [TextTheme].
 ///
@@ -18,7 +18,7 @@ const kTahfeezUiFontFamilyArabic = 'Noto Sans Arabic';
 /// script/font/rendering pipeline introduced in the Mushaf/Reader milestones
 /// (see `docs/reference/05_MUSHAF_SPEC.md`).
 ///
-/// The UI typeface is Noto Sans, with Noto Sans Arabic registered as a
+/// The UI typeface is Noto Sans, with Noto Kufi Arabic registered as a
 /// [TextStyle.fontFamilyFallback] — Flutter automatically falls back to it
 /// per-glyph, so a single UI string mixing Latin and Arabic characters (a
 /// translator's name, a bilingual label) renders both scripts in their

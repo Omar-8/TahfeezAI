@@ -657,7 +657,7 @@ fixed phrase" shortcut, would be exactly the kind of literal-Quran-text-in-a-wid
 `lib/core/theme/quran_text_style.dart`'s `quranTextStyle()` is intentionally **not** part of
 `buildTahfeezTextTheme`/`app_typography.dart`: per `docs/DESIGN_DIRECTION.md`, UI and Quran
 typography are separate systems, and canonical Quran text must never render with Tahfeez's own
-branded UI font (Noto Sans / Noto Sans Arabic). No real Quran-specific script/font has been
+branded UI font (Noto Sans / Noto Kufi Arabic). No real Quran-specific script/font has been
 selected yet — `docs/DATA_RESOURCE_REQUIREMENTS.md` §5 explicitly defers that to the Mushaf
 Renderer milestone (7), since a font choice is entangled with which Mushaf pagination dataset
 ends up usable. `quranTextStyle()` leaves `fontFamily` unset, deferring to each platform's own
