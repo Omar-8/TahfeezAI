@@ -38,9 +38,12 @@ void main() {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
-    // The app's icon and name head the page.
+    // The app's name heads the page, a greeting below it.
     expect(find.text('TahfeezAI'), findsOneWidget);
-    expect(find.byType(Image), findsWidgets);
+    expect(
+      find.textContaining(RegExp('^Good (morning|afternoon|evening)\$')),
+      findsOneWidget,
+    );
 
     // Section headers for every information-hierarchy item this milestone
     // requires (resource updates has no header -- it hides itself).

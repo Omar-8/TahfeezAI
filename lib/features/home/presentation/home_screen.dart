@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/localization/generated/app_localizations.dart';
 import '../../../core/theme/app_spacing.dart';
+import 'home_greeting.dart';
 import 'sections/home_daily_ayah_section.dart';
 import 'sections/home_featured_reading_section.dart';
 import 'sections/home_memorization_teaser_section.dart';
@@ -50,7 +51,7 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-/// The app's icon, and its name below it, centered at the top of Home.
+/// The app's name, and below it a time-of-day greeting.
 class _HomeBrandHeader extends StatelessWidget {
   const _HomeBrandHeader({required this.l10n});
 
@@ -59,22 +60,18 @@ class _HomeBrandHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final greeting = switch (homeGreetingBandForHour(DateTime.now().hour)) {
+      HomeGreetingBand.morning => l10n.homeGreetingMorning,
+      HomeGreetingBand.afternoon => l10n.homeGreetingAfternoon,
+      HomeGreetingBand.evening => l10n.homeGreetingEvening,
+    };
     return Semantics(
       header: true,
       child: Column(
-        spacing: TahfeezSpacing.sm,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ExcludeSemantics(
-            child: Image.asset(
-              'assets/branding/app_icon_256.png',
-              width: 72,
-              height: 72,
-              filterQuality: FilterQuality.medium,
-            ),
-          ),
           Text(
             l10n.appName,
-            textAlign: TextAlign.center,
             style: theme.textTheme.headlineMedium?.copyWith(
               fontFamily: 'El Messiri',
               fontWeight: FontWeight.w600,
@@ -82,6 +79,12 @@ class _HomeBrandHeader extends StatelessWidget {
               fontVariations: const [FontVariation('wght', 600)],
               letterSpacing: 0.5,
               height: 1.1,
+            ),
+          ),
+          Text(
+            greeting,
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
         ],

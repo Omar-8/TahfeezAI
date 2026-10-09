@@ -1,6 +1,9 @@
 {
   "@@locale": "en",
   "appName": "TahfeezAI",
+  "homeGreetingMorning": "Good morning",
+  "homeGreetingAfternoon": "Good afternoon",
+  "homeGreetingEvening": "Good evening",
   "@appName": {
     "description": "The application name, shown in the app bar and OS surfaces."
   },

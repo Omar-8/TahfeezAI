@@ -129,7 +129,6 @@ flutter:
   # Read at first launch by lib/quran/data/import/bundled_dataset_seeder.dart
   # so Android/iOS never need a network call to seed the local databases.
   assets:
-    - assets/branding/app_icon_256.png
     - assets/quran/quran_dataset.json
     - assets/quran/resource_manifest.json
     - assets/quran/translations/en_rowwad.json

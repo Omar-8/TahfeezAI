@@ -1,6 +1,9 @@
 {
   "@@locale": "ar",
   "appName": "تحفيظ AI",
+  "homeGreetingMorning": "صباح الخير",
+  "homeGreetingAfternoon": "مساء الخير",
+  "homeGreetingEvening": "مساء الخير",
   "foundationDemoTitle": "معاينة الأساس",
   "foundationDemoBody": "هذه الشاشة موجودة فقط لإثبات أن المظهر الفاتح والداكن، والتخطيط من اليمين إلى اليسار، ونقاط الاستجابة تعمل تمامًا. شاشات الميزات ستأتي في مراحل لاحقة.",
   "themeModeLabel": "المظهر",
