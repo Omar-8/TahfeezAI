@@ -44,6 +44,23 @@ Integrity checks for every import: one entry per ayah (6,236) or per canonical w
 the canonical ayah / word ids (never to Mushaf glyph data), with SHA-256 recorded per file,
 as the existing translation import already does.
 
+### Word meanings: licence check (2026-10-09)
+
+QUL lists word-by-word sets for every launch language (English #92, Urdu #93, French #95,
+Indonesian #96, Turkish #99 — also Persian, Bengali, Hindi, Tamil, Ingush; German #472 and
+Russian #97 are marked "© copyrighted"), as JSON or SQLite. Findings:
+- every set's copyright page says *"We don't have copyright information for this
+  resource"*;
+- QUL's FAQ: resources "vary in their copyright status"; commercial use of QUL data is
+  allowed in general, but "review the licensing information provided by each resource's
+  author before use";
+- these are Quran.com's word-by-word data (third parties cite its API v4 as the source); no
+  licence from Quran.com for it was found.
+
+So the status is **unverified**, like the Mushaf page corpus. Shipping needs either written
+permission from Quran.com / Tarteel (the QUL maintainers) or an explicit owner decision to
+ship while unverified, recorded in `docs/THIRD_PARTY_RESOURCES.md`.
+
 ## The user's surfaces
 
 - **Settings → Translation & tafsir:**
