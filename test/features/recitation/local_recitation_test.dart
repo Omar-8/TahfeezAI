@@ -22,6 +22,7 @@ import 'package:tahfeez_ai/features/recitation/application/acoustic_verification
 import 'package:tahfeez_ai/features/mushaf/application/mushaf_word_overlay.dart';
 import 'package:tahfeez_ai/features/recitation/application/hifz_controller.dart';
 import 'package:tahfeez_ai/features/recitation/application/recitation_position.dart';
+import 'package:tahfeez_ai/memorization/memorization_providers.dart';
 import 'package:tahfeez_ai/quran/quran_providers.dart';
 import 'package:tahfeez_ai/quran/domain/repositories/quran_repository.dart';
 import 'package:tahfeez_ai/features/recitation/application/live_recognition_controller.dart';
@@ -591,6 +592,7 @@ void main() {
           browserStorageProvider.overrideWithValue(_MemoryStorage()),
           hifzHapticsProvider.overrideWithValue(() {}),
           quranRepositoryProvider.overrideWithValue(_NoPages()),
+          memorizationRecorderProvider.overrideWithValue((_) async {}),
         ],
       );
       addTearDown(container.dispose);

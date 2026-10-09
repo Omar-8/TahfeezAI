@@ -1,21 +1,23 @@
-import '../../../quran/domain/models/quran_refs.dart';
+import '../models/memorization_models.dart';
 
-/// Read/write access to Tahfeez's core differentiator: memorization plans,
-/// review scheduling, and per-range memorization strength.
+/// Read/write access to Tahfeez's core differentiator: what the user has
+/// memorized, how strong each ayah is, and every test's per-ayah results.
 ///
-/// There is no reference behavior to study for this domain — per
-/// `docs/reference/01_FEATURE_MATRIX.md`'s "Memorize / AI — not present in
-/// reference" section, this is entirely Tahfeez-original and will be
-/// designed from `docs/DESIGN_DIRECTION.md`'s memorization visual-language
-/// guidance when the Memorization milestone (17) is implemented. This
-/// interface exists now purely so `lib/memorization/` has an established
-/// domain boundary from the very first milestone, matching
-/// `docs/PROJECT_BRIEF.md`'s framing of memorization as a first-class
-/// product area rather than a bolt-on.
+/// Mutable user data, kept entirely on the device and separate from the
+/// immutable Quran data (`docs/MEMORIZATION_MILESTONE.md`).
 abstract class MemorizationRepository {
-  Stream<double> watchMemorizationStrength(VerseRangeRef range);
+  /// Stores a test's graded ayahs and updates each one's memory
+  /// (`StrengthModel.apply`), in order.
+  Future<void> recordTest(List<AyahAttempt> attempts);
 
-  Future<void> markReviewed(VerseRangeRef range, {required bool successful});
+  /// Marks ayahs the user already knows as memorized, unverified (no
+  /// strength) until first recited. Ayahs already tracked are left as they
+  /// are.
+  Future<void> markMemorized(Iterable<int> ayahIds, {required DateTime at});
 
-  Future<List<VerseRangeRef>> dueForReviewToday();
+  /// The memory of every tracked ayah, by ayah id, updated as it changes.
+  Stream<Map<int, AyahMemory>> watchMemories();
+
+  /// [ayahId]'s test results, oldest first.
+  Future<List<AyahAttempt>> attemptsFor(int ayahId);
 }

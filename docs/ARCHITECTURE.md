@@ -66,7 +66,8 @@ lib/
   quran/presentation/           Translation/tafsir UI shared by more than one feature (Milestone 9): TranslationBlock, quick reference, packs sheets, TafsirReaderScreen.
   wbw/                           Word-by-word: its own domain/data/application/presentation, own database (Milestone 8).
   user_data/domain/             UserDataRepository (bookmarks, reading history).
-  memorization/domain/          MemorizationRepository.
+  memorization/                 MemorizationRepository, its own database, test grading and the strength
+                                model (docs/MEMORIZATION_MILESTONE.md).
   ai/domain/                    RecitationRecognizer, RecitationContext, RecitationEvent (interfaces only).
   features/                     Feature-area presentation code (home, quran, search, reader, mushaf, ...).
 ```

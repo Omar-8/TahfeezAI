@@ -18,6 +18,8 @@ import 'package:tahfeez_ai/features/recitation/application/quran_match_controlle
 import 'package:tahfeez_ai/features/recitation/application/recitation_providers.dart';
 import 'package:tahfeez_ai/features/recitation/application/recitation_session_controller.dart';
 import 'package:tahfeez_ai/features/recitation/application/recitation_position.dart';
+import 'package:tahfeez_ai/memorization/domain/models/memorization_models.dart';
+import 'package:tahfeez_ai/memorization/memorization_providers.dart';
 import 'package:tahfeez_ai/features/recitation/presentation/recitation_loop_sheet.dart';
 import 'package:tahfeez_ai/quran/domain/models/quran_location.dart';
 import 'package:tahfeez_ai/quran/domain/repositories/quran_repository.dart';
@@ -50,6 +52,8 @@ void main() {
   late ProviderSubscription<HifzState> hifzListener;
   late int vibrations;
   late int beeps;
+  // What the memorization recorder was given.
+  late List<AyahAttempt> recorded;
 
   HifzState hifz() => container.read(hifzControllerProvider);
   RecitationSessionController session() =>
@@ -94,6 +98,7 @@ void main() {
     recognizer = FakeRecognizer();
     vibrations = 0;
     beeps = 0;
+    recorded = [];
     container = ProviderContainer(
       overrides: [
         recitationAudioSourceFactoryProvider.overrideWithValue(
@@ -108,6 +113,9 @@ void main() {
         hifzBeepProvider.overrideWithValue(() => beeps++),
         acousticVerificationControllerProvider.overrideWith(_Acoustic.new),
         quranRepositoryProvider.overrideWithValue(_Pages()),
+        memorizationRecorderProvider.overrideWithValue(
+          (attempts) async => recorded.addAll(attempts),
+        ),
       ],
     );
     addTearDown(container.dispose);
@@ -578,6 +586,59 @@ void main() {
     expect(pageProgress(14, first: 10, last: 19), 0.5);
     expect(pageProgress(19, first: 10, last: 19), 1);
     expect(pageProgress(40, first: 10, last: 19), 1, reason: 'past it');
+  });
+
+  group('memorization: each test recorded per ayah', () {
+    const kursiVerse = (chapterNo: 2, verseNo: 255);
+
+    test('a clean test from memory: the ayah graded good', () async {
+      await setUpHifz(from: kursiVerse, to: kursiVerse);
+      await recite(kursi);
+      await session().stop();
+      await pumpEventQueue();
+      final a = recorded.single;
+      expect(
+        (a.ayahId, a.grade, a.words, a.hidden),
+        (2255, AyahGrade.good, 50, true),
+      );
+    });
+
+    test(
+      'a skipped word fails it; an ayah not finished is not graded',
+      () async {
+        await setUpHifz(
+          from: kursiVerse,
+          to: (chapterNo: 2, verseNo: 256),
+          strict: false,
+        );
+        await recite(kursi.replaceFirst('سنه ', ''));
+        await recite(spoken(2, 256).split(' ').take(5).join(' '));
+        await session().stop();
+        await pumpEventQueue();
+        expect(
+          [for (final a in recorded) (a.ayahId, a.grade, a.skipped)],
+          [(2255, AyahGrade.fail, 1)],
+        );
+      },
+    );
+
+    test('a loop records every repetition', () async {
+      await setUpHifz(
+        from: kursiVerse,
+        to: kursiVerse,
+        loop: const HifzLoop(mode: HifzLoopMode.range, count: 2),
+      );
+      await recite(kursi);
+      session().pause();
+      await pumpEventQueue();
+      session().resume();
+      await pumpEventQueue();
+      expect(recorded, hasLength(1), reason: 'the first repetition');
+      await recite(kursi);
+      await session().stop();
+      await pumpEventQueue();
+      expect(recorded.map((a) => a.grade), [AyahGrade.good, AyahGrade.good]);
+    });
   });
 
   group('loop recitation', () {

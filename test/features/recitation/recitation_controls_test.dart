@@ -18,6 +18,7 @@ import 'package:tahfeez_ai/features/recitation/application/live_recognition_cont
 import 'package:tahfeez_ai/features/recitation/application/recitation_providers.dart';
 import 'package:tahfeez_ai/features/recitation/domain/recitation_audio_source.dart';
 import 'package:tahfeez_ai/features/recitation/presentation/recitation_controls.dart';
+import 'package:tahfeez_ai/memorization/memorization_providers.dart';
 import 'package:tahfeez_ai/quran/domain/models/quran_location.dart';
 import 'package:tahfeez_ai/quran/domain/models/surah_models.dart';
 import 'package:tahfeez_ai/features/quran/application/quran_index_providers.dart';
@@ -42,6 +43,7 @@ void main() {
   }) {
     return ProviderScope(
       overrides: [
+        memorizationRecorderProvider.overrideWithValue((_) async {}),
         recitationSupportedProvider.overrideWithValue(supported),
         // No database in widget tests: an empty canonical word list.
         quranWordCorpusProvider.overrideWith(

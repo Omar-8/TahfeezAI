@@ -18,6 +18,8 @@ import '../../../core/ui/full_bleed_content.dart';
 import '../../../quran/domain/models/quran_location.dart';
 import '../../../quran/domain/models/quran_refs.dart';
 import '../../../quran/quran_providers.dart';
+import '../../../memorization/domain/test_grading.dart';
+import '../../../memorization/memorization_providers.dart';
 import '../../mushaf/application/mushaf_hide_mode.dart';
 import '../../mushaf/application/mushaf_page_turn.dart';
 import '../../mushaf/application/mushaf_page_verses.dart';
@@ -26,6 +28,7 @@ import 'acoustic_position_providers.dart';
 import 'acoustic_verification_controller.dart';
 import 'local_acoustic_inference_controller.dart';
 import 'recitation_ai_config.dart';
+import 'recitation_providers.dart' show recitationClockProvider;
 import 'recitation_position.dart';
 import 'live_recognition_controller.dart';
 import 'mushaf_recitation_target.dart';
@@ -456,6 +459,7 @@ class HifzController extends Notifier<HifzState> {
   /// included — while the page is otherwise back to normal.
   void _clear() {
     _showHeld();
+    if (_judge case final judge?) _record(judge);
     _syncToHideMode();
     _matcher = null;
     _locating = false;
@@ -1036,6 +1040,7 @@ class HifzController extends Notifier<HifzState> {
   /// already be a word or two into it, is followed from the end of the last
   /// pass's final word.
   void _again(HifzJudge finished, int start, int end) {
+    _record(finished);
     final corpus = finished.corpus;
     _judge = HifzJudge(
       corpus,
@@ -1063,6 +1068,54 @@ class HifzController extends Notifier<HifzState> {
       matcher?.start(anchor: start, trustAnchor: true);
     }
     _publish(const [], running: true);
+  }
+
+  /// The test whose results were last recorded (each test once).
+  HifzJudge? _recorded;
+
+  /// Records a finished test for memorization: every ayah it covered whole,
+  /// graded from its words (wrong, skipped or revealed by hand, corrected,
+  /// and this pass's pronunciation mistakes).
+  void _record(HifzJudge judge) {
+    final sessionId = _sessionId;
+    if (identical(_recorded, judge) || sessionId == null) return;
+    _recorded = judge;
+    final corpus = judge.corpus;
+    final acoustic = ref.read(acousticVerificationControllerProvider).words;
+    final words = [
+      for (final p in judge.revealed)
+        if (p >= judge.start && p <= judge.end && !judge.given.contains(p))
+          TestWord(
+            corpus.words[p].ref,
+            switch (judge.marked[p]) {
+              HifzVerdict.wrong => WordOutcome.wrong,
+              HifzVerdict.skipped => WordOutcome.skipped,
+              HifzVerdict.selfCorrected => WordOutcome.selfCorrected,
+              _ => WordOutcome.correct,
+            },
+            pronunciationMistake: switch (acoustic[corpus.words[p].ref]) {
+              final a? => a.isMistake && a.pass == _pass,
+              null => false,
+            },
+          ),
+    ];
+    int ayahWords(int ayahId) {
+      final verse = (chapterNo: ayahId ~/ 1000, verseNo: ayahId % 1000);
+      final first = corpus.verseStartPosition(verse);
+      final last = corpus.verseEndPosition(verse);
+      return first == null || last == null ? 0 : last - first + 1;
+    }
+
+    final attempts = gradeTest(
+      words,
+      ayahWords: ayahWords,
+      sessionId: sessionId,
+      at: ref.read(recitationClockProvider)(),
+      hidden: ref.read(mushafHideModeProvider).enabled,
+    );
+    if (attempts.isNotEmpty) {
+      unawaited(ref.read(memorizationRecorderProvider)(attempts));
+    }
   }
 
   /// Shows the page holding [word] if it is not on screen (a loop going
