@@ -13,7 +13,7 @@ abstract class MemorizationRepository {
   /// Marks ayahs the user already knows as memorized, unverified (no
   /// strength) until first recited. Ayahs already tracked are left as they
   /// are.
-  Future<void> markMemorized(Iterable<int> ayahIds, {required DateTime at});
+  Future<void> markMemorized(Iterable<int> ayahIds);
 
   /// The memory of every tracked ayah, by ayah id, updated as it changes.
   Stream<Map<int, AyahMemory>> watchMemories();

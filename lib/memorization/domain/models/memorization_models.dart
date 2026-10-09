@@ -47,7 +47,8 @@ class AyahMemory {
 
   final DateTime? lastReviewed;
 
-  /// When it first became [MemoryStatus.memorized].
+  /// When it became [MemoryStatus.memorized] through the app's tests; `null`
+  /// for parts marked as already known.
   final DateTime? learnedOn;
 
   /// Tests it was graded in.

@@ -181,6 +181,20 @@ final hifzBeepProvider = Provider<void Function()>((ref) {
 /// A chosen memorization range (whole ayahs, inclusive).
 typedef HifzRange = ({VerseRef from, VerseRef to});
 
+/// A range to test, chosen outside the Mushaf (the Memorize tab's tasks):
+/// the Hifz test takes it as its range once the Mushaf is open.
+class RequestedHifzRange extends Notifier<HifzRange?> {
+  @override
+  HifzRange? build() => null;
+
+  void request(HifzRange range) => state = range;
+
+  void clear() => state = null;
+}
+
+final requestedHifzRangeProvider =
+    NotifierProvider<RequestedHifzRange, HifzRange?>(RequestedHifzRange.new);
+
 /// How a loop repeats its range.
 enum HifzLoopMode {
   /// The whole range, then from its first ayah again.
@@ -341,6 +355,15 @@ class HifzController extends Notifier<HifzState> {
       _onSession(next);
     });
     ref.listen(hifzSettingsProvider, (_, _) => _updateOverlay());
+    // A range chosen outside the Mushaf: taken as the test's range.
+    ref.listen(requestedHifzRangeProvider, (_, next) {
+      if (next == null) return;
+      Future.microtask(() {
+        if (!ref.mounted || state.running) return;
+        setRange(next);
+        ref.read(requestedHifzRangeProvider.notifier).clear();
+      });
+    }, fireImmediately: true);
     // Share the reciter's position (see recitationPositionProvider).
     listenSelf((_, next) {
       ref

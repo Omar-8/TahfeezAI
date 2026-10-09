@@ -1,6 +1,6 @@
 # Memorization milestone (17) — plan
 
-Status: planned 2026-10-09; M1 done the same day. Decisions by the product owner are marked **(decided)**.
+Status: planned 2026-10-09; M1 and M2 done the same day. Decisions by the product owner are marked **(decided)**.
 
 ## Goal
 
@@ -14,9 +14,10 @@ is, and what to recite today. Everything stays on the device (no account, no bac
   parts, as in Hifz programmes:
   - **New lesson (sabaq):** the next portion of the active plan;
   - **Recent revision (sabqi):** what was learned in the last week (default 7 days), every day;
-  - **Old revision (manzil):** a daily amount from everything memorized before that,
-    **weakest first** by the strength model below (then least recently reviewed). Unverified
-    parts come first.
+  - **Old revision (manzil):** a daily amount from everything memorized before that, by
+    Mushaf page, **weakest first** by the strength model below (then least recently
+    reviewed); unverified parts come first. A day holds about a two-week cycle of what is
+    memorized (2–20 pages); pages reviewed today stay listed, marked done.
 - **Unit (decided): chosen per plan** — ayahs, half-pages or pages. Strength is always tracked
   **per ayah**; pages and half-pages come from the Mushaf's page map.
 - **Starting (decided): mark, then verify.** The user marks surahs / juz / pages they already
@@ -83,7 +84,7 @@ The constants are a starting point, to be tuned on real use (see "Later").
    grading at the end of each test; the strength model; unit tests for grading, the model and
    the repository; the existing Hifz tests still pass. *Done when* a test's results are stored
    per ayah and strengths update, verified by tests (no UI yet).
-2. **M2 — Today.** The scheduler (sabaq / sabqi / manzil from plans and strengths), the
+2. **M2 — Today.** *(done 2026-10-09; the new lesson card waits for M3's plans)* The scheduler (sabaq / sabqi / manzil from plans and strengths), the
    Memorize tab's Today screen, starting a session at a range, the session summary. *Done
    when* a user with memorized parts sees today's three tasks, recites one, and sees its
    summary and updated strength.

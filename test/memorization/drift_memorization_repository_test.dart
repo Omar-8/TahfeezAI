@@ -48,12 +48,13 @@ void main() {
     'marking known parts: unverified, and never over what is tracked',
     () async {
       await repo.recordTest([attempt(112001, AyahGrade.good, t0)]);
-      await repo.markMemorized([112001, 112002, 112003], at: t0);
+      await repo.markMemorized([112001, 112002, 112003]);
       final m = await repo.watchMemories().first;
       expect(m[112001]!.verified, isTrue, reason: 'already tested: kept');
       expect(m[112002]!.verified, isFalse);
       expect(m[112002]!.stability, isNull);
       expect(m[112003]!.status, MemoryStatus.memorized);
+      expect(m[112003]!.learnedOn, isNull, reason: 'not learned in the app');
     },
   );
 }

@@ -46,10 +46,7 @@ class DriftMemorizationRepository implements MemorizationRepository {
   }
 
   @override
-  Future<void> markMemorized(
-    Iterable<int> ayahIds, {
-    required DateTime at,
-  }) async {
+  Future<void> markMemorized(Iterable<int> ayahIds) async {
     await _db.batch((b) {
       b.insertAll(_db.memorizedAyahs, [
         for (final id in ayahIds)
@@ -57,7 +54,6 @@ class DriftMemorizationRepository implements MemorizationRepository {
             ayahId: Value(id),
             status: MemoryStatus.memorized.name,
             verified: false,
-            learnedOn: Value(at),
           ),
       ], mode: InsertMode.insertOrIgnore);
     });

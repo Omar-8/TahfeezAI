@@ -66,7 +66,10 @@ abstract final class StrengthModel {
       verified: true,
       stability: stability,
       lastReviewed: attempt.at,
-      learnedOn: before?.learnedOn ?? (memorized ? attempt.at : null),
+      // When learned in the app; a part marked as already known has none.
+      learnedOn: before?.status == MemoryStatus.memorized
+          ? before!.learnedOn
+          : (memorized ? attempt.at : null),
       reviews: (before?.reviews ?? 0) + 1,
     );
   }

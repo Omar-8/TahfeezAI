@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/database/database_connection.dart';
+import 'application/memorization_today.dart';
 import 'data/drift_memorization_repository.dart';
 import 'data/memorization_database.dart';
 import 'domain/models/memorization_models.dart';
@@ -22,13 +23,14 @@ final memorizationRepositoryProvider = Provider<MemorizationRepository>(
   (ref) => DriftMemorizationRepository(ref.watch(memorizationDatabaseProvider)),
 );
 
-/// Stores a finished recitation test's graded ayahs (`gradeTest`). A failure
-/// to store is logged, never thrown at the recitation.
+/// Stores a finished recitation test's graded ayahs (`gradeTest`) and adds
+/// them to the session's summary. A failure to store is logged, never thrown
+/// at the recitation.
 final memorizationRecorderProvider =
     Provider<Future<void> Function(List<AyahAttempt>)>((ref) {
       return (attempts) async {
         try {
-          await ref.read(memorizationRepositoryProvider).recordTest(attempts);
+          await ref.read(testSummaryProvider.notifier).record(attempts);
         } catch (e) {
           if (!kReleaseMode) debugPrint('Memorization: not recorded: $e');
         }

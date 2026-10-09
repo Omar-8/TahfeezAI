@@ -28,6 +28,8 @@ import '../application/recitation_ai_config.dart';
 import '../application/quran_match_controller.dart';
 import '../application/recitation_session_controller.dart';
 import 'recitation_loop_sheet.dart';
+import '../../../memorization/application/memorization_today.dart';
+import '../../memorize/presentation/test_summary_sheet.dart';
 
 export '../application/mushaf_recitation_target.dart';
 export 'recitation_loop_sheet.dart' show HifzLoopButton;
@@ -145,6 +147,13 @@ class RecitationBottomBar extends ConsumerWidget {
           next.phase == RecitationPhase.error) {
         ref.read(recitationSessionControllerProvider.notifier).dismissError();
       }
+    });
+
+    // A session over: its results (each ayah's grade and strength).
+    ref.listen(testSummaryProvider, (previous, next) {
+      if (next == null || identical(previous, next)) return;
+      if (ref.read(recitationSessionControllerProvider).isActive) return;
+      showTestSummarySheet(context, next);
     });
 
     // Leaving the Mushaf — or opening a different surah or screen — ends

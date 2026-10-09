@@ -94,16 +94,16 @@ void main() {
   });
 
   test('a part marked as known is verified by its first test', () {
-    final marked = AyahMemory(
+    const marked = AyahMemory(
       ayahId: 112001,
       status: MemoryStatus.memorized,
       verified: false,
-      learnedOn: t0,
     );
     expect(StrengthModel.strength(marked, t0), isNull);
     final tested = StrengthModel.apply(marked, attempt(AyahGrade.good, t0));
     expect(tested.verified, isTrue);
     expect(tested.stability, 1.0);
     expect(tested.status, MemoryStatus.memorized);
+    expect(tested.learnedOn, isNull, reason: 'known before, not learned now');
   });
 }

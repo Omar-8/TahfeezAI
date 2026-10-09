@@ -334,6 +334,56 @@ class DriftQuranRepository implements QuranRepository {
   }
 
   @override
+  Future<Map<int, int>> getAyahPages({required int mushafId}) async {
+    // Lines in reading order, with the token ids they span; each ayah's
+    // first token, in order. One merge pass.
+    final lines =
+        await (_db.select(_db.mushafLines)
+              ..where(
+                (l) => l.mushafId.equals(mushafId) & l.firstTokenId.isNotNull(),
+              )
+              ..orderBy([(l) => OrderingTerm(expression: l.firstTokenId)]))
+            .get();
+    final firstTokens =
+        await (_db.selectOnly(_db.mushafTokens)
+              ..addColumns([
+                _db.mushafTokens.surahNumber,
+                _db.mushafTokens.ayahNumber,
+                _db.mushafTokens.sourceTokenId.min(),
+              ])
+              ..where(
+                _db.mushafTokens.mushafId.equals(mushafId) &
+                    _db.mushafTokens.surahNumber.isNotNull() &
+                    _db.mushafTokens.ayahNumber.isNotNull(),
+              )
+              ..groupBy([
+                _db.mushafTokens.surahNumber,
+                _db.mushafTokens.ayahNumber,
+              ]))
+            .get();
+    final starts = [
+      for (final r in firstTokens)
+        (
+          token: r.read(_db.mushafTokens.sourceTokenId.min())!.toInt(),
+          ayahId:
+              r.read(_db.mushafTokens.surahNumber)!.toInt() * 1000 +
+              r.read(_db.mushafTokens.ayahNumber)!.toInt(),
+        ),
+    ]..sort((a, b) => a.token.compareTo(b.token));
+    final out = <int, int>{};
+    var l = 0;
+    for (final s in starts) {
+      while (l < lines.length && (lines[l].lastTokenId ?? -1) < s.token) {
+        l++;
+      }
+      if (l < lines.length && lines[l].firstTokenId! <= s.token) {
+        out[s.ayahId] = lines[l].pageNumber;
+      }
+    }
+    return out;
+  }
+
+  @override
   Future<int?> getPageForAyah({
     required int mushafId,
     required int ayahId,

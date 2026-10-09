@@ -15,6 +15,7 @@ abstract final class AppRoutes {
   static const home = '/home';
   static const quran = '/quran';
   static const search = '/quran/search';
+  static const memorize = '/memorize';
   static const settings = '/settings';
   static const about = '/settings/about';
   static const tafsir = '/tafsir';

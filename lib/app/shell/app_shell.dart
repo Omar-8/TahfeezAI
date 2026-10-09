@@ -76,6 +76,11 @@ class AppShell extends ConsumerWidget {
         isPrimary: true,
       ),
       TahfeezPrimaryNavItem(
+        icon: Icons.school_outlined,
+        selectedIcon: Icons.school,
+        label: l10n.navMemorize,
+      ),
+      TahfeezPrimaryNavItem(
         icon: Icons.settings_outlined,
         selectedIcon: Icons.settings,
         label: l10n.navSettings,

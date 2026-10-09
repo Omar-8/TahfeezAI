@@ -134,6 +134,11 @@ abstract class QuranRepository {
   /// `null` if the ayah/mushaf combination is unknown.
   Future<int?> getPageForAyah({required int mushafId, required int ayahId});
 
+  /// Every ayah's page in [mushafId]'s pagination (the page its first word
+  /// is on), by stable ayah id — one pass, for callers that need them all
+  /// (memorization's page units).
+  Future<Map<int, int>> getAyahPages({required int mushafId});
+
   // ---------------------------------------------------------------------
   // Navigation (Juz/Hizb/Rub/Manzil)
   // ---------------------------------------------------------------------

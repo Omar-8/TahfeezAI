@@ -139,4 +139,23 @@ void main() {
     expect(lastQuranWord.surahNumber, 114);
     expect(lastQuranWord.ayahNumber, 6);
   });
+
+  test(
+    'every ayah\'s page in one pass agrees with the one-ayah lookup',
+    () async {
+      final pages = await repo.getAyahPages(mushafId: mushafId);
+      expect(pages, hasLength(6236));
+      expect(
+        (pages[1001], pages[2001], pages[2255], pages[114006]),
+        (1, 2, 42, 604),
+      );
+      for (final ayah in [1007, 2005, 5001, 18001, 36001, 67001, 112001]) {
+        expect(
+          pages[ayah],
+          await repo.getPageForAyah(mushafId: mushafId, ayahId: ayah),
+          reason: '$ayah',
+        );
+      }
+    },
+  );
 }

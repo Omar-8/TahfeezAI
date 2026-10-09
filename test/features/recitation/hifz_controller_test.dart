@@ -588,6 +588,27 @@ void main() {
     expect(pageProgress(40, first: 10, last: 19), 1, reason: 'past it');
   });
 
+  test(
+    'a range chosen in the Memorize tab becomes the test\'s range',
+    () async {
+      await setUpHifz();
+      await session().stop();
+      await pumpEventQueue();
+      const range = (
+        from: (chapterNo: 2, verseNo: 255),
+        to: (chapterNo: 2, verseNo: 256),
+      );
+      container.read(requestedHifzRangeProvider.notifier).request(range);
+      await pumpEventQueue();
+      expect(hifz().range, range);
+      expect(
+        container.read(requestedHifzRangeProvider),
+        isNull,
+        reason: 'taken',
+      );
+    },
+  );
+
   group('memorization: each test recorded per ayah', () {
     const kursiVerse = (chapterNo: 2, verseNo: 255);
 
