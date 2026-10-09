@@ -221,6 +221,7 @@
   "tafsirNoCommentary": "لا يوجد تفسير لهذه الآية في التفسير المختار.",
   "tafsirLoadError": "تعذّر تحميل هذا التفسير.",
   "wordDetails": "تفاصيل الكلمة",
+  "ayahDetails": "تفاصيل الآية",
   "wordRef": "الآية {ref} · الكلمة {n}",
   "wordPlayAudio": "تشغيل صوت الكلمة",
   "wordInstall": "ثبّت حزمة كلمة بكلمة لعرض الترجمات هنا.",

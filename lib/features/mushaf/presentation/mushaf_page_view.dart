@@ -28,12 +28,16 @@ class MushafPageView extends ConsumerWidget {
     required this.mushafId,
     required this.pageNumber,
     this.onWordTap,
+    this.onWordLongPress,
     this.isCurrentPage = false,
   });
 
   final int mushafId;
   final int pageNumber;
   final ValueChanged<MushafTokenHitRect>? onWordTap;
+
+  /// See [QuranEngineMushafPageContent.onWordLongPress].
+  final Future<void> Function(MushafTokenHitRect hit)? onWordLongPress;
 
   /// Kept for API stability with `MushafPager`'s existing call sites; no
   /// longer drives any prewarming decision here (Quran Engine's own
@@ -53,6 +57,7 @@ class MushafPageView extends ConsumerWidget {
         pageNumber: pageNumber,
         colors: colors,
         onWordTap: onWordTap,
+        onWordLongPress: onWordLongPress,
       ),
     );
   }

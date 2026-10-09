@@ -40,3 +40,15 @@ Future<String?> canonicalAyahWordText(
   }
   return null;
 }
+
+/// An ayah's canonical words joined by spaces — the same safe source as
+/// [canonicalAyahWordText], for a whole ayah (the Mushaf's ayah sheet).
+@riverpod
+Future<String?> canonicalAyahText(Ref ref, {required int ayahId}) async {
+  final scriptCode = ref.watch(quranScriptCodeProvider);
+  final words = await ref
+      .watch(quranRepositoryProvider)
+      .getWordsForAyah(ayahId, scriptCode: scriptCode);
+  if (words.isEmpty) return null;
+  return [for (final w in words) w.text].join(' ');
+}

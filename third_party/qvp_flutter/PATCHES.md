@@ -90,6 +90,18 @@ enforced *inside* `QvpPageView` itself, not by anything wrapping it.
   already uses — only the *number* Tahfeez chooses to put in it differs
   from the previous hardcoded default.
 
+## Patch 0002: a word long-press callback
+
+`patches/0002-word-long-press-on-QvpPageView.patch` adds
+`QvpPageView.onWordLongPress` (`void Function(int word, QvpHit hit)?`).
+When set, a long press on a word calls it (with a selection-click haptic)
+instead of starting the widget's own drag selection; when `null`,
+behaviour is exactly upstream's. Tahfeez uses it to highlight a word's
+whole ayah and open the ayah sheet
+(`quran_engine_android_backend.dart`, `onWordLongHit`). Re-apply it with
+`patch -p1 < patches/0002-word-long-press-on-QvpPageView.patch` after
+re-vendoring, like patch 0001.
+
 ## How Tahfeez uses this
 
 `lib/features/mushaf/data/quran_engine/quran_engine_android_backend.dart`

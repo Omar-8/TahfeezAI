@@ -13,6 +13,7 @@ import '../application/mushaf_appearance_controller.dart';
 import '../application/mushaf_page_turn.dart';
 import '../application/mushaf_quran_engine_providers.dart';
 import '../domain/mushaf_appearance.dart';
+import 'mushaf_ayah_sheet.dart';
 import 'mushaf_token_hit_rect.dart';
 import 'mushaf_page_view.dart';
 
@@ -530,6 +531,8 @@ class _MushafPagerState extends ConsumerState<MushafPager> {
             mushafId: widget.mushafId,
             pageNumber: pageNumber,
             onWordTap: (hitRect) => _showWordInfo(context, hitRect),
+            onWordLongPress: (hitRect) =>
+                _showAyahInfo(context, hitRect, pageNumber),
             isCurrentPage: pageNumber == _currentPageNumber,
           );
           // No width cap here: the Mushaf page is a fixed-aspect-ratio
@@ -587,6 +590,8 @@ class _MushafPagerState extends ConsumerState<MushafPager> {
                 mushafId: widget.mushafId,
                 pageNumber: rightPageNumber,
                 onWordTap: (hitRect) => _showWordInfo(context, hitRect),
+                onWordLongPress: (hitRect) =>
+                    _showAyahInfo(context, hitRect, rightPageNumber),
                 // Both pages of a spread are simultaneously visible,
                 // but only one may be the prewarm-driving "current"
                 // page (see `MushafPageView.isCurrentPage`'s doc
@@ -603,6 +608,8 @@ class _MushafPagerState extends ConsumerState<MushafPager> {
                 mushafId: widget.mushafId,
                 pageNumber: leftPageNumber,
                 onWordTap: (hitRect) => _showWordInfo(context, hitRect),
+                onWordLongPress: (hitRect) =>
+                    _showAyahInfo(context, hitRect, leftPageNumber),
               )
             : const SizedBox.shrink();
         // A physical Mushaf opens right-to-left: the lower-numbered page sits
@@ -699,6 +706,24 @@ class _MushafPagerState extends ConsumerState<MushafPager> {
   /// right — the Mushaf's page order must not depend on the UI language.
   Widget _rightToLeft(Widget pageView) =>
       Directionality(textDirection: TextDirection.ltr, child: pageView);
+
+  /// A long-pressed word's ayah, in its sheet; completes when it closes.
+  Future<void> _showAyahInfo(
+    BuildContext context,
+    MushafTokenHitRect hitRect,
+    int pageNumber,
+  ) async {
+    final ayahId = hitRect.canonicalAyahId;
+    if (hitRect.tokenType != MushafTokenType.quranWord || ayahId == null) {
+      return;
+    }
+    await showAyahDetailSheet(
+      context,
+      mushafId: widget.mushafId,
+      pageNumber: pageNumber,
+      ayahId: ayahId,
+    );
+  }
 
   void _showWordInfo(BuildContext context, MushafTokenHitRect hitRect) {
     // Only a real Quran word has canonical identity to look up — an

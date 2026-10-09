@@ -29,11 +29,16 @@ class QuranEngineMushafPageContent extends ConsumerStatefulWidget {
     required this.pageNumber,
     required this.colors,
     this.onWordTap,
+    this.onWordLongPress,
   });
 
   final int pageNumber;
   final MushafAppearanceColors colors;
   final ValueChanged<MushafTokenHitRect>? onWordTap;
+
+  /// A long press on a word: its ayah is highlighted until the returned
+  /// future completes (the ayah sheet is closed).
+  final Future<void> Function(MushafTokenHitRect hit)? onWordLongPress;
 
   @override
   ConsumerState<QuranEngineMushafPageContent> createState() =>
@@ -268,6 +273,16 @@ class _QuranEngineMushafPageContentState
     // already computes the true maximum uniform scale that shows the
     // entire page, uncropped and undistorted, and centers it.
     final onWordTap = widget.onWordTap;
+    final onWordLongPress = widget.onWordLongPress;
+    bool isHidden(MushafTokenHitRect hit) {
+      final applied = _appliedOverlay;
+      return applied != null
+          ? applied.$1.contains(hit.sourceTokenId)
+          : ref
+                .read(mushafHideModeProvider)
+                .isWordHidden(widget.pageNumber, hit.sourceTokenId);
+    }
+
     return page.buildView(
       ink: widget.colors.text,
       paper: widget.colors.background,
@@ -277,15 +292,26 @@ class _QuranEngineMushafPageContentState
       onWordHit: onWordTap == null
           ? null
           : (hit) {
-              final applied = _appliedOverlay;
-              final hidden = applied != null
-                  ? applied.$1.contains(hit.sourceTokenId)
-                  : ref
-                        .read(mushafHideModeProvider)
-                        .isWordHidden(widget.pageNumber, hit.sourceTokenId);
-              if (!hidden) onWordTap(hit);
+              if (!isHidden(hit)) onWordTap(hit);
             },
       onDecorationHit: widget.onWordTap,
+      onWordLongHit: onWordLongPress == null
+          ? null
+          : (hit) async {
+              final ayahId = hit.canonicalAyahId;
+              if (ayahId == null || isHidden(hit)) return;
+              page.highlightAyah((
+                chapterNo: ayahId ~/ 1000,
+                verseNo: ayahId % 1000,
+              ));
+              await onWordLongPress(hit);
+              if (!mounted || _page != page) return;
+              // Drop the ayah's highlight; the word overlay's own marks,
+              // if any, are drawn again.
+              page.clearHighlights();
+              _appliedOverlay = null;
+              _applyMasks();
+            },
     );
   }
 }

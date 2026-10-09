@@ -179,6 +179,8 @@ class QuranEngineWebPageAdapter implements QuranEngineMushafPage {
     ValueChanged<MushafTokenHitRect>? onWordHit,
     ValueChanged<MushafTokenHitRect>? onDecorationHit,
     VoidCallback? onEmptyHit,
+    // Long press isn't bridged from the web view yet.
+    ValueChanged<MushafTokenHitRect>? onWordLongHit,
   }) {
     page.paperColorCss = _cssHex(paper);
     return _QuranEngineWebPageView(

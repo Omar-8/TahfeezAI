@@ -37,6 +37,7 @@ class _FakePage implements QuranEngineMushafPage {
     ValueChanged<MushafTokenHitRect>? onWordHit,
     ValueChanged<MushafTokenHitRect>? onDecorationHit,
     VoidCallback? onEmptyHit,
+    ValueChanged<MushafTokenHitRect>? onWordLongHit,
   }) {
     return LayoutBuilder(
       builder: (context, constraints) {

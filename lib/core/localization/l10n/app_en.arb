@@ -484,6 +484,7 @@
   "tafsirNoCommentary": "No commentary for this verse in the active tafsir.",
   "tafsirLoadError": "Could not load this tafsir.",
   "wordDetails": "Word details",
+  "ayahDetails": "Ayah details",
   "wordRef": "Ayah {ref} · Word {n}",
   "@wordRef": {
     "placeholders": {

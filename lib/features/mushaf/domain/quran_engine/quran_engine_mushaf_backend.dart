@@ -62,13 +62,15 @@ abstract class QuranEngineMushafPage {
   /// `.background` at the one call site,
   /// `QuranEngineMushafPageContent.build` in
   /// `../../presentation/quran_engine_mushaf_page_content.dart`).
-  /// [onWordHit]/[onDecorationHit] fire with [MushafTokenHitRect].
+  /// [onWordHit]/[onDecorationHit] fire with [MushafTokenHitRect];
+  /// [onWordLongHit] on a long press on a word (Android only for now).
   Widget buildView({
     required Color ink,
     required Color paper,
     ValueChanged<MushafTokenHitRect>? onWordHit,
     ValueChanged<MushafTokenHitRect>? onDecorationHit,
     VoidCallback? onEmptyHit,
+    ValueChanged<MushafTokenHitRect>? onWordLongHit,
   });
 
   /// Highlights [target] (a [WordRef] or [VerseRef]) — 'band' is the only

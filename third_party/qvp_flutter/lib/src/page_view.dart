@@ -177,6 +177,7 @@ class QvpPageView extends StatefulWidget {
     this.onWordTap,
     this.onDecorationTap,
     this.onEmptyTap,
+    this.onWordLongPress,
     this.onSelectionChanged,
     this.hitMaxDistance = QvpDefaults.tapDistance,
     this.selectionEnabled = true,
@@ -203,6 +204,10 @@ class QvpPageView extends StatefulWidget {
   /// Tap on a decoration (ayah mark, surah banner, …) that is not a word.
   final void Function(QvpDecorationInfo decoration)? onDecorationTap;
   final VoidCallback? onEmptyTap;
+
+  /// Long press on a word (gap-aware), in place of starting a drag
+  /// selection. Tahfeez patch 0002 (`PATCHES.md`).
+  final void Function(int word, QvpHit hit)? onWordLongPress;
 
   /// Whole-word selection changed through long-press-drag (empty list = cleared).
   final void Function(List<int> words)? onSelectionChanged;
@@ -386,6 +391,14 @@ class QvpPageViewState extends State<QvpPageView>
   }
 
   void _onLongPressStart(LongPressStartDetails d) {
+    final onWordLongPress = widget.onWordLongPress;
+    if (onWordLongPress != null) {
+      final h = _hitAt(d.localPosition, maxDistance: widget.hitMaxDistance);
+      if (h == null || h.word < 0) return;
+      HapticFeedback.selectionClick();
+      onWordLongPress(h.word, h);
+      return;
+    }
     if (!widget.selectionEnabled) return;
     final h = _hitAt(d.localPosition, maxDistance: widget.hitMaxDistance);
     if (h == null || h.word < 0) return;

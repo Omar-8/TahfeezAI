@@ -162,6 +162,7 @@ class QuranEngineAndroidPage implements QuranEngineMushafPage {
     ValueChanged<MushafTokenHitRect>? onWordHit,
     ValueChanged<MushafTokenHitRect>? onDecorationHit,
     VoidCallback? onEmptyHit,
+    ValueChanged<MushafTokenHitRect>? onWordLongHit,
   }) {
     final view = _buildQvpPageView(
       ink: ink,
@@ -169,6 +170,7 @@ class QuranEngineAndroidPage implements QuranEngineMushafPage {
       onWordHit: onWordHit,
       onDecorationHit: onDecorationHit,
       onEmptyHit: onEmptyHit,
+      onWordLongHit: onWordLongHit,
     );
     if (!_biggerTextPages.contains(pageNumber)) return view;
     return _ZoomTextInPlace(
@@ -185,6 +187,7 @@ class QuranEngineAndroidPage implements QuranEngineMushafPage {
     ValueChanged<MushafTokenHitRect>? onWordHit,
     ValueChanged<MushafTokenHitRect>? onDecorationHit,
     VoidCallback? onEmptyHit,
+    ValueChanged<MushafTokenHitRect>? onWordLongHit,
   }) {
     return QvpPageView(
       page: page,
@@ -255,6 +258,23 @@ class QuranEngineAndroidPage implements QuranEngineMushafPage {
               ),
             ),
       onEmptyTap: onEmptyHit,
+      onWordLongPress: onWordLongHit == null
+          ? null
+          : (word, hit) {
+              final rawKey = hit.wordKey;
+              if (rawKey == null) return;
+              final ref = QuranEngineRefAdapter.wordRefFromEngineKey(rawKey);
+              onWordLongHit(
+                MushafTokenHitRect(
+                  rect: Rect.zero,
+                  sourceTokenId: word,
+                  tokenType: MushafTokenType.quranWord,
+                  canonicalAyahId: ref.ayahId,
+                  canonicalWordIndex: ref.wordIndex,
+                  text: '',
+                ),
+              );
+            },
     );
   }
 

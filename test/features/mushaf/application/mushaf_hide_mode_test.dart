@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -18,6 +20,8 @@ class _MaskRecordingPage implements QuranEngineMushafPage {
   final int pageNumber;
   final masks = <({bool hidden, int revealed})>[];
   ValueChanged<MushafTokenHitRect>? onWordHit;
+  ValueChanged<MushafTokenHitRect>? onWordLongHit;
+  final ayahHighlights = <VerseRef>[];
 
   @override
   int get wordCount => 3;
@@ -68,17 +72,27 @@ class _MaskRecordingPage implements QuranEngineMushafPage {
     ValueChanged<MushafTokenHitRect>? onWordHit,
     ValueChanged<MushafTokenHitRect>? onDecorationHit,
     VoidCallback? onEmptyHit,
+    ValueChanged<MushafTokenHitRect>? onWordLongHit,
   }) {
     this.onWordHit = onWordHit;
+    this.onWordLongHit = onWordLongHit;
     return const SizedBox.expand();
   }
 
   @override
   int highlightWord(WordRef target, {String mode = 'band'}) => 0;
   @override
-  int highlightAyah(VerseRef target, {String mode = 'band'}) => 0;
+  int highlightAyah(VerseRef target, {String mode = 'band'}) {
+    ayahHighlights.add(target);
+    return ayahHighlights.length;
+  }
+
   @override
-  void clearHighlights() => highlights.clear();
+  void clearHighlights() {
+    highlights.clear();
+    ayahHighlights.clear();
+  }
+
   @override
   void maskWord(WordRef target, {String mode = 'hide'}) {}
   @override
@@ -317,6 +331,55 @@ void main() {
     await tester.pump();
     expect(p41.masks.last, (hidden: false, revealed: 0));
     expect(p42.masks.last, (hidden: false, revealed: 0));
+  });
+
+  testWidgets('a long-pressed word\'s ayah stays highlighted while its '
+      'sheet is open', (tester) async {
+    final backend = _Backend();
+    final sheet = Completer<void>();
+    final pressed = <int>[];
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          mushafQuranEngineBackendProvider.overrideWith((ref) async => backend),
+        ],
+        child: MaterialApp(
+          home: QuranEngineMushafPageContent(
+            pageNumber: 42,
+            colors: const MushafAppearanceColors(
+              background: Color(0xFFFFFFFF),
+              text: Color(0xFF000000),
+              secondaryText: Color(0xFF888888),
+              headerInk: Color(0xFF000000),
+            ),
+            onWordTap: (_) {},
+            onWordLongPress: (hit) {
+              pressed.add(hit.canonicalAyahId!);
+              return sheet.future;
+            },
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final page = backend.pages[42]!;
+    page.onWordLongHit!(
+      const MushafTokenHitRect(
+        rect: Rect.zero,
+        sourceTokenId: 1,
+        tokenType: MushafTokenType.quranWord,
+        canonicalAyahId: 2042,
+        canonicalWordIndex: 1,
+        text: '',
+      ),
+    );
+    await tester.pump();
+    expect(pressed, [2042]);
+    expect(page.ayahHighlights, [(chapterNo: 2, verseNo: 42)]);
+
+    sheet.complete();
+    await tester.pumpAndSettle();
+    expect(page.ayahHighlights, isEmpty, reason: 'the sheet was closed');
   });
 
   testWidgets('tapping a hidden word does not open its word sheet', (
