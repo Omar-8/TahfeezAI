@@ -8,7 +8,9 @@ import '../../../core/localization/locale_controller.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/components/components.dart';
 import '../../../core/theme/app_surface_tone.dart';
+import '../../../core/notifications/daily_reminder_scheduler.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../memorize/application/memorization_reminder.dart';
 import '../../../core/theme/theme_controller.dart';
 import 'theme_choices.dart';
 
@@ -30,6 +32,14 @@ class SettingsScreen extends ConsumerWidget {
       ref.watch(appSurfaceToneProvider),
     );
     final arabicFont = ref.watch(arabicFontControllerProvider);
+    final reminderSupported = ref
+        .watch(dailyReminderSchedulerProvider)
+        .supported;
+    final reminder = ref.watch(memorizationReminderProvider);
+    final reminderTime = TimeOfDay(
+      hour: reminder.minutes ~/ 60,
+      minute: reminder.minutes % 60,
+    );
 
     Widget group(String title, IconData icon, Widget child) => Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -143,6 +153,55 @@ class SettingsScreen extends ConsumerWidget {
               ],
             ),
           ),
+          if (reminderSupported) ...[
+            const SizedBox(height: TahfeezSpacing.lg),
+            group(
+              l10n.memReminderTitle,
+              Icons.notifications_outlined,
+              Column(
+                children: [
+                  SwitchListTile(
+                    key: const ValueKey('settings-reminder'),
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(l10n.memReminderSwitch),
+                    subtitle: Text(
+                      l10n.memReminderAt(reminderTime.format(context)),
+                    ),
+                    value: reminder.enabled,
+                    onChanged: (on) async {
+                      final messenger = ScaffoldMessenger.of(context);
+                      final done = await ref
+                          .read(memorizationReminderProvider.notifier)
+                          .setEnabled(on);
+                      if (!done) {
+                        messenger.showSnackBar(
+                          SnackBar(content: Text(l10n.memReminderDenied)),
+                        );
+                      }
+                    },
+                  ),
+                  ListTile(
+                    key: const ValueKey('settings-reminder-time'),
+                    contentPadding: EdgeInsets.zero,
+                    enabled: reminder.enabled,
+                    leading: const Icon(Icons.schedule),
+                    title: Text(l10n.memReminderTime),
+                    trailing: Text(reminderTime.format(context)),
+                    onTap: () async {
+                      final picked = await showTimePicker(
+                        context: context,
+                        initialTime: reminderTime,
+                      );
+                      if (picked == null) return;
+                      await ref
+                          .read(memorizationReminderProvider.notifier)
+                          .setTime(picked.hour * 60 + picked.minute);
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ],
           const SizedBox(height: TahfeezSpacing.lg),
           TahfeezCard(
             child: ListTile(

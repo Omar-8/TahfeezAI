@@ -10,6 +10,7 @@ import '../core/routing/app_router.dart';
 import '../core/theme/app_surface_tone.dart';
 import '../core/theme/app_theme.dart';
 import '../core/theme/theme_controller.dart';
+import '../features/memorize/application/memorization_reminder.dart';
 
 /// Tahfeez AI's root widget.
 ///
@@ -29,6 +30,9 @@ class TahfeezApp extends ConsumerWidget {
     final arabicFont = ref.watch(arabicFontControllerProvider);
     final localeOverride = ref.watch(localeControllerProvider);
     final router = ref.watch(appRouterProvider);
+    // Started with the app: restores the daily reminder, reschedules it and
+    // handles a tap on it.
+    ref.listen(memorizationReminderProvider, (_, _) {});
 
     // DynamicColorBuilder provides the OS's Material You palette on
     // platforms that have one (Android 12+); `lightDynamic`/`darkDynamic`

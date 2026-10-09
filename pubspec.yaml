@@ -61,6 +61,9 @@ dependencies:
   qvp_flutter: ^0.2.2
   web: ^1.1.1
   record: ^7.1.1
+  flutter_local_notifications: ^22.3.1
+  timezone: ^0.11.1
+  flutter_timezone: ^5.1.1
 
 # A locally-vendored, minimally-patched copy of qvp_flutter 0.2.2 —
 # exposes QvpViewLayout.maxAspectSlack (already a real, documented,

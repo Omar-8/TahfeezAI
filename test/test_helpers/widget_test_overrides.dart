@@ -1,6 +1,7 @@
 import 'package:drift/native.dart';
 import 'package:tahfeez_ai/core/audio/audio_controller.dart';
 import 'package:tahfeez_ai/core/core_providers.dart';
+import 'package:tahfeez_ai/memorization/memorization_providers.dart';
 import 'package:tahfeez_ai/quran/data/quran_database.dart';
 import 'package:tahfeez_ai/quran/data/search_index_database.dart';
 import 'package:tahfeez_ai/quran/data/tafsir_database.dart';
@@ -12,6 +13,7 @@ import 'package:tahfeez_ai/quran/translation_providers.dart';
 import 'package:tahfeez_ai/wbw/data/wbw_database.dart';
 import 'package:tahfeez_ai/wbw/wbw_providers.dart';
 
+import 'empty_memorization_repository.dart';
 import 'fake_audio_controller.dart';
 
 /// The default override set for widget tests that render `TahfeezApp` (or
@@ -68,6 +70,9 @@ tahfeezWidgetTestOverrides({AudioController? audioController}) {
       ref.onDispose(db.close);
       return db;
     }),
+    memorizationRepositoryProvider.overrideWithValue(
+      const EmptyMemorizationRepository(),
+    ),
     audioControllerProvider.overrideWith(
       (ref) => audioController ?? FakeAudioController(),
     ),

@@ -74,10 +74,10 @@ void main() {
       findsOneWidget,
     );
 
-    // The memorization slot is reserved and visible today, per this
-    // milestone's "do not paint the architecture into a reading-only
-    // corner" requirement.
-    expect(find.text('Recite from the Mushaf'), findsOneWidget);
+    // Today's memorization: nothing memorized and no plan yet, with the
+    // way into the Memorize tab.
+    expect(find.byKey(const ValueKey('home-mem-empty')), findsOneWidget);
+    expect(find.text('Open Memorize'), findsOneWidget);
 
     // No resource-update banner: `outdatedResourceSummariesProvider`
     // resolves to an empty list.

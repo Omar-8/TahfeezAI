@@ -10,6 +10,9 @@ android {
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
+        // flutter_local_notifications (the daily reminder) needs library
+        // desugaring for its scheduled notifications on older Android.
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
@@ -68,6 +71,7 @@ dependencies {
     // On-device Quran acoustic model (QuranAcousticModelChannel). The model
     // itself is never bundled; it is sideloaded on development devices.
     implementation("com.microsoft.onnxruntime:onnxruntime-android:1.30.0")
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }
 
 // The acoustic model needs a 64-bit ARM device (memory and speed), so a

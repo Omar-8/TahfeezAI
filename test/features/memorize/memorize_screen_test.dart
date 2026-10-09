@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tahfeez_ai/core/localization/generated/app_localizations.dart';
+import 'package:tahfeez_ai/features/home/presentation/sections/home_memorization_teaser_section.dart';
 import 'package:tahfeez_ai/features/memorize/presentation/mark_known_sheet.dart';
 import 'package:tahfeez_ai/features/memorize/presentation/memorize_screen.dart';
 import 'package:tahfeez_ai/features/memorize/presentation/progress_screen.dart';
@@ -269,6 +270,43 @@ void main() {
     expect(find.text('Next lesson'), findsOneWidget);
     expect(find.text('An-Nas 3–4'), findsOneWidget);
     expect(find.text('Start'), findsOneWidget);
+  });
+
+  testWidgets('Home: today\'s three parts, how far each has come, and '
+      'Continue', (tester) async {
+    tester.view.physicalSize = const Size(500, 1400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      app(
+        const TodayPlan(
+          recent: [
+            RevisionTask(ayahIds: [112001, 112002], done: true),
+          ],
+          old: [
+            RevisionTask(ayahIds: [113001], page: 604),
+            RevisionTask(ayahIds: [113002], page: 604),
+          ],
+        ),
+        lesson: const NewLesson(
+          runs: [
+            [114001, 114002],
+          ],
+          done: true,
+          memorized: 2,
+          total: 6,
+        ),
+        child: const Scaffold(
+          body: SingleChildScrollView(child: HomeMemorizationTeaserSection()),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('home-mem-today')), findsOneWidget);
+    expect(find.text("Today's lesson is learned."), findsOneWidget);
+    expect(find.text('1 of 1 done'), findsOneWidget);
+    expect(find.text('0 of 2 done'), findsOneWidget);
+    expect(find.byKey(const ValueKey('home-mem-continue')), findsOneWidget);
   });
 
   group('progress (M4)', () {

@@ -4,148 +4,193 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/localization/generated/app_localizations.dart';
 import '../../../../core/routing/app_routes.dart';
-import '../../../../core/routing/quran_location_routing.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/components/components.dart';
-import '../../../../quran/application/recent_quran_location.dart';
-import '../../../../quran/domain/models/quran_location.dart';
-import '../../application/home_providers.dart';
-import '../home_location_label.dart';
+import '../../../../memorization/application/memorization_today.dart';
+import '../../../../memorization/domain/models/memorization_models.dart';
+import '../../../../memorization/domain/plan_scheduler.dart';
+import '../../../../memorization/domain/recitation_score.dart';
+import '../../../../memorization/domain/today_scheduler.dart';
+import '../../../memorize/presentation/memorize_screen.dart';
 
-/// Home's memorization section: this week's recitation practice, the latest
-/// sessions (each opening where it started), and a way to start reciting —
-/// the Mushaf, where Tahfeez follows the recitation word by word.
+/// Home's memorization card (`docs/MEMORIZATION_MILESTONE.md`, M5): today's
+/// three parts — the new lesson, recent and old revision — with how far
+/// each has come, today's scores, and Continue for the next part not done.
 class HomeMemorizationTeaserSection extends ConsumerWidget {
   const HomeMemorizationTeaserSection({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    final summary = ref.watch(memorizationSummaryProvider);
-
+    final plan = ref.watch(todayPlanProvider);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         TahfeezSectionHeader(
           title: l10n.homeSectionMemorization,
-          icon: Icons.bookmark_border,
+          icon: Icons.school_outlined,
         ),
         const SizedBox(height: TahfeezSpacing.sm),
-        summary.when(
-          data: (s) => _MemorizationCard(summary: s),
+        plan.when(
+          data: (today) => _TodayCard(today: today),
           loading: () => const TahfeezCard(child: TahfeezLoadingView()),
-          error: (_, _) =>
-              const _MemorizationCard(summary: MemorizationSummary()),
+          error: (_, _) => const _TodayCard(today: TodayPlan()),
         ),
       ],
     );
   }
 }
 
-class _MemorizationCard extends ConsumerWidget {
-  const _MemorizationCard({required this.summary});
+/// The next part to recite: its first and last ayah, and its page.
+typedef _Next = ({int first, int last, int? page});
 
-  final MemorizationSummary summary;
+class _TodayCard extends ConsumerWidget {
+  const _TodayCard({required this.today});
+
+  final TodayPlan today;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final dates = MaterialLocalizations.of(context);
-    final recent = ref.watch(recentQuranLocationControllerProvider);
+    final lesson = ref.watch(newLessonProvider).value;
+    final names = surahNames(ref);
+    final score = RecitationScore.of(
+      ref.watch(todayAttemptsProvider).value ?? const <AyahAttempt>[],
+    );
+    void openMemorize() => context.go(AppRoutes.memorize);
 
-    // Recitation is followed in the Mushaf: the last Mushaf page read, or
-    // the Quran index to choose one.
-    void start() {
-      if (recent is QuranLocationPage) {
-        goToQuranLocation(context, recent);
-      } else {
-        context.go(AppRoutes.quran);
-      }
+    final lessonOpen =
+        lesson != null &&
+        !lesson.done &&
+        !lesson.rest &&
+        !lesson.finished &&
+        lesson.runs.isNotEmpty;
+    RevisionTask? firstOpen(List<RevisionTask> tasks) =>
+        tasks.where((t) => !t.done).firstOrNull;
+    final recentOpen = firstOpen(today.recent);
+    final oldOpen = firstOpen(today.old);
+    final _Next? next = lessonOpen
+        ? (
+            first: lesson.runs.first.first,
+            last: lesson.runs.first.last,
+            page: null,
+          )
+        : recentOpen != null
+        ? (
+            first: recentOpen.first,
+            last: recentOpen.last,
+            page: recentOpen.page,
+          )
+        : oldOpen != null
+        ? (first: oldOpen.first, last: oldOpen.last, page: oldOpen.page)
+        : null;
+
+    if (lesson == null && today.isEmpty) {
+      return TahfeezCard(
+        key: const ValueKey('home-mem-empty'),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          spacing: TahfeezSpacing.smPlus,
+          children: [
+            Text(
+              l10n.homeMemNothing,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
+            ),
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: FilledButton.tonal(
+                onPressed: openMemorize,
+                child: Text(l10n.homeMemOpen),
+              ),
+            ),
+          ],
+        ),
+      );
     }
 
+    Widget row(String title, String value, {required bool done}) => Row(
+      spacing: TahfeezSpacing.sm,
+      children: [
+        Icon(
+          done ? Icons.check_circle : Icons.radio_button_unchecked,
+          size: 20,
+          color: done ? scheme.primary : scheme.outline,
+        ),
+        Expanded(child: Text(title, style: theme.textTheme.bodyLarge)),
+        Flexible(
+          child: Text(
+            value,
+            textAlign: TextAlign.end,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
+          ),
+        ),
+      ],
+    );
+    String tasks(List<RevisionTask> list) =>
+        l10n.homeMemTasksDone(list.where((t) => t.done).length, list.length);
+
     return TahfeezCard(
+      key: const ValueKey('home-mem-today'),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: TahfeezSpacing.smPlus,
         children: [
-          if (summary.recent.isEmpty)
-            Row(
-              spacing: TahfeezSpacing.smPlus,
-              children: [
-                Icon(Icons.auto_stories_outlined, color: scheme.primary),
+          row(l10n.memNewLesson, switch (lesson) {
+            null => l10n.homeMemNoPlan,
+            NewLesson(finished: true) => l10n.memPlanFinished,
+            NewLesson(done: true) => l10n.memLessonDone,
+            NewLesson(rest: true) => l10n.memLessonRest,
+            NewLesson(:final runs) when runs.isNotEmpty => ayahRangeLabel(
+              runs.first.first,
+              runs.last.last,
+              names,
+            ),
+            _ => '',
+          }, done: lesson != null && (lesson.done || lesson.finished)),
+          if (today.recent.isNotEmpty)
+            row(l10n.memRecent, tasks(today.recent), done: recentOpen == null),
+          if (today.old.isNotEmpty)
+            row(l10n.memOld, tasks(today.old), done: oldOpen == null),
+          if (!score.isEmpty) ScorePair(score: score, dense: true),
+          if (next == null)
+            Text(
+              l10n.homeMemAllDone,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: scheme.primary,
+              ),
+            ),
+          Row(
+            spacing: TahfeezSpacing.sm,
+            children: [
+              if (next != null)
                 Expanded(
-                  child: Text(
-                    l10n.homeMemorizationEmpty,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: scheme.onSurfaceVariant,
+                  child: FilledButton(
+                    key: const ValueKey('home-mem-continue'),
+                    onPressed: () => reciteAyahs(
+                      context,
+                      ref,
+                      next.first,
+                      next.last,
+                      page: next.page,
                     ),
+                    child: Text(l10n.homeMemContinue),
                   ),
                 ),
-              ],
-            )
-          else ...[
-            Text(
-              l10n.homeMemorizationWeek(
-                summary.weekSessions,
-                summary.weekMinutes,
-              ),
-              style: theme.textTheme.titleMedium,
-            ),
-            Text(
-              l10n.homeMemorizationRecent,
-              style: theme.textTheme.labelMedium?.copyWith(
-                color: scheme.onSurfaceVariant,
-              ),
-            ),
-            for (final session in summary.recent)
-              InkWell(
-                borderRadius: BorderRadius.circular(TahfeezRadii.sm),
-                onTap: session.startLocation == null
-                    ? null
-                    : () => goToQuranLocation(context, session.startLocation!),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: TahfeezSpacing.xs,
-                  ),
-                  child: Row(
-                    spacing: TahfeezSpacing.sm,
-                    children: [
-                      Icon(
-                        Icons.mic_none_outlined,
-                        size: 18,
-                        color: scheme.primary,
-                      ),
-                      Expanded(
-                        child: Text(
-                          session.startLocation == null
-                              ? dates.formatMediumDate(session.startedAt)
-                              : '${homeLocationLabel(l10n, session.startLocation!)}'
-                                    ' · ${dates.formatMediumDate(session.startedAt)}',
-                          style: theme.textTheme.bodyMedium,
-                        ),
-                      ),
-                      Text(
-                        l10n.homeMemorizationMinutes(
-                          (session.duration.inSeconds / 60).ceil(),
-                        ),
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: scheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
+              Expanded(
+                child: OutlinedButton(
+                  key: const ValueKey('home-mem-open'),
+                  onPressed: openMemorize,
+                  child: Text(l10n.homeMemOpen),
                 ),
               ),
-          ],
-          Align(
-            alignment: AlignmentDirectional.centerStart,
-            child: FilledButton.tonalIcon(
-              onPressed: start,
-              icon: const Icon(Icons.mic_none_outlined),
-              label: Text(l10n.homeMemorizationStart),
-            ),
+            ],
           ),
         ],
       ),

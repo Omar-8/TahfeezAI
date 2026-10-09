@@ -1,6 +1,6 @@
 # Memorization milestone (17) — plan
 
-Status: planned 2026-10-09; M1 to M4 done the same day. Decisions by the product owner are marked **(decided)**.
+Status: planned 2026-10-09; M1 to M5 done the same day. Decisions by the product owner are marked **(decided)**.
 
 ## Goal
 
@@ -94,7 +94,7 @@ The constants are a starting point, to be tuned on real use (see "Later").
 4. **M4 — Progress and starting point.** *(done 2026-10-09; a Progress screen from the Memorize tab: the share memorized, a page-by-page strength map by juz, the weakest pages with Start; "Mark what I know" by surah or juz, unmarking only what was never recited)* The strength map, the weak-parts list, marking
    already-memorized surahs / juz / pages (unverified until recited). *Done when* marking
    works and the map reflects tests.
-5. **M5 — Home and reminders.** Home cards; an optional daily reminder (local notification,
+5. **M5 — Home and reminders.** *(done 2026-10-09; Home's memorization card shows today's three parts with Continue; the daily reminder is opt-in in Settings, Android only, inexact, and opens the Memorize tab)* Home cards; an optional daily reminder (local notification,
    opt-in, Android first). *Done when* Home shows today's tasks and the reminder fires.
 
 Each phase: `flutter analyze` clean, tests added and passing, English + Arabic strings, light
