@@ -129,7 +129,7 @@ flutter:
   # Read at first launch by lib/quran/data/import/bundled_dataset_seeder.dart
   # so Android/iOS never need a network call to seed the local databases.
   assets:
-    - assets/branding/app_icon_192.png
+    - assets/branding/app_icon_256.png
     - assets/quran/quran_dataset.json
     - assets/quran/resource_manifest.json
     - assets/quran/translations/en_rowwad.json
@@ -201,3 +201,7 @@ flutter:
     - family: Noto Sans Arabic
       fonts:
         - asset: assets/fonts/NotoSansArabic-Variable.ttf
+    # The app's name (wordmark) only; Latin and Arabic.
+    - family: El Messiri
+      fonts:
+        - asset: assets/fonts/ElMessiri-Variable.ttf

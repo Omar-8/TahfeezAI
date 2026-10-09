@@ -50,7 +50,7 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-/// The app's icon and name at the top of Home.
+/// The app's icon, and its name below it, centered at the top of Home.
 class _HomeBrandHeader extends StatelessWidget {
   const _HomeBrandHeader({required this.l10n});
 
@@ -58,23 +58,31 @@ class _HomeBrandHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Semantics(
       header: true,
-      child: Row(
-        spacing: TahfeezSpacing.smPlus,
+      child: Column(
+        spacing: TahfeezSpacing.sm,
         children: [
           ExcludeSemantics(
             child: Image.asset(
-              'assets/branding/app_icon_192.png',
-              width: 44,
-              height: 44,
+              'assets/branding/app_icon_256.png',
+              width: 72,
+              height: 72,
               filterQuality: FilterQuality.medium,
             ),
           ),
           Text(
             l10n.appName,
-            style: Theme.of(context).textTheme.headlineSmall
-                ?.copyWith(fontWeight: FontWeight.w600),
+            textAlign: TextAlign.center,
+            style: theme.textTheme.headlineMedium?.copyWith(
+              fontFamily: 'El Messiri',
+              fontWeight: FontWeight.w600,
+              // A variable font: its weight axis, set explicitly.
+              fontVariations: const [FontVariation('wght', 600)],
+              letterSpacing: 0.5,
+              height: 1.1,
+            ),
           ),
         ],
       ),
