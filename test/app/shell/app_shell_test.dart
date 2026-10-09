@@ -55,10 +55,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Home is the initial branch.
-    expect(
-      find.text('Your calm place to read and memorize the Quran.'),
-      findsOneWidget,
-    );
+    expect(find.text('Daily Ayah'), findsOneWidget);
 
     await tester.tap(find.text('Quran'));
     await tester.pumpAndSettle();
@@ -72,10 +69,7 @@ void main() {
 
     await tester.tap(find.text('Home'));
     await tester.pumpAndSettle();
-    expect(
-      find.text('Your calm place to read and memorize the Quran.'),
-      findsOneWidget,
-    );
+    expect(find.text('Daily Ayah'), findsOneWidget);
   });
 
   testWidgets('uses a navigation rail (not a bottom bar) on a wide viewport', (

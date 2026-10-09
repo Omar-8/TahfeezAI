@@ -38,11 +38,9 @@ void main() {
     await tester.pumpWidget(wrap());
     await tester.pumpAndSettle();
 
-    // Greeting header (item: "clear page greeting/title").
-    expect(
-      find.text('Your calm place to read and memorize the Quran.'),
-      findsOneWidget,
-    );
+    // The app's icon and name head the page.
+    expect(find.text('TahfeezAI'), findsOneWidget);
+    expect(find.byType(Image), findsWidgets);
 
     // Section headers for every information-hierarchy item this milestone
     // requires (resource updates has no header -- it hides itself).
@@ -91,7 +89,7 @@ void main() {
       Directionality.of(tester.element(find.byType(HomeScreen))),
       TextDirection.rtl,
     );
-    expect(find.text('مكانك الهادئ لقراءة القرآن وحفظه.'), findsOneWidget);
+    expect(find.text('تحفيظ AI'), findsOneWidget);
     expect(find.text('آية اليوم'), findsOneWidget);
   });
 

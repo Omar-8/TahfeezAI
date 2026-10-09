@@ -21,17 +21,10 @@ void main() {
       await tester.pumpWidget(app());
       await tester.pumpAndSettle();
 
-      // English by default: the LTR Home greeting subtitle is visible.
+      // English by default: the LTR Home's Daily Ayah title is visible.
+      expect(find.text('Daily Ayah'), findsOneWidget);
       expect(
-        find.text('Your calm place to read and memorize the Quran.'),
-        findsOneWidget,
-      );
-      expect(
-        Directionality.of(
-          tester.element(
-            find.text('Your calm place to read and memorize the Quran.'),
-          ),
-        ),
+        Directionality.of(tester.element(find.text('Daily Ayah'))),
         TextDirection.ltr,
       );
 
@@ -46,11 +39,9 @@ void main() {
           .read(localeControllerProvider.notifier)
           .setLocale(const Locale('ar'));
       await tester.pumpAndSettle();
-      expect(find.text('مكانك الهادئ لقراءة القرآن وحفظه.'), findsOneWidget);
+      expect(find.text('آية اليوم'), findsOneWidget);
       expect(
-        Directionality.of(
-          tester.element(find.text('مكانك الهادئ لقراءة القرآن وحفظه.')),
-        ),
+        Directionality.of(tester.element(find.text('آية اليوم'))),
         TextDirection.rtl,
       );
 

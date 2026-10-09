@@ -63,6 +63,9 @@ def rounded(img, radius_share):
 
 if __name__ == '__main__':
     save(master, 'assets/branding/app_icon.png')
+    # In the app (the Home header), rounded like a launcher icon.
+    save(rounded(master.resize((192, 192), Image.LANCZOS), 0.22),
+         'assets/branding/app_icon_192.png')
 
     # Android: adaptive (API 26+): an opaque foreground with the emblem
     # inside the masks' safe circle; legacy icons below.

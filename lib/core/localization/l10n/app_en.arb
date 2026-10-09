@@ -1,6 +1,6 @@
 {
   "@@locale": "en",
-  "appName": "Tahfeez AI",
+  "appName": "TahfeezAI",
   "@appName": {
     "description": "The application name, shown in the app bar and OS surfaces."
   },
@@ -40,10 +40,6 @@
   "navQuran": "Quran",
   "navSearch": "Search",
 
-  "homeGreetingMorning": "Good morning",
-  "homeGreetingAfternoon": "Good afternoon",
-  "homeGreetingEvening": "Good evening",
-  "homeGreetingSubtitle": "Your calm place to read and memorize the Quran.",
 
   "homeSectionDailyAyah": "Daily Ayah",
   "homeSectionContinueReading": "Continue Reading",

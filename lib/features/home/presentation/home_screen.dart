@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../core/localization/generated/app_localizations.dart';
 import '../../../core/theme/app_spacing.dart';
-import 'home_greeting.dart';
 import 'sections/home_daily_ayah_section.dart';
 import 'sections/home_featured_reading_section.dart';
 import 'sections/home_memorization_teaser_section.dart';
@@ -38,7 +37,7 @@ class HomeScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           spacing: TahfeezSpacing.lg,
           children: [
-            _HomeGreetingHeader(l10n: l10n),
+            _HomeBrandHeader(l10n: l10n),
             const HomeResourceUpdatesBanner(),
             const HomeDailyAyahSection(),
             const HomeReadHistorySection(),
@@ -51,32 +50,31 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-class _HomeGreetingHeader extends StatelessWidget {
-  const _HomeGreetingHeader({required this.l10n});
+/// The app's icon and name at the top of Home.
+class _HomeBrandHeader extends StatelessWidget {
+  const _HomeBrandHeader({required this.l10n});
 
   final AppLocalizations l10n;
 
   @override
   Widget build(BuildContext context) {
-    final band = homeGreetingBandForHour(DateTime.now().hour);
-    final greeting = switch (band) {
-      HomeGreetingBand.morning => l10n.homeGreetingMorning,
-      HomeGreetingBand.afternoon => l10n.homeGreetingAfternoon,
-      HomeGreetingBand.evening => l10n.homeGreetingEvening,
-    };
-
     return Semantics(
       header: true,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        spacing: TahfeezSpacing.xs,
+      child: Row(
+        spacing: TahfeezSpacing.smPlus,
         children: [
-          Text(greeting, style: Theme.of(context).textTheme.headlineSmall),
-          Text(
-            l10n.homeGreetingSubtitle,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ExcludeSemantics(
+            child: Image.asset(
+              'assets/branding/app_icon_192.png',
+              width: 44,
+              height: 44,
+              filterQuality: FilterQuality.medium,
             ),
+          ),
+          Text(
+            l10n.appName,
+            style: Theme.of(context).textTheme.headlineSmall
+                ?.copyWith(fontWeight: FontWeight.w600),
           ),
         ],
       ),
