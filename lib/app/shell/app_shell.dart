@@ -73,7 +73,6 @@ class AppShell extends ConsumerWidget {
         icon: Icons.menu_book_outlined,
         selectedIcon: Icons.menu_book,
         label: l10n.navQuran,
-        isPrimary: true,
       ),
       TahfeezPrimaryNavItem(
         icon: Icons.school_outlined,

@@ -26,6 +26,14 @@ final ayahPagesProvider = FutureProvider<Map<int, int>>((ref) async {
   return ref.watch(quranRepositoryProvider).getAyahPages(mushafId: mushaf.id);
 });
 
+/// Every test result recorded today, live.
+final todayAttemptsProvider = StreamProvider<List<AyahAttempt>>((ref) {
+  final now = ref.read(memorizationClockProvider)();
+  return ref
+      .watch(memorizationRepositoryProvider)
+      .watchAttemptsSince(DateTime(now.year, now.month, now.day));
+});
+
 /// Today's memorization (`TodayScheduler`).
 final todayPlanProvider = FutureProvider<TodayPlan>((ref) async {
   final memories = await ref.watch(ayahMemoriesProvider.future);

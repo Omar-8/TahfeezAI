@@ -30,9 +30,29 @@ void main() {
       ),
   ];
 
-  Widget app(TodayPlan plan, {Widget? child}) => ProviderScope(
+  AyahAttempt attempt(
+    int id, {
+    AyahGrade? grade,
+    int wrong = 0,
+    int pronunciation = 0,
+  }) => AyahAttempt(
+    ayahId: id,
+    sessionId: 's',
+    at: DateTime(2026),
+    grade: grade ?? (wrong > 0 ? AyahGrade.fail : AyahGrade.good),
+    words: 10,
+    wrong: wrong,
+    pronunciation: pronunciation,
+  );
+
+  Widget app(
+    TodayPlan plan, {
+    Widget? child,
+    List<AyahAttempt> today = const [],
+  }) => ProviderScope(
     overrides: [
       todayPlanProvider.overrideWith((ref) async => plan),
+      todayAttemptsProvider.overrideWith((ref) => Stream.value(today)),
       indexedSurahsProvider.overrideWith((ref) async => names),
     ],
     child: MaterialApp(
@@ -46,14 +66,18 @@ void main() {
     await tester.pumpWidget(app(const TodayPlan()));
     await tester.pumpAndSettle();
     expect(find.text('Nothing to revise yet'), findsOneWidget);
+    expect(find.text('Nothing recited yet today'), findsOneWidget);
     expect(find.text('Start'), findsNothing);
   });
 
-  testWidgets('today: recent runs and old pages, with strength and done', (
-    tester,
-  ) async {
+  testWidgets('today: each part\'s strength, or how today\'s recitation of '
+      'it went', (tester) async {
+    tester.view.physicalSize = const Size(500, 1400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
     await tester.pumpWidget(
       app(
+        today: [attempt(114002, wrong: 2, pronunciation: 1)],
         const TodayPlan(
           recent: [
             RevisionTask(ayahIds: [112001, 112002, 112003, 112004]),
@@ -72,23 +96,22 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Al-Ikhlas 1–4'), findsOneWidget);
     expect(find.text('Al-Falaq 1 – An-Nas 1'), findsOneWidget);
+    expect(find.text('Strength'), findsOneWidget);
     expect(find.text('42%'), findsOneWidget);
     expect(find.text('Start'), findsNWidgets(2));
-    expect(find.text('Done'), findsOneWidget);
+    // Reviewed today: its scores (8 of 10 words right, 1 of those 8 with a
+    // pronunciation mistake), shown for it and for today; recite it again.
+    expect(find.text('Again'), findsOneWidget);
+    expect(find.text('1 ayah recited today'), findsOneWidget);
+    expect(find.text('80%'), findsNWidgets(2));
+    expect(find.text('88%'), findsNWidgets(2));
   });
 
-  testWidgets('a session\'s results: grades, strength, and the weak ayahs to '
-      'repeat', (tester) async {
-    AyahAttempt a(int id, AyahGrade g) => AyahAttempt(
-      ayahId: id,
-      sessionId: 's',
-      at: DateTime(2026),
-      grade: g,
-      words: 4,
-    );
+  testWidgets('a session\'s results: an overview, and only the ayahs to '
+      'review', (tester) async {
     final summary = TestSummary('s', [
-      SummaryRow(a(112001, AyahGrade.good), before: 0.5, after: 0.95),
-      SummaryRow(a(112002, AyahGrade.fail), before: 0.8, after: 0.3),
+      SummaryRow(attempt(112001), before: 0.5, after: 0.95),
+      SummaryRow(attempt(112002, wrong: 3), before: 0.8, after: 0.3),
     ]);
     await tester.pumpWidget(
       app(
@@ -104,8 +127,14 @@ void main() {
     await tester.tap(find.text('open'));
     await tester.pumpAndSettle();
     expect(find.text('Session results'), findsOneWidget);
-    expect(find.text('50% → 95%'), findsOneWidget);
-    expect(find.text('Missed'), findsOneWidget);
+    expect(
+      find.text('2 ayahs · 1 good · 0 hesitant · 1 missed'),
+      findsOneWidget,
+    );
+    expect(find.text('85%'), findsOneWidget, reason: '17 of 20 words right');
+    expect(find.text('Strength 65% → 63%'), findsOneWidget);
+    expect(find.byKey(const ValueKey('mem-weak-112002')), findsOneWidget);
+    expect(find.byKey(const ValueKey('mem-weak-112001')), findsNothing);
     expect(find.byKey(const ValueKey('mem-repeat-weak')), findsOneWidget);
   });
 }

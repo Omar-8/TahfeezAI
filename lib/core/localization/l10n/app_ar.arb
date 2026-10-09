@@ -303,5 +303,13 @@
   "memGradeFail": "فائت",
   "memAllGood": "تُليت كل الآيات دون خطأ.",
   "memRepeatWeak": "كرّر الآيات الضعيفة",
-  "memClose": "إغلاق"
+  "memClose": "إغلاق",
+  "memScoreMemorization": "الحفظ",
+  "memScoreTajweed": "التجويد",
+  "memTodayRecited": "{count, plural, =0{لم تُتلَ آيات اليوم بعد} =1{تُليت آية واحدة اليوم} =2{تُليت آيتان اليوم} few{تُليت {count} آيات اليوم} other{تُليت {count} آية اليوم}}",
+  "memAgain": "مرة أخرى",
+  "memSummaryCounts": "{ayahs} آية · {good} جيّدة · {hesitant} متردّدة · {missed} فائتة",
+  "memSummaryStrength": "قوة الحفظ {before}٪ ← {after}٪",
+  "memToReview": "للمراجعة",
+  "memStrengthLabel": "قوة الحفظ"
 }

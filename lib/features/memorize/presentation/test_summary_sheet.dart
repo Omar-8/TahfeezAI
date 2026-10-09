@@ -6,13 +6,15 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/components/components.dart';
 import '../../../memorization/application/memorization_today.dart';
 import '../../../memorization/domain/models/memorization_models.dart';
+import '../../../memorization/domain/recitation_score.dart';
 import '../../recitation/application/hifz_controller.dart';
 import '../../recitation/application/mushaf_recitation_target.dart';
 import '../../recitation/application/recitation_session_controller.dart';
-import 'memorize_screen.dart' show ayahRangeLabel, surahNames;
+import 'memorize_screen.dart' show ScorePair, ayahRangeLabel, surahNames;
 
-/// A session's results, after it ends: each ayah's grade and its strength
-/// before → after, and a loop over the weak ayahs.
+/// A session's results, after it ends — an overview: how many ayahs and how
+/// they went, memorization and tajweed, the strength before → after, and
+/// only the ayahs to review (with a loop over them).
 Future<void> showTestSummarySheet(BuildContext context, TestSummary summary) =>
     showTahfeezModalBottomSheet<void>(
       context: context,
@@ -30,32 +32,36 @@ class _TestSummarySheet extends ConsumerWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final names = surahNames(ref);
-    // The latest result per ayah (a loop recites them more than once).
-    final latest = <int, SummaryRow>{};
+    final score = RecitationScore.of(summary.rows.map((r) => r.attempt));
+    // The strength before the session and after it: each ayah's first
+    // "before" and last "after" (a loop recites them more than once).
+    final before = <int, double>{}, after = <int, double>{};
     for (final r in summary.rows) {
-      latest[r.attempt.ayahId] = r;
+      final id = r.attempt.ayahId;
+      if (r.before case final b? when !before.containsKey(id)) before[id] = b;
+      if (r.after case final a?) after[id] = a;
     }
-    final rows = latest.values.toList()
-      ..sort((a, b) => a.attempt.ayahId.compareTo(b.attempt.ayahId));
+    int mean(Map<int, double> m) => m.isEmpty
+        ? 0
+        : (m.values.reduce((a, b) => a + b) / m.length * 100).round();
+    // To review: an ayah whose latest result was not good.
+    final latest = <int, AyahGrade>{};
+    for (final r in summary.rows) {
+      latest[r.attempt.ayahId] = r.attempt.grade;
+    }
     final weak = [
-      for (final r in rows)
-        if (r.attempt.grade != AyahGrade.good) r.attempt.ayahId,
-    ];
-
-    (String, Color) grade(AyahGrade g) => switch (g) {
-      AyahGrade.good => (l10n.memGradeGood, scheme.primary),
-      AyahGrade.hard => (l10n.memGradeHard, scheme.tertiary),
-      AyahGrade.fail => (l10n.memGradeFail, scheme.error),
-    };
-    String pct(double? s) => s == null ? '–' : '${(s * 100).round()}%';
+      for (final MapEntry(key: id, value: g) in latest.entries)
+        if (g != AyahGrade.good) (id, g),
+    ]..sort((a, b) => a.$1.compareTo(b.$1));
 
     void repeatWeak() {
       final location = ref.read(mushafRecitationTargetProvider)?.location;
       Navigator.of(context).pop();
       if (location == null || weak.isEmpty) return;
+      final first = weak.first.$1, last = weak.last.$1;
       ref.read(hifzControllerProvider.notifier).setLoop((
-        from: (chapterNo: weak.first ~/ 1000, verseNo: weak.first % 1000),
-        to: (chapterNo: weak.last ~/ 1000, verseNo: weak.last % 1000),
+        from: (chapterNo: first ~/ 1000, verseNo: first % 1000),
+        to: (chapterNo: last ~/ 1000, verseNo: last % 1000),
       ), const HifzLoop(mode: HifzLoopMode.eachAyah, count: 3));
       ref
           .read(recitationSessionControllerProvider.notifier)
@@ -71,40 +77,59 @@ class _TestSummarySheet extends ConsumerWidget {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        spacing: TahfeezSpacing.sm,
+        spacing: TahfeezSpacing.smPlus,
         children: [
           Text(l10n.memSummaryTitle, style: theme.textTheme.titleLarge),
-          if (weak.isEmpty)
-            Text(
-              l10n.memAllGood,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: scheme.onSurfaceVariant,
-              ),
+          Text(
+            l10n.memSummaryCounts(
+              latest.length,
+              latest.values.where((g) => g == AyahGrade.good).length,
+              latest.values.where((g) => g == AyahGrade.hard).length,
+              latest.values.where((g) => g == AyahGrade.fail).length,
             ),
+            key: const ValueKey('mem-summary-counts'),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
+          ),
           TahfeezCard(
-            padding: EdgeInsets.zero,
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              spacing: TahfeezSpacing.smPlus,
               children: [
-                for (final (i, r) in rows.indexed) ...[
-                  if (i > 0) const Divider(height: 1),
-                  ListTile(
-                    key: ValueKey('mem-row-${r.attempt.ayahId}'),
-                    dense: true,
-                    title: Text(
-                      ayahRangeLabel(r.attempt.ayahId, r.attempt.ayahId, names),
-                    ),
-                    subtitle: Text('${pct(r.before)} → ${pct(r.after)}'),
-                    trailing: Text(
-                      grade(r.attempt.grade).$1,
-                      style: theme.textTheme.labelLarge?.copyWith(
-                        color: grade(r.attempt.grade).$2,
-                      ),
+                ScorePair(score: score),
+                if (after.isNotEmpty)
+                  Text(
+                    l10n.memSummaryStrength(mean(before), mean(after)),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: scheme.onSurfaceVariant,
                     ),
                   ),
-                ],
               ],
             ),
           ),
+          if (weak.isEmpty)
+            Text(l10n.memAllGood, style: theme.textTheme.bodyMedium)
+          else ...[
+            Text(l10n.memToReview, style: theme.textTheme.titleSmall),
+            Wrap(
+              spacing: TahfeezSpacing.sm,
+              runSpacing: TahfeezSpacing.sm,
+              children: [
+                for (final (id, g) in weak)
+                  Chip(
+                    key: ValueKey('mem-weak-$id'),
+                    visualDensity: VisualDensity.compact,
+                    side: BorderSide(
+                      color: g == AyahGrade.fail
+                          ? scheme.error
+                          : scheme.tertiary,
+                    ),
+                    label: Text(ayahRangeLabel(id, id, names)),
+                  ),
+              ],
+            ),
+          ],
           Row(
             spacing: TahfeezSpacing.sm,
             children: [

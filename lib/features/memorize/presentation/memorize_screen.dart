@@ -6,6 +6,8 @@ import '../../../core/routing/quran_location_routing.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/components/components.dart';
 import '../../../memorization/application/memorization_today.dart';
+import '../../../memorization/domain/models/memorization_models.dart';
+import '../../../memorization/domain/recitation_score.dart';
 import '../../../memorization/domain/today_scheduler.dart';
 import '../../../quran/domain/models/quran_location.dart';
 import '../../../quran/domain/models/quran_refs.dart';
@@ -14,9 +16,9 @@ import '../../quran/application/quran_index_providers.dart';
 import '../../recitation/application/hifz_controller.dart';
 
 /// The Memorize tab: today's memorization, the three parts of a Hifz day
-/// (`docs/MEMORIZATION_MILESTONE.md`). Each task opens the Mushaf at its
-/// range with hide mode on, the Hifz test set to it; the reciter starts
-/// with the mic.
+/// (`docs/MEMORIZATION_MILESTONE.md`), with how today's recitation went.
+/// Each task opens the Mushaf at its range with hide mode on, the Hifz test
+/// set to it; the reciter starts with the mic.
 class MemorizeScreen extends ConsumerWidget {
   const MemorizeScreen({super.key});
 
@@ -50,6 +52,8 @@ class MemorizeScreen extends ConsumerWidget {
         data: (today) => ListView(
           padding: const EdgeInsets.all(TahfeezSpacing.md),
           children: [
+            const _TodayScore(),
+            const SizedBox(height: TahfeezSpacing.lg),
             section(
               l10n.memNewLesson,
               l10n.memNewLessonSoon,
@@ -114,6 +118,131 @@ String ayahRangeLabel(int first, int last, Map<int, String> names) {
   return '${name(first)} ${first % 1000} – ${name(last)} ${last % 1000}';
 }
 
+/// A score (0-1) as a labelled bar: green from 90%, amber from 70%, red
+/// below.
+class ScoreBar extends StatelessWidget {
+  const ScoreBar({
+    super.key,
+    required this.label,
+    required this.value,
+    this.dense = false,
+  });
+
+  final String label;
+  final double value;
+
+  /// Thinner, with smaller text (in a list row).
+  final bool dense;
+
+  static Color colorOf(double value, ColorScheme scheme) => value >= 0.9
+      ? scheme.primary
+      : value >= 0.7
+      ? scheme.tertiary
+      : scheme.error;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final color = colorOf(value, scheme);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: TahfeezSpacing.xs,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                label,
+                style: dense
+                    ? theme.textTheme.labelSmall
+                    : theme.textTheme.labelMedium,
+              ),
+            ),
+            Text(
+              '${(value * 100).round()}%',
+              style:
+                  (dense
+                          ? theme.textTheme.labelMedium
+                          : theme.textTheme.labelLarge)
+                      ?.copyWith(color: color),
+            ),
+          ],
+        ),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(TahfeezRadii.pill),
+          child: LinearProgressIndicator(
+            value: value,
+            minHeight: dense ? 4 : 6,
+            color: color,
+            backgroundColor: scheme.surfaceContainerHighest,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Memorization and tajweed of [score], side by side.
+class ScorePair extends StatelessWidget {
+  const ScorePair({super.key, required this.score, this.dense = false});
+
+  final RecitationScore score;
+  final bool dense;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Row(
+      spacing: TahfeezSpacing.md,
+      children: [
+        Expanded(
+          child: ScoreBar(
+            label: l10n.memScoreMemorization,
+            value: score.memorization,
+            dense: dense,
+          ),
+        ),
+        Expanded(
+          child: ScoreBar(
+            label: l10n.memScoreTajweed,
+            value: score.tajweed,
+            dense: dense,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Today's recitation so far: ayahs recited, and how memorization and
+/// tajweed went.
+class _TodayScore extends ConsumerWidget {
+  const _TodayScore();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final score = RecitationScore.of(
+      ref.watch(todayAttemptsProvider).value ?? const <AyahAttempt>[],
+    );
+    return TahfeezCard(
+      key: const ValueKey('mem-today-score'),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: TahfeezSpacing.smPlus,
+        children: [
+          Text(
+            l10n.memTodayRecited(score.ayahs),
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          if (!score.isEmpty) ScorePair(score: score),
+        ],
+      ),
+    );
+  }
+}
+
 VerseRef _verse(int ayah) => (chapterNo: ayah ~/ 1000, verseNo: ayah % 1000);
 
 class _TaskList extends ConsumerWidget {
@@ -144,62 +273,75 @@ class _TaskList extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
+    final today =
+        ref.watch(todayAttemptsProvider).value ?? const <AyahAttempt>[];
+    RecitationScore scoreOf(RevisionTask t) {
+      final ids = t.ayahIds.toSet();
+      return RecitationScore.of(today.where((a) => ids.contains(a.ayahId)));
+    }
+
     return TahfeezCard(
       padding: EdgeInsets.zero,
       child: Column(
         children: [
           for (final (i, t) in tasks.indexed) ...[
             if (i > 0) const Divider(height: 1),
-            ListTile(
+            Padding(
               key: ValueKey('mem-task-${t.first}'),
-              title: Text(ayahRangeLabel(t.first, t.last, names)),
-              subtitle: Row(
+              padding: const EdgeInsets.symmetric(
+                horizontal: TahfeezSpacing.md,
+                vertical: TahfeezSpacing.smPlus,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 spacing: TahfeezSpacing.sm,
                 children: [
-                  if (t.page != null) Text(l10n.memPage(t.page!)),
-                  if (t.strength case final s?)
-                    Expanded(
-                      child: Row(
-                        spacing: TahfeezSpacing.xs,
-                        children: [
-                          Expanded(
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(
-                                TahfeezRadii.pill,
-                              ),
-                              child: LinearProgressIndicator(
-                                value: s,
-                                minHeight: 4,
-                                color: s < 0.7
-                                    ? scheme.tertiary
-                                    : scheme.primary,
-                                backgroundColor: scheme.surfaceContainerHighest,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              ayahRangeLabel(t.first, t.last, names),
+                              style: theme.textTheme.bodyLarge,
+                            ),
+                            Text(
+                              [
+                                if (t.page != null) l10n.memPage(t.page!),
+                                if (t.unverified) l10n.memUnverified,
+                              ].join(' · '),
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
                               ),
                             ),
-                          ),
-                          Text(l10n.memStrength((s * 100).round())),
-                        ],
+                          ],
+                        ),
                       ),
-                    )
-                  else if (t.unverified)
-                    Text(l10n.memUnverified),
+                      if (t.done)
+                        TextButton(
+                          onPressed: () => _start(context, ref, t),
+                          child: Text(l10n.memAgain),
+                        )
+                      else
+                        FilledButton.tonal(
+                          onPressed: () => _start(context, ref, t),
+                          child: Text(l10n.memStart),
+                        ),
+                    ],
+                  ),
+                  // Recited today: how it went. Otherwise its memory's
+                  // strength.
+                  if (scoreOf(t) case final s when !s.isEmpty)
+                    ScorePair(score: s, dense: true)
+                  else if (t.strength case final s?)
+                    ScoreBar(
+                      label: l10n.memStrengthLabel,
+                      value: s,
+                      dense: true,
+                    ),
                 ],
               ),
-              trailing: t.done
-                  ? Chip(
-                      avatar: Icon(
-                        Icons.check,
-                        size: 16,
-                        color: scheme.primary,
-                      ),
-                      label: Text(l10n.memDone),
-                      visualDensity: VisualDensity.compact,
-                    )
-                  : FilledButton.tonal(
-                      onPressed: () => _start(context, ref, t),
-                      child: Text(l10n.memStart),
-                    ),
             ),
           ],
         ],

@@ -640,5 +640,16 @@
   "memGradeFail": "Missed",
   "memAllGood": "Every ayah recited cleanly.",
   "memRepeatWeak": "Repeat the weak ayahs",
-  "memClose": "Close"
+  "memClose": "Close",
+  "memScoreMemorization": "Memorization",
+  "memScoreTajweed": "Tajweed",
+  "memTodayRecited": "{count, plural, =0{Nothing recited yet today} =1{1 ayah recited today} other{{count} ayahs recited today}}",
+  "@memTodayRecited": { "placeholders": { "count": { "type": "int" } } },
+  "memAgain": "Again",
+  "memSummaryCounts": "{ayahs} ayahs · {good} good · {hesitant} hesitant · {missed} missed",
+  "@memSummaryCounts": { "placeholders": { "ayahs": { "type": "int" }, "good": { "type": "int" }, "hesitant": { "type": "int" }, "missed": { "type": "int" } } },
+  "memSummaryStrength": "Strength {before}% → {after}%",
+  "@memSummaryStrength": { "placeholders": { "before": { "type": "int" }, "after": { "type": "int" } } },
+  "memToReview": "To review",
+  "memStrengthLabel": "Strength"
 }

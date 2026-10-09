@@ -66,28 +66,35 @@ class DriftMemorizationRepository implements MemorizationRepository {
       .map((rows) => {for (final r in rows) r.ayahId: _memory(r)});
 
   @override
+  Stream<List<AyahAttempt>> watchAttemptsSince(DateTime since) =>
+      (_db.select(_db.attempts)
+            ..where((t) => t.at.isBiggerOrEqualValue(since))
+            ..orderBy([(t) => OrderingTerm.asc(t.at)]))
+          .watch()
+          .map((rows) => [for (final r in rows) _attempt(r)]);
+
+  @override
   Future<List<AyahAttempt>> attemptsFor(int ayahId) async {
     final rows =
         await (_db.select(_db.attempts)
               ..where((t) => t.ayahId.equals(ayahId))
               ..orderBy([(t) => OrderingTerm.asc(t.at)]))
             .get();
-    return [
-      for (final r in rows)
-        AyahAttempt(
-          ayahId: r.ayahId,
-          sessionId: r.sessionId,
-          at: r.at,
-          grade: AyahGrade.values.byName(r.grade),
-          words: r.words,
-          wrong: r.wrong,
-          skipped: r.skipped,
-          selfCorrected: r.selfCorrected,
-          pronunciation: r.pronunciation,
-          hidden: r.hidden,
-        ),
-    ];
+    return [for (final r in rows) _attempt(r)];
   }
+
+  static AyahAttempt _attempt(AttemptRow r) => AyahAttempt(
+    ayahId: r.ayahId,
+    sessionId: r.sessionId,
+    at: r.at,
+    grade: AyahGrade.values.byName(r.grade),
+    words: r.words,
+    wrong: r.wrong,
+    skipped: r.skipped,
+    selfCorrected: r.selfCorrected,
+    pronunciation: r.pronunciation,
+    hidden: r.hidden,
+  );
 
   static AyahMemory _memory(MemorizedAyahRow r) => AyahMemory(
     ayahId: r.ayahId,

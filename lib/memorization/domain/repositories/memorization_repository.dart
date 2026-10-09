@@ -18,6 +18,10 @@ abstract class MemorizationRepository {
   /// The memory of every tracked ayah, by ayah id, updated as it changes.
   Stream<Map<int, AyahMemory>> watchMemories();
 
+  /// Every test result from [since] on, oldest first, updated as tests are
+  /// recorded.
+  Stream<List<AyahAttempt>> watchAttemptsSince(DateTime since);
+
   /// [ayahId]'s test results, oldest first.
   Future<List<AyahAttempt>> attemptsFor(int ayahId);
 }
