@@ -19,7 +19,8 @@ class TahfeezQuranSectionCard extends StatelessWidget {
     this.subtitle,
     this.accentColor,
     this.onTap,
-    this.footer,
+    this.progress,
+    this.progressColor,
   });
 
   final int number;
@@ -28,8 +29,13 @@ class TahfeezQuranSectionCard extends StatelessWidget {
   final Color? accentColor;
   final VoidCallback? onTap;
 
-  /// Shown under the title and subtitle (e.g. progress).
-  final Widget? footer;
+  /// A share (0-1) drawn as a ring around the number badge (e.g. how much of
+  /// a surah is memorized), with its percentage under the badge; `null`:
+  /// no ring.
+  final double? progress;
+
+  /// The ring's color (default: the accent).
+  final Color? progressColor;
 
   @override
   Widget build(BuildContext context) {
@@ -44,19 +50,46 @@ class TahfeezQuranSectionCard extends StatelessWidget {
           padding: const EdgeInsets.all(TahfeezSpacing.md),
           child: Row(
             children: [
-              Container(
-                width: 40,
-                height: 40,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: accent.withValues(alpha: 0.12),
-                  shape: BoxShape.circle,
-                ),
-                child: Text(
-                  '$number',
-                  style: Theme.of(context).textTheme.titleSmall
-                      ?.copyWith(color: accent),
-                ),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    width: 40,
+                    height: 40,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            color: accent.withValues(alpha: 0.12),
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        if (progress case final p?)
+                          SizedBox.expand(
+                            child: CircularProgressIndicator(
+                              key: const ValueKey('section-card-progress'),
+                              value: p.clamp(0.0, 1.0),
+                              strokeWidth: 3,
+                              color: progressColor ?? accent,
+                              backgroundColor: Colors.transparent,
+                            ),
+                          ),
+                        Text(
+                          '$number',
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(color: accent),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (progress case final p?)
+                    Text(
+                      '${(p.clamp(0.0, 1.0) * 100).round()}%',
+                      style: Theme.of(context).textTheme.labelSmall
+                          ?.copyWith(color: progressColor ?? accent),
+                    ),
+                ],
               ),
               const SizedBox(width: TahfeezSpacing.smPlus),
               Expanded(
@@ -71,10 +104,6 @@ class TahfeezQuranSectionCard extends StatelessWidget {
                         style: Theme.of(context).textTheme.bodySmall
                             ?.copyWith(color: scheme.onSurfaceVariant),
                       ),
-                    if (footer != null) ...[
-                      const SizedBox(height: TahfeezSpacing.sm),
-                      footer!,
-                    ],
                   ],
                 ),
               ),

@@ -132,7 +132,7 @@ class _SurahIndexTabState extends ConsumerState<SurahIndexTab> {
   Widget build(BuildContext context) {
     final surahs = ref.watch(indexedSurahsProvider);
     final scheme = Theme.of(context).colorScheme;
-    // Memorization and tajweed, for the surahs worked on.
+    // How much is memorized, for the surahs worked on.
     final progress = ref.watch(surahProgressProvider).value ?? const {};
 
     return Column(
@@ -330,8 +330,10 @@ class _SurahIndexTabState extends ConsumerState<SurahIndexTab> {
                           AppLocalizations.of(context)
                               .homeContinueReadingSurah(indexed.surah.surahNo),
                       subtitle: subtitleParts.join(' · '),
-                      footer: switch (progress[indexed.surah.surahNo]) {
-                        final p? => _SurahProgressBars(progress: p),
+                      // How much of it is memorized, as a ring.
+                      progress: progress[indexed.surah.surahNo]?.memorization,
+                      progressColor: switch (progress[indexed.surah.surahNo]) {
+                        final p? => ScoreBar.colorOf(p.memorization, scheme),
                         null => null,
                       },
                       onTap: () => widget.onSelect(
@@ -349,41 +351,6 @@ class _SurahIndexTabState extends ConsumerState<SurahIndexTab> {
                   .homeQuranDatasetUnavailableBody,
             ),
           ),
-        ),
-      ],
-    );
-  }
-}
-
-/// A surah's memorization (share memorized) and tajweed (its ayahs' latest
-/// recitations), as two thin bars.
-class _SurahProgressBars extends StatelessWidget {
-  const _SurahProgressBars({required this.progress});
-
-  final SurahProgress progress;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    return Row(
-      key: const ValueKey('surah-progress'),
-      spacing: TahfeezSpacing.md,
-      children: [
-        Expanded(
-          child: ScoreBar(
-            label: l10n.memScoreMemorization,
-            value: progress.memorization,
-            dense: true,
-          ),
-        ),
-        Expanded(
-          child: progress.tajweed == null
-              ? const SizedBox.shrink()
-              : ScoreBar(
-                  label: l10n.memScoreTajweed,
-                  value: progress.tajweed!,
-                  dense: true,
-                ),
         ),
       ],
     );

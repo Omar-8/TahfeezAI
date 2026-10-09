@@ -108,7 +108,7 @@ void main() {
       expect(find.text('Surah 2'), findsNothing);
     });
 
-    testWidgets('a surah worked on shows its memorization and tajweed', (
+    testWidgets('a surah worked on shows how much of it is memorized', (
       tester,
     ) async {
       await tester.pumpWidget(
@@ -133,9 +133,12 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(find.byKey(const ValueKey('surah-progress')), findsOneWidget);
+      // A ring around its number, the share memorized under it.
+      expect(
+        find.byKey(const ValueKey('section-card-progress')),
+        findsOneWidget,
+      );
       expect(find.text('75%'), findsOneWidget, reason: '3 of 4 memorized');
-      expect(find.text('90%'), findsOneWidget, reason: 'tajweed');
     });
 
     testWidgets('filters by revelation type via the filter sheet', (
