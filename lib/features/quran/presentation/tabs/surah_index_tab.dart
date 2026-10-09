@@ -8,6 +8,8 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/components/components.dart';
 import '../../../../quran/domain/models/quran_location.dart';
 import '../../../../quran/domain/models/surah_models.dart';
+import '../../../../memorization/application/memorization_today.dart';
+import '../../../memorize/presentation/memorize_screen.dart' show ScoreBar;
 import '../../application/quran_index_providers.dart';
 
 enum _RevelationFilter { all, meccan, medinan }
@@ -130,6 +132,8 @@ class _SurahIndexTabState extends ConsumerState<SurahIndexTab> {
   Widget build(BuildContext context) {
     final surahs = ref.watch(indexedSurahsProvider);
     final scheme = Theme.of(context).colorScheme;
+    // Memorization and tajweed, for the surahs worked on.
+    final progress = ref.watch(surahProgressProvider).value ?? const {};
 
     return Column(
       children: [
@@ -326,6 +330,10 @@ class _SurahIndexTabState extends ConsumerState<SurahIndexTab> {
                           AppLocalizations.of(context)
                               .homeContinueReadingSurah(indexed.surah.surahNo),
                       subtitle: subtitleParts.join(' · '),
+                      footer: switch (progress[indexed.surah.surahNo]) {
+                        final p? => _SurahProgressBars(progress: p),
+                        null => null,
+                      },
                       onTap: () => widget.onSelect(
                         QuranLocation.surah(indexed.surah.surahNo),
                       ),
@@ -341,6 +349,41 @@ class _SurahIndexTabState extends ConsumerState<SurahIndexTab> {
                   .homeQuranDatasetUnavailableBody,
             ),
           ),
+        ),
+      ],
+    );
+  }
+}
+
+/// A surah's memorization (share memorized) and tajweed (its ayahs' latest
+/// recitations), as two thin bars.
+class _SurahProgressBars extends StatelessWidget {
+  const _SurahProgressBars({required this.progress});
+
+  final SurahProgress progress;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Row(
+      key: const ValueKey('surah-progress'),
+      spacing: TahfeezSpacing.md,
+      children: [
+        Expanded(
+          child: ScoreBar(
+            label: l10n.memScoreMemorization,
+            value: progress.memorization,
+            dense: true,
+          ),
+        ),
+        Expanded(
+          child: progress.tajweed == null
+              ? const SizedBox.shrink()
+              : ScoreBar(
+                  label: l10n.memScoreTajweed,
+                  value: progress.tajweed!,
+                  dense: true,
+                ),
         ),
       ],
     );

@@ -12,6 +12,9 @@ import 'package:tahfeez_ai/features/reader/application/reader_preferences_contro
 import 'package:tahfeez_ai/features/reader/domain/reader_mode.dart';
 import 'package:tahfeez_ai/quran/data/import/quran_dataset_importer.dart';
 import 'package:tahfeez_ai/quran/data/quran_database.dart';
+import 'package:tahfeez_ai/memorization/application/memorization_today.dart';
+import 'package:tahfeez_ai/memorization/domain/models/memorization_models.dart';
+import 'package:tahfeez_ai/memorization/domain/recitation_score.dart';
 import 'package:tahfeez_ai/quran/quran_providers.dart';
 
 import '../../../quran/quran_test_fixtures.dart';
@@ -28,7 +31,7 @@ class _FixedReaderMode extends ReaderModePreferenceController {
 }
 
 void main() {
-  Widget wrap(QuranDatabase db) {
+  Widget wrap(QuranDatabase db, {Map<int, SurahProgress> progress = const {}}) {
     final router = GoRouter(
       initialLocation: '/quran',
       routes: [
@@ -43,6 +46,7 @@ void main() {
     return ProviderScope(
       overrides: [
         quranDatabaseProvider.overrideWith((ref) => db),
+        surahProgressProvider.overrideWith((ref) async => progress),
         readerModePreferenceControllerProvider.overrideWith(
           () => _FixedReaderMode(ReaderMode.verseByVerse),
         ),
@@ -102,6 +106,36 @@ void main() {
 
       expect(find.text('Test Chapter One'), findsOneWidget);
       expect(find.text('Surah 2'), findsNothing);
+    });
+
+    testWidgets('a surah worked on shows its memorization and tajweed', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        wrap(
+          db,
+          progress: {
+            1: SurahProgress(
+              ayahs: 4,
+              memorized: 3,
+              latest: RecitationScore.of([
+                AyahAttempt(
+                  ayahId: 1001,
+                  sessionId: 's',
+                  at: DateTime(2026),
+                  grade: AyahGrade.hard,
+                  words: 10,
+                  pronunciation: 1,
+                ),
+              ]),
+            ),
+          },
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('surah-progress')), findsOneWidget);
+      expect(find.text('75%'), findsOneWidget, reason: '3 of 4 memorized');
+      expect(find.text('90%'), findsOneWidget, reason: 'tajweed');
     });
 
     testWidgets('filters by revelation type via the filter sheet', (

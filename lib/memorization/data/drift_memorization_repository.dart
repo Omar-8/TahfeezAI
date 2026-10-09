@@ -74,6 +74,23 @@ class DriftMemorizationRepository implements MemorizationRepository {
           .map((rows) => [for (final r in rows) _attempt(r)]);
 
   @override
+  Stream<Map<int, AyahAttempt>> watchLatestAttempts() => _db
+      .customSelect(
+        'SELECT a.* FROM attempts a JOIN (SELECT ayah_id, MAX(id) AS last '
+        'FROM attempts GROUP BY ayah_id) l ON a.id = l.last',
+        readsFrom: {_db.attempts},
+      )
+      .watch()
+      .asyncMap(
+        (rows) async => {
+          for (final r in rows)
+            r.read<int>('ayah_id'): _attempt(
+              await _db.attempts.mapFromRow(r),
+            ),
+        },
+      );
+
+  @override
   Future<List<AyahAttempt>> attemptsFor(int ayahId) async {
     final rows =
         await (_db.select(_db.attempts)

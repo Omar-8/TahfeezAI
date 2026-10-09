@@ -22,6 +22,10 @@ abstract class MemorizationRepository {
   /// recorded.
   Stream<List<AyahAttempt>> watchAttemptsSince(DateTime since);
 
+  /// Each ayah's latest test result, by ayah id, updated as tests are
+  /// recorded.
+  Stream<Map<int, AyahAttempt>> watchLatestAttempts();
+
   /// [ayahId]'s test results, oldest first.
   Future<List<AyahAttempt>> attemptsFor(int ayahId);
 }

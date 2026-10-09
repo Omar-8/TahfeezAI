@@ -57,4 +57,18 @@ void main() {
       expect(m[112003]!.learnedOn, isNull, reason: 'not learned in the app');
     },
   );
+
+  test('each ayah\'s latest result', () async {
+    await repo.recordTest([
+      attempt(112001, AyahGrade.fail, t0),
+      attempt(112002, AyahGrade.good, t0),
+    ]);
+    await repo.recordTest([
+      attempt(112001, AyahGrade.good, t0.add(const Duration(hours: 1))),
+    ]);
+    final latest = await repo.watchLatestAttempts().first;
+    expect(latest.keys.toSet(), {112001, 112002});
+    expect(latest[112001]!.grade, AyahGrade.good);
+    expect(latest[112001]!.at, t0.add(const Duration(hours: 1)));
+  });
 }

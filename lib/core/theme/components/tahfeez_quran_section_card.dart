@@ -19,6 +19,7 @@ class TahfeezQuranSectionCard extends StatelessWidget {
     this.subtitle,
     this.accentColor,
     this.onTap,
+    this.footer,
   });
 
   final int number;
@@ -26,6 +27,9 @@ class TahfeezQuranSectionCard extends StatelessWidget {
   final String? subtitle;
   final Color? accentColor;
   final VoidCallback? onTap;
+
+  /// Shown under the title and subtitle (e.g. progress).
+  final Widget? footer;
 
   @override
   Widget build(BuildContext context) {
@@ -67,6 +71,10 @@ class TahfeezQuranSectionCard extends StatelessWidget {
                         style: Theme.of(context).textTheme.bodySmall
                             ?.copyWith(color: scheme.onSurfaceVariant),
                       ),
+                    if (footer != null) ...[
+                      const SizedBox(height: TahfeezSpacing.sm),
+                      footer!,
+                    ],
                   ],
                 ),
               ),

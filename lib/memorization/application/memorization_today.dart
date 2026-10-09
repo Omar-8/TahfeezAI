@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/quran/application/quran_index_providers.dart';
 import '../../quran/quran_providers.dart';
 import '../domain/models/memorization_models.dart';
+import '../domain/recitation_score.dart';
 import '../domain/strength_model.dart';
 import '../domain/today_scheduler.dart';
 import '../memorization_providers.dart';
@@ -102,3 +103,59 @@ final testSummaryProvider =
     NotifierProvider<TestSummaryController, TestSummary?>(
       TestSummaryController.new,
     );
+
+/// Each ayah's latest test result, live.
+final latestAttemptsProvider = StreamProvider<Map<int, AyahAttempt>>(
+  (ref) => ref.watch(memorizationRepositoryProvider).watchLatestAttempts(),
+);
+
+/// Where a surah stands: how much of it is memorized, and how its ayahs
+/// were last recited.
+class SurahProgress {
+  const SurahProgress({
+    required this.ayahs,
+    required this.memorized,
+    required this.latest,
+  });
+
+  final int ayahs, memorized;
+
+  /// Each of its recited ayahs' latest result, together.
+  final RecitationScore latest;
+
+  /// The share of its ayahs memorized (0-1).
+  double get memorization => ayahs == 0 ? 0 : memorized / ayahs;
+
+  /// Tajweed in its ayahs' latest recitations; `null` before any.
+  double? get tajweed => latest.isEmpty ? null : latest.tajweed;
+}
+
+/// Every surah with anything memorized or recited, by surah number.
+final surahProgressProvider = FutureProvider<Map<int, SurahProgress>>((
+  ref,
+) async {
+  final memories = await ref.watch(ayahMemoriesProvider.future);
+  final latest = await ref.watch(latestAttemptsProvider.future);
+  final surahs = await ref.watch(indexedSurahsProvider.future);
+  final ayahCount = {
+    for (final s in surahs) s.surah.surahNo: s.surah.ayahCount,
+  };
+  final memorized = <int, int>{};
+  for (final m in memories.values) {
+    if (m.status == MemoryStatus.memorized) {
+      memorized.update(m.ayahId ~/ 1000, (n) => n + 1, ifAbsent: () => 1);
+    }
+  }
+  final attempts = <int, List<AyahAttempt>>{};
+  for (final a in latest.values) {
+    (attempts[a.ayahId ~/ 1000] ??= []).add(a);
+  }
+  return {
+    for (final surah in {...memorized.keys, ...attempts.keys})
+      surah: SurahProgress(
+        ayahs: ayahCount[surah] ?? 0,
+        memorized: memorized[surah] ?? 0,
+        latest: RecitationScore.of(attempts[surah] ?? const []),
+      ),
+  };
+});
