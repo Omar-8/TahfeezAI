@@ -1,5 +1,8 @@
 import '../features/settings/presentation/about_screen.dart';
 
+import 'dart:async';
+
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -28,17 +31,20 @@ import 'bootstrap_gate.dart';
 /// seed costs ~1.3s (canonical Quran alone) to ~2.6s (dev/profile builds,
 /// which also seed the Mushaf dataset), timed against the real bundled
 /// assets — see `bootstrap_gate.dart`'s own doc comment. [runApp] fires
-/// immediately, and [TahfeezBootstrapGate] shows a minimal splash until
-/// that same [Future] completes, then hands off to the real app — so a
-/// cold/first launch shows *something* within a normal frame or two
-/// instead of a blank/frozen window for the full seeding duration, on Web
-/// especially (no native OS splash to lean on there). No provider ever
+/// immediately. On Android/iOS the first frame is deferred until that same
+/// [Future] completes, so the system splash (the app icon) stays up the
+/// whole time and the app appears ready; on the web, with no native splash,
+/// [TahfeezBootstrapGate] shows a minimal one meanwhile. No provider ever
 /// gets a chance to read from the database before seeding completes: the
 /// real app widget tree ([TahfeezApp]) simply doesn't build until then.
 Future<void> bootstrap() async {
   // The credited sources' notices on Flutter's licence page.
   registerCreditLicences();
-  WidgetsFlutterBinding.ensureInitialized();
+  final binding = WidgetsFlutterBinding.ensureInitialized();
+  // Native apps keep the system splash (the app icon) until the app is
+  // ready: nothing is drawn while the bundled data is seeded. The web has
+  // no native splash, so it shows TahfeezBootstrapGate's own meanwhile.
+  if (!kIsWeb) binding.deferFirstFrame();
   // Without this, `AnnotatedRegion<SystemUiOverlayStyle>`'s
   // `systemNavigationBarColor` has no effect on some Android versions/skins
   // until edge-to-edge is explicitly enabled — declaring the style alone
@@ -61,6 +67,13 @@ Future<void> bootstrap() async {
     logger: logger,
     storage: container.read(browserStorageProvider),
   ).seedIfNeeded();
+  if (!kIsWeb) {
+    unawaited(
+      seeding
+          .then((_) {}, onError: (_) {})
+          .whenComplete(binding.allowFirstFrame),
+    );
+  }
 
   runApp(
     UncontrolledProviderScope(

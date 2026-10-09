@@ -25,57 +25,58 @@ void main() {
     checksum: 'x',
   );
 
-  Widget app(AyahSheetContent content, {String? tafsirId = 'ar-muyassar'}) =>
-      ProviderScope(
-        overrides: [
-          ...tahfeezWidgetTestOverrides(),
-          ayahSheetContentProvider.overrideWithBuild((ref, _) => content),
-          tafsirSelectionControllerProvider.overrideWithBuild(
-            (ref, _) => tafsirId,
-          ),
-          canonicalAyahTextProvider.overrideWith(
-            (ref, _) async => 'قُلۡ هُوَ ٱللَّهُ أَحَدٌ',
-          ),
-          activeTranslationBooksProvider.overrideWith(
-            (ref) async => {'en-rowwad': book},
-          ),
-          mushafPageTranslationsProvider.overrideWith(
-            (ref, _) async => {
-              112001: {
-                'en-rowwad': const TranslationVerseText(
-                  slug: 'en-rowwad',
-                  chapterNo: 112,
-                  verseNo: 1,
-                  text: 'Say: He is Allah, the One.',
-                ),
-              },
-            },
-          ),
-          tafsirVerseTextProvider.overrideWith(
-            (ref, _) async => const TafsirVerseText(
-              tafsirId: 'ar-muyassar',
+  Widget app(
+    AyahSheetContent content, {
+    String? tafsirId = 'ar-muyassar',
+  }) => ProviderScope(
+    overrides: [
+      ...tahfeezWidgetTestOverrides(),
+      ayahSheetContentProvider.overrideWithBuild((ref, _) => content),
+      tafsirSelectionControllerProvider.overrideWithBuild((ref, _) => tafsirId),
+      canonicalAyahTextProvider.overrideWith(
+        (ref, _) async => 'قُلۡ هُوَ ٱللَّهُ أَحَدٌ',
+      ),
+      activeTranslationBooksProvider.overrideWith(
+        (ref) async => {'en-rowwad': book},
+      ),
+      mushafPageTranslationsProvider.overrideWith(
+        (ref, _) async => {
+          112001: {
+            'en-rowwad': const TranslationVerseText(
+              slug: 'en-rowwad',
               chapterNo: 112,
               verseNo: 1,
-              text: 'قل -أيها الرسول-: هو الله المتفرد بالألوهية.',
+              text: 'Say: He is Allah, the One.[1]',
+              footnotes: [TranslationFootnote(marker: 1, text: 'He is Alone.')],
             ),
-          ),
-        ],
-        child: MaterialApp(
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: Builder(
-            builder: (context) => TextButton(
-              onPressed: () => showAyahDetailSheet(
-                context,
-                mushafId: 1,
-                pageNumber: 604,
-                ayahId: 112001,
-              ),
-              child: const Text('open'),
-            ),
-          ),
+          },
+        },
+      ),
+      tafsirVerseTextProvider.overrideWith(
+        (ref, _) async => const TafsirVerseText(
+          tafsirId: 'ar-muyassar',
+          chapterNo: 112,
+          verseNo: 1,
+          text: 'قل -أيها الرسول-: هو الله المتفرد بالألوهية.',
         ),
-      );
+      ),
+    ],
+    child: MaterialApp(
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
+      home: Builder(
+        builder: (context) => TextButton(
+          onPressed: () => showAyahDetailSheet(
+            context,
+            mushafId: 1,
+            pageNumber: 604,
+            ayahId: 112001,
+          ),
+          child: const Text('open'),
+        ),
+      ),
+    ),
+  );
 
   Future<void> open(WidgetTester tester, Widget app) async {
     await tester.pumpWidget(app);
@@ -87,24 +88,27 @@ void main() {
     tester,
   ) async {
     await open(tester, app(AyahSheetContent.both));
-    expect(find.text('Say: He is Allah, the One.'), findsOneWidget);
+    expect(find.textContaining('Say: He is Allah, the One.'), findsOneWidget);
     expect(
       find.byKey(const ValueKey('ayah-sheet-tafsir-text')),
       findsOneWidget,
     );
     expect(find.text('Read more'), findsOneWidget);
+    // The translator's note, listed under the translation.
+    expect(find.byKey(const ValueKey('footnote-1')), findsOneWidget);
+    expect(find.textContaining('He is Alone.'), findsOneWidget);
   });
 
   testWidgets('translation only, or tafsir only, as chosen in Settings', (
     tester,
   ) async {
     await open(tester, app(AyahSheetContent.translation));
-    expect(find.text('Say: He is Allah, the One.'), findsOneWidget);
+    expect(find.textContaining('Say: He is Allah, the One.'), findsOneWidget);
     expect(find.byKey(const ValueKey('ayah-sheet-tafsir-text')), findsNothing);
 
     await tester.pumpWidget(const SizedBox());
     await open(tester, app(AyahSheetContent.tafsir));
-    expect(find.text('Say: He is Allah, the One.'), findsNothing);
+    expect(find.textContaining('Say: He is Allah, the One.'), findsNothing);
     expect(
       find.byKey(const ValueKey('ayah-sheet-tafsir-text')),
       findsOneWidget,

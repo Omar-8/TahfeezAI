@@ -78,7 +78,31 @@ dependencies {
 // release ships ONNX Runtime for arm64-v8a only: ~25 MB less per other ABI
 // in the bundle. Elsewhere the model reports itself unsupported. Debug and
 // profile builds keep every ABI (emulators).
+// A build for chosen processors (`flutter build apk --target-platform
+// android-arm64`) packages only their native libraries — the plugins' too
+// (ONNX Runtime ships every ABI): ~60 MB less for arm64.
+val chosenAbis = (project.findProperty("target-platform") as String?)
+    ?.split(",")
+    ?.map {
+        when (it.trim()) {
+            "android-arm64" -> "arm64-v8a"
+            "android-arm" -> "armeabi-v7a"
+            "android-x64" -> "x86_64"
+            "android-x86" -> "x86"
+            else -> it.trim()
+        }
+    }
+
 androidComponents {
+    if (chosenAbis != null) {
+        onVariants { variant ->
+            variant.packaging.jniLibs.excludes.addAll(
+                listOf("arm64-v8a", "armeabi-v7a", "x86_64", "x86")
+                    .filter { it !in chosenAbis }
+                    .map { "lib/$it/**" },
+            )
+        }
+    }
     onVariants(selector().withBuildType("release")) { variant ->
         variant.packaging.jniLibs.excludes.addAll(
             listOf(

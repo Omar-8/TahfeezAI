@@ -19,10 +19,20 @@ class TranslationBlock extends StatelessWidget {
     super.key,
     required this.verseText,
     required this.authorName,
+    this.inlineFootnotes = false,
+    this.textDirection,
   });
 
   final TranslationVerseText verseText;
   final String authorName;
+
+  /// The translator's notes listed under the text (the ayah sheet) rather
+  /// than opened from their markers.
+  final bool inlineFootnotes;
+
+  /// The translation's own direction (e.g. right to left for Urdu); the
+  /// surrounding one when `null`.
+  final TextDirection? textDirection;
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +48,28 @@ class TranslationBlock extends StatelessWidget {
             children: _buildSpans(context, bodyStyle, scheme),
             style: bodyStyle,
           ),
+          textDirection: textDirection,
         ),
+        if (inlineFootnotes)
+          for (final note in verseText.footnotes)
+            Text.rich(
+              key: ValueKey('footnote-${note.marker}'),
+              TextSpan(
+                children: [
+                  TextSpan(
+                    text: '[${note.marker}] ',
+                    style: TextStyle(
+                      color: scheme.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  TextSpan(text: note.text),
+                ],
+              ),
+              textDirection: textDirection,
+              style: Theme.of(context).textTheme.bodySmall
+                  ?.copyWith(color: scheme.onSurfaceVariant, height: 1.5),
+            ),
         if (verseText.crossReferences.isNotEmpty)
           Wrap(
             spacing: TahfeezSpacing.xs,
@@ -81,7 +112,19 @@ class TranslationBlock extends StatelessWidget {
       }
       final marker = int.parse(match.group(1)!);
       final footnote = footnotesByMarker[marker];
-      if (footnote != null) {
+      if (footnote != null && inlineFootnotes) {
+        // The note is listed below: the marker only points to it.
+        spans.add(
+          TextSpan(
+            text: '[$marker]',
+            style: bodyStyle?.copyWith(
+              color: scheme.primary,
+              fontWeight: FontWeight.bold,
+              fontSize: (bodyStyle.fontSize ?? 14) * 0.75,
+            ),
+          ),
+        );
+      } else if (footnote != null) {
         spans.add(
           WidgetSpan(
             alignment: PlaceholderAlignment.middle,

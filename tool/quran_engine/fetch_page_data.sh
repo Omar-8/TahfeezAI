@@ -9,7 +9,10 @@
 set -euo pipefail
 
 MANIFEST_URL="https://cdn.quran.ws/qvp/v0.3.0/manifest.json"
+# The app bundles only the .qvp pages (pubspec.yaml); the release's
+# word sidecars, atlas and manifest go beside them, unbundled.
 OUT_DIR="assets/quran/quran_engine/pages"
+SIDECAR_DIR="assets/quran/quran_engine/sidecar"
 
 if [[ "${1:-}" == "--all" ]]; then
   PAGES=($(seq 1 604))
@@ -17,10 +20,10 @@ else
   PAGES=(1 2 42 106 302 604)
 fi
 
-mkdir -p "$OUT_DIR"
-curl -sS -m 30 "$MANIFEST_URL" -o "$OUT_DIR/manifest.json"
+mkdir -p "$OUT_DIR" "$SIDECAR_DIR"
+curl -sS -m 30 "$MANIFEST_URL" -o "$SIDECAR_DIR/manifest.json"
 
-python3 - "$OUT_DIR" "${PAGES[@]}" <<'PYEOF'
+python3 - "$OUT_DIR" "$SIDECAR_DIR" "${PAGES[@]}" <<'PYEOF'
 import hashlib
 import json
 import subprocess
@@ -28,9 +31,10 @@ import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 out_dir = sys.argv[1]
-pages = [int(p) for p in sys.argv[2:]]
+sidecar_dir = sys.argv[2]
+pages = [int(p) for p in sys.argv[3:]]
 
-manifest = json.load(open(f"{out_dir}/manifest.json"))
+manifest = json.load(open(f"{sidecar_dir}/manifest.json"))
 release = manifest["release"]
 base = release.get("base") or "https://cdn.quran.ws/qvp/v0.3.0/"
 files = release["files"]
@@ -46,7 +50,7 @@ def fetch_one(name):
     expected = files.get(name)
     if expected is None:
         return name, False, f"MISSING FROM MANIFEST: {name}"
-    path = f"{out_dir}/{name}"
+    path = f"{out_dir if name.endswith('.qvp') else sidecar_dir}/{name}"
     url = base + name
     result = subprocess.run(
         ["curl", "-sS", "-m", "30", url, "-o", path],

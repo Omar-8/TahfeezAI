@@ -123,6 +123,11 @@ class _AyahDetailSheetBody extends ConsumerWidget {
                 TranslationBlock(
                   verseText: entry.value,
                   authorName: books[entry.key]?.author ?? entry.key,
+                  inlineFootnotes: true,
+                  textDirection:
+                      _AyahTafsir._rtl.contains(books[entry.key]?.languageCode)
+                      ? TextDirection.rtl
+                      : TextDirection.ltr,
                 )
             // Asked for the translation alone, with none chosen.
             else if (books.isEmpty && content == AyahSheetContent.translation)

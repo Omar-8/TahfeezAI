@@ -25,11 +25,14 @@ Pinned upstream:
   (`rustup target add wasm32-unknown-unknown`).
 - `fetch_page_data.sh` — downloads page data from the pinned data release,
   verifying each file's SHA-256 against the release's own `manifest.json`
-  before writing it to `assets/quran/quran_engine/pages/`. Refuses to
-  write any file that fails verification. Defaults to six representative
-  pages (1, 2, 42, 106, 302, 604) plus `atlas.qva`; `--all` fetches the
-  full 604-page corpus. **The full corpus is what Tahfeez ships** — see
-  "Asset gating" below.
+  before writing it: the `.qvp` pages to `assets/quran/quran_engine/pages/`
+  (bundled), the release's `NNN.words.json` sidecars, `atlas.qva` and
+  `manifest.json` to `assets/quran/quran_engine/sidecar/` (not bundled —
+  the app reads each page's words from its `.qvp`; keeping them out saves
+  ~12 MB raw). Refuses to write any file that fails verification. Defaults
+  to six representative pages (1, 2, 42, 106, 302, 604) plus `atlas.qva`;
+  `--all` fetches the full 604-page corpus. **The full corpus is what
+  Tahfeez ships** — see "Asset gating" below.
 
 Both scripts are idempotent and never touch the production QPC V2
 assets/renderer.
