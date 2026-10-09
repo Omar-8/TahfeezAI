@@ -61,8 +61,11 @@ void main() {
       File('assets/quran/wbw/en_qurancom.json').readAsStringSync(),
     ) as Map;
     final words = (pack['words'] as List).cast<List>();
+    final keys = {for (final w in words) '${w[0]}:${w[1]}'};
     expect(words, hasLength(canonical.length));
-    expect({for (final w in words) '${w[0]}:${w[1]}'}, canonical);
+    // Differences, not set equality: a deep compare of ~77k items is slow.
+    expect(keys.difference(canonical), isEmpty);
+    expect(canonical.difference(keys), isEmpty);
     expect(
       words.where((w) => '${w[2] ?? ''}'.trim().isEmpty),
       isEmpty,
