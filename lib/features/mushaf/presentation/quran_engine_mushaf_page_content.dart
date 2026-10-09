@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart' show mapEquals, setEquals;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../application/mushaf_focus_ayah.dart';
 import '../application/mushaf_hide_mode.dart';
 import '../application/mushaf_page_verses.dart';
 import '../application/mushaf_word_overlay.dart';
@@ -71,9 +72,42 @@ class _QuranEngineMushafPageContentState
     MushafWordMark.uncertain: (color: Color(0xFFFBC02D), ink: true),
   };
 
+  /// The focus ayah (`mushafFocusAyahProvider`) highlighted on [_page], if
+  /// any; `null` once the page's highlights are cleared.
+  int? _focusApplied;
+
+  /// Applies the masks, then the focus ayah's highlight over them.
+  void _applyMasks() {
+    _applyMasksOnly();
+    _applyFocus();
+  }
+
+  /// Highlights the focus ayah when it is on this page, or removes its
+  /// highlight once it is no longer the focus.
+  void _applyFocus() {
+    final page = _page;
+    if (page == null) return;
+    final focus = ref.read(mushafFocusAyahProvider)?.ayahId;
+    final onPage = focus != null && page.wordRefs.any((w) => w.ayahId == focus)
+        ? focus
+        : null;
+    if (onPage == _focusApplied) return;
+    if (_focusApplied != null) {
+      // Highlights can only be cleared all at once: the word overlay's own
+      // marks are drawn again, then the new focus, if any.
+      _focusApplied = null;
+      page.clearHighlights();
+      _appliedOverlay = null;
+      _applyMasks();
+      return;
+    }
+    page.highlightAyah((chapterNo: onPage! ~/ 1000, verseNo: onPage % 1000));
+    _focusApplied = onPage;
+  }
+
   /// Applies whichever mask is active: a word overlay (Hifz mode) wins
   /// over hide mode.
-  void _applyMasks() {
+  void _applyMasksOnly() {
     final page = _page;
     if (page == null) return;
     final overlay = ref.read(mushafWordOverlayProvider);
@@ -99,6 +133,7 @@ class _QuranEngineMushafPageContentState
         return;
       }
       page.setHiddenWords(hidden);
+      _focusApplied = null;
       page.setWordHighlights([
         for (final MapEntry(key: i, value: mark) in marks.entries)
           (
@@ -114,6 +149,7 @@ class _QuranEngineMushafPageContentState
     if (_appliedOverlay != null) {
       page.setHiddenWords(const {});
       page.clearHighlights();
+      _focusApplied = null;
       _appliedOverlay = null;
       _appliedMask = null;
     }
@@ -149,6 +185,7 @@ class _QuranEngineMushafPageContentState
         _loadError = null;
         _appliedMask = null;
         _appliedOverlay = null;
+        _focusApplied = null;
       });
       _load();
     }
@@ -194,6 +231,7 @@ class _QuranEngineMushafPageContentState
         _page = page;
         _appliedMask = null;
         _appliedOverlay = null;
+        _focusApplied = null;
       });
       _applyMasks();
       // Fire-and-forget: never awaited, never allowed to affect the page
@@ -219,6 +257,7 @@ class _QuranEngineMushafPageContentState
   Widget build(BuildContext context) {
     ref.listen(mushafHideModeProvider, (_, _) => _applyMasks());
     ref.listen(mushafWordOverlayProvider, (_, _) => _applyMasks());
+    ref.listen(mushafFocusAyahProvider, (_, _) => _applyFocus());
     if (_page == null && _loadError == null) {
       // Fire-and-forget: harmless to call every build (a no-op once a
       // load is in flight or complete) -- the same pattern
@@ -309,6 +348,7 @@ class _QuranEngineMushafPageContentState
               // Drop the ayah's highlight; the word overlay's own marks,
               // if any, are drawn again.
               page.clearHighlights();
+              _focusApplied = null;
               _appliedOverlay = null;
               _applyMasks();
             },

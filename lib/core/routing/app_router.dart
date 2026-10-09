@@ -29,7 +29,9 @@ GoRouter appRouter(Ref ref) {
           // The shell needs the *active* branch's location (see
           // `fullBleedContentProvider` on why it may only honor a spread's
           // width request while the Quran branch is on screen).
-          currentLocation: state.uri.path,
+          // The topmost screen's, a pushed one (a Mushaf opened from Home)
+          // included.
+          currentLocation: GoRouter.of(context).state.uri.path,
         ),
         branches: [
           StatefulShellBranch(
@@ -37,6 +39,8 @@ GoRouter appRouter(Ref ref) {
               GoRoute(
                 path: AppRoutes.home,
                 builder: (context, state) => const HomeScreen(),
+                // What Home opens stays in Home's tab: back returns to it.
+                routes: quranLocationRoutes(),
               ),
             ],
           ),
@@ -60,6 +64,7 @@ GoRouter appRouter(Ref ref) {
               GoRoute(
                 path: AppRoutes.memorize,
                 builder: (context, state) => const MemorizeScreen(),
+                routes: quranLocationRoutes(),
               ),
             ],
           ),

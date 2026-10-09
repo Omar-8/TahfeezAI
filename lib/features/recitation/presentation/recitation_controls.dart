@@ -43,7 +43,7 @@ final recitationBarVisibleProvider = Provider.autoDispose<bool>((ref) {
 });
 
 /// Wraps a Mushaf screen's body and reports [location] (the page on
-/// screen) to the app shell's recitation bar for as long as it is mounted.
+/// screen) to the app shell's recitation bar while it is on screen.
 /// Lays out [child] exactly as-is, with a [RecitationProgressBar] drawn over
 /// its top edge.
 class RecitationMushafAnchor extends ConsumerStatefulWidget {
@@ -68,23 +68,35 @@ class _RecitationMushafAnchorState
     mushafRecitationTargetProvider.notifier,
   );
 
+  /// Whether this Mushaf is on screen: its tab is the active one and no
+  /// screen covers it (`TickerMode`). A Mushaf left open in another tab
+  /// must not keep the recitation bar in place of the navigation.
+  bool? _visible;
+
   @override
-  void initState() {
-    super.initState();
-    _report();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final visible = TickerMode.valuesOf(context).enabled;
+    if (visible == _visible) return;
+    _visible = visible;
+    if (visible) {
+      _report();
+    } else {
+      Future.microtask(() => _target.clear(this));
+    }
   }
 
   @override
   void didUpdateWidget(RecitationMushafAnchor oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.location != widget.location) _report();
+    if (oldWidget.location != widget.location && _visible == true) _report();
   }
 
   // Providers can't be modified while the widget tree is building.
   void _report() {
     final location = widget.location;
     Future.microtask(() {
-      if (mounted) _target.show(this, location);
+      if (mounted && _visible == true) _target.show(this, location);
     });
   }
 

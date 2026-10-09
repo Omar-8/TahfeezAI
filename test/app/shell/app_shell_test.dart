@@ -5,12 +5,14 @@ import 'package:tahfeez_ai/app/app.dart';
 import 'package:tahfeez_ai/core/audio/audio_controller.dart';
 import 'package:tahfeez_ai/core/localization/locale_controller.dart';
 import 'package:tahfeez_ai/core/routing/app_router.dart';
+import 'package:tahfeez_ai/core/routing/quran_location_routing.dart';
 import 'package:tahfeez_ai/core/theme/components/components.dart';
 import 'package:tahfeez_ai/core/theme/tahfeez_content_widths.dart';
 import 'package:tahfeez_ai/core/ui/full_bleed_content.dart';
 import 'package:tahfeez_ai/features/home/presentation/home_screen.dart';
 import 'package:tahfeez_ai/features/mushaf/presentation/mushaf_reader_screen.dart';
 import 'package:tahfeez_ai/features/quran/presentation/quran_index_screen.dart';
+import 'package:tahfeez_ai/quran/domain/models/quran_location.dart';
 
 import '../../test_helpers/fake_audio_controller.dart';
 import '../../test_helpers/widget_test_overrides.dart';
@@ -174,5 +176,38 @@ void main() {
       tester.getSize(find.byType(QuranIndexScreen)).width,
       TahfeezContentWidth.maxReading,
     );
+  });
+
+  testWidgets('a Quran location opens in the tab that asked for it, and back '
+      'returns there', (tester) async {
+    setPhoneSize(tester);
+    await tester.pumpWidget(app());
+    await tester.pumpAndSettle();
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(TahfeezApp)),
+    );
+    final router = container.read(appRouterProvider);
+    String location() => router.state.uri.path;
+
+    goToQuranLocation(
+      tester.element(find.byType(HomeScreen)),
+      const QuranLocation.page(1, 5),
+    );
+    await tester.pumpAndSettle();
+    expect(location(), '/home/page/1/5', reason: 'still the Home tab');
+    expect(find.byType(MushafReaderScreen), findsOneWidget);
+
+    // From a Mushaf screen, another location replaces it.
+    goToQuranLocation(
+      tester.element(find.byType(MushafReaderScreen)),
+      const QuranLocation.page(1, 6),
+    );
+    await tester.pumpAndSettle();
+    expect(location(), '/home/page/1/6');
+
+    router.pop();
+    await tester.pumpAndSettle();
+    expect(location(), '/home', reason: 'back to the opener');
+    expect(find.byType(HomeScreen), findsOneWidget);
   });
 }

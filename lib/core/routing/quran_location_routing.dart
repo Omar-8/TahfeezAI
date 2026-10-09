@@ -81,25 +81,59 @@ List<RouteBase> quranLocationRoutes() {
   ];
 }
 
+/// The shell branches that carry [quranLocationRoutes] under their root,
+/// so a location opens in the tab that asked for it.
+const quranLocationBranchRoots = {'home', 'memorize', 'quran'};
+
+/// The first path segment of each [quranLocationRoutes] route.
+const _locationKinds = {'surah', 'ayah', 'ayah-range', 'juz', 'hizb', 'page'};
+
+/// Whether [path] is a Quran location route (a reader or Mushaf screen) in
+/// any branch, e.g. `/home/page/1/23`.
+bool isQuranLocationPath(String path) {
+  final segments = Uri.tryParse(path)?.pathSegments ?? const [];
+  return segments.length >= 2 &&
+      quranLocationBranchRoots.contains(segments[0]) &&
+      _locationKinds.contains(segments[1]);
+}
+
 /// The one function every Quran index result (and, later, search results,
 /// bookmarks, deep links) should call to open a [QuranLocation] — per this
 /// milestone's "every index result should route through `QuranLocation`...
 /// without screen-specific routing hacks" requirement.
+///
+/// The location opens on top of the screen that asked for it, in that
+/// screen's own tab (Home, Memorize or Quran), so back returns there.
+/// From a reader or Mushaf screen it replaces that screen instead of
+/// stacking another; from any other tab it opens in the Quran tab.
 void goToQuranLocation(BuildContext context, QuranLocation location) {
-  final path = switch (location) {
-    QuranLocationSurah(:final surahNo) => '${AppRoutes.quran}/surah/$surahNo',
+  final kindPath = switch (location) {
+    QuranLocationSurah(:final surahNo) => 'surah/$surahNo',
     QuranLocationAyah(:final chapterNo, :final verseNo) =>
-      '${AppRoutes.quran}/ayah/$chapterNo/$verseNo',
+      'ayah/$chapterNo/$verseNo',
     QuranLocationAyahRange(
       :final chapterNo,
       :final fromVerseNo,
       :final toVerseNo,
     ) =>
-      '${AppRoutes.quran}/ayah-range/$chapterNo/$fromVerseNo/$toVerseNo',
-    QuranLocationJuz(:final juzNo) => '${AppRoutes.quran}/juz/$juzNo',
-    QuranLocationHizb(:final hizbNo) => '${AppRoutes.quran}/hizb/$hizbNo',
+      'ayah-range/$chapterNo/$fromVerseNo/$toVerseNo',
+    QuranLocationJuz(:final juzNo) => 'juz/$juzNo',
+    QuranLocationHizb(:final hizbNo) => 'hizb/$hizbNo',
     QuranLocationPage(:final mushafId, :final pageNumber) =>
-      '${AppRoutes.quran}/page/$mushafId/$pageNumber',
+      'page/$mushafId/$pageNumber',
   };
-  GoRouter.of(context).go(path);
+  final router = GoRouter.of(context);
+  // The topmost screen, a pushed one included.
+  final current = router.state.uri.path;
+  final segments = Uri.tryParse(current)?.pathSegments ?? const [];
+  final root =
+      segments.isNotEmpty && quranLocationBranchRoots.contains(segments[0])
+      ? '/${segments[0]}'
+      : AppRoutes.quran;
+  final path = '$root/$kindPath';
+  if (isQuranLocationPath(current)) {
+    router.replace(path);
+  } else {
+    router.push(path);
+  }
 }

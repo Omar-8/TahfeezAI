@@ -13,6 +13,7 @@ import '../../../quran/domain/models/mushaf_token_models.dart';
 import '../../../quran/domain/models/quran_location.dart';
 import '../../../quran/quran_providers.dart';
 import '../../mushaf/application/mushaf_appearance_controller.dart';
+import '../../mushaf/application/mushaf_focus_ayah.dart';
 import '../../mushaf/application/mushaf_page_providers.dart';
 import '../../mushaf/domain/mushaf_appearance.dart';
 import '../../mushaf/presentation/mushaf_pager.dart';
@@ -104,10 +105,27 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
     super.initState();
     _scrollController.addListener(_maybeLoadMore);
     _scrollController.addListener(_maybeUpdateLiveMushafTitle);
+    _focus = ref.read(mushafFocusAyahProvider.notifier);
+    // Opened at an ayah (Home's Daily Ayah, a search result): that ayah is
+    // highlighted on its Mushaf page while this screen is open.
+    if (widget.location case QuranLocationAyah(
+      :final chapterNo,
+      :final verseNo,
+    )) {
+      Future.microtask(() {
+        if (mounted) _focus.focus(this, chapterNo * 1000 + verseNo);
+      });
+    }
   }
+
+  // Captured up front (initState): `ref` is unusable by the time dispose
+  // runs.
+  late final MushafFocusAyah _focus;
 
   @override
   void dispose() {
+    final focus = _focus;
+    Future.microtask(() => focus.clear(this));
     _scrollController.removeListener(_maybeLoadMore);
     _scrollController.removeListener(_maybeUpdateLiveMushafTitle);
     _scrollController.dispose();

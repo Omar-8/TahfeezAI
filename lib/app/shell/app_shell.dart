@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/localization/generated/app_localizations.dart';
+import '../../core/routing/quran_location_routing.dart';
 import '../../core/theme/app_breakpoints.dart';
 import '../../core/theme/components/components.dart';
 import '../../core/theme/tahfeez_content_widths.dart';
@@ -51,13 +52,13 @@ class AppShell extends ConsumerWidget {
     final breakpoint = TahfeezBreakpoint.of(context);
     final scheme = Theme.of(context).colorScheme;
     // The full-width exception is owned by the active Mushaf pager. Gate it
-    // to the Quran branch because StatefulShellRoute keeps inactive branches
-    // mounted; this prevents a spread in the retained Quran branch from
-    // widening Home/Search while still covering both standalone and in-reader
-    // Mushaf routes.
+    // to the active branch's own Quran location route (a reader or Mushaf
+    // screen, in whichever tab opened it) because StatefulShellRoute keeps
+    // inactive branches mounted; this prevents a spread retained in another
+    // branch from widening Home/Memorize while still covering both
+    // standalone and in-reader Mushaf routes.
     final fullBleed = _isStandaloneMushafRoute(currentLocation) ||
-        (navigationShell.currentIndex == 1 &&
-            currentLocation != '/quran' &&
+        (isQuranLocationPath(currentLocation) &&
         ref.watch(fullBleedContentProvider));
     // While a Mushaf is open (or a recitation session runs), the live
     // recitation bar takes the place of the Home/Quran/Settings navigation.
@@ -165,7 +166,7 @@ class AppShell extends ConsumerWidget {
     final segments = Uri.tryParse(location)?.pathSegments;
     return segments != null &&
         segments.length >= 3 &&
-        segments[0] == 'quran' &&
+        quranLocationBranchRoots.contains(segments[0]) &&
         segments[1] == 'page';
   }
 
