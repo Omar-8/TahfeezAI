@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/quran/application/quran_index_providers.dart';
 import '../../quran/quran_providers.dart';
 import '../domain/models/memorization_models.dart';
+import '../domain/models/memorization_plan.dart';
+import '../domain/plan_scheduler.dart';
 import '../domain/recitation_score.dart';
 import '../domain/strength_model.dart';
 import '../domain/today_scheduler.dart';
@@ -33,6 +35,26 @@ final todayAttemptsProvider = StreamProvider<List<AyahAttempt>>((ref) {
   return ref
       .watch(memorizationRepositoryProvider)
       .watchAttemptsSince(DateTime(now.year, now.month, now.day));
+});
+
+/// The active memorization plan, live; `null` without one.
+final activePlanProvider = StreamProvider<MemorizationPlan?>(
+  (ref) => ref.watch(memorizationRepositoryProvider).watchActivePlan(),
+);
+
+/// Today's new lesson from the active plan (`PlanScheduler`); `null`
+/// without a plan.
+final newLessonProvider = FutureProvider<NewLesson?>((ref) async {
+  final plan = await ref.watch(activePlanProvider.future);
+  if (plan == null) return null;
+  final memories = await ref.watch(ayahMemoriesProvider.future);
+  final pages = await ref.watch(ayahPagesProvider.future);
+  return PlanScheduler.today(
+    plan: plan,
+    memories: memories,
+    pages: pages,
+    now: ref.read(memorizationClockProvider)(),
+  );
 });
 
 /// Today's memorization (`TodayScheduler`).

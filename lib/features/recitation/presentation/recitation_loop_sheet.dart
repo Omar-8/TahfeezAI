@@ -244,7 +244,7 @@ class _RecitationLoopSheetState extends ConsumerState<_RecitationLoopSheet> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 label(l10n.recFrom),
-                _VersePicker(
+                VersePicker(
                   id: 'from',
                   surahs: surahList,
                   value: from,
@@ -255,7 +255,7 @@ class _RecitationLoopSheetState extends ConsumerState<_RecitationLoopSheet> {
                 ),
                 const SizedBox(height: TahfeezSpacing.md),
                 label(l10n.recTo),
-                _VersePicker(
+                VersePicker(
                   id: 'to',
                   surahs: surahList,
                   value: to,
@@ -317,7 +317,7 @@ class _RecitationLoopSheetState extends ConsumerState<_RecitationLoopSheet> {
                       ),
                     ),
                     const SizedBox(width: TahfeezSpacing.sm),
-                    _Stepper(
+                    CountStepper(
                       id: 'loop-count',
                       value: _loop.count,
                       min: 1,
@@ -380,8 +380,9 @@ class _RecitationLoopSheetState extends ConsumerState<_RecitationLoopSheet> {
 }
 
 /// A surah (searchable list) and an ayah in it.
-class _VersePicker extends StatelessWidget {
-  const _VersePicker({
+class VersePicker extends StatelessWidget {
+  const VersePicker({
+    super.key,
     required this.id,
     required this.surahs,
     required this.value,
@@ -435,7 +436,7 @@ class _VersePicker extends StatelessWidget {
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             const Spacer(),
-            _Stepper(
+            CountStepper(
               id: 'loop-$id-ayah',
               value: value.verseNo,
               min: 1,
@@ -451,8 +452,9 @@ class _VersePicker extends StatelessWidget {
 
 /// − value +, the value itself a menu of every choice (an ayah among 286
 /// is too far to step to).
-class _Stepper extends StatelessWidget {
-  const _Stepper({
+class CountStepper extends StatelessWidget {
+  const CountStepper({
+    super.key,
     required this.id,
     required this.value,
     required this.min,

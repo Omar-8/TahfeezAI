@@ -7,6 +7,10 @@ import 'package:tahfeez_ai/features/memorize/presentation/test_summary_sheet.dar
 import 'package:tahfeez_ai/features/quran/application/quran_index_providers.dart';
 import 'package:tahfeez_ai/memorization/application/memorization_today.dart';
 import 'package:tahfeez_ai/memorization/domain/models/memorization_models.dart';
+import 'package:tahfeez_ai/memorization/domain/models/memorization_plan.dart';
+import 'package:tahfeez_ai/memorization/domain/plan_scheduler.dart';
+import 'package:tahfeez_ai/memorization/domain/repositories/memorization_repository.dart';
+import 'package:tahfeez_ai/memorization/memorization_providers.dart';
 import 'package:tahfeez_ai/memorization/domain/today_scheduler.dart';
 import 'package:tahfeez_ai/quran/domain/models/surah_models.dart';
 
@@ -49,9 +53,15 @@ void main() {
     TodayPlan plan, {
     Widget? child,
     List<AyahAttempt> today = const [],
+    MemorizationPlan? memPlan,
+    NewLesson? lesson,
+    MemorizationRepository? repo,
   }) => ProviderScope(
     overrides: [
       todayPlanProvider.overrideWith((ref) async => plan),
+      activePlanProvider.overrideWith((ref) => Stream.value(memPlan)),
+      newLessonProvider.overrideWith((ref) async => lesson),
+      if (repo != null) memorizationRepositoryProvider.overrideWithValue(repo),
       todayAttemptsProvider.overrideWith((ref) => Stream.value(today)),
       indexedSurahsProvider.overrideWith((ref) async => names),
     ],
@@ -137,4 +147,89 @@ void main() {
     expect(find.byKey(const ValueKey('mem-weak-112001')), findsNothing);
     expect(find.byKey(const ValueKey('mem-repeat-weak')), findsOneWidget);
   });
+
+  testWidgets('no plan: how to make one; a plan saved from the sheet', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(500, 1600);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final repo = _PlanRepository();
+    await tester.pumpWidget(app(const TodayPlan(), repo: repo));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('mem-plan-none')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('mem-plan-create')));
+    await tester.pumpAndSettle();
+    expect(find.text('Memorization plan'), findsOneWidget);
+    await tester.tap(find.text('Ayahs'));
+    await tester.tap(find.text('6 days'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('plan-save')));
+    await tester.pumpAndSettle();
+    final saved = repo.saved;
+    expect(saved, isNotNull);
+    expect((saved!.fromAyah, saved.toAyah), (78001, 114006));
+    expect(
+      (saved.unit, saved.amount, saved.daysPerWeek, saved.backward),
+      (PlanUnit.ayahs, 1, 6, true),
+    );
+  });
+
+  testWidgets('a plan: today\'s lesson with its progress, or its state', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(500, 1600);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final plan = MemorizationPlan(
+      fromAyah: 112001,
+      toAyah: 114006,
+      createdAt: DateTime(2026),
+    );
+    await tester.pumpWidget(
+      app(
+        const TodayPlan(),
+        memPlan: plan,
+        lesson: const NewLesson(
+          runs: [
+            [114001, 114002, 114003, 114004, 114005, 114006],
+            [113001, 113002],
+          ],
+          memorized: 4,
+          total: 16,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('4 of 16 ayahs memorized'), findsOneWidget);
+    expect(find.text('25%'), findsOneWidget);
+    expect(find.text('An-Nas 1–6'), findsOneWidget);
+    expect(find.text('Al-Falaq 1–2'), findsOneWidget);
+    expect(find.text('Start'), findsNWidgets(2));
+
+    await tester.pumpWidget(const SizedBox());
+    await tester.pumpWidget(
+      app(
+        const TodayPlan(),
+        memPlan: plan,
+        lesson: const NewLesson(rest: true, memorized: 4, total: 16),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Rest day: no new lesson today.'), findsOneWidget);
+    expect(find.text('Start'), findsNothing);
+  });
+}
+
+class _PlanRepository implements MemorizationRepository {
+  MemorizationPlan? saved;
+
+  @override
+  Future<int> savePlan(MemorizationPlan plan) async {
+    saved = plan;
+    return 1;
+  }
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

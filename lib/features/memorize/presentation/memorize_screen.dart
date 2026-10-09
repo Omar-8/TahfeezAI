@@ -14,6 +14,7 @@ import '../../../quran/domain/models/quran_refs.dart';
 import '../../mushaf/application/mushaf_hide_mode.dart';
 import '../../quran/application/quran_index_providers.dart';
 import '../../recitation/application/hifz_controller.dart';
+import 'plan_sheet.dart';
 
 /// The Memorize tab: today's memorization, the three parts of a Hifz day
 /// (`docs/MEMORIZATION_MILESTONE.md`), with how today's recitation went.
@@ -56,9 +57,9 @@ class MemorizeScreen extends ConsumerWidget {
             const SizedBox(height: TahfeezSpacing.lg),
             section(
               l10n.memNewLesson,
-              l10n.memNewLessonSoon,
+              l10n.memLessonHint,
               Icons.auto_stories_outlined,
-              const SizedBox.shrink(),
+              _NewLessonCard(names: names),
             ),
             const SizedBox(height: TahfeezSpacing.lg),
             if (today.isEmpty)
@@ -245,29 +246,153 @@ class _TodayScore extends ConsumerWidget {
 
 VerseRef _verse(int ayah) => (chapterNo: ayah ~/ 1000, verseNo: ayah % 1000);
 
+/// Opens the Mushaf at [first]'s page (or [page]) with hide mode on and the
+/// Hifz test set to [first]..[last].
+Future<void> _recite(
+  BuildContext context,
+  WidgetRef ref,
+  int first,
+  int last, {
+  int? page,
+}) async {
+  final mushaf = await ref.read(defaultMushafProvider.future);
+  final pages = await ref.read(ayahPagesProvider.future);
+  page ??= pages[first];
+  if (mushaf == null || page == null || !context.mounted) return;
+  ref.read(requestedHifzRangeProvider.notifier).request((
+    from: _verse(first),
+    to: _verse(last),
+  ));
+  final hide = ref.read(mushafHideModeProvider.notifier);
+  if (!ref.read(mushafHideModeProvider).enabled) hide.toggle();
+  goToQuranLocation(context, QuranLocation.page(mushaf.id, page));
+}
+
+/// Today's new lesson from the plan, or how to make one.
+class _NewLessonCard extends ConsumerWidget {
+  const _NewLessonCard({required this.names});
+
+  final Map<int, String> names;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final plan = ref.watch(activePlanProvider).value;
+    final lesson = ref.watch(newLessonProvider).value;
+    if (plan == null || lesson == null) {
+      return TahfeezCard(
+        key: const ValueKey('mem-plan-none'),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          spacing: TahfeezSpacing.smPlus,
+          children: [
+            Text(l10n.memPlanNone),
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: FilledButton.tonalIcon(
+                key: const ValueKey('mem-plan-create'),
+                onPressed: () => showPlanSheet(context),
+                icon: const Icon(Icons.add),
+                label: Text(l10n.memPlanCreate),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+    final status = lesson.finished
+        ? l10n.memPlanFinished
+        : lesson.rest
+        ? l10n.memLessonRest
+        : lesson.done
+        ? l10n.memLessonDone
+        : null;
+    return TahfeezCard(
+      key: const ValueKey('mem-lesson'),
+      padding: EdgeInsets.zero,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsetsDirectional.fromSTEB(
+              TahfeezSpacing.md,
+              TahfeezSpacing.smPlus,
+              TahfeezSpacing.xs,
+              TahfeezSpacing.smPlus,
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: ScoreBar(
+                    label: l10n.memPlanProgress(lesson.memorized, lesson.total),
+                    value: lesson.progress,
+                    dense: true,
+                  ),
+                ),
+                IconButton(
+                  key: const ValueKey('mem-plan-edit'),
+                  tooltip: l10n.memPlanEdit,
+                  onPressed: () => showPlanSheet(context, plan: plan),
+                  icon: const Icon(Icons.tune),
+                ),
+              ],
+            ),
+          ),
+          if (status != null) ...[
+            const Divider(height: 1),
+            Padding(
+              padding: const EdgeInsets.all(TahfeezSpacing.md),
+              child: Text(status, style: theme.textTheme.bodyLarge),
+            ),
+          ],
+          if (!lesson.rest)
+            for (final run in lesson.runs) ...[
+              const Divider(height: 1),
+              Padding(
+                key: ValueKey('mem-lesson-${run.first}'),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: TahfeezSpacing.md,
+                  vertical: TahfeezSpacing.smPlus,
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        ayahRangeLabel(run.first, run.last, names),
+                        style: theme.textTheme.bodyLarge,
+                      ),
+                    ),
+                    if (lesson.done)
+                      TextButton(
+                        onPressed: () =>
+                            _recite(context, ref, run.first, run.last),
+                        child: Text(l10n.memAgain),
+                      )
+                    else
+                      FilledButton.tonal(
+                        onPressed: () =>
+                            _recite(context, ref, run.first, run.last),
+                        child: Text(l10n.memStart),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+        ],
+      ),
+    );
+  }
+}
+
 class _TaskList extends ConsumerWidget {
   const _TaskList({required this.tasks, required this.names});
 
   final List<RevisionTask> tasks;
   final Map<int, String> names;
 
-  Future<void> _start(
-    BuildContext context,
-    WidgetRef ref,
-    RevisionTask task,
-  ) async {
-    final mushaf = await ref.read(defaultMushafProvider.future);
-    final pages = await ref.read(ayahPagesProvider.future);
-    final page = task.page ?? pages[task.first];
-    if (mushaf == null || page == null || !context.mounted) return;
-    ref.read(requestedHifzRangeProvider.notifier).request((
-      from: _verse(task.first),
-      to: _verse(task.last),
-    ));
-    final hide = ref.read(mushafHideModeProvider.notifier);
-    if (!ref.read(mushafHideModeProvider).enabled) hide.toggle();
-    goToQuranLocation(context, QuranLocation.page(mushaf.id, page));
-  }
+  Future<void> _start(BuildContext context, WidgetRef ref, RevisionTask t) =>
+      _recite(context, ref, t.first, t.last, page: t.page);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

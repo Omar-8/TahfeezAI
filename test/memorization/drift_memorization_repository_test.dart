@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tahfeez_ai/memorization/data/drift_memorization_repository.dart';
 import 'package:tahfeez_ai/memorization/data/memorization_database.dart';
 import 'package:tahfeez_ai/memorization/domain/models/memorization_models.dart';
+import 'package:tahfeez_ai/memorization/domain/models/memorization_plan.dart';
 
 void main() {
   late MemorizationDatabase db;
@@ -70,5 +71,36 @@ void main() {
     expect(latest.keys.toSet(), {112001, 112002});
     expect(latest[112001]!.grade, AyahGrade.good);
     expect(latest[112001]!.at, t0.add(const Duration(hours: 1)));
+  });
+
+  test('plans: one active at a time, updated in place', () async {
+    expect(await repo.watchActivePlan().first, isNull);
+    final first = await repo.savePlan(
+      MemorizationPlan(fromAyah: 78001, toAyah: 114006, createdAt: t0),
+    );
+    var active = await repo.watchActivePlan().first;
+    expect(
+      (active!.id, active.unit, active.amount),
+      (first, PlanUnit.pages, 1),
+    );
+    await repo.savePlan(active.copyWith(amount: 2, unit: PlanUnit.halfPages));
+    active = await repo.watchActivePlan().first;
+    expect(
+      (active!.id, active.unit, active.amount),
+      (first, PlanUnit.halfPages, 2),
+    );
+    // A new active plan replaces it; pausing leaves none.
+    final second = await repo.savePlan(
+      MemorizationPlan(
+        fromAyah: 1001,
+        toAyah: 2286,
+        backward: true,
+        createdAt: t0,
+      ),
+    );
+    active = await repo.watchActivePlan().first;
+    expect((active!.id, active.backward), (second, true));
+    await repo.savePlan(active.copyWith(active: false));
+    expect(await repo.watchActivePlan().first, isNull);
   });
 }

@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart';
 
 import '../domain/models/memorization_models.dart';
+import '../domain/models/memorization_plan.dart';
 import '../domain/repositories/memorization_repository.dart';
 import '../domain/strength_model.dart';
 import 'memorization_database.dart';
@@ -84,11 +85,55 @@ class DriftMemorizationRepository implements MemorizationRepository {
       .asyncMap(
         (rows) async => {
           for (final r in rows)
-            r.read<int>('ayah_id'): _attempt(
-              await _db.attempts.mapFromRow(r),
-            ),
+            r.read<int>('ayah_id'): _attempt(await _db.attempts.mapFromRow(r)),
         },
       );
+
+  @override
+  Stream<MemorizationPlan?> watchActivePlan() =>
+      (_db.select(_db.plans)
+            ..where((t) => t.active.equals(true))
+            ..orderBy([(t) => OrderingTerm.desc(t.id)])
+            ..limit(1))
+          .watchSingleOrNull()
+          .map((r) => r == null ? null : _plan(r));
+
+  @override
+  Future<int> savePlan(MemorizationPlan plan) => _db.transaction(() async {
+    if (plan.active) {
+      await (_db.update(_db.plans)..where(
+            (t) => plan.id == null
+                ? const Constant(true)
+                : t.id.isNotValue(plan.id!),
+          ))
+          .write(const PlansCompanion(active: Value(false)));
+    }
+    final row = PlansCompanion(
+      id: plan.id == null ? const Value.absent() : Value(plan.id!),
+      name: const Value(''),
+      fromAyah: Value(plan.fromAyah),
+      toAyah: Value(plan.toAyah),
+      unit: Value(plan.unit.name),
+      amount: Value(plan.amount.toDouble()),
+      daysPerWeek: Value(plan.daysPerWeek),
+      backward: Value(plan.backward),
+      active: Value(plan.active),
+      createdAt: Value(plan.createdAt),
+    );
+    return _db.into(_db.plans).insertOnConflictUpdate(row);
+  });
+
+  static MemorizationPlan _plan(PlanRow r) => MemorizationPlan(
+    id: r.id,
+    fromAyah: r.fromAyah,
+    toAyah: r.toAyah,
+    unit: PlanUnit.values.byName(r.unit),
+    amount: r.amount.round(),
+    daysPerWeek: r.daysPerWeek,
+    backward: r.backward,
+    active: r.active,
+    createdAt: r.createdAt,
+  );
 
   @override
   Future<List<AyahAttempt>> attemptsFor(int ayahId) async {

@@ -1,4 +1,5 @@
 import '../models/memorization_models.dart';
+import '../models/memorization_plan.dart';
 
 /// Read/write access to Tahfeez's core differentiator: what the user has
 /// memorized, how strong each ayah is, and every test's per-ayah results.
@@ -25,6 +26,13 @@ abstract class MemorizationRepository {
   /// Each ayah's latest test result, by ayah id, updated as tests are
   /// recorded.
   Stream<Map<int, AyahAttempt>> watchLatestAttempts();
+
+  /// The active plan (one at most), updated as plans change.
+  Stream<MemorizationPlan?> watchActivePlan();
+
+  /// Stores [plan] (new, or by its id); an active one makes every other
+  /// plan inactive. Returns its id.
+  Future<int> savePlan(MemorizationPlan plan);
 
   /// [ayahId]'s test results, oldest first.
   Future<List<AyahAttempt>> attemptsFor(int ayahId);

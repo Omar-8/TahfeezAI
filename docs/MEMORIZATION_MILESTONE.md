@@ -1,6 +1,6 @@
 # Memorization milestone (17) — plan
 
-Status: planned 2026-10-09; M1 and M2 done the same day. Decisions by the product owner are marked **(decided)**.
+Status: planned 2026-10-09; M1, M2 and M3 done the same day. Decisions by the product owner are marked **(decided)**.
 
 ## Goal
 
@@ -84,11 +84,11 @@ The constants are a starting point, to be tuned on real use (see "Later").
    grading at the end of each test; the strength model; unit tests for grading, the model and
    the repository; the existing Hifz tests still pass. *Done when* a test's results are stored
    per ayah and strengths update, verified by tests (no UI yet).
-2. **M2 — Today.** *(done 2026-10-09; the new lesson card waits for M3's plans)* The scheduler (sabaq / sabqi / manzil from plans and strengths), the
+2. **M2 — Today.** *(done 2026-10-09)* The scheduler (sabaq / sabqi / manzil from plans and strengths), the
    Memorize tab's Today screen, starting a session at a range, the session summary. *Done
    when* a user with memorized parts sees today's three tasks, recites one, and sees its
    summary and updated strength.
-3. **M3 — Plans.** Create / edit / pause plans in ayahs, half-pages or pages; the new lesson
+3. **M3 — Plans.** *(done 2026-10-09; one active plan, its new lesson on the Memorize tab; a plan is stopped rather than paused)* Create / edit / pause plans in ayahs, half-pages or pages; the new lesson
    advances when its test passes (no fail); missed days roll forward. *Done when* a plan
    produces the right new lesson day by day (tests over simulated days).
 4. **M4 — Progress and starting point.** The strength map, the weak-parts list, marking
