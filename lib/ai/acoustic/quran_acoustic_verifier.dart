@@ -139,7 +139,14 @@ class AcousticThresholds {
     this.sounds = const {},
     this.tajweed = true,
     this.qalqalaError = 3,
+    this.maddShare = QuranAcousticVerifier.maddShortShare,
   });
+
+  /// With [tajweed]: a madd of 4 or 6 counts is short when held for less
+  /// than this share of its length, in the reciter's beats. (A ghunnah's
+  /// length cannot be read this way: the model does not hold the noon's
+  /// probability through it - on QDAT nearly every ghunnah held looked short.)
+  final double maddShare;
 
   /// With [tajweed]: a qalqala letter's echo missing needs "said without
   /// it" to beat "said with it" by this much. (On QDAT's expert labels for
@@ -190,6 +197,7 @@ class AcousticThresholds {
     Map<SoundGroup, SoundMargins>? sounds,
     bool? tajweed,
     double? qalqalaError,
+    double? maddShare,
   }) => AcousticThresholds(
     error: error ?? this.error,
     letterError: letterError ?? this.letterError,
@@ -202,6 +210,7 @@ class AcousticThresholds {
     sounds: sounds ?? this.sounds,
     tajweed: tajweed ?? this.tajweed,
     qalqalaError: qalqalaError ?? this.qalqalaError,
+    maddShare: maddShare ?? this.maddShare,
   );
 
   /// The expected pronunciation must beat every alternative by this much
@@ -618,7 +627,7 @@ class QuranAcousticVerifier {
           t.count >= 4 &&
           _plainOfHidden(t) == null) {
         final beats = _held(frames, expected, spans, k) / beat;
-        if (beats < maddShortShare * t.count) {
+        if (beats < thresholds.maddShare * t.count) {
           out.add(
             PhonemeVerdict(
               token: t,

@@ -5,6 +5,7 @@
 //       [--mine phone,phone2,...] [--sweep] [--margins group=error/uncertain,...]
 //       [--pause N] [--correct C] [--clips]
 //       [--error E (vowel, letter, shadda)] [--minor M (sukun, missing)]
+//       [--madd S] (a long madd's share held)
 //
 // <tag>: the model outputs' tag (results/<set>_<tag>.json/.f32; the
 // calibration sets as calib_<tag>, calibdeg_<tag>). Measured, per setting:
@@ -73,6 +74,7 @@ void main(List<String> args) {
     correct: double.parse(opt('correct') ?? '0'),
     pauseFrames: int.parse(opt('pause') ?? '6'),
     sounds: _parse(opt('margins') ?? ''),
+    maddShare: double.parse(opt('madd') ?? '0.65'),
   );
 
   stdout.writeln(

@@ -50,6 +50,7 @@ void main(List<String> args) {
       letterError: opt('error', 4),
       shaddaError: opt('error', 4),
       sukunError: opt('minor', 3),
+      maddShare: opt('madd', 0.65),
       missingVowelError: opt('minor', 3),
       correct: -1,
       pauseFrames: 4,
