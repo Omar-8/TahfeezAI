@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tahfeez_ai/quran/application/translation_selection_controller.dart';
 import 'package:tahfeez_ai/features/reader/application/verse_mode_feature.dart';
 import 'package:tahfeez_ai/core/localization/generated/app_localizations.dart';
 import 'package:tahfeez_ai/features/reader/application/reader_preferences_controller.dart';
@@ -44,6 +45,10 @@ void main() {
         ProviderScope(
           overrides: [
             verseByVerseModeEnabledProvider.overrideWithValue(true),
+            // No translation chosen (the app's default would be English).
+            translationSelectionControllerProvider.overrideWithBuild(
+              (ref, _) => const [],
+            ),
             quranDatabaseProvider.overrideWith((ref) => db),
             readerModePreferenceControllerProvider.overrideWith(
               () => _FixedReaderMode(ReaderMode.verseByVerse),

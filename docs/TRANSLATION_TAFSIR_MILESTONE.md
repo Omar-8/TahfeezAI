@@ -1,6 +1,6 @@
 # Translation and tafsir milestone (18) — plan
 
-Status: planned 2026-10-09; T1, T2 and T4 done the same day; T3 deferred. Decisions by the product owner are marked **(decided)**; open
+Status: planned 2026-10-09; T1, T2, T4 and T5 done the same day; T3 (word meanings) deferred. Decisions by the product owner are marked **(decided)**; open
 ones **(open)**.
 
 ## Goal
@@ -94,7 +94,7 @@ ship while unverified, recorded in `docs/THIRD_PARTY_RESOURCES.md`.
    translations, and the short tafsir per language where license-clean, imported with
    checksums and integrity checks and bundled (word meanings for them too, if the source
    has them). *Done when* every launch language works in airplane mode on a fresh install.
-5. **T5 — Defaults and attribution.** Sensible defaults by app language (Arabic: tafsir, no
+5. **T5 — Defaults and attribution.** *(done 2026-10-09: until the user chooses, the translation and tafsir follow the app's language, else the phone's — Arabic: Al-Muyassar, no translation; English, Indonesian, Turkish, French: their translation + Al-Mukhtasar; Urdu, German: their translation, no tafsir; any other: English. Every source is credited on the About screen)* Sensible defaults by app language (Arabic: tafsir, no
    translation; English: Rowwad + Mukhtasar, etc.); every source credited on the About
    screen with its version; provenance rows complete. *Done when* a fresh install in each
    language shows useful meaning without any setup.

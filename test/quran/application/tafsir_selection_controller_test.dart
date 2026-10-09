@@ -1,4 +1,6 @@
+import 'package:flutter/widgets.dart' show Locale;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tahfeez_ai/core/localization/locale_controller.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tahfeez_ai/core/storage/storage_providers.dart';
 import 'package:tahfeez_ai/quran/application/tafsir_selection_controller.dart';
@@ -17,11 +19,41 @@ void main() {
   });
 
   group('TafsirSelectionController', () {
-    test('starts null', () {
+    test('until chosen: the default for the language', () {
+      for (final (language, id) in [
+        ('ar', 'ar-muyassar'),
+        ('en', 'en-mukhtasar'),
+        ('tr', 'tr-mukhtasar'),
+        ('ur', null),
+      ]) {
+        final container = ProviderContainer(
+          overrides: [
+            localeControllerProvider.overrideWithBuild(
+              (ref, _) => Locale(language),
+            ),
+          ],
+        );
+        addTearDown(container.dispose);
+        expect(
+          container.read(tafsirSelectionControllerProvider),
+          id,
+          reason: language,
+        );
+      }
+    });
+
+    test('none, once chosen, stays none', () async {
       final container = ProviderContainer();
       addTearDown(container.dispose);
-
-      expect(container.read(tafsirSelectionControllerProvider), isNull);
+      await container
+          .read(tafsirSelectionControllerProvider.notifier)
+          .select(null);
+      expect(
+        await container
+            .read(browserStorageProvider)
+            .getString('tafsir.active_id'),
+        '',
+      );
     });
 
     test('select sets then clears the active tafsir', () async {

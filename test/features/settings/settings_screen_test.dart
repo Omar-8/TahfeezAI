@@ -121,8 +121,11 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Settings'));
     await tester.pumpAndSettle();
-    await tester.scrollUntilVisible(find.text('About'), 200);
-    await tester.tap(find.text('About'));
+    final about = find.byKey(const ValueKey('settings-about'));
+    await tester.scrollUntilVisible(about, 200);
+    await tester.ensureVisible(about);
+    await tester.pumpAndSettle();
+    await tester.tap(about);
     await tester.pumpAndSettle();
     expect(find.text('The Quran text'), findsOneWidget);
     // Every source is listed, scrolling down the page.

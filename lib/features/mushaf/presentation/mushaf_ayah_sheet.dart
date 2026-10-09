@@ -99,16 +99,6 @@ class _AyahDetailSheetBody extends ConsumerWidget {
                   ),
                 ),
               ),
-              TextButton.icon(
-                key: const ValueKey('ayah-sheet-tafsir'),
-                onPressed: () => openTafsirReader(
-                  context,
-                  chapterNo: chapterNo,
-                  verseNo: verseNo,
-                ),
-                icon: const Icon(Icons.menu_book_outlined, size: 18),
-                label: Text(l10n.readerTafsir),
-              ),
             ],
           ),
           if (text != null)
@@ -131,11 +121,16 @@ class _AyahDetailSheetBody extends ConsumerWidget {
                   verseText: entry.value,
                   authorName: books[entry.key]?.author ?? entry.key,
                 )
-            else if (books.isEmpty)
+            // Asked for the translation alone, with none chosen.
+            else if (books.isEmpty && content == AyahSheetContent.translation)
               _ChooseInSettings(l10n.ayahSheetNoTranslation),
           ],
           if (content != AyahSheetContent.translation)
-            _AyahTafsir(chapterNo: chapterNo, verseNo: verseNo),
+            _AyahTafsir(
+              chapterNo: chapterNo,
+              verseNo: verseNo,
+              hintIfNone: content == AyahSheetContent.tafsir,
+            ),
         ],
       ),
     );
@@ -144,9 +139,17 @@ class _AyahDetailSheetBody extends ConsumerWidget {
 
 /// The ayah's tafsir: its opening, and "Read more" for the full reader.
 class _AyahTafsir extends ConsumerWidget {
-  const _AyahTafsir({required this.chapterNo, required this.verseNo});
+  const _AyahTafsir({
+    required this.chapterNo,
+    required this.verseNo,
+    required this.hintIfNone,
+  });
 
   final int chapterNo, verseNo;
+
+  /// With no tafsir chosen: say where to choose one (asked for the tafsir
+  /// alone), or show nothing.
+  final bool hintIfNone;
 
   /// Languages written right to left.
   static const _rtl = {'ar', 'ur', 'fa', 'ps', 'ku', 'he', 'dv', 'ug', 'sd'};
@@ -156,7 +159,11 @@ class _AyahTafsir extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final tafsirId = ref.watch(tafsirSelectionControllerProvider);
-    if (tafsirId == null) return _ChooseInSettings(l10n.ayahSheetNoTafsir);
+    if (tafsirId == null) {
+      return hintIfNone
+          ? _ChooseInSettings(l10n.ayahSheetNoTafsir)
+          : const SizedBox.shrink();
+    }
     final work = [
       for (final t in ref.watch(tafsirLibraryControllerProvider).value ?? [])
         if (t.work.id == tafsirId) t.work,

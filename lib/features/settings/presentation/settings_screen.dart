@@ -17,8 +17,6 @@ import '../../../quran/application/tafsir_library_controller.dart';
 import '../../../quran/application/tafsir_selection_controller.dart';
 import '../../../quran/presentation/tafsir_packs_sheet.dart';
 import '../../../quran/presentation/translation_packs_sheet.dart';
-import '../../../wbw/application/wbw_preferences_controller.dart';
-import '../../../wbw/presentation/wbw_packs_sheet.dart';
 import '../../mushaf/application/mushaf_page_translations.dart';
 import 'theme_choices.dart';
 
@@ -247,9 +245,9 @@ Color _ink(AppThemeChoice c) =>
         ? const Color(0xFFECF2EF)
         : const Color(0xFF1C1C1C));
 
-/// Settings → Translation & tafsir: what the word and ayah sheets show.
-/// The lists of translations, tafsir and word-by-word languages are the
-/// existing pack sheets.
+/// Settings → Translation & tafsir: what the ayah sheet shows. (Word
+/// meanings and transliteration return with their data —
+/// `docs/TRANSLATION_TAFSIR_MILESTONE.md`, T3.)
 class _MeaningSettings extends ConsumerWidget {
   const _MeaningSettings();
 
@@ -263,9 +261,6 @@ class _MeaningSettings extends ConsumerWidget {
         if (t.work.id == tafsirId) t.work.displayName,
     ].firstOrNull;
     final content = ref.watch(ayahSheetContentProvider);
-    final transliteration = ref.watch(
-      wbwShowTransliterationPreferenceControllerProvider,
-    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -276,7 +271,7 @@ class _MeaningSettings extends ConsumerWidget {
           subtitle: Text(
             books == null || books.isEmpty
                 ? l10n.readerSelected(0)
-                : [for (final b in books.values) b.displayName].join(', '),
+                : [for (final b in books.values) b.author].join(', '),
           ),
           trailing: const Icon(Icons.chevron_right),
           onTap: () => showTranslationPacksSheet(context),
@@ -315,24 +310,6 @@ class _MeaningSettings extends ConsumerWidget {
           selected: {content},
           onSelectionChanged: (s) =>
               ref.read(ayahSheetContentProvider.notifier).set(s.first),
-        ),
-        const SizedBox(height: TahfeezSpacing.sm),
-        ListTile(
-          key: const ValueKey('settings-wbw'),
-          contentPadding: EdgeInsets.zero,
-          title: Text(l10n.readerWbw),
-          subtitle: Text(l10n.readerWbwSub),
-          trailing: const Icon(Icons.chevron_right),
-          onTap: () => showWbwPacksSheet(context),
-        ),
-        SwitchListTile(
-          key: const ValueKey('settings-transliteration'),
-          contentPadding: EdgeInsets.zero,
-          title: Text(l10n.settingsTransliteration),
-          value: transliteration,
-          onChanged: (on) => ref
-              .read(wbwShowTransliterationPreferenceControllerProvider.notifier)
-              .setEnabled(on),
         ),
       ],
     );

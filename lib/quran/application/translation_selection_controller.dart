@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../core/storage/storage_providers.dart';
+import 'meaning_defaults.dart';
 
 part 'translation_selection_controller.g.dart';
 
@@ -23,14 +24,15 @@ class TranslationSelectionController extends _$TranslationSelectionController {
   @override
   List<String> build() {
     _restore();
-    return const [];
+    // Until a choice is made: the default for the user's language.
+    return defaultTranslationSlugs(meaningLanguage(ref));
   }
 
   Future<void> _restore() async {
     final stored = await ref
         .read(browserStorageProvider)
         .getString(_activeTranslationSlugsPrefKey);
-    if (stored == null) return;
+    if (stored == null || !ref.mounted) return;
     state = stored.isEmpty ? const [] : stored.split(',');
   }
 

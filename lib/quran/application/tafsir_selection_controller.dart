@@ -1,6 +1,7 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../core/storage/storage_providers.dart';
+import 'meaning_defaults.dart';
 
 part 'tafsir_selection_controller.g.dart';
 
@@ -17,27 +18,26 @@ class TafsirSelectionController extends _$TafsirSelectionController {
   @override
   String? build() {
     _restore();
-    return null;
+    // Until a choice is made: the default for the user's language.
+    return defaultTafsirId(meaningLanguage(ref));
   }
 
   Future<void> _restore() async {
     final stored = await ref
         .read(browserStorageProvider)
         .getString(_activeTafsirIdPrefKey);
-    if (stored != null && stored != state) {
-      state = stored;
-    }
+    if (stored == null || !ref.mounted) return;
+    // '' is a chosen "none".
+    final chosen = stored.isEmpty ? null : stored;
+    if (chosen != state) state = chosen;
   }
 
+  /// [tafsirId] `null` for none — kept as a choice, unlike never choosing.
   Future<void> select(String? tafsirId) async {
     state = tafsirId;
-    if (tafsirId == null) {
-      await ref.read(browserStorageProvider).remove(_activeTafsirIdPrefKey);
-    } else {
-      await ref
-          .read(browserStorageProvider)
-          .setString(_activeTafsirIdPrefKey, tafsirId);
-    }
+    await ref
+        .read(browserStorageProvider)
+        .setString(_activeTafsirIdPrefKey, tafsirId ?? '');
   }
 }
 

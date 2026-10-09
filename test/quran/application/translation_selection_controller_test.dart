@@ -1,4 +1,6 @@
+import 'package:flutter/widgets.dart' show Locale;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tahfeez_ai/core/localization/locale_controller.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tahfeez_ai/core/storage/storage_providers.dart';
 import 'package:tahfeez_ai/quran/application/translation_selection_controller.dart';
@@ -19,16 +21,41 @@ void main() {
     cleanup.dispose();
   });
 
-  group('TranslationSelectionController', () {
-    test('starts empty', () {
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
+  // Arabic has no default translation: these start from an empty list.
+  ProviderContainer arabic() => ProviderContainer(
+    overrides: [
+      localeControllerProvider.overrideWithBuild(
+        (ref, _) => const Locale('ar'),
+      ),
+    ],
+  );
 
-      expect(container.read(translationSelectionControllerProvider), isEmpty);
+  group('TranslationSelectionController', () {
+    test('until chosen: the default for the language', () {
+      for (final (language, slugs) in [
+        ('en', ['en-rowwad']),
+        ('ur', ['ur-junagarhi']),
+        ('fr', ['fr-noor']),
+        ('ar', <String>[]),
+      ]) {
+        final container = ProviderContainer(
+          overrides: [
+            localeControllerProvider.overrideWithBuild(
+              (ref, _) => Locale(language),
+            ),
+          ],
+        );
+        addTearDown(container.dispose);
+        expect(
+          container.read(translationSelectionControllerProvider),
+          slugs,
+          reason: language,
+        );
+      }
     });
 
     test('toggle adds then removes a slug', () async {
-      final container = ProviderContainer();
+      final container = arabic();
       addTearDown(container.dispose);
       final notifier = container.read(
         translationSelectionControllerProvider.notifier,
@@ -48,7 +75,7 @@ void main() {
     });
 
     test('reorder moves a slug to a new position', () async {
-      final container = ProviderContainer();
+      final container = arabic();
       addTearDown(container.dispose);
       final notifier = container.read(
         translationSelectionControllerProvider.notifier,
@@ -67,7 +94,7 @@ void main() {
     });
 
     test('persists the active slug list', () async {
-      final container = ProviderContainer();
+      final container = arabic();
       addTearDown(container.dispose);
       await container
           .read(translationSelectionControllerProvider.notifier)

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tahfeez_ai/quran/application/translation_selection_controller.dart';
 import 'package:tahfeez_ai/features/reader/application/verse_mode_feature.dart';
 import 'package:tahfeez_ai/core/localization/generated/app_localizations.dart';
 import 'package:tahfeez_ai/features/reader/application/reader_preferences_controller.dart';
@@ -32,6 +33,10 @@ void main() {
     return ProviderScope(
       overrides: [
         verseByVerseModeEnabledProvider.overrideWithValue(true),
+        // No translation chosen (the app's default would be English).
+        translationSelectionControllerProvider.overrideWithBuild(
+          (ref, _) => const [],
+        ),
         quranDatabaseProvider.overrideWith((ref) => db),
         quranScriptCodeProvider.overrideWith((ref) => testScriptCode),
         readerModePreferenceControllerProvider.overrideWith(
@@ -124,10 +129,8 @@ void main() {
   );
 
   testWidgets(
-    "in Mushaf mode, the in-place Reader's own 'Reader options' sheet "
-    "(mushaf_reader_options_sheet.dart) lists 'Appearance' -- the "
-    "QPC-V2-specific 'Quran text boldness' setting was removed with that "
-    'renderer (docs/QURAN_ENGINE_MIGRATION.md)',
+    "in Mushaf mode, 'Reader options' opens the Mushaf themes directly "
+    '(mushaf_reader_options_sheet.dart), with no menu in between',
     (tester) async {
       final db = QuranDatabase(NativeDatabase.memory());
       await const QuranDatasetImporter().import(
@@ -144,7 +147,8 @@ void main() {
       await tester.tap(find.byTooltip('Reader options'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Appearance'), findsOneWidget);
+      expect(find.text('Mushaf appearance'), findsOneWidget);
+      expect(find.text('Appearance'), findsNothing);
     },
   );
 
@@ -164,6 +168,10 @@ void main() {
       ProviderScope(
         overrides: [
           verseByVerseModeEnabledProvider.overrideWithValue(true),
+          // No translation chosen (the app's default would be English).
+          translationSelectionControllerProvider.overrideWithBuild(
+            (ref, _) => const [],
+          ),
           quranDatabaseProvider.overrideWith((ref) => db),
           quranScriptCodeProvider.overrideWith(
             (ref) => mushaf_fixtures.mushafTestScriptCode,
@@ -239,6 +247,10 @@ void main() {
       ProviderScope(
         overrides: [
           verseByVerseModeEnabledProvider.overrideWithValue(true),
+          // No translation chosen (the app's default would be English).
+          translationSelectionControllerProvider.overrideWithBuild(
+            (ref, _) => const [],
+          ),
           quranDatabaseProvider.overrideWith((ref) => db),
           quranScriptCodeProvider.overrideWith(
             (ref) => mushaf_fixtures.mushafTestScriptCode,

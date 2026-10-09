@@ -42,7 +42,9 @@ class TafsirReaderScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final activeTafsirId = ref.watch(tafsirSelectionControllerProvider);
+    final chosen = ref.watch(tafsirSelectionControllerProvider);
+    // A chosen tafsir that isn't installed counts as none.
+    final work = chosen == null ? null : ref.watch(_tafsirWorkForId(chosen));
     final textScale = ref.watch(tafsirTextScaleControllerProvider);
 
     return Scaffold(
@@ -63,13 +65,17 @@ class TafsirReaderScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: activeTafsirId == null
-          ? const _NoTafsirSelected()
-          : _TafsirContent(
-              tafsirId: activeTafsirId,
-              verse: _verse,
-              textScale: textScale,
-            ),
+      body: switch (work) {
+        null => const _NoTafsirSelected(),
+        AsyncValue(isLoading: true, hasValue: false) =>
+          const TahfeezLoadingView(),
+        AsyncValue(value: final installed?) => _TafsirContent(
+          tafsirId: installed.id,
+          verse: _verse,
+          textScale: textScale,
+        ),
+        _ => const _NoTafsirSelected(),
+      },
       bottomNavigationBar: _PrevNextBar(verse: _verse),
     );
   }

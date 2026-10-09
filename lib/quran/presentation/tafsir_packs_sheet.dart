@@ -1,24 +1,20 @@
 import 'package:flutter/material.dart';
-
-import '../../core/localization/generated/app_localizations.dart';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/downloads/resource_download_status.dart';
+import '../../core/localization/generated/app_localizations.dart';
+import '../../core/theme/app_spacing.dart';
 import '../../core/theme/components/tahfeez_bottom_sheet.dart';
-import '../../core/theme/components/tahfeez_resource_row.dart';
 import '../../core/theme/components/tahfeez_state_views.dart';
 import '../application/tafsir_library_controller.dart';
 import '../application/tafsir_selection_controller.dart';
+import 'meaning_language_names.dart';
 
-/// Browse/install/delete tafsir works and pick the single active one —
-/// mirrors `lib/wbw/presentation/wbw_packs_sheet.dart`'s shape exactly,
-/// except selecting a row here also sets it as the single active tafsir
-/// (tafsir is single-select, unlike WBW packs and translations).
+/// Which bundled tafsir to show (one, or none), each with its language.
 void showTafsirPacksSheet(BuildContext context) {
   showTahfeezModalBottomSheet(
     context: context,
-    title: AppLocalizations.of(context).packsTafsirLibrary,
+    title: AppLocalizations.of(context).readerTafsir,
     builder: (context) => const _TafsirPacksSheetBody(),
   );
 }
@@ -28,84 +24,58 @@ class _TafsirPacksSheetBody extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final library = ref.watch(tafsirLibraryControllerProvider);
-    final activeTafsirId = ref.watch(tafsirSelectionControllerProvider);
-
+    final active = ref.watch(tafsirSelectionControllerProvider);
+    void select(String? id) =>
+        ref.read(tafsirSelectionControllerProvider.notifier).select(id);
     return library.when(
       data: (statuses) {
-        if (statuses.isEmpty) {
+        final works = [
+          for (final s in statuses)
+            if (s.state == ResourceDownloadState.completed ||
+                s.state == ResourceDownloadState.outdated)
+              s.work,
+        ];
+        if (works.isEmpty) {
           return Padding(
-            padding: EdgeInsets.only(bottom: 24),
+            padding: const EdgeInsets.only(bottom: TahfeezSpacing.lg),
             child: TahfeezEmptyView(
               icon: Icons.menu_book_outlined,
-              message: AppLocalizations.of(context).packsNoTafsir,
+              message: l10n.packsNoTafsir,
             ),
           );
         }
-        return ListView.separated(
-          shrinkWrap: true,
-          itemCount: statuses.length,
-          separatorBuilder: (_, _) => const Divider(height: 1),
-          itemBuilder: (context, index) {
-            final status = statuses[index];
-            final isActive = status.work.id == activeTafsirId;
-            return TahfeezResourceRow(
-              title: isActive
-                  ? AppLocalizations.of(context)
-                        .packsActive(status.work.displayName)
-                  : status.work.displayName,
-              subtitle: status.work.languageCode,
-              state: _rowState(status.state),
-              onAction: () => _onAction(context, ref, status),
-            );
-          },
+        return RadioGroup<String>(
+          groupValue: active ?? '',
+          onChanged: (id) => select(id == null || id.isEmpty ? null : id),
+          child: ListView(
+            shrinkWrap: true,
+            padding: const EdgeInsets.fromLTRB(
+              TahfeezSpacing.sm,
+              0,
+              TahfeezSpacing.sm,
+              TahfeezSpacing.md,
+            ),
+            children: [
+              for (final work in works)
+                RadioListTile<String>(
+                  key: ValueKey('tafsir-${work.id}'),
+                  value: work.id,
+                  title: Text(work.displayName),
+                  subtitle: Text(nativeLanguageName(work.languageCode)),
+                ),
+              RadioListTile<String>(
+                key: const ValueKey('tafsir-none'),
+                value: '',
+                title: Text(l10n.settingsTafsirNone),
+              ),
+            ],
+          ),
         );
       },
       loading: () => const TahfeezLoadingView(),
-      error: (_, _) => TahfeezErrorView(
-        message: AppLocalizations.of(context).packsTafsirError,
-      ),
+      error: (_, _) => TahfeezErrorView(message: l10n.packsTafsirError),
     );
-  }
-
-  TahfeezResourceRowState _rowState(ResourceDownloadState state) {
-    switch (state) {
-      case ResourceDownloadState.notDownloaded:
-        return TahfeezResourceRowState.notDownloaded;
-      case ResourceDownloadState.queued:
-        return TahfeezResourceRowState.queued;
-      case ResourceDownloadState.downloading:
-        return TahfeezResourceRowState.downloading;
-      case ResourceDownloadState.paused:
-        return TahfeezResourceRowState.downloading;
-      case ResourceDownloadState.completed:
-        return TahfeezResourceRowState.downloaded;
-      case ResourceDownloadState.outdated:
-        return TahfeezResourceRowState.outdated;
-      case ResourceDownloadState.failed:
-        return TahfeezResourceRowState.failed;
-      case ResourceDownloadState.deleting:
-        return TahfeezResourceRowState.deleting;
-    }
-  }
-
-  void _onAction(BuildContext context, WidgetRef ref, TafsirStatus status) {
-    final controller = ref.read(tafsirLibraryControllerProvider.notifier);
-    switch (status.state) {
-      case ResourceDownloadState.completed:
-        ref
-            .read(tafsirSelectionControllerProvider.notifier)
-            .select(status.work.id);
-      case ResourceDownloadState.outdated:
-      case ResourceDownloadState.notDownloaded:
-      case ResourceDownloadState.failed:
-        // No real bytes to fetch yet — see `TafsirCatalog`'s doc comment.
-        controller.install(status.work, const []);
-      case ResourceDownloadState.queued:
-      case ResourceDownloadState.downloading:
-      case ResourceDownloadState.paused:
-      case ResourceDownloadState.deleting:
-        break;
-    }
   }
 }
