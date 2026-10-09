@@ -46,4 +46,4 @@ final listenOptionsProvider =
     );
 
 /// Playback speeds offered in the bar, cycled in order.
-const listenSpeeds = [0.75, 1.0, 1.25, 1.5, 2.0];
+const listenSpeeds = [0.5, 0.75, 1.0, 1.25, 1.5, 2.0];
