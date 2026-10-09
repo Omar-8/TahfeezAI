@@ -288,11 +288,21 @@ class TeacherMix(torch.nn.Module):
     def dtype(self):
         return self.models[0].dtype
 
+    # TEACHER_SELECT=1 (two teachers): each frame from the first, unless either one's
+    # most likely sound there is a tajweed sound (a hidden noon / meem, the qalqala echo,
+    # a madd, a ghunnah's noon / meem): then from the second.
+    TAJWEED = 'ں۾ڇاۥۦنم'
+
     def forward(self, **kw):
         outs = [m(**kw) for m in self.models]
         lps = torch.stack([F.log_softmax(o.logits['phonemes'].float(), -1) for o in outs])
         out = outs[0]
-        out.logits['phonemes'] = torch.logsumexp(lps, 0) - math.log(len(outs))
+        if os.environ.get('TEACHER_SELECT') and len(outs) == 2:
+            ids = torch.tensor([VOCAB.index(c) for c in self.TAJWEED], device=lps.device)
+            tj = torch.isin(lps[0].argmax(-1), ids) | torch.isin(lps[1].argmax(-1), ids)
+            out.logits['phonemes'] = torch.where(tj[..., None], lps[1], lps[0])
+        else:
+            out.logits['phonemes'] = torch.logsumexp(lps, 0) - math.log(len(outs))
         return out
 
 

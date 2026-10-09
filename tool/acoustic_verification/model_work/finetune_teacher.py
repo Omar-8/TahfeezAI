@@ -60,16 +60,29 @@ def batches(items, max_audio_s, rng):
             yield cur
 
 
-def ctc(model, fe, items):
+def ctc(model, fe, items, anchor=None, free=()):
+    """CTC loss on [items]; with [anchor], also the frames' KL from the anchor's
+    distribution (clips whose index is in [free] are not held), returned beside it."""
     x, mask = ds.featurize(fe, items)
     with torch.autocast('cuda', dtype=torch.bfloat16):
         out = model(input_features=x, attention_mask=mask, return_dict=True)
     lp = F.log_softmax(out.logits['phonemes'].float(), -1)
+    if anchor is not None:
+        with torch.no_grad():
+            alp = F.log_softmax(anchor(input_features=x.to(anchor.dtype), attention_mask=mask,
+                                       return_dict=True).logits['phonemes'].float(), -1)
+        n = min(lp.shape[1], alp.shape[1])
+        fm = mask[:, ::2][:, :n].float()
+        for j in free:
+            fm[j] = 0
+        kl = F.kl_div(lp[:, :n], alp[:, :n], log_target=True, reduction='none').sum(-1)
+        akl = (kl * fm).sum() / fm.sum().clamp_min(1)
     n = lp.shape[1]
     lens = mask[:, ::2][:, :n].sum(1).long()
     targets = torch.tensor([i for _, t in items for i in t], device=lp.device)
     tl = torch.tensor([len(t) for _, t in items], device=lp.device)
-    return F.ctc_loss(lp.transpose(0, 1), targets, lens, tl, blank=0, zero_infinity=True)
+    loss = F.ctc_loss(lp.transpose(0, 1), targets, lens, tl, blank=0, zero_infinity=True)
+    return (loss, akl) if anchor is not None else loss
 
 
 def main():
@@ -91,6 +104,11 @@ def main():
                    help="learners' expert-labelled clips with their mistakes in the transcript "
                         '(real_mistakes_data.py): added to the amateur clips, nasal tajweed included '
                         '(their labels judge it)')
+    p.add_argument('--anchor', help='a teacher state dict (e.g. teacher_ft4.pt) the fine-tune is held to: '
+                   'KL(anchor || model) per frame, so it changes only where its transcripts require')
+    p.add_argument('--anchor-weight', type=float, default=1.0)
+    p.add_argument('--anchor-real', action='store_true',
+                   help='hold the real-mistake clips to the anchor too (by default they are free)')
     p.add_argument('--held', nargs='*', default=[],
                    help='held-out mistake shards (spliced, other reciters): validated beside the amateur '
                         'clips, and the best step is chosen on the sum of the two losses')
@@ -116,6 +134,18 @@ def main():
         ama = [c for c in ama if not nasal(c[1])]
     real = labelled(a.real)
     ama += real
+    real_ids = set() if a.anchor_real else {id(x) for x, _ in real}
+    anchor = None
+    if a.anchor:
+        from quran_muaalem import Muaalem
+        anchor = Muaalem(model_name_or_path='obadx/muaalem-model-v3_2', device=ds.DEV,
+                         dtype=torch.bfloat16).model
+        anchor.load_state_dict(torch.load(a.anchor, map_location='cpu'))
+        anchor.to(device=ds.DEV, dtype=torch.bfloat16).eval()
+        for q in anchor.parameters():
+            q.requires_grad_(False)
+        print('anchor:', a.anchor, 'weight', a.anchor_weight, 'real clips held' if a.anchor_real else 'real clips free',
+              flush=True)
     print(f'{len(real)} real-mistake clips', flush=True)
     rng.shuffle(ama)
     held = ama[:max(20, len(ama) // 10)]
@@ -145,7 +175,11 @@ def main():
     t0 = time.time()
     for step in range(1, a.steps + 1):
         items = next(ga) if rng.random() < a.amateur_share else next(gp)
-        loss = ctc(model, fe, items)
+        if anchor is not None:
+            loss, akl = ctc(model, fe, items, anchor, [j for j, (x, _) in enumerate(items) if id(x) in real_ids])
+            loss = loss + a.anchor_weight * akl
+        else:
+            loss = ctc(model, fe, items)
         if not torch.isfinite(loss):
             opt.zero_grad(set_to_none=True)
             continue

@@ -399,17 +399,19 @@ class AcousticVerificationController
 
   static const streamingMinorError = 2.0;
 
-  /// The streaming model v3.5 (v3.4 distilled from a teacher fine-tuned on
-  /// learners' labelled mistakes): its verdicts are less confident, so a vowel,
-  /// letter or shadda mistake needs a margin of 3.5, not 4. At the same false
-  /// flags on the user's correct recitation (6.5%), against v3.4 at 4: QuranMB
-  /// mistakes marked 67.5% (v3.4 68.8%), QDAT's held-out learners' missed ikhfa
-  /// flagged 60% (40%; correct ikhfa flagged 8.5%, 5.8%).
-  static const streamingError = 3.5;
+  /// The streaming model v3.5s: v3.4 distilled further from two teachers
+  /// chosen per frame - the tajweed sounds (hidden noon / meem, qalqala echo,
+  /// madd, ghunnah) from one fine-tuned on learners' labelled mistakes, the rest
+  /// from the old one. At a vowel / letter / shadda margin of 4, against v3.4:
+  /// the user's correct words flagged 6.3 -> 6.2%, amateurs' 3.8 -> 3.4%;
+  /// QuranMB mistakes marked 68.8 -> 68.2%; held-out learners' missed ikhfa
+  /// flagged 40 -> 58% (correct ikhfa 5.8 -> 9.0%), qalqala misses caught
+  /// ~6 -> 19% (at [streamingQalqalaError]).
+  static const streamingError = 4.0;
 
-  /// A missing qalqala echo, at 2: v3.5 on the held-out Surah Al-Ikhlas learners
-  /// catches 20.8% of labelled misses, flags 2.7% of correct ones; the user's
-  /// phone sessions and professional recitation no more than at 3.
+  /// A missing qalqala echo, at 2: v3.5s on the held-out Surah Al-Ikhlas
+  /// learners catches 19.2% of labelled misses, flags 2.5% of correct ones; the
+  /// user's phone sessions and professional recitation no more than at 3.
   static const streamingQalqalaError = 2.0;
 
   @override
