@@ -1,6 +1,6 @@
 # Translation and tafsir milestone (18) — plan
 
-Status: planned 2026-10-09. Decisions by the product owner are marked **(decided)**; open
+Status: planned 2026-10-09; T1 and T2 done the same day. Decisions by the product owner are marked **(decided)**; open
 ones **(open)**.
 
 ## Goal
@@ -61,11 +61,11 @@ as the existing translation import already does.
 
 ## Phases and Definition of Done
 
-1. **T1 — Settings and cleanup.** Remove the Mushaf (and reader) top-bar button; the
+1. **T1 — Settings and cleanup.** *(done 2026-10-09)* Remove the Mushaf (and reader) top-bar button; the
    Settings section with the choices above for what exists today (EN/DE translations,
    Al-Muyassar); persisted. *Done when* the button is gone and every choice persists and is
    reflected in the sheets.
-2. **T2 — The ayah sheet.** Translation and/or tafsir per the setting, tafsir opening with
+2. **T2 — The ayah sheet.** *(done 2026-10-09; until T5's defaults, nothing chosen shows where to choose it)* Translation and/or tafsir per the setting, tafsir opening with
    "Read more"; Arabic tafsir right-to-left in the Arabic UI font, translations in their own
    direction. *Done when* long-press shows exactly what Settings says, in both languages and
    themes.

@@ -485,6 +485,9 @@
   "tafsirLoadError": "Could not load this tafsir.",
   "wordDetails": "Word details",
   "ayahDetails": "Ayah details",
+  "ayahSheetNoTranslation": "No translation chosen. Choose one in Settings → Translation & tafsir.",
+  "ayahSheetNoTafsir": "No tafsir chosen. Choose one in Settings → Translation & tafsir.",
+  "ayahSheetReadMore": "Read more",
   "wordRef": "Ayah {ref} · Word {n}",
   "@wordRef": {
     "placeholders": {

@@ -9,6 +9,10 @@ import '../../../core/theme/quran_text_style.dart';
 import '../../../quran/application/canonical_ayah_word_text.dart';
 import '../../../quran/domain/models/translation_models.dart';
 import '../../../quran/presentation/translation_block.dart';
+import '../../../quran/application/ayah_sheet_content.dart';
+import '../../../quran/application/tafsir_library_controller.dart';
+import '../../../quran/application/tafsir_selection_controller.dart';
+import '../../../quran/application/tafsir_verse_text.dart';
 import '../../quran/application/quran_index_providers.dart';
 import '../application/mushaf_appearance_controller.dart';
 import '../application/mushaf_page_translations.dart';
@@ -65,6 +69,7 @@ class _AyahDetailSheetBody extends ConsumerWidget {
     final books =
         ref.watch(activeTranslationBooksProvider).value ??
         const <String, TranslationBook>{};
+    final content = ref.watch(ayahSheetContentProvider);
     final quranTextColor = ref
         .watch(mushafAppearanceControllerProvider)
         .colors
@@ -119,13 +124,106 @@ class _AyahDetailSheetBody extends ConsumerWidget {
                 ),
               ),
             ),
-          if (translations != null)
-            for (final entry in translations.entries)
-              TranslationBlock(
-                verseText: entry.value,
-                authorName: books[entry.key]?.author ?? entry.key,
-              ),
+          if (content != AyahSheetContent.tafsir) ...[
+            if (translations != null && translations.isNotEmpty)
+              for (final entry in translations.entries)
+                TranslationBlock(
+                  verseText: entry.value,
+                  authorName: books[entry.key]?.author ?? entry.key,
+                )
+            else if (books.isEmpty)
+              _ChooseInSettings(l10n.ayahSheetNoTranslation),
+          ],
+          if (content != AyahSheetContent.translation)
+            _AyahTafsir(chapterNo: chapterNo, verseNo: verseNo),
         ],
+      ),
+    );
+  }
+}
+
+/// The ayah's tafsir: its opening, and "Read more" for the full reader.
+class _AyahTafsir extends ConsumerWidget {
+  const _AyahTafsir({required this.chapterNo, required this.verseNo});
+
+  final int chapterNo, verseNo;
+
+  /// Languages written right to left.
+  static const _rtl = {'ar', 'ur', 'fa', 'ps', 'ku', 'he', 'dv', 'ug', 'sd'};
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final tafsirId = ref.watch(tafsirSelectionControllerProvider);
+    if (tafsirId == null) return _ChooseInSettings(l10n.ayahSheetNoTafsir);
+    final work = [
+      for (final t in ref.watch(tafsirLibraryControllerProvider).value ?? [])
+        if (t.work.id == tafsirId) t.work,
+    ].firstOrNull;
+    final text = ref
+        .watch(
+          tafsirVerseTextProvider(
+            chapterNo: chapterNo,
+            verseNo: verseNo,
+            tafsirId: tafsirId,
+          ),
+        )
+        .value
+        ?.text;
+    if (text == null) return const SizedBox.shrink();
+    final direction = _rtl.contains(work?.languageCode)
+        ? TextDirection.rtl
+        : TextDirection.ltr;
+    return Column(
+      key: const ValueKey('ayah-sheet-tafsir-text'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: TahfeezSpacing.xs,
+      children: [
+        Text(
+          work == null
+              ? l10n.readerTafsir
+              : '${l10n.readerTafsir} · ${work.displayName}',
+          style: theme.textTheme.labelMedium?.copyWith(
+            color: theme.colorScheme.primary,
+          ),
+        ),
+        Text(
+          text,
+          textDirection: direction,
+          maxLines: 8,
+          overflow: TextOverflow.ellipsis,
+          style: theme.textTheme.bodyMedium?.copyWith(height: 1.6),
+        ),
+        Align(
+          alignment: AlignmentDirectional.centerEnd,
+          child: TextButton(
+            onPressed: () => openTafsirReader(
+              context,
+              chapterNo: chapterNo,
+              verseNo: verseNo,
+            ),
+            child: Text(l10n.ayahSheetReadMore),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Nothing chosen yet: where to choose it.
+class _ChooseInSettings extends StatelessWidget {
+  const _ChooseInSettings(this.message);
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Text(
+      message,
+      style: theme.textTheme.bodySmall?.copyWith(
+        color: theme.colorScheme.onSurfaceVariant,
       ),
     );
   }
