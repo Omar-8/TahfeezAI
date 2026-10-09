@@ -1,6 +1,6 @@
 {
-    "name": "tahfeez_ai",
-    "short_name": "tahfeez_ai",
+    "name": "TahfeezAI",
+    "short_name": "TahfeezAI",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#03100C",

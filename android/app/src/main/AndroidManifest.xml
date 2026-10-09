@@ -8,7 +8,7 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:networkSecurityConfig="@xml/network_security_config"
-        android:label="tahfeez_ai"
+        android:label="TahfeezAI"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
