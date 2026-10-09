@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
-import 'package:flutter/foundation.dart' show kReleaseMode;
 import 'package:flutter/services.dart' show rootBundle;
 
 import '../../../core/logging/app_logger.dart';
@@ -41,17 +40,12 @@ import 'quran_dataset_importer.dart';
 /// triggers loading and parsing the large files. A normal subsequent
 /// launch does a handful of cheap reads, never a full JSON parse.
 ///
-/// **The Mushaf layer** is seeded only when [includeMushaf] is true
-/// (defaults to `!kReleaseMode` — development/profile builds only). QUL's
-/// redistribution terms for the Mushaf layout/word-by-word/font resources
-/// remain unverified (`SHIP_BLOCKED_LICENSE`,
-/// `docs/QURAN_DATA_PROVENANCE.md` §7/§7a/§8); this gate stops the app's
-/// own code from importing or displaying that data in a release build even
-/// if the asset bytes happen to be present in a naively-built package. It
-/// does **not** by itself keep those bytes out of a release binary — a
-/// true public release must also remove/flavor-gate the asset declarations
-/// themselves; see the release checklist in
-/// `docs/QURAN_DATA_PROVENANCE.md`.
+/// **The Mushaf layer** (QUL's KFGQPC V2 layout and word data: which ayah
+/// is on which page and line) is seeded in every build — debug, profile
+/// and release alike — by the owner's decision of 2026-10-09: its licence
+/// is still unverified, like the Quran Engine page corpus already shipped
+/// (`docs/THIRD_PARTY_RESOURCES.md`). Memorization, listening and Hifz
+/// need it to know each ayah's page. [includeMushaf] is only for tests.
 class BundledDatasetSeeder {
   const BundledDatasetSeeder({
     required this.quranRepository,
@@ -62,7 +56,7 @@ class BundledDatasetSeeder {
     required this.logger,
     required this.storage,
     this.importer = const QuranDatasetImporter(),
-    this.includeMushaf = !kReleaseMode,
+    this.includeMushaf = true,
   });
 
   final QuranRepository quranRepository;

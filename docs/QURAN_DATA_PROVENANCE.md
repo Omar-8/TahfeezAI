@@ -825,6 +825,12 @@ resource's license status, and it does not change how every *other* resource in 
 checklist must still be handled: the rule below ("no build should reach public distribution
 until cleared") still applies to everything else in this file.
 
+**A second exception (owner decision, 2026-10-09)**: the KFGQPC V2 Mushaf layout and
+word-by-word data (`assets/quran/mushaf/kfgqpc_v2.json`, §7/§7a) is likewise bundled and
+imported in every build, release included — the former `kReleaseMode` gate in
+`BundledDatasetSeeder` is removed, because memorization, listening and Hifz need each ayah's
+page. Its licence status is unchanged (unverified); the fonts (§8) remain unshipped.
+
 **Do not mark any of these "YES" without source documentation** (an email, a QUL account
 license page, or written confirmation from Tarteel AI/Digital Khadeeja Foundation) — never
 inferred from CDN accessibility, successful download, or QUL's own MIT-licensed platform

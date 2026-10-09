@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart' show kReleaseMode;
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -15,14 +14,12 @@ const _qpcHafsDisplayWordsAsset =
 /// The verified QPC Hafs display-word manifest — verse-by-verse mode's
 /// Quran text display source, kept separate from canonical `AyahWord`
 /// (Tanzil, `QuranRepository`) and Mushaf mode's `MushafToken` (QPC V2).
-/// See `docs/QURAN_DATA_PROVENANCE.md` §17. `null` in a release build
-/// (`SHIP_BLOCKED_LICENSE`, same gate as every other QUL-sourced resource)
-/// or if the manifest asset isn't bundled — both honest, expected states
-/// that [QuranDisplayRepository] falls back from, never an error.
+/// See `docs/QURAN_DATA_PROVENANCE.md` §17. `null` when the manifest asset
+/// isn't bundled (verse-by-verse mode is off, so it isn't) — an honest,
+/// expected state [QuranDisplayRepository] falls back from, never an
+/// error.
 @Riverpod(keepAlive: true)
 Future<QpcHafsDisplayManifest?> qpcHafsDisplayManifest(Ref ref) async {
-  if (kReleaseMode) return null;
-
   final String raw;
   try {
     raw = await rootBundle.loadString(_qpcHafsDisplayWordsAsset);

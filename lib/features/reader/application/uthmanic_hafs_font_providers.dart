@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart' show kReleaseMode;
 import 'package:flutter/services.dart' show FontLoader, rootBundle;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -33,8 +32,6 @@ const _uthmanicHafsManifestAsset =
 /// fabricated substitute glyph.
 @Riverpod(keepAlive: true)
 Future<QuranCommonFontManifest?> uthmanicHafsFontManifest(Ref ref) async {
-  if (kReleaseMode) return null;
-
   final String raw;
   try {
     raw = await rootBundle.loadString(_uthmanicHafsManifestAsset);

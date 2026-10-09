@@ -469,10 +469,10 @@ Future<void> main() async {
     'mushafFontStatus': 'SHIP_BLOCKED_LICENSE',
     'mushafStatus': mushafStatus,
     'mushafReleaseGate':
-        'BLOCKED — QUL layout/word-by-word/font redistribution terms not '
-        'independently verified (see docs/QURAN_DATA_PROVENANCE.md §7/§7a/§8). '
-        'assets/quran/mushaf/kfgqpc_v2.json is generated for local '
-        'development/testing only and is not declared as a Flutter asset.',
+        'OWNER DECISION 2026-10-09 — bundled and imported in every build, '
+        'release included, while QUL layout/word-by-word redistribution '
+        'terms stay unverified (docs/QURAN_DATA_PROVENANCE.md §7/§7a/§8, '
+        'docs/THIRD_PARTY_RESOURCES.md).',
     'translationResources': [
       {
         'slug': en.book.slug,

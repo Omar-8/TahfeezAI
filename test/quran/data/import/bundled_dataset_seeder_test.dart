@@ -102,9 +102,8 @@ void main() {
     final de = await translationRepository.getInstalledTranslation('de-rowwad');
     expect(de, isNotNull);
 
-    // Mushaf seeding is dev/debug-build-only (BundledDatasetSeeder.includeMushaf
-    // defaults to !kReleaseMode, true in `flutter test`) and only actually
-    // imports anything when the real, license-gated Mushaf dataset happens
+    // Mushaf seeding runs in every build (BundledDatasetSeeder.includeMushaf
+    // defaults to true) and only actually imports anything when the real, license-gated Mushaf dataset happens
     // to be present on disk (it is not committed to git) — assert
     // conditionally on what is really there, never fabricate an
     // expectation either way.
