@@ -11,7 +11,7 @@ import '../application/mushaf_page_providers.dart';
 import '../domain/mushaf_appearance.dart';
 import 'mushaf_pager.dart';
 import 'mushaf_page_title.dart';
-import 'mushaf_reader_options_sheet.dart';
+import 'mushaf_appearance_sheet.dart';
 
 /// Tahfeez's standalone Mushaf (paginated, printed-page-style) reader route
 /// — reached from the Quran index's Page tab, with no underlying
@@ -53,10 +53,8 @@ class _MushafReaderScreenState extends ConsumerState<MushafReaderScreen> {
         ),
         actions: [
           // Same icon/tooltip/sheet as `reader_screen.dart`'s
-          // `_MushafModeScaffold` -- both Mushaf surfaces share
-          // `showMushafReaderOptionsSheet` so Appearance/Quran text
-          // boldness can never drift out of sync between them again (see
-          // that sheet's own doc comment for the real bug this fixes).
+          // `_MushafModeScaffold`: both open the Mushaf themes
+          // (`showMushafAppearanceSheet`).
           // Recording: a red dot while a recitation session runs.
           const RecordingDot(),
           // Loop recitation, and Hifz mode's feedback settings, beside the
@@ -66,7 +64,7 @@ class _MushafReaderScreenState extends ConsumerState<MushafReaderScreen> {
           IconButton(
             icon: const Icon(Icons.tune),
             tooltip: AppLocalizations.of(context).readerOptions,
-            onPressed: () => showMushafReaderOptionsSheet(context),
+            onPressed: () => showMushafAppearanceSheet(context),
           ),
         ],
       ),

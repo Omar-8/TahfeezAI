@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tahfeez_ai/core/localization/generated/app_localizations.dart';
-import 'package:tahfeez_ai/features/home/presentation/sections/home_memorization_teaser_section.dart';
+import 'package:tahfeez_ai/features/home/presentation/sections/home_memorization_section.dart';
 import 'package:tahfeez_ai/features/memorize/presentation/mark_known_sheet.dart';
 import 'package:tahfeez_ai/features/memorize/presentation/memorize_screen.dart';
 import 'package:tahfeez_ai/features/memorize/presentation/progress_screen.dart';
@@ -297,7 +297,7 @@ void main() {
           total: 6,
         ),
         child: const Scaffold(
-          body: SingleChildScrollView(child: HomeMemorizationTeaserSection()),
+          body: SingleChildScrollView(child: HomeMemorizationSection()),
         ),
       ),
     );

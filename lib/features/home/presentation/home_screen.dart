@@ -5,15 +5,15 @@ import '../../../core/theme/app_spacing.dart';
 import 'home_greeting.dart';
 import 'sections/home_daily_ayah_section.dart';
 import 'sections/home_featured_reading_section.dart';
-import 'sections/home_memorization_teaser_section.dart';
+import 'sections/home_memorization_section.dart';
 import 'sections/home_read_history_section.dart';
 import 'sections/home_resource_updates_banner.dart';
 
 /// Tahfeez's Home screen — the app's single non-tabbed landing screen
 /// (`docs/reference/03_NAVIGATION_MAP.md`), composed from the
 /// reference-equivalent information hierarchy this milestone requires:
-/// resource/update notices, Daily Ayah, Continue Reading, a reserved
-/// Memorization slot, and Featured Reading. The persistent
+/// resource/update notices, Daily Ayah, Continue Reading, today's
+/// memorization, and Featured Reading. The persistent
 /// mini-player region (item 6) is mounted at the app-shell level
 /// (`lib/app/shell/app_shell.dart`), not here, so it can persist across
 /// Home/Quran/Search rather than being tied to one screen.
@@ -42,7 +42,7 @@ class HomeScreen extends StatelessWidget {
             const HomeResourceUpdatesBanner(),
             const HomeDailyAyahSection(),
             const HomeReadHistorySection(),
-            const HomeMemorizationTeaserSection(),
+            const HomeMemorizationSection(),
             const HomeFeaturedReadingSection(),
           ],
         ),

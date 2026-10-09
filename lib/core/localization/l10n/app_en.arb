@@ -38,59 +38,42 @@
       }
     }
   },
-
   "navHome": "Home",
   "navQuran": "Quran",
   "navSearch": "Search",
-
-
   "homeSectionDailyAyah": "Daily Ayah",
   "homeSectionContinueReading": "Continue Reading",
   "homeSectionMemorization": "Memorization",
   "homeSectionFeaturedReading": "Featured Reading",
-  "homeSectionExplore": "Explore Quran",
-
   "homeDailyAyahReference": "Surah {surahNo} · Ayah {verseNo}",
   "@homeDailyAyahReference": {
     "description": "Numeric chapter/verse reference shown on the Daily Ayah card.",
     "placeholders": {
-      "surahNo": { "type": "int" },
-      "verseNo": { "type": "int" }
+      "surahNo": {
+        "type": "int"
+      },
+      "verseNo": {
+        "type": "int"
+      }
     }
   },
   "homeDailyAyahReferenceNamed": "{surahName} · Ayah {verseNo}",
   "@homeDailyAyahReferenceNamed": {
     "description": "Chapter-name reference shown on the Daily Ayah card once a localized chapter name is available.",
     "placeholders": {
-      "surahName": { "type": "String" },
-      "verseNo": { "type": "int" }
+      "surahName": {
+        "type": "String"
+      },
+      "verseNo": {
+        "type": "int"
+      }
     }
   },
-
-  "homeQuranDatasetUnavailableTitle": "Quran text isn't installed yet",
   "homeQuranDatasetUnavailableBody": "This will appear automatically once a Quran dataset is added to the app.",
   "homeReadHistoryEmpty": "Your reading history will appear here once you start reading.",
-  "homeMemorizationTeaserTitle": "Memorization, coming soon",
-  "homeMemorizationTeaserBody": "Today's memorization, revision, and progress will live right here.",
   "homeFeaturedReadingUnavailable": "Featured passages will appear once a Quran dataset is installed.",
   "comingSoonMessage": "Coming soon",
-
-  "exploreDuas": "Duas",
-  "exploreTopics": "Topics",
-  "exploreProphets": "Prophets",
-  "exploreScience": "Science",
-
-  "quranPlaceholderTitle": "Quran",
-  "quranPlaceholderBody": "Chapter, Juz, and page navigation are coming in a later milestone.",
-  "quranPlaceholderChapterCount": "{count} chapters, ready once a Quran dataset is installed.",
-  "@quranPlaceholderChapterCount": {
-    "placeholders": {
-      "count": { "type": "int" }
-    }
-  },
-
   "miniPlayerDefaultTitle": "Now playing",
-
   "navSettings": "Settings",
   "homeDailyAyahOpen": "Read in context",
   "homeContinueReadingAction": "Continue",
@@ -134,28 +117,6 @@
       }
     }
   },
-  "homeMemorizationStart": "Recite from the Mushaf",
-  "homeMemorizationEmpty": "Open the Mushaf and recite: Tahfeez follows you word by word and marks what needs another look.",
-  "homeMemorizationWeek": "This week: {sessions} sessions · {minutes} min",
-  "@homeMemorizationWeek": {
-    "placeholders": {
-      "sessions": {
-        "type": "int"
-      },
-      "minutes": {
-        "type": "int"
-      }
-    }
-  },
-  "homeMemorizationRecent": "Recent sessions",
-  "homeMemorizationMinutes": "{minutes} min",
-  "@homeMemorizationMinutes": {
-    "placeholders": {
-      "minutes": {
-        "type": "int"
-      }
-    }
-  },
   "homeFeaturedAyahCount": "{count} ayahs",
   "@homeFeaturedAyahCount": {
     "placeholders": {
@@ -173,7 +134,6 @@
   "settingsThemeSystem": "System",
   "settingsThemeLight": "Light",
   "settingsThemeDark": "Dark",
-
   "quranTitle": "Quran",
   "quranTabSurah": "Surah",
   "quranTabJuz": "Juz",
@@ -233,7 +193,6 @@
   "quranNoChaptersMatch": "No chapters match your search.",
   "quranMeccan": "Meccan",
   "quranMedinan": "Medinan",
-
   "searchRecent": "Recent searches",
   "searchClearAll": "Clear all",
   "searchRemove": "Remove",
@@ -266,7 +225,6 @@
       }
     }
   },
-
   "recMicNeeded": "Microphone access is needed to listen to your recitation.",
   "recStopped": "Recitation stopped.",
   "recStart": "Start recitation",
@@ -375,8 +333,6 @@
   "recColourSub": "Correct green, skipped yellow, wrong red",
   "recShowMistakes": "Show mistakes",
   "recShowMistakesSub": "Mark wrong and skipped words",
-  "recVibrate": "Vibrate on mistakes",
-  "recVibrateSub": "A short vibration when a mistake is detected",
   "recRangeDefault": "Range: from the visible page to the end of the surah",
   "recRange": "Range: {from} – {to}",
   "@recRange": {
@@ -408,8 +364,6 @@
   "readerQuranScript": "Quran script",
   "readerScriptsError": "Could not load available Quran scripts.",
   "readerTranslationTafsir": "Translation & tafsir",
-  "readerNoPageTranslations": "No active translations to show for this page. Select translations from the Reader options.",
-  "readerPageTranslationsError": "Could not load translations for this page.",
   "readerOptions": "Reader options",
   "readerContinuous": "Continuous scrolling",
   "readerContinuousSub": "Automatically continue into the next chapter",
@@ -438,7 +392,6 @@
       }
     }
   },
-
   "packsNoTranslations": "No translations available yet.",
   "packsActive": "{name} (active)",
   "@packsActive": {
@@ -602,7 +555,9 @@
   "@recSaidOtherWord": {
     "description": "A word heard said as another word of the passage (swapped, out of order, or said instead); {word} is the word heard, in Uthmani script.",
     "placeholders": {
-      "word": { "type": "String" }
+      "word": {
+        "type": "String"
+      }
     }
   },
   "recLoop": "Loop recitation",
@@ -616,7 +571,9 @@
   "recLoopAyahCount": "{count, plural, =1{1 ayah} other{{count} ayahs}}",
   "@recLoopAyahCount": {
     "placeholders": {
-      "count": { "type": "int" }
+      "count": {
+        "type": "int"
+      }
     }
   },
   "recLoopTimes": "Times",
@@ -626,15 +583,18 @@
   "recLoopProgress": "{current} of {total}",
   "@recLoopProgress": {
     "placeholders": {
-      "current": { "type": "int" },
-      "total": { "type": "int" }
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "recLoopComplete": "Loop complete",
   "recLoopHint": "Each time, the range is tested afresh — with hide mode on, hidden again.",
   "navMemorize": "Memorize",
   "memTitle": "Memorize",
-  "memToday": "Today",
   "memNewLesson": "New lesson",
   "memRecent": "Recent revision",
   "memRecentSub": "What you are learning, and learned this week",
@@ -643,28 +603,58 @@
   "memEmptyTitle": "Nothing to revise yet",
   "memEmptyBody": "Recite in the Mushaf with hide mode on: every ayah you recite from memory is kept here, with how strong it is.",
   "memStart": "Start",
-  "memDone": "Done",
   "memPage": "Page {page}",
-  "@memPage": { "placeholders": { "page": { "type": "int" } } },
-  "memStrength": "{percent}%",
-  "@memStrength": { "placeholders": { "percent": { "type": "int" } } },
+  "@memPage": {
+    "placeholders": {
+      "page": {
+        "type": "int"
+      }
+    }
+  },
   "memUnverified": "Not recited yet",
   "memSummaryTitle": "Session results",
-  "memGradeGood": "Good",
-  "memGradeHard": "Hesitant",
-  "memGradeFail": "Missed",
   "memAllGood": "Every ayah recited cleanly.",
   "memRepeatWeak": "Repeat the weak ayahs",
   "memClose": "Close",
   "memScoreMemorization": "Memorization",
   "memScoreTajweed": "Tajweed",
   "memTodayRecited": "{count, plural, =0{Nothing recited yet today} =1{1 ayah recited today} other{{count} ayahs recited today}}",
-  "@memTodayRecited": { "placeholders": { "count": { "type": "int" } } },
+  "@memTodayRecited": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "memAgain": "Again",
   "memSummaryCounts": "{ayahs} ayahs · {good} good · {hesitant} hesitant · {missed} missed",
-  "@memSummaryCounts": { "placeholders": { "ayahs": { "type": "int" }, "good": { "type": "int" }, "hesitant": { "type": "int" }, "missed": { "type": "int" } } },
+  "@memSummaryCounts": {
+    "placeholders": {
+      "ayahs": {
+        "type": "int"
+      },
+      "good": {
+        "type": "int"
+      },
+      "hesitant": {
+        "type": "int"
+      },
+      "missed": {
+        "type": "int"
+      }
+    }
+  },
   "memSummaryStrength": "Strength {before}% → {after}%",
-  "@memSummaryStrength": { "placeholders": { "before": { "type": "int" }, "after": { "type": "int" } } },
+  "@memSummaryStrength": {
+    "placeholders": {
+      "before": {
+        "type": "int"
+      },
+      "after": {
+        "type": "int"
+      }
+    }
+  },
   "memToReview": "To review",
   "memStrengthLabel": "Strength",
   "memPractised": "Practised",
@@ -682,44 +672,91 @@
   "memLessonMore": "Learn more today",
   "memLessonNext": "Next lesson",
   "memPlanDaysCount": "{count, plural, =1{1 day a week} other{{count} days a week}}",
-  "@memPlanDaysCount": {"placeholders": {"count": {"type": "int"}}},
+  "@memPlanDaysCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "memPlanDaysSub": "Tap a day to add or remove it.",
   "memPlanSave": "Start plan",
   "memPlanUpdate": "Save",
   "memPlanStop": "Stop plan",
   "memPlanEdit": "Edit plan",
   "memPlanProgress": "{memorized} of {total} ayahs memorized",
-  "@memPlanProgress": { "placeholders": { "memorized": { "type": "int" }, "total": { "type": "int" } } },
+  "@memPlanProgress": {
+    "placeholders": {
+      "memorized": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "memLessonDone": "Today's lesson is learned.",
   "memLessonRest": "Rest day. You can still learn today's lesson.",
   "memPlanFinished": "The whole plan is memorized.",
   "memLessonHint": "Recite it with hide mode on until it comes without word mistakes.",
   "memProgressTitle": "Progress",
   "memProgressShare": "{percent}% of the Quran memorized",
-  "@memProgressShare": {"placeholders": {"percent": {"type": "int"}}},
+  "@memProgressShare": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
   "memProgressUnverified": "{count, plural, =1{1 ayah marked, not recited yet} other{{count} ayahs marked, not recited yet}}",
-  "@memProgressUnverified": {"placeholders": {"count": {"type": "int"}}},
+  "@memProgressUnverified": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "memMapTitle": "Strength map",
   "memMapStrong": "Strong",
   "memMapFading": "Fading",
   "memMapWeak": "Weak",
   "memMapNone": "Not memorized",
   "memJuzNo": "Juz {juz}",
-  "@memJuzNo": {"placeholders": {"juz": {"type": "int"}}},
+  "@memJuzNo": {
+    "placeholders": {
+      "juz": {
+        "type": "int"
+      }
+    }
+  },
   "memWeakTitle": "Weak pages",
-  "memWeakSub": "Revise these first",
   "memWeakNone": "No weak pages. Well done.",
   "memMarkKnown": "Mark what I know",
   "memMarkSub": "Check the surahs or juz you already know. They count as memorized, and are verified the first time you recite them with hide mode on.",
   "memMarkSurahs": "Surahs",
   "memMarkJuz": "Juz",
   "memPageAyahs": "{memorized} of {ayahs} ayahs memorized",
-  "@memPageAyahs": {"placeholders": {"memorized": {"type": "int"}, "ayahs": {"type": "int"}}},
+  "@memPageAyahs": {
+    "placeholders": {
+      "memorized": {
+        "type": "int"
+      },
+      "ayahs": {
+        "type": "int"
+      }
+    }
+  },
   "memOpenPage": "Open page",
   "memReminderTitle": "Daily reminder",
   "memReminderSwitch": "Remind me to memorize",
   "memReminderAt": "Every day at {time}",
-  "@memReminderAt": {"placeholders": {"time": {"type": "String"}}},
+  "@memReminderAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
   "memReminderTime": "Time",
   "memReminderDenied": "Notifications are turned off for TahfeezAI. Allow them in the phone's settings.",
   "memReminderNotifTitle": "Time to memorize",
@@ -727,7 +764,16 @@
   "memReminderChannel": "Memorization reminder",
   "homeMemNoPlan": "No plan yet",
   "homeMemTasksDone": "{done} of {total} done",
-  "@homeMemTasksDone": {"placeholders": {"done": {"type": "int"}, "total": {"type": "int"}}},
+  "@homeMemTasksDone": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "homeMemContinue": "Continue",
   "homeMemOpen": "Open Memorize",
   "homeMemAllDone": "Today's memorization is done.",

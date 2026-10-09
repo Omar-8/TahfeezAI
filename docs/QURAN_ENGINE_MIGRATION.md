@@ -73,7 +73,7 @@ full, not assumed:
 | Reader appearance / themes (Light/Warm/Sepia/Dark/Black) | `mushaf_appearance_controller.dart` | **Yes — must be mapped per backend**, see §6. Dark confirmed live; Light/Warm/Sepia/Black not yet exercised against Quran Engine. |
 | Quran text boldness | *(removed — see §11)* | Was QPC-V2-specific (font-weight variant selection); had no Quran Engine equivalent, so the setting itself, its controller, and its sheet were deleted with the rest of the QPC V2 renderer rather than kept as a dead option |
 | Page number / live Surah-Juz title | `mushaf_page_title.dart` | No — derived from canonical page/Juz/Surah data. Confirmed live ("Al-Faatiha · Page 1 · Juz 1", "Al-Baqara · Page 17 · Juz 1"). |
-| Reader chrome (app bar, translation button, reader-options sheet) | `reader_screen.dart`, `mushaf_reader_options_sheet.dart` | No |
+| Reader chrome (app bar, reader-options button → Mushaf themes) | `reader_screen.dart`, `mushaf_appearance_sheet.dart` | No |
 | Light/dark app mode vs. Mushaf appearance | Deliberately separate systems already (`docs/DESIGN_DIRECTION.md`) | No |
 | Memorization | Not yet implemented on `main` | Future capability this migration's highlight/mask API is designed for, see §7 |
 | Audio hooks | Not yet implemented for Mushaf mode on `main` | Future capability the highlight API is designed for |

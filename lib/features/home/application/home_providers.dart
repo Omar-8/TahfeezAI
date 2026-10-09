@@ -250,46 +250,6 @@ void _refreshOnSessionChange(Ref ref) {
   });
 }
 
-/// Home's memorization summary: the latest sessions and this week's totals.
-class MemorizationSummary {
-  const MemorizationSummary({
-    this.recent = const [],
-    this.weekSessions = 0,
-    this.weekMinutes = 0,
-  });
-
-  final List<RecitationSession> recent;
-  final int weekSessions, weekMinutes;
-}
-
-/// [sessions] summarized as of [now]: the three latest, and the sessions and
-/// minutes of the last seven days. Pure and separately testable.
-MemorizationSummary summarizeSessions(
-  List<RecitationSession> sessions,
-  DateTime now,
-) {
-  final sorted = [...sessions]
-    ..sort((a, b) => b.startedAt.compareTo(a.startedAt));
-  final week = now.subtract(const Duration(days: 7));
-  final thisWeek = [
-    for (final s in sorted)
-      if (s.startedAt.isAfter(week)) s,
-  ];
-  final seconds = thisWeek.fold<int>(0, (t, s) => t + s.duration.inSeconds);
-  return MemorizationSummary(
-    recent: sorted.take(3).toList(),
-    weekSessions: thisWeek.length,
-    weekMinutes: (seconds / 60).round(),
-  );
-}
-
-@riverpod
-Future<MemorizationSummary> memorizationSummary(Ref ref) async {
-  _refreshOnSessionChange(ref);
-  final sessions = await ref.watch(recitationSessionRepositoryProvider).list();
-  return summarizeSessions(sessions, DateTime.now());
-}
-
 /// Outdated-resource summaries for the update banner. Always empty today:
 /// `ResourceRepository` (`core/downloads`) is an interface with no concrete
 /// implementation until the Resource Manager milestone (13) — this provider

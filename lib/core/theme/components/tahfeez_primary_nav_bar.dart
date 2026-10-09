@@ -1,39 +1,23 @@
 import 'package:flutter/material.dart';
 
 import '../app_spacing.dart';
-import '../tahfeez_elevation.dart';
 import '../tahfeez_icon_sizes.dart';
 
 /// One destination in [TahfeezPrimaryNavigationBar]/[TahfeezPrimaryNavigationRail].
-///
-/// [isPrimary] marks the single destination that should read as the app's
-/// main entry point (Quran, for the root shell) — see those widgets' doc
-/// comments for why this exists as its own token-driven treatment rather
-/// than a copy of the reference app's center pill button.
 class TahfeezPrimaryNavItem {
   const TahfeezPrimaryNavItem({
     required this.icon,
     this.selectedIcon,
     required this.label,
-    this.isPrimary = false,
   });
 
   final IconData icon;
   final IconData? selectedIcon;
   final String label;
-  final bool isPrimary;
 }
 
-/// A bottom navigation bar where exactly one destination — [isPrimary] — is
-/// rendered as a raised, filled circular action instead of a plain icon.
-///
-/// This is Tahfeez's own answer to `docs/reference/03_NAVIGATION_MAP.md`'s
-/// observation that the reference app gives Quran access special visual
-/// weight: rather than cloning that app's specific center-pill artwork
-/// (which `CLAUDE.md`'s clean-room rules forbid anyway), the emphasis is
-/// built entirely from existing tokens (`TahfeezElevation`, `TahfeezRadii`,
-/// the active `ColorScheme`) so it reads as part of the same design system
-/// as every other component, not a one-off.
+/// The app shell's bottom navigation bar: equal destinations, each an icon
+/// over its label, the selected one in the primary colour.
 class TahfeezPrimaryNavigationBar extends StatelessWidget {
   const TahfeezPrimaryNavigationBar({
     super.key,
@@ -91,74 +75,19 @@ class _PrimaryNavBarItem extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final icon = selected ? (item.selectedIcon ?? item.icon) : item.icon;
 
-    if (!item.isPrimary) {
-      final color = selected ? scheme.primary : scheme.onSurfaceVariant;
-      return InkWell(
-        onTap: onTap,
-        // `end`, not `center`: the primary item's icon sits in a much
-        // taller filled circle than a plain `Icon`, so centering each
-        // item's Column independently (the previous approach) pushed
-        // *that* item's label further down than its plain-icon siblings
-        // -- aligning every item's label to the same bottom edge instead
-        // keeps all labels on one shared line regardless of icon height.
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          mainAxisSize: MainAxisSize.min,
-          spacing: TahfeezSpacing.xs,
-          children: [
-            Icon(icon, size: TahfeezIconSize.lg, color: color),
-            Text(
-              item.label,
-              style: Theme.of(context).textTheme.labelSmall
-                  ?.copyWith(color: color),
-            ),
-          ],
-        ),
-      );
-    }
-
-    // The primary destination floats slightly above the bar in a filled
-    // circle, so it reads as the shell's main action without needing a
-    // separate FloatingActionButton (which would add a second navigation
-    // idiom on top of the bar).
+    final color = selected ? scheme.primary : scheme.onSurfaceVariant;
     return InkWell(
       onTap: onTap,
-      // `end`, not `center` -- see the plain-item branch above for why:
-      // this keeps "Quran"'s label on the exact same line as "Home"/
-      // "Search" despite its much taller filled-circle icon. The circle
-      // still floats above the bar via `Transform.translate` (a pure
-      // paint-time shift, so it doesn't disturb this shared baseline) --
-      // kept small (not the circle's full raise-worthy amount) because
-      // `Transform.translate` doesn't reclaim layout space: every pixel of
-      // upward shift becomes extra empty gap between the visible circle and
-      // the label below it, on top of the `spacing` below, so a larger
-      // offset here visibly pushes "Quran"'s label further from its icon
-      // than "Home"/"Search"'s label sits from theirs.
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
+        mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
         spacing: TahfeezSpacing.xs,
         children: [
-          Transform.translate(
-            offset: const Offset(0, -4),
-            child: Material(
-              color: scheme.primary,
-              elevation: TahfeezElevation.high,
-              shape: const CircleBorder(),
-              child: Padding(
-                padding: const EdgeInsets.all(TahfeezSpacing.smPlus),
-                child: Icon(
-                  icon,
-                  size: TahfeezIconSize.lg,
-                  color: scheme.onPrimary,
-                ),
-              ),
-            ),
-          ),
+          Icon(icon, size: TahfeezIconSize.lg, color: color),
           Text(
             item.label,
             style: Theme.of(context).textTheme.labelSmall
-                ?.copyWith(color: scheme.primary, fontWeight: FontWeight.w600),
+                ?.copyWith(color: color),
           ),
         ],
       ),
@@ -167,9 +96,7 @@ class _PrimaryNavBarItem extends StatelessWidget {
 }
 
 /// The tablet/desktop counterpart of [TahfeezPrimaryNavigationBar]: a side
-/// [NavigationRail]-shaped column where the primary destination still gets
-/// the same filled-circle treatment, so the "Quran is prominent" identity
-/// holds across every breakpoint rather than only on phone.
+/// [NavigationRail]-shaped column of the same destinations.
 class TahfeezPrimaryNavigationRail extends StatelessWidget {
   const TahfeezPrimaryNavigationRail({
     super.key,
@@ -235,31 +162,15 @@ class _PrimaryNavRailItem extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           spacing: TahfeezSpacing.xs,
           children: [
-            if (item.isPrimary)
-              Material(
-                color: scheme.primary,
-                elevation: TahfeezElevation.medium,
-                shape: const CircleBorder(),
-                child: Padding(
-                  padding: const EdgeInsets.all(TahfeezSpacing.smPlus),
-                  child: Icon(
-                    icon,
-                    size: TahfeezIconSize.lg,
-                    color: scheme.onPrimary,
-                  ),
-                ),
-              )
-            else
-              Icon(
-                icon,
-                size: TahfeezIconSize.lg,
-                color: selected ? scheme.primary : scheme.onSurfaceVariant,
-              ),
+            Icon(
+              icon,
+              size: TahfeezIconSize.lg,
+              color: selected ? scheme.primary : scheme.onSurfaceVariant,
+            ),
             Text(
               item.label,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
                 color: selected ? scheme.primary : scheme.onSurfaceVariant,
-                fontWeight: item.isPrimary ? FontWeight.w600 : null,
               ),
             ),
           ],

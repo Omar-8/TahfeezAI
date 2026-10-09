@@ -2,7 +2,6 @@ import 'package:drift/native.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tahfeez_ai/features/home/application/home_providers.dart';
-import 'package:tahfeez_ai/features/recitation/domain/recitation_session.dart';
 import 'package:tahfeez_ai/quran/application/quran_dataset_status.dart';
 import 'package:tahfeez_ai/quran/data/import/quran_dataset_importer.dart';
 import 'package:tahfeez_ai/quran/data/quran_database.dart';
@@ -45,33 +44,6 @@ void main() {
     test('the listed order otherwise', () {
       final order = featuredOrderFor(DateTime(2026, 10, 7, 10));
       expect([for (final (n, _) in order) n], featuredReadingSurahNumbers);
-    });
-  });
-
-  group('summarizeSessions', () {
-    RecitationSession session(DateTime at, int minutes) => RecitationSession(
-      id: '$at',
-      startedAt: at,
-      duration: Duration(minutes: minutes),
-    );
-
-    test('the three latest, and this week\'s sessions and minutes', () {
-      final now = DateTime(2026, 10, 5, 12);
-      final summary = summarizeSessions([
-        session(DateTime(2026, 9, 20), 30), // more than a week ago
-        session(DateTime(2026, 10, 1), 5),
-        session(DateTime(2026, 10, 4), 7),
-        session(DateTime(2026, 10, 5, 9), 3),
-      ], now);
-      expect(summary.recent.map((s) => s.startedAt.day), [5, 4, 1]);
-      expect(summary.weekSessions, 3);
-      expect(summary.weekMinutes, 15);
-    });
-
-    test('nothing yet', () {
-      final summary = summarizeSessions(const [], DateTime(2026, 10, 5));
-      expect(summary.recent, isEmpty);
-      expect(summary.weekSessions, 0);
     });
   });
 

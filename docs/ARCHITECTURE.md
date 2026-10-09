@@ -993,7 +993,10 @@ on the page in the same batched-by-range shape as the reader. `MushafReaderScree
 translations plus a per-ayah "Tafsir" shortcut, reusing the same `TranslationBlock` the reader stacks
 inline. The printed Mushaf page itself never gains any translation-related decoration, satisfying
 this milestone's explicit "use a separate bottom/side sheet or panel so the printed page remains
-visually clean" instruction literally.
+visually clean" instruction literally. *(Superseded by the translation milestone,
+`docs/TRANSLATION_TAFSIR_MILESTONE.md`: the AppBar action and the page-scoped sheet were removed;
+translation and tafsir are chosen in Settings and shown per ayah in the long-press ayah sheet,
+`mushaf_ayah_sheet.dart`, and per word in the word sheet.)*
 
 ### Resource-row UI reused, not duplicated
 
@@ -1646,7 +1649,7 @@ whether QUL's redistribution terms are ever cleared.
   out-of-range marker simply renders as literal text rather than a tappable span, which is
   acceptable since no real (unverified) content is ever installed to begin with.
 - No `QuickReference` support inside the tafsir reader itself — cross-reference chips only appear
-  in the verse-by-verse reader's translation blocks and the Mushaf translation sheet, not inside
+  in the verse-by-verse reader's translation blocks and the Mushaf ayah sheet, not inside
   tafsir commentary text, since tafsir verse text has no footnote/cross-reference structure in this
   milestone's data model (only translations do).
 - No multi-tafsir simultaneous display — `TafsirSelectionController` holds exactly one active

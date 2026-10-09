@@ -129,8 +129,8 @@ void main() {
   );
 
   testWidgets(
-    "in Mushaf mode, 'Reader options' opens the Mushaf themes directly "
-    '(mushaf_reader_options_sheet.dart), with no menu in between',
+    "in Mushaf mode, 'Reader options' opens the Mushaf themes directly, "
+    'with no menu in between',
     (tester) async {
       final db = QuranDatabase(NativeDatabase.memory());
       await const QuranDatasetImporter().import(

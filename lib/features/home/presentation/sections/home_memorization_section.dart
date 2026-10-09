@@ -16,8 +16,8 @@ import '../../../memorize/presentation/memorize_screen.dart';
 /// Home's memorization card (`docs/MEMORIZATION_MILESTONE.md`, M5): today's
 /// three parts — the new lesson, recent and old revision — with how far
 /// each has come, today's scores, and Continue for the next part not done.
-class HomeMemorizationTeaserSection extends ConsumerWidget {
-  const HomeMemorizationTeaserSection({super.key});
+class HomeMemorizationSection extends ConsumerWidget {
+  const HomeMemorizationSection({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

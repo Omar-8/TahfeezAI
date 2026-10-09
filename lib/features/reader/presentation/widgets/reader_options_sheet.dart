@@ -60,16 +60,9 @@ class _ReaderOptionsBody extends ConsumerWidget {
           trailing: const Icon(Icons.chevron_right),
           onTap: () => showMushafAppearanceSheet(context),
         ),
-        // "Quran text boldness" (Mushaf-only) does NOT belong in this
-        // sheet: `_ReaderScreenState.build()` only ever renders
-        // `showReaderOptionsSheet` from its verse-by-verse branch --
-        // Mushaf mode returns `_MushafModeScaffold` instead, which opens
-        // `showMushafReaderOptionsSheet` (`mushaf_reader_options_sheet
-        // .dart`). A `readerMode == ReaderMode.mushaf` condition here
-        // would be unreachable dead code, not a real gate -- that was a
-        // real, shipped bug (the setting was completely unreachable from
-        // Mushaf mode, the one place it applies) fixed by moving it there
-        // instead of guarding it here.
+        // Mushaf-page settings live behind Mushaf mode's own "Reader
+        // options" button (the Mushaf themes), never in this
+        // verse-by-verse-only sheet.
         SwitchListTile(
           title: Text(AppLocalizations.of(context).readerContinuous),
           subtitle: Text(AppLocalizations.of(context).readerContinuousSub),

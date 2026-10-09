@@ -18,7 +18,7 @@ import '../../mushaf/application/mushaf_page_providers.dart';
 import '../../mushaf/domain/mushaf_appearance.dart';
 import '../../mushaf/presentation/mushaf_pager.dart';
 import '../../mushaf/presentation/mushaf_page_title.dart';
-import '../../mushaf/presentation/mushaf_reader_options_sheet.dart';
+import '../../mushaf/presentation/mushaf_appearance_sheet.dart';
 import '../../recitation/presentation/recitation_controls.dart';
 import '../application/reader_preferences_controller.dart';
 import '../application/reader_session_controller.dart';
@@ -646,25 +646,18 @@ class _MushafModeScaffold extends ConsumerWidget {
               mode: ReaderMode.mushaf,
               onSwitchToMode: onSwitchMode,
               // This segment's own "Translation mode" stub (a whole separate
-              // reading mode, permanently disabled/coming-soon) is a
-              // different thing from the real per-page translation sheet
-              // below -- still hidden here regardless: Mushaf mode's app bar
-              // is the tightest on space (title + mode switch + translation +
-              // Appearance all need to fit), and a permanently-disabled stub
-              // is the first thing worth dropping to give the live
-              // Surah/page/Juz title room before it truncates.
+              // reading mode, permanently disabled/coming-soon) is hidden:
+              // Mushaf mode's app bar is the tightest on space, and a
+              // permanently-disabled stub is the first thing worth dropping
+              // to give the live Surah/page/Juz title room before it
+              // truncates.
               showTranslationSegment: false,
               compact: true,
             ),
           // Same icon/tooltip as verse-by-verse mode's own settings button
-          // (`Icons.tune`/"Reader options") -- the button itself stays a
-          // consistent, always-visible fixture across both modes; only the
-          // sheet it opens differs. Mushaf mode's own small menu
-          // (Appearance / Quran text boldness) -- shared with
-          // `MushafReaderScreen`'s identical button, never the
-          // verse-by-verse-only `reader_options_sheet.dart` sheet (which
-          // this scaffold never renders while active, so anything gated
-          // to Mushaf mode there would be unreachable dead code).
+          // (`Icons.tune`/"Reader options"); in Mushaf mode it opens the
+          // Mushaf themes (`showMushafAppearanceSheet`), as
+          // `MushafReaderScreen`'s identical button does.
           // Recording: a red dot while a recitation session runs.
           const RecordingDot(),
           // Loop recitation, and Hifz mode's feedback settings, beside the
@@ -674,7 +667,7 @@ class _MushafModeScaffold extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.tune),
             tooltip: AppLocalizations.of(context).readerOptions,
-            onPressed: () => showMushafReaderOptionsSheet(context),
+            onPressed: () => showMushafAppearanceSheet(context),
           ),
         ],
       ),
