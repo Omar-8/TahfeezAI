@@ -197,6 +197,11 @@ flutter:
     - family: Noto Sans
       fonts:
         - asset: assets/fonts/NotoSans-Variable.ttf
+    # Home's Daily Ayah: Quran text (Tanzil Uthmani) — a font designed for
+    # it, with full Quranic mark support.
+    - family: Scheherazade New
+      fonts:
+        - asset: assets/fonts/ScheherazadeNew-Regular.ttf
     # The Arabic UI fonts, one chosen in Settings (ArabicUiFont).
     - family: Noto Kufi Arabic
       fonts:

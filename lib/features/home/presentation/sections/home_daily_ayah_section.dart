@@ -7,19 +7,15 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/components/components.dart';
 import '../../../../core/theme/quran_text_style.dart';
 import '../../../../quran/domain/models/quran_location.dart';
-import '../../../reader/application/quran_display_providers.dart';
-import '../../../reader/application/uthmanic_hafs_font_providers.dart';
 import '../../application/home_providers.dart';
 
 /// Home's Daily Ayah: today's verse in the Quran script, its first active
 /// translation, and a way into the reader at that verse. An honest "not
 /// installed yet" state while no Quran dataset is installed.
 ///
-/// The Arabic follows the reader's own rule (`VerseBlock`): the QPC Hafs
-/// font only together with its own validated display text for this verse
-/// (same word count), otherwise the canonical words through the platform's
-/// Arabic font — never the app's UI font, never canonical text forced
-/// through the QPC Hafs font.
+/// The Arabic is the verse's canonical words, unchanged, in Scheherazade
+/// New — a font designed for Quran text (`docs/THIRD_PARTY_RESOURCES.md`)
+/// — never the app's UI font.
 class HomeDailyAyahSection extends ConsumerWidget {
   const HomeDailyAyahSection({super.key});
 
@@ -58,6 +54,8 @@ class HomeDailyAyahSection extends ConsumerWidget {
   }
 }
 
+const _dailyAyahFont = 'Scheherazade New';
+
 class _DailyAyahCard extends ConsumerWidget {
   const _DailyAyahCard({required this.ayah});
 
@@ -68,19 +66,6 @@ class _DailyAyahCard extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final fontFamily = ref
-        .watch(uthmanicHafsFontManifestProvider)
-        .value
-        ?.fontFamily;
-    final displayWords = ayah.ayahId == null
-        ? null
-        : ref
-              .watch(quranDisplayRepositoryProvider)
-              .displayWordsForAyah(ayah.ayahId!);
-    final useQpcHafs =
-        fontFamily != null &&
-        displayWords != null &&
-        displayWords.length == ayah.words.length;
     final reference = ayah.chapterName != null
         ? l10n.homeDailyAyahReferenceNamed(ayah.chapterName!, ayah.verseNo)
         : l10n.homeDailyAyahReference(ayah.surahNo, ayah.verseNo);
@@ -99,12 +84,12 @@ class _DailyAyahCard extends ConsumerWidget {
             Directionality(
               textDirection: TextDirection.rtl,
               child: Text(
-                (useQpcHafs ? displayWords : ayah.words).join(' '),
+                ayah.words.join(' '),
                 textAlign: TextAlign.center,
                 style: quranTextStyle(
                   color: scheme.onSurface,
-                  fontFamily: useQpcHafs ? fontFamily : null,
-                  fontSize: 26,
+                  fontFamily: _dailyAyahFont,
+                  fontSize: 28,
                 ),
               ),
             ),
