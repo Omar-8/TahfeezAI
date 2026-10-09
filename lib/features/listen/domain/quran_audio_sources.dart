@@ -82,6 +82,23 @@ int globalAyahNumber(int ayahId) {
   return n;
 }
 
+/// [from] through [to] (stable ids), across surah ends; empty when [to]
+/// comes first.
+List<int> ayahRange(int from, int to) {
+  final out = <int>[];
+  var surah = from ~/ 1000, verse = from % 1000;
+  while (surah <= 114 && surah * 1000 + verse <= to) {
+    out.add(surah * 1000 + verse);
+    if (verse < surahAyahCounts[surah - 1]) {
+      verse++;
+    } else {
+      surah++;
+      verse = 1;
+    }
+  }
+  return out;
+}
+
 String ayahAudioUrl(int ayahId, Reciter reciter) =>
     'https://cdn.islamic.network/quran/audio/${reciter.kbps}/'
     '${reciter.edition}/${globalAyahNumber(ayahId)}.mp3';

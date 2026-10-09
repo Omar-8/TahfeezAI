@@ -10,7 +10,6 @@ import '../../core/theme/components/components.dart';
 import '../../core/theme/tahfeez_content_widths.dart';
 import '../../core/ui/full_bleed_content.dart';
 import '../../features/recitation/presentation/recitation_controls.dart';
-import 'mini_player_region.dart';
 
 /// Tahfeez's main app shell: the persistent chrome around Home/Quran/Settings.
 ///
@@ -23,10 +22,9 @@ import 'mini_player_region.dart';
 /// §7 itself flags as worth improving on: (1) each branch (Home/Quran/
 /// Search) keeps its own independent navigation stack and scroll/state
 /// restoration via `StatefulShellBranch`, which the reference app's Activity
-/// boundaries only approximate; and (2) a single, shell-level
-/// [MiniPlayerRegion] can persist across every branch, instead of being
-/// re-created (and losing continuity) at every Activity boundary the way
-/// the reference app's mini player is described as doing.
+/// boundaries only approximate; and (2) shell-level chrome (the Mushaf's
+/// recitation and listening bar) persists across every branch instead of
+/// being re-created at every Activity boundary.
 ///
 /// The primary navigation surface adapts by [TahfeezBreakpoint]: a bottom
 /// [TahfeezPrimaryNavigationBar] on phone, a side
@@ -107,7 +105,6 @@ class AppShell extends ConsumerWidget {
             child: navigationShell,
           ),
         ),
-        const _ConstrainedContent(child: MiniPlayerRegion()),
       ],
     );
 

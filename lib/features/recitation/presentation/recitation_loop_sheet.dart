@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../listen/application/quran_audio_player.dart';
+
 import '../../../core/localization/generated/app_localizations.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/components/components.dart';
@@ -604,8 +606,18 @@ class RecitationProgressBar extends ConsumerWidget {
         ? ref.watch(hifzControllerProvider)
         : null;
     final hide = ref.watch(mushafHideModeProvider);
+    // Listening: through the ayah being recited.
+    final playing = ref.watch(quranAudioPlayerProvider)?.ayahId;
     int? done;
-    if (hifz != null && hifz.active) {
+    if (playing != null &&
+        corpus.positionOf((ayahId: playing, wordIndex: 0)) != null) {
+      var end = corpus.positionOf((ayahId: playing, wordIndex: 0))!;
+      while (end + 1 < corpus.length &&
+          corpus.words[end + 1].ref.ayahId == playing) {
+        end++;
+      }
+      done = end;
+    } else if (hifz != null && hifz.active) {
       final next = hifz.completed ? null : hifz.expected;
       done = next != null
           ? switch (corpus.positionOf(next)) {

@@ -5,6 +5,10 @@ import '../../../core/localization/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/audio/audio_models.dart';
+import '../../listen/presentation/listen_sheet.dart';
+import '../../listen/application/quran_audio_player.dart';
+
 import '../../../core/core_providers.dart';
 import '../../../core/theme/components/tahfeez_bottom_sheet.dart';
 import '../../../core/ui/full_bleed_content.dart';
@@ -205,6 +209,10 @@ class RecitationBottomBar extends ConsumerWidget {
         ? ref.watch(localAcousticInferenceControllerProvider)
         : null;
     final centered = ref.watch(platformCapabilitiesProvider).isWeb;
+    // A run of ayahs playing (not a single word): its controls take the
+    // mic's place.
+    final playing = ref.watch(quranAudioPlayerProvider);
+    final listening = playing != null && !playing.isWord;
     final showDevPanel =
         recognition != null &&
         state.isActive &&
@@ -244,6 +252,8 @@ class RecitationBottomBar extends ConsumerWidget {
                           key: const ValueKey('recitation-session-controls'),
                           state: state,
                         )
+                      : listening
+                      ? const _ListenControls(key: ValueKey('listen-controls'))
                       : Row(
                           key: const ValueKey('recitation-start'),
                           // Web keeps the buttons together in the middle
@@ -253,16 +263,34 @@ class RecitationBottomBar extends ConsumerWidget {
                               ? MainAxisAlignment.center
                               : MainAxisAlignment.spaceBetween,
                           children: [
-                            IconButton.filled(
-                              icon: const Icon(Icons.mic_rounded),
-                              tooltip: AppLocalizations.of(context).recStart,
-                              onPressed:
-                                  location == null ||
-                                      state.phase == RecitationPhase.starting
-                                  ? null
-                                  : () => controller.start(
-                                      startLocation: location,
-                                    ),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              spacing: 8,
+                              children: [
+                                IconButton.filled(
+                                  icon: const Icon(Icons.mic_rounded),
+                                  tooltip: AppLocalizations.of(context)
+                                      .recStart,
+                                  onPressed:
+                                      location == null ||
+                                          state.phase ==
+                                              RecitationPhase.starting
+                                      ? null
+                                      : () => controller.start(
+                                          startLocation: location,
+                                        ),
+                                ),
+                                // Listen: the reciter, from a range.
+                                IconButton.filledTonal(
+                                  key: const ValueKey('listen-open'),
+                                  icon: const Icon(Icons.headphones_rounded),
+                                  tooltip: AppLocalizations.of(context)
+                                      .listenMenuTitle,
+                                  onPressed: location == null
+                                      ? null
+                                      : () => showListenSheet(context),
+                                ),
+                              ],
                             ),
                             if (centered)
                               const SizedBox(width: _centeredGroupGap),
@@ -361,6 +389,86 @@ class _SessionControls extends ConsumerWidget {
           ),
         const MushafHideControls(part: MushafHideControlsPart.pinned),
       ],
+    );
+  }
+}
+
+/// The bar while the reciter plays (the Listen menu, or an ayah from its
+/// sheet): stop, pause / resume and the speed where the mic was, the
+/// reveal/hide buttons where they always are.
+class _ListenControls extends ConsumerWidget {
+  const _ListenControls({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final scheme = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context);
+    final player = ref.read(quranAudioPlayerProvider.notifier);
+    final audio = ref.watch(audioControllerProvider);
+    final centered = ref.watch(platformCapabilitiesProvider).isWeb;
+    const steps = FittedBox(
+      fit: BoxFit.scaleDown,
+      child: MushafHideControls(part: MushafHideControlsPart.steps),
+    );
+    return StreamBuilder<AudioPlaybackState>(
+      stream: audio.state,
+      initialData: const AudioPlaybackState(isPlaying: true),
+      builder: (context, snapshot) {
+        final playback = snapshot.data ?? const AudioPlaybackState();
+        final speed = playback.speed;
+        return Row(
+          mainAxisAlignment: centered
+              ? MainAxisAlignment.center
+              : MainAxisAlignment.start,
+          children: [
+            IconButton.filled(
+              key: const ValueKey('listen-stop'),
+              style: IconButton.styleFrom(
+                backgroundColor: scheme.error,
+                foregroundColor: scheme.onError,
+              ),
+              icon: const Icon(Icons.stop_rounded),
+              tooltip: l10n.listenStop,
+              onPressed: player.stop,
+            ),
+            const SizedBox(width: 8),
+            if (playback.isPlaying)
+              IconButton.filledTonal(
+                key: const ValueKey('listen-pause'),
+                icon: const Icon(Icons.pause_rounded),
+                tooltip: l10n.recPause,
+                onPressed: player.pause,
+              )
+            else
+              IconButton.filledTonal(
+                key: const ValueKey('listen-resume'),
+                icon: const Icon(Icons.play_arrow_rounded),
+                tooltip: l10n.recResume,
+                onPressed: player.resume,
+              ),
+            const SizedBox(width: 4),
+            TextButton(
+              key: const ValueKey('listen-speed'),
+              onPressed: () => player.cycleSpeed(speed),
+              child: Text(
+                '${speed == speed.roundToDouble() ? speed.toInt() : speed}×',
+                semanticsLabel: '${l10n.listenSpeed} $speed',
+              ),
+            ),
+            if (centered) ...[
+              const SizedBox(width: _centeredGroupGap),
+              const Flexible(child: steps),
+            ] else
+              const Expanded(
+                child: Align(
+                  alignment: AlignmentDirectional.centerEnd,
+                  child: steps,
+                ),
+              ),
+            const MushafHideControls(part: MushafHideControlsPart.pinned),
+          ],
+        );
+      },
     );
   }
 }

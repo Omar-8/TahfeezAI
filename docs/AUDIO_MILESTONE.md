@@ -1,6 +1,6 @@
 # Listening milestone (19) — plan
 
-Status: planned 2026-10-09; L1 and L2 done the same day. Decisions by the product owner are marked **(decided)**.
+Status: planned 2026-10-09; L1–L3 done the same day. Decisions by the product owner are marked **(decided)**.
 
 ## Goal
 
@@ -25,9 +25,18 @@ starting one stops playback.
 2. **L2 — Word audio.** *(done 2026-10-09)* The word sheet's speaker plays the word (Quran.com word positions
    mapped from the canonical words — they differ only where Quran.com joins two words).
 
+3. **L3 — Listening from the Mushaf bar.** *(done 2026-10-09, replacing L1's mini player at
+   the owner's request)* A Listen button beside the mic opens a menu: the reciter, a range
+   (from / to ayah), repeat each ayah and the range (1–10), turn the pages with the
+   recitation, highlight the ayah being recited. While it plays the same bar holds stop,
+   pause / resume and the speed (0.75–1.5×), the hide buttons in place; in hide mode each ayah
+   is revealed as it is recited; the page's progress line follows the recited ayah. Leaving the
+   Mushaf, or a recitation test starting, stops it. The ayah sheet's *Play from here* opens
+   the menu at that ayah.
+
 Each phase: `flutter analyze` clean, tests, English + Arabic strings, credits and
 `docs/THIRD_PARTY_RESOURCES.md` rows.
 
 ## Later
 
-Following the playing ayah across pages; speed and repeat controls; translation audio.
+Translation audio; downloading recitations for offline listening (not wanted for now).

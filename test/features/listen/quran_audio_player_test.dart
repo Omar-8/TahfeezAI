@@ -1,8 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tahfeez_ai/core/core_providers.dart';
+import 'package:tahfeez_ai/features/listen/application/listen_options.dart';
 import 'package:tahfeez_ai/features/listen/application/quran_audio_player.dart';
+import 'package:tahfeez_ai/features/listen/domain/quran_audio_sources.dart';
+import 'package:tahfeez_ai/features/recitation/application/mushaf_recitation_target.dart';
+import 'package:tahfeez_ai/quran/domain/models/quran_location.dart';
 import 'package:tahfeez_ai/features/mushaf/application/mushaf_focus_ayah.dart';
+import 'package:tahfeez_ai/features/quran/application/quran_index_providers.dart';
 
 import '../../test_helpers/fake_audio_controller.dart';
 
@@ -11,7 +16,11 @@ void main() {
       'stop clears it', () async {
     final audio = FakeAudioController();
     final container = ProviderContainer(
-      overrides: [audioControllerProvider.overrideWithValue(audio)],
+      overrides: [
+        audioControllerProvider.overrideWithValue(audio),
+        // No Mushaf to follow in these tests.
+        defaultMushafProvider.overrideWith((ref) async => null),
+      ],
     );
     addTearDown(container.dispose);
     final player = container.read(quranAudioPlayerProvider.notifier);
@@ -35,7 +44,11 @@ void main() {
   test('a word plays alone, without highlighting an ayah', () async {
     final audio = FakeAudioController();
     final container = ProviderContainer(
-      overrides: [audioControllerProvider.overrideWithValue(audio)],
+      overrides: [
+        audioControllerProvider.overrideWithValue(audio),
+        // No Mushaf to follow in these tests.
+        defaultMushafProvider.overrideWith((ref) async => null),
+      ],
     );
     addTearDown(container.dispose);
     expect(
@@ -44,5 +57,53 @@ void main() {
     );
     expect(container.read(quranAudioPlayerProvider)?.isWord, isTrue);
     expect(container.read(mushafFocusAyahProvider), isNull);
+  });
+
+  test('repeats: each ayah, then the whole range', () async {
+    final audio = FakeAudioController();
+    final container = ProviderContainer(
+      overrides: [
+        audioControllerProvider.overrideWithValue(audio),
+        // No Mushaf to follow in these tests.
+        defaultMushafProvider.overrideWith((ref) async => null),
+      ],
+    );
+    addTearDown(container.dispose);
+    await container
+        .read(quranAudioPlayerProvider.notifier)
+        .playRange(
+          112001,
+          112002,
+          options: const ListenOptions(ayahRepeats: 2, rangeRepeats: 2),
+        );
+    expect(container.read(quranAudioPlayerProvider)?.ayahIds, [
+      112001, 112001, 112002, 112002, //
+      112001, 112001, 112002, 112002,
+    ]);
+  });
+
+  test('a range runs across surah ends', () {
+    expect(ayahRange(113005, 114002), [113005, 114001, 114002]);
+    expect(ayahRange(114002, 114001), isEmpty);
+  });
+
+  test('leaving the Mushaf stops it', () async {
+    final audio = FakeAudioController();
+    final container = ProviderContainer(
+      overrides: [
+        audioControllerProvider.overrideWithValue(audio),
+        // No Mushaf to follow in these tests.
+        defaultMushafProvider.overrideWith((ref) async => null),
+      ],
+    );
+    addTearDown(container.dispose);
+    final target = container.read(mushafRecitationTargetProvider.notifier);
+    final owner = Object();
+    target.show(owner, const QuranLocation.page(1, 604));
+    await container.read(quranAudioPlayerProvider.notifier).playFrom(112001);
+    expect(container.read(quranAudioPlayerProvider), isNotNull);
+    target.clear(owner);
+    await Future<void>.delayed(Duration.zero);
+    expect(container.read(quranAudioPlayerProvider), isNull);
   });
 }

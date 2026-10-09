@@ -24,6 +24,7 @@ import '../../mushaf/application/mushaf_page_translations.dart';
 import '../application/reset_all_data.dart';
 import '../../listen/application/reciter_controller.dart';
 import '../../listen/domain/quran_audio_sources.dart';
+import '../../listen/presentation/listen_sheet.dart';
 import 'theme_choices.dart';
 
 /// The Settings tab: the app's language and theme (the Quran page's own
@@ -403,8 +404,6 @@ class _ListenSettings extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    final arabic = Localizations.localeOf(context).languageCode == 'ar';
-    String name(Reciter r) => arabic ? r.nameAr : r.nameEn;
     final reciter = reciterFor(ref.watch(reciterProvider));
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -413,39 +412,9 @@ class _ListenSettings extends ConsumerWidget {
           key: const ValueKey('settings-reciter'),
           contentPadding: EdgeInsets.zero,
           title: Text(l10n.listenReciter),
-          subtitle: Text(name(reciter)),
+          subtitle: Text(reciterName(context, reciter)),
           trailing: const Icon(Icons.chevron_right),
-          onTap: () => showTahfeezModalBottomSheet<void>(
-            context: context,
-            title: l10n.listenReciter,
-            builder: (context) => Consumer(
-              builder: (context, ref, _) => RadioGroup<String>(
-                groupValue: ref.watch(reciterProvider),
-                onChanged: (edition) {
-                  if (edition == null) return;
-                  ref.read(reciterProvider.notifier).select(edition);
-                  Navigator.of(context).pop();
-                },
-                child: ListView(
-                  shrinkWrap: true,
-                  padding: const EdgeInsets.fromLTRB(
-                    TahfeezSpacing.sm,
-                    0,
-                    TahfeezSpacing.sm,
-                    TahfeezSpacing.md,
-                  ),
-                  children: [
-                    for (final r in reciters)
-                      RadioListTile<String>(
-                        key: ValueKey('reciter-${r.edition}'),
-                        value: r.edition,
-                        title: Text(name(r)),
-                      ),
-                  ],
-                ),
-              ),
-            ),
-          ),
+          onTap: () => showReciterSheet(context),
         ),
         Text(
           l10n.listenSourcesNote,

@@ -10,12 +10,10 @@ import 'package:tahfeez_ai/core/theme/components/components.dart';
 import 'package:tahfeez_ai/core/theme/tahfeez_content_widths.dart';
 import 'package:tahfeez_ai/core/ui/full_bleed_content.dart';
 import 'package:tahfeez_ai/features/home/presentation/home_screen.dart';
-import 'package:tahfeez_ai/features/listen/application/quran_audio_player.dart';
 import 'package:tahfeez_ai/features/mushaf/presentation/mushaf_reader_screen.dart';
 import 'package:tahfeez_ai/features/quran/presentation/quran_index_screen.dart';
 import 'package:tahfeez_ai/quran/domain/models/quran_location.dart';
 
-import '../../test_helpers/fake_audio_controller.dart';
 import '../../test_helpers/widget_test_overrides.dart';
 
 void main() {
@@ -119,35 +117,6 @@ void main() {
       expect(find.text(tab), findsOneWidget);
     }
     expect(find.text('Surah'), findsNothing);
-  });
-
-  testWidgets('the mini player: only for a run of ayahs, and its close '
-      'stops it', (tester) async {
-    setPhoneSize(tester);
-    final controller = FakeAudioController();
-    await tester.pumpWidget(app(audioController: controller));
-    await tester.pumpAndSettle();
-    final container = ProviderScope.containerOf(
-      tester.element(find.byType(TahfeezApp)),
-    );
-    final player = container.read(quranAudioPlayerProvider.notifier);
-    expect(find.byType(TahfeezMiniPlayerShell), findsNothing);
-
-    // A word, or one ayah: no player bar.
-    await player.playWord(1001, 0);
-    await tester.pumpAndSettle();
-    expect(find.byType(TahfeezMiniPlayerShell), findsNothing);
-    await player.playAyahs([1001]);
-    await tester.pumpAndSettle();
-    expect(find.byType(TahfeezMiniPlayerShell), findsNothing);
-
-    // From an ayah on: the bar, until closed.
-    await player.playFrom(1001);
-    await tester.pumpAndSettle();
-    expect(find.byType(TahfeezMiniPlayerShell), findsOneWidget);
-    await tester.tap(find.byKey(const ValueKey('mini-player-close')));
-    await tester.pumpAndSettle();
-    expect(find.byType(TahfeezMiniPlayerShell), findsNothing);
   });
 
   testWidgets('the Mushaf spread is the only screen that can escape the cap', (

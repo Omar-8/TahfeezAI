@@ -351,5 +351,13 @@
   "listenPlayFrom": "تشغيل من هنا",
   "listenStop": "إيقاف",
   "listenOffline": "الصوت يحتاج إلى اتصال بالإنترنت.",
-  "listenSourcesNote": "يُبثّ من Islamic Network (الآيات) وQuran.com (الكلمات)؛ ولا يُنزَّل شيء."
+  "listenSourcesNote": "يُبثّ من Islamic Network (الآيات) وQuran.com (الكلمات)؛ ولا يُنزَّل شيء.",
+  "listenMenuTitle": "استماع",
+  "listenRepeatAyah": "تكرار كل آية",
+  "listenRepeatRange": "تكرار المقطع",
+  "listenFollow": "قلب الصفحات مع التلاوة",
+  "listenHighlight": "تمييز الآية المتلوّة",
+  "listenRevealNote": "إخفاء النص مفعّل: تظهر كل آية عند تلاوتها.",
+  "listenPlay": "تشغيل",
+  "listenSpeed": "السرعة"
 }

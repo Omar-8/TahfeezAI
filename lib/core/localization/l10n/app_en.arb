@@ -785,5 +785,13 @@
   "listenPlayFrom": "Play from here",
   "listenStop": "Stop",
   "listenOffline": "Audio needs an internet connection.",
-  "listenSourcesNote": "Streamed from Islamic Network (ayahs) and Quran.com (words); nothing is downloaded."
+  "listenSourcesNote": "Streamed from Islamic Network (ayahs) and Quran.com (words); nothing is downloaded.",
+  "listenMenuTitle": "Listen",
+  "listenRepeatAyah": "Repeat each ayah",
+  "listenRepeatRange": "Repeat the range",
+  "listenFollow": "Turn the pages with the recitation",
+  "listenHighlight": "Highlight the ayah being recited",
+  "listenRevealNote": "Hide mode is on: each ayah is revealed as it is recited.",
+  "listenPlay": "Play",
+  "listenSpeed": "Speed"
 }

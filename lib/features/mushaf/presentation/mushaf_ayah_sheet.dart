@@ -15,6 +15,7 @@ import '../../../quran/application/tafsir_selection_controller.dart';
 import '../../../quran/application/tafsir_verse_text.dart';
 import '../../quran/application/quran_index_providers.dart';
 import '../../listen/application/quran_audio_player.dart';
+import '../../listen/presentation/listen_sheet.dart';
 import '../application/mushaf_appearance_controller.dart';
 import '../application/mushaf_page_translations.dart';
 import '../domain/mushaf_appearance.dart';
@@ -268,7 +269,15 @@ class _ListenButtons extends ConsumerWidget {
         Expanded(
           child: OutlinedButton.icon(
             key: const ValueKey('ayah-sheet-play-from'),
-            onPressed: () => play(() => player.playFrom(ayahId)),
+            // The Listen menu, from this ayah.
+            onPressed: () {
+              final navigator = Navigator.of(context);
+              navigator.pop();
+              showListenSheet(
+                navigator.context,
+                from: (chapterNo: ayahId ~/ 1000, verseNo: ayahId % 1000),
+              );
+            },
             icon: const Icon(Icons.playlist_play_rounded),
             label: Text(l10n.listenPlayFrom),
           ),
