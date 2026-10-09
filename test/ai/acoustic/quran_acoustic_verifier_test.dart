@@ -426,6 +426,68 @@ void main() {
     expect(flagged(kept(ShortVowel.damma)), isTrue);
   });
 
+  test('two ayahs joined: the end in flow and the next start joined, as a '
+      'pair', () {
+    // 106:3-4 «…ٱلْبَيْتِ ٱلَّذِىٓ…» said on without a stop: «-bayti-lladhī»,
+    // the ت with its kasra and no hamza before «لَّذِي». Judged one unit at a
+    // time against the next ayah's fresh start, the kasra read as a sukun
+    // mistake.
+    final span = reference.span([
+      (ayahId: 106003, wordIndex: 3),
+      (ayahId: 106004, wordIndex: 0),
+    ]);
+    final units = {for (final t in span.tokens) t.unit}.toList()..sort();
+    List<PhoneticToken> unit(int u) => [
+      for (final t in span.tokens)
+        if (t.unit == u) t,
+    ];
+    final end = units.first, next = units.last;
+    final joined = [
+      ...span.pauses[end]!.apply(
+        unit(end),
+        stop: false,
+        start: false,
+        begin: false,
+      ),
+      ...span.pauses[next]!.apply(
+        unit(next),
+        stop: false,
+        start: false,
+        end: false,
+      ),
+    ];
+    final heard = [
+      for (final t in joined)
+        if (!t.optional) t.token,
+    ];
+    final verdicts = verifier.verify(
+      clearFrames(heard),
+      span.tokens,
+      pauses: span.pauses,
+      openStart: true,
+      openEnd: true,
+    );
+    expect(verdicts.where((v) => v.type.isError), isEmpty);
+    // Stopped instead, and started afresh: fine too.
+    final stopped = [
+      for (final t in [...unit(end), ...unit(next)])
+        if (!t.optional) t.token,
+    ];
+    final cut = unit(end).where((t) => !t.optional).length;
+    expect(
+      verifier
+          .verify(
+            clearFrames(stopped, pauseAfter: cut),
+            span.tokens,
+            pauses: span.pauses,
+            openStart: true,
+            openEnd: true,
+          )
+          .where((v) => v.type.isError),
+      isEmpty,
+    );
+  });
+
   test('stopping inside a joined unit is a stop, not a mistake', () {
     // 2:7 «غِشَٰوَةٌ ۖ وَلَهُمْ»: in flow one unit (the tanween merges into the
     // و); stopping after غِشَٰوَةٌ (a waqf mark) it is said «غِشَاوَه», and

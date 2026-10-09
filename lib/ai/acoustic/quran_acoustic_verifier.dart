@@ -372,6 +372,14 @@ class QuranAcousticVerifier {
               if (e || b)
                 forms.apply(unit, stop: s, start: st, end: e, begin: b),
       ].where((o) => !_sameTokens(o, unit)).toList();
+      // The ayah's end said on into the next ayah (wasl): judged with the
+      // next ayah's start joined to it too (no hamzat al-wasl) — a join is
+      // a pair, «ٱلْبَيْتِ ٱلَّذِىٓ» said «-bayti-lladhī».
+      final joinedEnds = <List<PhoneticToken>>{
+        if (forms?.wasl != null)
+          for (final (st, b) in begins)
+            forms!.apply(unit, stop: false, start: st, end: true, begin: b),
+      };
       // Stopping inside a unit of several words (after a word whose
       // ending joins the next in flow): only where a pause was heard
       // inside it, so in flow the joined form is the one judged.
@@ -397,11 +405,25 @@ class QuranAcousticVerifier {
         final after = [
           for (final x in byUnit[next] ?? const <PhoneticToken>[]) x.token,
         ];
+        final nextForms = next == null ? null : pauses[next];
+        final afterJoined = nextForms?.joined == null
+            ? after
+            : [
+                for (final x in nextForms!.apply(
+                  byUnit[next]!,
+                  stop: false,
+                  start: false,
+                  end: false,
+                ))
+                  x.token,
+              ];
         final local = frames.slice(f0, f1);
         double score(List<PhoneticToken> tokens) => ctcLogProbability(local, [
           ...before,
           for (final x in tokens) x.token,
-          ...after,
+          ...(joinedEnds.any((j) => _sameTokens(j, tokens))
+              ? afterJoined
+              : after),
         ]);
         var best = score(unit);
         for (final o in options) {
