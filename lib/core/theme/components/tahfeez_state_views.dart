@@ -48,7 +48,7 @@ class TahfeezEmptyView extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
 
-    return Center(
+    return _CenteredOrScrolling(
       child: Padding(
         padding: const EdgeInsets.all(TahfeezSpacing.lg),
         child: Column(
@@ -89,7 +89,7 @@ class TahfeezErrorView extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
 
-    return Center(
+    return _CenteredOrScrolling(
       child: Padding(
         padding: const EdgeInsets.all(TahfeezSpacing.lg),
         child: Column(
@@ -116,4 +116,29 @@ class TahfeezErrorView extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Centred in the space given; scrollable when that space is too short for
+/// it (a small phone with large text). In an unbounded height (inside a
+/// list), just the child.
+class _CenteredOrScrolling extends StatelessWidget {
+  const _CenteredOrScrolling({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, box) {
+      if (!box.hasBoundedHeight) return Center(child: child);
+      return SingleChildScrollView(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            minHeight: box.maxHeight,
+            minWidth: box.hasBoundedWidth ? box.maxWidth : 0,
+          ),
+          child: Center(child: child),
+        ),
+      );
+    },
+  );
 }

@@ -29,12 +29,21 @@ class MemorizationProgressScreen extends ConsumerWidget {
         title: Text(l10n.memProgressTitle),
         centerTitle: false,
         actions: [
-          TextButton.icon(
-            key: const ValueKey('mem-mark-known'),
-            onPressed: () => showMarkKnownSheet(context),
-            icon: const Icon(Icons.playlist_add_check),
-            label: Text(l10n.memMarkKnown),
-          ),
+          // The label where there is room for it beside the title.
+          if (MediaQuery.sizeOf(context).width >= 400)
+            TextButton.icon(
+              key: const ValueKey('mem-mark-known'),
+              onPressed: () => showMarkKnownSheet(context),
+              icon: const Icon(Icons.playlist_add_check),
+              label: Text(l10n.memMarkKnown),
+            )
+          else
+            IconButton(
+              key: const ValueKey('mem-mark-known'),
+              tooltip: l10n.memMarkKnown,
+              onPressed: () => showMarkKnownSheet(context),
+              icon: const Icon(Icons.playlist_add_check),
+            ),
         ],
       ),
       body: map.when(
@@ -149,7 +158,7 @@ class _StrengthMap extends StatelessWidget {
             borderRadius: BorderRadius.circular(3),
           ),
         ),
-        Text(label, style: theme.textTheme.labelSmall),
+        Flexible(child: Text(label, style: theme.textTheme.labelSmall)),
       ],
     );
 

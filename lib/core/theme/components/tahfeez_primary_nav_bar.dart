@@ -78,18 +78,26 @@ class _PrimaryNavBarItem extends StatelessWidget {
     final color = selected ? scheme.primary : scheme.onSurfaceVariant;
     return InkWell(
       onTap: onTap,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        spacing: TahfeezSpacing.xs,
-        children: [
-          Icon(icon, size: TahfeezIconSize.lg, color: color),
-          Text(
-            item.label,
-            style: Theme.of(context).textTheme.labelSmall
-                ?.copyWith(color: color),
-          ),
-        ],
+      // The bar keeps its height at any text size: labels grow up to 1.3×,
+      // stay on one line, and the item scales down if that still doesn't
+      // fit (very large text, long Arabic labels).
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          spacing: TahfeezSpacing.xs,
+          children: [
+            Icon(icon, size: TahfeezIconSize.lg, color: color),
+            Text(
+              item.label,
+              maxLines: 1,
+              textScaler: MediaQuery.textScalerOf(context)
+                  .clamp(maxScaleFactor: 1.3),
+              style: Theme.of(context).textTheme.labelSmall
+                  ?.copyWith(color: color),
+            ),
+          ],
+        ),
       ),
     );
   }

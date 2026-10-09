@@ -224,7 +224,7 @@ class _PlanSheetState extends ConsumerState<_PlanSheet> {
                 Row(
                   children: [
                     Expanded(child: label(l10n.memPlanDays)),
-                    label(l10n.memPlanDaysCount(_days.length)),
+                    Flexible(child: label(l10n.memPlanDaysCount(_days.length))),
                   ],
                 ),
                 Wrap(

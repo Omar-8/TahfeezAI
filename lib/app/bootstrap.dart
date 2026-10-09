@@ -45,6 +45,11 @@ Future<void> bootstrap() async {
   // ready: nothing is drawn while the bundled data is seeded. The web has
   // no native splash, so it shows TahfeezBootstrapGate's own meanwhile.
   if (!kIsWeb) binding.deferFirstFrame();
+  // Portrait only, phones and tablets (the Android manifest says so too).
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
   // Without this, `AnnotatedRegion<SystemUiOverlayStyle>`'s
   // `systemNavigationBarColor` has no effect on some Android versions/skins
   // until edge-to-edge is explicitly enabled — declaring the style alone
