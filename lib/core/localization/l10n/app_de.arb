@@ -370,5 +370,19 @@
   "listenRevealNote": "Ausblendmodus ist an: Jeder Vers erscheint, während er rezitiert wird.",
   "listenPlay": "Abspielen",
   "listenSpeed": "Geschwindigkeit",
-  "listenContinue": "Mit den nächsten Suren fortfahren"
+  "listenContinue": "Mit den nächsten Suren fortfahren",
+  "followTitle": "Mitrezitieren",
+  "followSub": "Der Rezitator rezitiert, dann bist du dran und rezitierst dasselbe — Vers für Vers oder den ganzen Abschnitt.",
+  "followEachAyahSub": "Jeder Vers: der Rezitator, dann du, dann der nächste Vers.",
+  "followRangeSub": "Der ganze Abschnitt: der Rezitator, dann du.",
+  "followReciterTimes": "Rezitator rezitiert (Mal)",
+  "followYourTimes": "Du rezitierst (Mal)",
+  "followStart": "Starten",
+  "followYourTurn": "Du bist dran — rezitiere jetzt",
+  "followReciterTurn": "Hör {reciter} zu",
+  "sajdahReminder": "Erinnerung an die Rezitationsniederwerfung",
+  "sajdahReminderSub": "Nach einem Vers der Niederwerfung (einmal pro Sitzung)",
+  "sajdahReminderMessage": "Bei diesem Vers gibt es eine Niederwerfung der Rezitation (Sujud at-Tilawa).",
+  "sajdahReminderOff": "Ausschalten",
+  "settingsRecitation": "Rezitation"
 }

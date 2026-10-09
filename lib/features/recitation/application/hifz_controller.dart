@@ -61,7 +61,12 @@ class HifzSettings {
     this.alert = MistakeAlert.vibrate,
     this.colorWords = true,
     this.tajweed = true,
+    this.sajdahReminder = true,
   });
+
+  /// Reciting an ayah of prostration: a reminder of Sujood al-Tilawah
+  /// (once per app session).
+  final bool sajdahReminder;
 
   /// Judge tajweed in the pronunciation check (idghām, ikhfāʾ, iqlāb …);
   /// off, only the letters and vowels.
@@ -89,6 +94,7 @@ class HifzSettings {
     MistakeAlert? alert,
     bool? colorWords,
     bool? tajweed,
+    bool? sajdahReminder,
   }) => HifzSettings(
     strict: strict ?? this.strict,
     highlightCurrent: highlightCurrent ?? this.highlightCurrent,
@@ -96,6 +102,7 @@ class HifzSettings {
     alert: alert ?? this.alert,
     colorWords: colorWords ?? this.colorWords,
     tajweed: tajweed ?? this.tajweed,
+    sajdahReminder: sajdahReminder ?? this.sajdahReminder,
   );
 
   Map<String, Object> toJson() => {
@@ -105,6 +112,7 @@ class HifzSettings {
     'alert': alert.name,
     'colorWords': colorWords,
     'tajweed': tajweed,
+    'sajdahReminder': sajdahReminder,
   };
 
   static HifzSettings fromJson(Object? json) {
@@ -121,6 +129,7 @@ class HifzSettings {
           (read('vibrate', true) ? MistakeAlert.vibrate : MistakeAlert.off),
       colorWords: read('colorWords', true),
       tajweed: read('tajweed', true),
+      sajdahReminder: read('sajdahReminder', true),
     );
   }
 }

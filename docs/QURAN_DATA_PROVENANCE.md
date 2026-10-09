@@ -82,6 +82,10 @@ This rule, and the verification that it holds for every affected surah, is cover
   the dedicated `<juzs>` element (not a derived value) for the 30 Juz boundaries. Every
   ayah's unit number is assigned by finding the latest boundary at or before it — verified
   against known chapter/unit counts in `test/quran_data/bundled_dataset_integrity_test.dart`.
+- **Sajdah**: the 15 `<sajda>` verses are also kept as a constant (`sajdahAyahs`,
+  `lib/features/recitation/application/sajdah_reminder.dart`) for the Sujood al-Tilawah
+  reminder after reciting one; checked equal to the file on 2026-10-10. (The bundled
+  dataset's `Ayahs.sajdah` column is currently empty.)
 - **Status**: **integrated**.
 
 ## 3. English translation — QuranEnc (Rowwad Translation Center)

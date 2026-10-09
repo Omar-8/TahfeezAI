@@ -29,6 +29,7 @@ import '../application/user_data_backup.dart';
 import '../../../core/storage/storage_providers.dart';
 import '../../../memorization/memorization_providers.dart';
 import '../../listen/application/reciter_controller.dart';
+import '../../recitation/application/hifz_controller.dart';
 import '../../listen/domain/quran_audio_sources.dart';
 import '../../listen/presentation/listen_sheet.dart';
 import 'theme_choices.dart';
@@ -190,6 +191,26 @@ class SettingsScreen extends ConsumerWidget {
             l10n.readerTranslationTafsir,
             Icons.translate_outlined,
             const _MeaningSettings(),
+          ),
+          const SizedBox(height: TahfeezSpacing.lg),
+          group(
+            l10n.settingsRecitation,
+            Icons.mic_none_rounded,
+            // Also in the Mushaf's Hifz settings.
+            SwitchListTile(
+              key: const ValueKey('settings-sajdah-reminder'),
+              contentPadding: EdgeInsets.zero,
+              title: Text(l10n.sajdahReminder),
+              subtitle: Text(l10n.sajdahReminderSub),
+              value: ref.watch(
+                hifzSettingsProvider.select((s) => s.sajdahReminder),
+              ),
+              onChanged: (on) => ref
+                  .read(hifzSettingsProvider.notifier)
+                  .update(
+                    ref.read(hifzSettingsProvider).copyWith(sajdahReminder: on),
+                  ),
+            ),
           ),
           const SizedBox(height: TahfeezSpacing.lg),
           group(

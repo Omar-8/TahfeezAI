@@ -370,5 +370,19 @@
   "listenRevealNote": "Gizleme modu açık: her ayet okundukça görünür.",
   "listenPlay": "Çal",
   "listenSpeed": "Hız",
-  "listenContinue": "Sonraki surelerle devam et"
+  "listenContinue": "Sonraki surelerle devam et",
+  "followTitle": "Kâriyle birlikte",
+  "followSub": "Kâri okur, sonra aynısını okuma sırası sizdedir — ayet ayet veya tüm aralık.",
+  "followEachAyahSub": "Her ayet: kâri, sonra siz, sonra sonraki ayet.",
+  "followRangeSub": "Tüm aralık: kâri, sonra siz.",
+  "followReciterTimes": "Kâri okur (kez)",
+  "followYourTimes": "Siz okursunuz (kez)",
+  "followStart": "Başla",
+  "followYourTurn": "Sıra sizde — şimdi okuyun",
+  "followReciterTurn": "{reciter} dinleniyor",
+  "sajdahReminder": "Tilavet secdesi hatırlatıcısı",
+  "sajdahReminderSub": "Secde ayeti okunduktan sonra (oturum başına bir kez)",
+  "sajdahReminderMessage": "Bu ayette tilavet secdesi vardır.",
+  "sajdahReminderOff": "Kapat",
+  "settingsRecitation": "Okuma"
 }

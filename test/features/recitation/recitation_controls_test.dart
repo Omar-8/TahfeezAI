@@ -273,10 +273,12 @@ void main() {
     // The eye is the group's last button.
     final groupCenter = (mic.left + eye.right) / 2;
     expect(groupCenter, closeTo(600, 2));
-    // The mic and Listen buttons, then the hide controls.
+    // The mic, Listen and Follow along buttons, then the hide controls.
     final listen = tester.getRect(find.byTooltip('Listen'));
+    final follow = tester.getRect(find.byTooltip('Follow along'));
     expect(listen.left - mic.right, lessThan(24), reason: 'beside the mic');
-    expect(eye.left - listen.right, lessThan(40), reason: 'kept together');
+    expect(follow.left - listen.right, lessThan(24), reason: 'beside Listen');
+    expect(eye.left - follow.right, lessThan(40), reason: 'kept together');
   });
 
   testWidgets('Android keeps the mic and hide buttons at the edges', (

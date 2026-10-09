@@ -370,5 +370,19 @@
   "listenRevealNote": "چھپانے کا موڈ آن ہے: ہر آیت پڑھے جانے پر ظاہر ہوتی ہے۔",
   "listenPlay": "چلائیں",
   "listenSpeed": "رفتار",
-  "listenContinue": "اگلی سورتوں میں جاری رکھیں"
+  "listenContinue": "اگلی سورتوں میں جاری رکھیں",
+  "followTitle": "قاری کے ساتھ پڑھیں",
+  "followSub": "قاری پڑھتا ہے، پھر آپ کی باری ہے کہ وہی پڑھیں — آیت بہ آیت یا پورا حصہ۔",
+  "followEachAyahSub": "ہر آیت: قاری، پھر آپ، پھر اگلی آیت۔",
+  "followRangeSub": "پورا حصہ: قاری، پھر آپ۔",
+  "followReciterTimes": "قاری پڑھے (بار)",
+  "followYourTimes": "آپ پڑھیں (بار)",
+  "followStart": "شروع کریں",
+  "followYourTurn": "آپ کی باری — اب پڑھیں",
+  "followReciterTurn": "{reciter} کو سنیں",
+  "sajdahReminder": "سجدۂ تلاوت کی یاد دہانی",
+  "sajdahReminderSub": "سجدے والی آیت پڑھنے کے بعد (ہر نشست میں ایک بار)",
+  "sajdahReminderMessage": "اس آیت میں سجدۂ تلاوت ہے۔",
+  "sajdahReminderOff": "بند کریں",
+  "settingsRecitation": "تلاوت"
 }

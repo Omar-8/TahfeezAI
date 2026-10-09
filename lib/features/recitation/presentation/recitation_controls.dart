@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/audio/audio_models.dart';
+import '../../listen/application/follow_along_controller.dart';
+import '../../listen/presentation/follow_along_sheet.dart';
 import '../../listen/presentation/listen_sheet.dart';
 import '../../listen/application/quran_audio_player.dart';
 
@@ -21,6 +23,7 @@ import '../../../ai/speech/live_quran_recognizer.dart';
 import '../application/live_recognition_controller.dart';
 import '../application/recitation_providers.dart';
 import '../application/mushaf_recitation_target.dart';
+import '../application/sajdah_reminder.dart';
 import '../../../ai/hifz/hifz_judge.dart';
 import '../../mushaf/application/mushaf_page_verses.dart';
 import '../../mushaf/application/mushaf_word_overlay.dart';
@@ -165,12 +168,46 @@ class RecitationBottomBar extends ConsumerWidget {
       }
     });
 
-    // A session over: its results (each ayah's grade and strength).
+    // A session over: its results (each ayah's grade and strength) — not
+    // between Follow along's turns.
     ref.listen(testSummaryProvider, (previous, next) {
       if (next == null || identical(previous, next)) return;
       if (ref.read(recitationSessionControllerProvider).isActive) return;
+      if (ref.exists(followAlongControllerProvider) &&
+          ref.read(followAlongControllerProvider) != null) {
+        return;
+      }
       showTestSummarySheet(context, next);
     });
+
+    // An ayah of prostration recited: a reminder of Sujood al-Tilawah.
+    if (ref.watch(liveRecognitionEnabledProvider)) {
+      ref.listen(sajdahReminderProvider, (previous, next) {
+        final messenger = ScaffoldMessenger.maybeOf(context);
+        if (next == null || messenger == null) return;
+        final l10n = AppLocalizations.of(context);
+        messenger
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            SnackBar(
+              key: const ValueKey('sajdah-reminder'),
+              duration: const Duration(seconds: 8),
+              content: Text(l10n.sajdahReminderMessage),
+              action: SnackBarAction(
+                label: l10n.sajdahReminderOff,
+                onPressed: () {
+                  final settings = ref.read(hifzSettingsProvider.notifier);
+                  settings.update(
+                    ref
+                        .read(hifzSettingsProvider)
+                        .copyWith(sajdahReminder: false),
+                  );
+                },
+              ),
+            ),
+          );
+      });
+    }
 
     // Leaving the Mushaf — or opening a different surah or screen — ends
     // the recitation session.
@@ -238,6 +275,8 @@ class RecitationBottomBar extends ConsumerWidget {
               ),
             if (recognition != null)
               _RecitationAiNotice(config: aiConfig, inference: inference),
+            // Whose turn it is, while Follow along runs.
+            if (recognition != null) const FollowAlongBanner(),
             ConstrainedBox(
               constraints: const BoxConstraints(minHeight: 72),
               child: Padding(
@@ -290,6 +329,19 @@ class RecitationBottomBar extends ConsumerWidget {
                                       ? null
                                       : () => showListenSheet(context),
                                 ),
+                                // Follow along: the reciter, then the user.
+                                if (recognition != null)
+                                  IconButton.filledTonal(
+                                    key: const ValueKey('follow-open'),
+                                    icon: const Icon(
+                                      Icons.record_voice_over_rounded,
+                                    ),
+                                    tooltip: AppLocalizations.of(context)
+                                        .followTitle,
+                                    onPressed: location == null
+                                        ? null
+                                        : () => showFollowAlongSheet(context),
+                                  ),
                               ],
                             ),
                             if (centered)
@@ -1034,6 +1086,12 @@ class _HifzSettingsSheet extends ConsumerWidget {
               AppLocalizations.of(context).recShowMistakesSub,
               settings.showMistakes,
               (v) => settings.copyWith(showMistakes: v),
+            ),
+            toggle(
+              AppLocalizations.of(context).sajdahReminder,
+              AppLocalizations.of(context).sajdahReminderSub,
+              settings.sajdahReminder,
+              (v) => settings.copyWith(sajdahReminder: v),
             ),
             if (android)
               ListTile(

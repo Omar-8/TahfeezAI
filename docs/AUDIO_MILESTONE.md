@@ -37,6 +37,16 @@ starting one stops playback.
    the eye (revealing follows the recitation); turning hide mode on mid-playback keeps the
    playing ayah and those before it on its page shown.
 
+4. **L4 — Follow along.** *(done 2026-10-10)* A third bar button beside the mic and Listen
+   opens a menu laid out like Listen's: the reciter, a range, each ayah or the whole range,
+   how many times the reciter recites it and then how many times the user does (1–10), and
+   the reciter's speed. The reciter plays the part; then a banner above the bar says it is
+   the user's turn (with a vibration on Android) and the microphone tests the same part as a
+   loop (`HifzController.setLoop`, whole-range mode); once every repetition is recited, on
+   to the next part. Stopping either turn from the bar, leaving the Mushaf, the audio
+   failing (offline) or the microphone being refused ends the run; the results sheet is
+   not shown between turns. (`FollowAlongController`; needs live recognition.)
+
 Each phase: `flutter analyze` clean, tests, English + Arabic strings, credits and
 `docs/THIRD_PARTY_RESOURCES.md` rows.
 

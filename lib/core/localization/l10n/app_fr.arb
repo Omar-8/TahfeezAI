@@ -370,5 +370,19 @@
   "listenRevealNote": "Le mode masqué est actif : chaque verset apparaît à mesure qu'il est récité.",
   "listenPlay": "Écouter",
   "listenSpeed": "Vitesse",
-  "listenContinue": "Continuer avec les sourates suivantes"
+  "listenContinue": "Continuer avec les sourates suivantes",
+  "followTitle": "Réciter avec le récitateur",
+  "followSub": "Le récitateur récite, puis c'est à votre tour de réciter la même chose — verset par verset ou tout le passage.",
+  "followEachAyahSub": "Chaque verset : le récitateur, puis vous, puis le verset suivant.",
+  "followRangeSub": "Tout le passage : le récitateur, puis vous.",
+  "followReciterTimes": "Le récitateur récite (fois)",
+  "followYourTimes": "Vous récitez (fois)",
+  "followStart": "Commencer",
+  "followYourTurn": "À vous — récitez maintenant",
+  "followReciterTurn": "Écoutez {reciter}",
+  "sajdahReminder": "Rappel de la prosternation de récitation",
+  "sajdahReminderSub": "Après avoir récité un verset de prosternation (une fois par session)",
+  "sajdahReminderMessage": "Ce verset comporte une prosternation de récitation (soujoud at-tilawa).",
+  "sajdahReminderOff": "Désactiver",
+  "settingsRecitation": "Récitation"
 }

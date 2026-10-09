@@ -807,5 +807,26 @@
   "listenRevealNote": "Hide mode is on: each ayah is revealed as it is recited.",
   "listenPlay": "Play",
   "listenSpeed": "Speed",
-  "listenContinue": "Continue to the next surahs"
+  "listenContinue": "Continue to the next surahs",
+  "followTitle": "Follow along",
+  "followSub": "The reciter recites, then it's your turn to recite the same — ayah by ayah or the whole range.",
+  "followEachAyahSub": "Each ayah: the reciter, then you, then the next ayah.",
+  "followRangeSub": "The whole range: the reciter, then you.",
+  "followReciterTimes": "Reciter recites (times)",
+  "followYourTimes": "You recite (times)",
+  "followStart": "Start",
+  "followYourTurn": "Your turn — recite now",
+  "followReciterTurn": "Listen to {reciter}",
+  "@followReciterTurn": {
+    "placeholders": {
+      "reciter": {
+        "type": "String"
+      }
+    }
+  },
+  "sajdahReminder": "Sujood al-Tilawah reminder",
+  "sajdahReminderSub": "After reciting an ayah of prostration (once per session)",
+  "sajdahReminderMessage": "This ayah has a prostration of recitation (Sujood al-Tilawah).",
+  "sajdahReminderOff": "Turn off",
+  "settingsRecitation": "Recitation"
 }

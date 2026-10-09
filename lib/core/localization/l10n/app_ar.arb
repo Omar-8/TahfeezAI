@@ -370,5 +370,19 @@
   "listenRevealNote": "إخفاء النص مفعّل: تظهر كل آية عند تلاوتها.",
   "listenPlay": "تشغيل",
   "listenSpeed": "السرعة",
-  "listenContinue": "المتابعة إلى السور التالية"
+  "listenContinue": "المتابعة إلى السور التالية",
+  "followTitle": "التلاوة مع القارئ",
+  "followSub": "يتلو القارئ ثم يأتي دورك لتتلو الشيء نفسه — آيةً آية أو المقطع كاملًا.",
+  "followEachAyahSub": "كل آية: القارئ، ثم أنت، ثم الآية التالية.",
+  "followRangeSub": "المقطع كاملًا: القارئ، ثم أنت.",
+  "followReciterTimes": "يتلو القارئ (مرات)",
+  "followYourTimes": "تتلو أنت (مرات)",
+  "followStart": "ابدأ",
+  "followYourTurn": "دورك — اتلُ الآن",
+  "followReciterTurn": "استمع إلى {reciter}",
+  "sajdahReminder": "التذكير بسجود التلاوة",
+  "sajdahReminderSub": "بعد تلاوة آية سجدة (مرة واحدة في كل جلسة)",
+  "sajdahReminderMessage": "في هذه الآية سجدة تلاوة.",
+  "sajdahReminderOff": "إيقاف",
+  "settingsRecitation": "التلاوة"
 }
