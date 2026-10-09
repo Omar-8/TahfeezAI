@@ -79,6 +79,29 @@ const credits = <Credit>[
     useEn: 'Tafsir',
     useAr: 'التفسير',
   ),
+  Credit(
+    group: CreditGroup.translations,
+    name:
+        'Urdu (Muhammad Junagarhi), Indonesian (Ministry of Religious '
+        'Affairs), Turkish (Rowwad) and French (Noor International Center) '
+        'translations',
+    owner: 'QuranEnc',
+    licence: 'QuranEnc terms: unmodified, with attribution and version',
+    url: 'https://quranenc.com',
+    useEn: 'Translations of the meanings',
+    useAr: 'ترجمات المعاني',
+  ),
+  Credit(
+    group: CreditGroup.translations,
+    name:
+        'Al-Mukhtasar in Interpreting the Noble Quran (English, Indonesian, '
+        'Turkish, French)',
+    owner: 'QuranEnc — Tafsir Center for Quranic Studies',
+    licence: 'QuranEnc terms: unmodified, with attribution',
+    url: 'https://quranenc.com',
+    useEn: 'Short tafsir',
+    useAr: 'تفسير مختصر',
+  ),
   // ── The Mushaf ──
   Credit(
     group: CreditGroup.mushaf,

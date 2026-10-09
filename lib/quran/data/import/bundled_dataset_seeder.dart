@@ -109,6 +109,31 @@ class BundledDatasetSeeder {
       assetPath: 'assets/quran/tafsir/ar_muyassar.json',
       hashKey: 'tafsir/ar_muyassar.json',
     );
+    // The translation milestone's launch languages (T4).
+    for (final name in const [
+      'ur_junagarhi',
+      'id_affairs',
+      'tr_rowwad',
+      'fr_noor',
+    ]) {
+      await _seedTranslation(
+        hashes,
+        assetPath: 'assets/quran/translations/$name.json',
+        hashKey: 'translations/$name.json',
+      );
+    }
+    for (final name in const [
+      'en_mukhtasar',
+      'id_mukhtasar',
+      'tr_mukhtasar',
+      'fr_mukhtasar',
+    ]) {
+      await _seedTafsir(
+        hashes,
+        assetPath: 'assets/quran/tafsir/$name.json',
+        hashKey: 'tafsir/$name.json',
+      );
+    }
   }
 
   Future<Uint8List?> _loadVerified(

@@ -1,6 +1,6 @@
 # Translation and tafsir milestone (18) — plan
 
-Status: planned 2026-10-09; T1 and T2 done the same day. Decisions by the product owner are marked **(decided)**; open
+Status: planned 2026-10-09; T1, T2 and T4 done the same day; T3 deferred. Decisions by the product owner are marked **(decided)**; open
 ones **(open)**.
 
 ## Goal
@@ -86,11 +86,11 @@ ship while unverified, recorded in `docs/THIRD_PARTY_RESOURCES.md`.
    "Read more"; Arabic tafsir right-to-left in the Arabic UI font, translations in their own
    direction. *Done when* long-press shows exactly what Settings says, in both languages and
    themes.
-3. **T3 — Word meanings.** Once the source is decided: an import tool
+3. **T3 — Word meanings.** *(deferred 2026-10-09 by the owner: no license-clean source; revisit later)* Once the source is decided: an import tool
    (`tool/quran_data/`) building a word-meaning pack aligned to canonical word ids, with the
    integrity checks above; bundled for the launch language(s); the word sheet shows it.
    *Done when* tapping any word shows its meaning offline and the checks pass for every word.
-4. **T4 — The launch languages, bundled.** Urdu, Indonesian, Turkish and French
+4. **T4 — The launch languages, bundled.** *(done 2026-10-09: Urdu (Junagarhi), Indonesian (Ministry of Religious Affairs), Turkish (Rowwad), French (Noor International) translations; Al-Mukhtasar tafsir in English, Indonesian, Turkish and French — none exists in Urdu; no word meanings, T3 being deferred)* Urdu, Indonesian, Turkish and French
    translations, and the short tafsir per language where license-clean, imported with
    checksums and integrity checks and bundled (word meanings for them too, if the source
    has them). *Done when* every launch language works in airplane mode on a fresh install.

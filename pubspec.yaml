@@ -137,6 +137,15 @@ flutter:
     - assets/quran/translations/en_rowwad.json
     - assets/quran/translations/de_rowwad.json
     - assets/quran/tafsir/ar_muyassar.json
+    # The translation milestone's launch languages (T4).
+    - assets/quran/translations/ur_junagarhi.json
+    - assets/quran/translations/id_affairs.json
+    - assets/quran/translations/tr_rowwad.json
+    - assets/quran/translations/fr_noor.json
+    - assets/quran/tafsir/en_mukhtasar.json
+    - assets/quran/tafsir/id_mukhtasar.json
+    - assets/quran/tafsir/tr_mukhtasar.json
+    - assets/quran/tafsir/fr_mukhtasar.json
     # Expected Hafs pronunciation of every ayah for acoustic verification —
     # tool/acoustic_verification/build_reference.py.
     - assets/quran/recitation/phonetic_reference_hafs.json

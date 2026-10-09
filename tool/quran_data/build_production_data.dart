@@ -32,7 +32,79 @@ import 'src/mushaf_wbw_source.dart';
 import 'src/quranenc_source.dart';
 import 'src/tanzil_source.dart';
 
-const _toolVersion = '1.0.0';
+const _toolVersion = '1.1.0';
+
+/// The launch languages' ayah translations (QuranEnc keys and versions as
+/// listed by its API, 2026-10-09).
+const _launchTranslations = [
+  (
+    key: 'urdu_junagarhi',
+    slug: 'ur-junagarhi',
+    displayName: 'Urdu Translation - Muhammad Junagarhi',
+    language: 'ur',
+    author: 'Muhammad Junagarhi',
+    version: '1.1.3',
+    versionCode: 1103,
+  ),
+  (
+    key: 'indonesian_affairs',
+    slug: 'id-affairs',
+    displayName: 'Indonesian Translation - Ministry of Religious Affairs',
+    language: 'id',
+    author: 'Ministry of Religious Affairs (Indonesia)',
+    version: '1.0.1',
+    versionCode: 1001,
+  ),
+  (
+    key: 'turkish_rwwad',
+    slug: 'tr-rowwad',
+    displayName: 'Turkish Translation - Rowwad Translation Center',
+    language: 'tr',
+    author: 'Rowwad Translation Center',
+    version: '1.0.4',
+    versionCode: 1004,
+  ),
+  (
+    key: 'french_montada',
+    slug: 'fr-noor',
+    displayName: 'French Translation - Noor International Center',
+    language: 'fr',
+    author: 'Noor International Center',
+    version: '1.0.0',
+    versionCode: 1000,
+  ),
+];
+
+const _mukhtasarAuthor = 'Tafsir Center for Quranic Studies';
+
+/// Al-Mukhtasar fī Tafsīr al-Qurʾān al-Karīm in the launch languages that
+/// have it (none in Urdu).
+const _launchTafsirs = [
+  (
+    key: 'english_mokhtasar',
+    id: 'en-mukhtasar',
+    displayName: 'Al-Mukhtasar in Interpreting the Noble Quran (English)',
+    language: 'en',
+  ),
+  (
+    key: 'indonesian_mokhtasar',
+    id: 'id-mukhtasar',
+    displayName: 'Al-Mukhtashar dalam Tafsir Al-Qur\'an (Indonesia)',
+    language: 'id',
+  ),
+  (
+    key: 'turkish_mokhtasar',
+    id: 'tr-mukhtasar',
+    displayName: 'Muhtasar Kur\'an-ı Kerim Tefsiri (Türkçe)',
+    language: 'tr',
+  ),
+  (
+    key: 'french_mokhtasar',
+    id: 'fr-mukhtasar',
+    displayName: 'Al-Mukhtasar : exégèse abrégée du Coran (Français)',
+    language: 'fr',
+  ),
+];
 const _cache = 'tool/quran_data/.cache';
 const _outDir = 'assets/quran';
 
@@ -68,10 +140,21 @@ Future<void> main() async {
 
   final packagedAssetHashes = <String, String>{};
 
-  packagedAssetHashes['quran_dataset.json'] = _writeJson(
-    '$_outDir/quran_dataset.json',
-    quranDatasetPayloadToJson(tanzil.payload),
-  );
+  // Unchanged canonical content is left byte-for-byte as shipped (only its
+  // import timestamp would differ), so installs never re-import it.
+  final datasetFile = File('$_outDir/quran_dataset.json');
+  final datasetJson = quranDatasetPayloadToJson(tanzil.payload);
+  Object? contentHash(Object? json) => json is Map && json['metadata'] is Map
+      ? (json['metadata'] as Map)['contentHash']
+      : null;
+  final shipped = datasetFile.existsSync()
+      ? contentHash(jsonDecode(datasetFile.readAsStringSync()))
+      : null;
+  final fresh = contentHash(datasetJson);
+  packagedAssetHashes['quran_dataset.json'] =
+      shipped != null && shipped == fresh
+      ? sha256.convert(datasetFile.readAsBytesSync()).toString()
+      : _writeJson(datasetFile.path, datasetJson);
 
   stdout.writeln('Parsing QuranEnc translations and tafsir...');
   final en = parseQuranEncTranslation(
@@ -127,6 +210,72 @@ Future<void> main() async {
   stdout.writeln(
     'EN: ${en.verses.length} verses, DE: ${de.verses.length} verses, '
     'Tafsir: ${muyassar.verses.length} verses.',
+  );
+
+  // The launch languages (docs/TRANSLATION_TAFSIR_MILESTONE.md, T4): each
+  // must hold exactly the canonical ayahs, every one with text.
+  final canonicalAyahs = {
+    for (final a in tanzil.payload.ayahs) '${a.chapterNo}:${a.verseNo}',
+  };
+  void requireEveryAyah(String what, Iterable<(int, int, String)> rows) {
+    final seen = <String>{};
+    for (final (sura, aya, text) in rows) {
+      final key = '$sura:$aya';
+      if (!canonicalAyahs.contains(key) || text.trim().isEmpty) {
+        throw StateError('$what: bad or empty ayah $key');
+      }
+      seen.add(key);
+    }
+    if (seen.length != canonicalAyahs.length) {
+      throw StateError(
+        '$what: ${seen.length} ayahs, expected ${canonicalAyahs.length}',
+      );
+    }
+  }
+
+  final extraTranslations = <(QuranEncTranslationResult, String, String)>[];
+  for (final t in _launchTranslations) {
+    final r = parseQuranEncTranslation(
+      sqliteFile: File('$_cache/${t.key}/${t.key}.sqlite'),
+      slug: t.slug,
+      displayName: t.displayName,
+      languageCode: t.language,
+      author: t.author,
+      version: t.versionCode,
+    );
+    requireEveryAyah(t.key, [
+      for (final v in r.verses) (v.chapterNo, v.verseNo, v.text),
+    ]);
+    final asset = 'translations/${t.slug.replaceAll('-', '_')}.json';
+    packagedAssetHashes[asset] = _writeJson('$_outDir/$asset', {
+      'book': translationBookToJson(r.book),
+      'verses': r.verses.map(translationVerseToJson).toList(),
+    });
+    extraTranslations.add((r, t.key, t.version));
+  }
+  final extraTafsirs = <(QuranEncTafsirResult, String)>[];
+  for (final t in _launchTafsirs) {
+    final r = parseQuranEncTafsir(
+      sqliteFile: File('$_cache/${t.key}/${t.key}.sqlite'),
+      tafsirId: t.id,
+      displayName: t.displayName,
+      languageCode: t.language,
+      author: _mukhtasarAuthor,
+      version: 1,
+    );
+    requireEveryAyah(t.key, [
+      for (final v in r.verses) (v.chapterNo, v.verseNo, v.text),
+    ]);
+    final asset = 'tafsir/${t.id.replaceAll('-', '_')}.json';
+    packagedAssetHashes[asset] = _writeJson('$_outDir/$asset', {
+      'work': tafsirWorkToJson(r.work),
+      'verses': r.verses.map(tafsirVerseToJson).toList(),
+    });
+    extraTafsirs.add((r, t.key));
+  }
+  stdout.writeln(
+    'Launch languages: ${extraTranslations.length} translations, '
+    '${extraTafsirs.length} tafsirs, every ayah present.',
   );
 
   // The Mushaf layer: real layout + real word-by-word data, combined and
@@ -294,6 +443,16 @@ Future<void> main() async {
         'sourceHash': de.sourceHash,
         'ayahCount': de.verses.length,
       },
+      for (final (r, key, version) in extraTranslations)
+        {
+          'slug': r.book.slug,
+          'resourceId':
+              'tahfeez.translation.${r.book.slug.replaceAll('-', '.')}',
+          'quranEncKey': key,
+          'version': version,
+          'sourceHash': r.sourceHash,
+          'ayahCount': r.verses.length,
+        },
     ],
     'tafsirResources': [
       {
@@ -306,6 +465,17 @@ Future<void> main() async {
         'sourceHash': muyassar.sourceHash,
         'ayahCount': muyassar.verses.length,
       },
+      for (final (r, key) in extraTafsirs)
+        {
+          'id': r.work.id,
+          'resourceId': 'tahfeez.tafsir.${r.work.id.replaceAll('-', '.')}',
+          'quranEncKey': key,
+          'version':
+              'unversioned upstream (QuranEnc lists no version for '
+              'Al-Mukhtasar; tracked by sourceHash)',
+          'sourceHash': r.sourceHash,
+          'ayahCount': r.verses.length,
+        },
     ],
     'toolVersion': _toolVersion,
     // The sha256 of each packaged asset file's own bytes, exactly as

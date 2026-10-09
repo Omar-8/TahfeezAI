@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "buildDate": "2026-09-19T17:53:03.720496Z",
+  "buildDate": "2026-10-09T17:00:13.678525Z",
   "canonicalQuranSource": "Tanzil Project (tanzil.net)",
   "canonicalQuranVersion": "Uthmani, Version 1.1",
   "canonicalQuranHash": "bf4f57b968d03f4131c070b1e285da9be0e0a108a21c910e872801ca273312c8",
@@ -42,6 +42,38 @@
       "version": "1.0.15",
       "sourceHash": "32c6a6e0e45b4ece65f3b85094fa6f4c0a9b9bdc5c94a7933e8fe711efb5125e",
       "ayahCount": 6236
+    },
+    {
+      "slug": "ur-junagarhi",
+      "resourceId": "tahfeez.translation.ur.junagarhi",
+      "quranEncKey": "urdu_junagarhi",
+      "version": "1.1.3",
+      "sourceHash": "20ccc96bd25e481ca248e8a02d354a316bda2b6fc325fd2aeb5cdd26f7fb11bb",
+      "ayahCount": 6236
+    },
+    {
+      "slug": "id-affairs",
+      "resourceId": "tahfeez.translation.id.affairs",
+      "quranEncKey": "indonesian_affairs",
+      "version": "1.0.1",
+      "sourceHash": "948f7c94943c55e3924b6a28178111a7eee9baabefb0e97a3a65534be8125103",
+      "ayahCount": 6236
+    },
+    {
+      "slug": "tr-rowwad",
+      "resourceId": "tahfeez.translation.tr.rowwad",
+      "quranEncKey": "turkish_rwwad",
+      "version": "1.0.4",
+      "sourceHash": "577ab9743a9cfae3235bc2393ed85cf3133c39c29bb32d16c7dc733a4d68d89e",
+      "ayahCount": 6236
+    },
+    {
+      "slug": "fr-noor",
+      "resourceId": "tahfeez.translation.fr.noor",
+      "quranEncKey": "french_montada",
+      "version": "1.0.0",
+      "sourceHash": "7a00139d1d145d015631f19c4a49f49ec668ee8d97edad74161245cb5f239149",
+      "ayahCount": 6236
     }
   ],
   "tafsirResources": [
@@ -52,13 +84,53 @@
       "version": "unversioned upstream (QuranEnc publishes no version number for this resource; tracked by sourceHash)",
       "sourceHash": "eb384e586487b089b826375d3f705d07e775e0019325da405e0337a9f6b3da04",
       "ayahCount": 6236
+    },
+    {
+      "id": "en-mukhtasar",
+      "resourceId": "tahfeez.tafsir.en.mukhtasar",
+      "quranEncKey": "english_mokhtasar",
+      "version": "unversioned upstream (QuranEnc lists no version for Al-Mukhtasar; tracked by sourceHash)",
+      "sourceHash": "7e7a9312963abc06d5aeb55e7f12c74104fe7b0ccc227350e322b6b47eb90827",
+      "ayahCount": 6236
+    },
+    {
+      "id": "id-mukhtasar",
+      "resourceId": "tahfeez.tafsir.id.mukhtasar",
+      "quranEncKey": "indonesian_mokhtasar",
+      "version": "unversioned upstream (QuranEnc lists no version for Al-Mukhtasar; tracked by sourceHash)",
+      "sourceHash": "06d496c34a0c38791ab91d4698f4344f2468f1deb964628e9664f9b16e969724",
+      "ayahCount": 6236
+    },
+    {
+      "id": "tr-mukhtasar",
+      "resourceId": "tahfeez.tafsir.tr.mukhtasar",
+      "quranEncKey": "turkish_mokhtasar",
+      "version": "unversioned upstream (QuranEnc lists no version for Al-Mukhtasar; tracked by sourceHash)",
+      "sourceHash": "11639f79ba705ddea4f330ce91e2f2b77a5bed852ba921a0a2d0c5a82d09a763",
+      "ayahCount": 6236
+    },
+    {
+      "id": "fr-mukhtasar",
+      "resourceId": "tahfeez.tafsir.fr.mukhtasar",
+      "quranEncKey": "french_mokhtasar",
+      "version": "unversioned upstream (QuranEnc lists no version for Al-Mukhtasar; tracked by sourceHash)",
+      "sourceHash": "6b1dbfc6fc7ff3f021d38da921ed5a5eb70c1a44cfe3e49518ca372449214aef",
+      "ayahCount": 6236
     }
   ],
-  "toolVersion": "1.0.0",
+  "toolVersion": "1.1.0",
   "packagedAssetHashes": {
     "quran_dataset.json": "f7218187450bd1f8e12438fbece08db9820e4780f5fa33e007d0edc506ce7104",
     "translations/en_rowwad.json": "9f8260516e290f14072838e713c5ce52313e9e2954d6da7a374ded058c502e2b",
     "translations/de_rowwad.json": "f300113d6f09024d46bbe08a0a9ade70a2f6c9f76ba67fccfe56970dc351f64f",
-    "tafsir/ar_muyassar.json": "75583a480b3d2824dd781a9f088656d897b218d7413a66a58663e3d6e3a7410e"
+    "tafsir/ar_muyassar.json": "75583a480b3d2824dd781a9f088656d897b218d7413a66a58663e3d6e3a7410e",
+    "translations/ur_junagarhi.json": "400e4405f08b41942142f321fadbef86c1a67672221a09317c59d1c19c91b87e",
+    "translations/id_affairs.json": "572c3b6333ac1d7ea7ec4a964f7e6e5ee9f60f9db8480e603ed3428ee8817c36",
+    "translations/tr_rowwad.json": "7a79572923ea2d708a50e98560d0b8c7b1b4816e8ac478135bfc1fe4e711435e",
+    "translations/fr_noor.json": "3c422449e6e7a20d71107ca8a6459bb339a89547ec95093fe0295801a79ce703",
+    "tafsir/en_mukhtasar.json": "fa13bc9b62ab765e2bae5773c75f6c5937bf15a6aefafec74b6f1ef5b2188dd5",
+    "tafsir/id_mukhtasar.json": "fe1f0c695678c21afbef804e4fe4fcf217a83007ecf7949c4e0b6e63f17625c1",
+    "tafsir/tr_mukhtasar.json": "ec2d0086212638862e82cdf38282b369684234f28cc702b6342a39832f60787c",
+    "tafsir/fr_mukhtasar.json": "42ca82f3dea4f170b7a498ab032b91fd3eb3f60c646f49b68dd450eef36b76c2"
   }
 }
