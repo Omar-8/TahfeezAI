@@ -17,6 +17,7 @@ import '../../../quran/application/tafsir_library_controller.dart';
 import '../../../quran/application/tafsir_selection_controller.dart';
 import '../../../quran/presentation/tafsir_packs_sheet.dart';
 import '../../../quran/presentation/translation_packs_sheet.dart';
+import '../../../wbw/application/wbw_preferences_controller.dart';
 import '../../mushaf/application/mushaf_page_translations.dart';
 import 'theme_choices.dart';
 
@@ -245,9 +246,8 @@ Color _ink(AppThemeChoice c) =>
         ? const Color(0xFFECF2EF)
         : const Color(0xFF1C1C1C));
 
-/// Settings → Translation & tafsir: what the ayah sheet shows. (Word
-/// meanings and transliteration return with their data —
-/// `docs/TRANSLATION_TAFSIR_MILESTONE.md`, T3.)
+/// Settings → Translation & tafsir: what the ayah sheet shows, and whether
+/// word meanings show the transliteration too.
 class _MeaningSettings extends ConsumerWidget {
   const _MeaningSettings();
 
@@ -261,6 +261,9 @@ class _MeaningSettings extends ConsumerWidget {
         if (t.work.id == tafsirId) t.work.displayName,
     ].firstOrNull;
     final content = ref.watch(ayahSheetContentProvider);
+    final transliteration = ref.watch(
+      wbwShowTransliterationPreferenceControllerProvider,
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -310,6 +313,16 @@ class _MeaningSettings extends ConsumerWidget {
           selected: {content},
           onSelectionChanged: (s) =>
               ref.read(ayahSheetContentProvider.notifier).set(s.first),
+        ),
+        const SizedBox(height: TahfeezSpacing.sm),
+        SwitchListTile(
+          key: const ValueKey('settings-transliteration'),
+          contentPadding: EdgeInsets.zero,
+          title: Text(l10n.settingsTransliteration),
+          value: transliteration,
+          onChanged: (on) => ref
+              .read(wbwShowTransliterationPreferenceControllerProvider.notifier)
+              .setEnabled(on),
         ),
       ],
     );

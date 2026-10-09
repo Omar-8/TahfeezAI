@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/logging/error_reporting.dart';
 import '../core/logging/logging_package_logger.dart';
 import '../core/storage/storage_providers.dart';
+import '../wbw/wbw_providers.dart';
 import '../quran/data/import/bundled_dataset_seeder.dart';
 import '../quran/quran_providers.dart';
 import '../quran/tafsir_providers.dart';
@@ -56,6 +57,7 @@ Future<void> bootstrap() async {
     quranDatabase: container.read(quranDatabaseProvider),
     translationRepository: container.read(translationRepositoryProvider),
     tafsirRepository: container.read(tafsirRepositoryProvider),
+    wbwRepository: container.read(wbwRepositoryProvider),
     logger: logger,
     storage: container.read(browserStorageProvider),
   ).seedIfNeeded();

@@ -15,6 +15,8 @@ import 'package:tahfeez_ai/quran/data/translation_database.dart';
 import 'package:tahfeez_ai/quran/domain/models/quran_location.dart';
 import 'package:tahfeez_ai/quran/quran_providers.dart';
 import 'package:tahfeez_ai/quran/translation_providers.dart';
+import 'package:tahfeez_ai/wbw/data/wbw_database.dart';
+import 'package:tahfeez_ai/wbw/wbw_providers.dart';
 
 import '../../../quran/quran_test_fixtures.dart';
 
@@ -51,6 +53,12 @@ void main() {
       overrides: [
         verseByVerseModeEnabledProvider.overrideWithValue(true),
         quranDatabaseProvider.overrideWith((ref) => db),
+        // No word meanings installed (the word sheet asks for them).
+        wbwDatabaseProvider.overrideWith((ref) {
+          final wbw = WbwDatabase(NativeDatabase.memory());
+          ref.onDispose(wbw.close);
+          return wbw;
+        }),
         quranScriptCodeProvider.overrideWith((ref) => testScriptCode),
         readerModePreferenceControllerProvider.overrideWith(
           () => _FixedReaderMode(ReaderMode.verseByVerse),

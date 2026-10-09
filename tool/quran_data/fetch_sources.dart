@@ -18,12 +18,17 @@ import 'package:sqlite3/sqlite3.dart';
 
 final _cacheDir = Directory('tool/quran_data/.cache');
 
-/// `dart run tool/quran_data/fetch_sources.dart [quranenc]`: everything, or
-/// with `quranenc` only the QuranEnc translations and tafsir (the canonical
-/// Tanzil text is left as cached).
+/// `dart run tool/quran_data/fetch_sources.dart [quranenc | wbw]`:
+/// everything; with `quranenc` only the QuranEnc translations and tafsir;
+/// with `wbw` only the word-by-word data (the canonical Tanzil text is left
+/// as cached in both).
 Future<void> main(List<String> args) async {
   if (!_cacheDir.existsSync()) {
     _cacheDir.createSync(recursive: true);
+  }
+  if (args.contains('wbw')) {
+    await _fetchQuranComWbw();
+    return;
   }
 
   if (!args.contains('quranenc')) {
@@ -137,6 +142,45 @@ Future<void> _fetchQuranEnc({required String key, required String url}) async {
     final zipPath = '${_cacheDir.path}/$key.zip';
     File(zipPath).writeAsBytesSync(bytes.takeBytes());
     _unzip(zipPath, '${_cacheDir.path}/$key');
+  } finally {
+    client.close();
+  }
+}
+
+/// Quran.com's word-by-word English (meaning + transliteration), from its
+/// public API v4, one JSON file per surah under `.cache/qurancom_wbw/`
+/// (the same data QUL lists as resource 92; licence unverified — an owner
+/// decision, `docs/THIRD_PARTY_RESOURCES.md`).
+Future<void> _fetchQuranComWbw() async {
+  stdout.writeln('Fetching Quran.com word-by-word (English)...');
+  final dir = Directory('${_cacheDir.path}/qurancom_wbw')
+    ..createSync(recursive: true);
+  final client = HttpClient();
+  try {
+    for (var surah = 1; surah <= 114; surah++) {
+      final verses = <Object?>[];
+      for (var page = 1; ; page++) {
+        final request = await client.getUrl(
+          Uri.parse(
+            'https://api.quran.com/api/v4/verses/by_chapter/$surah'
+            '?words=true&word_fields=text_uthmani&per_page=50&page=$page',
+          ),
+        );
+        final response = await request.close();
+        final body = await response.transform(utf8.decoder).join();
+        if (response.statusCode != 200) {
+          throw StateError(
+            'Quran.com API failed for $surah/$page: HTTP '
+            '${response.statusCode}',
+          );
+        }
+        final json = jsonDecode(body) as Map;
+        verses.addAll(json['verses'] as List);
+        final next = (json['pagination'] as Map)['next_page'];
+        if (next == null) break;
+      }
+      File('${dir.path}/$surah.json').writeAsStringSync(jsonEncode(verses));
+    }
   } finally {
     client.close();
   }

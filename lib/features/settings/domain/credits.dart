@@ -102,6 +102,15 @@ const credits = <Credit>[
     useEn: 'Short tafsir',
     useAr: 'تفسير مختصر',
   ),
+  Credit(
+    group: CreditGroup.translations,
+    name: 'Word-by-word English (meanings and transliteration)',
+    owner: 'Quran.com (Quranic Universal Library, resource 92)',
+    licence: 'Not stated by the source; used with credit while clarified',
+    url: 'https://quran.com',
+    useEn: 'Word meanings',
+    useAr: 'معاني الكلمات',
+  ),
   // ── The Mushaf ──
   Credit(
     group: CreditGroup.mushaf,

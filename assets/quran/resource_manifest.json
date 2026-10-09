@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "buildDate": "2026-10-09T17:00:13.678525Z",
+  "buildDate": "2026-10-09T18:41:35.386628Z",
   "canonicalQuranSource": "Tanzil Project (tanzil.net)",
   "canonicalQuranVersion": "Uthmani, Version 1.1",
   "canonicalQuranHash": "bf4f57b968d03f4131c070b1e285da9be0e0a108a21c910e872801ca273312c8",
@@ -76,6 +76,16 @@
       "ayahCount": 6236
     }
   ],
+  "wbwResources": [
+    {
+      "id": "en-qurancom",
+      "resourceId": "tahfeez.wbw.en.qurancom",
+      "source": "Quran.com API v4 (api.quran.com/api/v4), = QUL resource 92",
+      "licenseStatus": "UNVERIFIED — shipped by owner decision 2026-10-09",
+      "sourceHash": "98d068236d56ca62d714f4c469aedd4c5fb258155f664516b95d7707207e623c",
+      "wordCount": 77433
+    }
+  ],
   "tafsirResources": [
     {
       "id": "ar-muyassar",
@@ -131,6 +141,7 @@
     "tafsir/en_mukhtasar.json": "fa13bc9b62ab765e2bae5773c75f6c5937bf15a6aefafec74b6f1ef5b2188dd5",
     "tafsir/id_mukhtasar.json": "fe1f0c695678c21afbef804e4fe4fcf217a83007ecf7949c4e0b6e63f17625c1",
     "tafsir/tr_mukhtasar.json": "ec2d0086212638862e82cdf38282b369684234f28cc702b6342a39832f60787c",
-    "tafsir/fr_mukhtasar.json": "42ca82f3dea4f170b7a498ab032b91fd3eb3f60c646f49b68dd450eef36b76c2"
+    "tafsir/fr_mukhtasar.json": "42ca82f3dea4f170b7a498ab032b91fd3eb3f60c646f49b68dd450eef36b76c2",
+    "wbw/en_qurancom.json": "57b8716542cf9949820809459f5bcdd9b55f2ab5ba53e9edb516eec00720093a"
   }
 }

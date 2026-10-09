@@ -11,6 +11,8 @@ import '../../domain/quran_dataset_payload.dart';
 import '../../domain/repositories/quran_repository.dart';
 import '../../domain/repositories/tafsir_repository.dart';
 import '../../domain/repositories/translation_repository.dart';
+import '../../../wbw/domain/models/wbw_models.dart';
+import '../../../wbw/domain/repositories/wbw_repository.dart';
 import '../quran_database.dart';
 import 'dataset_json_codec.dart';
 import 'dataset_integrity_exception.dart';
@@ -56,6 +58,7 @@ class BundledDatasetSeeder {
     required this.quranDatabase,
     required this.translationRepository,
     required this.tafsirRepository,
+    this.wbwRepository,
     required this.logger,
     required this.storage,
     this.importer = const QuranDatasetImporter(),
@@ -66,6 +69,9 @@ class BundledDatasetSeeder {
   final QuranDatabase quranDatabase;
   final TranslationRepository translationRepository;
   final TafsirRepository tafsirRepository;
+
+  /// Where the bundled word meanings go; none seeded without one.
+  final WbwRepository? wbwRepository;
   final AppLogger logger;
   final BrowserStorage storage;
   final QuranDatasetImporter importer;
@@ -108,6 +114,11 @@ class BundledDatasetSeeder {
       hashes,
       assetPath: 'assets/quran/tafsir/ar_muyassar.json',
       hashKey: 'tafsir/ar_muyassar.json',
+    );
+    await _seedWbw(
+      hashes,
+      assetPath: 'assets/quran/wbw/en_qurancom.json',
+      hashKey: 'wbw/en_qurancom.json',
     );
     // The translation milestone's launch languages (T4).
     for (final name in const [
@@ -383,6 +394,64 @@ class BundledDatasetSeeder {
     } catch (e, st) {
       logger.error(
         'Failed to seed tafsir from $assetPath — this tafsir will be '
+        'unavailable, other resources are unaffected.',
+        tag: 'BundledDatasetSeeder',
+        error: e,
+        stackTrace: st,
+      );
+    }
+  }
+
+  /// Installs a bundled word-meaning pack (`[ayahId, wordIndex, meaning,
+  /// transliteration]` rows) unless the same checksum is installed.
+  Future<void> _seedWbw(
+    Map<String, dynamic> hashes, {
+    required String assetPath,
+    required String hashKey,
+  }) async {
+    final repository = wbwRepository;
+    if (repository == null || !hashes.containsKey(hashKey)) return;
+    final bytes = await _loadVerified(
+      hashes,
+      assetPath,
+      hashKey,
+      resourceLabel: 'Word meanings ($hashKey)',
+    );
+    if (bytes == null) return;
+    try {
+      final json = jsonDecode(utf8.decode(bytes)) as Map<String, dynamic>;
+      final p = json['pack'] as Map<String, dynamic>;
+      final pack = WbwLanguagePack(
+        id: p['id'] as String,
+        languageCode: p['languageCode'] as String,
+        displayName: p['displayName'] as String,
+        version: p['version'] as int,
+        checksum: p['checksum'] as String,
+        source: p['source'] as String,
+        license: p['license'] as String,
+        hasTranslation: p['hasTranslation'] as bool,
+        hasTransliteration: p['hasTransliteration'] as bool,
+      );
+      final existing = await repository.getInstalledPack(pack.id);
+      if (existing != null && existing.checksum == pack.checksum) return;
+      final words = [
+        for (final w in (json['words'] as List).cast<List>())
+          WbwWordEntry(
+            packId: pack.id,
+            ayahId: w[0] as int,
+            wordIndex: w[1] as int,
+            translation: w[2] as String?,
+            transliteration: w[3] as String?,
+          ),
+      ];
+      await repository.installPack(pack, words);
+      logger.info(
+        'Seeded word meanings "${pack.id}": ${words.length} words.',
+        tag: 'BundledDatasetSeeder',
+      );
+    } catch (e, st) {
+      logger.error(
+        'Failed to seed word meanings from $assetPath — word meanings will be '
         'unavailable, other resources are unaffected.',
         tag: 'BundledDatasetSeeder',
         error: e,

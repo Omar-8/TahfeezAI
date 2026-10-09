@@ -30,6 +30,7 @@ import 'src/mushaf_import.dart';
 import 'src/mushaf_layout_source.dart';
 import 'src/mushaf_wbw_source.dart';
 import 'src/quranenc_source.dart';
+import 'src/qurancom_wbw_source.dart';
 import 'src/tanzil_source.dart';
 
 const _toolVersion = '1.1.0';
@@ -273,6 +274,52 @@ Future<void> main() async {
     });
     extraTafsirs.add((r, t.key));
   }
+  // Word meanings (docs/TRANSLATION_TAFSIR_MILESTONE.md, T3): Quran.com's
+  // English, aligned to the canonical words — licence unverified, shipped
+  // by owner decision (docs/THIRD_PARTY_RESOURCES.md).
+  QuranComWbwResult? wbw;
+  final wbwCache = Directory('$_cache/qurancom_wbw');
+  if (wbwCache.existsSync()) {
+    wbw = alignQuranComWbw(
+      cacheDir: wbwCache,
+      canonicalWords: tanzil.payload.ayahWords,
+      packId: 'en-qurancom',
+    );
+    if (wbw.words.length != tanzil.payload.ayahWords.length) {
+      throw StateError(
+        'Word meanings: ${wbw.words.length} words, expected '
+        '${tanzil.payload.ayahWords.length}',
+      );
+    }
+    Directory('$_outDir/wbw').createSync(recursive: true);
+    final p = wbw.pack;
+    packagedAssetHashes['wbw/en_qurancom.json'] = _writeJson(
+      '$_outDir/wbw/en_qurancom.json',
+      {
+        'pack': {
+          'id': p.id,
+          'languageCode': p.languageCode,
+          'displayName': p.displayName,
+          'version': p.version,
+          'checksum': p.checksum,
+          'source': p.source,
+          'license': p.license,
+          'hasTranslation': p.hasTranslation,
+          'hasTransliteration': p.hasTransliteration,
+        },
+        // [ayahId, wordIndex, meaning, transliteration] per word.
+        'words': [
+          for (final w in wbw.words)
+            [w.ayahId, w.wordIndex, w.translation, w.transliteration],
+        ],
+      },
+    );
+    stdout.writeln(
+      'Word meanings: ${wbw.words.length} words aligned '
+      '(${wbw.joined} joined, ${wbw.respelled} spelled differently).',
+    );
+  }
+
   stdout.writeln(
     'Launch languages: ${extraTranslations.length} translations, '
     '${extraTafsirs.length} tafsirs, every ayah present.',
@@ -452,6 +499,18 @@ Future<void> main() async {
           'version': version,
           'sourceHash': r.sourceHash,
           'ayahCount': r.verses.length,
+        },
+    ],
+    'wbwResources': [
+      if (wbw != null)
+        {
+          'id': wbw.pack.id,
+          'resourceId': 'tahfeez.wbw.en.qurancom',
+          'source':
+              'Quran.com API v4 (api.quran.com/api/v4), = QUL resource 92',
+          'licenseStatus': 'UNVERIFIED — shipped by owner decision 2026-10-09',
+          'sourceHash': wbw.sourceHash,
+          'wordCount': wbw.words.length,
         },
     ],
     'tafsirResources': [

@@ -137,6 +137,9 @@ flutter:
     - assets/quran/translations/en_rowwad.json
     - assets/quran/translations/de_rowwad.json
     - assets/quran/tafsir/ar_muyassar.json
+    # Word meanings (translation milestone T3; licence unverified, owner
+    # decision — docs/THIRD_PARTY_RESOURCES.md).
+    - assets/quran/wbw/en_qurancom.json
     # The translation milestone's launch languages (T4).
     - assets/quran/translations/ur_junagarhi.json
     - assets/quran/translations/id_affairs.json

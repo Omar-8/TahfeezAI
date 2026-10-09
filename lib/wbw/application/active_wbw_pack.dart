@@ -17,6 +17,11 @@ part 'active_wbw_pack.g.dart';
 @riverpod
 Future<WbwLanguagePack?> activeWbwPack(Ref ref) async {
   final selectedId = ref.watch(wbwSelectedPackControllerProvider);
-  if (selectedId == null) return null;
-  return ref.watch(wbwRepositoryProvider).getInstalledPack(selectedId);
+  final repository = ref.watch(wbwRepositoryProvider);
+  // None chosen: the installed one (the bundled English), if any.
+  if (selectedId == null) {
+    final installed = await repository.getInstalledPacks();
+    return installed.firstOrNull;
+  }
+  return repository.getInstalledPack(selectedId);
 }

@@ -8,9 +8,9 @@ import 'package:flutter_test/flutter_test.dart';
 /// exists with its recorded hash and is declared in pubspec.yaml, and every
 /// translation and tafsir covers every ayah.
 void main() {
-  final manifest =
-      jsonDecode(File('assets/quran/resource_manifest.json').readAsStringSync())
-          as Map<String, dynamic>;
+  final manifest = jsonDecode(
+    File('assets/quran/resource_manifest.json').readAsStringSync(),
+  ) as Map<String, dynamic>;
   final hashes = (manifest['packagedAssetHashes'] as Map)
       .cast<String, String>();
   final pubspec = File('pubspec.yaml').readAsStringSync();
@@ -47,5 +47,26 @@ void main() {
         reason: '$name: no ayah twice',
       );
     }
+  });
+
+  test('word meanings: every canonical word, exactly once, with a meaning', () {
+    final dataset = jsonDecode(
+      File('assets/quran/quran_dataset.json').readAsStringSync(),
+    ) as Map;
+    final canonical = {
+      for (final w in (dataset['ayahWords'] as List).cast<Map>())
+        '${w['ayahId']}:${w['wordIndex']}',
+    };
+    final pack = jsonDecode(
+      File('assets/quran/wbw/en_qurancom.json').readAsStringSync(),
+    ) as Map;
+    final words = (pack['words'] as List).cast<List>();
+    expect(words, hasLength(canonical.length));
+    expect({for (final w in words) '${w[0]}:${w[1]}'}, canonical);
+    expect(
+      words.where((w) => '${w[2] ?? ''}'.trim().isEmpty),
+      isEmpty,
+      reason: 'every word has a meaning',
+    );
   });
 }

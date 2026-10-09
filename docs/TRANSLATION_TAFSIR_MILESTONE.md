@@ -1,6 +1,6 @@
 # Translation and tafsir milestone (18) — plan
 
-Status: planned 2026-10-09; T1, T2, T4 and T5 done the same day; T3 (word meanings) deferred. Decisions by the product owner are marked **(decided)**; open
+Status: planned 2026-10-09; T1–T5 done the same day (T3 in English only). Decisions by the product owner are marked **(decided)**; open
 ones **(open)**.
 
 ## Goal
@@ -86,7 +86,7 @@ ship while unverified, recorded in `docs/THIRD_PARTY_RESOURCES.md`.
    "Read more"; Arabic tafsir right-to-left in the Arabic UI font, translations in their own
    direction. *Done when* long-press shows exactly what Settings says, in both languages and
    themes.
-3. **T3 — Word meanings.** *(deferred 2026-10-09 by the owner: no license-clean source; revisit later)* Once the source is decided: an import tool
+3. **T3 — Word meanings.** *(done 2026-10-09 for English: Quran.com's word-by-word meanings and transliteration, shipped while its licence is unverified by explicit owner decision — see `docs/THIRD_PARTY_RESOURCES.md`; aligned to every one of the 77,433 canonical words. Other languages skipped by the owner)* Once the source is decided: an import tool
    (`tool/quran_data/`) building a word-meaning pack aligned to canonical word ids, with the
    integrity checks above; bundled for the launch language(s); the word sheet shows it.
    *Done when* tapping any word shows its meaning offline and the checks pass for every word.
