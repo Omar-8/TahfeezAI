@@ -330,12 +330,19 @@ class _SurahIndexTabState extends ConsumerState<SurahIndexTab> {
                           AppLocalizations.of(context)
                               .homeContinueReadingSurah(indexed.surah.surahNo),
                       subtitle: subtitleParts.join(' · '),
-                      // How much of it is memorized, as a ring.
-                      progress: progress[indexed.surah.surahNo]?.memorization,
+                      // How much of it is memorized (from memory, hide mode
+                      // on); recited with the page visible only: practised.
+                      progress: switch (progress[indexed.surah.surahNo]) {
+                        final p? when p.memorized > 0 => p.memorization,
+                        _ => null,
+                      },
                       progressColor: switch (progress[indexed.surah.surahNo]) {
                         final p? => ScoreBar.colorOf(p.memorization, scheme),
                         null => null,
                       },
+                      progressLabel: progress[indexed.surah.surahNo] == null
+                          ? null
+                          : AppLocalizations.of(context).memPractised,
                       onTap: () => widget.onSelect(
                         QuranLocation.surah(indexed.surah.surahNo),
                       ),

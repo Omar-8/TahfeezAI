@@ -311,5 +311,6 @@
   "memSummaryCounts": "{ayahs} آية · {good} جيّدة · {hesitant} متردّدة · {missed} فائتة",
   "memSummaryStrength": "قوة الحفظ {before}٪ ← {after}٪",
   "memToReview": "للمراجعة",
-  "memStrengthLabel": "قوة الحفظ"
+  "memStrengthLabel": "قوة الحفظ",
+  "memPractised": "تمّ التدرّب"
 }

@@ -141,6 +141,34 @@ void main() {
       expect(find.text('75%'), findsOneWidget, reason: '3 of 4 memorized');
     });
 
+    testWidgets('a surah only recited with the page visible: practised', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        wrap(
+          db,
+          progress: {
+            1: SurahProgress(
+              ayahs: 4,
+              memorized: 0,
+              latest: RecitationScore.of([
+                AyahAttempt(
+                  ayahId: 1001,
+                  sessionId: 's',
+                  at: DateTime(2026),
+                  grade: AyahGrade.good,
+                  words: 10,
+                ),
+              ]),
+            ),
+          },
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Practised'), findsOneWidget);
+      expect(find.text('0%'), findsNothing);
+    });
+
     testWidgets('filters by revelation type via the filter sheet', (
       tester,
     ) async {

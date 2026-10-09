@@ -21,6 +21,7 @@ class TahfeezQuranSectionCard extends StatelessWidget {
     this.onTap,
     this.progress,
     this.progressColor,
+    this.progressLabel,
   });
 
   final int number;
@@ -36,6 +37,10 @@ class TahfeezQuranSectionCard extends StatelessWidget {
 
   /// The progress's color (default: the accent).
   final Color? progressColor;
+
+  /// Shown at the card's end instead of a share (e.g. "Practised"), when
+  /// [progress] is `null`.
+  final String? progressLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -104,6 +109,13 @@ class TahfeezQuranSectionCard extends StatelessWidget {
                       ),
                     ],
                   ),
+                )
+              else if (progressLabel case final label?)
+                Text(
+                  label,
+                  key: const ValueKey('section-card-progress-label'),
+                  style: Theme.of(context).textTheme.labelMedium
+                      ?.copyWith(color: scheme.onSurfaceVariant),
                 )
               else
                 Icon(

@@ -651,5 +651,6 @@
   "memSummaryStrength": "Strength {before}% → {after}%",
   "@memSummaryStrength": { "placeholders": { "before": { "type": "int" }, "after": { "type": "int" } } },
   "memToReview": "To review",
-  "memStrengthLabel": "Strength"
+  "memStrengthLabel": "Strength",
+  "memPractised": "Practised"
 }
