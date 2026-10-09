@@ -23,6 +23,8 @@ class AudioPlaybackState {
     this.contentOption = AudioContentOption.quranOnly,
     this.endBehaviour = AudioEndBehaviour.stopPlayback,
     this.repeatCount = 1,
+    this.currentIndex,
+    this.completed = false,
   });
 
   final bool isPlaying;
@@ -37,6 +39,12 @@ class AudioPlaybackState {
   /// `docs/reference/08_AUDIO_SPEC.md` §2.
   final int repeatCount;
 
+  /// The item of a queue ([AudioController.playQueue]) playing now.
+  final int? currentIndex;
+
+  /// Played to the end.
+  final bool completed;
+
   AudioPlaybackState copyWith({
     bool? isPlaying,
     int? positionMs,
@@ -45,6 +53,8 @@ class AudioPlaybackState {
     AudioContentOption? contentOption,
     AudioEndBehaviour? endBehaviour,
     int? repeatCount,
+    int? currentIndex,
+    bool? completed,
   }) {
     return AudioPlaybackState(
       isPlaying: isPlaying ?? this.isPlaying,
@@ -54,6 +64,8 @@ class AudioPlaybackState {
       contentOption: contentOption ?? this.contentOption,
       endBehaviour: endBehaviour ?? this.endBehaviour,
       repeatCount: repeatCount ?? this.repeatCount,
+      currentIndex: currentIndex ?? this.currentIndex,
+      completed: completed ?? this.completed,
     );
   }
 }

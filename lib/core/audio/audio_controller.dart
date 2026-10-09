@@ -14,6 +14,10 @@ abstract class AudioController {
   Stream<AudioPlaybackState> get state;
 
   Future<void> playUrl(String url);
+
+  /// Plays [urls] one after another; [AudioPlaybackState.currentIndex] says
+  /// which. Throws when the first can't be loaded (e.g. offline).
+  Future<void> playQueue(List<String> urls);
   Future<void> pause();
   Future<void> resume();
   Future<void> stop();

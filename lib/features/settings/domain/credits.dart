@@ -111,6 +111,24 @@ const credits = <Credit>[
     useEn: 'Word meanings',
     useAr: 'معاني الكلمات',
   ),
+  Credit(
+    group: CreditGroup.translations,
+    name: 'Recitation audio (ayahs)',
+    owner: 'Islamic Network (alquran.cloud) — the reciters',
+    licence: 'Licensed by the reciters for free redistribution; streamed',
+    url: 'https://alquran.cloud',
+    useEn: 'Listening to ayahs and surahs',
+    useAr: 'الاستماع إلى الآيات والسور',
+  ),
+  Credit(
+    group: CreditGroup.translations,
+    name: 'Word audio',
+    owner: 'Quran Foundation (Quran.com)',
+    licence: 'Quran Foundation Developer Terms; streamed',
+    url: 'https://quran.com',
+    useEn: 'Hearing a word',
+    useAr: 'الاستماع إلى الكلمة',
+  ),
   // ── The Mushaf ──
   Credit(
     group: CreditGroup.mushaf,

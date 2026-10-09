@@ -32,6 +32,14 @@ class JustAudioController implements AudioController {
       _player.speedStream.listen(
         (speed) => _update((s) => s.copyWith(speed: speed)),
       ),
+      _player.currentIndexStream.listen(
+        (i) => _update((s) => s.copyWith(currentIndex: i)),
+      ),
+      _player.processingStateStream.listen(
+        (p) => _update(
+          (s) => s.copyWith(completed: p == ProcessingState.completed),
+        ),
+      ),
     ];
   }
 
@@ -51,6 +59,14 @@ class JustAudioController implements AudioController {
   @override
   Future<void> playUrl(String url) async {
     await _player.setUrl(url);
+    await _player.play();
+  }
+
+  @override
+  Future<void> playQueue(List<String> urls) async {
+    await _player.setAudioSources([
+      for (final url in urls) AudioSource.uri(Uri.parse(url)),
+    ]);
     await _player.play();
   }
 

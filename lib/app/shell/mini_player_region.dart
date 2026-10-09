@@ -8,6 +8,8 @@ import '../../core/localization/generated/app_localizations.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/components/components.dart';
 import '../../core/theme/tahfeez_motion.dart';
+import '../../features/listen/application/quran_audio_player.dart';
+import '../../features/quran/application/quran_index_providers.dart';
 
 /// Home information-hierarchy item 6: "persistent mini-player region when
 /// active." Mounted once at the app-shell level (`app_shell.dart`), not
@@ -30,13 +32,26 @@ class MiniPlayerRegion extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final controller = ref.watch(audioControllerProvider);
+    final nowPlaying = ref.watch(quranAudioPlayerProvider);
+    final arabic = Localizations.localeOf(context).languageCode == 'ar';
+    final ayahId = nowPlaying?.ayahId;
+    final surahName = ayahId == null
+        ? null
+        : [
+            for (final s in ref.watch(indexedSurahsProvider).value ?? const [])
+              if (s.surah.surahNo == ayahId ~/ 1000)
+                s.localizedName ?? s.arabicName,
+          ].firstOrNull;
+    final reciter = nowPlaying?.reciter;
 
     return StreamBuilder<AudioPlaybackState>(
       stream: controller.state,
       initialData: const AudioPlaybackState(),
       builder: (context, snapshot) {
         final state = snapshot.data ?? const AudioPlaybackState();
-        final isActive = state.durationMs != null;
+        // A single word plays without the player bar.
+        final isActive =
+            state.durationMs != null && !(nowPlaying?.isWord ?? false);
 
         return AnimatedSize(
           duration: TahfeezMotionDuration.medium,
@@ -52,7 +67,15 @@ class MiniPlayerRegion extends ConsumerWidget {
                     TahfeezSpacing.sm,
                   ),
                   child: TahfeezMiniPlayerShell(
-                    title: l10n.miniPlayerDefaultTitle,
+                    title: ayahId == null
+                        ? l10n.miniPlayerDefaultTitle
+                        : l10n.homeDailyAyahReferenceNamed(
+                            surahName ?? '${ayahId ~/ 1000}',
+                            ayahId % 1000,
+                          ),
+                    subtitle: reciter == null
+                        ? null
+                        : (arabic ? reciter.nameAr : reciter.nameEn),
                     isPlaying: state.isPlaying,
                     progress: (state.durationMs ?? 0) > 0
                         ? state.positionMs / state.durationMs!
@@ -64,6 +87,9 @@ class MiniPlayerRegion extends ConsumerWidget {
                         controller.resume();
                       }
                     },
+                    closeTooltip: l10n.listenStop,
+                    onClose: () =>
+                        ref.read(quranAudioPlayerProvider.notifier).stop(),
                   ),
                 ),
         );

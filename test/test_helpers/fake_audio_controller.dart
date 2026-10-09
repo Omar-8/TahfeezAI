@@ -29,6 +29,20 @@ class FakeAudioController implements AudioController {
     _emit((s) => s.copyWith(isPlaying: true, durationMs: 60000));
   }
 
+  /// The last queue played.
+  List<String> queue = const [];
+
+  @override
+  Future<void> playQueue(List<String> urls) async {
+    queue = urls;
+    _emit(
+      (s) => s.copyWith(isPlaying: true, durationMs: 60000, currentIndex: 0),
+    );
+  }
+
+  /// Moves the queue on, as the player would.
+  void advanceTo(int index) => _emit((s) => s.copyWith(currentIndex: index));
+
   @override
   Future<void> pause() async => _emit((s) => s.copyWith(isPlaying: false));
 

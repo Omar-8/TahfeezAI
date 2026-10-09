@@ -778,5 +778,12 @@
   "homeMemOpen": "Open Memorize",
   "homeMemAllDone": "Today's memorization is done.",
   "homeMemNothing": "Nothing to memorize or revise yet. Make a plan, or mark what you already know.",
-  "memRevise": "Revise"
+  "memRevise": "Revise",
+  "listenTitle": "Recitation audio",
+  "listenReciter": "Reciter",
+  "listenPlayAyah": "Play ayah",
+  "listenPlayFrom": "Play from here",
+  "listenStop": "Stop",
+  "listenOffline": "Audio needs an internet connection.",
+  "listenSourcesNote": "Streamed from Islamic Network (ayahs) and Quran.com (words); nothing is downloaded."
 }

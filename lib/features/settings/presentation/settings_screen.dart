@@ -22,6 +22,8 @@ import '../../../quran/presentation/translation_packs_sheet.dart';
 import '../../../wbw/application/wbw_preferences_controller.dart';
 import '../../mushaf/application/mushaf_page_translations.dart';
 import '../application/reset_all_data.dart';
+import '../../listen/application/reciter_controller.dart';
+import '../../listen/domain/quran_audio_sources.dart';
 import 'theme_choices.dart';
 
 /// The Settings tab: the app's language and theme (the Quran page's own
@@ -168,6 +170,12 @@ class SettingsScreen extends ConsumerWidget {
             l10n.readerTranslationTafsir,
             Icons.translate_outlined,
             const _MeaningSettings(),
+          ),
+          const SizedBox(height: TahfeezSpacing.lg),
+          group(
+            l10n.listenTitle,
+            Icons.headphones_outlined,
+            const _ListenSettings(),
           ),
           if (reminderSupported) ...[
             const SizedBox(height: TahfeezSpacing.lg),
@@ -384,5 +392,68 @@ Future<void> _confirmReset(BuildContext context, WidgetRef ref) async {
     await SystemNavigator.pop();
   } else {
     messenger.showSnackBar(SnackBar(content: Text(l10n.settingsResetDone)));
+  }
+}
+
+/// Settings → Recitation audio: the reciter heard in the Mushaf.
+class _ListenSettings extends ConsumerWidget {
+  const _ListenSettings();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final arabic = Localizations.localeOf(context).languageCode == 'ar';
+    String name(Reciter r) => arabic ? r.nameAr : r.nameEn;
+    final reciter = reciterFor(ref.watch(reciterProvider));
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        ListTile(
+          key: const ValueKey('settings-reciter'),
+          contentPadding: EdgeInsets.zero,
+          title: Text(l10n.listenReciter),
+          subtitle: Text(name(reciter)),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => showTahfeezModalBottomSheet<void>(
+            context: context,
+            title: l10n.listenReciter,
+            builder: (context) => Consumer(
+              builder: (context, ref, _) => RadioGroup<String>(
+                groupValue: ref.watch(reciterProvider),
+                onChanged: (edition) {
+                  if (edition == null) return;
+                  ref.read(reciterProvider.notifier).select(edition);
+                  Navigator.of(context).pop();
+                },
+                child: ListView(
+                  shrinkWrap: true,
+                  padding: const EdgeInsets.fromLTRB(
+                    TahfeezSpacing.sm,
+                    0,
+                    TahfeezSpacing.sm,
+                    TahfeezSpacing.md,
+                  ),
+                  children: [
+                    for (final r in reciters)
+                      RadioListTile<String>(
+                        key: ValueKey('reciter-${r.edition}'),
+                        value: r.edition,
+                        title: Text(name(r)),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+        Text(
+          l10n.listenSourcesNote,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+      ],
+    );
   }
 }

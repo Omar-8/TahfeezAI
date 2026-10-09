@@ -23,6 +23,8 @@ class TahfeezMiniPlayerShell extends StatelessWidget {
     required this.onPlayPause,
     this.progress,
     this.onTap,
+    this.onClose,
+    this.closeTooltip,
   });
 
   final String title;
@@ -33,6 +35,10 @@ class TahfeezMiniPlayerShell extends StatelessWidget {
   /// 0.0-1.0 playback progress, shown as a thin bar along the top edge.
   final double? progress;
   final VoidCallback? onTap;
+
+  /// Stops and dismisses the player, when given.
+  final VoidCallback? onClose;
+  final String? closeTooltip;
 
   @override
   Widget build(BuildContext context) {
@@ -102,6 +108,13 @@ class TahfeezMiniPlayerShell extends StatelessWidget {
                     color: scheme.primary,
                     onPressed: onPlayPause,
                   ),
+                  if (onClose != null)
+                    IconButton(
+                      key: const ValueKey('mini-player-close'),
+                      icon: const Icon(Icons.close),
+                      tooltip: closeTooltip,
+                      onPressed: onClose,
+                    ),
                 ],
               ),
             ),

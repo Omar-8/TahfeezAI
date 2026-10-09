@@ -8,7 +8,7 @@ import '../../core/theme/app_spacing.dart';
 import '../../core/theme/components/tahfeez_bottom_sheet.dart';
 import '../../core/theme/components/tahfeez_state_views.dart';
 import '../../core/theme/quran_text_style.dart';
-import '../../core/ui/coming_soon.dart';
+import '../../features/listen/application/quran_audio_player.dart';
 import '../../features/mushaf/application/mushaf_appearance_controller.dart';
 import '../../features/mushaf/domain/mushaf_appearance.dart';
 import '../../features/recitation/presentation/recitation_word_feedback.dart';
@@ -57,9 +57,6 @@ class _WordDetailSheetBody extends ConsumerWidget {
     final chapterNo = wordRef.ayahId ~/ 1000;
     final verseNo = wordRef.ayahId % 1000;
     final activePack = ref.watch(activeWbwPackProvider);
-    final wordAudioEnabled = ref.watch(
-      wbwWordAudioEnabledPreferenceControllerProvider,
-    );
     final arabicTextAsync = ref.watch(
       canonicalAyahWordTextProvider(
         ayahId: wordRef.ayahId,
@@ -113,9 +110,16 @@ class _WordDetailSheetBody extends ConsumerWidget {
               IconButton(
                 icon: const Icon(Icons.volume_up_outlined),
                 tooltip: AppLocalizations.of(context).wordPlayAudio,
-                onPressed: wordAudioEnabled
-                    ? () => showComingSoon(context)
-                    : null,
+                onPressed: () async {
+                  final messenger = ScaffoldMessenger.of(context);
+                  final offline = AppLocalizations.of(context).listenOffline;
+                  final played = await ref
+                      .read(quranAudioPlayerProvider.notifier)
+                      .playWord(wordRef.ayahId, wordRef.wordIndex);
+                  if (!played) {
+                    messenger.showSnackBar(SnackBar(content: Text(offline)));
+                  }
+                },
               ),
             ],
           ),

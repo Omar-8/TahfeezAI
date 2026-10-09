@@ -344,5 +344,12 @@
   "homeMemOpen": "افتح الحفظ",
   "homeMemAllDone": "أنهيت حفظ اليوم.",
   "homeMemNothing": "لا شيء للحفظ أو المراجعة بعد. ضع خطة، أو حدّد ما تحفظه.",
-  "memRevise": "راجع"
+  "memRevise": "راجع",
+  "listenTitle": "صوت التلاوة",
+  "listenReciter": "القارئ",
+  "listenPlayAyah": "تشغيل الآية",
+  "listenPlayFrom": "تشغيل من هنا",
+  "listenStop": "إيقاف",
+  "listenOffline": "الصوت يحتاج إلى اتصال بالإنترنت.",
+  "listenSourcesNote": "يُبثّ من Islamic Network (الآيات) وQuran.com (الكلمات)؛ ولا يُنزَّل شيء."
 }

@@ -14,6 +14,7 @@ import '../../../quran/application/tafsir_library_controller.dart';
 import '../../../quran/application/tafsir_selection_controller.dart';
 import '../../../quran/application/tafsir_verse_text.dart';
 import '../../quran/application/quran_index_providers.dart';
+import '../../listen/application/quran_audio_player.dart';
 import '../application/mushaf_appearance_controller.dart';
 import '../application/mushaf_page_translations.dart';
 import '../domain/mushaf_appearance.dart';
@@ -101,6 +102,7 @@ class _AyahDetailSheetBody extends ConsumerWidget {
               ),
             ],
           ),
+          _ListenButtons(ayahId: ayahId),
           if (text != null)
             Directionality(
               textDirection: TextDirection.rtl,
@@ -232,6 +234,48 @@ class _ChooseInSettings extends StatelessWidget {
       style: theme.textTheme.bodySmall?.copyWith(
         color: theme.colorScheme.onSurfaceVariant,
       ),
+    );
+  }
+}
+
+/// Plays this ayah, or from it to the end of its surah, by the chosen
+/// reciter (streamed; offline says so).
+class _ListenButtons extends ConsumerWidget {
+  const _ListenButtons({required this.ayahId});
+
+  final int ayahId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final player = ref.read(quranAudioPlayerProvider.notifier);
+    Future<void> play(Future<bool> Function() start) async {
+      final messenger = ScaffoldMessenger.of(context);
+      if (!await start()) {
+        messenger.showSnackBar(SnackBar(content: Text(l10n.listenOffline)));
+      }
+    }
+
+    return Row(
+      spacing: TahfeezSpacing.sm,
+      children: [
+        Expanded(
+          child: FilledButton.tonalIcon(
+            key: const ValueKey('ayah-sheet-play'),
+            onPressed: () => play(() => player.playAyahs([ayahId])),
+            icon: const Icon(Icons.play_arrow_rounded),
+            label: Text(l10n.listenPlayAyah),
+          ),
+        ),
+        Expanded(
+          child: OutlinedButton.icon(
+            key: const ValueKey('ayah-sheet-play-from'),
+            onPressed: () => play(() => player.playFrom(ayahId)),
+            icon: const Icon(Icons.playlist_play_rounded),
+            label: Text(l10n.listenPlayFrom),
+          ),
+        ),
+      ],
     );
   }
 }
