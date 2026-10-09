@@ -20,6 +20,10 @@ abstract class MemorizationRepository {
   /// and never recited (unverified); a recited ayah keeps its memory.
   Future<void> unmarkUnverified(Iterable<int> ayahIds);
 
+  /// Deletes every memory, test result and plan (Settings → Reset all
+  /// data).
+  Future<void> clearAll();
+
   /// The memory of every tracked ayah, by ayah id, updated as it changes.
   Stream<Map<int, AyahMemory>> watchMemories();
 

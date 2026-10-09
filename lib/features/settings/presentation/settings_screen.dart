@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show SystemNavigator;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/core_providers.dart';
 import '../../../core/localization/generated/app_localizations.dart';
 import '../../../core/routing/app_routes.dart';
 import '../../../core/localization/locale_controller.dart';
@@ -19,6 +21,7 @@ import '../../../quran/presentation/tafsir_packs_sheet.dart';
 import '../../../quran/presentation/translation_packs_sheet.dart';
 import '../../../wbw/application/wbw_preferences_controller.dart';
 import '../../mushaf/application/mushaf_page_translations.dart';
+import '../application/reset_all_data.dart';
 import 'theme_choices.dart';
 
 /// The Settings tab: the app's language and theme (the Quran page's own
@@ -227,6 +230,23 @@ class SettingsScreen extends ConsumerWidget {
               onTap: () => context.push(AppRoutes.about),
             ),
           ),
+          const SizedBox(height: TahfeezSpacing.lg),
+          TahfeezCard(
+            child: ListTile(
+              key: const ValueKey('settings-reset'),
+              contentPadding: EdgeInsets.zero,
+              leading: Icon(
+                Icons.delete_forever_outlined,
+                color: theme.colorScheme.error,
+              ),
+              title: Text(
+                l10n.settingsResetTitle,
+                style: TextStyle(color: theme.colorScheme.error),
+              ),
+              subtitle: Text(l10n.settingsResetSub),
+              onTap: () => _confirmReset(context, ref),
+            ),
+          ),
         ],
       ),
     );
@@ -326,5 +346,43 @@ class _MeaningSettings extends ConsumerWidget {
         ),
       ],
     );
+  }
+}
+
+/// Asks before deleting everything; then, on Android, closes the app so it
+/// opens fresh (elsewhere: asks for a reload).
+Future<void> _confirmReset(BuildContext context, WidgetRef ref) async {
+  final l10n = AppLocalizations.of(context);
+  final scheme = Theme.of(context).colorScheme;
+  final confirmed = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text(l10n.settingsResetConfirmTitle),
+      content: Text(l10n.settingsResetConfirmBody),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: Text(l10n.commonCancel),
+        ),
+        FilledButton(
+          key: const ValueKey('settings-reset-confirm'),
+          style: FilledButton.styleFrom(
+            backgroundColor: scheme.error,
+            foregroundColor: scheme.onError,
+          ),
+          onPressed: () => Navigator.of(context).pop(true),
+          child: Text(l10n.settingsResetConfirm),
+        ),
+      ],
+    ),
+  );
+  if (confirmed != true || !context.mounted) return;
+  final android = ref.read(platformCapabilitiesProvider).isAndroid;
+  final messenger = ScaffoldMessenger.of(context);
+  await resetAllData(ref);
+  if (android) {
+    await SystemNavigator.pop();
+  } else {
+    messenger.showSnackBar(SnackBar(content: Text(l10n.settingsResetDone)));
   }
 }

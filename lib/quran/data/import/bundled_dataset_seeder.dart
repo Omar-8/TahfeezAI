@@ -79,7 +79,10 @@ class BundledDatasetSeeder {
 
   static const _manifestAsset = 'assets/quran/resource_manifest.json';
   static const _mushafAsset = 'assets/quran/mushaf/kfgqpc_v2.json';
-  static const _seededVersionKey = 'quran.dataset.seeded_version';
+  static const _seededVersionKey = seededVersionKey;
+
+  /// Marks which bundled dataset is installed; kept by Reset all data.
+  static const seededVersionKey = 'quran.dataset.seeded_version';
 
   Future<void> seedIfNeeded() async {
     final Map<String, dynamic> manifest;

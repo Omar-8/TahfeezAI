@@ -17,6 +17,10 @@ abstract class BrowserStorage {
   Future<bool?> getBool(String key);
   Future<void> setBool(String key, bool value);
   Future<void> remove(String key);
+
+  /// Removes every stored value except those under [keep] (Settings →
+  /// Reset all data).
+  Future<void> clearExcept(Set<String> keep);
 }
 
 class SharedPreferencesBrowserStorage implements BrowserStorage {
@@ -43,5 +47,12 @@ class SharedPreferencesBrowserStorage implements BrowserStorage {
   @override
   Future<void> remove(String key) async {
     await (await _prefs).remove(key);
+  }
+
+  @override
+  Future<void> clearExcept(Set<String> keep) async {
+    final prefs = await _prefs;
+    final keys = await prefs.getKeys();
+    await prefs.clear(allowList: keys.difference(keep));
   }
 }

@@ -59,6 +59,18 @@ void main() {
     },
   );
 
+  test('clearing all: no memories, results or plans left', () async {
+    await repo.recordTest([attempt(112001, AyahGrade.good, t0)]);
+    await repo.markMemorized([112002]);
+    await repo.savePlan(
+      MemorizationPlan(fromAyah: 78001, toAyah: 114006, createdAt: t0),
+    );
+    await repo.clearAll();
+    expect(await repo.watchMemories().first, isEmpty);
+    expect(await repo.attemptsFor(112001), isEmpty);
+    expect(await repo.watchActivePlan().first, isNull);
+  });
+
   test('unmarking removes only what is still unverified', () async {
     await repo.recordTest([attempt(112001, AyahGrade.good, t0)]);
     await repo.markMemorized([112001, 112002, 112003]);

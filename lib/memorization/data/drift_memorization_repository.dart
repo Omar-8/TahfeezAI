@@ -68,6 +68,13 @@ class DriftMemorizationRepository implements MemorizationRepository {
           .go();
 
   @override
+  Future<void> clearAll() => _db.transaction(() async {
+    await _db.delete(_db.attempts).go();
+    await _db.delete(_db.memorizedAyahs).go();
+    await _db.delete(_db.plans).go();
+  });
+
+  @override
   Stream<Map<int, AyahMemory>> watchMemories() => _db
       .select(_db.memorizedAyahs)
       .watch()

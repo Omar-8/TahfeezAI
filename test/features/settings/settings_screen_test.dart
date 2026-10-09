@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tahfeez_ai/app/app.dart';
 import 'package:tahfeez_ai/core/localization/locale_controller.dart';
+import 'package:tahfeez_ai/core/storage/storage_providers.dart';
 import 'package:tahfeez_ai/core/theme/app_surface_tone.dart';
 import 'package:tahfeez_ai/core/theme/app_typography.dart';
 import 'package:tahfeez_ai/quran/application/ayah_sheet_content.dart';
@@ -139,5 +140,52 @@ void main() {
         .where((l) => l.packages.any((p) => p.startsWith('Tahfeez:')))
         .length;
     expect(notices, credits.length);
+  });
+
+  testWidgets('Reset all data asks first, then clears every setting but the '
+      'installed Quran\'s marker', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: tahfeezWidgetTestOverrides(),
+        child: const TahfeezApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(TahfeezApp)),
+    );
+    final storage = container.read(browserStorageProvider);
+    await storage.setString('core.theme_mode', 'dark');
+    await storage.setString('quran.dataset.seeded_version', 'v1');
+
+    await tester.tap(find.text('Settings'));
+    await tester.pumpAndSettle();
+    final reset = find.byKey(const ValueKey('settings-reset'));
+    await tester.scrollUntilVisible(reset, 200);
+    await tester.ensureVisible(reset);
+    await tester.pumpAndSettle();
+    await tester.tap(reset);
+    await tester.pumpAndSettle();
+    expect(find.text('Reset all data?'), findsOneWidget);
+
+    // Cancel keeps everything.
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    expect(await storage.getString('core.theme_mode'), 'dark');
+
+    await tester.tap(reset);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('settings-reset-confirm')));
+    await tester.pumpAndSettle();
+    expect(await storage.getString('core.theme_mode'), isNull);
+    expect(await storage.getString('quran.dataset.seeded_version'), 'v1');
+    expect(
+      find.text('All data reset. Reload the app to start fresh.'),
+      findsOneWidget,
+    );
   });
 }

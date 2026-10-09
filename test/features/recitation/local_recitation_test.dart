@@ -54,6 +54,9 @@ final offlineAndroid = resolveRecitationAiConfig(
 );
 
 class _MemoryStorage implements BrowserStorage {
+  @override
+  Future<void> clearExcept(Set<String> keep) async {}
+
   final values = <String, Object>{};
   @override
   Future<String?> getString(String key) async => values[key] as String?;
