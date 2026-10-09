@@ -29,12 +29,12 @@ class TahfeezQuranSectionCard extends StatelessWidget {
   final Color? accentColor;
   final VoidCallback? onTap;
 
-  /// A share (0-1) drawn as a ring around the number badge (e.g. how much of
-  /// a surah is memorized), with its percentage under the badge; `null`:
-  /// no ring.
+  /// A share (0-1) shown at the card's end in place of the chevron — its
+  /// percentage over a short bar (e.g. how much of a surah is memorized);
+  /// `null`: the chevron.
   final double? progress;
 
-  /// The ring's color (default: the accent).
+  /// The progress's color (default: the accent).
   final Color? progressColor;
 
   @override
@@ -50,46 +50,19 @@ class TahfeezQuranSectionCard extends StatelessWidget {
           padding: const EdgeInsets.all(TahfeezSpacing.md),
           child: Row(
             children: [
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SizedBox(
-                    width: 40,
-                    height: 40,
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            color: accent.withValues(alpha: 0.12),
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        if (progress case final p?)
-                          SizedBox.expand(
-                            child: CircularProgressIndicator(
-                              key: const ValueKey('section-card-progress'),
-                              value: p.clamp(0.0, 1.0),
-                              strokeWidth: 3,
-                              color: progressColor ?? accent,
-                              backgroundColor: Colors.transparent,
-                            ),
-                          ),
-                        Text(
-                          '$number',
-                          style: Theme.of(context).textTheme.titleSmall
-                              ?.copyWith(color: accent),
-                        ),
-                      ],
-                    ),
-                  ),
-                  if (progress case final p?)
-                    Text(
-                      '${(p.clamp(0.0, 1.0) * 100).round()}%',
-                      style: Theme.of(context).textTheme.labelSmall
-                          ?.copyWith(color: progressColor ?? accent),
-                    ),
-                ],
+              Container(
+                width: 40,
+                height: 40,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: accent.withValues(alpha: 0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: Text(
+                  '$number',
+                  style: Theme.of(context).textTheme.titleSmall
+                      ?.copyWith(color: accent),
+                ),
               ),
               const SizedBox(width: TahfeezSpacing.smPlus),
               Expanded(
@@ -107,11 +80,37 @@ class TahfeezQuranSectionCard extends StatelessWidget {
                   ],
                 ),
               ),
-              Icon(
-                Icons.chevron_right,
-                size: TahfeezIconSize.md,
-                color: scheme.onSurfaceVariant,
-              ),
+              if (progress case final p?)
+                SizedBox(
+                  key: const ValueKey('section-card-progress'),
+                  width: 48,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    spacing: TahfeezSpacing.xs,
+                    children: [
+                      Text(
+                        '${(p.clamp(0.0, 1.0) * 100).round()}%',
+                        style: Theme.of(context).textTheme.labelLarge
+                            ?.copyWith(color: progressColor ?? accent),
+                      ),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(TahfeezRadii.pill),
+                        child: LinearProgressIndicator(
+                          value: p.clamp(0.0, 1.0),
+                          minHeight: 4,
+                          color: progressColor ?? accent,
+                          backgroundColor: scheme.surfaceContainerHighest,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              else
+                Icon(
+                  Icons.chevron_right,
+                  size: TahfeezIconSize.md,
+                  color: scheme.onSurfaceVariant,
+                ),
             ],
           ),
         ),
