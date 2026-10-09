@@ -879,8 +879,13 @@ class AcousticVerificationController
     for (final t in span.tokens) {
       (passage[t.word] ??= []).add(t);
     }
+    // Another word said in a word's place needs the passage around it: judged
+    // in the ayah's check, not a word's quick one (whose short audio took
+    // «هَٰذَا» for «ٱلْبَيْتِ» in a clean recitation).
     final swaps = {
-      for (final s in verifier.wordSwaps(frames, verdicts, passage)) s.word: s,
+      if (!job.quick)
+        for (final s in verifier.wordSwaps(frames, verdicts, passage))
+          s.word: s,
     };
     final byWord = <WordRef, List<PhonemeVerdict>>{};
     for (final v in verdicts) {
@@ -1093,6 +1098,15 @@ class AcousticVerificationController
       hi = hi == null ? t.unit : math.max(hi, t.unit);
     }
     if (lo == null || hi == null) return null;
+    // Said on from the word before (no stop): it is expected too, so a join
+    // is judged as one (an ayah's first word joined: no hamzat al-wasl).
+    if (job.openStart) {
+      final before = [
+        for (final t in span.tokens)
+          if (t.unit < lo) t.unit,
+      ];
+      if (before.isNotEmpty) lo = before.reduce(math.max);
+    }
     _log('piece placed as ${job.targets.map(_ref).join(' ')} (not located)');
     return (lo, hi);
   }
