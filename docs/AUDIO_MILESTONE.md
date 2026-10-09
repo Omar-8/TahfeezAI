@@ -32,7 +32,10 @@ starting one stops playback.
    pause / resume and the speed (0.75–1.5×), the hide buttons in place; in hide mode each ayah
    is revealed as it is recited; the page's progress line follows the recited ayah. Leaving the
    Mushaf, or a recitation test starting, stops it. The ayah sheet's *Play from here* opens
-   the menu at that ayah.
+   the menu at that ayah. Speeds go to 2×; *Continue to the next surahs* plays on, surah
+   by surah, once a range ends at a surah's end. While reciting or listening the bar shows only
+   the eye (revealing follows the recitation); turning hide mode on mid-playback keeps the
+   playing ayah and those before it on its page shown.
 
 Each phase: `flutter analyze` clean, tests, English + Arabic strings, credits and
 `docs/THIRD_PARTY_RESOURCES.md` rows.

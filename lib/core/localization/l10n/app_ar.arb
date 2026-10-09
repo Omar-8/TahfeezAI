@@ -359,5 +359,6 @@
   "listenHighlight": "تمييز الآية المتلوّة",
   "listenRevealNote": "إخفاء النص مفعّل: تظهر كل آية عند تلاوتها.",
   "listenPlay": "تشغيل",
-  "listenSpeed": "السرعة"
+  "listenSpeed": "السرعة",
+  "listenContinue": "المتابعة إلى السور التالية"
 }

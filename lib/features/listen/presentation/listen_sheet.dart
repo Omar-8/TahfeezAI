@@ -242,6 +242,15 @@ class _ListenSheetState extends ConsumerState<_ListenSheet> {
             child: Column(
               children: [
                 SwitchListTile(
+                  key: const ValueKey('listen-continue'),
+                  title: Text(l10n.listenContinue),
+                  value: _options.continueToNextSurahs,
+                  onChanged: (on) => setState(
+                    () =>
+                        _options = _options.copyWith(continueToNextSurahs: on),
+                  ),
+                ),
+                SwitchListTile(
                   key: const ValueKey('listen-follow'),
                   title: Text(l10n.listenFollow),
                   value: _options.followPages,

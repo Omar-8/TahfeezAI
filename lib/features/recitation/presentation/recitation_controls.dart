@@ -342,14 +342,9 @@ class _SessionControls extends ConsumerWidget {
         state.phase == RecitationPhase.paused;
     final centered = ref.watch(platformCapabilitiesProvider).isWeb;
     // Laid out like the bar before a session: stop and pause where the mic
-    // was, the reveal/hide buttons filling in from the eye's side (scaled
-    // down rather than overflowing a narrow phone), the eye at the end — so
-    // the eye never moves, recording or not. The web keeps them together in
-    // the middle.
-    const steps = FittedBox(
-      fit: BoxFit.scaleDown,
-      child: MushafHideControls(part: MushafHideControlsPart.steps),
-    );
+    // was, the eye at the end — so it never moves, recording or not. The
+    // reveal-next buttons are gone while reciting (revealing follows the
+    // recitation). The web keeps the buttons together in the middle.
     return Row(
       mainAxisAlignment: centered
           ? MainAxisAlignment.center
@@ -377,16 +372,11 @@ class _SessionControls extends ConsumerWidget {
             tooltip: l10n.recPause,
             onPressed: canControl ? controller.pause : null,
           ),
-        if (centered) ...[
-          const SizedBox(width: _centeredGroupGap),
-          const Flexible(child: steps),
-        ] else
-          const Expanded(
-            child: Align(
-              alignment: AlignmentDirectional.centerEnd,
-              child: steps,
-            ),
-          ),
+        // Revealing follows the recitation: only the eye stays.
+        if (centered)
+          const SizedBox(width: _centeredGroupGap)
+        else
+          const Spacer(),
         const MushafHideControls(part: MushafHideControlsPart.pinned),
       ],
     );
@@ -394,8 +384,8 @@ class _SessionControls extends ConsumerWidget {
 }
 
 /// The bar while the reciter plays (the Listen menu, or an ayah from its
-/// sheet): stop, pause / resume and the speed where the mic was, the
-/// reveal/hide buttons where they always are.
+/// sheet): stop, pause / resume and the speed where the mic was, the eye
+/// where it always is (revealing follows the recitation).
 class _ListenControls extends ConsumerWidget {
   const _ListenControls({super.key});
 
@@ -406,10 +396,6 @@ class _ListenControls extends ConsumerWidget {
     final player = ref.read(quranAudioPlayerProvider.notifier);
     final audio = ref.watch(audioControllerProvider);
     final centered = ref.watch(platformCapabilitiesProvider).isWeb;
-    const steps = FittedBox(
-      fit: BoxFit.scaleDown,
-      child: MushafHideControls(part: MushafHideControlsPart.steps),
-    );
     return StreamBuilder<AudioPlaybackState>(
       stream: audio.state,
       initialData: const AudioPlaybackState(isPlaying: true),
@@ -455,16 +441,11 @@ class _ListenControls extends ConsumerWidget {
                 semanticsLabel: '${l10n.listenSpeed} $speed',
               ),
             ),
-            if (centered) ...[
-              const SizedBox(width: _centeredGroupGap),
-              const Flexible(child: steps),
-            ] else
-              const Expanded(
-                child: Align(
-                  alignment: AlignmentDirectional.centerEnd,
-                  child: steps,
-                ),
-              ),
+            // Revealing follows the recitation: only the eye stays.
+            if (centered)
+              const SizedBox(width: _centeredGroupGap)
+            else
+              const Spacer(),
             const MushafHideControls(part: MushafHideControlsPart.pinned),
           ],
         );

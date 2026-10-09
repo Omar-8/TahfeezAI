@@ -43,6 +43,10 @@ class FakeAudioController implements AudioController {
   /// Moves the queue on, as the player would.
   void advanceTo(int index) => _emit((s) => s.copyWith(currentIndex: index));
 
+  /// Plays to the end, as the player would — which then keeps reporting
+  /// `completed` until something new loads.
+  void finish() => _emit((s) => s.copyWith(isPlaying: false, completed: true));
+
   @override
   Future<void> pause() async => _emit((s) => s.copyWith(isPlaying: false));
 

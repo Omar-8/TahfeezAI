@@ -228,9 +228,8 @@ void main() {
     }
   });
 
-  testWidgets('recording with hide mode on fits one row on a small phone', (
-    tester,
-  ) async {
+  testWidgets('recording with hide mode on: only the eye beside stop and '
+      'pause, in one row on a small phone', (tester) async {
     tester.view.physicalSize = const Size(360, 780);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -243,15 +242,16 @@ void main() {
 
     expect(tester.takeException(), isNull, reason: 'no overflow');
     final stopY = tester.getCenter(find.byTooltip('Stop')).dy;
+    // Revealing follows the recitation: no reveal/hide-back buttons.
     for (final tip in [
       'Reveal next ayah',
       'Reveal next word',
-      'Show ayahs',
       'Hide previous word',
       'Hide previous ayah',
-      'Pause',
-      'Stop',
     ]) {
+      expect(find.byTooltip(tip), findsNothing, reason: tip);
+    }
+    for (final tip in ['Show ayahs', 'Pause', 'Stop']) {
       expect(find.byTooltip(tip), findsOneWidget, reason: tip);
       expect(
         tester.getCenter(find.byTooltip(tip)).dy,
@@ -309,11 +309,14 @@ void main() {
         .reportPageWords(5, wordCount: 2);
     await tester.pumpAndSettle();
 
-    Future<void> toggleKeepsEye() async {
+    Future<void> toggleKeepsEye({bool recording = false}) async {
       final off = tester.getRect(find.byTooltip('Hide ayahs'));
       await tester.tap(find.byTooltip('Hide ayahs'));
       await tester.pumpAndSettle();
-      expect(find.byTooltip('Reveal next word'), findsOneWidget);
+      expect(
+        find.byTooltip('Reveal next word'),
+        recording ? findsNothing : findsOneWidget,
+      );
       expect(tester.getRect(find.byTooltip('Show ayahs')), off);
       await tester.tap(find.byTooltip('Show ayahs'));
       await tester.pumpAndSettle();
@@ -336,15 +339,13 @@ void main() {
       ),
       findsOneWidget,
     );
-    await toggleKeepsEye();
+    await toggleKeepsEye(recording: true);
 
-    // Recording, with every hide button showing: still one row.
+    // Recording, hidden: the eye in the stop button's row.
     await tester.tap(find.byTooltip('Hide ayahs'));
     await tester.pumpAndSettle();
     final row = tester.getCenter(find.byTooltip('Stop')).dy;
-    for (final tip in ['Reveal next ayah', 'Show ayahs']) {
-      expect(tester.getCenter(find.byTooltip(tip)).dy, closeTo(row, 1));
-    }
+    expect(tester.getCenter(find.byTooltip('Show ayahs')).dy, closeTo(row, 1));
     expect(tester.takeException(), isNull, reason: 'no overflow');
   });
 
@@ -468,7 +469,8 @@ void main() {
     }
   });
 
-  testWidgets('hide controls stay available while recording', (tester) async {
+  testWidgets('the eye stays available while recording, the reveal steps '
+      'not', (tester) async {
     await tester.pumpWidget(app(devPanel: false));
     await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('Start recitation'));
@@ -476,7 +478,8 @@ void main() {
     expect(find.byTooltip('Listening…'), findsOneWidget);
     await tester.tap(find.byTooltip('Hide ayahs'));
     await tester.pumpAndSettle();
-    expect(find.byTooltip('Reveal next word'), findsOneWidget);
+    expect(find.byTooltip('Show ayahs'), findsOneWidget);
+    expect(find.byTooltip('Reveal next word'), findsNothing);
     expect(find.byTooltip('Stop'), findsOneWidget);
   });
 

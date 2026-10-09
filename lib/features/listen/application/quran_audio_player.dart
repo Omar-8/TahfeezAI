@@ -65,6 +65,11 @@ class QuranAudioPlayer extends Notifier<NowPlaying?> {
     ref.listen(recitationSessionControllerProvider, (previous, next) {
       if (next.isActive && !(previous?.isActive ?? false)) stop();
     });
+    // Hide mode turned on while an ayah plays: it and what came before it
+    // on its page stay shown.
+    ref.listen(mushafHideModeProvider, (previous, next) {
+      if (next.enabled && !(previous?.enabled ?? false)) _revealPlaying();
+    });
     // Its controls are the Mushaf's bar: leaving the Mushaf stops it.
     ref.listen(mushafRecitationTargetProvider, (previous, next) {
       if (previous != null && next == null) stop();
@@ -75,8 +80,27 @@ class QuranAudioPlayer extends Notifier<NowPlaying?> {
   void _onPlayback(AudioPlaybackState playback) {
     final now = state;
     if (now == null) return;
-    if (playback.completed) {
+    // The player reports the previous item's end until the new one loads:
+    // only an end seen after this one started is its end.
+    if (!playback.completed) _started = true;
+    if (playback.completed && _started) {
+      final last = now.isWord ? null : now.ayahIds.last;
       _clear();
+      // Going on: the next surah, whole, with the same options.
+      if (last != null && now.options.continueToNextSurahs) {
+        final surah = last ~/ 1000;
+        final atSurahEnd = last % 1000 == surahAyahCounts[surah - 1];
+        if (atSurahEnd && surah < 114) {
+          final next = surah + 1;
+          unawaited(
+            playRange(
+              next * 1000 + 1,
+              next * 1000 + surahAyahCounts[next - 1],
+              options: now.options,
+            ),
+          );
+        }
+      }
       return;
     }
     final i = playback.currentIndex;
@@ -118,6 +142,26 @@ class QuranAudioPlayer extends Notifier<NowPlaying?> {
 
   int? _turnedTo;
 
+  /// Whether what is playing now has been seen loading or playing (so a
+  /// "completed" is its own, not the previous item's).
+  var _started = false;
+
+  /// Hide mode: uncovers the playing ayah's page through it.
+  void _revealPlaying() {
+    final ayahId = state?.ayahId;
+    if (ayahId == null) return;
+    unawaited(() async {
+      final mushaf = await ref.read(defaultMushafProvider.future);
+      if (mushaf == null || !ref.mounted) return;
+      final page = await ref
+          .read(quranRepositoryProvider)
+          .getPageForAyah(mushafId: mushaf.id, ayahId: ayahId);
+      if (page != null && ref.mounted && state?.ayahId == ayahId) {
+        _reveal(page, ayahId);
+      }
+    }());
+  }
+
   /// Hide mode: uncovers [page] through [ayahId] as it is recited.
   void _reveal(int page, int ayahId) {
     final hide = ref.read(mushafHideModeProvider);
@@ -150,6 +194,7 @@ class QuranAudioPlayer extends Notifier<NowPlaying?> {
   }) async {
     if (ayahIds.isEmpty) return false;
     final reciter = reciterFor(ref.read(reciterProvider));
+    _started = false;
     state = NowPlaying.ayahs(ayahIds, 0, reciter, options: options);
     _follow();
     try {
@@ -194,6 +239,7 @@ class QuranAudioPlayer extends Notifier<NowPlaying?> {
   /// One word, as Quran.com recites it alone.
   Future<bool> playWord(int ayahId, int wordIndex) async {
     ref.read(mushafFocusAyahProvider.notifier).clear(this);
+    _started = false;
     state = NowPlaying.word(ayahId, wordIndex);
     try {
       await ref

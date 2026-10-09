@@ -793,5 +793,6 @@
   "listenHighlight": "Highlight the ayah being recited",
   "listenRevealNote": "Hide mode is on: each ayah is revealed as it is recited.",
   "listenPlay": "Play",
-  "listenSpeed": "Speed"
+  "listenSpeed": "Speed",
+  "listenContinue": "Continue to the next surahs"
 }

@@ -106,4 +106,28 @@ void main() {
     await Future<void>.delayed(Duration.zero);
     expect(container.read(quranAudioPlayerProvider), isNull);
   });
+
+  test('a new run isn\'t ended by the previous item\'s "completed" (the '
+      'bar and highlight stay)', () async {
+    final audio = FakeAudioController();
+    final container = ProviderContainer(
+      overrides: [
+        audioControllerProvider.overrideWithValue(audio),
+        defaultMushafProvider.overrideWith((ref) async => null),
+      ],
+    );
+    addTearDown(container.dispose);
+    final player = container.read(quranAudioPlayerProvider.notifier);
+    await player.playWord(1001, 0);
+    audio.finish();
+    await Future<void>.delayed(Duration.zero);
+    expect(container.read(quranAudioPlayerProvider), isNull);
+
+    // The player still says "completed" as the run starts.
+    await player.playFrom(112001);
+    audio.advanceTo(0);
+    await Future<void>.delayed(Duration.zero);
+    expect(container.read(quranAudioPlayerProvider)?.ayahId, 112001);
+    expect(container.read(mushafFocusAyahProvider)?.ayahId, 112001);
+  });
 }
