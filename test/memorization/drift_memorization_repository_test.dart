@@ -83,12 +83,19 @@ void main() {
       (active!.id, active.unit, active.amount),
       (first, PlanUnit.pages, 1),
     );
-    await repo.savePlan(active.copyWith(amount: 2, unit: PlanUnit.halfPages));
+    await repo.savePlan(
+      active.copyWith(
+        amount: 2,
+        unit: PlanUnit.halfPages,
+        studyDays: {DateTime.monday, DateTime.thursday},
+      ),
+    );
     active = await repo.watchActivePlan().first;
     expect(
       (active!.id, active.unit, active.amount),
       (first, PlanUnit.halfPages, 2),
     );
+    expect(active.studyDays, {DateTime.monday, DateTime.thursday});
     // A new active plan replaces it; pausing leaves none.
     final second = await repo.savePlan(
       MemorizationPlan(
@@ -102,5 +109,31 @@ void main() {
     expect((active!.id, active.backward), (second, true));
     await repo.savePlan(active.copyWith(active: false));
     expect(await repo.watchActivePlan().first, isNull);
+  });
+
+  test('schema 1 plans: their day count becomes weekdays', () async {
+    await db.close();
+    db = MemorizationDatabase(
+      NativeDatabase.memory(
+        setup: (raw) {
+          raw.execute(
+            'CREATE TABLE plans (id INTEGER PRIMARY KEY AUTOINCREMENT, '
+            'name TEXT NOT NULL, from_ayah INTEGER NOT NULL, '
+            'to_ayah INTEGER NOT NULL, unit TEXT NOT NULL, '
+            'amount REAL NOT NULL, days_per_week INTEGER NOT NULL, '
+            'backward INTEGER NOT NULL, active INTEGER NOT NULL, '
+            'created_at INTEGER NOT NULL)',
+          );
+          raw.execute(
+            "INSERT INTO plans VALUES (1, '', 78001, 114006, 'pages', 1, 5, "
+            '1, 1, 0)',
+          );
+          raw.execute('PRAGMA user_version = 1');
+        },
+      ),
+    );
+    repo = DriftMemorizationRepository(db);
+    final plan = await repo.watchActivePlan().first;
+    expect(plan!.studyDays, {1, 2, 3, 6, 7}, reason: 'Thursday, Friday off');
   });
 }

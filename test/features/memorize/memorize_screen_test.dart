@@ -162,7 +162,12 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Memorization plan'), findsOneWidget);
     await tester.tap(find.text('Ayahs'));
-    await tester.tap(find.text('6 days'));
+    // Friday and Saturday off; the last day can't be turned off.
+    await tester.tap(find.byKey(const ValueKey('plan-day-5')));
+    await tester.tap(find.byKey(const ValueKey('plan-day-6')));
+    await tester.pumpAndSettle();
+    expect(find.text('5 days a week'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('plan-amount-plus')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('plan-save')));
     await tester.pumpAndSettle();
@@ -170,9 +175,10 @@ void main() {
     expect(saved, isNotNull);
     expect((saved!.fromAyah, saved.toAyah), (78001, 114006));
     expect(
-      (saved.unit, saved.amount, saved.daysPerWeek, saved.backward),
-      (PlanUnit.ayahs, 1, 6, true),
+      (saved.unit, saved.amount, saved.backward),
+      (PlanUnit.ayahs, 2, true),
     );
+    expect(saved.studyDays, {1, 2, 3, 4, 7});
   });
 
   testWidgets('a plan: today\'s lesson with its progress, or its state', (
@@ -212,12 +218,50 @@ void main() {
       app(
         const TodayPlan(),
         memPlan: plan,
-        lesson: const NewLesson(rest: true, memorized: 4, total: 16),
+        lesson: const NewLesson(
+          runs: [
+            [114001, 114002],
+          ],
+          rest: true,
+          memorized: 4,
+          total: 16,
+        ),
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.text('Rest day: no new lesson today.'), findsOneWidget);
-    expect(find.text('Start'), findsNothing);
+    expect(
+      find.text('Rest day. You can still learn today\'s lesson.'),
+      findsOneWidget,
+    );
+    expect(find.text('Start'), findsOneWidget);
+
+    // Learned: again, or learn the next lesson too.
+    await tester.pumpWidget(const SizedBox());
+    await tester.pumpWidget(
+      app(
+        const TodayPlan(),
+        memPlan: plan,
+        lesson: const NewLesson(
+          runs: [
+            [114001, 114002],
+          ],
+          more: [
+            [114003, 114004],
+          ],
+          done: true,
+          memorized: 6,
+          total: 16,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Again'), findsOneWidget);
+    expect(find.text('An-Nas 3–4'), findsNothing);
+    await tester.tap(find.byKey(const ValueKey('mem-lesson-more')));
+    await tester.pumpAndSettle();
+    expect(find.text('Next lesson'), findsOneWidget);
+    expect(find.text('An-Nas 3–4'), findsOneWidget);
+    expect(find.text('Start'), findsOneWidget);
   });
 }
 

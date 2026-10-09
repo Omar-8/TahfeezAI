@@ -88,7 +88,7 @@ The constants are a starting point, to be tuned on real use (see "Later").
    Memorize tab's Today screen, starting a session at a range, the session summary. *Done
    when* a user with memorized parts sees today's three tasks, recites one, and sees its
    summary and updated strength.
-3. **M3 — Plans.** *(done 2026-10-09; one active plan, its new lesson on the Memorize tab; a plan is stopped rather than paused)* Create / edit / pause plans in ayahs, half-pages or pages; the new lesson
+3. **M3 — Plans.** *(done 2026-10-09; one active plan, its new lesson on the Memorize tab; chosen study days; more can be learned once the lesson is; a plan is stopped rather than paused)* Create / edit / pause plans in ayahs, half-pages or pages; the new lesson
    advances when its test passes (no fail); missed days roll forward. *Done when* a plan
    produces the right new lesson day by day (tests over simulated days).
 4. **M4 — Progress and starting point.** The strength map, the weak-parts list, marking

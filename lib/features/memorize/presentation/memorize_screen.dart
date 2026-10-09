@@ -268,14 +268,23 @@ Future<void> _recite(
   goToQuranLocation(context, QuranLocation.page(mushaf.id, page));
 }
 
-/// Today's new lesson from the plan, or how to make one.
-class _NewLessonCard extends ConsumerWidget {
+/// Today's new lesson from the plan, or how to make one. Once it is
+/// learned, the next lesson can be learned too.
+class _NewLessonCard extends ConsumerStatefulWidget {
   const _NewLessonCard({required this.names});
 
   final Map<int, String> names;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_NewLessonCard> createState() => _NewLessonCardState();
+}
+
+class _NewLessonCardState extends ConsumerState<_NewLessonCard> {
+  bool _more = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final names = widget.names;
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final plan = ref.watch(activePlanProvider).value;
@@ -301,6 +310,45 @@ class _NewLessonCard extends ConsumerWidget {
         ),
       );
     }
+    List<Widget> runRow(
+      List<int> run, {
+      bool again = false,
+      bool quiet = false,
+      bool divider = true,
+    }) {
+      void start() => _recite(context, ref, run.first, run.last);
+      return [
+        if (divider) const Divider(height: 1),
+        Padding(
+          key: ValueKey('mem-lesson-${run.first}'),
+          padding: const EdgeInsets.symmetric(
+            horizontal: TahfeezSpacing.md,
+            vertical: TahfeezSpacing.smPlus,
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  ayahRangeLabel(run.first, run.last, names),
+                  style: theme.textTheme.bodyLarge,
+                ),
+              ),
+              if (again || quiet)
+                TextButton(
+                  onPressed: start,
+                  child: Text(again ? l10n.memAgain : l10n.memStart),
+                )
+              else
+                FilledButton.tonal(
+                  onPressed: start,
+                  child: Text(l10n.memStart),
+                ),
+            ],
+          ),
+        ),
+      ];
+    }
+
     final status = lesson.finished
         ? l10n.memPlanFinished
         : lesson.rest
@@ -346,39 +394,42 @@ class _NewLessonCard extends ConsumerWidget {
               child: Text(status, style: theme.textTheme.bodyLarge),
             ),
           ],
-          if (!lesson.rest)
-            for (final run in lesson.runs) ...[
-              const Divider(height: 1),
+          for (final run in lesson.runs)
+            ...runRow(run, again: lesson.done, quiet: lesson.rest),
+          if (lesson.done && lesson.more.isNotEmpty) ...[
+            const Divider(height: 1),
+            if (!_more)
               Padding(
-                key: ValueKey('mem-lesson-${run.first}'),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: TahfeezSpacing.md,
-                  vertical: TahfeezSpacing.smPlus,
+                padding: const EdgeInsets.all(TahfeezSpacing.sm),
+                child: Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: TextButton.icon(
+                    key: const ValueKey('mem-lesson-more'),
+                    onPressed: () => setState(() => _more = true),
+                    icon: const Icon(Icons.add),
+                    label: Text(l10n.memLessonMore),
+                  ),
                 ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        ayahRangeLabel(run.first, run.last, names),
-                        style: theme.textTheme.bodyLarge,
-                      ),
-                    ),
-                    if (lesson.done)
-                      TextButton(
-                        onPressed: () =>
-                            _recite(context, ref, run.first, run.last),
-                        child: Text(l10n.memAgain),
-                      )
-                    else
-                      FilledButton.tonal(
-                        onPressed: () =>
-                            _recite(context, ref, run.first, run.last),
-                        child: Text(l10n.memStart),
-                      ),
-                  ],
+              )
+            else ...[
+              Padding(
+                padding: const EdgeInsetsDirectional.fromSTEB(
+                  TahfeezSpacing.md,
+                  TahfeezSpacing.smPlus,
+                  TahfeezSpacing.md,
+                  0,
+                ),
+                child: Text(
+                  l10n.memLessonNext,
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ),
+              for (final (i, run) in lesson.more.indexed)
+                ...runRow(run, divider: i > 0),
             ],
+          ],
         ],
       ),
     );

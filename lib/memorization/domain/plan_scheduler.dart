@@ -5,6 +5,7 @@ import 'models/memorization_plan.dart';
 class NewLesson {
   const NewLesson({
     this.runs = const [],
+    this.more = const [],
     this.done = false,
     this.rest = false,
     this.finished = false,
@@ -16,10 +17,15 @@ class NewLesson {
   /// order within a run; a backward plan may hold more than one run).
   final List<List<int>> runs;
 
+  /// Once the lesson is learned: the next lesson, to learn more today
+  /// (as runs, like [runs]); empty at the plan's end.
+  final List<List<int>> more;
+
   /// Every ayah of it memorized today.
   final bool done;
 
-  /// Not a study day (and nothing learned today).
+  /// Not a study day (and nothing learned today); [runs] can be learned
+  /// anyway.
   final bool rest;
 
   /// The whole plan is memorized.
@@ -36,7 +42,8 @@ abstract final class PlanScheduler {
   /// Today's lesson: from the first of the plan's units (in its order) with
   /// an ayah not yet memorized or memorized today, [MemorizationPlan.amount]
   /// units; of them, the ayahs not memorized before today. A missed day
-  /// changes nothing: the lesson waits.
+  /// changes nothing: the lesson waits. Learning more today extends the
+  /// lesson: the next [MemorizationPlan.amount] units then follow.
   static NewLesson today({
     required MemorizationPlan plan,
     required Map<int, AyahMemory> memories,
@@ -96,34 +103,48 @@ abstract final class PlanScheduler {
     if (start < 0) {
       return NewLesson(finished: true, memorized: known, total: total);
     }
-    final lesson = [
-      for (final u in units.skip(start).take(plan.amount))
+    // Units learned today beyond a day's amount (learning more) join the
+    // lesson.
+    var end = start + plan.amount;
+    while (end < units.length &&
+        units[end].every(memorized) &&
+        units[end].any(learnedToday)) {
+      end++;
+    }
+    end = end.clamp(0, units.length);
+    List<int> fresh(Iterable<List<int>> us) => [
+      for (final u in us)
         for (final a in u)
           if (!memorized(a) || learnedToday(a)) a,
     ];
+    final lesson = fresh(units.sublist(start, end));
     final anyToday = lesson.any(learnedToday);
-    if (!plan.studiesOn(day) && !anyToday) {
-      return NewLesson(rest: true, memorized: known, total: total);
-    }
+    final done = lesson.every(learnedToday);
+
     // Runs of ayahs consecutive in the Quran (one surah's end into the next
     // one's start included).
     final quranOrder = pages.keys.toList()..sort();
     final index = {
       for (var i = 0; i < quranOrder.length; i++) quranOrder[i]: i,
     };
-    final runs = <List<int>>[];
-    for (final a in lesson) {
-      final last = runs.isEmpty ? null : runs.last.last;
-      final next = last != null && index[a] == index[last]! + 1;
-      if (next) {
-        runs.last.add(a);
-      } else {
-        runs.add([a]);
+    List<List<int>> runsOf(List<int> ayahs) {
+      final runs = <List<int>>[];
+      for (final a in ayahs) {
+        final last = runs.isEmpty ? null : runs.last.last;
+        if (last != null && index[a] == index[last]! + 1) {
+          runs.last.add(a);
+        } else {
+          runs.add([a]);
+        }
       }
+      return runs;
     }
+
     return NewLesson(
-      runs: runs,
-      done: lesson.every(learnedToday),
+      runs: runsOf(lesson),
+      more: done ? runsOf(fresh(units.skip(end).take(plan.amount))) : const [],
+      done: done,
+      rest: !plan.studiesOn(day) && !anyToday,
       memorized: known,
       total: total,
     );

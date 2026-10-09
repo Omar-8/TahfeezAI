@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../../../core/localization/generated/app_localizations.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -35,18 +36,33 @@ class _PlanSheetState extends ConsumerState<_PlanSheet> {
   late VerseRef _to = _verse(widget.plan?.toAyah ?? 114006);
   late PlanUnit _unit = widget.plan?.unit ?? PlanUnit.pages;
   late int _amount = widget.plan?.amount ?? 1;
-  late int _days = widget.plan?.daysPerWeek ?? 7;
+  late final Set<int> _days = {
+    ...widget.plan?.studyDays ?? MemorizationPlan.everyDay,
+  };
   late bool _backward = widget.plan?.backward ?? widget.plan == null;
 
   static VerseRef _verse(int ayah) =>
       (chapterNo: ayah ~/ 1000, verseNo: ayah % 1000);
   static int _id(VerseRef v) => v.chapterNo * 1000 + v.verseNo;
 
+  // Bounds for the stepper only: up to a juz a day.
   static const _maxAmount = {
-    PlanUnit.ayahs: 20,
-    PlanUnit.halfPages: 10,
-    PlanUnit.pages: 5,
+    PlanUnit.ayahs: 300,
+    PlanUnit.halfPages: 40,
+    PlanUnit.pages: 20,
   };
+
+  /// The weekdays (`DateTime.monday`..) from the locale's first day.
+  static List<int> _week(BuildContext context) {
+    // 0 = Sunday.
+    final first = MaterialLocalizations.of(context).firstDayOfWeekIndex;
+    return [for (var i = 0; i < 7; i++) (first + i + 6) % 7 + 1];
+  }
+
+  static String _dayName(BuildContext context, int weekday) =>
+      DateFormat.E(Localizations.localeOf(context).toLanguageTag())
+      // 2024-01-01 was a Monday.
+      .format(DateTime(2024, 1, weekday));
 
   Future<void> _save({bool stop = false}) async {
     final repo = ref.read(memorizationRepositoryProvider);
@@ -60,7 +76,7 @@ class _PlanSheetState extends ConsumerState<_PlanSheet> {
               toAyah: to,
               unit: _unit,
               amount: _amount,
-              daysPerWeek: _days,
+              studyDays: _days,
               backward: _backward,
               active: !stop,
             );
@@ -205,17 +221,32 @@ class _PlanSheetState extends ConsumerState<_PlanSheet> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                label(l10n.memPlanDays),
-                SegmentedButton<int>(
-                  key: const ValueKey('plan-days'),
-                  showSelectedIcon: false,
-                  segments: [
-                    ButtonSegment(value: 7, label: Text(l10n.memPlanDays7)),
-                    ButtonSegment(value: 6, label: Text(l10n.memPlanDays6)),
-                    ButtonSegment(value: 5, label: Text(l10n.memPlanDays5)),
+                Row(
+                  children: [
+                    Expanded(child: label(l10n.memPlanDays)),
+                    label(l10n.memPlanDaysCount(_days.length)),
                   ],
-                  selected: {_days},
-                  onSelectionChanged: (s) => setState(() => _days = s.first),
+                ),
+                Wrap(
+                  spacing: TahfeezSpacing.sm,
+                  runSpacing: TahfeezSpacing.sm,
+                  children: [
+                    for (final day in _week(context))
+                      FilterChip(
+                        key: ValueKey('plan-day-$day'),
+                        showCheckmark: false,
+                        label: Text(_dayName(context, day)),
+                        selected: _days.contains(day),
+                        // At least one study day.
+                        onSelected: (on) => setState(() {
+                          if (on) {
+                            _days.add(day);
+                          } else if (_days.length > 1) {
+                            _days.remove(day);
+                          }
+                        }),
+                      ),
+                  ],
                 ),
                 const SizedBox(height: TahfeezSpacing.sm),
                 Text(

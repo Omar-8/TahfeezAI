@@ -129,16 +129,47 @@ void main() {
       fromAyah: 112001,
       toAyah: 112004,
       unit: PlanUnit.ayahs,
-      daysPerWeek: 6,
+      studyDays: {1, 2, 3, 4, 6, 7},
       createdAt: created,
     );
     final friday = DateTime(2026, 10, 16, 9);
-    expect(today(plan, {}, now: friday).rest, isTrue);
+    final rest = today(plan, {}, now: friday);
+    expect(rest.rest, isTrue);
+    expect(rest.runs.single, [112001], reason: 'can be learned anyway');
     expect(today(plan, {}).rest, isFalse);
     final all = today(plan, {
       for (var a = 1; a <= 4; a++) 112000 + a: mem(112000 + a),
     });
     expect(all.finished, isTrue);
     expect(all.progress, 1);
+  });
+
+  test('learning more: the next lesson after today\'s, then both stay', () {
+    final plan = MemorizationPlan(
+      fromAyah: 112001,
+      toAyah: 114006,
+      unit: PlanUnit.ayahs,
+      amount: 2,
+      createdAt: created,
+    );
+    final learned = monday.subtract(const Duration(hours: 1));
+    final done = today(plan, {
+      for (final a in [112001, 112002]) a: mem(a, learned: learned),
+    });
+    expect(done.done, isTrue);
+    expect(done.more.single, [112003, 112004]);
+    final more = today(plan, {
+      for (final a in [112001, 112002, 112003, 112004])
+        a: mem(a, learned: learned),
+    });
+    expect(more.runs.single, [112001, 112002, 112003, 112004]);
+    expect(more.more.single, [113001, 113002]);
+    final tomorrow = today(plan, {
+      for (final a in [112001, 112002, 112003, 112004])
+        a: mem(a, learned: learned),
+    }, now: monday.add(const Duration(days: 1)));
+    expect(tomorrow.done, isFalse);
+    expect(tomorrow.runs.single, [113001, 113002]);
+    expect(tomorrow.more, isEmpty);
   });
 }

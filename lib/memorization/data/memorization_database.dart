@@ -49,7 +49,12 @@ class Plans extends Table {
   /// `ayahs` / `halfPages` / `pages`.
   TextColumn get unit => text()();
   RealColumn get amount => real()();
+
+  /// How many [weekdays] (kept for schema 1 readers).
   IntColumn get daysPerWeek => integer()();
+
+  /// The study days: bit `weekday - 1` for each (schema 2).
+  IntColumn get weekdays => integer().withDefault(const Constant(127))();
 
   /// Learned from [toAyah] back to [fromAyah] (e.g. An-Nas to An-Naba).
   BoolColumn get backward => boolean()();
@@ -65,7 +70,7 @@ class MemorizationDatabase extends _$MemorizationDatabase {
   MemorizationDatabase(super.connection);
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -77,6 +82,16 @@ class MemorizationDatabase extends _$MemorizationDatabase {
           'CREATE INDEX attempts_ayah ON attempts (ayah_id)',
         ),
       );
+    },
+    onUpgrade: (m, from, to) async {
+      if (from < 2) {
+        // Schema 1 counted days: 6 without Friday, 5 without Thursday too.
+        await m.addColumn(plans, plans.weekdays);
+        await customStatement(
+          'UPDATE plans SET weekdays = CASE days_per_week '
+          'WHEN 6 THEN 111 WHEN 5 THEN 103 ELSE 127 END',
+        );
+      }
     },
   );
 }
