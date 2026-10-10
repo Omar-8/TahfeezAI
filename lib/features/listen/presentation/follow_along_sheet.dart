@@ -10,6 +10,7 @@ import '../../../quran/domain/models/quran_refs.dart';
 import '../../mushaf/application/mushaf_hide_mode.dart';
 import '../../mushaf/application/mushaf_page_verses.dart';
 import '../../quran/application/quran_index_providers.dart';
+import '../../recitation/application/live_recognition_controller.dart';
 import '../../recitation/application/mushaf_recitation_target.dart';
 import '../../recitation/presentation/recitation_loop_sheet.dart'
     show CountStepper, VersePicker;
@@ -265,14 +266,17 @@ class _FollowAlongSheetState extends ConsumerState<_FollowAlongSheet> {
   }
 }
 
-/// While Follow along runs, above the bar: whose turn it is — the reciter
-/// (listen), or the user (recite now, the microphone listening) — and how
-/// far along the run is.
-class FollowAlongBanner extends ConsumerWidget {
-  const FollowAlongBanner({super.key});
+/// While Follow along runs, at the top of the page: a small pill saying
+/// whose turn it is — the reciter's (listen) or the user's (recite now) —
+/// and how far the run has come. Nothing without live recognition.
+class FollowAlongHint extends ConsumerWidget {
+  const FollowAlongHint({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    if (!ref.watch(liveRecognitionEnabledProvider)) {
+      return const SizedBox.shrink();
+    }
     final run = ref.watch(followAlongControllerProvider);
     if (run == null) return const SizedBox.shrink();
     final l10n = AppLocalizations.of(context);
@@ -280,46 +284,45 @@ class FollowAlongBanner extends ConsumerWidget {
     final scheme = theme.colorScheme;
     final yours = run.phase == FollowAlongPhase.user;
     final reciter = reciterFor(ref.watch(reciterProvider));
-    final background = yours ? scheme.primary : scheme.secondaryContainer;
     final foreground = yours ? scheme.onPrimary : scheme.onSecondaryContainer;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
-      child: AnimatedContainer(
-        key: ValueKey('follow-banner-${run.phase.name}'),
-        duration: const Duration(milliseconds: 250),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        decoration: BoxDecoration(
-          color: background,
-          borderRadius: BorderRadius.circular(TahfeezRadii.md),
-        ),
-        child: Row(
-          spacing: 10,
-          children: [
-            Icon(
-              yours ? Icons.mic_rounded : Icons.headphones_rounded,
-              color: foreground,
-              size: 22,
+    final style = theme.textTheme.labelMedium?.copyWith(color: foreground);
+    return AnimatedContainer(
+      key: ValueKey('follow-hint-${run.phase.name}'),
+      duration: const Duration(milliseconds: 250),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: yours ? scheme.primary : scheme.secondaryContainer,
+        borderRadius: BorderRadius.circular(TahfeezRadii.pill),
+        boxShadow: [
+          BoxShadow(
+            color: scheme.shadow.withValues(alpha: 0.12),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        spacing: 6,
+        children: [
+          Icon(
+            yours ? Icons.mic_rounded : Icons.headphones_rounded,
+            color: foreground,
+            size: 16,
+          ),
+          Flexible(
+            child: Text(
+              yours
+                  ? l10n.followYourTurn
+                  : l10n.followReciterTurn(reciterName(context, reciter)),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: style?.copyWith(fontWeight: FontWeight.w600),
             ),
-            Expanded(
-              child: Text(
-                yours
-                    ? l10n.followYourTurn
-                    : l10n.followReciterTurn(reciterName(context, reciter)),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.titleSmall?.copyWith(
-                  color: foreground,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            if (run.parts.length > 1)
-              Text(
-                l10n.recLoopProgress(run.index + 1, run.parts.length),
-                style: theme.textTheme.labelMedium?.copyWith(color: foreground),
-              ),
-          ],
-        ),
+          ),
+          if (run.parts.length > 1)
+            Text('${run.index + 1}/${run.parts.length}', style: style),
+        ],
       ),
     );
   }

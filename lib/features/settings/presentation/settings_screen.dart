@@ -268,18 +268,6 @@ class SettingsScreen extends ConsumerWidget {
             ),
           ],
           const SizedBox(height: TahfeezSpacing.lg),
-          TahfeezCard(
-            child: ListTile(
-              key: const ValueKey('settings-about'),
-              contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.info_outline),
-              title: Text(l10n.aboutTitle),
-              subtitle: Text(l10n.aboutSubtitle),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => context.push(AppRoutes.about),
-            ),
-          ),
-          const SizedBox(height: TahfeezSpacing.lg),
           group(
             l10n.settingsBackupTitle,
             Icons.save_alt_rounded,
@@ -319,6 +307,18 @@ class SettingsScreen extends ConsumerWidget {
               ),
               subtitle: Text(l10n.settingsResetSub),
               onTap: () => _confirmReset(context, ref),
+            ),
+          ),
+          const SizedBox(height: TahfeezSpacing.lg),
+          TahfeezCard(
+            child: ListTile(
+              key: const ValueKey('settings-about'),
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.info_outline),
+              title: Text(l10n.aboutTitle),
+              subtitle: Text(l10n.aboutSubtitle),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push(AppRoutes.about),
             ),
           ),
         ],

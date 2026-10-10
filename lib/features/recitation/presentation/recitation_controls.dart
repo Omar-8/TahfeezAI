@@ -127,6 +127,13 @@ class _RecitationMushafAnchorState
         end: 0,
         child: RecitationProgressBar(location: widget.location),
       ),
+      // Whose turn it is, while Follow along runs: just below the line.
+      const PositionedDirectional(
+        top: RecitationProgressBar.height + 8,
+        start: 16,
+        end: 16,
+        child: IgnorePointer(child: Center(child: FollowAlongHint())),
+      ),
     ],
   );
 }
@@ -138,15 +145,53 @@ class _RecitationMushafAnchorState
 /// beside them. Shows [navigation] otherwise.
 ///
 /// Also reports permission-denied/error/saved outcomes as snackbars.
-/// The bar's start buttons (mic, Listen, Follow along): smaller than the
-/// default, so the hide controls beside them keep their size.
-final _compactButton = IconButton.styleFrom(
-  fixedSize: const Size.square(38),
-  minimumSize: const Size.square(38),
-  padding: EdgeInsets.zero,
-  iconSize: 20,
-  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-);
+/// A row of the bar's buttons as one rounded group, thin dividers between
+/// them (mic · Listen · Follow along; stop · pause; the reveal/hide steps).
+class BarButtonGroup extends StatelessWidget {
+  const BarButtonGroup({super.key, required this.children});
+
+  final List<Widget> children;
+
+  static const height = 40.0;
+
+  /// A button inside the group: plain (the group is its background).
+  static final buttonStyle = IconButton.styleFrom(
+    fixedSize: const Size(42, height),
+    minimumSize: const Size(42, height),
+    padding: EdgeInsets.zero,
+    iconSize: 20,
+    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      height: height,
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(height / 2),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 2),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (var i = 0; i < children.length; i++) ...[
+            if (i > 0)
+              VerticalDivider(
+                width: 1,
+                thickness: 1,
+                indent: 10,
+                endIndent: 10,
+                color: scheme.outlineVariant,
+              ),
+            children[i],
+          ],
+        ],
+      ),
+    );
+  }
+}
 
 class RecitationBottomBar extends ConsumerWidget {
   const RecitationBottomBar({super.key, required this.navigation});
@@ -285,8 +330,6 @@ class RecitationBottomBar extends ConsumerWidget {
               ),
             if (recognition != null)
               _RecitationAiNotice(config: aiConfig, inference: inference),
-            // Whose turn it is, while Follow along runs.
-            if (recognition != null) const FollowAlongBanner(),
             ConstrainedBox(
               constraints: const BoxConstraints(minHeight: 72),
               child: Padding(
@@ -312,14 +355,13 @@ class RecitationBottomBar extends ConsumerWidget {
                               ? MainAxisAlignment.center
                               : MainAxisAlignment.spaceBetween,
                           children: [
-                            // Compact, close together: room for the hide
-                            // controls beside them.
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              spacing: 4,
+                            // One group: room for the hide controls beside
+                            // it.
+                            BarButtonGroup(
                               children: [
-                                IconButton.filled(
-                                  style: _compactButton,
+                                IconButton(
+                                  style: BarButtonGroup.buttonStyle,
+                                  color: scheme.primary,
                                   icon: const Icon(Icons.mic_rounded),
                                   tooltip: AppLocalizations.of(context)
                                       .recStart,
@@ -333,9 +375,9 @@ class RecitationBottomBar extends ConsumerWidget {
                                         ),
                                 ),
                                 // Listen: the reciter, from a range.
-                                IconButton.filledTonal(
+                                IconButton(
                                   key: const ValueKey('listen-open'),
-                                  style: _compactButton,
+                                  style: BarButtonGroup.buttonStyle,
                                   icon: const Icon(Icons.headphones_rounded),
                                   tooltip: AppLocalizations.of(context)
                                       .listenMenuTitle,
@@ -345,9 +387,9 @@ class RecitationBottomBar extends ConsumerWidget {
                                 ),
                                 // Follow along: the reciter, then the user.
                                 if (recognition != null)
-                                  IconButton.filledTonal(
+                                  IconButton(
                                     key: const ValueKey('follow-open'),
-                                    style: _compactButton,
+                                    style: BarButtonGroup.buttonStyle,
                                     icon: const Icon(
                                       Icons.record_voice_over_rounded,
                                     ),
@@ -409,42 +451,59 @@ class _SessionControls extends ConsumerWidget {
         state.phase == RecitationPhase.paused;
     final centered = ref.watch(platformCapabilitiesProvider).isWeb;
     // Laid out like the bar before a session: stop and pause where the mic
-    // was, the eye at the end — so it never moves, recording or not. The
-    // reveal-next buttons are gone while reciting (revealing follows the
-    // recitation). The web keeps the buttons together in the middle.
+    // was, the reveal/hide buttons and the eye at the end — so they never
+    // move, recording or not. The web keeps the buttons together in the
+    // middle.
     return Row(
       mainAxisAlignment: centered
           ? MainAxisAlignment.center
           : MainAxisAlignment.start,
       children: [
-        IconButton.filled(
-          style: IconButton.styleFrom(
-            backgroundColor: scheme.error,
-            foregroundColor: scheme.onError,
-          ),
-          icon: const Icon(Icons.stop_rounded),
-          tooltip: l10n.recStop,
-          onPressed: canControl ? controller.stop : null,
+        BarButtonGroup(
+          children: [
+            IconButton(
+              style: BarButtonGroup.buttonStyle,
+              color: scheme.error,
+              icon: const Icon(Icons.stop_rounded),
+              tooltip: l10n.recStop,
+              onPressed: canControl ? controller.stop : null,
+            ),
+            if (state.phase == RecitationPhase.paused)
+              IconButton(
+                style: BarButtonGroup.buttonStyle,
+                icon: const Icon(Icons.play_arrow_rounded),
+                tooltip: l10n.recResume,
+                onPressed: controller.resume,
+              )
+            else
+              IconButton(
+                style: BarButtonGroup.buttonStyle,
+                icon: const Icon(Icons.pause_rounded),
+                tooltip: l10n.recPause,
+                onPressed: canControl ? controller.pause : null,
+              ),
+          ],
         ),
-        const SizedBox(width: 8),
-        if (state.phase == RecitationPhase.paused)
-          IconButton.filledTonal(
-            icon: const Icon(Icons.play_arrow_rounded),
-            tooltip: l10n.recResume,
-            onPressed: controller.resume,
-          )
-        else
-          IconButton.filledTonal(
-            icon: const Icon(Icons.pause_rounded),
-            tooltip: l10n.recPause,
-            onPressed: canControl ? controller.pause : null,
+        // The reveal/hide buttons (to help the test along, or go back)
+        // scale down rather than overflow; the eye keeps its size and place.
+        SizedBox(width: centered ? _centeredGroupGap : 8),
+        // On a phone they fill the rest of the row, the eye at its end.
+        Flexible(
+          fit: centered ? FlexFit.loose : FlexFit.tight,
+          child: Row(
+            mainAxisSize: centered ? MainAxisSize.min : MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: const [
+              Flexible(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: MushafHideControls(part: MushafHideControlsPart.steps),
+                ),
+              ),
+              MushafHideControls(part: MushafHideControlsPart.pinned),
+            ],
           ),
-        // Revealing follows the recitation: only the eye stays.
-        if (centered)
-          const SizedBox(width: _centeredGroupGap)
-        else
-          const Spacer(),
-        const MushafHideControls(part: MushafHideControlsPart.pinned),
+        ),
       ],
     );
   }
@@ -474,39 +533,46 @@ class _ListenControls extends ConsumerWidget {
               ? MainAxisAlignment.center
               : MainAxisAlignment.start,
           children: [
-            IconButton.filled(
-              key: const ValueKey('listen-stop'),
-              style: IconButton.styleFrom(
-                backgroundColor: scheme.error,
-                foregroundColor: scheme.onError,
-              ),
-              icon: const Icon(Icons.stop_rounded),
-              tooltip: l10n.listenStop,
-              onPressed: player.stop,
-            ),
-            const SizedBox(width: 8),
-            if (playback.isPlaying)
-              IconButton.filledTonal(
-                key: const ValueKey('listen-pause'),
-                icon: const Icon(Icons.pause_rounded),
-                tooltip: l10n.recPause,
-                onPressed: player.pause,
-              )
-            else
-              IconButton.filledTonal(
-                key: const ValueKey('listen-resume'),
-                icon: const Icon(Icons.play_arrow_rounded),
-                tooltip: l10n.recResume,
-                onPressed: player.resume,
-              ),
-            const SizedBox(width: 4),
-            TextButton(
-              key: const ValueKey('listen-speed'),
-              onPressed: () => player.cycleSpeed(speed),
-              child: Text(
-                '${speed == speed.roundToDouble() ? speed.toInt() : speed}×',
-                semanticsLabel: '${l10n.listenSpeed} $speed',
-              ),
+            BarButtonGroup(
+              children: [
+                IconButton(
+                  key: const ValueKey('listen-stop'),
+                  style: BarButtonGroup.buttonStyle,
+                  color: scheme.error,
+                  icon: const Icon(Icons.stop_rounded),
+                  tooltip: l10n.listenStop,
+                  onPressed: player.stop,
+                ),
+                if (playback.isPlaying)
+                  IconButton(
+                    key: const ValueKey('listen-pause'),
+                    style: BarButtonGroup.buttonStyle,
+                    icon: const Icon(Icons.pause_rounded),
+                    tooltip: l10n.recPause,
+                    onPressed: player.pause,
+                  )
+                else
+                  IconButton(
+                    key: const ValueKey('listen-resume'),
+                    style: BarButtonGroup.buttonStyle,
+                    icon: const Icon(Icons.play_arrow_rounded),
+                    tooltip: l10n.recResume,
+                    onPressed: player.resume,
+                  ),
+                TextButton(
+                  key: const ValueKey('listen-speed'),
+                  style: TextButton.styleFrom(
+                    minimumSize: const Size(46, BarButtonGroup.height),
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  onPressed: () => player.cycleSpeed(speed),
+                  child: Text(
+                    '${speed == speed.roundToDouble() ? speed.toInt() : speed}×',
+                    semanticsLabel: '${l10n.listenSpeed} $speed',
+                  ),
+                ),
+              ],
             ),
             // Revealing follows the recitation: only the eye stays.
             if (centered)
@@ -703,10 +769,10 @@ class MushafHideControls extends ConsumerWidget {
     // Compact, so the bar still fits a phone next to the recording controls.
     const density = VisualDensity.compact;
     const gap = SizedBox(width: MushafHideControls._hideControlsGap);
-    Widget tonal(String key, IconData icon, String tip, VoidCallback? onTap) =>
-        IconButton.filledTonal(
+    Widget step(String key, IconData icon, String tip, VoidCallback? onTap) =>
+        IconButton(
           key: ValueKey(key),
-          visualDensity: density,
+          style: BarButtonGroup.buttonStyle,
           icon: Icon(icon),
           tooltip: tip,
           onPressed: onTap,
@@ -763,32 +829,33 @@ class MushafHideControls extends ConsumerWidget {
         ? const <Widget>[]
         : [
             if (hide.enabled) ...[
-              tonal(
-                'mushaf-reveal-ayah',
-                Icons.first_page_rounded,
-                AppLocalizations.of(context).recRevealAyah,
-                onRevealAyah,
-              ),
-              gap,
-              tonal(
-                'mushaf-reveal-word',
-                Icons.keyboard_double_arrow_left_rounded,
-                AppLocalizations.of(context).recRevealWord,
-                onRevealWord,
-              ),
-              gap,
-              tonal(
-                'mushaf-hide-word',
-                Icons.keyboard_double_arrow_right_rounded,
-                AppLocalizations.of(context).recHideWord,
-                onHideWord,
-              ),
-              gap,
-              tonal(
-                'mushaf-hide-ayah',
-                Icons.last_page_rounded,
-                AppLocalizations.of(context).recHideAyah,
-                onHideAyah,
+              BarButtonGroup(
+                children: [
+                  step(
+                    'mushaf-reveal-ayah',
+                    Icons.first_page_rounded,
+                    AppLocalizations.of(context).recRevealAyah,
+                    onRevealAyah,
+                  ),
+                  step(
+                    'mushaf-reveal-word',
+                    Icons.keyboard_double_arrow_left_rounded,
+                    AppLocalizations.of(context).recRevealWord,
+                    onRevealWord,
+                  ),
+                  step(
+                    'mushaf-hide-word',
+                    Icons.keyboard_double_arrow_right_rounded,
+                    AppLocalizations.of(context).recHideWord,
+                    onHideWord,
+                  ),
+                  step(
+                    'mushaf-hide-ayah',
+                    Icons.last_page_rounded,
+                    AppLocalizations.of(context).recHideAyah,
+                    onHideAyah,
+                  ),
+                ],
               ),
               gap,
             ],
