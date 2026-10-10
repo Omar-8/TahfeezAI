@@ -255,10 +255,11 @@ class FollowAlongController extends Notifier<FollowAlongState?> {
     FollowAlongState done, {
     required int wordMistakes,
   }) async {
-    // The pronunciation check of the last words follows the voice by a
-    // moment (and the pause after it): keep listening until it is done.
+    // The pronunciation check of the last words: the microphone paused at
+    // once, so the audio heard is checked now (no waiting to hear the
+    // reciter stop), then on as soon as the last ayah's check is in.
     final pass = ref.read(recitationPassProvider);
-    final pronunciation = await _settle();
+    final pronunciation = await _settle(done.part.last, pass);
     if (!identical(state, done)) return;
     final mistake =
         wordMistakes > 0 ||
@@ -292,33 +293,47 @@ class FollowAlongController extends Notifier<FollowAlongState?> {
 
   /// Waits for the pronunciation check of the turn's last words (at most a
   /// few seconds), then returns its verdicts; none without it.
-  Future<Map<WordRef, AcousticWordResult>> _settle() async {
+  /// Pauses the microphone and waits for the pronunciation check of
+  /// [lastAyah] (this [pass]'s, confirmed by its ayah's check) — at most
+  /// [_settleMax] — then returns the verdicts; none without the check.
+  Future<Map<WordRef, AcousticWordResult>> _settle(
+    int lastAyah,
+    int pass,
+  ) async {
+    // Out of the test's update, then the microphone off: what was heard is
+    // computed at once.
+    await Future<void>.delayed(Duration.zero);
+    ref.read(recitationSessionControllerProvider.notifier).pause();
     if (!ref.exists(acousticVerificationControllerProvider)) {
-      await Future<void>.delayed(const Duration(milliseconds: 700));
+      await Future<void>.delayed(const Duration(milliseconds: 300));
       return const {};
     }
     AcousticVerificationState acoustic() =>
         ref.read(acousticVerificationControllerProvider);
-    final checked = acoustic().utterances;
     final started = DateTime.now();
     while (ref.mounted) {
-      await Future<void>.delayed(const Duration(milliseconds: 100));
-      if (!ref.mounted) break;
       final now = acoustic();
       final waited = DateTime.now().difference(started);
-      if (!now.active || waited >= _settleMax) break;
-      if (waited >= _settleMin &&
-          now.utterances > checked &&
-          now.pending == 0) {
+      final checked = now.words.entries.any(
+        (e) =>
+            e.key.ayahId == lastAyah &&
+            e.value.pass == pass &&
+            !e.value.provisional,
+      );
+      if (now.pending == 0 &&
+          (checked || waited >= _settleNothing || !now.active)) {
         break;
       }
+      if (waited >= _settleMax) break;
+      await Future<void>.delayed(const Duration(milliseconds: 50));
     }
     return ref.mounted ? acoustic().words : const {};
   }
 
-  /// The model hears ~1 s past a word before placing it.
-  static const _settleMin = Duration(milliseconds: 1200);
-  static const _settleMax = Duration(seconds: 5);
+  /// With nothing being checked this long after the pause, no check is
+  /// coming (no words of it were placed).
+  static const _settleNothing = Duration(milliseconds: 1500);
+  static const _settleMax = Duration(seconds: 4);
 
   void _end() => state = null;
 
