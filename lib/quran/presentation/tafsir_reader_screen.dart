@@ -8,6 +8,8 @@ import 'package:go_router/go_router.dart';
 import '../../core/routing/app_routes.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/components/components.dart';
+import '../../core/theme/quran_text_style.dart';
+import '../application/canonical_ayah_word_text.dart';
 import '../application/tafsir_selection_controller.dart';
 import '../application/tafsir_verse_text.dart';
 import '../domain/models/quran_refs.dart';
@@ -150,6 +152,8 @@ class _TafsirContent extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         spacing: TahfeezSpacing.md,
         children: [
+          // The ayah itself, above its commentary.
+          _AyahText(ayahId: verse.chapterNo * 1000 + verse.verseNo),
           verseTextAsync.when(
             data: (text) => text == null
                 ? TahfeezEmptyView(
@@ -184,6 +188,40 @@ class _TafsirContent extends ConsumerWidget {
             error: (_, _) => const SizedBox.shrink(),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// The ayah's canonical text, in the Quran-text font (as the ayah sheet
+/// shows it).
+class _AyahText extends ConsumerWidget {
+  const _AyahText({required this.ayahId});
+
+  final int ayahId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final text = ref.watch(canonicalAyahTextProvider(ayahId: ayahId)).value;
+    if (text == null) return const SizedBox.shrink();
+    final scheme = Theme.of(context).colorScheme;
+    return Container(
+      key: const ValueKey('tafsir-ayah'),
+      width: double.infinity,
+      padding: const EdgeInsets.all(TahfeezSpacing.md),
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(TahfeezRadii.md),
+      ),
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        textDirection: TextDirection.rtl,
+        style: quranTextStyle(
+          color: scheme.onSurface,
+          fontFamily: 'Scheherazade New',
+          fontSize: 26,
+        ),
       ),
     );
   }

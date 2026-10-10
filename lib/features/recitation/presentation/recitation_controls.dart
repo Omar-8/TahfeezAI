@@ -144,9 +144,13 @@ class BarButtonGroup extends StatelessWidget {
     super.key,
     required this.children,
     this.groupHeight = height,
+    this.expand = false,
   });
 
   final List<Widget> children;
+
+  /// Fills the width it is given, the buttons sharing it evenly.
+  final bool expand;
 
   /// Its height ([height]; [labelledHeight] with labels under the icons).
   final double groupHeight;
@@ -174,7 +178,7 @@ class BarButtonGroup extends StatelessWidget {
       ),
       padding: const EdgeInsets.symmetric(horizontal: 2),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
+        mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
         children: [
           for (var i = 0; i < children.length; i++) ...[
             if (i > 0)
@@ -185,7 +189,7 @@ class BarButtonGroup extends StatelessWidget {
                 endIndent: 10,
                 color: scheme.outlineVariant,
               ),
-            children[i],
+            if (expand) Expanded(child: children[i]) else children[i],
           ],
         ],
       ),
@@ -362,42 +366,17 @@ class RecitationBottomBar extends ConsumerWidget {
                                   ? MainAxisAlignment.center
                                   : MainAxisAlignment.spaceBetween,
                               children: [
-                                // The modes: one group — collapsed to one
-                                // button while hide mode's reveal buttons
-                                // need the room.
-                                _ModeButtons(
+                                ..._idleRow(
                                   location: location,
                                   starting:
                                       state.phase == RecitationPhase.starting,
                                   recognition: recognition != null,
-                                  collapsed: ref.watch(
+                                  hidden: ref.watch(
                                     mushafHideModeProvider.select(
                                       (h) => h.enabled,
                                     ),
                                   ),
-                                ),
-                                if (centered)
-                                  const SizedBox(width: _centeredGroupGap),
-                                // The reveal/hide buttons scale down rather
-                                // than overflow a narrow phone; the eye keeps
-                                // its size and place.
-                                Flexible(
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: const [
-                                      Flexible(
-                                        child: FittedBox(
-                                          fit: BoxFit.scaleDown,
-                                          child: MushafHideControls(
-                                            part: MushafHideControlsPart.steps,
-                                          ),
-                                        ),
-                                      ),
-                                      MushafHideControls(
-                                        part: MushafHideControlsPart.pinned,
-                                      ),
-                                    ],
-                                  ),
+                                  centered: centered,
                                 ),
                               ],
                             ),
@@ -420,6 +399,52 @@ class RecitationBottomBar extends ConsumerWidget {
   }
 }
 
+/// The idle bar's row: the modes, then the reveal/hide buttons and the eye.
+/// With the ayahs shown (no reveal buttons) the modes' labelled group takes
+/// all the room up to the eye (on a phone); with hide mode on it collapses
+/// to one button and the reveal buttons, scaling down rather than
+/// overflowing a narrow phone, sit before the eye, which keeps its place.
+List<Widget> _idleRow({
+  required QuranLocation? location,
+  required bool starting,
+  required bool recognition,
+  required bool hidden,
+  required bool centered,
+}) {
+  final modes = _ModeButtons(
+    location: location,
+    starting: starting,
+    recognition: recognition,
+    collapsed: hidden,
+    expand: !hidden && !centered,
+  );
+  if (!hidden && !centered) {
+    return [
+      Expanded(child: modes),
+      const SizedBox(width: 12),
+      const MushafHideControls(part: MushafHideControlsPart.pinned),
+    ];
+  }
+  return [
+    modes,
+    if (centered) const SizedBox(width: _centeredGroupGap),
+    const Flexible(
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Flexible(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: MushafHideControls(part: MushafHideControlsPart.steps),
+            ),
+          ),
+          MushafHideControls(part: MushafHideControlsPart.pinned),
+        ],
+      ),
+    ),
+  ];
+}
+
 /// The recitation bar's modes before one starts: recite (the mic), loop,
 /// listen and follow along, as one group — or, [collapsed] (hide mode on,
 /// its reveal buttons beside), one button opening them as a menu. Fades in
@@ -430,10 +455,14 @@ class _ModeButtons extends ConsumerWidget {
     required this.starting,
     required this.recognition,
     required this.collapsed,
+    this.expand = false,
   });
 
   final QuranLocation? location;
   final bool starting, recognition, collapsed;
+
+  /// Stretched over the room it is given, the buttons sharing it evenly.
+  final bool expand;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -524,6 +553,7 @@ class _ModeButtons extends ConsumerWidget {
       child = BarButtonGroup(
         key: const ValueKey('modes-group'),
         groupHeight: BarButtonGroup.labelledHeight,
+        expand: expand,
         children: [
           for (final m in modes)
             _LabelledModeButton(
@@ -593,11 +623,10 @@ class _LabelledModeButton extends StatelessWidget {
         child: ConstrainedBox(
           constraints: const BoxConstraints(
             minWidth: 46,
-            maxWidth: 64,
             minHeight: BarButtonGroup.labelledHeight,
           ),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 8),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,

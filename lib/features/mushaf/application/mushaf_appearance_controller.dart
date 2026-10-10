@@ -1,9 +1,11 @@
 import 'dart:ui' show Brightness;
 
-import 'package:flutter/widgets.dart' show WidgetsBinding;
+import 'package:flutter/material.dart' show ThemeMode, WidgetsBinding;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/storage/storage_providers.dart';
+import '../../../core/theme/app_surface_tone.dart';
+import '../../../core/theme/theme_controller.dart';
 import '../domain/mushaf_appearance.dart';
 
 part 'mushaf_appearance_controller.g.dart';
@@ -31,13 +33,37 @@ const _mushafAppearancePrefKey = 'mushaf.appearance';
 /// default should match the system".
 @Riverpod(keepAlive: true)
 class MushafAppearanceController extends _$MushafAppearanceController {
+  /// The user's own choice; until there is one, the Mushaf follows the app
+  /// theme (Light, Warm, Sepia, Dark, Black; System: the phone's).
+  MushafAppearance? _chosen;
+  var _restoring = false;
+
   @override
   MushafAppearance build() {
-    _restore();
-    final isSystemDark =
+    if (!_restoring) {
+      _restoring = true;
+      _restore();
+    }
+    final mode = ref.watch(themeModeControllerProvider);
+    final tone = ref.watch(appSurfaceToneProvider);
+    return _chosen ?? _followingApp(mode, tone);
+  }
+
+  static MushafAppearance _followingApp(ThemeMode mode, AppSurfaceTone tone) {
+    final dark = switch (mode) {
+      ThemeMode.dark => true,
+      ThemeMode.light => false,
+      ThemeMode.system =>
         WidgetsBinding.instance.platformDispatcher.platformBrightness ==
-        Brightness.dark;
-    return isSystemDark ? MushafAppearance.dark : MushafAppearance.light;
+            Brightness.dark,
+    };
+    return switch ((dark, tone)) {
+      (false, AppSurfaceTone.warm) => MushafAppearance.warm,
+      (false, AppSurfaceTone.sepia) => MushafAppearance.sepia,
+      (false, _) => MushafAppearance.light,
+      (true, AppSurfaceTone.black) => MushafAppearance.black,
+      (true, _) => MushafAppearance.dark,
+    };
   }
 
   Future<void> _restore() async {
@@ -45,7 +71,8 @@ class MushafAppearanceController extends _$MushafAppearanceController {
         .read(browserStorageProvider)
         .getString(_mushafAppearancePrefKey);
     for (final appearance in MushafAppearance.values) {
-      if (appearance.name == stored && appearance != state) {
+      if (appearance.name == stored && _chosen == null && ref.mounted) {
+        _chosen = appearance;
         state = appearance;
         return;
       }
@@ -53,6 +80,7 @@ class MushafAppearanceController extends _$MushafAppearanceController {
   }
 
   Future<void> setAppearance(MushafAppearance appearance) async {
+    _chosen = appearance;
     state = appearance;
     await ref
         .read(browserStorageProvider)
