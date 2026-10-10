@@ -41,7 +41,11 @@ class _FollowAlongSheet extends ConsumerStatefulWidget {
 
 class _FollowAlongSheetState extends ConsumerState<_FollowAlongSheet> {
   VerseRef? _from, _to;
-  late FollowAlongOptions _options = ref.read(followAlongOptionsProvider);
+
+  /// The menu's choices, each saved as soon as it changes.
+  FollowAlongOptions get _options => ref.read(followAlongOptionsProvider);
+  set _options(FollowAlongOptions options) =>
+      ref.read(followAlongOptionsProvider.notifier).set(options);
 
   static int _id(VerseRef v) => v.chapterNo * 1000 + v.verseNo;
 

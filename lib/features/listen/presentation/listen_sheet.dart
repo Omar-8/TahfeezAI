@@ -148,7 +148,11 @@ class _ListenSheet extends ConsumerStatefulWidget {
 
 class _ListenSheetState extends ConsumerState<_ListenSheet> {
   VerseRef? _from, _to;
-  late ListenOptions _options = ref.read(listenOptionsProvider);
+
+  /// The menu's choices, each saved as soon as it changes.
+  ListenOptions get _options => ref.read(listenOptionsProvider);
+  set _options(ListenOptions options) =>
+      ref.read(listenOptionsProvider.notifier).set(options);
 
   static int _id(VerseRef v) => v.chapterNo * 1000 + v.verseNo;
 
