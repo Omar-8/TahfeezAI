@@ -108,7 +108,29 @@ void main() {
           .show('screen', const QuranLocation.page(1, 1));
       container.listen(liveRecognitionControllerProvider, (_, _) {});
       container.listen(hifzControllerProvider, (_, _) {});
-      container.listen(acousticVerificationControllerProvider, (_, _) {});
+      // Every quick early mistake verdict, and what its ayah's check then
+      // made of it (confirmed or withdrawn): `<name>.early.json`.
+      final early = <String, Map<String, Object?>>{};
+      container.listen(acousticVerificationControllerProvider, (_, next) {
+        for (final MapEntry(key: w, value: r) in next.words.entries) {
+          final key = '${w.ayahId}:${w.wordIndex}:${r.pass}';
+          final seen = early[key];
+          if (r.provisional && r.isMistake && seen == null) {
+            early[key] = {
+              'word': key,
+              'type': r.type.name,
+              'errors': [
+                for (final e in r.errors)
+                  if (e.type.isError)
+                    {'type': e.type.name, 'llr': e.likelihoodRatio},
+              ],
+            };
+          } else if (!r.provisional && seen != null && seen['final'] == null) {
+            seen['final'] = r.type.name;
+            seen['confirmed'] = r.isMistake;
+          }
+        }
+      });
       container.listen(localAcousticInferenceControllerProvider, (_, _) {});
       await container.read(quranWordCorpusProvider.future);
       await container.read(quranPhonemeResourcesProvider.future);
@@ -165,6 +187,9 @@ void main() {
         }),
       );
       File('${out.path}/$name.log').writeAsStringSync(log.join('\n'));
+      File('${out.path}/$name.early.json').writeAsStringSync(
+        const JsonEncoder.withIndent(' ').convert(early.values.toList()),
+      );
       await session.stop();
       await pumpEventQueue();
     }, timeout: const Timeout(Duration(minutes: 20)));
