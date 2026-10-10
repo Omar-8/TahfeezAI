@@ -27,12 +27,8 @@ const reciters = [
     'محمد صديق المنشاوي',
     128,
   ),
-  Reciter(
-    'ar.minshawimujawwad',
-    'Al-Minshawi (Mujawwad)',
-    'المنشاوي (مجوّد)',
-    64,
-  ),
+  // (Not 'ar.minshawimujawwad': the CDN's ayah files for it are the
+  // murattal recitation's, byte for byte — checked 2026-10-10.)
   Reciter(
     'ar.abdulbasitmurattal',
     'Abdul Basit Abdus-Samad',
@@ -122,16 +118,31 @@ String wordAudioUrl(int ayahId, int wordIndex) {
       '${three(ayahId % 1000)}_${three(quranComWordPosition(ayahId, wordIndex))}.mp3';
 }
 
-/// Each reciter's whole recitation (all 6,236 ayah files), in bytes —
-/// measured from the CDN's file sizes (2026-10-10).
-const reciterDownloadBytes = <String, int>{};
+/// Each reciter's whole recitation (all 6,236 ayah files), in bytes,
+/// estimated (2026-10-10) from 250 sampled ayah files' sizes, fitted to the
+/// ayahs' letter counts (within a few percent).
+const reciterDownloadBytes = <String, int>{
+  'ar.alafasy': 1746434324,
+  'ar.husary': 2500573503,
+  'ar.husarymujawwad': 3541025481,
+  'ar.minshawi': 1658509149,
+  'ar.abdulbasitmurattal': 899447010,
+  'ar.abdurrahmaansudais': 607405161,
+  'ar.saoodshuraym': 1054243682,
+  'ar.mahermuaiqly': 614588102,
+  'ar.hudhaify': 1756796245,
+  'ar.muhammadayyoub': 937553634,
+  'ar.shaatree': 1420569190,
+  'ar.abdullahbasfar': 850391972,
+};
 
-/// [reciter]'s download size, as "640 MB" / "1.2 GB"; `null` if unknown.
+/// [reciter]'s download size, as "≈ 640 MB" / "≈ 1.2 GB"; `null` if
+/// unknown.
 String? reciterDownloadSize(Reciter reciter) {
   final bytes = reciterDownloadBytes[reciter.edition];
   if (bytes == null) return null;
   final mb = bytes / (1000 * 1000);
   return mb >= 1000
-      ? '${(mb / 1000).toStringAsFixed(1)} GB'
-      : '${mb.round()} MB';
+      ? '≈ ${(mb / 1000).toStringAsFixed(1)} GB'
+      : '≈ ${mb.round()} MB';
 }
