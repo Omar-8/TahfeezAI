@@ -330,7 +330,7 @@ class RecitationBottomBar extends ConsumerWidget {
                   constraints: const BoxConstraints(minHeight: 72),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
+                      horizontal: 6,
                       vertical: 12,
                     ),
                     child: AnimatedSwitcher(
