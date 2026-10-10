@@ -271,7 +271,6 @@ class RecitationBottomBar extends ConsumerWidget {
     final scheme = Theme.of(context).colorScheme;
     final state = ref.watch(recitationSessionControllerProvider);
     final location = ref.watch(mushafRecitationTargetProvider)?.location;
-    final controller = ref.read(recitationSessionControllerProvider.notifier);
     // Watching keeps live recognition running alongside the session.
     final recognition = ref.watch(liveRecognitionEnabledProvider)
         ? ref.watch(liveRecognitionControllerProvider)
@@ -355,68 +354,19 @@ class RecitationBottomBar extends ConsumerWidget {
                                   ? MainAxisAlignment.center
                                   : MainAxisAlignment.spaceBetween,
                               children: [
-                                // One group: room for the hide controls beside
-                                // it.
-                                BarButtonGroup(
-                                  children: [
-                                    IconButton(
-                                      style: BarButtonGroup.buttonStyle,
-                                      color: scheme.primary,
-                                      icon: const Icon(Icons.mic_rounded),
-                                      tooltip: AppLocalizations.of(context)
-                                          .recStart,
-                                      onPressed:
-                                          location == null ||
-                                              state.phase ==
-                                                  RecitationPhase.starting
-                                          ? null
-                                          : () => controller.start(
-                                              startLocation: location,
-                                            ),
+                                // The modes: one group — collapsed to one
+                                // button while hide mode's reveal buttons
+                                // need the room.
+                                _ModeButtons(
+                                  location: location,
+                                  starting:
+                                      state.phase == RecitationPhase.starting,
+                                  recognition: recognition != null,
+                                  collapsed: ref.watch(
+                                    mushafHideModeProvider.select(
+                                      (h) => h.enabled,
                                     ),
-                                    // Loop recitation: a range, recited over.
-                                    if (recognition != null)
-                                      IconButton(
-                                        key: const ValueKey('hifz-loop'),
-                                        style: BarButtonGroup.buttonStyle,
-                                        icon: const Icon(Icons.repeat_rounded),
-                                        tooltip: AppLocalizations.of(context)
-                                            .recLoop,
-                                        onPressed: location == null
-                                            ? null
-                                            : () => showRecitationLoopSheet(
-                                                context,
-                                              ),
-                                      ),
-                                    // Listen: the reciter, from a range.
-                                    IconButton(
-                                      key: const ValueKey('listen-open'),
-                                      style: BarButtonGroup.buttonStyle,
-                                      icon: const Icon(
-                                        Icons.headphones_rounded,
-                                      ),
-                                      tooltip: AppLocalizations.of(context)
-                                          .listenMenuTitle,
-                                      onPressed: location == null
-                                          ? null
-                                          : () => showListenSheet(context),
-                                    ),
-                                    // Follow along: the reciter, then the user.
-                                    if (recognition != null)
-                                      IconButton(
-                                        key: const ValueKey('follow-open'),
-                                        style: BarButtonGroup.buttonStyle,
-                                        icon: const Icon(
-                                          Icons.record_voice_over_rounded,
-                                        ),
-                                        tooltip: AppLocalizations.of(context)
-                                            .followTitle,
-                                        onPressed: location == null
-                                            ? null
-                                            : () =>
-                                                  showFollowAlongSheet(context),
-                                      ),
-                                  ],
+                                  ),
                                 ),
                                 if (centered)
                                   const SizedBox(width: _centeredGroupGap),
@@ -457,6 +407,141 @@ class RecitationBottomBar extends ConsumerWidget {
               child: IgnorePointer(child: Center(child: FollowAlongHint())),
             ),
         ],
+      ),
+    );
+  }
+}
+
+/// The recitation bar's modes before one starts: recite (the mic), loop,
+/// listen and follow along, as one group — or, [collapsed] (hide mode on,
+/// its reveal buttons beside), one button opening them as a menu. Grows
+/// and shrinks between the two.
+class _ModeButtons extends ConsumerWidget {
+  const _ModeButtons({
+    required this.location,
+    required this.starting,
+    required this.recognition,
+    required this.collapsed,
+  });
+
+  final QuranLocation? location;
+  final bool starting, recognition, collapsed;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final scheme = Theme.of(context).colorScheme;
+    final location = this.location;
+    final controller = ref.read(recitationSessionControllerProvider.notifier);
+    final modes = [
+      (
+        key: 'recite',
+        icon: Icons.mic_rounded,
+        label: l10n.recStart,
+        onPressed: location == null || starting
+            ? null
+            : () => controller.start(startLocation: location),
+      ),
+      if (recognition)
+        (
+          key: 'hifz-loop',
+          icon: Icons.repeat_rounded,
+          label: l10n.recLoop,
+          onPressed: location == null
+              ? null
+              : () => showRecitationLoopSheet(context),
+        ),
+      (
+        key: 'listen-open',
+        icon: Icons.headphones_rounded,
+        label: l10n.listenMenuTitle,
+        onPressed: location == null ? null : () => showListenSheet(context),
+      ),
+      if (recognition)
+        (
+          key: 'follow-open',
+          icon: Icons.record_voice_over_rounded,
+          label: l10n.followTitle,
+          onPressed: location == null
+              ? null
+              : () => showFollowAlongSheet(context),
+        ),
+    ];
+    final Widget child;
+    if (collapsed) {
+      child = BarButtonGroup(
+        key: const ValueKey('modes-collapsed'),
+        children: [
+          MenuAnchor(
+            alignmentOffset: const Offset(0, 4),
+            menuChildren: [
+              for (final m in modes)
+                MenuItemButton(
+                  key: ValueKey('modes-menu-${m.key}'),
+                  leadingIcon: Icon(
+                    m.icon,
+                    color: m.key == 'recite' ? scheme.primary : null,
+                  ),
+                  onPressed: m.onPressed,
+                  child: Text(m.label),
+                ),
+            ],
+            builder: (context, menu, _) => IconButton(
+              key: const ValueKey('modes-open'),
+              style: BarButtonGroup.buttonStyle.copyWith(
+                fixedSize: const WidgetStatePropertyAll(
+                  Size(56, BarButtonGroup.height),
+                ),
+              ),
+              tooltip: l10n.recModes,
+              onPressed: () => menu.isOpen ? menu.close() : menu.open(),
+              icon: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.mic_rounded, color: scheme.primary),
+                  const Icon(Icons.arrow_drop_up_rounded, size: 18),
+                ],
+              ),
+            ),
+          ),
+        ],
+      );
+    } else {
+      child = BarButtonGroup(
+        key: const ValueKey('modes-group'),
+        children: [
+          for (final m in modes)
+            IconButton(
+              key: m.key == 'recite' ? null : ValueKey(m.key),
+              style: BarButtonGroup.buttonStyle,
+              color: m.key == 'recite' ? scheme.primary : null,
+              icon: Icon(m.icon),
+              tooltip: m.label,
+              onPressed: m.onPressed,
+            ),
+        ],
+      );
+    }
+    return AnimatedSize(
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.easeOutCubic,
+      alignment: AlignmentDirectional.centerStart,
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 200),
+        switchInCurve: Curves.easeOut,
+        switchOutCurve: Curves.easeIn,
+        transitionBuilder: (child, animation) => FadeTransition(
+          opacity: animation,
+          child: ScaleTransition(
+            scale: Tween(begin: 0.9, end: 1.0).animate(animation),
+            child: child,
+          ),
+        ),
+        layoutBuilder: (current, previous) => Stack(
+          alignment: AlignmentDirectional.centerStart,
+          children: [...previous, ?current],
+        ),
+        child: child,
       ),
     );
   }

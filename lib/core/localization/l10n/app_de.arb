@@ -394,5 +394,6 @@
   "listenDownloadDeleteBody": "Die Rezitation von {reciter} ({size}) wird von diesem Telefon entfernt. Sie kann weiterhin gestreamt werden.",
   "listenDownloaded": "Heruntergeladen",
   "listenDownloadFailed": "Gestoppt — zum erneuten Versuch auf Download tippen",
-  "commonDelete": "Löschen"
+  "commonDelete": "Löschen",
+  "recModes": "Rezitationsmodi"
 }

@@ -394,5 +394,6 @@
   "listenDownloadDeleteBody": "{reciter} کی تلاوت ({size}) اس فون سے ہٹا دی جائے گی۔ اسے پھر بھی آن لائن سنا جا سکتا ہے۔",
   "listenDownloaded": "ڈاؤن لوڈ شدہ",
   "listenDownloadFailed": "رک گیا — دوبارہ کوشش کے لیے ڈاؤن لوڈ دبائیں",
-  "commonDelete": "حذف کریں"
+  "commonDelete": "حذف کریں",
+  "recModes": "تلاوت کے طریقے"
 }

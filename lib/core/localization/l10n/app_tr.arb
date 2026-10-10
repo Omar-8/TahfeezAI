@@ -394,5 +394,6 @@
   "listenDownloadDeleteBody": "{reciter} tilaveti ({size}) bu telefondan kaldırılacak. Yine de çevrimiçi dinlenebilir.",
   "listenDownloaded": "İndirildi",
   "listenDownloadFailed": "Durdu — tekrar denemek için indire dokunun",
-  "commonDelete": "Sil"
+  "commonDelete": "Sil",
+  "recModes": "Okuma modları"
 }

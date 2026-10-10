@@ -834,5 +834,6 @@
         "type": "String"
       }
     }
-  }
+  },
+  "recModes": "Recitation modes"
 }

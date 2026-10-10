@@ -293,6 +293,34 @@ void main() {
     expect(eye.right, greaterThan(1160));
   });
 
+  testWidgets('hide mode collapses the modes into one button, with a menu; '
+      'showing the ayahs brings them back', (tester) async {
+    tester.view.physicalSize = const Size(360, 780);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(app(devPanel: false));
+    await tester.pumpAndSettle();
+    expect(find.byTooltip('Listen'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Hide ayahs'));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull, reason: 'no overflow');
+    expect(find.byTooltip('Listen'), findsNothing);
+    expect(find.byTooltip('Reveal next word'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('modes-open')));
+    await tester.pumpAndSettle();
+    for (final mode in ['Start recitation', 'Listen', 'Loop recitation']) {
+      expect(find.text(mode), findsOneWidget, reason: mode);
+    }
+    await tester.tapAt(const Offset(180, 100)); // closes the menu
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('Show ayahs'));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('modes-open')), findsNothing);
+    expect(find.byTooltip('Listen'), findsOneWidget);
+  });
+
   testWidgets('the eye stays put when toggled, before and during a session', (
     tester,
   ) async {

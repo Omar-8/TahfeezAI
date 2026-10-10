@@ -394,5 +394,6 @@
   "listenDownloadDeleteBody": "La récitation de {reciter} ({size}) sera supprimée de ce téléphone. Elle reste disponible en streaming.",
   "listenDownloaded": "Téléchargé",
   "listenDownloadFailed": "Arrêté — touchez télécharger pour réessayer",
-  "commonDelete": "Supprimer"
+  "commonDelete": "Supprimer",
+  "recModes": "Modes de récitation"
 }

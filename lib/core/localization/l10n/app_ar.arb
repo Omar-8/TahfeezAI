@@ -394,5 +394,6 @@
   "listenDownloadDeleteBody": "ستُحذف تلاوة {reciter} ({size}) من هذا الهاتف. ويمكن الاستماع إليها عبر الإنترنت.",
   "listenDownloaded": "منزّل",
   "listenDownloadFailed": "توقف — اضغط تنزيل للمحاولة مجددًا",
-  "commonDelete": "حذف"
+  "commonDelete": "حذف",
+  "recModes": "أوضاع التلاوة"
 }
