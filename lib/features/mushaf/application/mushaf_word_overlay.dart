@@ -25,6 +25,11 @@ enum MushafWordMark {
   /// mistake in it (a vowel, sukun, shadda or letter).
   tashkeel,
 
+  /// A likely pronunciation mistake: the word's quick check heard one, its
+  /// ayah's check (which confirms it as [tashkeel] or clears it) is still
+  /// to come. A softer colour, no alert.
+  checking,
+
   /// The audio could not confirm its pronunciation either way.
   uncertain,
 }

@@ -43,7 +43,7 @@ class RecitationWordFeedback extends ConsumerWidget {
         ];
       case MushafWordMark.skipped:
         lines = [l10n.recFeedbackSkipped];
-      case MushafWordMark.tashkeel:
+      case MushafWordMark.tashkeel || MushafWordMark.checking:
         final errors = [
           for (final e
               in ref

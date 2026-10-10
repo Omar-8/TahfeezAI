@@ -580,12 +580,15 @@ class HifzController extends Notifier<HifzState> {
   /// A recited word's colour from its pronunciation check.
   /// (Only [pass]'s verdict: a loop's earlier repetitions of the word are
   /// not this one.)
-  /// (Confirmed by the ayah's check: a word's quick early verdict is
-  /// sometimes withdrawn by it.)
+  /// (A quick early verdict shows at once, softly, as [MushafWordMark
+  /// .checking]: the ayah's check confirms it — and only then alerts — or
+  /// withdraws it.)
   static MushafWordMark _pronunciationMark(AcousticWordResult? a, int pass) =>
-      a != null && a.isMistake && !a.provisional && a.pass == pass
-      ? MushafWordMark.tashkeel
-      : MushafWordMark.correct;
+      a == null || !a.isMistake || a.pass != pass
+      ? MushafWordMark.correct
+      : a.provisional
+      ? MushafWordMark.checking
+      : MushafWordMark.tashkeel;
 
   /// A finished test's colours: every recited word as it went, no band on
   /// a next word, and the page hidden only as hide mode hides it.

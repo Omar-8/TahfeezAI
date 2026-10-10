@@ -251,7 +251,8 @@ void main() {
     expect(vibrations, 1);
   });
 
-  test('only a confirmed pronunciation mistake alerts and is marked', () async {
+  test('a quick early pronunciation verdict is marked at once, softly; only '
+      'a confirmed one alerts', () async {
     const kursiVerse = (chapterNo: 2, verseNo: 255);
     await setUpHifz(from: kursiVerse, to: kursiVerse);
     await recite(kursi.split(' ').take(5).join(' '));
@@ -259,7 +260,7 @@ void main() {
     final acoustic = container.read(
       acousticVerificationControllerProvider.notifier,
     ) as _Acoustic;
-    // A word's quick early verdict: not yet.
+    // A word's quick early verdict: marked as checking, no alert.
     acoustic.put({
       word: const AcousticWordResult(
         RecitationErrorType.wrongVowel,
@@ -271,14 +272,18 @@ void main() {
     expect(vibrations, 0);
     expect(
       container.read(mushafWordOverlayProvider)!.marks[word],
-      MushafWordMark.correct,
+      MushafWordMark.checking,
     );
-    // The ayah's check withdraws it: nothing ever shown.
+    // The ayah's check withdraws it: the mark goes, no alert.
     acoustic.put({
       word: const AcousticWordResult(RecitationErrorType.correct, []),
     });
     await pumpEventQueue();
     expect(vibrations, 0);
+    expect(
+      container.read(mushafWordOverlayProvider)!.marks[word],
+      MushafWordMark.correct,
+    );
     // Confirmed: alerted and marked.
     acoustic.put({
       word: const AcousticWordResult(RecitationErrorType.wrongVowel, []),
