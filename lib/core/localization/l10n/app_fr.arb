@@ -428,5 +428,7 @@
   "updateUpToDate": "TahfeezAI est à jour",
   "updateCheckFailed": "Les mises à jour passent par Google Play : installez TahfeezAI depuis Google Play pour les recevoir.",
   "settingsSearchHint": "Rechercher dans les réglages",
-  "settingsNoMatch": "Aucun réglage ne correspond"
+  "settingsNoMatch": "Aucun réglage ne correspond",
+  "settingsGitHub": "GitHub",
+  "settingsGitHubSub": "Le code source du projet"
 }

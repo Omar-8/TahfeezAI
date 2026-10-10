@@ -113,6 +113,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             words: [
               l10n.appName,
               l10n.settingsFeedback,
+              'GitHub',
               l10n.settingsRate,
               l10n.settingsShare,
               l10n.settingsCheckUpdates,
@@ -740,14 +741,25 @@ class _AboutAppState extends ConsumerState<_AboutApp> {
             ],
           ),
           const SizedBox(height: TahfeezSpacing.sm),
-          if (kFeedbackUrl.isNotEmpty)
-            row(
-              'settings-feedback',
-              Icons.feedback_outlined,
-              l10n.settingsFeedback,
-              l10n.settingsFeedbackSub,
-              () => store.openUrl(kFeedbackUrl),
-            ),
+          // (Both do nothing until the GitHub repository exists.)
+          row(
+            'settings-feedback',
+            Icons.feedback_outlined,
+            l10n.settingsFeedback,
+            l10n.settingsFeedbackSub,
+            () {
+              if (kFeedbackUrl.isNotEmpty) store.openUrl(kFeedbackUrl);
+            },
+          ),
+          row(
+            'settings-github',
+            Icons.code_rounded,
+            l10n.settingsGitHub,
+            l10n.settingsGitHubSub,
+            () {
+              if (kGitHubUrl.isNotEmpty) store.openUrl(kGitHubUrl);
+            },
+          ),
           row(
             'settings-rate',
             Icons.star_outline_rounded,

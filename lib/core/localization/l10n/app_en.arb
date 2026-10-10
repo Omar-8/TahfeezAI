@@ -899,5 +899,7 @@
     }
   },
   "settingsSearchHint": "Search settings",
-  "settingsNoMatch": "No settings match"
+  "settingsNoMatch": "No settings match",
+  "settingsGitHub": "GitHub",
+  "settingsGitHubSub": "The project's source code"
 }

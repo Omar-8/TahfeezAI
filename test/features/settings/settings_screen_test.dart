@@ -75,7 +75,7 @@ void main() {
     // The Arabic UI font: the app's text falls back to it.
     expect(container.read(arabicFontControllerProvider), ArabicUiFont.kufi);
     final tajawal = find.byKey(const ValueKey('settings-arabic-font-tajawal'));
-    await tester.ensureVisible(tajawal);
+    await tester.scrollUntilVisible(tajawal, 200, scrollable: _list);
     await tester.tap(tajawal);
     await tester.pumpAndSettle();
     expect(container.read(arabicFontControllerProvider), ArabicUiFont.tajawal);

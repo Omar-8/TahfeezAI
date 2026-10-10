@@ -428,5 +428,7 @@
   "updateUpToDate": "TahfeezAI güncel",
   "updateCheckFailed": "Güncellemeler Google Play üzerinden gelir: almak için TahfeezAI'yi Google Play'den yükleyin.",
   "settingsSearchHint": "Ayarlarda ara",
-  "settingsNoMatch": "Eşleşen ayar yok"
+  "settingsNoMatch": "Eşleşen ayar yok",
+  "settingsGitHub": "GitHub",
+  "settingsGitHubSub": "Projenin kaynak kodu"
 }

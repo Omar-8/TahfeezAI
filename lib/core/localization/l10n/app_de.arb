@@ -428,5 +428,7 @@
   "updateUpToDate": "TahfeezAI ist aktuell",
   "updateCheckFailed": "Updates kommen über Google Play: Installiere TahfeezAI aus Google Play, um sie zu erhalten.",
   "settingsSearchHint": "Einstellungen durchsuchen",
-  "settingsNoMatch": "Keine passende Einstellung"
+  "settingsNoMatch": "Keine passende Einstellung",
+  "settingsGitHub": "GitHub",
+  "settingsGitHubSub": "Der Quellcode des Projekts"
 }

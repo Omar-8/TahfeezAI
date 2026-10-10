@@ -12,8 +12,12 @@ const kPlayStoreUrl =
     'https://play.google.com/store/apps/details?id=ai.tahfeez.tahfeez_ai';
 
 /// Where feedback goes: the project's GitHub issues, once the repository
-/// exists. Empty: Settings shows no feedback link.
+/// exists. Empty: Settings' "Send feedback" does nothing yet.
 const kFeedbackUrl = '';
+
+/// The project's GitHub repository, once it exists. Empty: Settings'
+/// "GitHub" does nothing yet.
+const kGitHubUrl = '';
 
 /// The app's dealings with its store and the system: its version, updates
 /// (Google Play's in-app update), rating (the store's in-app review),

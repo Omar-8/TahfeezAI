@@ -428,5 +428,7 @@
   "updateUpToDate": "TahfeezAI محدّث",
   "updateCheckFailed": "تصل التحديثات عبر Google Play: ثبّت TahfeezAI من Google Play للحصول عليها.",
   "settingsSearchHint": "ابحث في الإعدادات",
-  "settingsNoMatch": "لا توجد إعدادات مطابقة"
+  "settingsNoMatch": "لا توجد إعدادات مطابقة",
+  "settingsGitHub": "GitHub",
+  "settingsGitHubSub": "الشيفرة المصدرية للمشروع"
 }
