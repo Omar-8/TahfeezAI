@@ -438,7 +438,7 @@ class RecitationBottomBar extends ConsumerWidget {
           ),
           if (recognition != null)
             const Positioned(
-              top: -FollowAlongHint.height / 2 + 2,
+              top: -FollowAlongHint.height / 2 + 4,
               left: 16,
               right: 16,
               child: IgnorePointer(child: Center(child: FollowAlongHint())),
