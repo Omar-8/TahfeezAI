@@ -28,39 +28,107 @@ Future<void> showListenSheet(BuildContext context, {VerseRef? from}) =>
       builder: (context) => _ListenSheet(from: from),
     );
 
-/// The reciters, to pick one (Settings and the Listen menu).
+/// The reciters, to pick one (Settings, the Listen and Follow along
+/// menus), with a search box over their English and Arabic names.
 Future<void> showReciterSheet(BuildContext context) =>
     showTahfeezModalBottomSheet<void>(
       context: context,
       title: AppLocalizations.of(context).listenReciter,
-      builder: (context) => Consumer(
-        builder: (context, ref, _) => RadioGroup<String>(
-          groupValue: ref.watch(reciterProvider),
-          onChanged: (edition) {
-            if (edition == null) return;
-            ref.read(reciterProvider.notifier).select(edition);
-            Navigator.of(context).pop();
-          },
-          child: ListView(
-            shrinkWrap: true,
-            padding: const EdgeInsets.fromLTRB(
-              TahfeezSpacing.sm,
-              0,
-              TahfeezSpacing.sm,
-              TahfeezSpacing.md,
+      builder: (context) => const _ReciterPicker(),
+    );
+
+class _ReciterPicker extends ConsumerStatefulWidget {
+  const _ReciterPicker();
+
+  @override
+  ConsumerState<_ReciterPicker> createState() => _ReciterPickerState();
+}
+
+class _ReciterPickerState extends ConsumerState<_ReciterPicker> {
+  var _query = '';
+
+  /// Lower case, without Arabic vowel marks or tatweel, alef forms as one,
+  /// and Latin punctuation and spaces dropped: "Al-Husary", "الحُصري" and
+  /// "husary" alike.
+  static String _fold(String s) => s
+      .toLowerCase()
+      .replaceAll(RegExp('[ً-ٰٟـ]'), '')
+      .replaceAll(RegExp('[أإآٱ]'), 'ا')
+      .replaceAll('ى', 'ي')
+      .replaceAll('ة', 'ه')
+      .replaceAll(RegExp(r"[-'’ʿʾ.\s]"), '');
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final q = _fold(_query);
+    final shown = [
+      for (final r in reciters)
+        if (q.isEmpty ||
+            _fold(r.nameEn).contains(q) ||
+            _fold(r.nameAr).contains(q))
+          r,
+    ];
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+            TahfeezSpacing.md,
+            0,
+            TahfeezSpacing.md,
+            TahfeezSpacing.sm,
+          ),
+          child: TextField(
+            key: const ValueKey('reciter-search'),
+            onChanged: (text) => setState(() => _query = text),
+            textInputAction: TextInputAction.search,
+            decoration: InputDecoration(
+              prefixIcon: const Icon(Icons.search_rounded),
+              hintText: l10n.listenSearchReciters,
+              isDense: true,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(TahfeezRadii.pill),
+              ),
             ),
-            children: [
-              for (final r in reciters)
-                RadioListTile<String>(
-                  key: ValueKey('reciter-${r.edition}'),
-                  value: r.edition,
-                  title: Text(reciterName(context, r)),
-                ),
-            ],
           ),
         ),
-      ),
+        Flexible(
+          child: RadioGroup<String>(
+            groupValue: ref.watch(reciterProvider),
+            onChanged: (edition) {
+              if (edition == null) return;
+              ref.read(reciterProvider.notifier).select(edition);
+              Navigator.of(context).pop();
+            },
+            child: shown.isEmpty
+                ? Padding(
+                    padding: const EdgeInsets.all(TahfeezSpacing.lg),
+                    child: Text(l10n.listenNoReciters),
+                  )
+                : ListView(
+                    shrinkWrap: true,
+                    padding: const EdgeInsets.fromLTRB(
+                      TahfeezSpacing.sm,
+                      0,
+                      TahfeezSpacing.sm,
+                      TahfeezSpacing.md,
+                    ),
+                    children: [
+                      for (final r in shown)
+                        RadioListTile<String>(
+                          key: ValueKey('reciter-${r.edition}'),
+                          value: r.edition,
+                          title: Text(reciterName(context, r)),
+                        ),
+                    ],
+                  ),
+          ),
+        ),
+      ],
     );
+  }
+}
 
 /// [reciter]'s name in the UI language: Arabic script for Arabic and Urdu.
 String reciterName(BuildContext context, Reciter reciter) =>

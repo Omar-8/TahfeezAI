@@ -389,5 +389,7 @@
   "mushafPassagesSub": "Her rükû (konu bölümü) kendi renginde",
   "followStrict": "Katı",
   "followStrictSub": "Hata olursa, hatasız okuyana kadar tekrar okuyun",
-  "followAgain": "Hata — tekrar okuyun"
+  "followAgain": "Hata — tekrar okuyun",
+  "listenSearchReciters": "Kâri ara",
+  "listenNoReciters": "Bu isimde kâri yok"
 }

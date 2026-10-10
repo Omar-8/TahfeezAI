@@ -389,5 +389,7 @@
   "mushafPassagesSub": "كل ركوع (مقطع موضوعي) بلون مختلف",
   "followStrict": "صارم",
   "followStrictSub": "بعد أي خطأ أعِد التلاوة حتى تكون بلا أخطاء",
-  "followAgain": "خطأ — أعِد التلاوة"
+  "followAgain": "خطأ — أعِد التلاوة",
+  "listenSearchReciters": "ابحث عن قارئ",
+  "listenNoReciters": "لا يوجد قارئ بهذا الاسم"
 }

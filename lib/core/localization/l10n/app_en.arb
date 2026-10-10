@@ -833,5 +833,7 @@
   "mushafPassagesSub": "Each rukūʿ (thematic section) in its own colour",
   "followStrict": "Strict",
   "followStrictSub": "After a mistake, recite it again until it's without mistakes",
-  "followAgain": "A mistake — recite it again"
+  "followAgain": "A mistake — recite it again",
+  "listenSearchReciters": "Search reciters",
+  "listenNoReciters": "No reciter by that name"
 }

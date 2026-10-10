@@ -389,5 +389,7 @@
   "mushafPassagesSub": "Jeder Ruku (thematischer Abschnitt) in eigener Farbe",
   "followStrict": "Streng",
   "followStrictSub": "Nach einem Fehler erneut rezitieren, bis es fehlerfrei ist",
-  "followAgain": "Ein Fehler — rezitiere es erneut"
+  "followAgain": "Ein Fehler — rezitiere es erneut",
+  "listenSearchReciters": "Rezitatoren suchen",
+  "listenNoReciters": "Kein Rezitator mit diesem Namen"
 }

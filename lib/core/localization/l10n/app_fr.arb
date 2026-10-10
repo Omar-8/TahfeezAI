@@ -389,5 +389,7 @@
   "mushafPassagesSub": "Chaque rukūʿ (section thématique) dans sa propre couleur",
   "followStrict": "Strict",
   "followStrictSub": "Après une erreur, récitez à nouveau jusqu'à le faire sans erreur",
-  "followAgain": "Une erreur — récitez à nouveau"
+  "followAgain": "Une erreur — récitez à nouveau",
+  "listenSearchReciters": "Rechercher un récitateur",
+  "listenNoReciters": "Aucun récitateur à ce nom"
 }
