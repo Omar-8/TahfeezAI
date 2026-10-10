@@ -289,24 +289,21 @@ class SettingsScreen extends ConsumerWidget {
                   subtitle: Text(l10n.settingsImportSub),
                   onTap: () => _import(context, ref),
                 ),
+                ListTile(
+                  key: const ValueKey('settings-reset'),
+                  contentPadding: EdgeInsets.zero,
+                  leading: Icon(
+                    Icons.delete_forever_outlined,
+                    color: theme.colorScheme.error,
+                  ),
+                  title: Text(
+                    l10n.settingsResetTitle,
+                    style: TextStyle(color: theme.colorScheme.error),
+                  ),
+                  subtitle: Text(l10n.settingsResetSub),
+                  onTap: () => _confirmReset(context, ref),
+                ),
               ],
-            ),
-          ),
-          const SizedBox(height: TahfeezSpacing.lg),
-          TahfeezCard(
-            child: ListTile(
-              key: const ValueKey('settings-reset'),
-              contentPadding: EdgeInsets.zero,
-              leading: Icon(
-                Icons.delete_forever_outlined,
-                color: theme.colorScheme.error,
-              ),
-              title: Text(
-                l10n.settingsResetTitle,
-                style: TextStyle(color: theme.colorScheme.error),
-              ),
-              subtitle: Text(l10n.settingsResetSub),
-              onTap: () => _confirmReset(context, ref),
             ),
           ),
           const SizedBox(height: TahfeezSpacing.lg),
