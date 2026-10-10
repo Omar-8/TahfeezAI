@@ -138,6 +138,16 @@ class _RecitationMushafAnchorState
 /// beside them. Shows [navigation] otherwise.
 ///
 /// Also reports permission-denied/error/saved outcomes as snackbars.
+/// The bar's start buttons (mic, Listen, Follow along): smaller than the
+/// default, so the hide controls beside them keep their size.
+final _compactButton = IconButton.styleFrom(
+  fixedSize: const Size.square(38),
+  minimumSize: const Size.square(38),
+  padding: EdgeInsets.zero,
+  iconSize: 20,
+  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+);
+
 class RecitationBottomBar extends ConsumerWidget {
   const RecitationBottomBar({super.key, required this.navigation});
 
@@ -302,11 +312,14 @@ class RecitationBottomBar extends ConsumerWidget {
                               ? MainAxisAlignment.center
                               : MainAxisAlignment.spaceBetween,
                           children: [
+                            // Compact, close together: room for the hide
+                            // controls beside them.
                             Row(
                               mainAxisSize: MainAxisSize.min,
-                              spacing: 8,
+                              spacing: 4,
                               children: [
                                 IconButton.filled(
+                                  style: _compactButton,
                                   icon: const Icon(Icons.mic_rounded),
                                   tooltip: AppLocalizations.of(context)
                                       .recStart,
@@ -322,6 +335,7 @@ class RecitationBottomBar extends ConsumerWidget {
                                 // Listen: the reciter, from a range.
                                 IconButton.filledTonal(
                                   key: const ValueKey('listen-open'),
+                                  style: _compactButton,
                                   icon: const Icon(Icons.headphones_rounded),
                                   tooltip: AppLocalizations.of(context)
                                       .listenMenuTitle,
@@ -333,6 +347,7 @@ class RecitationBottomBar extends ConsumerWidget {
                                 if (recognition != null)
                                   IconButton.filledTonal(
                                     key: const ValueKey('follow-open'),
+                                    style: _compactButton,
                                     icon: const Icon(
                                       Icons.record_voice_over_rounded,
                                     ),
