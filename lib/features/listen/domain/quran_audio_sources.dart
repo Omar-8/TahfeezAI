@@ -48,6 +48,7 @@ const reciters = [
   Reciter('ar.muhammadayyoub', 'Muhammad Ayyoub', 'محمد أيوب', 128),
   Reciter('ar.shaatree', 'Abu Bakr Ash-Shatri', 'أبو بكر الشاطري', 64),
   Reciter('ar.abdullahbasfar', 'Abdullah Basfar', 'عبد الله بصفر', 64),
+  Reciter('ar.ahmedajamy', 'Ahmad al-Ajamy', 'أحمد بن علي العجمي', 64),
 ];
 
 const defaultReciter = 'ar.alafasy';
@@ -135,6 +136,7 @@ const reciterDownloadBytes = <String, int>{
   'ar.muhammadayyoub': 937553634,
   'ar.shaatree': 743749929,
   'ar.abdullahbasfar': 850391972,
+  'ar.ahmedajamy': 771903997,
 };
 
 /// [reciter]'s download size, as "≈ 640 MB" / "≈ 1.2 GB"; `null` if
