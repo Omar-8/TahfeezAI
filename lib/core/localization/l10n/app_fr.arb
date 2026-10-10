@@ -384,5 +384,7 @@
   "sajdahReminderSub": "Après avoir récité un verset de prosternation (une fois par session)",
   "sajdahReminderMessage": "Ce verset comporte une prosternation de récitation (soujoud at-tilawa).",
   "sajdahReminderOff": "Désactiver",
-  "settingsRecitation": "Récitation"
+  "settingsRecitation": "Récitation",
+  "mushafPassages": "Colorer les passages thématiques",
+  "mushafPassagesSub": "Chaque rukūʿ (section thématique) dans sa propre couleur"
 }

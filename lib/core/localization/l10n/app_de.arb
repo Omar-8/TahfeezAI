@@ -384,5 +384,7 @@
   "sajdahReminderSub": "Nach einem Vers der Niederwerfung (einmal pro Sitzung)",
   "sajdahReminderMessage": "Bei diesem Vers gibt es eine Niederwerfung der Rezitation (Sujud at-Tilawa).",
   "sajdahReminderOff": "Ausschalten",
-  "settingsRecitation": "Rezitation"
+  "settingsRecitation": "Rezitation",
+  "mushafPassages": "Thematische Abschnitte einfärben",
+  "mushafPassagesSub": "Jeder Ruku (thematischer Abschnitt) in eigener Farbe"
 }

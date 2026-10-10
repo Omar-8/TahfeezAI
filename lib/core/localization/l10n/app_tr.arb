@@ -384,5 +384,7 @@
   "sajdahReminderSub": "Secde ayeti okunduktan sonra (oturum başına bir kez)",
   "sajdahReminderMessage": "Bu ayette tilavet secdesi vardır.",
   "sajdahReminderOff": "Kapat",
-  "settingsRecitation": "Okuma"
+  "settingsRecitation": "Okuma",
+  "mushafPassages": "Konu bölümlerini renklendir",
+  "mushafPassagesSub": "Her rükû (konu bölümü) kendi renginde"
 }

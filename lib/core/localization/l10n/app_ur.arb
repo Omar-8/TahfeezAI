@@ -384,5 +384,7 @@
   "sajdahReminderSub": "سجدے والی آیت پڑھنے کے بعد (ہر نشست میں ایک بار)",
   "sajdahReminderMessage": "اس آیت میں سجدۂ تلاوت ہے۔",
   "sajdahReminderOff": "بند کریں",
-  "settingsRecitation": "تلاوت"
+  "settingsRecitation": "تلاوت",
+  "mushafPassages": "موضوعاتی حصے رنگیں",
+  "mushafPassagesSub": "ہر رکوع (موضوعاتی حصہ) الگ رنگ میں"
 }

@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../application/mushaf_focus_ayah.dart';
 import '../application/mushaf_hide_mode.dart';
 import '../application/mushaf_page_verses.dart';
+import '../application/mushaf_passages.dart';
 import '../application/mushaf_word_overlay.dart';
 import '../application/mushaf_quran_engine_providers.dart';
 import '../domain/mushaf_appearance.dart';
@@ -72,41 +73,72 @@ class _QuranEngineMushafPageContentState
     MushafWordMark.uncertain: (color: Color(0xFFFBC02D), ink: true),
   };
 
-  /// The focus ayah (`mushafFocusAyahProvider`) highlighted on [_page], if
-  /// any; `null` once the page's highlights are cleared.
-  int? _focusApplied;
+  /// The highlights last drawn on [_page] (see [_applyHighlights]); `null`
+  /// once cleared.
+  ({Map<int, MushafWordMark> marks, int? focus, Map<int, Color>? passages})?
+  _appliedHighlights;
 
-  /// Applies the masks, then the focus ayah's highlight over them.
+  /// The ayah being long-pressed (its sheet open): highlighted like the
+  /// focus ayah.
+  int? _pressedAyah;
+
+  static bool _isInk(MushafWordMark mark) => _markStyles[mark]!.ink;
+
+  /// Applies the masks, then the highlights over them.
   void _applyMasks() {
     _applyMasksOnly();
-    _applyFocus();
+    _applyHighlights();
   }
 
-  /// Highlights the focus ayah when it is on this page, or removes its
-  /// highlight once it is no longer the focus.
-  void _applyFocus() {
+  /// Draws every highlight on the page at once, each word's by priority:
+  /// the focus (or long-pressed) ayah's blue, then a recitation's marks,
+  /// then — with "Colour thematic passages" on — its passage's tint. Ink
+  /// marks colour the letters over whichever band is behind them.
+  void _applyHighlights() {
     final page = _page;
     if (page == null) return;
-    final focus = ref.read(mushafFocusAyahProvider)?.ayahId;
-    final onPage = focus != null && page.wordRefs.any((w) => w.ayahId == focus)
-        ? focus
+    final refs = page.wordRefs;
+    final marks = _appliedOverlay?.$2 ?? const <int, MushafWordMark>{};
+    final focusId = _pressedAyah ?? ref.read(mushafFocusAyahProvider)?.ayahId;
+    final focus = focusId != null && refs.any((w) => w.ayahId == focusId)
+        ? focusId
         : null;
-    if (onPage == _focusApplied) return;
-    if (_focusApplied != null) {
-      // Highlights can only be cleared all at once: the word overlay's own
-      // marks are drawn again, then the new focus, if any.
-      _focusApplied = null;
-      page.clearHighlights();
-      _appliedOverlay = null;
-      _applyMasks();
+    final passages = ref.read(mushafPassagesProvider)
+        ? ref.read(passageColorsProvider).value
+        : null;
+    final applied = _appliedHighlights;
+    if (applied != null &&
+        applied.focus == focus &&
+        identical(applied.passages, passages) &&
+        mapEquals(applied.marks, marks)) {
       return;
     }
-    page.highlightAyah((chapterNo: onPage! ~/ 1000, verseNo: onPage % 1000));
-    _focusApplied = onPage;
+    if (applied == null && focus == null && marks.isEmpty && passages == null) {
+      return; // nothing drawn, nothing to draw
+    }
+    final highlights = <({int word, Color color, bool ink})>[];
+    for (var i = 0; i < refs.length; i++) {
+      final mark = marks[i];
+      final ayah = refs[i].ayahId;
+      if (mark != null && !_isInk(mark)) {
+        highlights.add((word: i, color: _markStyles[mark]!.color, ink: false));
+      } else if (passages != null && ayah != focus) {
+        final tint = passages[ayah];
+        if (tint != null) highlights.add((word: i, color: tint, ink: false));
+      }
+      if (mark != null && _isInk(mark)) {
+        highlights.add((word: i, color: _markStyles[mark]!.color, ink: true));
+      }
+    }
+    page.setWordHighlights(highlights);
+    if (focus != null) {
+      page.highlightAyah((chapterNo: focus ~/ 1000, verseNo: focus % 1000));
+    }
+    _appliedHighlights = (marks: marks, focus: focus, passages: passages);
   }
 
   /// Applies whichever mask is active: a word overlay (Hifz mode) wins
-  /// over hide mode.
+  /// over hide mode. (Its marks are drawn by [_applyHighlights].)
   void _applyMasksOnly() {
     final page = _page;
     if (page == null) return;
@@ -127,29 +159,15 @@ class _QuranEngineMushafPageContentState
           if (overlay.marks.containsKey(refs[i])) i: overlay.marks[refs[i]]!,
       };
       final applied = _appliedOverlay;
-      if (applied != null &&
-          setEquals(applied.$1, hidden) &&
-          mapEquals(applied.$2, marks)) {
-        return;
+      if (applied == null || !setEquals(applied.$1, hidden)) {
+        page.setHiddenWords(hidden);
       }
-      page.setHiddenWords(hidden);
-      _focusApplied = null;
-      page.setWordHighlights([
-        for (final MapEntry(key: i, value: mark) in marks.entries)
-          (
-            word: i,
-            color: _markStyles[mark]!.color,
-            ink: _markStyles[mark]!.ink,
-          ),
-      ]);
       _appliedOverlay = (hidden, marks);
       _appliedMask = null;
       return;
     }
     if (_appliedOverlay != null) {
       page.setHiddenWords(const {});
-      page.clearHighlights();
-      _focusApplied = null;
       _appliedOverlay = null;
       _appliedMask = null;
     }
@@ -185,7 +203,7 @@ class _QuranEngineMushafPageContentState
         _loadError = null;
         _appliedMask = null;
         _appliedOverlay = null;
-        _focusApplied = null;
+        _appliedHighlights = null;
       });
       _load();
     }
@@ -231,7 +249,7 @@ class _QuranEngineMushafPageContentState
         _page = page;
         _appliedMask = null;
         _appliedOverlay = null;
-        _focusApplied = null;
+        _appliedHighlights = null;
       });
       _applyMasks();
       // Fire-and-forget: never awaited, never allowed to affect the page
@@ -257,7 +275,12 @@ class _QuranEngineMushafPageContentState
   Widget build(BuildContext context) {
     ref.listen(mushafHideModeProvider, (_, _) => _applyMasks());
     ref.listen(mushafWordOverlayProvider, (_, _) => _applyMasks());
-    ref.listen(mushafFocusAyahProvider, (_, _) => _applyFocus());
+    ref.listen(mushafFocusAyahProvider, (_, _) => _applyHighlights());
+    // Thematic passages: their tints once loaded, on or off.
+    if (ref.watch(mushafPassagesProvider)) {
+      ref.listen(passageColorsProvider, (_, _) => _applyHighlights());
+    }
+    ref.listen(mushafPassagesProvider, (_, _) => _applyHighlights());
     if (_page == null && _loadError == null) {
       // Fire-and-forget: harmless to call every build (a no-op once a
       // load is in flight or complete) -- the same pattern
@@ -339,18 +362,12 @@ class _QuranEngineMushafPageContentState
           : (hit) async {
               final ayahId = hit.canonicalAyahId;
               if (ayahId == null || isHidden(hit)) return;
-              page.highlightAyah((
-                chapterNo: ayahId ~/ 1000,
-                verseNo: ayahId % 1000,
-              ));
+              _pressedAyah = ayahId;
+              _applyHighlights();
               await onWordLongPress(hit);
               if (!mounted || _page != page) return;
-              // Drop the ayah's highlight; the word overlay's own marks,
-              // if any, are drawn again.
-              page.clearHighlights();
-              _focusApplied = null;
-              _appliedOverlay = null;
-              _applyMasks();
+              _pressedAyah = null;
+              _applyHighlights();
             },
     );
   }

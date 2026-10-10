@@ -384,5 +384,7 @@
   "sajdahReminderSub": "بعد تلاوة آية سجدة (مرة واحدة في كل جلسة)",
   "sajdahReminderMessage": "في هذه الآية سجدة تلاوة.",
   "sajdahReminderOff": "إيقاف",
-  "settingsRecitation": "التلاوة"
+  "settingsRecitation": "التلاوة",
+  "mushafPassages": "تلوين المقاطع الموضوعية",
+  "mushafPassagesSub": "كل ركوع (مقطع موضوعي) بلون مختلف"
 }

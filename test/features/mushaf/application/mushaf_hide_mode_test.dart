@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tahfeez_ai/features/mushaf/application/mushaf_focus_ayah.dart';
 import 'package:tahfeez_ai/features/mushaf/application/mushaf_hide_mode.dart';
+import 'package:tahfeez_ai/features/mushaf/application/mushaf_passages.dart';
 import 'package:tahfeez_ai/features/mushaf/application/mushaf_quran_engine_providers.dart';
 import 'package:tahfeez_ai/features/mushaf/application/mushaf_word_overlay.dart';
 import 'package:tahfeez_ai/features/mushaf/domain/mushaf_appearance.dart';
@@ -45,6 +47,8 @@ class _MaskRecordingPage implements QuranEngineMushafPage {
 
   @override
   void setWordHighlights(List<({int word, Color color, bool ink})> highlights) {
+    // Like the engine: every highlight replaced, the ayah's too.
+    ayahHighlights.clear();
     this.highlights
       ..clear()
       ..addAll([for (final h in highlights) (h.word, h.color)]);
@@ -333,6 +337,51 @@ void main() {
     expect(p42.masks.last, (hidden: false, revealed: 0));
   });
 
+  testWidgets('thematic passages: tinted, with the blue ayah drawn instead', (
+    tester,
+  ) async {
+    final backend = _Backend();
+    const tint = Color(0x3326A69A);
+    final container = ProviderContainer(
+      overrides: [
+        mushafQuranEngineBackendProvider.overrideWith((ref) async => backend),
+        mushafPassagesProvider.overrideWith(_PassagesOn.new),
+        passageColorsProvider.overrideWith((ref) async => {2042: tint}),
+      ],
+    );
+    addTearDown(container.dispose);
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const MaterialApp(
+          home: QuranEngineMushafPageContent(
+            pageNumber: 42,
+            colors: MushafAppearanceColors(
+              background: Color(0xFFFFFFFF),
+              text: Color(0xFF000000),
+              secondaryText: Color(0xFF888888),
+              headerInk: Color(0xFF000000),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final page = backend.pages[42]!;
+    expect(page.highlights, [(0, tint), (1, tint), (2, tint)]);
+
+    final owner = Object();
+    container.read(mushafFocusAyahProvider.notifier).focus(owner, 2042);
+    await tester.pump();
+    expect(page.highlights, isEmpty, reason: 'the blue ayah instead');
+    expect(page.ayahHighlights, [(chapterNo: 2, verseNo: 42)]);
+
+    container.read(mushafFocusAyahProvider.notifier).clear(owner);
+    await tester.pump();
+    expect(page.highlights, hasLength(3));
+    expect(page.ayahHighlights, isEmpty);
+  });
+
   testWidgets('a long-pressed word\'s ayah stays highlighted while its '
       'sheet is open', (tester) async {
     final backend = _Backend();
@@ -508,4 +557,9 @@ void main() {
     expect(p41.hiddenCalls.last, isEmpty);
     expect(p41.highlights, isEmpty);
   });
+}
+
+class _PassagesOn extends MushafPassagesController {
+  @override
+  bool build() => true;
 }

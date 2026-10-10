@@ -828,5 +828,7 @@
   "sajdahReminderSub": "After reciting an ayah of prostration (once per session)",
   "sajdahReminderMessage": "This ayah has a prostration of recitation (Sujood al-Tilawah).",
   "sajdahReminderOff": "Turn off",
-  "settingsRecitation": "Recitation"
+  "settingsRecitation": "Recitation",
+  "mushafPassages": "Colour thematic passages",
+  "mushafPassagesSub": "Each rukūʿ (thematic section) in its own colour"
 }
