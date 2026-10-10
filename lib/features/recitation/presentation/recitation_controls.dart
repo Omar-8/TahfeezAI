@@ -127,9 +127,9 @@ class _RecitationMushafAnchorState
         end: 0,
         child: RecitationProgressBar(location: widget.location),
       ),
-      // Whose turn it is, while Follow along runs: just below the line.
+      // Whose turn it is, while Follow along runs: just above the bar.
       const PositionedDirectional(
-        top: RecitationProgressBar.height + 8,
+        bottom: 4,
         start: 16,
         end: 16,
         child: IgnorePointer(child: Center(child: FollowAlongHint())),

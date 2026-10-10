@@ -266,7 +266,7 @@ class _FollowAlongSheetState extends ConsumerState<_FollowAlongSheet> {
   }
 }
 
-/// While Follow along runs, at the top of the page: a small pill saying
+/// While Follow along runs, just above the bar: a small pill saying
 /// whose turn it is — the reciter's (listen) or the user's (recite now) —
 /// and how far the run has come. Nothing without live recognition.
 class FollowAlongHint extends ConsumerWidget {
