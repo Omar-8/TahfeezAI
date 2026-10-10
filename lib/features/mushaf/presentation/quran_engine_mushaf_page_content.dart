@@ -117,6 +117,9 @@ class _QuranEngineMushafPageContentState
       return; // nothing drawn, nothing to draw
     }
     final highlights = <({int word, Color color, bool ink})>[];
+    // Each passage's words on the page as one seamless band (word by word,
+    // the see-through bands would overlap into darker seams).
+    final bands = <({List<int> words, Color color})>[];
     for (var i = 0; i < refs.length; i++) {
       final mark = marks[i];
       final ayah = refs[i].ayahId;
@@ -124,13 +127,19 @@ class _QuranEngineMushafPageContentState
         highlights.add((word: i, color: _markStyles[mark]!.color, ink: false));
       } else if (passages != null && ayah != focus) {
         final tint = passages[ayah];
-        if (tint != null) highlights.add((word: i, color: tint, ink: false));
+        if (tint != null) {
+          if (bands.isNotEmpty && bands.last.color == tint) {
+            bands.last.words.add(i);
+          } else {
+            bands.add((words: [i], color: tint));
+          }
+        }
       }
       if (mark != null && _isInk(mark)) {
         highlights.add((word: i, color: _markStyles[mark]!.color, ink: true));
       }
     }
-    page.setWordHighlights(highlights);
+    page.setWordHighlights(highlights, bands: bands);
     if (focus != null) {
       page.highlightAyah((chapterNo: focus ~/ 1000, verseNo: focus % 1000));
     }

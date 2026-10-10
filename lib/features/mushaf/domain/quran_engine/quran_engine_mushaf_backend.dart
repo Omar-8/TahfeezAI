@@ -125,10 +125,16 @@ abstract class QuranEngineMushafPage {
   /// highlight handle.
   int highlightWordAt(int wordIndex, {required Color color});
 
-  /// Replaces every highlight on the page at once: for each engine word
-  /// index, a [color] either as a band behind the word or, with `ink`, on
-  /// the word's own letters. One repaint for the whole set.
-  void setWordHighlights(List<({int word, Color color, bool ink})> highlights);
+  /// Replaces every highlight on the page at once: first the [bands] —
+  /// each one band of [color] behind a set of engine word indices, drawn
+  /// as one seamless highlight (no darker seams where words meet) — then,
+  /// for each engine word index in [highlights], a [color] either as a
+  /// band behind the word or, with `ink`, on the word's own letters. One
+  /// repaint for the whole set.
+  void setWordHighlights(
+    List<({int word, Color color, bool ink})> highlights, {
+    List<({List<int> words, Color color})> bands = const [],
+  });
 
   void dispose();
 }

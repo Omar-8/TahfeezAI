@@ -374,8 +374,14 @@ class QuranEngineAndroidPage implements QuranEngineMushafPage {
   }
 
   @override
-  void setWordHighlights(List<({int word, Color color, bool ink})> highlights) {
+  void setWordHighlights(
+    List<({int word, Color color, bool ink})> highlights, {
+    List<({List<int> words, Color color})> bands = const [],
+  }) {
     page.clearHighlights();
+    for (final b in bands) {
+      page.highlight(T.words(b.words), QvpHighlightStyle(band: b.color));
+    }
     for (final h in highlights) {
       page.highlight(
         T.word(h.word),

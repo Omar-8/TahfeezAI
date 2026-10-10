@@ -33,15 +33,14 @@ final mushafPassagesProvider = NotifierProvider<MushafPassagesController, bool>(
   MushafPassagesController.new,
 );
 
-/// The passage tints: soft, see-through, and clear of the blue of the
-/// recited ayah and the red of mistakes (which are drawn instead of them).
+/// The passage tints: bright and easy to tell apart, still see-through,
+/// and clear of the blue of the recited ayah (drawn instead of them).
 const passagePalette = [
-  Color(0x3326A69A), // teal
-  Color(0x33FFB300), // amber
-  Color(0x33AB47BC), // purple
-  Color(0x33C0CA33), // lime
-  Color(0x33EC407A), // pink
-  Color(0x338D6E63), // brown
+  Color(0x5543A047), // green
+  Color(0x55FDD835), // yellow
+  Color(0x558D6E63), // brown
+  Color(0x55FB8C00), // orange
+  Color(0x55EC407A), // pink
 ];
 
 /// Each passage's tint from its rukūʿ number: scattered over the palette,

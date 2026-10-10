@@ -79,8 +79,9 @@ class _FakePage implements QuranEngineMushafPage {
 
   @override
   void setWordHighlights(
-    List<({int word, Color color, bool ink})> highlights,
-  ) {}
+    List<({int word, Color color, bool ink})> highlights, {
+    List<({List<int> words, Color color})> bands = const [],
+  }) {}
 
   @override
   void setHiddenWords(Set<int> hidden) {}

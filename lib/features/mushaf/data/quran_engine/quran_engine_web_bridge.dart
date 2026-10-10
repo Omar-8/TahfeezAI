@@ -362,10 +362,26 @@ class QuranEngineWebPage {
     _redraw();
   }
 
-  /// Replaces every highlight at once, with a single repaint: each word
+  /// Replaces every highlight at once, with a single repaint: first each
+  /// of [bands] as one seamless band over its words, then each word
   /// [rgba]-coloured (0xRRGGBBAA) as a band, or on its letters with `ink`.
-  void setWordHighlights(List<({int word, int rgba, bool ink})> highlights) {
+  void setWordHighlights(
+    List<({int word, int rgba, bool ink})> highlights, {
+    List<({List<int> words, int rgba})> bands = const [],
+  }) {
     _page.callMethod('clearHighlights'.toJS);
+    final t = _qvp.getProperty('T'.toJS) as JSObject;
+    for (final b in bands) {
+      final style = JSObject()
+        ..setProperty('mode'.toJS, 'band'.toJS)
+        ..setProperty('band'.toJS, b.rgba.toJS);
+      final words = [for (final w in b.words) w.toJS].toJS;
+      _page.callMethod(
+        'highlight'.toJS,
+        t.callMethod('words'.toJS, words) as JSObject,
+        style,
+      );
+    }
     for (final h in highlights) {
       final style = JSObject()
         ..setProperty('mode'.toJS, (h.ink ? 'ink' : 'band').toJS)
