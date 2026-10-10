@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/core_providers.dart';
 import '../../../quran/domain/models/quran_refs.dart';
 import '../../recitation/application/hifz_controller.dart';
 import '../../recitation/application/mushaf_recitation_target.dart';
@@ -14,20 +13,19 @@ import 'quran_audio_player.dart';
 /// What Follow along repeats: each ayah in turn, or the whole range.
 enum FollowAlongUnit { eachAyah, range }
 
-/// Follow along's settings (its menu): the unit, how many times the
-/// reciter recites it and how many times the user then does, and the
-/// reciter's speed. Kept for the app's lifetime, not persisted.
+/// Follow along's settings (its menu): the unit, and how many times the
+/// reciter recites it and the user then does. (The reciter and the speed
+/// are those of all listening: [reciterProvider], [listenSpeedProvider].)
+/// Saved: the menu opens as last used.
 class FollowAlongOptions {
   const FollowAlongOptions({
     this.unit = FollowAlongUnit.eachAyah,
     this.reciterTimes = 1,
     this.userTimes = 1,
-    this.speed = 1.0,
   });
 
   final FollowAlongUnit unit;
   final int reciterTimes, userTimes;
-  final double speed;
 
   static const maxTimes = 10;
 
@@ -35,20 +33,47 @@ class FollowAlongOptions {
     FollowAlongUnit? unit,
     int? reciterTimes,
     int? userTimes,
-    double? speed,
   }) => FollowAlongOptions(
     unit: unit ?? this.unit,
     reciterTimes: reciterTimes ?? this.reciterTimes,
     userTimes: userTimes ?? this.userTimes,
-    speed: speed ?? this.speed,
   );
 }
 
-class FollowAlongOptionsController extends Notifier<FollowAlongOptions> {
+class FollowAlongOptionsController
+    extends SavedJsonController<FollowAlongOptions> {
   @override
-  FollowAlongOptions build() => const FollowAlongOptions();
+  String get storageKey => 'follow.options';
 
-  void set(FollowAlongOptions options) => state = options;
+  @override
+  Object toJson(FollowAlongOptions value) => {
+    'unit': value.unit.name,
+    'reciterTimes': value.reciterTimes,
+    'userTimes': value.userTimes,
+  };
+
+  @override
+  FollowAlongOptions fromJson(Object? json) {
+    if (json is! Map) return const FollowAlongOptions();
+    int times(String key) => json[key] is int
+        ? (json[key] as int).clamp(1, FollowAlongOptions.maxTimes)
+        : 1;
+    return FollowAlongOptions(
+      unit:
+          FollowAlongUnit.values.asNameMap()[json['unit']] ??
+          FollowAlongUnit.eachAyah,
+      reciterTimes: times('reciterTimes'),
+      userTimes: times('userTimes'),
+    );
+  }
+
+  @override
+  FollowAlongOptions build() {
+    restore();
+    return const FollowAlongOptions();
+  }
+
+  void set(FollowAlongOptions options) => save(options);
 }
 
 final followAlongOptionsProvider =
@@ -161,8 +186,6 @@ class FollowAlongController extends Notifier<FollowAlongState?> {
       phase: FollowAlongPhase.reciter,
       options: options,
     );
-    // The bar's speed button changes it from here on.
-    await ref.read(audioControllerProvider).setSpeed(options.speed);
     return _reciterTurn();
   }
 

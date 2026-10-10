@@ -100,6 +100,7 @@ class _FollowAlongSheetState extends ConsumerState<_FollowAlongSheet> {
     _defaults();
     final from = _from!, to = _to!;
     final reciter = reciterFor(ref.watch(reciterProvider));
+    final currentSpeed = ref.watch(listenSpeedProvider);
     final eachAyah = _options.unit == FollowAlongUnit.eachAyah;
     Widget label(String text) => Padding(
       padding: const EdgeInsets.only(bottom: TahfeezSpacing.sm),
@@ -241,10 +242,10 @@ class _FollowAlongSheetState extends ConsumerState<_FollowAlongSheet> {
                         label: Text(
                           '${speed == speed.roundToDouble() ? speed.toInt() : speed}×',
                         ),
-                        selected: (_options.speed - speed).abs() < 0.01,
-                        onSelected: (_) => setState(
-                          () => _options = _options.copyWith(speed: speed),
-                        ),
+                        // The speed of all listening, kept for next time.
+                        selected: (currentSpeed - speed).abs() < 0.01,
+                        onSelected: (_) =>
+                            ref.read(listenSpeedProvider.notifier).set(speed),
                       ),
                   ],
                 ),

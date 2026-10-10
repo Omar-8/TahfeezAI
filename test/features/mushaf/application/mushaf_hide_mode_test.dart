@@ -395,10 +395,19 @@ void main() {
     expect(page.bands, hasLength(1));
     expect(page.ayahHighlights, isEmpty);
 
-    // Hide mode: no passage colours over the hidden words.
+    // Hide mode: no passage colours over the hidden words; a revealed
+    // word has its colour again.
     container.read(mushafHideModeProvider.notifier).toggle();
     await tester.pump();
     expect(page.bands, isEmpty);
+    container.read(mushafHideModeProvider.notifier).revealNextWord(42);
+    await tester.pump();
+    expect(
+      [for (final b in page.bands) b.words],
+      [
+        [0],
+      ],
+    );
     container.read(mushafHideModeProvider.notifier).toggle();
     await tester.pump();
     expect(page.bands, hasLength(1));

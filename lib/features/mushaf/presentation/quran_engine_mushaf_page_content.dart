@@ -75,7 +75,12 @@ class _QuranEngineMushafPageContentState
 
   /// The highlights last drawn on [_page] (see [_applyHighlights]); `null`
   /// once cleared.
-  ({Map<int, MushafWordMark> marks, int? focus, Map<int, Color>? passages})?
+  ({
+    Map<int, MushafWordMark> marks,
+    int? focus,
+    Map<int, Color>? passages,
+    Set<int> hidden,
+  })?
   _appliedHighlights;
 
   /// The ayah being long-pressed (its sheet open): highlighted like the
@@ -92,9 +97,9 @@ class _QuranEngineMushafPageContentState
 
   /// Draws every highlight on the page at once, each word's by priority:
   /// the focus (or long-pressed) ayah's blue, then a recitation's marks,
-  /// then — with "Colour thematic passages" on, outside hide mode — its
-  /// passage's tint. Ink marks colour the letters over whichever band is
-  /// behind them.
+  /// then — with "Colour thematic passages" on — its passage's tint, on
+  /// the words not hidden (in hide mode, as they are revealed). Ink marks
+  /// colour the letters over whichever band is behind them.
   void _applyHighlights() {
     final page = _page;
     if (page == null) return;
@@ -104,17 +109,25 @@ class _QuranEngineMushafPageContentState
     final focus = focusId != null && refs.any((w) => w.ayahId == focusId)
         ? focusId
         : null;
-    // (Not in hide mode: the hidden words' places stay plain.)
-    final passages =
-        ref.read(mushafPassagesProvider) &&
-            !ref.read(mushafHideModeProvider).enabled
+    final passages = ref.read(mushafPassagesProvider)
         ? ref.read(passageColorsProvider).value
         : null;
+    // Hidden words' places stay plain: a recitation's own reveals while
+    // one runs, else hide mode's.
+    final hideMode = ref.read(mushafHideModeProvider);
+    final hidden = passages == null
+        ? const <int>{}
+        : _appliedOverlay?.$1 ??
+              {
+                for (var i = 0; i < refs.length; i++)
+                  if (hideMode.isWordHidden(widget.pageNumber, i)) i,
+              };
     final applied = _appliedHighlights;
     if (applied != null &&
         applied.focus == focus &&
         identical(applied.passages, passages) &&
-        mapEquals(applied.marks, marks)) {
+        mapEquals(applied.marks, marks) &&
+        setEquals(applied.hidden, hidden)) {
       return;
     }
     if (applied == null && focus == null && marks.isEmpty && passages == null) {
@@ -126,9 +139,11 @@ class _QuranEngineMushafPageContentState
     // included — or, in an ayah with a mark band or the focus, its other
     // words.
     final bands = <PageBand>[];
+    // Ayahs tinted only in part: with a mark band, or words hidden.
     final banded = <int>{
       for (final MapEntry(key: i, value: mark) in marks.entries)
         if (!_isInk(mark)) refs[i].ayahId,
+      for (final i in hidden) refs[i].ayahId,
     };
     final tintedWords = <int, List<int>>{};
     for (var i = 0; i < refs.length; i++) {
@@ -136,7 +151,7 @@ class _QuranEngineMushafPageContentState
       final ayah = refs[i].ayahId;
       if (mark != null && !_isInk(mark)) {
         highlights.add((word: i, color: _markStyles[mark]!.color, ink: false));
-      } else if (passages != null && ayah != focus) {
+      } else if (passages != null && ayah != focus && !hidden.contains(i)) {
         final tint = passages[ayah];
         if (tint != null) {
           if (banded.contains(ayah)) {
@@ -168,7 +183,12 @@ class _QuranEngineMushafPageContentState
     if (focus != null) {
       page.highlightAyah((chapterNo: focus ~/ 1000, verseNo: focus % 1000));
     }
-    _appliedHighlights = (marks: marks, focus: focus, passages: passages);
+    _appliedHighlights = (
+      marks: marks,
+      focus: focus,
+      passages: passages,
+      hidden: hidden,
+    );
   }
 
   /// Applies whichever mask is active: a word overlay (Hifz mode) wins

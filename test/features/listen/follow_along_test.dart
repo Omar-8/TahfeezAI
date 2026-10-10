@@ -103,7 +103,7 @@ void main() {
         .start(
           (chapterNo: 112, verseNo: 1),
           (chapterNo: 112, verseNo: 2),
-          const FollowAlongOptions(reciterTimes: 2, speed: 0.75),
+          const FollowAlongOptions(reciterTimes: 2),
         );
     expect(started, isTrue);
     expect(audio.queue, hasLength(2), reason: '112:1 twice');

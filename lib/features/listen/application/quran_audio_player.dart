@@ -204,7 +204,10 @@ class QuranAudioPlayer extends Notifier<NowPlaying?> {
     state = NowPlaying.ayahs(ayahIds, 0, reciter, options: options);
     _follow();
     try {
-      await ref.read(audioControllerProvider).playQueue([
+      final audio = ref.read(audioControllerProvider);
+      // The speed last chosen, wherever it was.
+      await audio.setSpeed(ref.read(listenSpeedProvider));
+      await audio.playQueue([
         for (final a in ayahIds) ayahAudioUrl(a, reciter),
       ]);
       return true;
@@ -235,10 +238,11 @@ class QuranAudioPlayer extends Notifier<NowPlaying?> {
   Future<void> pause() => ref.read(audioControllerProvider).pause();
   Future<void> resume() => ref.read(audioControllerProvider).resume();
 
-  /// The next of [listenSpeeds] after [current].
+  /// The next of [listenSpeeds] after [current], kept for next time.
   Future<void> cycleSpeed(double current) {
     final i = listenSpeeds.indexWhere((s) => (s - current).abs() < 0.01);
     final next = listenSpeeds[(i + 1) % listenSpeeds.length];
+    ref.read(listenSpeedProvider.notifier).set(next);
     return ref.read(audioControllerProvider).setSpeed(next);
   }
 
