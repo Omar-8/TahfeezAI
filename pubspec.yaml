@@ -134,6 +134,8 @@ flutter:
   # so Android/iOS never need a network call to seed the local databases.
   assets:
     - assets/quran/quran_dataset.json
+    # The splash's icon (the launcher icon's foreground, on its own colour).
+    - assets/branding/splash_icon.png
     - assets/quran/resource_manifest.json
     - assets/quran/translations/en_rowwad.json
     - assets/quran/translations/de_rowwad.json

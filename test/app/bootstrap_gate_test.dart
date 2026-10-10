@@ -1,8 +1,8 @@
 // Exercises TahfeezBootstrapGate in isolation (a bare Completer standing
 // in for the real BundledDatasetSeeder.seedIfNeeded() future -- this is a
 // widget-level contract test, not a re-test of seeding itself): it must
-// show a loading state while the seeding future is pending, and hand off
-// to the real app the instant it resolves, never before.
+// show the splash (the app's name) while the seeding future is pending,
+// and hand off to the real app once it resolves, never before.
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -19,20 +19,23 @@ void main() {
   );
 
   testWidgets(
-    'shows a loading indicator while seeding is pending, then swaps to '
-    'the real app once it resolves',
+    'shows the splash while seeding is pending, then swaps to the real app '
+    'once it resolves',
     (tester) async {
       final completer = Completer<void>();
 
       await tester.pumpWidget(gate(completer.future));
       await tester.pump();
 
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.text('TahfeezAI'), findsOneWidget);
+      expect(find.byType(MaterialApp), findsNothing);
 
       completer.complete();
+      // (The splash shows at least 0.9 s.)
+      await tester.pump(const Duration(seconds: 1));
       await tester.pumpAndSettle();
 
-      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(find.byType(MaterialApp), findsOneWidget);
     },
   );
 
@@ -45,7 +48,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(find.byType(MaterialApp), findsNothing);
 
     completer.complete();
     await tester.pumpAndSettle();

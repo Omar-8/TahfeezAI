@@ -301,7 +301,8 @@ class _ListenButtons extends ConsumerWidget {
   }
 }
 
-/// Bookmarks the ayah, or its whole surah (each again to remove it).
+/// Bookmarks the ayah (again to remove it). Surahs are bookmarked from the
+/// surah list.
 class _BookmarkButtons extends ConsumerWidget {
   const _BookmarkButtons({required this.ayahId});
 
@@ -312,30 +313,17 @@ class _BookmarkButtons extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     ref.watch(bookmarksProvider);
     final bookmarks = ref.read(bookmarksProvider.notifier);
-    final surahNo = ayahId ~/ 1000;
-    final ayahSaved = bookmarks.hasAyah(ayahId);
-    final surahSaved = bookmarks.hasSurah(surahNo);
-    final primary = Theme.of(context).colorScheme.primary;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        IconButton(
-          key: const ValueKey('ayah-sheet-bookmark'),
-          isSelected: ayahSaved,
-          icon: const Icon(Icons.bookmark_border_rounded),
-          selectedIcon: Icon(Icons.bookmark_rounded, color: primary),
-          tooltip: ayahSaved ? l10n.bookmarkRemove : l10n.bookmarkAyah,
-          onPressed: () => bookmarks.toggleAyah(ayahId),
-        ),
-        IconButton(
-          key: const ValueKey('ayah-sheet-bookmark-surah'),
-          isSelected: surahSaved,
-          icon: const Icon(Icons.bookmarks_outlined),
-          selectedIcon: Icon(Icons.bookmarks_rounded, color: primary),
-          tooltip: surahSaved ? l10n.bookmarkRemove : l10n.bookmarkSurah,
-          onPressed: () => bookmarks.toggleSurah(surahNo),
-        ),
-      ],
+    final saved = bookmarks.hasAyah(ayahId);
+    return IconButton(
+      key: const ValueKey('ayah-sheet-bookmark'),
+      isSelected: saved,
+      icon: const Icon(Icons.bookmark_border_rounded),
+      selectedIcon: Icon(
+        Icons.bookmark_rounded,
+        color: Theme.of(context).colorScheme.primary,
+      ),
+      tooltip: saved ? l10n.bookmarkRemove : l10n.bookmarkAyah,
+      onPressed: () => bookmarks.toggleAyah(ayahId),
     );
   }
 }
