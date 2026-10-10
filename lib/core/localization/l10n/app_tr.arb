@@ -400,5 +400,8 @@
   "modeLoop": "Tekrar",
   "modeListen": "Dinle",
   "modeFollow": "Takip",
-  "sajdahReminderTitle": "Tilavet secdesi"
+  "sajdahReminderTitle": "Tilavet secdesi",
+  "listenDownloadWhole": "Kur'an'ın tamamı",
+  "listenDownloadDeleteAll": "İndirilenleri sil",
+  "listenDownloadedPart": "Bu telefonda %{percent}"
 }

@@ -400,5 +400,8 @@
   "modeLoop": "دہرائی",
   "modeListen": "سنیں",
   "modeFollow": "ساتھ",
-  "sajdahReminderTitle": "سجدۂ تلاوت"
+  "sajdahReminderTitle": "سجدۂ تلاوت",
+  "listenDownloadWhole": "پورا قرآن",
+  "listenDownloadDeleteAll": "ڈاؤن لوڈ شدہ حذف کریں",
+  "listenDownloadedPart": "اس فون پر {percent}%"
 }

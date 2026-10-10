@@ -840,5 +840,15 @@
   "modeLoop": "Loop",
   "modeListen": "Listen",
   "modeFollow": "Follow",
-  "sajdahReminderTitle": "Sujood al-Tilawah"
+  "sajdahReminderTitle": "Sujood al-Tilawah",
+  "listenDownloadWhole": "Whole Quran",
+  "listenDownloadDeleteAll": "Delete what is downloaded",
+  "listenDownloadedPart": "{percent}% on this phone",
+  "@listenDownloadedPart": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  }
 }

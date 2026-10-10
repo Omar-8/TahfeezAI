@@ -73,6 +73,19 @@ void main() {
     expect(Directory('${root.path}/ar.alafasy').existsSync(), isFalse);
   }, timeout: const Timeout(Duration(minutes: 2)));
 
+  test('one juz: only its ayahs; the rest still streams', () async {
+    await downloads().ready();
+    await downloads().download('ar.alafasy', juz: 30);
+    final juz30 = 6236 - juzFirstAyah[29] + 1;
+    expect(network.requests, juz30);
+    expect(downloads().juzComplete('ar.alafasy', 30), isTrue);
+    expect(downloads().juzComplete('ar.alafasy', 29), isFalse);
+    expect(state()!.complete, isFalse);
+    expect(state()!.files, juz30);
+    expect(downloads().localFile(114006, alafasy), isNotNull);
+    expect(downloads().localFile(1001, alafasy), isNull);
+  });
+
   test('a failed download stops, keeps what it has, and resumes', () async {
     await downloads().ready();
     network.failFrom = 101;

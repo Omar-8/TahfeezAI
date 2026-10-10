@@ -18,6 +18,9 @@ class ReciterDownload {
     this.files = 0,
     this.downloading = false,
     this.failed = false,
+    this.juz,
+    this.jobDone = 0,
+    this.jobTotal = 0,
   });
 
   /// Ayah files on the device.
@@ -27,15 +30,16 @@ class ReciterDownload {
   /// The last download stopped on an error (the connection, the storage).
   final bool failed;
 
-  bool get complete => files >= _ayahCount;
-  double get progress => files / _ayahCount;
+  /// The download running (or last run): one juz, or `null` for the whole
+  /// Quran; its files done of its total.
+  final int? juz;
+  final int jobDone, jobTotal;
 
-  ReciterDownload copyWith({int? files, bool? downloading, bool? failed}) =>
-      ReciterDownload(
-        files: files ?? this.files,
-        downloading: downloading ?? this.downloading,
-        failed: failed ?? this.failed,
-      );
+  bool get complete => files >= _ayahCount;
+
+  /// The running download's progress; else how much of the Quran is here.
+  double get progress =>
+      downloading && jobTotal > 0 ? jobDone / jobTotal : files / _ayahCount;
 }
 
 /// Where downloaded recitations live: the app's own storage (removed with
@@ -123,21 +127,43 @@ class ReciterDownloads extends Notifier<Map<String, ReciterDownload>> {
   static String _path(Directory root, String edition, int n) =>
       p.join(root.path, edition, '$n.mp3');
 
-  /// Downloads every ayah of [edition] not on the device yet.
-  Future<void> download(String edition) async {
+  /// Whether all of juz [juz] of [edition] is on the device.
+  bool juzComplete(String edition, int juz) {
+    final root = _root;
+    if (root == null || (state[edition]?.files ?? 0) == 0) return false;
+    return juzAyahNumbers(juz)
+        .every((n) => File(_path(root, edition, n)).existsSync());
+  }
+
+  /// Downloads the ayahs of [edition] not on the device yet: of juz [juz],
+  /// or of the whole Quran.
+  Future<void> download(String edition, {int? juz}) async {
     final root = await _rootDir();
     if (root == null || (state[edition]?.downloading ?? false)) return;
     final reciter = reciterFor(edition);
     final dir = Directory(p.join(root.path, edition));
     await dir.create(recursive: true);
+    final wanted = juz == null
+        ? [for (var n = 1; n <= _ayahCount; n++) n]
+        : juzAyahNumbers(juz).toList();
     final missing = [
-      for (var n = 1; n <= _ayahCount; n++)
+      for (final n in wanted)
         if (!File(_path(root, edition, n)).existsSync()) n,
     ];
-    var files = _ayahCount - missing.length;
+    var files = await _count(dir);
+    var done = 0;
     final token = CancelToken();
     _tokens[edition] = token;
-    _set(edition, ReciterDownload(files: files, downloading: true));
+    ReciterDownload progress({bool downloading = true, bool failed = false}) =>
+        ReciterDownload(
+          files: files,
+          downloading: downloading,
+          failed: failed,
+          juz: juz,
+          jobDone: done,
+          jobTotal: missing.length,
+        );
+    _set(edition, progress());
     final network = ref.read(networkClientProvider);
     var next = 0;
     var failed = false;
@@ -148,8 +174,8 @@ class ReciterDownloads extends Notifier<Map<String, ReciterDownload>> {
         final n = missing[next++];
         final target = _path(root, edition, n);
         final part = '$target.part';
-        var done = false;
-        for (var t = 0; t < _tries && !done && !token.isCancelled; t++) {
+        var saved = false;
+        for (var t = 0; t < _tries && !saved && !token.isCancelled; t++) {
           try {
             await network.download(
               'https://cdn.islamic.network/quran/audio/${reciter.kbps}/'
@@ -158,13 +184,13 @@ class ReciterDownloads extends Notifier<Map<String, ReciterDownload>> {
               cancelToken: token,
             );
             await File(part).rename(target);
-            done = true;
+            saved = true;
           } catch (_) {
             if (token.isCancelled) return;
             await Future<void>.delayed(Duration(seconds: 1 + t));
           }
         }
-        if (!done) {
+        if (!saved) {
           if (!token.isCancelled) {
             failed = true;
             token.cancel();
@@ -172,12 +198,11 @@ class ReciterDownloads extends Notifier<Map<String, ReciterDownload>> {
           return;
         }
         files++;
+        done++;
         final now = DateTime.now();
         if (now.difference(lastShown) > const Duration(milliseconds: 300)) {
           lastShown = now;
-          if (ref.mounted) {
-            _set(edition, ReciterDownload(files: files, downloading: true));
-          }
+          if (ref.mounted) _set(edition, progress());
         }
       }
     }
@@ -190,8 +215,11 @@ class ReciterDownloads extends Notifier<Map<String, ReciterDownload>> {
       return;
     }
     if (!ref.mounted) return;
-    _set(edition, ReciterDownload(files: files, failed: failed));
+    _set(edition, progress(downloading: false, failed: failed));
   }
+
+  static Future<int> _count(Directory dir) =>
+      dir.list().where((f) => f.path.endsWith('.mp3')).length;
 
   /// Stops [edition]'s download (what is downloaded stays).
   void cancel(String edition) => _tokens[edition]?.cancel();

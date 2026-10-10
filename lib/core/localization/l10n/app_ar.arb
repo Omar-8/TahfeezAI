@@ -400,5 +400,8 @@
   "modeLoop": "تكرار",
   "modeListen": "استماع",
   "modeFollow": "متابعة",
-  "sajdahReminderTitle": "سجود التلاوة"
+  "sajdahReminderTitle": "سجود التلاوة",
+  "listenDownloadWhole": "القرآن كاملًا",
+  "listenDownloadDeleteAll": "حذف ما تم تنزيله",
+  "listenDownloadedPart": "{percent}% على هذا الهاتف"
 }

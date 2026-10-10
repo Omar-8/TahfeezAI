@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -379,10 +381,13 @@ class _ReciterRow extends ConsumerWidget {
       _ when !downloads.supported => null,
       ReciterDownload(complete: true) => l10n.listenDownloaded,
       ReciterDownload(failed: true) => l10n.listenDownloadFailed,
-      ReciterDownload(:final progress, downloading: true) ||
-      ReciterDownload(
-        :final progress,
-      ) when progress > 0 => '${(progress * 100).floor()}%',
+      ReciterDownload(:final progress, :final juz?, downloading: true) =>
+        '${l10n.homeContinueReadingJuz(juz)} · ${(progress * 100).floor()}%',
+      ReciterDownload(:final progress, downloading: true) =>
+        '${(progress * 100).floor()}%',
+      ReciterDownload(:final files) when files > 0 => l10n.listenDownloadedPart(
+        (files * 100 / 6236).ceil(),
+      ),
       _ => null,
     };
     return ListTile(
@@ -479,7 +484,86 @@ class _DownloadButton extends ConsumerWidget {
       key: ValueKey('reciter-download-${reciter.edition}'),
       tooltip: l10n.listenDownload,
       icon: const Icon(Icons.download_rounded),
-      onPressed: () => downloads.download(reciter.edition),
+      onPressed: () => _showDownloadChoices(context, reciter),
     );
   }
 }
+
+/// What to download of [reciter]: the whole Quran, or one juz (each with
+/// its size; a check on what is already here). Deletes what is here, too.
+Future<void> _showDownloadChoices(BuildContext context, Reciter reciter) =>
+    showTahfeezModalBottomSheet<void>(
+      context: context,
+      title: reciterName(context, reciter),
+      builder: (context) => Consumer(
+        builder: (context, ref, _) {
+          final l10n = AppLocalizations.of(context);
+          final downloads = ref.read(reciterDownloadsProvider.notifier);
+          final d = ref.watch(
+            reciterDownloadsProvider.select((all) => all[reciter.edition]),
+          );
+          final check = Icon(
+            Icons.check_circle_rounded,
+            color: Theme.of(context).colorScheme.primary,
+          );
+          void start({int? juz}) {
+            unawaited(downloads.download(reciter.edition, juz: juz));
+            Navigator.of(context).pop();
+          }
+
+          return ListView(
+            shrinkWrap: true,
+            padding: const EdgeInsets.only(bottom: TahfeezSpacing.md),
+            children: [
+              ListTile(
+                key: const ValueKey('download-whole'),
+                leading: const Icon(Icons.menu_book_rounded),
+                title: Text(l10n.listenDownloadWhole),
+                subtitle: Text(reciterDownloadSize(reciter) ?? ''),
+                trailing: d?.complete ?? false
+                    ? check
+                    : const Icon(Icons.download_rounded),
+                onTap: d?.complete ?? false ? null : () => start(),
+              ),
+              const Divider(height: 1),
+              for (var juz = 1; juz <= 30; juz++)
+                Builder(
+                  builder: (context) {
+                    final here = downloads.juzComplete(reciter.edition, juz);
+                    return ListTile(
+                      key: ValueKey('download-juz-$juz'),
+                      dense: true,
+                      title: Text(l10n.homeContinueReadingJuz(juz)),
+                      subtitle: Text(juzDownloadSize(reciter, juz) ?? ''),
+                      trailing: here
+                          ? check
+                          : const Icon(Icons.download_rounded, size: 20),
+                      onTap: here ? null : () => start(juz: juz),
+                    );
+                  },
+                ),
+              if ((d?.files ?? 0) > 0) ...[
+                const Divider(height: 1),
+                ListTile(
+                  key: const ValueKey('download-delete-all'),
+                  leading: Icon(
+                    Icons.delete_outline_rounded,
+                    color: Theme.of(context).colorScheme.error,
+                  ),
+                  title: Text(
+                    l10n.listenDownloadDeleteAll,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                  ),
+                  onTap: () {
+                    unawaited(downloads.delete(reciter.edition));
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            ],
+          );
+        },
+      ),
+    );

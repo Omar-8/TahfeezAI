@@ -400,5 +400,8 @@
   "modeLoop": "Schleife",
   "modeListen": "Hören",
   "modeFollow": "Folgen",
-  "sajdahReminderTitle": "Rezitationsniederwerfung"
+  "sajdahReminderTitle": "Rezitationsniederwerfung",
+  "listenDownloadWhole": "Ganzer Koran",
+  "listenDownloadDeleteAll": "Heruntergeladenes löschen",
+  "listenDownloadedPart": "{percent} % auf diesem Telefon"
 }

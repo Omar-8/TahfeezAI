@@ -21,7 +21,7 @@ void main() {
     expect(globalAyahNumber(114006), 6236);
     expect(
       ayahAudioUrl(2255, reciterFor('ar.alafasy')),
-      'https://cdn.islamic.network/quran/audio/128/ar.alafasy/262.mp3',
+      'https://cdn.islamic.network/quran/audio/64/ar.alafasy/262.mp3',
     );
     expect(reciterFor('unknown').edition, reciters.first.edition);
   });

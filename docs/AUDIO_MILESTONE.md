@@ -63,7 +63,11 @@ Each phase: `flutter analyze` clean, tests, English + Arabic strings, credits an
    the app); an interrupted or stopped download goes on from where it was. The player
    plays a downloaded ayah from the phone (offline too), else streams it. Not on the web.
    Word audio stays streamed only (Quran Foundation terms: nothing kept beyond a week).
-   (`ReciterDownloads`.)
+   (`ReciterDownloads`.) The download button offers the whole Quran or any juz (each
+   with its size); a reciter's partial downloads can be deleted. Every reciter streams
+   and downloads at 64 kbps where the CDN has it (**decided 2026-10-10**, after listening:
+   half the size of 128, hardly different); Al-Minshawi and Muhammad Ayyoub only exist
+   at 128.
 
 ## Later
 

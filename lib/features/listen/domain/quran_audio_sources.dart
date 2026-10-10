@@ -16,11 +16,12 @@ class Reciter {
 }
 
 /// Ḥafṣ reciters, each checked to serve every ayah at [Reciter.kbps]
-/// (2026-10-09). A reciter who asks to be removed is removed here.
+/// (2026-10-09) — 64 kbps wherever the CDN has it (2026-10-10: half the
+/// size of 128, a difference hardly heard in recitation). A reciter who asks to be removed is removed here.
 const reciters = [
-  Reciter('ar.alafasy', 'Mishary Alafasy', 'مشاري العفاسي', 128),
-  Reciter('ar.husary', 'Mahmoud Khalil Al-Husary', 'محمود خليل الحصري', 128),
-  Reciter('ar.husarymujawwad', 'Al-Husary (Mujawwad)', 'الحصري (مجوّد)', 128),
+  Reciter('ar.alafasy', 'Mishary Alafasy', 'مشاري العفاسي', 64),
+  Reciter('ar.husary', 'Mahmoud Khalil Al-Husary', 'محمود خليل الحصري', 64),
+  Reciter('ar.husarymujawwad', 'Al-Husary (Mujawwad)', 'الحصري (مجوّد)', 64),
   Reciter(
     'ar.minshawi',
     'Muhammad Siddiq Al-Minshawi',
@@ -42,10 +43,10 @@ const reciters = [
     64,
   ),
   Reciter('ar.saoodshuraym', 'Saud Ash-Shuraym', 'سعود الشريم', 64),
-  Reciter('ar.mahermuaiqly', 'Maher Al-Muaiqly', 'ماهر المعيقلي', 128),
-  Reciter('ar.hudhaify', 'Ali Al-Hudhaify', 'علي الحذيفي', 128),
+  Reciter('ar.mahermuaiqly', 'Maher Al-Muaiqly', 'ماهر المعيقلي', 64),
+  Reciter('ar.hudhaify', 'Ali Al-Hudhaify', 'علي الحذيفي', 64),
   Reciter('ar.muhammadayyoub', 'Muhammad Ayyoub', 'محمد أيوب', 128),
-  Reciter('ar.shaatree', 'Abu Bakr Ash-Shatri', 'أبو بكر الشاطري', 128),
+  Reciter('ar.shaatree', 'Abu Bakr Ash-Shatri', 'أبو بكر الشاطري', 64),
   Reciter('ar.abdullahbasfar', 'Abdullah Basfar', 'عبد الله بصفر', 64),
 ];
 
@@ -122,17 +123,17 @@ String wordAudioUrl(int ayahId, int wordIndex) {
 /// estimated (2026-10-10) from 250 sampled ayah files' sizes, fitted to the
 /// ayahs' letter counts (within a few percent).
 const reciterDownloadBytes = <String, int>{
-  'ar.alafasy': 1746434324,
-  'ar.husary': 2500573503,
-  'ar.husarymujawwad': 3541025481,
+  'ar.alafasy': 877486397,
+  'ar.husary': 1245395110,
+  'ar.husarymujawwad': 1795656526,
   'ar.minshawi': 1658509149,
   'ar.abdulbasitmurattal': 899447010,
   'ar.abdurrahmaansudais': 607405161,
   'ar.saoodshuraym': 1054243682,
-  'ar.mahermuaiqly': 614588102,
-  'ar.hudhaify': 1756796245,
+  'ar.mahermuaiqly': 614719058,
+  'ar.hudhaify': 876030953,
   'ar.muhammadayyoub': 937553634,
-  'ar.shaatree': 1420569190,
+  'ar.shaatree': 743749929,
   'ar.abdullahbasfar': 850391972,
 };
 
@@ -140,9 +141,96 @@ const reciterDownloadBytes = <String, int>{
 /// unknown.
 String? reciterDownloadSize(Reciter reciter) {
   final bytes = reciterDownloadBytes[reciter.edition];
-  if (bytes == null) return null;
+  return bytes == null ? null : _sizeLabel(bytes.toDouble());
+}
+
+String _sizeLabel(double bytes) {
   final mb = bytes / (1000 * 1000);
   return mb >= 1000
       ? '≈ ${(mb / 1000).toStringAsFixed(1)} GB'
       : '≈ ${mb.round()} MB';
+}
+
+/// Each juz's first ayah, as a global ayah number (1–6236), juz 1 first.
+const juzFirstAyah = <int>[
+  1,
+  149,
+  260,
+  386,
+  517,
+  641,
+  751,
+  900,
+  1042,
+  1201,
+  1328,
+  1479,
+  1649,
+  1803,
+  2030,
+  2215,
+  2484,
+  2674,
+  2876,
+  3215,
+  3386,
+  3564,
+  3733,
+  4090,
+  4265,
+  4511,
+  4706,
+  5105,
+  5242,
+  5673,
+];
+
+/// Each juz's share of the whole recitation (by its letters), juz 1 first
+/// — for its download size.
+const juzShare = <double>[
+  0.0328,
+  0.0339,
+  0.0334,
+  0.0329,
+  0.0339,
+  0.0331,
+  0.0353,
+  0.0332,
+  0.0330,
+  0.0322,
+  0.0338,
+  0.0334,
+  0.0330,
+  0.0323,
+  0.0344,
+  0.0338,
+  0.0313,
+  0.0344,
+  0.0339,
+  0.0324,
+  0.0332,
+  0.0338,
+  0.0339,
+  0.0323,
+  0.0339,
+  0.0342,
+  0.0335,
+  0.0347,
+  0.0342,
+  0.0298,
+];
+
+/// Juz [juz]'s ayahs, as global ayah numbers.
+Iterable<int> juzAyahNumbers(int juz) sync* {
+  final end = juz < 30 ? juzFirstAyah[juz] : 6237;
+  for (var n = juzFirstAyah[juz - 1]; n < end; n++) {
+    yield n;
+  }
+}
+
+/// Juz [juz]'s download size for [reciter], as "≈ 30 MB"; `null` if
+/// unknown.
+String? juzDownloadSize(Reciter reciter, int juz) {
+  final bytes = reciterDownloadBytes[reciter.edition];
+  return bytes == null ? null : _sizeLabel(bytes * juzShare[juz - 1]);
 }

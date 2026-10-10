@@ -400,5 +400,8 @@
   "modeLoop": "Boucle",
   "modeListen": "Écouter",
   "modeFollow": "Suivre",
-  "sajdahReminderTitle": "Prosternation de récitation"
+  "sajdahReminderTitle": "Prosternation de récitation",
+  "listenDownloadWhole": "Le Coran entier",
+  "listenDownloadDeleteAll": "Supprimer ce qui est téléchargé",
+  "listenDownloadedPart": "{percent} % sur ce téléphone"
 }
