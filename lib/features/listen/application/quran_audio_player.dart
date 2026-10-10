@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/audio/audio_models.dart';
 import '../../../core/core_providers.dart';
+import '../../../memorization/application/activity_stats.dart';
 import '../../../quran/quran_providers.dart';
 import '../../mushaf/application/mushaf_focus_ayah.dart';
 import '../../mushaf/application/mushaf_hide_mode.dart';
@@ -91,7 +92,10 @@ class QuranAudioPlayer extends Notifier<NowPlaying?> {
     if (!playback.completed) _started = true;
     if (playback.completed && _started) {
       final last = now.isWord ? null : now.ayahIds.last;
-      if (!now.isWord) _finished.add(now);
+      if (!now.isWord) {
+        ref.read(activityStatsProvider.notifier).add(heardAyahs: 1);
+        _finished.add(now);
+      }
       _clear();
       // Going on: the next surah, whole, with the same options.
       if (last != null && now.options.continueToNextSurahs) {
@@ -112,6 +116,10 @@ class QuranAudioPlayer extends Notifier<NowPlaying?> {
     }
     final i = playback.currentIndex;
     if (!now.isWord && i != null && i != now.index && i < now.ayahIds.length) {
+      // The ayah before it was heard through.
+      if (i > now.index) {
+        ref.read(activityStatsProvider.notifier).add(heardAyahs: i - now.index);
+      }
       state = now.at(i);
       _follow();
     }

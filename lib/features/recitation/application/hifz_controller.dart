@@ -1,3 +1,5 @@
+import '../../../memorization/application/activity_stats.dart';
+
 import 'dart:async';
 import 'dart:convert';
 
@@ -1145,6 +1147,28 @@ class HifzController extends Notifier<HifzState> {
     final hidden = ref.read(mushafHideModeProvider).enabled;
     final recorder = ref.read(memorizationRecorderProvider);
     final settle = ref.read(memorizationRecordDelayProvider);
+    // Activity: the words heard recited, and the ayahs recited whole.
+    final recited = {
+      for (final p in judge.revealed)
+        if (!judge.given.contains(p)) p,
+    };
+    if (recited.isNotEmpty) {
+      final byAyah = <int, int>{};
+      for (final p in recited) {
+        final a = corpus.words[p].ref.ayahId;
+        byAyah[a] = (byAyah[a] ?? 0) + 1;
+      }
+      var whole = 0;
+      for (final MapEntry(key: a, value: n) in byAyah.entries) {
+        final verse = (chapterNo: a ~/ 1000, verseNo: a % 1000);
+        final first = corpus.verseStartPosition(verse);
+        final last = corpus.verseEndPosition(verse);
+        if (first != null && last != null && n >= last - first + 1) whole++;
+      }
+      ref
+          .read(activityStatsProvider.notifier)
+          .add(recitedWords: recited.length, recitedAyahs: whole);
+    }
     final outcomes = {
       for (final p in judge.revealed)
         if (p >= judge.start && p <= judge.end && !judge.given.contains(p))

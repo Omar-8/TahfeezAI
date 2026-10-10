@@ -403,5 +403,13 @@
   "sajdahReminderTitle": "سجدۂ تلاوت",
   "listenDownloadWhole": "پورا قرآن",
   "listenDownloadDeleteAll": "ڈاؤن لوڈ شدہ حذف کریں",
-  "listenDownloadedPart": "اس فون پر {percent}%"
+  "listenDownloadedPart": "اس فون پر {percent}%",
+  "activityTitle": "آپ کی سرگرمی",
+  "activityAyahsRecited": "پڑھی گئی آیات",
+  "activityWordsRecited": "پڑھے گئے الفاظ",
+  "activityAyahsHeard": "سنی گئی آیات",
+  "activityMushafTime": "مصحف میں وقت",
+  "activityHoursMinutes": "{hours} گھنٹے {minutes} منٹ",
+  "activityMinutes": "{minutes} منٹ",
+  "homeBackToExit": "باہر نکلنے کے لیے دوبارہ واپس دبائیں"
 }

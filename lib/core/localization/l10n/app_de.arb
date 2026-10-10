@@ -403,5 +403,13 @@
   "sajdahReminderTitle": "Rezitationsniederwerfung",
   "listenDownloadWhole": "Ganzer Koran",
   "listenDownloadDeleteAll": "Heruntergeladenes löschen",
-  "listenDownloadedPart": "{percent} % auf diesem Telefon"
+  "listenDownloadedPart": "{percent} % auf diesem Telefon",
+  "activityTitle": "Deine Aktivität",
+  "activityAyahsRecited": "Rezitierte Verse",
+  "activityWordsRecited": "Rezitierte Wörter",
+  "activityAyahsHeard": "Angehörte Verse",
+  "activityMushafTime": "Zeit im Mushaf",
+  "activityHoursMinutes": "{hours} Std. {minutes} Min.",
+  "activityMinutes": "{minutes} Min.",
+  "homeBackToExit": "Zum Beenden erneut Zurück drücken"
 }

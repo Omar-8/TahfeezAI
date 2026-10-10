@@ -24,6 +24,7 @@ import '../application/live_recognition_controller.dart';
 import '../application/recitation_providers.dart';
 import '../application/mushaf_recitation_target.dart';
 import '../application/sajdah_reminder.dart';
+import '../../../memorization/application/activity_stats.dart';
 import '../../../ai/hifz/hifz_judge.dart';
 import '../../mushaf/application/mushaf_page_verses.dart';
 import '../../mushaf/application/mushaf_word_overlay.dart';
@@ -74,6 +75,11 @@ class _RecitationMushafAnchorState
     mushafRecitationTargetProvider.notifier,
   );
 
+  /// Times how long a Mushaf is on screen (Progress → activity).
+  late final ActivityStatsController _activity = ref.read(
+    activityStatsProvider.notifier,
+  );
+
   /// Whether this Mushaf is on screen: its tab is the active one and no
   /// screen covers it (`TickerMode`). A Mushaf left open in another tab
   /// must not keep the recitation bar in place of the navigation.
@@ -90,6 +96,7 @@ class _RecitationMushafAnchorState
     } else {
       Future.microtask(() => _target.clear(this));
     }
+    _activity.mushafShown(visible);
   }
 
   @override
@@ -110,6 +117,7 @@ class _RecitationMushafAnchorState
   void dispose() {
     final target = _target;
     Future.microtask(() => target.clear(this));
+    _activity.mushafShown(false);
     super.dispose();
   }
 

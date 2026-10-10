@@ -403,5 +403,13 @@
   "sajdahReminderTitle": "سجود التلاوة",
   "listenDownloadWhole": "القرآن كاملًا",
   "listenDownloadDeleteAll": "حذف ما تم تنزيله",
-  "listenDownloadedPart": "{percent}% على هذا الهاتف"
+  "listenDownloadedPart": "{percent}% على هذا الهاتف",
+  "activityTitle": "نشاطك",
+  "activityAyahsRecited": "آيات تُليت",
+  "activityWordsRecited": "كلمات تُليت",
+  "activityAyahsHeard": "آيات استُمع إليها",
+  "activityMushafTime": "الوقت في المصحف",
+  "activityHoursMinutes": "{hours} س {minutes} د",
+  "activityMinutes": "{minutes} د",
+  "homeBackToExit": "اضغط رجوع مرة أخرى للخروج"
 }

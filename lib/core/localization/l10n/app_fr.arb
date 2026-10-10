@@ -403,5 +403,13 @@
   "sajdahReminderTitle": "Prosternation de récitation",
   "listenDownloadWhole": "Le Coran entier",
   "listenDownloadDeleteAll": "Supprimer ce qui est téléchargé",
-  "listenDownloadedPart": "{percent} % sur ce téléphone"
+  "listenDownloadedPart": "{percent} % sur ce téléphone",
+  "activityTitle": "Votre activité",
+  "activityAyahsRecited": "Versets récités",
+  "activityWordsRecited": "Mots récités",
+  "activityAyahsHeard": "Versets écoutés",
+  "activityMushafTime": "Temps dans le Mushaf",
+  "activityHoursMinutes": "{hours} h {minutes} min",
+  "activityMinutes": "{minutes} min",
+  "homeBackToExit": "Appuyez à nouveau sur retour pour quitter"
 }

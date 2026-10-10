@@ -850,5 +850,30 @@
         "type": "int"
       }
     }
-  }
+  },
+  "activityTitle": "Your activity",
+  "activityAyahsRecited": "Ayahs recited",
+  "activityWordsRecited": "Words recited",
+  "activityAyahsHeard": "Ayahs listened to",
+  "activityMushafTime": "Time in the Mushaf",
+  "activityHoursMinutes": "{hours} h {minutes} min",
+  "activityMinutes": "{minutes} min",
+  "@activityHoursMinutes": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "@activityMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "homeBackToExit": "Press back again to exit"
 }

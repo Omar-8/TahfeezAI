@@ -403,5 +403,13 @@
   "sajdahReminderTitle": "Tilavet secdesi",
   "listenDownloadWhole": "Kur'an'ın tamamı",
   "listenDownloadDeleteAll": "İndirilenleri sil",
-  "listenDownloadedPart": "Bu telefonda %{percent}"
+  "listenDownloadedPart": "Bu telefonda %{percent}",
+  "activityTitle": "Etkinliğiniz",
+  "activityAyahsRecited": "Okunan ayet",
+  "activityWordsRecited": "Okunan kelime",
+  "activityAyahsHeard": "Dinlenen ayet",
+  "activityMushafTime": "Mushaf'ta geçen süre",
+  "activityHoursMinutes": "{hours} sa {minutes} dk",
+  "activityMinutes": "{minutes} dk",
+  "homeBackToExit": "Çıkmak için tekrar geri basın"
 }

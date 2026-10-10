@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../memorization/application/activity_stats.dart';
 import '../../../core/localization/generated/app_localizations.dart';
 import '../../../core/routing/quran_location_routing.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -69,6 +71,13 @@ class MemorizationProgressScreen extends ConsumerWidget {
             _Summary(map: map),
             const SizedBox(height: TahfeezSpacing.lg),
             TahfeezSectionHeader(
+              title: l10n.activityTitle,
+              icon: Icons.insights_rounded,
+            ),
+            const SizedBox(height: TahfeezSpacing.sm),
+            const _Activity(),
+            const SizedBox(height: TahfeezSpacing.lg),
+            TahfeezSectionHeader(
               title: l10n.memMapTitle,
               icon: Icons.grid_view_outlined,
             ),
@@ -83,6 +92,90 @@ class MemorizationProgressScreen extends ConsumerWidget {
             _WeakPages(map: map),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Lifetime activity: ayahs and words recited, ayahs listened to, time in
+/// the Mushaf.
+class _Activity extends ConsumerWidget {
+  const _Activity();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final stats = ref.watch(activityStatsProvider);
+    final number = NumberFormat.decimalPattern(
+      Localizations.localeOf(context).toLanguageTag(),
+    );
+    final minutes = stats.mushafSeconds ~/ 60;
+    final time = minutes >= 60
+        ? l10n.activityHoursMinutes(minutes ~/ 60, minutes % 60)
+        : l10n.activityMinutes(minutes);
+    Widget cell(IconData icon, String value, String label) => Row(
+      spacing: TahfeezSpacing.sm,
+      children: [
+        Icon(icon, size: 22, color: theme.colorScheme.primary),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(value, style: theme.textTheme.titleMedium),
+              Text(
+                label,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+    return TahfeezCard(
+      key: const ValueKey('progress-activity'),
+      child: Column(
+        spacing: TahfeezSpacing.md,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: cell(
+                  Icons.mic_none_rounded,
+                  number.format(stats.recitedAyahs),
+                  l10n.activityAyahsRecited,
+                ),
+              ),
+              Expanded(
+                child: cell(
+                  Icons.short_text_rounded,
+                  number.format(stats.recitedWords),
+                  l10n.activityWordsRecited,
+                ),
+              ),
+            ],
+          ),
+          Row(
+            children: [
+              Expanded(
+                child: cell(
+                  Icons.headphones_rounded,
+                  number.format(stats.heardAyahs),
+                  l10n.activityAyahsHeard,
+                ),
+              ),
+              Expanded(
+                child: cell(
+                  Icons.schedule_rounded,
+                  time,
+                  l10n.activityMushafTime,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
