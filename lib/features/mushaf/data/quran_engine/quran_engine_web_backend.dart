@@ -252,13 +252,13 @@ class QuranEngineWebPageAdapter implements QuranEngineMushafPage {
   @override
   void setWordHighlights(
     List<({int word, Color color, bool ink})> highlights, {
-    List<({List<int> words, Color color})> bands = const [],
+    List<PageBand> bands = const [],
   }) => page.setWordHighlights(
     [
       for (final h in highlights)
         (word: h.word, rgba: _rgba(h.color), ink: h.ink),
     ],
-    bands: [for (final b in bands) (words: b.words, rgba: _rgba(b.color))],
+    bands: [for (final b in bands) (band: b, rgba: _rgba(b.color))],
   );
 
   /// qvp.js colours are 0xRRGGBBAA.

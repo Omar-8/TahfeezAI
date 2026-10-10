@@ -25,6 +25,8 @@ import 'dart:ui_web' as ui_web;
 import 'package:web/web.dart' as web;
 
 import '../../../../core/theme/components/tahfeez_bottom_sheet.dart';
+import '../../domain/quran_engine/quran_engine_mushaf_backend.dart'
+    show PageBand;
 
 /// `window.QVP`, read via `getProperty` rather than a top-level `@JS('QVP')
 /// external` getter — the latter produced a bare, stack-trace-free
@@ -367,20 +369,31 @@ class QuranEngineWebPage {
   /// [rgba]-coloured (0xRRGGBBAA) as a band, or on its letters with `ink`.
   void setWordHighlights(
     List<({int word, int rgba, bool ink})> highlights, {
-    List<({List<int> words, int rgba})> bands = const [],
+    List<({PageBand band, int rgba})> bands = const [],
   }) {
     _page.callMethod('clearHighlights'.toJS);
     final t = _qvp.getProperty('T'.toJS) as JSObject;
-    for (final b in bands) {
+    // The line pitch, from the page's height and line count.
+    final height = (_page.getProperty<JSNumber>('height'.toJS)).toDartDouble;
+    final lines = (_page.getProperty<JSNumber>('nLines'.toJS)).toDartInt;
+    final padY = -height / (lines > 0 ? lines : 15) * PageBand.inset;
+    for (final (:band, :rgba) in bands) {
       final style = JSObject()
         ..setProperty('mode'.toJS, 'band'.toJS)
-        ..setProperty('band'.toJS, b.rgba.toJS);
-      final words = [for (final w in b.words) w.toJS].toJS;
-      _page.callMethod(
-        'highlight'.toJS,
-        t.callMethod('words'.toJS, words) as JSObject,
-        style,
-      );
+        ..setProperty('band'.toJS, rgba.toJS)
+        ..setProperty('padY'.toJS, padY.toJS);
+      final target = band.isAyahs
+          ? t.callMethod(
+              'ayahRange'.toJS,
+              band.surah.toJS,
+              band.fromAyah.toJS,
+              band.toAyah.toJS,
+            )
+          : t.callMethod(
+              'words'.toJS,
+              [for (final w in band.words) w.toJS].toJS,
+            );
+      _page.callMethod('highlight'.toJS, target as JSObject, style);
     }
     for (final h in highlights) {
       final style = JSObject()

@@ -117,9 +117,16 @@ class _QuranEngineMushafPageContentState
       return; // nothing drawn, nothing to draw
     }
     final highlights = <({int word, Color color, bool ink})>[];
-    // Each passage's words on the page as one seamless band (word by word,
-    // the see-through bands would overlap into darker seams).
-    final bands = <({List<int> words, Color color})>[];
+    // Passages as seamless bands (word by word, the see-through bands
+    // would overlap into darker seams): runs of whole ayahs, markers
+    // included — or, in an ayah with a mark band or the focus, its other
+    // words.
+    final bands = <PageBand>[];
+    final banded = <int>{
+      for (final MapEntry(key: i, value: mark) in marks.entries)
+        if (!_isInk(mark)) refs[i].ayahId,
+    };
+    final tintedWords = <int, List<int>>{};
     for (var i = 0; i < refs.length; i++) {
       final mark = marks[i];
       final ayah = refs[i].ayahId;
@@ -128,16 +135,30 @@ class _QuranEngineMushafPageContentState
       } else if (passages != null && ayah != focus) {
         final tint = passages[ayah];
         if (tint != null) {
-          if (bands.isNotEmpty && bands.last.color == tint) {
-            bands.last.words.add(i);
+          if (banded.contains(ayah)) {
+            (tintedWords[ayah] ??= []).add(i);
+          } else if (bands.isNotEmpty &&
+              bands.last.isAyahs &&
+              bands.last.color == tint &&
+              bands.last.surah == ayah ~/ 1000 &&
+              bands.last.toAyah >= ayah % 1000 - 1) {
+            final last = bands.removeLast();
+            bands.add(
+              PageBand.ayahs(last.surah, last.fromAyah, ayah % 1000, tint),
+            );
           } else {
-            bands.add((words: [i], color: tint));
+            bands.add(
+              PageBand.ayahs(ayah ~/ 1000, ayah % 1000, ayah % 1000, tint),
+            );
           }
         }
       }
       if (mark != null && _isInk(mark)) {
         highlights.add((word: i, color: _markStyles[mark]!.color, ink: true));
       }
+    }
+    for (final MapEntry(key: ayah, value: words) in tintedWords.entries) {
+      bands.add(PageBand.words(words, passages![ayah]!));
     }
     page.setWordHighlights(highlights, bands: bands);
     if (focus != null) {

@@ -45,26 +45,22 @@ class _MaskRecordingPage implements QuranEngineMushafPage {
   final hiddenCalls = <Set<int>>[];
   final highlights = <(int, Color)>[];
 
-  /// The seamless bands last drawn: each one's words.
-  final bands = <List<int>>[];
+  /// The seamless bands last drawn.
+  final bands = <PageBand>[];
 
   @override
   void setWordHighlights(
     List<({int word, Color color, bool ink})> highlights, {
-    List<({List<int> words, Color color})> bands = const [],
+    List<PageBand> bands = const [],
   }) {
     // Like the engine: every highlight replaced, the ayah's too.
     ayahHighlights.clear();
     this.highlights
       ..clear()
-      ..addAll([
-        for (final b in bands)
-          for (final w in b.words) (w, b.color),
-        for (final h in highlights) (h.word, h.color),
-      ]);
+      ..addAll([for (final h in highlights) (h.word, h.color)]);
     this.bands
       ..clear()
-      ..addAll([for (final b in bands) b.words]);
+      ..addAll(bands);
   }
 
   @override
@@ -381,20 +377,22 @@ void main() {
     );
     await tester.pumpAndSettle();
     final page = backend.pages[42]!;
-    expect(page.highlights, [(0, tint), (1, tint), (2, tint)]);
-    expect(page.bands, [
-      [0, 1, 2],
-    ], reason: 'one seamless band, not one per word');
+    expect(page.highlights, isEmpty);
+    expect(
+      [for (final b in page.bands) (b.surah, b.fromAyah, b.toAyah, b.color)],
+      [(2, 42, 42, tint)],
+      reason: 'the whole ayah as one band, not one per word',
+    );
 
     final owner = Object();
     container.read(mushafFocusAyahProvider.notifier).focus(owner, 2042);
     await tester.pump();
-    expect(page.highlights, isEmpty, reason: 'the blue ayah instead');
+    expect(page.bands, isEmpty, reason: 'the blue ayah instead');
     expect(page.ayahHighlights, [(chapterNo: 2, verseNo: 42)]);
 
     container.read(mushafFocusAyahProvider.notifier).clear(owner);
     await tester.pump();
-    expect(page.highlights, hasLength(3));
+    expect(page.bands, hasLength(1));
     expect(page.ayahHighlights, isEmpty);
   });
 
