@@ -330,6 +330,19 @@ void main() {
     expect(vibrations, 1, reason: 'once per word');
   });
 
+  test(
+    'recitedIn: an ayah with a word recited, correct ones included',
+    () async {
+      const kursiVerse = (chapterNo: 2, verseNo: 255);
+      await setUpHifz(from: kursiVerse, to: kursiVerse);
+      final hifz = container.read(hifzControllerProvider.notifier);
+      expect(hifz.recitedIn(2255), isFalse);
+      await recite(kursi.split(' ').take(3).join(' '));
+      expect(hifz.recitedIn(2255), isTrue);
+      expect(hifz.recitedIn(2256), isFalse);
+    },
+  );
+
   test('a saved vibrate switch becomes the vibrate alert', () {
     expect(HifzSettings.fromJson({'vibrate': false}).alert, MistakeAlert.off);
     expect(

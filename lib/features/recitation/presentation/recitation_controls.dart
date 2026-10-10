@@ -197,6 +197,46 @@ class BarButtonGroup extends StatelessWidget {
   }
 }
 
+/// The Sujood al-Tilawah reminder while it is up (a session's results wait
+/// for it).
+Future<void>? _sajdahPopup;
+
+/// The Sujood al-Tilawah reminder: a small popup (above anything the
+/// session's end opens), with a way to turn it off.
+Future<void> showSajdahReminder(BuildContext context, WidgetRef ref) {
+  final l10n = AppLocalizations.of(context);
+  return showDialog<void>(
+    context: context,
+    useRootNavigator: true,
+    builder: (context) => AlertDialog(
+      key: const ValueKey('sajdah-reminder'),
+      icon: const Icon(Icons.mosque_outlined),
+      title: Text(l10n.sajdahReminderTitle),
+      content: Text(l10n.sajdahReminderMessage),
+      actions: [
+        TextButton(
+          onPressed: () {
+            ref
+                .read(hifzSettingsProvider.notifier)
+                .update(
+                  ref
+                      .read(hifzSettingsProvider)
+                      .copyWith(sajdahReminder: false),
+                );
+            Navigator.of(context).pop();
+          },
+          child: Text(l10n.sajdahReminderOff),
+        ),
+        FilledButton(
+          key: const ValueKey('sajdah-reminder-ok'),
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(MaterialLocalizations.of(context).okButtonLabel),
+        ),
+      ],
+    ),
+  );
+}
+
 class RecitationBottomBar extends ConsumerWidget {
   const RecitationBottomBar({super.key, required this.navigation});
 
@@ -236,35 +276,25 @@ class RecitationBottomBar extends ConsumerWidget {
           ref.read(followAlongControllerProvider) != null) {
         return;
       }
-      showTestSummarySheet(context, next);
+      // After the Sujood al-Tilawah reminder, if it is up.
+      final reminder = _sajdahPopup;
+      if (reminder == null) {
+        showTestSummarySheet(context, next);
+      } else {
+        reminder.whenComplete(() {
+          if (context.mounted) showTestSummarySheet(context, next);
+        });
+      }
     });
 
     // An ayah of prostration recited: a reminder of Sujood al-Tilawah.
     if (ref.watch(liveRecognitionEnabledProvider)) {
       ref.listen(sajdahReminderProvider, (previous, next) {
-        final messenger = ScaffoldMessenger.maybeOf(context);
-        if (next == null || messenger == null) return;
-        final l10n = AppLocalizations.of(context);
-        messenger
-          ..hideCurrentSnackBar()
-          ..showSnackBar(
-            SnackBar(
-              key: const ValueKey('sajdah-reminder'),
-              duration: const Duration(seconds: 8),
-              content: Text(l10n.sajdahReminderMessage),
-              action: SnackBarAction(
-                label: l10n.sajdahReminderOff,
-                onPressed: () {
-                  final settings = ref.read(hifzSettingsProvider.notifier);
-                  settings.update(
-                    ref
-                        .read(hifzSettingsProvider)
-                        .copyWith(sajdahReminder: false),
-                  );
-                },
-              ),
-            ),
-          );
+        if (next == null || _sajdahPopup != null) return;
+        _sajdahPopup = showSajdahReminder(
+          context,
+          ref,
+        ).whenComplete(() => _sajdahPopup = null);
       });
     }
 

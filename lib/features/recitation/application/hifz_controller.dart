@@ -459,6 +459,17 @@ class HifzController extends Notifier<HifzState> {
     state = state.copyWith(range: () => range, loop: () => loop);
   }
 
+  /// Whether the running test has heard a word of [ayahId] recited (not
+  /// revealed by hand).
+  bool recitedIn(int ayahId) {
+    final judge = _judge;
+    if (judge == null) return false;
+    final words = judge.corpus.words;
+    return judge.revealed.any(
+      (p) => !judge.given.contains(p) && words[p].ref.ayahId == ayahId,
+    );
+  }
+
   /// The words before the range stay shown (see [setLoop]); for one
   /// session.
   var _showBefore = false;

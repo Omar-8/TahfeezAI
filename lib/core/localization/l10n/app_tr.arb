@@ -399,5 +399,6 @@
   "modeRecite": "Oku",
   "modeLoop": "Tekrar",
   "modeListen": "Dinle",
-  "modeFollow": "Takip"
+  "modeFollow": "Takip",
+  "sajdahReminderTitle": "Tilavet secdesi"
 }

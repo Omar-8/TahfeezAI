@@ -53,6 +53,12 @@ class _FakeHifz extends HifzController {
   }
 
   void set(HifzState s) => state = s;
+
+  /// Ayahs with a word recited (not revealed by hand).
+  final recited = <int>{};
+
+  @override
+  bool recitedIn(int ayahId) => recited.contains(ayahId);
 }
 
 void main() {
@@ -214,7 +220,6 @@ void main() {
   group('the Sujood al-Tilawah reminder', () {
     setUp(resetSajdahReminderForTest);
 
-    const w = (ayahId: 96019, wordIndex: 0);
     const tested = HifzState(
       first: (ayahId: 96015, wordIndex: 0),
       last: (ayahId: 96019, wordIndex: 3),
@@ -223,13 +228,14 @@ void main() {
     HifzState at(WordRef? expected, {bool completed = false}) => HifzState(
       first: tested.first,
       last: tested.last,
-      marked: const {w: HifzVerdict.correct},
       expected: expected,
       completed: completed,
     );
 
     test('after the ayah of prostration is recited, once', () async {
       container.listen(sajdahReminderProvider, (_, _) {});
+      // Recited correctly: nothing marked, only recited.
+      hifz.recited.add(96019);
       hifz.set(at(const (ayahId: 96019, wordIndex: 1)));
       expect(
         container.read(sajdahReminderProvider),
@@ -240,12 +246,19 @@ void main() {
       expect(container.read(sajdahReminderProvider), 96019);
     });
 
+    test('an ayah only revealed by hand: no reminder', () async {
+      container.listen(sajdahReminderProvider, (_, _) {});
+      hifz.set(at(null, completed: true));
+      expect(container.read(sajdahReminderProvider), isNull);
+    });
+
     test('off in Hifz settings: never', () async {
       container.listen(sajdahReminderProvider, (_, _) {});
       final settings = container.read(hifzSettingsProvider.notifier);
       settings.update(
         container.read(hifzSettingsProvider).copyWith(sajdahReminder: false),
       );
+      hifz.recited.add(96019);
       hifz.set(at(null, completed: true));
       expect(container.read(sajdahReminderProvider), isNull);
     });

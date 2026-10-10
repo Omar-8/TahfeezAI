@@ -26,9 +26,10 @@ class SajdahReminder extends Notifier<int?> {
     ref.listen(hifzControllerProvider, (_, next) {
       if (_shown || !next.active) return;
       if (!ref.read(hifzSettingsProvider).sajdahReminder) return;
-      for (final word in next.marked.keys) {
-        final ayah = word.ayahId;
-        if (!sajdahAyahs.contains(ayah)) continue;
+      final hifz = ref.read(hifzControllerProvider.notifier);
+      for (final ayah in sajdahAyahs) {
+        // Recited, and the reciter past it (or the test done).
+        if (!hifz.recitedIn(ayah)) continue;
         if (!next.completed && next.expected?.ayahId == ayah) continue;
         _shown = true;
         state = ayah;
