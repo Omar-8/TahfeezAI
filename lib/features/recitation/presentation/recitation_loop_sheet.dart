@@ -21,34 +21,6 @@ import '../application/quran_match_controller.dart'
     show quranWordCorpusProvider;
 import '../application/recitation_session_controller.dart';
 
-/// Loop recitation, for a Mushaf screen's app bar: opens [showRecitationLoopSheet]
-/// (only where live recognition, and so Hifz mode, is available). Selected
-/// while a loop runs; disabled during a session that is not looping.
-class HifzLoopButton extends ConsumerWidget {
-  const HifzLoopButton({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    if (!ref.watch(liveRecognitionEnabledProvider)) {
-      return const SizedBox.shrink();
-    }
-    final location = ref.watch(mushafRecitationTargetProvider)?.location;
-    if (location is! QuranLocationPage) return const SizedBox.shrink();
-    final looping =
-        ref.watch(hifzControllerProvider.select((s) => s.loop)) != null;
-    final session = ref.watch(recitationSessionControllerProvider);
-    return IconButton(
-      key: const ValueKey('hifz-loop'),
-      icon: const Icon(Icons.repeat_rounded),
-      isSelected: looping,
-      tooltip: AppLocalizations.of(context).recLoop,
-      onPressed: session.isActive
-          ? null
-          : () => showRecitationLoopSheet(context),
-    );
-  }
-}
-
 /// Loop recitation's settings: how to repeat (the whole range, or each
 /// ayah), the range, and how many times — then starts reciting.
 /// Shown like the Hifz settings sheet: a drag handle, as tall as its

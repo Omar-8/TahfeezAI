@@ -99,11 +99,7 @@ void main() {
           builder: (context, open, _) => Scaffold(
             appBar: AppBar(
               title: const Text('Top bar'),
-              actions: const [
-                RecordingDot(),
-                HifzLoopButton(),
-                HifzSettingsButton(),
-              ],
+              actions: const [RecordingDot(), HifzSettingsButton()],
             ),
             body: open
                 ? const RecitationMushafAnchor(
@@ -272,10 +268,13 @@ void main() {
     // The eye is the group's last button.
     final groupCenter = (mic.left + eye.right) / 2;
     expect(groupCenter, closeTo(600, 2));
-    // The mic, Listen and Follow along buttons, then the hide controls.
+    // The mic, Loop, Listen and Follow along buttons, then the hide
+    // controls.
+    final loop = tester.getRect(find.byTooltip('Loop recitation'));
     final listen = tester.getRect(find.byTooltip('Listen'));
     final follow = tester.getRect(find.byTooltip('Follow along'));
-    expect(listen.left - mic.right, lessThan(24), reason: 'beside the mic');
+    expect(loop.left - mic.right, lessThan(24), reason: 'beside the mic');
+    expect(listen.left - loop.right, lessThan(24), reason: 'beside Loop');
     expect(follow.left - listen.right, lessThan(24), reason: 'beside Listen');
     expect(eye.left - follow.right, lessThan(40), reason: 'kept together');
   });
@@ -670,11 +669,8 @@ void main() {
       to: (chapterNo: 1, verseNo: 7),
     ));
     expect(find.byTooltip('Listening…'), findsOneWidget);
-    final loopButton = tester.widget<IconButton>(
-      find.byKey(const ValueKey('hifz-loop')),
-    );
-    expect(loopButton.isSelected, isTrue);
-    expect(loopButton.onPressed, isNull, reason: 'not during a session');
+    // In the recitation bar, which holds stop and pause during a session.
+    expect(find.byKey(const ValueKey('hifz-loop')), findsNothing);
 
     await tester.tap(find.byTooltip('Stop'));
     await tester.runAsync(() => Future<void>.delayed(Duration.zero));

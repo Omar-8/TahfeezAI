@@ -57,9 +57,8 @@ class _MushafReaderScreenState extends ConsumerState<MushafReaderScreen> {
           // (`showMushafAppearanceSheet`).
           // Recording: a red dot while a recitation session runs.
           const RecordingDot(),
-          // Loop recitation, and Hifz mode's feedback settings, beside the
-          // reader's own.
-          const HifzLoopButton(),
+          // Hifz mode's feedback settings, beside the reader's own (loop
+          // recitation is in the recitation bar).
           const HifzSettingsButton(),
           IconButton(
             icon: const Icon(Icons.tune),

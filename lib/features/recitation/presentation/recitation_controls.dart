@@ -39,7 +39,6 @@ import '../../../memorization/application/memorization_today.dart';
 import '../../memorize/presentation/test_summary_sheet.dart';
 
 export '../application/mushaf_recitation_target.dart';
-export 'recitation_loop_sheet.dart' show HifzLoopButton;
 
 /// Whether the app shell should replace its Home/Quran/Search navigation
 /// with [RecitationBottomBar]: a Mushaf is open, or a session is running.
@@ -375,6 +374,20 @@ class RecitationBottomBar extends ConsumerWidget {
                                               startLocation: location,
                                             ),
                                     ),
+                                    // Loop recitation: a range, recited over.
+                                    if (recognition != null)
+                                      IconButton(
+                                        key: const ValueKey('hifz-loop'),
+                                        style: BarButtonGroup.buttonStyle,
+                                        icon: const Icon(Icons.repeat_rounded),
+                                        tooltip: AppLocalizations.of(context)
+                                            .recLoop,
+                                        onPressed: location == null
+                                            ? null
+                                            : () => showRecitationLoopSheet(
+                                                context,
+                                              ),
+                                      ),
                                     // Listen: the reciter, from a range.
                                     IconButton(
                                       key: const ValueKey('listen-open'),
