@@ -380,5 +380,11 @@
   "bookmarkSurah": "Sureyi kaydet",
   "bookmarkRemove": "Yer imini kaldır",
   "bookmarkSurahAdded": "Sure kaydedildi",
-  "bookmarkSurahRemoved": "Yer imi kaldırıldı"
+  "bookmarkSurahRemoved": "Yer imi kaldırıldı",
+  "privacyTitle": "Gizlilik",
+  "privacyRecitation": "Okumanız telefonunuzda kontrol edilir. Ses hiçbir yere gönderilmez ve kaydedilmez.",
+  "privacyLocal": "Ezber ilerlemeniz, planlarınız, yer imleriniz ve ayarlarınız telefonunuzda kalır. Hesap yoktur.",
+  "privacyNetwork": "İnternet yalnızca tilavet sesini çalmak veya indirmek için kullanılır; bu istekler yalnızca ses dosyasının adını içerir.",
+  "privacyNoTracking": "Reklam yok, analiz yok, izleme yok.",
+  "privacyDelete": "Ayarlar → Tüm verileri sıfırla her şeyi siler; uygulamayı kaldırmak da siler."
 }

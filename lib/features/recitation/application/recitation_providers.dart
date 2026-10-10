@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kReleaseMode;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/core_providers.dart';
@@ -50,7 +51,9 @@ final recitationClockProvider = Provider<DateTime Function()>(
 /// Development only: `--dart-define=TAHFEEZ_KEEP_RECORDINGS=true` keeps each
 /// session's audio on the device, in the app's external files directory
 /// (`Android/data/<package>/files/recitations`, readable with adb), to
-/// diagnose on-device accuracy. Nothing is uploaded.
+/// diagnose on-device accuracy. Nothing is uploaded. A release build never
+/// keeps them, whatever it is passed (docs/PRIVACY_POLICY.md).
 final recitationKeepRecordingsProvider = Provider<bool>(
-  (ref) => const bool.fromEnvironment('TAHFEEZ_KEEP_RECORDINGS'),
+  (ref) =>
+      !kReleaseMode && const bool.fromEnvironment('TAHFEEZ_KEEP_RECORDINGS'),
 );

@@ -810,5 +810,11 @@
   "bookmarkSurah": "Bookmark surah",
   "bookmarkRemove": "Remove bookmark",
   "bookmarkSurahAdded": "Surah bookmarked",
-  "bookmarkSurahRemoved": "Bookmark removed"
+  "bookmarkSurahRemoved": "Bookmark removed",
+  "privacyTitle": "Privacy",
+  "privacyRecitation": "Your recitation is checked on your phone. The audio is never sent anywhere and is not saved.",
+  "privacyLocal": "Your memorization progress, plans, bookmarks and settings stay on your phone. There are no accounts.",
+  "privacyNetwork": "The internet is used only to play or download recitation audio; those requests name just the audio file.",
+  "privacyNoTracking": "No ads, no analytics, no tracking.",
+  "privacyDelete": "Settings → Reset all data deletes everything; uninstalling removes it too."
 }

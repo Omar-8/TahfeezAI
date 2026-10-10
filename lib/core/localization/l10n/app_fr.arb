@@ -380,5 +380,11 @@
   "bookmarkSurah": "Marquer la sourate",
   "bookmarkRemove": "Supprimer le signet",
   "bookmarkSurahAdded": "Sourate ajoutée aux signets",
-  "bookmarkSurahRemoved": "Signet supprimé"
+  "bookmarkSurahRemoved": "Signet supprimé",
+  "privacyTitle": "Confidentialité",
+  "privacyRecitation": "Votre récitation est vérifiée sur votre téléphone. L'audio n'est envoyé nulle part et n'est pas enregistré.",
+  "privacyLocal": "Votre progression, vos plans, vos signets et vos réglages restent sur votre téléphone. Aucun compte.",
+  "privacyNetwork": "Internet sert uniquement à écouter ou télécharger les récitations ; ces requêtes ne contiennent que le nom du fichier audio.",
+  "privacyNoTracking": "Pas de publicité, pas de statistiques, pas de pistage.",
+  "privacyDelete": "Réglages → Réinitialiser toutes les données efface tout ; désinstaller l'application aussi."
 }

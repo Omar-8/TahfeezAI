@@ -54,6 +54,36 @@ class AboutScreen extends StatelessWidget {
               applicationVersion: version,
             ),
           ),
+          // The privacy policy's essentials (docs/PRIVACY_POLICY.md).
+          const SizedBox(height: TahfeezSpacing.lg),
+          TahfeezSectionHeader(title: l10n.privacyTitle),
+          const SizedBox(height: TahfeezSpacing.sm),
+          TahfeezCard(
+            key: const ValueKey('about-privacy'),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: TahfeezSpacing.sm,
+              children: [
+                for (final (icon, text) in [
+                  (Icons.mic_none_rounded, l10n.privacyRecitation),
+                  (Icons.phone_android_rounded, l10n.privacyLocal),
+                  (Icons.cloud_outlined, l10n.privacyNetwork),
+                  (Icons.block_rounded, l10n.privacyNoTracking),
+                  (Icons.delete_outline_rounded, l10n.privacyDelete),
+                ])
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: TahfeezSpacing.smPlus,
+                    children: [
+                      Icon(icon, size: 20, color: theme.colorScheme.primary),
+                      Expanded(
+                        child: Text(text, style: theme.textTheme.bodyMedium),
+                      ),
+                    ],
+                  ),
+              ],
+            ),
+          ),
           for (final group in CreditGroup.values) ...[
             const SizedBox(height: TahfeezSpacing.lg),
             TahfeezSectionHeader(title: title(group)),

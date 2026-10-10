@@ -380,5 +380,11 @@
   "bookmarkSurah": "Sure merken",
   "bookmarkRemove": "Lesezeichen entfernen",
   "bookmarkSurahAdded": "Sure gemerkt",
-  "bookmarkSurahRemoved": "Lesezeichen entfernt"
+  "bookmarkSurahRemoved": "Lesezeichen entfernt",
+  "privacyTitle": "Datenschutz",
+  "privacyRecitation": "Deine Rezitation wird auf deinem Telefon geprüft. Der Ton wird nirgendwohin gesendet und nicht gespeichert.",
+  "privacyLocal": "Dein Lernfortschritt, deine Pläne, Lesezeichen und Einstellungen bleiben auf deinem Telefon. Es gibt keine Konten.",
+  "privacyNetwork": "Das Internet wird nur zum Abspielen oder Herunterladen von Rezitationen genutzt; diese Anfragen nennen nur die Audiodatei.",
+  "privacyNoTracking": "Keine Werbung, keine Analyse, kein Tracking.",
+  "privacyDelete": "Einstellungen → Alle Daten zurücksetzen löscht alles; ebenso das Deinstallieren der App."
 }

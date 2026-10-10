@@ -137,6 +137,9 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(about);
     await tester.pumpAndSettle();
+    // The privacy essentials, then the sources.
+    expect(find.byKey(const ValueKey('about-privacy')), findsOneWidget);
+    await tester.scrollUntilVisible(find.text('The Quran text'), 200);
     expect(find.text('The Quran text'), findsOneWidget);
     // Every source is listed, scrolling down the page.
     for (final c in credits) {
