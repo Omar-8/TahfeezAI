@@ -10,6 +10,7 @@ import '../../../../quran/domain/models/quran_location.dart';
 import '../../../../quran/domain/models/surah_models.dart';
 import '../../../../memorization/application/memorization_today.dart';
 import '../../../memorize/presentation/memorize_screen.dart' show ScoreBar;
+import '../../../bookmarks/application/bookmarks_controller.dart';
 import '../../application/quran_index_providers.dart';
 
 enum _RevelationFilter { all, meccan, medinan }
@@ -128,12 +129,30 @@ class _SurahIndexTabState extends ConsumerState<SurahIndexTab> {
     );
   }
 
+  /// Bookmarks [surahNo], or removes its bookmark, and says which.
+  void _toggleSurahBookmark(BuildContext context, int surahNo) {
+    final l10n = AppLocalizations.of(context);
+    final bookmarks = ref.read(bookmarksProvider.notifier);
+    final added = !bookmarks.hasSurah(surahNo);
+    bookmarks.toggleSurah(surahNo);
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(
+            added ? l10n.bookmarkSurahAdded : l10n.bookmarkSurahRemoved,
+          ),
+        ),
+      );
+  }
+
   @override
   Widget build(BuildContext context) {
     final surahs = ref.watch(indexedSurahsProvider);
     final scheme = Theme.of(context).colorScheme;
     // How much is memorized, for the surahs worked on.
     final progress = ref.watch(surahProgressProvider).value ?? const {};
+    final bookmarks = ref.watch(bookmarksProvider);
 
     return Column(
       children: [
@@ -346,6 +365,12 @@ class _SurahIndexTabState extends ConsumerState<SurahIndexTab> {
                       onTap: () => widget.onSelect(
                         QuranLocation.surah(indexed.surah.surahNo),
                       ),
+                      // Long-press: bookmark the surah (or remove it).
+                      bookmarked: bookmarks.any(
+                        (b) => b.isSurah && b.surahNo == indexed.surah.surahNo,
+                      ),
+                      onLongPress: () =>
+                          _toggleSurahBookmark(context, indexed.surah.surahNo),
                     ),
                   );
                 },

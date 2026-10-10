@@ -373,5 +373,12 @@
   "followStrictSub": "بعد أي خطأ أعِد التلاوة حتى تكون بلا أخطاء",
   "followAgain": "خطأ — أعِد التلاوة",
   "listenSearchReciters": "ابحث عن قارئ",
-  "listenNoReciters": "لا يوجد قارئ بهذا الاسم"
+  "listenNoReciters": "لا يوجد قارئ بهذا الاسم",
+  "bookmarksTitle": "العلامات",
+  "bookmarksEmpty": "لا توجد علامات بعد. اضغط مطولًا على كلمة في المصحف لحفظ آيتها أو سورتها، أو اضغط مطولًا على سورة في القائمة.",
+  "bookmarkAyah": "حفظ الآية",
+  "bookmarkSurah": "حفظ السورة",
+  "bookmarkRemove": "إزالة العلامة",
+  "bookmarkSurahAdded": "تم حفظ السورة",
+  "bookmarkSurahRemoved": "أزيلت العلامة"
 }

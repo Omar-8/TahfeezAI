@@ -75,6 +75,12 @@ class _QuranIndexScreenState extends ConsumerState<QuranIndexScreen>
             onPressed: _goToAyah,
           ),
           IconButton(
+            key: const ValueKey('quran-bookmarks'),
+            icon: const Icon(Icons.bookmarks_outlined),
+            tooltip: AppLocalizations.of(context).bookmarksTitle,
+            onPressed: () => context.go(AppRoutes.bookmarks),
+          ),
+          IconButton(
             icon: const Icon(Icons.search),
             tooltip: AppLocalizations.of(context).navSearch,
             onPressed: () => context.go(AppRoutes.search),

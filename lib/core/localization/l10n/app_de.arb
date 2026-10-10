@@ -373,5 +373,12 @@
   "followStrictSub": "Nach einem Fehler erneut rezitieren, bis es fehlerfrei ist",
   "followAgain": "Ein Fehler — rezitiere es erneut",
   "listenSearchReciters": "Rezitatoren suchen",
-  "listenNoReciters": "Kein Rezitator mit diesem Namen"
+  "listenNoReciters": "Kein Rezitator mit diesem Namen",
+  "bookmarksTitle": "Lesezeichen",
+  "bookmarksEmpty": "Noch keine Lesezeichen. Drücke lange auf ein Wort im Mushaf, um seinen Vers oder seine Sure zu merken, oder lange auf eine Sure in der Liste.",
+  "bookmarkAyah": "Vers merken",
+  "bookmarkSurah": "Sure merken",
+  "bookmarkRemove": "Lesezeichen entfernen",
+  "bookmarkSurahAdded": "Sure gemerkt",
+  "bookmarkSurahRemoved": "Lesezeichen entfernt"
 }

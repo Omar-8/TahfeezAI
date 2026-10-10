@@ -373,5 +373,12 @@
   "followStrictSub": "Après une erreur, récitez à nouveau jusqu'à le faire sans erreur",
   "followAgain": "Une erreur — récitez à nouveau",
   "listenSearchReciters": "Rechercher un récitateur",
-  "listenNoReciters": "Aucun récitateur à ce nom"
+  "listenNoReciters": "Aucun récitateur à ce nom",
+  "bookmarksTitle": "Signets",
+  "bookmarksEmpty": "Aucun signet pour le moment. Appuyez longuement sur un mot du Mushaf pour marquer son verset ou sa sourate, ou sur une sourate de la liste.",
+  "bookmarkAyah": "Marquer le verset",
+  "bookmarkSurah": "Marquer la sourate",
+  "bookmarkRemove": "Supprimer le signet",
+  "bookmarkSurahAdded": "Sourate ajoutée aux signets",
+  "bookmarkSurahRemoved": "Signet supprimé"
 }

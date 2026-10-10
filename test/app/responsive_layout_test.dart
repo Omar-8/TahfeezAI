@@ -27,6 +27,7 @@ void main() {
   const routes = [
     '/home',
     '/quran',
+    '/quran/bookmarks',
     '/memorize',
     '/memorize/progress',
     '/settings',

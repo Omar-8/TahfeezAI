@@ -373,5 +373,12 @@
   "followStrictSub": "غلطی کے بعد دوبارہ پڑھیں یہاں تک کہ بغیر غلطی کے ہو",
   "followAgain": "غلطی — دوبارہ پڑھیں",
   "listenSearchReciters": "قاری تلاش کریں",
-  "listenNoReciters": "اس نام کا کوئی قاری نہیں"
+  "listenNoReciters": "اس نام کا کوئی قاری نہیں",
+  "bookmarksTitle": "بک مارکس",
+  "bookmarksEmpty": "ابھی کوئی بک مارک نہیں۔ مصحف میں کسی لفظ کو دیر تک دبا کر اس کی آیت یا سورت محفوظ کریں، یا فہرست میں کسی سورت کو دیر تک دبائیں۔",
+  "bookmarkAyah": "آیت بک مارک کریں",
+  "bookmarkSurah": "سورت بک مارک کریں",
+  "bookmarkRemove": "بک مارک ہٹائیں",
+  "bookmarkSurahAdded": "سورت بک مارک ہو گئی",
+  "bookmarkSurahRemoved": "بک مارک ہٹا دیا گیا"
 }

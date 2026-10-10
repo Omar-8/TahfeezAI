@@ -3,6 +3,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../app/foundation_demo_screen.dart';
 import '../../app/shell/app_shell.dart';
+import '../../features/bookmarks/presentation/bookmarks_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
 import '../../features/memorize/presentation/memorize_screen.dart';
 import '../../features/memorize/presentation/progress_screen.dart';
@@ -55,6 +56,10 @@ GoRouter appRouter(Ref ref) {
                   GoRoute(
                     path: 'search',
                     builder: (context, state) => const SearchScreen(),
+                  ),
+                  GoRoute(
+                    path: 'bookmarks',
+                    builder: (context, state) => const BookmarksScreen(),
                   ),
                 ],
               ),

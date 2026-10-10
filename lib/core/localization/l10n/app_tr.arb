@@ -373,5 +373,12 @@
   "followStrictSub": "Hata olursa, hatasız okuyana kadar tekrar okuyun",
   "followAgain": "Hata — tekrar okuyun",
   "listenSearchReciters": "Kâri ara",
-  "listenNoReciters": "Bu isimde kâri yok"
+  "listenNoReciters": "Bu isimde kâri yok",
+  "bookmarksTitle": "Yer imleri",
+  "bookmarksEmpty": "Henüz yer imi yok. Ayetini veya suresini kaydetmek için Mushaf'ta bir kelimeye uzun basın ya da listede bir sureye uzun basın.",
+  "bookmarkAyah": "Ayeti kaydet",
+  "bookmarkSurah": "Sureyi kaydet",
+  "bookmarkRemove": "Yer imini kaldır",
+  "bookmarkSurahAdded": "Sure kaydedildi",
+  "bookmarkSurahRemoved": "Yer imi kaldırıldı"
 }

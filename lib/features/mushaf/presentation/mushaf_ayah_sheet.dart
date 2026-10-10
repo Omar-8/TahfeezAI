@@ -14,6 +14,7 @@ import '../../../quran/application/tafsir_library_controller.dart';
 import '../../../quran/application/tafsir_selection_controller.dart';
 import '../../../quran/application/tafsir_verse_text.dart';
 import '../../quran/application/quran_index_providers.dart';
+import '../../bookmarks/application/bookmarks_controller.dart';
 import '../../listen/application/listen_options.dart';
 import '../../listen/application/quran_audio_player.dart';
 import '../../listen/presentation/listen_sheet.dart';
@@ -102,6 +103,7 @@ class _AyahDetailSheetBody extends ConsumerWidget {
                   ),
                 ),
               ),
+              _BookmarkButtons(ayahId: ayahId),
             ],
           ),
           _ListenButtons(ayahId: ayahId),
@@ -293,6 +295,45 @@ class _ListenButtons extends ConsumerWidget {
             icon: const Icon(Icons.playlist_play_rounded),
             label: Text(l10n.listenPlayFrom),
           ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Bookmarks the ayah, or its whole surah (each again to remove it).
+class _BookmarkButtons extends ConsumerWidget {
+  const _BookmarkButtons({required this.ayahId});
+
+  final int ayahId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    ref.watch(bookmarksProvider);
+    final bookmarks = ref.read(bookmarksProvider.notifier);
+    final surahNo = ayahId ~/ 1000;
+    final ayahSaved = bookmarks.hasAyah(ayahId);
+    final surahSaved = bookmarks.hasSurah(surahNo);
+    final primary = Theme.of(context).colorScheme.primary;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        IconButton(
+          key: const ValueKey('ayah-sheet-bookmark'),
+          isSelected: ayahSaved,
+          icon: const Icon(Icons.bookmark_border_rounded),
+          selectedIcon: Icon(Icons.bookmark_rounded, color: primary),
+          tooltip: ayahSaved ? l10n.bookmarkRemove : l10n.bookmarkAyah,
+          onPressed: () => bookmarks.toggleAyah(ayahId),
+        ),
+        IconButton(
+          key: const ValueKey('ayah-sheet-bookmark-surah'),
+          isSelected: surahSaved,
+          icon: const Icon(Icons.bookmarks_outlined),
+          selectedIcon: Icon(Icons.bookmarks_rounded, color: primary),
+          tooltip: surahSaved ? l10n.bookmarkRemove : l10n.bookmarkSurah,
+          onPressed: () => bookmarks.toggleSurah(surahNo),
         ),
       ],
     );

@@ -803,5 +803,12 @@
   "followStrictSub": "After a mistake, recite it again until it's without mistakes",
   "followAgain": "A mistake — recite it again",
   "listenSearchReciters": "Search reciters",
-  "listenNoReciters": "No reciter by that name"
+  "listenNoReciters": "No reciter by that name",
+  "bookmarksTitle": "Bookmarks",
+  "bookmarksEmpty": "No bookmarks yet. Long-press a word in the Mushaf to bookmark its ayah or surah, or long-press a surah in the list.",
+  "bookmarkAyah": "Bookmark ayah",
+  "bookmarkSurah": "Bookmark surah",
+  "bookmarkRemove": "Remove bookmark",
+  "bookmarkSurahAdded": "Surah bookmarked",
+  "bookmarkSurahRemoved": "Bookmark removed"
 }

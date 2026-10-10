@@ -19,6 +19,8 @@ class TahfeezQuranSectionCard extends StatelessWidget {
     this.subtitle,
     this.accentColor,
     this.onTap,
+    this.onLongPress,
+    this.bookmarked = false,
     this.progress,
     this.progressColor,
     this.progressLabel,
@@ -29,6 +31,10 @@ class TahfeezQuranSectionCard extends StatelessWidget {
   final String? subtitle;
   final Color? accentColor;
   final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
+
+  /// A small bookmark after the title.
+  final bool bookmarked;
 
   /// A share (0-1) shown at the card's end in place of the chevron — its
   /// percentage over a short bar (e.g. how much of a surah is memorized);
@@ -50,6 +56,7 @@ class TahfeezQuranSectionCard extends StatelessWidget {
     return Card(
       child: InkWell(
         onTap: onTap,
+        onLongPress: onLongPress,
         borderRadius: BorderRadius.circular(TahfeezSpacing.md),
         child: Padding(
           padding: const EdgeInsets.all(TahfeezSpacing.md),
@@ -75,7 +82,28 @@ class TahfeezQuranSectionCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(title, style: Theme.of(context).textTheme.bodyLarge),
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            title,
+                            style: Theme.of(context).textTheme.bodyLarge,
+                          ),
+                        ),
+                        if (bookmarked)
+                          Padding(
+                            padding: const EdgeInsetsDirectional.only(
+                              start: TahfeezSpacing.xs,
+                            ),
+                            child: Icon(
+                              Icons.bookmark_rounded,
+                              key: const ValueKey('section-card-bookmarked'),
+                              size: 16,
+                              color: accent,
+                            ),
+                          ),
+                      ],
+                    ),
                     if (subtitle != null)
                       Text(
                         subtitle!,
