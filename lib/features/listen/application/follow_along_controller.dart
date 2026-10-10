@@ -242,10 +242,17 @@ class FollowAlongController extends Notifier<FollowAlongState?> {
     // Felt as well as seen: the user's turn.
     ref.read(hifzHapticsProvider)();
     VerseRef verse(int id) => (chapterNo: id ~/ 1000, verseNo: id % 1000);
-    ref.read(hifzControllerProvider.notifier).setLoop((
-      from: verse(s.part.first),
-      to: verse(s.part.last),
-    ), HifzLoop(mode: HifzLoopMode.range, count: times ?? s.options.userTimes));
+    ref
+        .read(hifzControllerProvider.notifier)
+        .setLoop(
+          (from: verse(s.part.first), to: verse(s.part.last)),
+          HifzLoop(
+            mode: HifzLoopMode.range,
+            count: times ?? s.options.userTimes,
+          ),
+          // The ayahs before the one recited stay readable.
+          showBefore: true,
+        );
     await ref
         .read(recitationSessionControllerProvider.notifier)
         .start(startLocation: location);

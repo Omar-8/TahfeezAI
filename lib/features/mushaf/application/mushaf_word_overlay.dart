@@ -47,6 +47,7 @@ class MushafWordOverlay {
     this.marks = const {},
     this.hideUnrevealed = true,
     this.followHideMode = false,
+    this.showBefore = false,
     this.heard = const {},
     this.corrected = const {},
   });
@@ -62,6 +63,10 @@ class MushafWordOverlay {
   /// uncovering.
   final bool followHideMode;
 
+  /// Words before [first] are never hidden (Follow along: the ayahs before
+  /// the one being recited stay readable).
+  final bool showBefore;
+
   final WordRef first, last;
   final Set<WordRef> revealed;
   final Map<WordRef, MushafWordMark> marks;
@@ -72,7 +77,11 @@ class MushafWordOverlay {
 
   /// With [hideUnrevealed], every word not revealed is hidden — on every
   /// page, inside or outside the range.
-  bool isHidden(WordRef ref) => hideUnrevealed && !revealed.contains(ref);
+  /// (With [showBefore], not those before [first].)
+  bool isHidden(WordRef ref) =>
+      hideUnrevealed &&
+      !revealed.contains(ref) &&
+      !(showBefore && compareWordRefs(ref, first) < 0);
 
   @override
   bool operator ==(Object other) =>
@@ -81,6 +90,7 @@ class MushafWordOverlay {
       other.last == last &&
       other.hideUnrevealed == hideUnrevealed &&
       other.followHideMode == followHideMode &&
+      other.showBefore == showBefore &&
       mapEquals(other.heard, heard) &&
       setEquals(other.corrected, corrected) &&
       setEquals(other.revealed, revealed) &&

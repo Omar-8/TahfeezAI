@@ -43,8 +43,11 @@ class _FakeHifz extends HifzController {
   @override
   HifzState build() => const HifzState();
 
+  bool showBefore = false;
+
   @override
-  void setLoop(HifzRange range, HifzLoop loop) {
+  void setLoop(HifzRange range, HifzLoop loop, {bool showBefore = false}) {
+    this.showBefore = showBefore;
     loopRange = range;
     this.loop = loop;
   }
@@ -120,6 +123,7 @@ void main() {
       to: (chapterNo: 112, verseNo: 1),
     ));
     expect(hifz.loop!.count, 1);
+    expect(hifz.showBefore, isTrue, reason: 'the ayahs before stay shown');
 
     // A loop's earlier pass completing is not the turn's end.
     hifz.set(

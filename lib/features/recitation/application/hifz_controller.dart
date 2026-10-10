@@ -449,13 +449,19 @@ class HifzController extends Notifier<HifzState> {
   HifzLoop lastLoop = const HifzLoop();
 
   /// Loops [range] in the next recitation session (started right after);
-  /// the session's end ends the loop.
-  void setLoop(HifzRange range, HifzLoop loop) {
+  /// the session's end ends the loop. [showBefore]: the words before the
+  /// range stay shown in hide mode (Follow along).
+  void setLoop(HifzRange range, HifzLoop loop, {bool showBefore = false}) {
     if (state.running) return;
     if (state.loop == null) _rangeBeforeLoop = state.range;
+    _showBefore = showBefore;
     lastLoop = loop;
     state = state.copyWith(range: () => range, loop: () => loop);
   }
+
+  /// The words before the range stay shown (see [setLoop]); for one
+  /// session.
+  var _showBefore = false;
 
   /// The pass being recited: one more each time a loop starts again (see
   /// [recitationPassProvider]).
@@ -499,6 +505,7 @@ class HifzController extends Notifier<HifzState> {
     _matcher = null;
     _locating = false;
     // A loop lasts one session.
+    _showBefore = false;
     state = HifzState(
       range: state.loop != null ? _rangeBeforeLoop : state.range,
     );
@@ -568,6 +575,7 @@ class HifzController extends Notifier<HifzState> {
             revealed: {..._loopDone, ...s.revealed}.difference(held),
             marks: marks,
             hideUnrevealed: ref.read(mushafHideModeProvider).enabled,
+            showBefore: _showBefore,
             heard: Map.of(_heardAt),
             corrected: Set.of(_correctedAt),
           ),
