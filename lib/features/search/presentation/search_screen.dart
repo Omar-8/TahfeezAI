@@ -8,7 +8,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/routing/quran_location_routing.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/components/components.dart';
-import '../../../core/ui/coming_soon.dart';
 import '../../../quran/application/quran_dataset_status.dart';
 import '../../../quran/domain/models/search_models.dart';
 import '../application/search_controller.dart';
@@ -92,11 +91,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           onSubmitted: _runSearch,
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.mic_none_outlined),
-            tooltip: AppLocalizations.of(context).searchVoice,
-            onPressed: () => showComingSoon(context),
-          ),
           IconButton(
             icon: const Icon(Icons.tune),
             tooltip: AppLocalizations.of(context).searchFilters,

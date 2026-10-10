@@ -74,7 +74,6 @@
   "homeReadHistoryEmpty": "Your reading history will appear here once you start reading.",
   "homeFeaturedReadingUnavailable": "Featured passages will appear once a Quran dataset is installed.",
   "comingSoonMessage": "Coming soon",
-  "miniPlayerDefaultTitle": "Now playing",
   "navSettings": "Settings",
   "homeDailyAyahOpen": "Read in context",
   "homeContinueReadingAction": "Continue",
@@ -131,7 +130,6 @@
   "settingsTitle": "Settings",
   "settingsLanguage": "Language",
   "settingsLanguageSystem": "System default",
-  "settingsAppearance": "Appearance",
   "settingsThemeSystem": "System",
   "settingsThemeLight": "Light",
   "settingsThemeDark": "Dark",
@@ -207,7 +205,6 @@
   "searchSurahs": "Surahs",
   "searchQuranText": "Quran text",
   "searchHint": "Search the Quran",
-  "searchVoice": "Voice search",
   "searchTry": "Try a verse (2:255), a range (2:255-257), a chapter number, or a Surah name.",
   "searchNoResults": "No results for \"{query}\".",
   "@searchNoResults": {
@@ -349,26 +346,9 @@
   "recFrom": "From",
   "recTo": "To",
   "recUseVisible": "Use the visible page",
-  "readerShare": "Share",
-  "readerCopy": "Copy",
-  "readerCopied": "Copied {reference}",
-  "@readerCopied": {
-    "placeholders": {
-      "reference": {
-        "type": "String"
-      }
-    }
-  },
-  "readerPlay": "Play",
-  "readerBookmark": "Bookmark",
   "readerTafsir": "Tafsir",
-  "readerQuranScript": "Quran script",
-  "readerScriptsError": "Could not load available Quran scripts.",
   "readerTranslationTafsir": "Translation & tafsir",
   "readerOptions": "Reader options",
-  "readerContinuous": "Continuous scrolling",
-  "readerContinuousSub": "Automatically continue into the next chapter",
-  "readerShowArabic": "Show Arabic text",
   "readerSelected": "{count} selected",
   "@readerSelected": {
     "placeholders": {
@@ -377,22 +357,10 @@
       }
     }
   },
-  "readerTafsirSub": "Language, active work",
   "readerWbw": "Word by word",
-  "readerWbwSub": "Language packs, translation, transliteration",
   "readerMushaf": "Mushaf",
-  "readerVerseByVerse": "Verse by verse",
-  "readerTranslation": "Translation",
   "readerPageError": "This page could not be rendered.",
   "mushafAppearance": "Mushaf appearance",
-  "readerAyahRef": "Ayah {ref}",
-  "@readerAyahRef": {
-    "placeholders": {
-      "ref": {
-        "type": "String"
-      }
-    }
-  },
   "packsNoTranslations": "No translations available yet.",
   "packsActive": "{name} (active)",
   "@packsActive": {

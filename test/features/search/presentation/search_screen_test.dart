@@ -8,8 +8,6 @@ import 'package:tahfeez_ai/core/localization/generated/app_localizations.dart';
 import 'package:tahfeez_ai/core/routing/app_routes.dart';
 import 'package:tahfeez_ai/core/routing/quran_location_routing.dart';
 import 'package:tahfeez_ai/core/storage/storage_providers.dart';
-import 'package:tahfeez_ai/features/reader/application/reader_preferences_controller.dart';
-import 'package:tahfeez_ai/features/reader/domain/reader_mode.dart';
 import 'package:tahfeez_ai/features/search/presentation/search_screen.dart';
 import 'package:tahfeez_ai/quran/application/quran_script_code.dart';
 import 'package:tahfeez_ai/quran/data/import/quran_dataset_importer.dart';
@@ -21,13 +19,6 @@ import 'package:tahfeez_ai/quran/search_providers.dart';
 import 'package:tahfeez_ai/quran/translation_providers.dart';
 
 import '../../../quran/quran_test_fixtures.dart';
-
-class _FixedReaderMode extends ReaderModePreferenceController {
-  _FixedReaderMode(this._fixed);
-  final ReaderMode _fixed;
-  @override
-  ReaderMode build() => _fixed;
-}
 
 void main() {
   setUp(() async {
@@ -66,9 +57,6 @@ void main() {
         translationDatabaseProvider.overrideWith((ref) => translationDb),
         searchIndexDatabaseProvider.overrideWith((ref) => indexDb),
         quranScriptCodeProvider.overrideWith((ref) => testScriptCode),
-        readerModePreferenceControllerProvider.overrideWith(
-          () => _FixedReaderMode(ReaderMode.verseByVerse),
-        ),
       ],
       child: MaterialApp.router(
         routerConfig: router,
@@ -210,16 +198,6 @@ void main() {
       await tester.pumpAndSettle(const Duration(milliseconds: 400));
 
       expect(find.text('Quran text'), findsNothing);
-    });
-
-    testWidgets('the voice search icon shows coming soon', (tester) async {
-      await tester.pumpWidget(wrap(db, translationDb, indexDb));
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.byTooltip('Voice search'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Coming soon'), findsOneWidget);
     });
   });
 }

@@ -174,13 +174,9 @@ flutter:
     # redistribution items "cleared" without verified upstream permission.
     - assets/quran/mushaf/kfgqpc_v2.json
 
-    # Verse-by-verse mode is disabled (verseByVerseModeEnabledProvider), so
-    # its own data is no longer bundled: the Uthmani Hafs display font
-    # (assets/quran/fonts/quranapp/uthmanic_hafs.ttf +
-    # assets/quran/manifests/uthmanic_hafs_font.json) and the QPC Hafs
-    # display-word manifest (assets/quran/quran_display/
-    # qpc_hafs_display_words.json, ~2.1MB). Re-add these three lines if the
-    # mode is ever re-enabled; the providers already tolerate their absence.
+    # The verse-by-verse reader is archived (git tag archive/verse-by-verse):
+    # neither its code nor its data — the Uthmani Hafs display font and the
+    # QPC Hafs display-word manifest — is in the app.
 
     # Quran Engine's own KFGQPC-derived Mushaf page corpus (the full,
     # real 604-page set — structurally validated by

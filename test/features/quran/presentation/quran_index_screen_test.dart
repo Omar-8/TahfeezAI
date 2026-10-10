@@ -8,8 +8,6 @@ import 'package:tahfeez_ai/features/reader/presentation/reader_screen.dart';
 import 'package:tahfeez_ai/core/localization/generated/app_localizations.dart';
 import 'package:tahfeez_ai/core/routing/quran_location_routing.dart';
 import 'package:tahfeez_ai/features/quran/presentation/quran_index_screen.dart';
-import 'package:tahfeez_ai/features/reader/application/reader_preferences_controller.dart';
-import 'package:tahfeez_ai/features/reader/domain/reader_mode.dart';
 import 'package:tahfeez_ai/quran/data/import/quran_dataset_importer.dart';
 import 'package:tahfeez_ai/quran/data/quran_database.dart';
 import 'package:tahfeez_ai/memorization/application/memorization_today.dart';
@@ -18,17 +16,6 @@ import 'package:tahfeez_ai/memorization/domain/recitation_score.dart';
 import 'package:tahfeez_ai/quran/quran_providers.dart';
 
 import '../../../quran/quran_test_fixtures.dart';
-
-/// The Quran index navigates to `ReaderScreen`, which now defaults to
-/// `ReaderMode.mushaf` (see `ReaderModePreferenceController`) — fixed to
-/// verse-by-verse here since these tests assert verse-by-verse-specific
-/// content (the chapter-info card, "Ayah 1:3", …), not Mushaf mode itself.
-class _FixedReaderMode extends ReaderModePreferenceController {
-  _FixedReaderMode(this._fixed);
-  final ReaderMode _fixed;
-  @override
-  ReaderMode build() => _fixed;
-}
 
 void main() {
   Widget wrap(QuranDatabase db, {Map<int, SurahProgress> progress = const {}}) {
@@ -47,9 +34,6 @@ void main() {
       overrides: [
         quranDatabaseProvider.overrideWith((ref) => db),
         surahProgressProvider.overrideWith((ref) async => progress),
-        readerModePreferenceControllerProvider.overrideWith(
-          () => _FixedReaderMode(ReaderMode.verseByVerse),
-        ),
       ],
       child: MaterialApp.router(
         routerConfig: router,
