@@ -129,7 +129,7 @@ class _RecitationMushafAnchorState
       ),
       // Whose turn it is, while Follow along runs: just above the bar.
       const PositionedDirectional(
-        bottom: 4,
+        bottom: 0,
         start: 16,
         end: 16,
         child: IgnorePointer(child: Center(child: FollowAlongHint())),
