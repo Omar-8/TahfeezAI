@@ -296,6 +296,40 @@ void main() {
     );
   });
 
+  test('a sure quick verdict (a clear wrong vowel) alerts at once, and not '
+      'again when confirmed', () async {
+    const kursiVerse = (chapterNo: 2, verseNo: 255);
+    await setUpHifz(from: kursiVerse, to: kursiVerse);
+    await recite(kursi.split(' ').take(5).join(' '));
+    final word = corpus.words[corpus.verseStartPosition(kursiVerse)! + 1].ref;
+    final acoustic = container.read(
+      acousticVerificationControllerProvider.notifier,
+    ) as _Acoustic;
+    RecitationError vowel(double llr) => RecitationError(
+      word: word,
+      letter: 0,
+      type: RecitationErrorType.wrongVowel,
+      expected: 'a',
+      likelihoodRatio: llr,
+    );
+    acoustic.put({
+      word: AcousticWordResult(RecitationErrorType.wrongVowel, [
+        vowel(AcousticWordResult.sureVowelLlr + 1),
+      ], provisional: true),
+    });
+    await pumpEventQueue();
+    expect(vibrations, 1);
+    expect(
+      container.read(mushafWordOverlayProvider)!.marks[word],
+      MushafWordMark.tashkeel,
+    );
+    acoustic.put({
+      word: AcousticWordResult(RecitationErrorType.wrongVowel, [vowel(9)]),
+    });
+    await pumpEventQueue();
+    expect(vibrations, 1, reason: 'once per word');
+  });
+
   test('a saved vibrate switch becomes the vibrate alert', () {
     expect(HifzSettings.fromJson({'vibrate': false}).alert, MistakeAlert.off);
     expect(

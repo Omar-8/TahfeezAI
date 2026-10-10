@@ -97,6 +97,26 @@ class AcousticWordResult {
   final int pass;
 
   bool get isMistake => type.isError;
+
+  /// A mistake shown and alerted at once, though only [provisional]: the
+  /// kinds a quick check is rarely wrong about. Replaying 30 phone
+  /// sessions (model v3.5s, 2026-10-10), quick verdicts of a wrong vowel
+  /// heard with llr ≥ [sureVowelLlr], or a wrong letter with llr ≥
+  /// [sureLetterLlr], were confirmed by their ayah's check 24 times in 28;
+  /// sukun verdicts only 10 in 34. Every other quick verdict waits for the
+  /// ayah's check.
+  bool get isSure =>
+      isMistake &&
+      (!provisional ||
+          errors.any(
+            (e) =>
+                (e.type == RecitationErrorType.wrongVowel &&
+                    e.likelihoodRatio >= sureVowelLlr) ||
+                (e.type == RecitationErrorType.wrongLetter &&
+                    e.likelihoodRatio >= sureLetterLlr),
+          ));
+
+  static const sureVowelLlr = 6.0, sureLetterLlr = 8.0;
 }
 
 class AcousticVerificationState {

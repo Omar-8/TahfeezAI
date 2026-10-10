@@ -392,14 +392,11 @@ class HifzController extends Notifier<HifzState> {
       // its words were recited.)
       for (final MapEntry(key: w, value: r) in next.words.entries) {
         final before = previous?.words[w];
-        // Only a confirmed mistake (the ayah's check): a word's quick early
-        // verdict is sometimes withdrawn by it.
-        if (!r.isMistake ||
-            r.provisional ||
-            (before != null &&
-                before.isMistake &&
-                !before.provisional &&
-                before.pass == r.pass)) {
+        // A confirmed mistake (the ayah's check), or a quick early verdict
+        // of a kind rarely withdrawn ([AcousticWordResult.isSure]); others
+        // are sometimes withdrawn by the ayah's check. Once per word.
+        if (!r.isSure ||
+            (before != null && before.isSure && before.pass == r.pass)) {
           continue;
         }
         if (r.pass < _pass ||
@@ -580,15 +577,15 @@ class HifzController extends Notifier<HifzState> {
   /// A recited word's colour from its pronunciation check.
   /// (Only [pass]'s verdict: a loop's earlier repetitions of the word are
   /// not this one.)
-  /// (A quick early verdict shows at once, softly, as [MushafWordMark
-  /// .checking]: the ayah's check confirms it — and only then alerts — or
-  /// withdraws it.)
+  /// (A quick early verdict shows at once: in full if it is
+  /// [AcousticWordResult.isSure], else softly, as [MushafWordMark.checking],
+  /// until the ayah's check confirms it — and alerts — or withdraws it.)
   static MushafWordMark _pronunciationMark(AcousticWordResult? a, int pass) =>
       a == null || !a.isMistake || a.pass != pass
       ? MushafWordMark.correct
-      : a.provisional
-      ? MushafWordMark.checking
-      : MushafWordMark.tashkeel;
+      : a.isSure
+      ? MushafWordMark.tashkeel
+      : MushafWordMark.checking;
 
   /// A finished test's colours: every recited word as it went, no band on
   /// a next word, and the page hidden only as hide mode hides it.
