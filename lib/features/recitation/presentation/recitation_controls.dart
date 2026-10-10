@@ -140,11 +140,19 @@ class _RecitationMushafAnchorState
 /// A row of the bar's buttons as one rounded group, thin dividers between
 /// them (mic · Listen · Follow along; stop · pause; the reveal/hide steps).
 class BarButtonGroup extends StatelessWidget {
-  const BarButtonGroup({super.key, required this.children});
+  const BarButtonGroup({
+    super.key,
+    required this.children,
+    this.groupHeight = height,
+  });
 
   final List<Widget> children;
 
+  /// Its height ([height]; [labelledHeight] with labels under the icons).
+  final double groupHeight;
+
   static const height = 40.0;
+  static const labelledHeight = 48.0;
 
   /// A button inside the group: plain (the group is its background).
   static final buttonStyle = IconButton.styleFrom(
@@ -159,10 +167,10 @@ class BarButtonGroup extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Container(
-      height: height,
+      height: groupHeight,
       decoration: BoxDecoration(
         color: scheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(height / 2),
+        borderRadius: BorderRadius.circular(groupHeight / 2),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 2),
       child: Row(
@@ -414,8 +422,8 @@ class RecitationBottomBar extends ConsumerWidget {
 
 /// The recitation bar's modes before one starts: recite (the mic), loop,
 /// listen and follow along, as one group — or, [collapsed] (hide mode on,
-/// its reveal buttons beside), one button opening them as a menu. Grows
-/// and shrinks between the two.
+/// its reveal buttons beside), one button opening them as a menu. Fades in
+/// as either.
 class _ModeButtons extends ConsumerWidget {
   const _ModeButtons({
     required this.location,
@@ -438,6 +446,7 @@ class _ModeButtons extends ConsumerWidget {
         key: 'recite',
         icon: Icons.mic_rounded,
         label: l10n.recStart,
+        short: l10n.modeRecite,
         onPressed: location == null || starting
             ? null
             : () => controller.start(startLocation: location),
@@ -447,6 +456,7 @@ class _ModeButtons extends ConsumerWidget {
           key: 'hifz-loop',
           icon: Icons.repeat_rounded,
           label: l10n.recLoop,
+          short: l10n.modeLoop,
           onPressed: location == null
               ? null
               : () => showRecitationLoopSheet(context),
@@ -455,6 +465,7 @@ class _ModeButtons extends ConsumerWidget {
         key: 'listen-open',
         icon: Icons.headphones_rounded,
         label: l10n.listenMenuTitle,
+        short: l10n.modeListen,
         onPressed: location == null ? null : () => showListenSheet(context),
       ),
       if (recognition)
@@ -462,6 +473,7 @@ class _ModeButtons extends ConsumerWidget {
           key: 'follow-open',
           icon: Icons.record_voice_over_rounded,
           label: l10n.followTitle,
+          short: l10n.modeFollow,
           onPressed: location == null
               ? null
               : () => showFollowAlongSheet(context),
@@ -507,41 +519,107 @@ class _ModeButtons extends ConsumerWidget {
         ],
       );
     } else {
+      // Each with a short name under its icon (the full one as its
+      // tooltip and in the collapsed menu).
       child = BarButtonGroup(
         key: const ValueKey('modes-group'),
+        groupHeight: BarButtonGroup.labelledHeight,
         children: [
           for (final m in modes)
-            IconButton(
+            _LabelledModeButton(
               key: m.key == 'recite' ? null : ValueKey(m.key),
-              style: BarButtonGroup.buttonStyle,
-              color: m.key == 'recite' ? scheme.primary : null,
-              icon: Icon(m.icon),
+              icon: m.icon,
+              label: m.short,
               tooltip: m.label,
+              color: m.key == 'recite' ? scheme.primary : null,
               onPressed: m.onPressed,
             ),
         ],
       );
     }
-    return AnimatedSize(
-      duration: const Duration(milliseconds: 250),
-      curve: Curves.easeOutCubic,
-      alignment: AlignmentDirectional.centerStart,
-      child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 200),
-        switchInCurve: Curves.easeOut,
-        switchOutCurve: Curves.easeIn,
-        transitionBuilder: (child, animation) => FadeTransition(
-          opacity: animation,
-          child: ScaleTransition(
-            scale: Tween(begin: 0.9, end: 1.0).animate(animation),
-            child: child,
+    // The layout changes at once — so the reveal buttons have their room
+    // (and full size) from the start; the new group fades and grows in.
+    return FadeScaleIn(key: ValueKey(collapsed), child: child);
+  }
+}
+
+/// Fades and scales [child] in when first shown (a new key shows it anew).
+class FadeScaleIn extends StatelessWidget {
+  const FadeScaleIn({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => TweenAnimationBuilder<double>(
+    tween: Tween(begin: 0, end: 1),
+    duration: const Duration(milliseconds: 220),
+    curve: Curves.easeOutCubic,
+    builder: (context, t, child) => Opacity(
+      opacity: t,
+      child: Transform.scale(scale: 0.92 + 0.08 * t, child: child),
+    ),
+    child: child,
+  );
+}
+
+/// A mode in the idle bar's group: its icon, its short name below.
+class _LabelledModeButton extends StatelessWidget {
+  const _LabelledModeButton({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.tooltip,
+    required this.onPressed,
+    this.color,
+  });
+
+  final IconData icon;
+  final String label, tooltip;
+  final VoidCallback? onPressed;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final enabled = onPressed != null;
+    final ink = enabled
+        ? color ?? theme.colorScheme.onSurfaceVariant
+        : theme.colorScheme.onSurface.withValues(alpha: 0.38);
+    return Tooltip(
+      message: tooltip,
+      child: InkWell(
+        onTap: onPressed,
+        customBorder: const StadiumBorder(),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            minWidth: 46,
+            maxWidth: 64,
+            minHeight: BarButtonGroup.labelledHeight,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 6),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, size: 20, color: ink),
+                const SizedBox(height: 1),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: ink,
+                      fontSize: 11,
+                      height: 1.1,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
-        layoutBuilder: (current, previous) => Stack(
-          alignment: AlignmentDirectional.centerStart,
-          children: [...previous, ?current],
-        ),
-        child: child,
       ),
     );
   }
@@ -940,33 +1018,35 @@ class MushafHideControls extends ConsumerWidget {
         ? const <Widget>[]
         : [
             if (hide.enabled) ...[
-              BarButtonGroup(
-                children: [
-                  step(
-                    'mushaf-reveal-ayah',
-                    Icons.first_page_rounded,
-                    AppLocalizations.of(context).recRevealAyah,
-                    onRevealAyah,
-                  ),
-                  step(
-                    'mushaf-reveal-word',
-                    Icons.keyboard_double_arrow_left_rounded,
-                    AppLocalizations.of(context).recRevealWord,
-                    onRevealWord,
-                  ),
-                  step(
-                    'mushaf-hide-word',
-                    Icons.keyboard_double_arrow_right_rounded,
-                    AppLocalizations.of(context).recHideWord,
-                    onHideWord,
-                  ),
-                  step(
-                    'mushaf-hide-ayah',
-                    Icons.last_page_rounded,
-                    AppLocalizations.of(context).recHideAyah,
-                    onHideAyah,
-                  ),
-                ],
+              FadeScaleIn(
+                child: BarButtonGroup(
+                  children: [
+                    step(
+                      'mushaf-reveal-ayah',
+                      Icons.first_page_rounded,
+                      AppLocalizations.of(context).recRevealAyah,
+                      onRevealAyah,
+                    ),
+                    step(
+                      'mushaf-reveal-word',
+                      Icons.keyboard_double_arrow_left_rounded,
+                      AppLocalizations.of(context).recRevealWord,
+                      onRevealWord,
+                    ),
+                    step(
+                      'mushaf-hide-word',
+                      Icons.keyboard_double_arrow_right_rounded,
+                      AppLocalizations.of(context).recHideWord,
+                      onHideWord,
+                    ),
+                    step(
+                      'mushaf-hide-ayah',
+                      Icons.last_page_rounded,
+                      AppLocalizations.of(context).recHideAyah,
+                      onHideAyah,
+                    ),
+                  ],
+                ),
               ),
               gap,
             ],

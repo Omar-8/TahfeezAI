@@ -395,5 +395,9 @@
   "listenDownloaded": "Téléchargé",
   "listenDownloadFailed": "Arrêté — touchez télécharger pour réessayer",
   "commonDelete": "Supprimer",
-  "recModes": "Modes de récitation"
+  "recModes": "Modes de récitation",
+  "modeRecite": "Réciter",
+  "modeLoop": "Boucle",
+  "modeListen": "Écouter",
+  "modeFollow": "Suivre"
 }

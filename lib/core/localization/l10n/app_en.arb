@@ -835,5 +835,9 @@
       }
     }
   },
-  "recModes": "Recitation modes"
+  "recModes": "Recitation modes",
+  "modeRecite": "Recite",
+  "modeLoop": "Loop",
+  "modeListen": "Listen",
+  "modeFollow": "Follow"
 }

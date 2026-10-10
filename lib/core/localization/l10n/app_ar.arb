@@ -395,5 +395,9 @@
   "listenDownloaded": "منزّل",
   "listenDownloadFailed": "توقف — اضغط تنزيل للمحاولة مجددًا",
   "commonDelete": "حذف",
-  "recModes": "أوضاع التلاوة"
+  "recModes": "أوضاع التلاوة",
+  "modeRecite": "تلاوة",
+  "modeLoop": "تكرار",
+  "modeListen": "استماع",
+  "modeFollow": "متابعة"
 }

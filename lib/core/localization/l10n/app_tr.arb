@@ -395,5 +395,9 @@
   "listenDownloaded": "İndirildi",
   "listenDownloadFailed": "Durdu — tekrar denemek için indire dokunun",
   "commonDelete": "Sil",
-  "recModes": "Okuma modları"
+  "recModes": "Okuma modları",
+  "modeRecite": "Oku",
+  "modeLoop": "Tekrar",
+  "modeListen": "Dinle",
+  "modeFollow": "Takip"
 }

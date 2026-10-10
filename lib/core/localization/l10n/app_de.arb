@@ -395,5 +395,9 @@
   "listenDownloaded": "Heruntergeladen",
   "listenDownloadFailed": "Gestoppt — zum erneuten Versuch auf Download tippen",
   "commonDelete": "Löschen",
-  "recModes": "Rezitationsmodi"
+  "recModes": "Rezitationsmodi",
+  "modeRecite": "Rezitieren",
+  "modeLoop": "Schleife",
+  "modeListen": "Hören",
+  "modeFollow": "Folgen"
 }

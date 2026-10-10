@@ -395,5 +395,9 @@
   "listenDownloaded": "ڈاؤن لوڈ شدہ",
   "listenDownloadFailed": "رک گیا — دوبارہ کوشش کے لیے ڈاؤن لوڈ دبائیں",
   "commonDelete": "حذف کریں",
-  "recModes": "تلاوت کے طریقے"
+  "recModes": "تلاوت کے طریقے",
+  "modeRecite": "تلاوت",
+  "modeLoop": "دہرائی",
+  "modeListen": "سنیں",
+  "modeFollow": "ساتھ"
 }
