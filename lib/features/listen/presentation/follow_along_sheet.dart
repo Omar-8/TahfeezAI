@@ -266,11 +266,14 @@ class _FollowAlongSheetState extends ConsumerState<_FollowAlongSheet> {
   }
 }
 
-/// While Follow along runs, just above the bar: a small pill saying
+/// While Follow along runs, on the bar's top border: a small pill saying
 /// whose turn it is — the reciter's (listen) or the user's (recite now) —
 /// and how far the run has come. Nothing without live recognition.
 class FollowAlongHint extends ConsumerWidget {
   const FollowAlongHint({super.key});
+
+  /// Its height, to centre it on the bar's border.
+  static const height = 26.0;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -289,7 +292,8 @@ class FollowAlongHint extends ConsumerWidget {
     return AnimatedContainer(
       key: ValueKey('follow-hint-${run.phase.name}'),
       duration: const Duration(milliseconds: 250),
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      height: height,
+      padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
         color: yours ? scheme.primary : scheme.secondaryContainer,
         borderRadius: BorderRadius.circular(TahfeezRadii.pill),

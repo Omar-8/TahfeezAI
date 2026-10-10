@@ -127,13 +127,6 @@ class _RecitationMushafAnchorState
         end: 0,
         child: RecitationProgressBar(location: widget.location),
       ),
-      // Whose turn it is, while Follow along runs: just above the bar.
-      const PositionedDirectional(
-        bottom: 0,
-        start: 16,
-        end: 16,
-        child: IgnorePointer(child: Center(child: FollowAlongHint())),
-      ),
     ],
   );
 }
@@ -315,122 +308,142 @@ class RecitationBottomBar extends ConsumerWidget {
       // Same surface as the navigation bar it replaces (and the system
       // navigation bar the shell already tints to match).
       color: scheme.surfaceContainer,
-      child: SafeArea(
-        top: false,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (showDevPanel)
-              RecognitionDevPanel(
-                state: recognition,
-                match: quranMatch,
-                acoustic: acoustic,
-                config: aiConfig,
-                inference: inference,
-              ),
-            if (recognition != null)
-              _RecitationAiNotice(config: aiConfig, inference: inference),
-            ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: 72),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 200),
-                  child: state.isActive
-                      ? _SessionControls(
-                          key: const ValueKey('recitation-session-controls'),
-                          state: state,
-                        )
-                      : listening
-                      ? const _ListenControls(key: ValueKey('listen-controls'))
-                      : Row(
-                          key: const ValueKey('recitation-start'),
-                          // Web keeps the buttons together in the middle
-                          // of the (usually wide) bar; Android spreads them
-                          // to the edges, within thumb reach.
-                          mainAxisAlignment: centered
-                              ? MainAxisAlignment.center
-                              : MainAxisAlignment.spaceBetween,
-                          children: [
-                            // One group: room for the hide controls beside
-                            // it.
-                            BarButtonGroup(
+      // Follow along's turn hint sits on the bar's top border, over the page.
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          SafeArea(
+            top: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (showDevPanel)
+                  RecognitionDevPanel(
+                    state: recognition,
+                    match: quranMatch,
+                    acoustic: acoustic,
+                    config: aiConfig,
+                    inference: inference,
+                  ),
+                if (recognition != null)
+                  _RecitationAiNotice(config: aiConfig, inference: inference),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(minHeight: 72),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 200),
+                      child: state.isActive
+                          ? _SessionControls(
+                              key: const ValueKey(
+                                'recitation-session-controls',
+                              ),
+                              state: state,
+                            )
+                          : listening
+                          ? const _ListenControls(
+                              key: ValueKey('listen-controls'),
+                            )
+                          : Row(
+                              key: const ValueKey('recitation-start'),
+                              // Web keeps the buttons together in the middle
+                              // of the (usually wide) bar; Android spreads them
+                              // to the edges, within thumb reach.
+                              mainAxisAlignment: centered
+                                  ? MainAxisAlignment.center
+                                  : MainAxisAlignment.spaceBetween,
                               children: [
-                                IconButton(
-                                  style: BarButtonGroup.buttonStyle,
-                                  color: scheme.primary,
-                                  icon: const Icon(Icons.mic_rounded),
-                                  tooltip: AppLocalizations.of(context)
-                                      .recStart,
-                                  onPressed:
-                                      location == null ||
-                                          state.phase ==
-                                              RecitationPhase.starting
-                                      ? null
-                                      : () => controller.start(
-                                          startLocation: location,
-                                        ),
-                                ),
-                                // Listen: the reciter, from a range.
-                                IconButton(
-                                  key: const ValueKey('listen-open'),
-                                  style: BarButtonGroup.buttonStyle,
-                                  icon: const Icon(Icons.headphones_rounded),
-                                  tooltip: AppLocalizations.of(context)
-                                      .listenMenuTitle,
-                                  onPressed: location == null
-                                      ? null
-                                      : () => showListenSheet(context),
-                                ),
-                                // Follow along: the reciter, then the user.
-                                if (recognition != null)
-                                  IconButton(
-                                    key: const ValueKey('follow-open'),
-                                    style: BarButtonGroup.buttonStyle,
-                                    icon: const Icon(
-                                      Icons.record_voice_over_rounded,
+                                // One group: room for the hide controls beside
+                                // it.
+                                BarButtonGroup(
+                                  children: [
+                                    IconButton(
+                                      style: BarButtonGroup.buttonStyle,
+                                      color: scheme.primary,
+                                      icon: const Icon(Icons.mic_rounded),
+                                      tooltip: AppLocalizations.of(context)
+                                          .recStart,
+                                      onPressed:
+                                          location == null ||
+                                              state.phase ==
+                                                  RecitationPhase.starting
+                                          ? null
+                                          : () => controller.start(
+                                              startLocation: location,
+                                            ),
                                     ),
-                                    tooltip: AppLocalizations.of(context)
-                                        .followTitle,
-                                    onPressed: location == null
-                                        ? null
-                                        : () => showFollowAlongSheet(context),
+                                    // Listen: the reciter, from a range.
+                                    IconButton(
+                                      key: const ValueKey('listen-open'),
+                                      style: BarButtonGroup.buttonStyle,
+                                      icon: const Icon(
+                                        Icons.headphones_rounded,
+                                      ),
+                                      tooltip: AppLocalizations.of(context)
+                                          .listenMenuTitle,
+                                      onPressed: location == null
+                                          ? null
+                                          : () => showListenSheet(context),
+                                    ),
+                                    // Follow along: the reciter, then the user.
+                                    if (recognition != null)
+                                      IconButton(
+                                        key: const ValueKey('follow-open'),
+                                        style: BarButtonGroup.buttonStyle,
+                                        icon: const Icon(
+                                          Icons.record_voice_over_rounded,
+                                        ),
+                                        tooltip: AppLocalizations.of(context)
+                                            .followTitle,
+                                        onPressed: location == null
+                                            ? null
+                                            : () =>
+                                                  showFollowAlongSheet(context),
+                                      ),
+                                  ],
+                                ),
+                                if (centered)
+                                  const SizedBox(width: _centeredGroupGap),
+                                // The reveal/hide buttons scale down rather
+                                // than overflow a narrow phone; the eye keeps
+                                // its size and place.
+                                Flexible(
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: const [
+                                      Flexible(
+                                        child: FittedBox(
+                                          fit: BoxFit.scaleDown,
+                                          child: MushafHideControls(
+                                            part: MushafHideControlsPart.steps,
+                                          ),
+                                        ),
+                                      ),
+                                      MushafHideControls(
+                                        part: MushafHideControlsPart.pinned,
+                                      ),
+                                    ],
                                   ),
+                                ),
                               ],
                             ),
-                            if (centered)
-                              const SizedBox(width: _centeredGroupGap),
-                            // The reveal/hide buttons scale down rather
-                            // than overflow a narrow phone; the eye keeps
-                            // its size and place.
-                            Flexible(
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: const [
-                                  Flexible(
-                                    child: FittedBox(
-                                      fit: BoxFit.scaleDown,
-                                      child: MushafHideControls(
-                                        part: MushafHideControlsPart.steps,
-                                      ),
-                                    ),
-                                  ),
-                                  MushafHideControls(
-                                    part: MushafHideControlsPart.pinned,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
+          ),
+          if (recognition != null)
+            const Positioned(
+              top: -FollowAlongHint.height / 2,
+              left: 16,
+              right: 16,
+              child: IgnorePointer(child: Center(child: FollowAlongHint())),
+            ),
+        ],
       ),
     );
   }
