@@ -386,5 +386,13 @@
   "privacyLocal": "Votre progression, vos plans, vos signets et vos réglages restent sur votre téléphone. Aucun compte.",
   "privacyNetwork": "Internet sert uniquement à écouter ou télécharger les récitations ; ces requêtes ne contiennent que le nom du fichier audio.",
   "privacyNoTracking": "Pas de publicité, pas de statistiques, pas de pistage.",
-  "privacyDelete": "Réglages → Réinitialiser toutes les données efface tout ; désinstaller l'application aussi."
+  "privacyDelete": "Réglages → Réinitialiser toutes les données efface tout ; désinstaller l'application aussi.",
+  "listenDownload": "Télécharger pour écouter hors ligne",
+  "listenDownloadStop": "Arrêter le téléchargement",
+  "listenDownloadDelete": "Supprimer le téléchargement",
+  "listenDownloadDeleteTitle": "Supprimer le téléchargement ?",
+  "listenDownloadDeleteBody": "La récitation de {reciter} ({size}) sera supprimée de ce téléphone. Elle reste disponible en streaming.",
+  "listenDownloaded": "Téléchargé",
+  "listenDownloadFailed": "Arrêté — touchez télécharger pour réessayer",
+  "commonDelete": "Supprimer"
 }

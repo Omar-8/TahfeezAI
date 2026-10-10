@@ -386,5 +386,13 @@
   "privacyLocal": "Dein Lernfortschritt, deine Pläne, Lesezeichen und Einstellungen bleiben auf deinem Telefon. Es gibt keine Konten.",
   "privacyNetwork": "Das Internet wird nur zum Abspielen oder Herunterladen von Rezitationen genutzt; diese Anfragen nennen nur die Audiodatei.",
   "privacyNoTracking": "Keine Werbung, keine Analyse, kein Tracking.",
-  "privacyDelete": "Einstellungen → Alle Daten zurücksetzen löscht alles; ebenso das Deinstallieren der App."
+  "privacyDelete": "Einstellungen → Alle Daten zurücksetzen löscht alles; ebenso das Deinstallieren der App.",
+  "listenDownload": "Für Offline-Hören herunterladen",
+  "listenDownloadStop": "Download stoppen",
+  "listenDownloadDelete": "Download löschen",
+  "listenDownloadDeleteTitle": "Download löschen?",
+  "listenDownloadDeleteBody": "Die Rezitation von {reciter} ({size}) wird von diesem Telefon entfernt. Sie kann weiterhin gestreamt werden.",
+  "listenDownloaded": "Heruntergeladen",
+  "listenDownloadFailed": "Gestoppt — zum erneuten Versuch auf Download tippen",
+  "commonDelete": "Löschen"
 }

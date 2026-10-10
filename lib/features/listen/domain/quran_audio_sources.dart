@@ -121,3 +121,17 @@ String wordAudioUrl(int ayahId, int wordIndex) {
   return 'https://audio.qurancdn.com/wbw/${three(ayahId ~/ 1000)}_'
       '${three(ayahId % 1000)}_${three(quranComWordPosition(ayahId, wordIndex))}.mp3';
 }
+
+/// Each reciter's whole recitation (all 6,236 ayah files), in bytes —
+/// measured from the CDN's file sizes (2026-10-10).
+const reciterDownloadBytes = <String, int>{};
+
+/// [reciter]'s download size, as "640 MB" / "1.2 GB"; `null` if unknown.
+String? reciterDownloadSize(Reciter reciter) {
+  final bytes = reciterDownloadBytes[reciter.edition];
+  if (bytes == null) return null;
+  final mb = bytes / (1000 * 1000);
+  return mb >= 1000
+      ? '${(mb / 1000).toStringAsFixed(1)} GB'
+      : '${mb.round()} MB';
+}

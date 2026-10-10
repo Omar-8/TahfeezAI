@@ -15,6 +15,7 @@ import '../../recitation/application/mushaf_recitation_target.dart';
 import '../../recitation/application/recitation_session_controller.dart';
 import '../domain/quran_audio_sources.dart';
 import 'listen_options.dart';
+import 'reciter_downloads.dart';
 import 'reciter_controller.dart';
 
 /// What is playing: a run of ayahs (one is current) by a reciter, or a
@@ -205,10 +206,17 @@ class QuranAudioPlayer extends Notifier<NowPlaying?> {
     _follow();
     try {
       final audio = ref.read(audioControllerProvider);
+      // A downloaded reciter plays from the device (offline too).
+      final downloads = ref.read(reciterDownloadsProvider.notifier);
+      await downloads.ready();
       // The speed last chosen, wherever it was.
       await audio.setSpeed(ref.read(listenSpeedProvider));
       await audio.playQueue([
-        for (final a in ayahIds) ayahAudioUrl(a, reciter),
+        for (final a in ayahIds)
+          switch (downloads.localFile(a, reciter)) {
+            final path? => Uri.file(path).toString(),
+            null => ayahAudioUrl(a, reciter),
+          },
       ]);
       return true;
     } catch (_) {

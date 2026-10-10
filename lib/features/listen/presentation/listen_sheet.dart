@@ -16,6 +16,7 @@ import '../../recitation/presentation/recitation_loop_sheet.dart'
 import '../application/listen_options.dart';
 import '../application/quran_audio_player.dart';
 import '../application/reciter_controller.dart';
+import '../application/reciter_downloads.dart';
 import '../domain/quran_audio_sources.dart';
 
 /// The Mushaf's Listen menu: what to play (a range, from [from] if given,
@@ -116,10 +117,9 @@ class _ReciterPickerState extends ConsumerState<_ReciterPicker> {
                     ),
                     children: [
                       for (final r in shown)
-                        RadioListTile<String>(
+                        _ReciterRow(
+                          reciter: r,
                           key: ValueKey('reciter-${r.edition}'),
-                          value: r.edition,
-                          title: Text(reciterName(context, r)),
                         ),
                     ],
                   ),
@@ -350,6 +350,132 @@ class _ListenSheetState extends ConsumerState<_ListenSheet> {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// One reciter in the picker: chosen with its radio (or a tap on the row);
+/// its recitation's size, and — where downloads are possible — download,
+/// its progress (tap to stop), then delete.
+class _ReciterRow extends ConsumerWidget {
+  const _ReciterRow({super.key, required this.reciter});
+
+  final Reciter reciter;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final downloads = ref.read(reciterDownloadsProvider.notifier);
+    final d = ref.watch(
+      reciterDownloadsProvider.select((all) => all[reciter.edition]),
+    );
+    final size = reciterDownloadSize(reciter);
+    final status = switch (d) {
+      _ when !downloads.supported => null,
+      ReciterDownload(complete: true) => l10n.listenDownloaded,
+      ReciterDownload(failed: true) => l10n.listenDownloadFailed,
+      ReciterDownload(:final progress, downloading: true) ||
+      ReciterDownload(
+        :final progress,
+      ) when progress > 0 => '${(progress * 100).floor()}%',
+      _ => null,
+    };
+    return ListTile(
+      contentPadding: const EdgeInsetsDirectional.only(start: 4, end: 4),
+      leading: Radio<String>(value: reciter.edition),
+      title: Text(reciterName(context, reciter)),
+      subtitle: Text(
+        [?size, ?status].join(' · '),
+        style: theme.textTheme.bodySmall?.copyWith(
+          color: d?.failed ?? false
+              ? theme.colorScheme.error
+              : theme.colorScheme.onSurfaceVariant,
+        ),
+      ),
+      trailing: downloads.supported
+          ? _DownloadButton(reciter: reciter, download: d, size: size)
+          : null,
+      onTap: () =>
+          RadioGroup.maybeOf<String>(context)?.onChanged(reciter.edition),
+    );
+  }
+}
+
+class _DownloadButton extends ConsumerWidget {
+  const _DownloadButton({
+    required this.reciter,
+    required this.download,
+    required this.size,
+  });
+
+  final Reciter reciter;
+  final ReciterDownload? download;
+  final String? size;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final downloads = ref.read(reciterDownloadsProvider.notifier);
+    final d = download;
+    if (d != null && d.downloading) {
+      return IconButton(
+        key: ValueKey('reciter-download-stop-${reciter.edition}'),
+        tooltip: l10n.listenDownloadStop,
+        onPressed: () => downloads.cancel(reciter.edition),
+        icon: SizedBox.square(
+          dimension: 26,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              CircularProgressIndicator(
+                value: d.progress.clamp(0.02, 1.0),
+                strokeWidth: 3,
+              ),
+              const Icon(Icons.stop_rounded, size: 14),
+            ],
+          ),
+        ),
+      );
+    }
+    if (d != null && d.complete) {
+      return IconButton(
+        key: ValueKey('reciter-download-delete-${reciter.edition}'),
+        tooltip: l10n.listenDownloadDelete,
+        icon: const Icon(Icons.delete_outline_rounded),
+        onPressed: () async {
+          final yes = await showDialog<bool>(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: Text(l10n.listenDownloadDeleteTitle),
+              content: Text(
+                l10n.listenDownloadDeleteBody(
+                  reciterName(context, reciter),
+                  size ?? '',
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: Text(l10n.commonCancel),
+                ),
+                FilledButton(
+                  key: const ValueKey('reciter-download-delete-confirm'),
+                  onPressed: () => Navigator.of(context).pop(true),
+                  child: Text(l10n.commonDelete),
+                ),
+              ],
+            ),
+          );
+          if (yes ?? false) await downloads.delete(reciter.edition);
+        },
+      );
+    }
+    return IconButton(
+      key: ValueKey('reciter-download-${reciter.edition}'),
+      tooltip: l10n.listenDownload,
+      icon: const Icon(Icons.download_rounded),
+      onPressed: () => downloads.download(reciter.edition),
     );
   }
 }

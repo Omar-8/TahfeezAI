@@ -386,5 +386,13 @@
   "privacyLocal": "Ezber ilerlemeniz, planlarınız, yer imleriniz ve ayarlarınız telefonunuzda kalır. Hesap yoktur.",
   "privacyNetwork": "İnternet yalnızca tilavet sesini çalmak veya indirmek için kullanılır; bu istekler yalnızca ses dosyasının adını içerir.",
   "privacyNoTracking": "Reklam yok, analiz yok, izleme yok.",
-  "privacyDelete": "Ayarlar → Tüm verileri sıfırla her şeyi siler; uygulamayı kaldırmak da siler."
+  "privacyDelete": "Ayarlar → Tüm verileri sıfırla her şeyi siler; uygulamayı kaldırmak da siler.",
+  "listenDownload": "Çevrimdışı dinlemek için indir",
+  "listenDownloadStop": "İndirmeyi durdur",
+  "listenDownloadDelete": "İndirileni sil",
+  "listenDownloadDeleteTitle": "İndirilen silinsin mi?",
+  "listenDownloadDeleteBody": "{reciter} tilaveti ({size}) bu telefondan kaldırılacak. Yine de çevrimiçi dinlenebilir.",
+  "listenDownloaded": "İndirildi",
+  "listenDownloadFailed": "Durdu — tekrar denemek için indire dokunun",
+  "commonDelete": "Sil"
 }

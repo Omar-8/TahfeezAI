@@ -816,5 +816,23 @@
   "privacyLocal": "Your memorization progress, plans, bookmarks and settings stay on your phone. There are no accounts.",
   "privacyNetwork": "The internet is used only to play or download recitation audio; those requests name just the audio file.",
   "privacyNoTracking": "No ads, no analytics, no tracking.",
-  "privacyDelete": "Settings → Reset all data deletes everything; uninstalling removes it too."
+  "privacyDelete": "Settings → Reset all data deletes everything; uninstalling removes it too.",
+  "listenDownload": "Download for offline listening",
+  "listenDownloadStop": "Stop download",
+  "listenDownloadDelete": "Delete download",
+  "listenDownloadDeleteTitle": "Delete the download?",
+  "listenDownloadDeleteBody": "{reciter}'s recitation ({size}) will be removed from this phone. It can still be streamed.",
+  "listenDownloaded": "Downloaded",
+  "listenDownloadFailed": "Stopped — tap download to try again",
+  "commonDelete": "Delete",
+  "@listenDownloadDeleteBody": {
+    "placeholders": {
+      "reciter": {
+        "type": "String"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -4,15 +4,16 @@ Status: planned 2026-10-09; L1–L3 done the same day. Decisions by the product 
 
 ## Goal
 
-Hear the Quran: an ayah, a whole surah from any ayah, or a single word — streamed, nothing
-downloaded (**decided: online only**). Recitation tests keep the microphone to themselves:
+Hear the Quran: an ayah, a whole surah from any ayah, or a single word — streamed, or
+for ayahs from a reciter downloaded for offline use (**decided 2026-10-10**; online only
+before). Recitation tests keep the microphone to themselves:
 starting one stops playback.
 
 ## Sources and licences (checked 2026-10-09)
 
 | Audio | Source | Terms | Use |
 |---|---|---|---|
-| Ayahs (and so whole surahs, ayah by ayah) | Islamic Network CDN, `cdn.islamic.network/quran/audio/{kbps}/{edition}/{ayah 1–6236}.mp3` — ~190 editions | alquran.cloud terms: reciters license their recitations "for free, non-commercial redistribution"; streaming, embedding and downloading allowed; commercial bundling allowed, but "copyrights lie with the reciters and they may ask you to remove" a recitation; caching encouraged | **(decided)** Used, with credit to Islamic Network and each reciter; a reciter is removed on request |
+| Ayahs (and so whole surahs, ayah by ayah) | Islamic Network CDN, `cdn.islamic.network/quran/audio/{kbps}/{edition}/{ayah 1–6236}.mp3` — ~190 editions | alquran.cloud terms: reciters license their recitations "for free, non-commercial redistribution"; streaming, embedding and downloading allowed; commercial bundling allowed, but "copyrights lie with the reciters and they may ask you to remove" a recitation; caching encouraged | **(decided)** Used, with credit to Islamic Network and each reciter; a reciter is removed on request. Users may download a reciter for offline listening (2026-10-10): the terms allow downloading for personal use and encourage caching; a reciter removed on request also has existing downloads deleted |
 | Words | Quran.com CDN, `audio.qurancdn.com/wbw/{sss}_{aaa}_{www}.mp3` | Quran Foundation Developer Terms (2026-10-04): showing QF content allowed (free or paid); no keeping it beyond a week outside Content Sync; no scraping; redistribution needs a commercial licence. Direct use of the public CDN by an app isn't addressed | **(decided)** Streamed only (nothing kept), credited to Quran Foundation; no email needed |
 | EveryAyah, mp3quran.net | — | No licence published | Not used |
 
@@ -54,6 +55,16 @@ starting one stops playback.
 Each phase: `flutter analyze` clean, tests, English + Arabic strings, credits and
 `docs/THIRD_PARTY_RESOURCES.md` rows.
 
+5. **L5 — Offline reciters.** *(done 2026-10-10; reverses the "online only" decision
+   for ayah recitations)* In the reciter list (Settings, Listen and Follow along menus),
+   each reciter shows its recitation's size and a download button: a ring with the
+   progress while it downloads (tap to stop), then delete. All 6,236 ayah files come from
+   the same Islamic Network CDN, 6 at a time, into the app's own storage (removed with
+   the app); an interrupted or stopped download goes on from where it was. The player
+   plays a downloaded ayah from the phone (offline too), else streams it. Not on the web.
+   Word audio stays streamed only (Quran Foundation terms: nothing kept beyond a week).
+   (`ReciterDownloads`.)
+
 ## Later
 
-Translation audio; downloading recitations for offline listening (not wanted for now).
+Translation audio.
