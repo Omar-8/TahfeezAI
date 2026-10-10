@@ -411,5 +411,22 @@
   "activityMushafTime": "Zeit im Mushaf",
   "activityHoursMinutes": "{hours} Std. {minutes} Min.",
   "activityMinutes": "{minutes} Min.",
-  "homeBackToExit": "Zum Beenden erneut Zurück drücken"
+  "homeBackToExit": "Zum Beenden erneut Zurück drücken",
+  "settingsFeedback": "Feedback senden",
+  "settingsFeedbackSub": "Ein Problem melden oder eine Idee vorschlagen",
+  "settingsRate": "TahfeezAI bewerten",
+  "settingsRateSub": "Bei Google Play",
+  "settingsShare": "TahfeezAI teilen",
+  "settingsShareSub": "An einen Freund senden",
+  "settingsShareText": "TahfeezAI hilft dir, den Koran auswendig zu lernen, und prüft deine Rezitation direkt auf dem Telefon: {url}",
+  "settingsCheckUpdates": "Nach Updates suchen",
+  "settingsUpdateOffers": "Mich über verfügbare Updates informieren",
+  "updateTitle": "Update verfügbar",
+  "updateBody": "Eine neue Version von TahfeezAI ist verfügbar.",
+  "updateNow": "Aktualisieren",
+  "updateLater": "Später",
+  "updateUpToDate": "TahfeezAI ist aktuell",
+  "updateCheckFailed": "Updates kommen über Google Play: Installiere TahfeezAI aus Google Play, um sie zu erhalten.",
+  "settingsSearchHint": "Einstellungen durchsuchen",
+  "settingsNoMatch": "Keine passende Einstellung"
 }

@@ -875,5 +875,29 @@
       }
     }
   },
-  "homeBackToExit": "Press back again to exit"
+  "homeBackToExit": "Press back again to exit",
+  "settingsFeedback": "Send feedback",
+  "settingsFeedbackSub": "Report a problem or suggest an idea",
+  "settingsRate": "Rate TahfeezAI",
+  "settingsRateSub": "On Google Play",
+  "settingsShare": "Share TahfeezAI",
+  "settingsShareSub": "Send it to a friend",
+  "settingsShareText": "TahfeezAI helps you memorize the Quran and checks your recitation right on your phone: {url}",
+  "settingsCheckUpdates": "Check for updates",
+  "settingsUpdateOffers": "Tell me when an update is available",
+  "updateTitle": "Update available",
+  "updateBody": "A new version of TahfeezAI is available.",
+  "updateNow": "Update",
+  "updateLater": "Later",
+  "updateUpToDate": "TahfeezAI is up to date",
+  "updateCheckFailed": "Updates come through Google Play: install TahfeezAI from Google Play to get them.",
+  "@settingsShareText": {
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsSearchHint": "Search settings",
+  "settingsNoMatch": "No settings match"
 }

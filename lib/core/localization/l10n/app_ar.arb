@@ -411,5 +411,22 @@
   "activityMushafTime": "الوقت في المصحف",
   "activityHoursMinutes": "{hours} س {minutes} د",
   "activityMinutes": "{minutes} د",
-  "homeBackToExit": "اضغط رجوع مرة أخرى للخروج"
+  "homeBackToExit": "اضغط رجوع مرة أخرى للخروج",
+  "settingsFeedback": "إرسال ملاحظات",
+  "settingsFeedbackSub": "أبلغ عن مشكلة أو اقترح فكرة",
+  "settingsRate": "قيّم TahfeezAI",
+  "settingsRateSub": "على Google Play",
+  "settingsShare": "شارك TahfeezAI",
+  "settingsShareSub": "أرسله إلى صديق",
+  "settingsShareText": "يساعدك TahfeezAI على حفظ القرآن ويصحح تلاوتك على هاتفك: {url}",
+  "settingsCheckUpdates": "البحث عن تحديثات",
+  "settingsUpdateOffers": "أعلمني عند توفر تحديث",
+  "updateTitle": "يتوفر تحديث",
+  "updateBody": "يتوفر إصدار جديد من TahfeezAI.",
+  "updateNow": "تحديث",
+  "updateLater": "لاحقًا",
+  "updateUpToDate": "TahfeezAI محدّث",
+  "updateCheckFailed": "تصل التحديثات عبر Google Play: ثبّت TahfeezAI من Google Play للحصول عليها.",
+  "settingsSearchHint": "ابحث في الإعدادات",
+  "settingsNoMatch": "لا توجد إعدادات مطابقة"
 }

@@ -411,5 +411,22 @@
   "activityMushafTime": "Mushaf'ta geçen süre",
   "activityHoursMinutes": "{hours} sa {minutes} dk",
   "activityMinutes": "{minutes} dk",
-  "homeBackToExit": "Çıkmak için tekrar geri basın"
+  "homeBackToExit": "Çıkmak için tekrar geri basın",
+  "settingsFeedback": "Geri bildirim gönder",
+  "settingsFeedbackSub": "Bir sorun bildirin veya fikir önerin",
+  "settingsRate": "TahfeezAI'yi değerlendir",
+  "settingsRateSub": "Google Play'de",
+  "settingsShare": "TahfeezAI'yi paylaş",
+  "settingsShareSub": "Bir arkadaşa gönderin",
+  "settingsShareText": "TahfeezAI Kur'an ezberlemenize yardımcı olur ve okumanızı doğrudan telefonunuzda kontrol eder: {url}",
+  "settingsCheckUpdates": "Güncellemeleri denetle",
+  "settingsUpdateOffers": "Güncelleme olduğunda bana haber ver",
+  "updateTitle": "Güncelleme var",
+  "updateBody": "TahfeezAI'nin yeni bir sürümü var.",
+  "updateNow": "Güncelle",
+  "updateLater": "Sonra",
+  "updateUpToDate": "TahfeezAI güncel",
+  "updateCheckFailed": "Güncellemeler Google Play üzerinden gelir: almak için TahfeezAI'yi Google Play'den yükleyin.",
+  "settingsSearchHint": "Ayarlarda ara",
+  "settingsNoMatch": "Eşleşen ayar yok"
 }

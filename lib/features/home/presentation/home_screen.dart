@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show SystemNavigator;
 
+import 'home_store_prompts.dart';
+
 import '../../../core/localization/generated/app_localizations.dart';
 import '../../../core/theme/app_spacing.dart';
 import 'sections/home_daily_ayah_section.dart';
@@ -95,6 +97,9 @@ class _HomeBrandHeader extends StatelessWidget {
               height: 1.2,
             ),
           ),
+          // Update offers and, now and then, a rating request (draws
+          // nothing).
+          const HomeStorePrompts(),
           // Shrinks rather than wraps on narrow screens or large text.
           FittedBox(
             fit: BoxFit.scaleDown,

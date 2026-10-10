@@ -26,6 +26,9 @@ import '../../../wbw/application/wbw_preferences_controller.dart';
 import '../../mushaf/application/mushaf_page_translations.dart';
 import '../application/reset_all_data.dart';
 import '../application/user_data_backup.dart';
+import '../../../core/app_store/app_store_service.dart';
+import '../../../core/app_store/store_prompts.dart';
+import '../../home/presentation/home_store_prompts.dart' show showUpdateOffer;
 import '../../../core/storage/storage_providers.dart';
 import '../../../memorization/memorization_providers.dart';
 import '../../listen/application/reciter_controller.dart';
@@ -39,11 +42,24 @@ import 'theme_choices.dart';
 /// Every choice is persisted by its controller ([LocaleController],
 /// [ThemeModeController] with [AppSurfaceToneController]) and applies at
 /// once.
-class SettingsScreen extends ConsumerWidget {
+///
+/// Compact, with a search over every section's options.
+class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends ConsumerState<SettingsScreen> {
+  var _query = '';
+
+  /// Lower case, Arabic vowel marks dropped.
+  static String _fold(String s) =>
+      s.toLowerCase().replaceAll(RegExp('[\u064B-\u065F\u0670]'), '');
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final locale = ref.watch(localeControllerProvider);
@@ -61,23 +77,54 @@ class SettingsScreen extends ConsumerWidget {
       minute: reminder.minutes % 60,
     );
 
-    Widget group(String title, IconData icon, Widget child) => Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: TahfeezSpacing.sm,
-      children: [
-        TahfeezSectionHeader(title: title, icon: icon),
-        TahfeezCard(child: child),
-      ],
-    );
+    // Each section with the words it is found by (its options' names).
+    final sections = <({List<String> words, Widget widget})>[];
+    void group(
+      String title,
+      IconData icon,
+      Widget child, {
+      List<String> words = const [],
+    }) => sections.add((
+      words: [title, ...words],
+      widget: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: TahfeezSpacing.xs,
+        children: [
+          TahfeezSectionHeader(title: title, icon: icon),
+          TahfeezCard(
+            padding: const EdgeInsets.symmetric(
+              horizontal: TahfeezSpacing.md,
+              vertical: TahfeezSpacing.sm,
+            ),
+            child: child,
+          ),
+        ],
+      ),
+    ));
 
     return Scaffold(
       appBar: TahfeezAppBar(
         title: Text(l10n.settingsTitle),
         centerTitle: false,
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(TahfeezSpacing.md),
-        children: [
+      body: Builder(
+        builder: (context) {
+          sections.add((
+            words: [
+              l10n.appName,
+              l10n.settingsFeedback,
+              l10n.settingsRate,
+              l10n.settingsShare,
+              l10n.settingsCheckUpdates,
+              l10n.settingsUpdateOffers,
+              l10n.aboutTitle,
+              l10n.aboutSubtitle,
+              l10n.privacyTitle,
+            ],
+            // First: the app — its version, feedback, rating, sharing,
+            // updates, and its sources.
+            widget: const _AboutApp(),
+          ));
           group(
             l10n.settingsLanguage,
             Icons.translate,
@@ -116,8 +163,11 @@ class SettingsScreen extends ConsumerWidget {
                 ],
               ),
             ),
-          ),
-          const SizedBox(height: TahfeezSpacing.lg),
+            words: [
+              l10n.settingsLanguageSystem,
+              for (final (_, _, name) in kAppLanguages) name,
+            ],
+          );
           group(
             l10n.settingsAppTheme,
             Icons.palette_outlined,
@@ -145,8 +195,8 @@ class SettingsScreen extends ConsumerWidget {
                   ),
               ],
             ),
-          ),
-          const SizedBox(height: TahfeezSpacing.lg),
+            words: [for (final c in AppThemeChoice.values) c.label(l10n)],
+          );
           group(
             l10n.settingsArabicFont,
             Icons.font_download_outlined,
@@ -185,14 +235,19 @@ class SettingsScreen extends ConsumerWidget {
                 ),
               ],
             ),
-          ),
-          const SizedBox(height: TahfeezSpacing.lg),
+            words: [for (final f in ArabicUiFont.values) f.arabicName],
+          );
           group(
             l10n.readerTranslationTafsir,
             Icons.translate_outlined,
             const _MeaningSettings(),
-          ),
-          const SizedBox(height: TahfeezSpacing.lg),
+            words: [
+              l10n.searchTranslations,
+              l10n.readerTafsir,
+              l10n.settingsLongPressShows,
+              l10n.settingsTransliteration,
+            ],
+          );
           group(
             l10n.settingsRecitation,
             Icons.mic_none_rounded,
@@ -211,15 +266,19 @@ class SettingsScreen extends ConsumerWidget {
                     ref.read(hifzSettingsProvider).copyWith(sajdahReminder: on),
                   ),
             ),
-          ),
-          const SizedBox(height: TahfeezSpacing.lg),
+            words: [l10n.sajdahReminder, l10n.sajdahReminderSub],
+          );
           group(
             l10n.listenTitle,
             Icons.headphones_outlined,
             const _ListenSettings(),
-          ),
-          if (reminderSupported) ...[
-            const SizedBox(height: TahfeezSpacing.lg),
+            words: [
+              l10n.listenReciter,
+              l10n.listenDownload,
+              l10n.listenSearchReciters,
+            ],
+          );
+          if (reminderSupported) {
             group(
               l10n.memReminderTitle,
               Icons.notifications_outlined,
@@ -265,9 +324,9 @@ class SettingsScreen extends ConsumerWidget {
                   ),
                 ],
               ),
-            ),
-          ],
-          const SizedBox(height: TahfeezSpacing.lg),
+              words: [l10n.memReminderSwitch, l10n.memReminderTime],
+            );
+          }
           group(
             l10n.settingsBackupTitle,
             Icons.save_alt_rounded,
@@ -305,20 +364,68 @@ class SettingsScreen extends ConsumerWidget {
                 ),
               ],
             ),
-          ),
-          const SizedBox(height: TahfeezSpacing.lg),
-          TahfeezCard(
-            child: ListTile(
-              key: const ValueKey('settings-about'),
-              contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.info_outline),
-              title: Text(l10n.aboutTitle),
-              subtitle: Text(l10n.aboutSubtitle),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => context.push(AppRoutes.about),
+            words: [
+              l10n.settingsExportTitle,
+              l10n.settingsImportTitle,
+              l10n.settingsResetTitle,
+              l10n.settingsResetSub,
+            ],
+          );
+          final query = _fold(_query.trim());
+          final shown = [
+            for (final section in sections)
+              if (query.isEmpty ||
+                  section.words.any((w) => _fold(w).contains(query)))
+                section.widget,
+          ];
+          // Rows and switches compact throughout.
+          return Theme(
+            data: theme.copyWith(visualDensity: VisualDensity.compact),
+            child: ListTileTheme(
+              dense: true,
+              minVerticalPadding: 2,
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(
+                  TahfeezSpacing.md,
+                  TahfeezSpacing.sm,
+                  TahfeezSpacing.md,
+                  TahfeezSpacing.md,
+                ),
+                children: [
+                  TextField(
+                    key: const ValueKey('settings-search'),
+                    onChanged: (text) => setState(() => _query = text),
+                    textInputAction: TextInputAction.search,
+                    decoration: InputDecoration(
+                      prefixIcon: const Icon(Icons.search_rounded),
+                      hintText: l10n.settingsSearchHint,
+                      isDense: true,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(TahfeezRadii.pill),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: TahfeezSpacing.md),
+                  if (shown.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.all(TahfeezSpacing.lg),
+                      child: Text(
+                        l10n.settingsNoMatch,
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                  for (var i = 0; i < shown.length; i++) ...[
+                    if (i > 0) const SizedBox(height: TahfeezSpacing.md),
+                    shown[i],
+                  ],
+                ],
+              ),
             ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
@@ -535,6 +642,157 @@ Future<void> _import(BuildContext context, WidgetRef ref) async {
     await SystemNavigator.pop();
   } else {
     messenger.showSnackBar(SnackBar(content: Text(l10n.settingsImportDone)));
+  }
+}
+
+/// Settings' first section: the app's name and version, then send
+/// feedback, rate, share, check for updates (and whether to be told of
+/// them), and its sources and licences.
+class _AboutApp extends ConsumerStatefulWidget {
+  const _AboutApp();
+
+  @override
+  ConsumerState<_AboutApp> createState() => _AboutAppState();
+}
+
+class _AboutAppState extends ConsumerState<_AboutApp> {
+  bool? _updateOffers;
+
+  @override
+  void initState() {
+    super.initState();
+    ref.read(storePromptsProvider).updateOffersOn().then((on) {
+      if (mounted) setState(() => _updateOffers = on);
+    });
+  }
+
+  Future<void> _checkForUpdates() async {
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final available = await ref.read(appStoreServiceProvider).updateAvailable();
+    if (!mounted) return;
+    if (available ?? false) {
+      await showUpdateOffer(context, ref);
+    } else {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            available == null ? l10n.updateCheckFailed : l10n.updateUpToDate,
+          ),
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final store = ref.read(appStoreServiceProvider);
+    final version = ref.watch(appVersionProvider).value ?? '';
+    final android = ref.watch(platformCapabilitiesProvider).isAndroid;
+    Widget row(
+      String key,
+      IconData icon,
+      String title,
+      String subtitle,
+      VoidCallback onTap,
+    ) => ListTile(
+      key: ValueKey(key),
+      contentPadding: EdgeInsets.zero,
+      leading: Icon(icon),
+      title: Text(title),
+      subtitle: Text(subtitle),
+      onTap: onTap,
+    );
+    return TahfeezCard(
+      key: const ValueKey('settings-about-app'),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            spacing: TahfeezSpacing.smPlus,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(TahfeezRadii.sm),
+                child: Image.asset(
+                  'assets/branding/splash_icon.png',
+                  width: 44,
+                  height: 44,
+                ),
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(l10n.appName, style: theme.textTheme.titleMedium),
+                    if (version.isNotEmpty)
+                      Text(
+                        l10n.aboutVersion(version),
+                        key: const ValueKey('settings-version'),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: TahfeezSpacing.sm),
+          if (kFeedbackUrl.isNotEmpty)
+            row(
+              'settings-feedback',
+              Icons.feedback_outlined,
+              l10n.settingsFeedback,
+              l10n.settingsFeedbackSub,
+              () => store.openUrl(kFeedbackUrl),
+            ),
+          row(
+            'settings-rate',
+            Icons.star_outline_rounded,
+            l10n.settingsRate,
+            l10n.settingsRateSub,
+            store.openListing,
+          ),
+          row(
+            'settings-share',
+            Icons.share_outlined,
+            l10n.settingsShare,
+            l10n.settingsShareSub,
+            () => store.share(l10n.settingsShareText(kPlayStoreUrl)),
+          ),
+          if (android) ...[
+            row(
+              'settings-check-updates',
+              Icons.system_update_outlined,
+              l10n.settingsCheckUpdates,
+              l10n.aboutVersion(version),
+              _checkForUpdates,
+            ),
+            SwitchListTile(
+              key: const ValueKey('settings-update-offers'),
+              contentPadding: EdgeInsets.zero,
+              title: Text(l10n.settingsUpdateOffers),
+              value: _updateOffers ?? true,
+              onChanged: (on) {
+                setState(() => _updateOffers = on);
+                ref.read(storePromptsProvider).setUpdateOffers(on);
+              },
+            ),
+          ],
+          ListTile(
+            key: const ValueKey('settings-about'),
+            contentPadding: EdgeInsets.zero,
+            leading: const Icon(Icons.info_outline),
+            title: Text(l10n.aboutTitle),
+            subtitle: Text(l10n.aboutSubtitle),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.push(AppRoutes.about),
+          ),
+        ],
+      ),
+    );
   }
 }
 

@@ -14,6 +14,11 @@ import 'package:tahfeez_ai/features/settings/presentation/about_screen.dart';
 
 import '../../test_helpers/widget_test_overrides.dart';
 
+/// The settings list (the search field holds a scrollable too).
+final _list = find
+    .descendant(of: find.byType(ListView), matching: find.byType(Scrollable))
+    .first;
+
 void main() {
   testWidgets('the Settings tab sets the theme and the language', (
     tester,
@@ -114,6 +119,42 @@ void main() {
     expect(container.read(localeControllerProvider), isNull);
   });
 
+  testWidgets('searching shows only the sections that match', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: tahfeezWidgetTestOverrides(),
+        child: const TahfeezApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Settings'));
+    await tester.pumpAndSettle();
+    final search = find.byKey(const ValueKey('settings-search'));
+
+    // An option's name finds its section.
+    await tester.enterText(search, 'reset');
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('settings-reset')), findsOneWidget);
+    expect(find.byKey(const ValueKey('settings-app-theme')), findsNothing);
+
+    await tester.enterText(search, 'reciter');
+    await tester.pumpAndSettle();
+    expect(find.text('Recitation audio'), findsOneWidget);
+    expect(find.byKey(const ValueKey('settings-reset')), findsNothing);
+
+    await tester.enterText(search, 'zzzz');
+    await tester.pumpAndSettle();
+    expect(find.text('No settings match'), findsOneWidget);
+
+    await tester.enterText(search, '');
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('settings-about-app')), findsOneWidget);
+  });
+
   testWidgets('About lists every source with its licence, and the licences', (
     tester,
   ) async {
@@ -132,18 +173,26 @@ void main() {
     await tester.tap(find.text('Settings'));
     await tester.pumpAndSettle();
     final about = find.byKey(const ValueKey('settings-about'));
-    await tester.scrollUntilVisible(about, 200);
+    await tester.scrollUntilVisible(about, 200, scrollable: _list);
     await tester.ensureVisible(about);
     await tester.pumpAndSettle();
     await tester.tap(about);
     await tester.pumpAndSettle();
     // The privacy essentials, then the sources.
     expect(find.byKey(const ValueKey('about-privacy')), findsOneWidget);
-    await tester.scrollUntilVisible(find.text('The Quran text'), 200);
+    await tester.scrollUntilVisible(
+      find.text('The Quran text'),
+      200,
+      scrollable: _list,
+    );
     expect(find.text('The Quran text'), findsOneWidget);
     // Every source is listed, scrolling down the page.
     for (final c in credits) {
-      await tester.scrollUntilVisible(find.text(c.name), 300);
+      await tester.scrollUntilVisible(
+        find.text(c.name),
+        300,
+        scrollable: _list,
+      );
       expect(find.text(c.name), findsOneWidget);
     }
     expect(find.textContaining('Licence:'), findsWidgets);
@@ -177,7 +226,7 @@ void main() {
     await tester.tap(find.text('Settings'));
     await tester.pumpAndSettle();
     final reset = find.byKey(const ValueKey('settings-reset'));
-    await tester.scrollUntilVisible(reset, 200);
+    await tester.scrollUntilVisible(reset, 200, scrollable: _list);
     await tester.ensureVisible(reset);
     await tester.pumpAndSettle();
     await tester.tap(reset);

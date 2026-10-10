@@ -33,6 +33,7 @@ Audio requests to `cdn.islamic.network` and `audio.qurancdn.com` contain only th
 - Network: `lib/features/listen/domain/quran_audio_sources.dart` (audio URLs only). The web build also fetches Mushaf pages from its own site. The remote acoustic server and the speech recognizer run only with developer `--dart-define`s (`lib/features/recitation/application/recitation_ai_config.dart`); on Android the default is the on-device model.
 - Recordings: `recitationKeepRecordingsProvider` (`lib/features/recitation/application/recitation_providers.dart`) is false unless the build passes `--dart-define=TAHFEEZ_KEEP_RECORDINGS=true`. **Never pass it to a release build.**
 - No analytics, crash-reporting, advertising or account SDK in `pubspec.yaml`.
+- Google Play's in-app update and in-app review (`in_app_update`, `in_app_review`) run through the Play Store app on the device; TahfeezAI passes them no user data. `share_plus` and `url_launcher` hand text/links to apps the user picks.
 
 ## Release build command
 

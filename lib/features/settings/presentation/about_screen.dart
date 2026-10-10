@@ -1,5 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+
+import '../../../core/app_store/app_store_service.dart';
+
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 
 import '../../../core/localization/generated/app_localizations.dart';
@@ -11,13 +15,12 @@ import '../domain/credits.dart';
 /// licence and purpose (tap a link to copy it), and Flutter's licence page
 /// — the packages' licences and the sources' notices
 /// ([registerCreditLicences]).
-class AboutScreen extends StatelessWidget {
+class AboutScreen extends ConsumerWidget {
   const AboutScreen({super.key});
 
-  static const version = '1.0.0';
-
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final version = ref.watch(appVersionProvider).value ?? '';
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final arabic = Localizations.localeOf(context).languageCode == 'ar';
