@@ -92,8 +92,9 @@ class _QuranEngineMushafPageContentState
 
   /// Draws every highlight on the page at once, each word's by priority:
   /// the focus (or long-pressed) ayah's blue, then a recitation's marks,
-  /// then — with "Colour thematic passages" on — its passage's tint. Ink
-  /// marks colour the letters over whichever band is behind them.
+  /// then — with "Colour thematic passages" on, outside hide mode — its
+  /// passage's tint. Ink marks colour the letters over whichever band is
+  /// behind them.
   void _applyHighlights() {
     final page = _page;
     if (page == null) return;
@@ -103,7 +104,10 @@ class _QuranEngineMushafPageContentState
     final focus = focusId != null && refs.any((w) => w.ayahId == focusId)
         ? focusId
         : null;
-    final passages = ref.read(mushafPassagesProvider)
+    // (Not in hide mode: the hidden words' places stay plain.)
+    final passages =
+        ref.read(mushafPassagesProvider) &&
+            !ref.read(mushafHideModeProvider).enabled
         ? ref.read(passageColorsProvider).value
         : null;
     final applied = _appliedHighlights;

@@ -394,6 +394,14 @@ void main() {
     await tester.pump();
     expect(page.bands, hasLength(1));
     expect(page.ayahHighlights, isEmpty);
+
+    // Hide mode: no passage colours over the hidden words.
+    container.read(mushafHideModeProvider.notifier).toggle();
+    await tester.pump();
+    expect(page.bands, isEmpty);
+    container.read(mushafHideModeProvider.notifier).toggle();
+    await tester.pump();
+    expect(page.bands, hasLength(1));
   });
 
   testWidgets('a long-pressed word\'s ayah stays highlighted while its '

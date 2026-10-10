@@ -14,6 +14,7 @@ import '../../../quran/application/tafsir_library_controller.dart';
 import '../../../quran/application/tafsir_selection_controller.dart';
 import '../../../quran/application/tafsir_verse_text.dart';
 import '../../quran/application/quran_index_providers.dart';
+import '../../listen/application/listen_options.dart';
 import '../../listen/application/quran_audio_player.dart';
 import '../../listen/presentation/listen_sheet.dart';
 import '../application/mushaf_appearance_controller.dart';
@@ -266,7 +267,13 @@ class _ListenButtons extends ConsumerWidget {
         Expanded(
           child: FilledButton.tonalIcon(
             key: const ValueKey('ayah-sheet-play'),
-            onPressed: () => play(() => player.playAyahs([ayahId])),
+            // Highlighted on the page while it plays (the sheet closed or
+            // not).
+            onPressed: () => play(
+              () => player.playAyahs([
+                ayahId,
+              ], options: const ListenOptions(followPages: false)),
+            ),
             icon: const Icon(Icons.play_arrow_rounded),
             label: Text(l10n.listenPlayAyah),
           ),
