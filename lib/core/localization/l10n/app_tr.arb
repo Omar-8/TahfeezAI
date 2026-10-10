@@ -386,5 +386,8 @@
   "sajdahReminderOff": "Kapat",
   "settingsRecitation": "Okuma",
   "mushafPassages": "Konu bölümlerini renklendir",
-  "mushafPassagesSub": "Her rükû (konu bölümü) kendi renginde"
+  "mushafPassagesSub": "Her rükû (konu bölümü) kendi renginde",
+  "followStrict": "Katı",
+  "followStrictSub": "Hata olursa, hatasız okuyana kadar tekrar okuyun",
+  "followAgain": "Hata — tekrar okuyun"
 }

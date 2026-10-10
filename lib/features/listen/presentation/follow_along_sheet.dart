@@ -223,6 +223,15 @@ class _FollowAlongSheetState extends ConsumerState<_FollowAlongSheet> {
                   _options.userTimes,
                   (n) => _options = _options.copyWith(userTimes: n),
                 ),
+                SwitchListTile(
+                  key: const ValueKey('follow-strict'),
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(l10n.followStrict),
+                  subtitle: Text(l10n.followStrictSub),
+                  value: _options.strict,
+                  onChanged: (on) =>
+                      setState(() => _options = _options.copyWith(strict: on)),
+                ),
               ],
             ),
           ),
@@ -317,9 +326,11 @@ class FollowAlongHint extends ConsumerWidget {
           ),
           Flexible(
             child: Text(
-              yours
-                  ? l10n.followYourTurn
-                  : l10n.followReciterTurn(reciterName(context, reciter)),
+              !yours
+                  ? l10n.followReciterTurn(reciterName(context, reciter))
+                  : run.again
+                  ? l10n.followAgain
+                  : l10n.followYourTurn,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: style?.copyWith(fontWeight: FontWeight.w600),

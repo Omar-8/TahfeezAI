@@ -386,5 +386,8 @@
   "sajdahReminderOff": "إيقاف",
   "settingsRecitation": "التلاوة",
   "mushafPassages": "تلوين المقاطع الموضوعية",
-  "mushafPassagesSub": "كل ركوع (مقطع موضوعي) بلون مختلف"
+  "mushafPassagesSub": "كل ركوع (مقطع موضوعي) بلون مختلف",
+  "followStrict": "صارم",
+  "followStrictSub": "بعد أي خطأ أعِد التلاوة حتى تكون بلا أخطاء",
+  "followAgain": "خطأ — أعِد التلاوة"
 }

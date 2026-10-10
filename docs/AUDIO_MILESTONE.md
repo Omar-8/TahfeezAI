@@ -46,6 +46,10 @@ starting one stops playback.
    to the next part. Stopping either turn from the bar, leaving the Mushaf, the audio
    failing (offline) or the microphone being refused ends the run; the results sheet is
    not shown between turns. (`FollowAlongController`; needs live recognition.)
+   The user's turn ends only once the pronunciation check of its last words is done
+   (it follows the voice by about a second and the pause after it; at most 5 s) —
+   stopping sooner missed those mistakes. *Strict*: a turn with a mistake (a word
+   wrong or skipped, or a pronunciation mistake) is recited once more, until without.
 
 Each phase: `flutter analyze` clean, tests, English + Arabic strings, credits and
 `docs/THIRD_PARTY_RESOURCES.md` rows.

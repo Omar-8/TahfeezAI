@@ -386,5 +386,8 @@
   "sajdahReminderOff": "Ausschalten",
   "settingsRecitation": "Rezitation",
   "mushafPassages": "Thematische Abschnitte einfärben",
-  "mushafPassagesSub": "Jeder Ruku (thematischer Abschnitt) in eigener Farbe"
+  "mushafPassagesSub": "Jeder Ruku (thematischer Abschnitt) in eigener Farbe",
+  "followStrict": "Streng",
+  "followStrictSub": "Nach einem Fehler erneut rezitieren, bis es fehlerfrei ist",
+  "followAgain": "Ein Fehler — rezitiere es erneut"
 }

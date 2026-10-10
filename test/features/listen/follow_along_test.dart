@@ -83,13 +83,14 @@ void main() {
 
   FollowAlongState? run() => container.read(followAlongControllerProvider);
 
-  /// The user's turn recited, every repetition.
-  Future<void> userRecites(int count) async {
+  /// The user's turn recited, every repetition ([wrong] words in it).
+  Future<void> userRecites(int count, {int wrong = 0}) async {
     hifz.set(
       HifzState(
         completed: true,
         loop: HifzLoop(mode: HifzLoopMode.range, count: count),
         repetition: count,
+        counts: {if (wrong > 0) HifzVerdict.wrong: wrong},
       ),
     );
     await Future<void>.delayed(const Duration(milliseconds: 800));
@@ -142,6 +143,30 @@ void main() {
     expect(run()!.phase, FollowAlongPhase.user);
     await userRecites(1);
     expect(run(), isNull, reason: 'the last ayah done');
+  });
+
+  test('strict: a turn with a mistake is recited again, once, until '
+      'without', () async {
+    await container
+        .read(followAlongControllerProvider.notifier)
+        .start(
+          (chapterNo: 112, verseNo: 1),
+          (chapterNo: 112, verseNo: 2),
+          const FollowAlongOptions(userTimes: 3, strict: true),
+        );
+    audio.finish();
+    await Future<void>.delayed(Duration.zero);
+    await userRecites(3, wrong: 1);
+    expect(run()!.index, 0, reason: 'not on to the next ayah');
+    expect(run()!.phase, FollowAlongPhase.user);
+    expect(run()!.again, isTrue);
+    expect(hifz.loop!.count, 1, reason: 'once more');
+    expect(session.starts, 2);
+
+    await userRecites(1);
+    expect(run()!.index, 1);
+    expect(run()!.phase, FollowAlongPhase.reciter);
+    expect(run()!.again, isFalse);
   });
 
   test('the whole range at once', () async {

@@ -2,8 +2,11 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../ai/hifz/hifz_judge.dart' show HifzVerdict;
 import '../../../quran/domain/models/quran_refs.dart';
+import '../../recitation/application/acoustic_verification_controller.dart';
 import '../../recitation/application/hifz_controller.dart';
+import '../../recitation/application/recitation_position.dart';
 import '../../recitation/application/mushaf_recitation_target.dart';
 import '../../recitation/application/recitation_session_controller.dart';
 import '../domain/quran_audio_sources.dart';
@@ -22,10 +25,15 @@ class FollowAlongOptions {
     this.unit = FollowAlongUnit.eachAyah,
     this.reciterTimes = 1,
     this.userTimes = 1,
+    this.strict = false,
   });
 
   final FollowAlongUnit unit;
   final int reciterTimes, userTimes;
+
+  /// After the user's turn, a mistake in it (a word wrong or skipped, or a
+  /// pronunciation mistake) means reciting it once more, until without.
+  final bool strict;
 
   static const maxTimes = 10;
 
@@ -33,10 +41,12 @@ class FollowAlongOptions {
     FollowAlongUnit? unit,
     int? reciterTimes,
     int? userTimes,
+    bool? strict,
   }) => FollowAlongOptions(
     unit: unit ?? this.unit,
     reciterTimes: reciterTimes ?? this.reciterTimes,
     userTimes: userTimes ?? this.userTimes,
+    strict: strict ?? this.strict,
   );
 }
 
@@ -50,6 +60,7 @@ class FollowAlongOptionsController
     'unit': value.unit.name,
     'reciterTimes': value.reciterTimes,
     'userTimes': value.userTimes,
+    'strict': value.strict,
   };
 
   @override
@@ -64,6 +75,7 @@ class FollowAlongOptionsController
           FollowAlongUnit.eachAyah,
       reciterTimes: times('reciterTimes'),
       userTimes: times('userTimes'),
+      strict: json['strict'] == true,
     );
   }
 
@@ -92,6 +104,7 @@ class FollowAlongState {
     required this.index,
     required this.phase,
     required this.options,
+    this.again = false,
   });
 
   final List<List<int>> parts;
@@ -99,15 +112,22 @@ class FollowAlongState {
   final FollowAlongPhase phase;
   final FollowAlongOptions options;
 
+  /// Strict: the user's turn again, after a mistake.
+  final bool again;
+
   List<int> get part => parts[index];
 
-  FollowAlongState copyWith({int? index, FollowAlongPhase? phase}) =>
-      FollowAlongState(
-        parts: parts,
-        index: index ?? this.index,
-        phase: phase ?? this.phase,
-        options: options,
-      );
+  FollowAlongState copyWith({
+    int? index,
+    FollowAlongPhase? phase,
+    bool again = false,
+  }) => FollowAlongState(
+    parts: parts,
+    index: index ?? this.index,
+    phase: phase ?? this.phase,
+    options: options,
+    again: again,
+  );
 }
 
 /// Follow along: the reciter recites a part (an ayah, or the whole range)
@@ -154,7 +174,12 @@ class FollowAlongController extends Notifier<FollowAlongState?> {
       (_, done) {
         final s = state;
         if (done && s != null && s.phase == FollowAlongPhase.user) {
-          unawaited(_onUserDone(s));
+          // The test's verdicts now, before the session ends clears them.
+          final counts = ref.read(hifzControllerProvider).counts;
+          final wordMistakes =
+              (counts[HifzVerdict.wrong] ?? 0) +
+              (counts[HifzVerdict.skipped] ?? 0);
+          unawaited(_onUserDone(s, wordMistakes: wordMistakes));
         }
       },
     );
@@ -207,7 +232,7 @@ class FollowAlongController extends Notifier<FollowAlongState?> {
     unawaited(_userTurn());
   }
 
-  Future<void> _userTurn() async {
+  Future<void> _userTurn({int? times}) async {
     final s = state;
     final location = ref.read(mushafRecitationTargetProvider)?.location;
     if (s == null || location == null) {
@@ -220,16 +245,29 @@ class FollowAlongController extends Notifier<FollowAlongState?> {
     ref.read(hifzControllerProvider.notifier).setLoop((
       from: verse(s.part.first),
       to: verse(s.part.last),
-    ), HifzLoop(mode: HifzLoopMode.range, count: s.options.userTimes));
+    ), HifzLoop(mode: HifzLoopMode.range, count: times ?? s.options.userTimes));
     await ref
         .read(recitationSessionControllerProvider.notifier)
         .start(startLocation: location);
   }
 
-  Future<void> _onUserDone(FollowAlongState done) async {
-    // A moment to see the part complete; and out of the test's update.
-    await Future<void>.delayed(const Duration(milliseconds: 700));
+  Future<void> _onUserDone(
+    FollowAlongState done, {
+    required int wordMistakes,
+  }) async {
+    // The pronunciation check of the last words follows the voice by a
+    // moment (and the pause after it): keep listening until it is done.
+    final pass = ref.read(recitationPassProvider);
+    final pronunciation = await _settle();
     if (!identical(state, done)) return;
+    final mistake =
+        wordMistakes > 0 ||
+        pronunciation.entries.any(
+          (e) =>
+              done.part.contains(e.key.ayahId) &&
+              e.value.pass == pass &&
+              e.value.isMistake,
+        );
     _advancing = true;
     try {
       await ref.read(recitationSessionControllerProvider.notifier).stop();
@@ -238,6 +276,12 @@ class FollowAlongController extends Notifier<FollowAlongState?> {
     }
     final s = state;
     if (s == null) return;
+    if (s.options.strict && mistake) {
+      // Once more, until without a mistake.
+      state = s.copyWith(phase: FollowAlongPhase.user, again: true);
+      await _userTurn(times: 1);
+      return;
+    }
     if (s.index + 1 >= s.parts.length) {
       _end();
       return;
@@ -245,6 +289,36 @@ class FollowAlongController extends Notifier<FollowAlongState?> {
     state = s.copyWith(index: s.index + 1, phase: FollowAlongPhase.reciter);
     await _reciterTurn();
   }
+
+  /// Waits for the pronunciation check of the turn's last words (at most a
+  /// few seconds), then returns its verdicts; none without it.
+  Future<Map<WordRef, AcousticWordResult>> _settle() async {
+    if (!ref.exists(acousticVerificationControllerProvider)) {
+      await Future<void>.delayed(const Duration(milliseconds: 700));
+      return const {};
+    }
+    AcousticVerificationState acoustic() =>
+        ref.read(acousticVerificationControllerProvider);
+    final checked = acoustic().utterances;
+    final started = DateTime.now();
+    while (ref.mounted) {
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      if (!ref.mounted) break;
+      final now = acoustic();
+      final waited = DateTime.now().difference(started);
+      if (!now.active || waited >= _settleMax) break;
+      if (waited >= _settleMin &&
+          now.utterances > checked &&
+          now.pending == 0) {
+        break;
+      }
+    }
+    return ref.mounted ? acoustic().words : const {};
+  }
+
+  /// The model hears ~1 s past a word before placing it.
+  static const _settleMin = Duration(milliseconds: 1200);
+  static const _settleMax = Duration(seconds: 5);
 
   void _end() => state = null;
 

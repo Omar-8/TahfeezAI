@@ -386,5 +386,8 @@
   "sajdahReminderOff": "Désactiver",
   "settingsRecitation": "Récitation",
   "mushafPassages": "Colorer les passages thématiques",
-  "mushafPassagesSub": "Chaque rukūʿ (section thématique) dans sa propre couleur"
+  "mushafPassagesSub": "Chaque rukūʿ (section thématique) dans sa propre couleur",
+  "followStrict": "Strict",
+  "followStrictSub": "Après une erreur, récitez à nouveau jusqu'à le faire sans erreur",
+  "followAgain": "Une erreur — récitez à nouveau"
 }

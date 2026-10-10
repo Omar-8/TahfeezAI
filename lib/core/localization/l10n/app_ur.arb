@@ -386,5 +386,8 @@
   "sajdahReminderOff": "بند کریں",
   "settingsRecitation": "تلاوت",
   "mushafPassages": "موضوعاتی حصے رنگیں",
-  "mushafPassagesSub": "ہر رکوع (موضوعاتی حصہ) الگ رنگ میں"
+  "mushafPassagesSub": "ہر رکوع (موضوعاتی حصہ) الگ رنگ میں",
+  "followStrict": "سخت",
+  "followStrictSub": "غلطی کے بعد دوبارہ پڑھیں یہاں تک کہ بغیر غلطی کے ہو",
+  "followAgain": "غلطی — دوبارہ پڑھیں"
 }
