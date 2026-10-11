@@ -11,7 +11,7 @@ Pod::Spec.new do |s|
   s.author           = 'quran-ws'
   s.source           = { :path => '.' }
   s.dependency 'Flutter'
-  s.platform         = :ios, '13.0'
+  s.platform         = :ios, '15.0'
   s.vendored_frameworks = 'Frameworks/qvp_ffi.xcframework'
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES' }
 end

@@ -20,10 +20,8 @@ the compiled Dart code).
 ## Steps on the Mac
 
 1. Flutter, Xcode, CocoaPods and rustup installed; this repository cloned.
-2. The engine: clone `github.com/quran-ws/quran-engine` at the commit
-   `qvp_flutter` 0.2.2 was published from (its `qvp.h` must match
-   `lib/src/bindings.dart`), then
-   `QVP_REPO=<that checkout> bash third_party/qvp_flutter/scripts/build-engine-ios.sh`.
+2. The engine: `bash third_party/qvp_flutter/scripts/build-engine-ios.sh`
+   (clones upstream tag `v0.2.2`, the published package's commit).
 3. `flutter pub get && cd ios && pod install` (sets the platform to iOS
    13+ if asked; brings `onnxruntime-objc` 1.30.0).
 4. Signing: open `ios/Runner.xcworkspace`, set the team and bundle id.

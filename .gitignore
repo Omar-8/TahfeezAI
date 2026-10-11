@@ -161,3 +161,6 @@ tool/acoustic_verification/model_work/artifacts/
 /tool/acoustic_verification/model_work/data_*/
 /tool/acoustic_verification/model_work/runs/
 /tool/acoustic_verification/model_work/fp32*/
+
+# iOS smoke test screenshots (test_driver/integration_test.dart)
+/screenshots/

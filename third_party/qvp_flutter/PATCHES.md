@@ -163,11 +163,16 @@ x86_64, a dynamic framework with install name
 found by `DynamicLibrary.process()`, which `QvpEngine.resolveLibrary`
 already uses on iOS — no Dart change.
 
-The engine must be built from a commit whose C ABI matches 0.2.2's Dart
-bindings (see "Provenance": the commit pinned for the web build does
-not). The script refuses a `qvp.h` without `QvpLayoutSpec`'s
-`max_aspect_slack`; that check is necessary, not sufficient — compare
-`qvp.h` with `lib/src/bindings.dart` before shipping.
+The engine is built from upstream tag `v0.2.2`
+(`4ad5c1292ac88d56b5fc7d58fce46c459231b096`, 2026-09-14): its
+`packages/flutter/qvp_flutter/lib` is byte-identical to the published
+0.2.2 package's (checked 2026-10-11), so its C ABI is the one these
+bindings were written for. (The commit pinned for the web build is
+older and does not match — see "Provenance".) The script clones that tag
+and refuses any other commit. Upstream also publishes a prebuilt
+`QvpEngine.xcframework` for the tag, but of static libraries, whose
+unreferenced symbols the app's linker would strip — hence the dynamic
+build here.
 
 New files only (nothing upstream changed): re-vendoring keeps them if
 `ios/`, `scripts/build-engine-ios.sh` and the `ios:` platform entry are

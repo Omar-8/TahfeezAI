@@ -1,0 +1,91 @@
+# iOS on GitHub's Mac runners (docs/IOS.md): builds the Mushaf engine for
+# iOS, compiles the app for an iPhone (unsigned) and for the simulator,
+# and runs the smoke test there (integration_test/ios_smoke_test.dart),
+# keeping its screenshots and logs. No signing: nothing here installs on a
+# real iPhone.
+name: iOS
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'ios/**'
+      - 'lib/**'
+      - 'packages/tahfeez_ios/**'
+      - 'third_party/qvp_flutter/**'
+      - 'integration_test/ios_smoke_test.dart'
+      - 'pubspec.yaml'
+      - 'pubspec.lock'
+      - '.github/workflows/ios.yml'
+
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ios:
+    runs-on: macos-15
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.47.3
+          channel: stable
+          cache: true
+
+      - name: Rust targets cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: cargo-${{ runner.os }}-qvp-v0.2.2
+
+      - name: Mushaf engine (qvp_ffi.xcframework from quran-engine v0.2.2)
+        run: bash third_party/qvp_flutter/scripts/build-engine-ios.sh
+
+      - name: Dependencies
+        run: flutter pub get
+
+      - name: iPhone build (release, unsigned) — compiles the Swift and links the engine
+        run: flutter build ios --release --no-codesign
+
+      - name: Simulator
+        id: sim
+        run: |
+          udid=$(xcrun simctl list devices available -j | python3 -c "
+          import json, sys
+          devices = json.load(sys.stdin)['devices']
+          phones = [d for runtime, ds in devices.items() if 'iOS' in runtime
+                    for d in ds if d['name'].startswith('iPhone')]
+          print(phones[-1]['udid'])")
+          xcrun simctl boot "$udid"
+          xcrun simctl bootstatus "$udid" -b
+          echo "udid=$udid" >> "$GITHUB_OUTPUT"
+
+      - name: Smoke test on the simulator
+        shell: bash  # -eo pipefail: the test's failure is not hidden by tee
+        run: |
+          flutter drive \
+            --driver=test_driver/integration_test.dart \
+            --target=integration_test/ios_smoke_test.dart \
+            -d "${{ steps.sim.outputs.udid }}" 2>&1 | tee smoke.log
+
+      - name: Simulator log
+        if: always()
+        run: |
+          xcrun simctl spawn booted log show --last 15m --style compact \
+            --predicate 'process == "Runner"' > simulator.log 2>&1 || true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ios-smoke
+          path: |
+            screenshots/
+            smoke.log
+            simulator.log
+          if-no-files-found: warn

@@ -4,14 +4,25 @@
 # (arm64) and the simulator (arm64 + x86_64). Run on a Mac with Xcode and
 # rustup:
 #
-#   QVP_REPO=~/src/quran-engine bash third_party/qvp_flutter/scripts/build-engine-ios.sh
+#   bash third_party/qvp_flutter/scripts/build-engine-ios.sh
 #
-# QVP_REPO must be the upstream monorepo (github.com/quran-ws/quran-engine)
-# at the commit qvp_flutter 0.2.2 was published from: its C ABI must match
-# this package's Dart bindings (lib/src/bindings.dart) — see PATCHES.md.
+# QVP_REPO: the upstream monorepo (github.com/quran-ws/quran-engine) at
+# tag v0.2.2 — the commit qvp_flutter 0.2.2 was published from (its Dart
+# sources are identical to this package's unpatched ones). Without it,
+# that tag is cloned into a temporary directory.
 set -euo pipefail
 here="$(cd "$(dirname "$0")/.." && pwd)"
-repo="${QVP_REPO:?set QVP_REPO to the quran-engine checkout}"
+tag=v0.2.2
+commit=4ad5c1292ac88d56b5fc7d58fce46c459231b096
+repo="${QVP_REPO:-}"
+if [ -z "$repo" ]; then
+  repo="$(mktemp -d)/quran-engine"
+  git clone --quiet --depth 1 --branch "$tag" https://github.com/quran-ws/quran-engine.git "$repo"
+fi
+[ "$(git -C "$repo" rev-parse HEAD)" = "$commit" ] || {
+  echo "error: $repo is not at $tag ($commit)" >&2
+  exit 1
+}
 header="$repo/crates/qvp-ffi/include/qvp.h"
 
 # The ABI check: 0.2.2's QvpLayoutSpec has max_aspect_slack (patch 0001);
@@ -23,7 +34,7 @@ grep -q "max_aspect_slack" "$header" || {
 
 targets=(aarch64-apple-ios aarch64-apple-ios-sim x86_64-apple-ios)
 rustup target add "${targets[@]}"
-export IPHONEOS_DEPLOYMENT_TARGET=13.0
+export IPHONEOS_DEPLOYMENT_TARGET=15.0
 for t in "${targets[@]}"; do
   (cd "$repo" && cargo build -p qvp-ffi --release --target "$t")
 done
@@ -48,7 +59,7 @@ framework() {
   <key>CFBundlePackageType</key><string>FMWK</string>
   <key>CFBundleShortVersionString</key><string>0.2.2</string>
   <key>CFBundleVersion</key><string>1</string>
-  <key>MinimumOSVersion</key><string>13.0</string>
+  <key>MinimumOSVersion</key><string>15.0</string>
 </dict>
 </plist>
 PLIST
