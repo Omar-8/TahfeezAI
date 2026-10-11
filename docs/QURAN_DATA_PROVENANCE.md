@@ -278,9 +278,13 @@ and other similar intermediates". Status: **permitted** (was
 
 ### Update 2026-10-11: licence
 
-Still **unconfirmed by QUL**: its 2026-05-06 statement covers layouts, and
-this is a script resource. A question to QUL was drafted (GitHub). The glyph
-codes are the Complex's QCF V2 encoding, under its usage rights.
+No licence stated by QUL (checked 2026-10-11: resource page, FAQ, GitHub).
+**Owner decision 2026-10-11: shipped with attribution** ("Data provided by
+QUL", and the King Fahd Complex), on the strength of QUL's consistent answers
+(layouts free for commercial use, #596; QUL's datasets available for
+commercial use, #803) and the Complex's usage rights, which cover its QCF V2
+glyph codes. See `docs/THIRD_PARTY_RESOURCES.md`, "Mushaf licensing,
+2026-10-11".
 
 ## 7b. Compatibility audit and the ayah-marker finding
 

@@ -161,8 +161,8 @@ const credits = <Credit>[
     owner: 'Tarteel (QUL); King Fahd Glorious Quran Printing Complex',
     licence:
         'Layouts free for personal and commercial use (QUL); word data: '
-        'terms being confirmed. The Mushaf: the King Fahd Complex’s usage '
-        'rights',
+        'no licence stated, used with credit. The Mushaf: the King Fahd '
+        'Complex’s usage rights',
     url: 'https://qul.tarteel.ai',
     useEn: 'Mushaf layout and word data',
     useAr: 'تخطيط المصحف وبيانات الكلمات',
