@@ -173,20 +173,23 @@ final hifzSettingsProvider =
 
 /// Vibrates on a mistake; overridden in tests.
 /// A short vibration for a mistake (Android: the device's vibrator — the
-/// touch-feedback setting MIUI and others often turn down is not used).
+/// touch-feedback setting MIUI and others often turn down is not used;
+/// iOS: the haptic engine).
 final hifzHapticsProvider = Provider<void Function()>((ref) {
-  final android = ref.watch(platformCapabilitiesProvider).isAndroid;
+  final capabilities = ref.watch(platformCapabilitiesProvider);
+  final native = capabilities.isAndroid || capabilities.isIOS;
   const channel = MethodChannel('tahfeez/alert');
-  return android
+  return native
       ? () => unawaited(channel.invokeMethod<void>('vibrate', 120))
       : () {};
 });
 
-/// A short, soft beep for a mistake (Android).
+/// A short, soft beep for a mistake (Android and iOS).
 final hifzBeepProvider = Provider<void Function()>((ref) {
-  final android = ref.watch(platformCapabilitiesProvider).isAndroid;
+  final capabilities = ref.watch(platformCapabilitiesProvider);
+  final native = capabilities.isAndroid || capabilities.isIOS;
   const channel = MethodChannel('tahfeez/alert');
-  return android ? () => unawaited(channel.invokeMethod<void>('beep')) : () {};
+  return native ? () => unawaited(channel.invokeMethod<void>('beep')) : () {};
 });
 
 /// A chosen memorization range (whole ayahs, inclusive).

@@ -13,13 +13,14 @@ import 'recitation_ai_config.dart';
 import 'recitation_providers.dart';
 import 'recitation_session_controller.dart';
 
-/// Whether live recognition runs during a session at all: always on Android
-/// (on the device, every build alike); on the web only in development
-/// builds, whose engine sends audio to a cloud service — a release must not
-/// (recitation stays on the device).
-final liveRecognitionEnabledProvider = Provider<bool>(
-  (ref) => ref.watch(platformCapabilitiesProvider).isAndroid || !kReleaseMode,
-);
+/// Whether live recognition runs during a session at all: always on
+/// Android and iOS (on the device, every build alike); on the web only in
+/// development builds, whose engine sends audio to a cloud service — a
+/// release must not (recitation stays on the device).
+final liveRecognitionEnabledProvider = Provider<bool>((ref) {
+  final capabilities = ref.watch(platformCapabilitiesProvider);
+  return capabilities.isAndroid || capabilities.isIOS || !kReleaseMode;
+});
 
 /// Whether to show the recognition diagnostics panel: only in development
 /// builds made with `--dart-define=TAHFEEZ_DEV_PANEL=true`.

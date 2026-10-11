@@ -33,8 +33,8 @@ abstract class DailyReminderScheduler {
   Future<void> cancel();
 }
 
-/// Android: `flutter_local_notifications`, inexact (no exact-alarm
-/// permission), repeating daily at the local time.
+/// Android and iOS: `flutter_local_notifications`, repeating daily at the
+/// local time (Android: inexact, no exact-alarm permission).
 class LocalNotificationsReminderScheduler implements DailyReminderScheduler {
   final _plugin = FlutterLocalNotificationsPlugin();
   bool _initialized = false;
@@ -59,6 +59,12 @@ class LocalNotificationsReminderScheduler implements DailyReminderScheduler {
     await _plugin.initialize(
       settings: const InitializationSettings(
         android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+        // Permission is asked when the reminder is turned on, not at launch.
+        iOS: DarwinInitializationSettings(
+          requestAlertPermission: false,
+          requestBadgePermission: false,
+          requestSoundPermission: false,
+        ),
       ),
       onDidReceiveNotificationResponse: (_) => onOpen(),
     );
@@ -71,9 +77,19 @@ class LocalNotificationsReminderScheduler implements DailyReminderScheduler {
         AndroidFlutterLocalNotificationsPlugin
       >();
 
+  IOSFlutterLocalNotificationsPlugin? get _ios => _plugin
+      .resolvePlatformSpecificImplementation<
+        IOSFlutterLocalNotificationsPlugin
+      >();
+
   @override
-  Future<bool> requestPermission() async =>
-      await _android?.requestNotificationsPermission() ?? false;
+  Future<bool> requestPermission() async {
+    final ios = _ios;
+    if (ios != null) {
+      return await ios.requestPermissions(alert: true, sound: true) ?? false;
+    }
+    return await _android?.requestNotificationsPermission() ?? false;
+  }
 
   @override
   Future<void> schedule({
@@ -106,6 +122,7 @@ class LocalNotificationsReminderScheduler implements DailyReminderScheduler {
           importance: Importance.defaultImportance,
           priority: Priority.defaultPriority,
         ),
+        iOS: const DarwinNotificationDetails(),
       ),
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
       matchDateTimeComponents: DateTimeComponents.time,
@@ -116,7 +133,7 @@ class LocalNotificationsReminderScheduler implements DailyReminderScheduler {
   Future<void> cancel() => _plugin.cancel(id: _id);
 }
 
-/// Web and iOS for now: no reminder.
+/// The web: no reminder.
 class UnsupportedReminderScheduler implements DailyReminderScheduler {
   const UnsupportedReminderScheduler();
 
@@ -139,7 +156,8 @@ class UnsupportedReminderScheduler implements DailyReminderScheduler {
 }
 
 final dailyReminderSchedulerProvider = Provider<DailyReminderScheduler>(
-  (ref) => ref.watch(platformCapabilitiesProvider).isAndroid
+  (ref) =>
+      ref.watch(platformCapabilitiesProvider).supportsScheduledNotifications
       ? LocalNotificationsReminderScheduler()
       : const UnsupportedReminderScheduler(),
 );

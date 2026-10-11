@@ -1336,6 +1336,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.4.2"
+  tahfeez_ios:
+    dependency: "direct main"
+    description:
+      path: "packages/tahfeez_ios"
+      relative: true
+    source: path
+    version: "0.1.0"
   term_glyph:
     dependency: transitive
     description:

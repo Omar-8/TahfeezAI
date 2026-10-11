@@ -10,11 +10,11 @@ import '../domain/recitation_audio_source.dart';
 import '../domain/recitation_recording_store.dart';
 import '../domain/recitation_session.dart';
 
-/// Live recitation is Android + Web only for now (Milestone R1). iOS needs
-/// its own microphone usage string and audio-session review first.
+/// Live recitation: Android, iOS (its microphone usage string in
+/// Info.plist) and the web.
 final recitationSupportedProvider = Provider<bool>((ref) {
   final capabilities = ref.watch(platformCapabilitiesProvider);
-  return capabilities.isAndroid || capabilities.isWeb;
+  return capabilities.isAndroid || capabilities.isIOS || capabilities.isWeb;
 });
 
 /// Creates a fresh microphone source per session controller. A factory,

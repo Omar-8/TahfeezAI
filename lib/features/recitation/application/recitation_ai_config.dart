@@ -82,13 +82,13 @@ final recitationAiConfigProvider = Provider<RecitationAiConfig>((ref) {
   const positionName = String.fromEnvironment('TAHFEEZ_POSITION_SOURCE');
   const comparator = bool.fromEnvironment('TAHFEEZ_SPEECH_COMPARATOR');
   final offline = ref.watch(recitationOfflineProvider);
-  final android = ref.watch(platformCapabilitiesProvider).isAndroid;
+  final capabilities = ref.watch(platformCapabilitiesProvider);
   return resolveRecitationAiConfig(
     backendName: backendName,
     positionName: positionName,
     comparator: comparator,
     offline: offline,
-    android: android,
+    onDevice: capabilities.isAndroid || capabilities.isIOS,
     release: kReleaseMode,
   );
 });
@@ -99,7 +99,7 @@ RecitationAiConfig resolveRecitationAiConfig({
   required String positionName,
   required bool comparator,
   required bool offline,
-  required bool android,
+  required bool onDevice,
   required bool release,
 }) {
   final violations = <String>[];
@@ -108,7 +108,7 @@ RecitationAiConfig resolveRecitationAiConfig({
     'remote' => QuranAcousticBackend.remoteDevelopment,
     'disabled' => QuranAcousticBackend.disabled,
     '' =>
-      android
+      onDevice
           ? QuranAcousticBackend.local
           : release || offline
           ? QuranAcousticBackend.disabled

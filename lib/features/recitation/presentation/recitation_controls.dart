@@ -1393,7 +1393,9 @@ class _HifzSettingsSheet extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(hifzSettingsProvider);
     final controller = ref.read(hifzSettingsProvider.notifier);
-    final android = ref.watch(platformCapabilitiesProvider).isAndroid;
+    final capabilities = ref.watch(platformCapabilitiesProvider);
+    // The mistake alert's vibration and beep: Android and iOS.
+    final alerts = capabilities.isAndroid || capabilities.isIOS;
     final hifz = ref.watch(hifzControllerProvider);
     final corpus = ref.watch(quranWordCorpusProvider).value;
     final location = ref.watch(mushafRecitationTargetProvider)?.location;
@@ -1509,7 +1511,7 @@ class _HifzSettingsSheet extends ConsumerWidget {
               settings.sajdahReminder,
               (v) => settings.copyWith(sajdahReminder: v),
             ),
-            if (android)
+            if (alerts)
               ListTile(
                 key: const ValueKey('hifz-mistake-alert'),
                 title: Text(AppLocalizations.of(context).recAlert),

@@ -49,7 +49,7 @@ final offlineAndroid = resolveRecitationAiConfig(
   positionName: '',
   comparator: false,
   offline: true,
-  android: true,
+  onDevice: true,
   release: false,
 );
 
@@ -251,7 +251,7 @@ void main() {
         positionName: '',
         comparator: false,
         offline: false,
-        android: true,
+        onDevice: true,
         release: true,
       );
       expect(c.acoustic, QuranAcousticBackend.local);
@@ -266,7 +266,7 @@ void main() {
         positionName: '',
         comparator: false,
         offline: false,
-        android: false,
+        onDevice: false,
         release: false,
       );
       expect(dev.acoustic, QuranAcousticBackend.remoteDevelopment);
@@ -276,7 +276,7 @@ void main() {
         positionName: '',
         comparator: false,
         offline: false,
-        android: false,
+        onDevice: false,
         release: true,
       );
       expect(release.acoustic, QuranAcousticBackend.disabled);
@@ -288,7 +288,7 @@ void main() {
         positionName: 'speech',
         comparator: true,
         offline: true,
-        android: false,
+        onDevice: false,
         release: false,
       );
       expect(c.acoustic, QuranAcousticBackend.disabled);
@@ -305,7 +305,7 @@ void main() {
         positionName: '',
         comparator: true,
         offline: false,
-        android: true,
+        onDevice: true,
         release: false,
       );
       expect(c.position, RecitationPositionSource.acoustic);

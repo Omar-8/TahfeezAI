@@ -772,7 +772,7 @@ class _AboutAppState extends ConsumerState<_AboutApp> {
             Icons.share_outlined,
             l10n.settingsShare,
             l10n.settingsShareSub,
-            () => store.share(l10n.settingsShareText(kPlayStoreUrl)),
+            () => store.share(l10n.settingsShareText(store.listingUrl)),
           ),
           if (android) ...[
             row(

@@ -275,7 +275,7 @@ final _offlineAndroid = resolveRecitationAiConfig(
   positionName: '',
   comparator: false,
   offline: true,
-  android: true,
+  onDevice: true,
   release: false,
 );
 

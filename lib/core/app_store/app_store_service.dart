@@ -11,6 +11,11 @@ import 'package:url_launcher/url_launcher.dart';
 const kPlayStoreUrl =
     'https://play.google.com/store/apps/details?id=ai.tahfeez.tahfeez_ai';
 
+/// The App Store listing, once the app has one
+/// (`https://apps.apple.com/app/id<number>`). Empty: on iOS, rating opens
+/// nothing beyond the in-app prompt, and sharing links Google Play.
+const kAppStoreUrl = '';
+
 /// Where feedback goes: the project's GitHub issues, once the repository
 /// exists. Empty: Settings' "Send feedback" does nothing yet.
 const kFeedbackUrl = '';
@@ -41,12 +46,21 @@ abstract class AppStoreService {
 
   Future<void> share(String text);
 
+  /// This platform's store listing, to link to.
+  String get listingUrl;
+
   Future<bool> openUrl(String url);
 }
 
 class PlatformAppStoreService implements AppStoreService {
   bool get _android =>
       !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+
+  bool get _ios => !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
+
+  @override
+  String get listingUrl =>
+      _ios && kAppStoreUrl.isNotEmpty ? kAppStoreUrl : kPlayStoreUrl;
 
   @override
   Future<String> version() async {
@@ -94,7 +108,8 @@ class PlatformAppStoreService implements AppStoreService {
 
   @override
   Future<void> openListing() async {
-    if (!await openUrl(kPlayStoreUrl)) {
+    if (_ios && kAppStoreUrl.isEmpty) return;
+    if (!await openUrl(listingUrl)) {
       try {
         await InAppReview.instance.openStoreListing();
       } catch (_) {

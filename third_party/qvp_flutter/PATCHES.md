@@ -150,3 +150,26 @@ Used by `quran_engine_android_backend.dart` for the Mushaf's thematic
 passage tints (`PageBand`). Re-apply with
 `patch -p1 < patches/0003-slot-filling-highlight-bands.patch` after
 re-vendoring.
+
+## Patch 0004 — iOS
+
+The published package is Android-only. This patch adds iOS as an
+`ffiPlugin` platform (`pubspec.yaml`), `ios/qvp_flutter.podspec`
+(vendoring `ios/Frameworks/qvp_ffi.xcframework`) and
+`scripts/build-engine-ios.sh`, which builds that framework on a Mac from
+the upstream monorepo (`crates/qvp-ffi`: device arm64, simulator arm64 +
+x86_64, a dynamic framework with install name
+`@rpath/qvp_ffi.framework/qvp_ffi`). Linked into the app, its symbols are
+found by `DynamicLibrary.process()`, which `QvpEngine.resolveLibrary`
+already uses on iOS — no Dart change.
+
+The engine must be built from a commit whose C ABI matches 0.2.2's Dart
+bindings (see "Provenance": the commit pinned for the web build does
+not). The script refuses a `qvp.h` without `QvpLayoutSpec`'s
+`max_aspect_slack`; that check is necessary, not sufficient — compare
+`qvp.h` with `lib/src/bindings.dart` before shipping.
+
+New files only (nothing upstream changed): re-vendoring keeps them if
+`ios/`, `scripts/build-engine-ios.sh` and the `ios:` platform entry are
+carried over. Not yet built or run: no Mac was available when it was
+written (2026-10-11).

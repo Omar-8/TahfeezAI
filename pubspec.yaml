@@ -71,6 +71,9 @@ dependencies:
   in_app_update: ^5.0.0
   package_info_plus: ^10.2.2
   just_audio_background: ^0.0.1-beta.17
+  # Tahfeez's own iOS platform channels (Android's are in android/app).
+  tahfeez_ios:
+    path: packages/tahfeez_ios
 
 # A locally-vendored, minimally-patched copy of qvp_flutter 0.2.2 —
 # exposes QvpViewLayout.maxAspectSlack (already a real, documented,

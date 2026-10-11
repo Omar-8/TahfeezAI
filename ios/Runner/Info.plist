@@ -6,6 +6,15 @@
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>en</string>
+		<string>ar</string>
+		<string>ur</string>
+		<string>tr</string>
+		<string>fr</string>
+		<string>de</string>
+	</array>
 	<key>CFBundleDisplayName</key>
 	<string>TahfeezAI</string>
 	<key>CFBundleExecutable</key>
@@ -26,6 +35,12 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>TahfeezAI listens while you recite to follow your place and point out mistakes. The audio is checked on your iPhone and never sent anywhere.</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>audio</string>
+	</array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

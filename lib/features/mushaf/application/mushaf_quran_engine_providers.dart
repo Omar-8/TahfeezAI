@@ -72,7 +72,9 @@ Future<QuranEngineMushafBackend> mushafQuranEngineBackend(Ref ref) async {
   final capabilities = ref.watch(platformCapabilitiesProvider);
 
   final QuranEngineMushafBackend backend;
-  if (capabilities.isAndroid) {
+  if (capabilities.isAndroid || capabilities.isIOS) {
+    // The native engine through dart:ffi: on Android its shared library,
+    // on iOS linked into the app (qvp_flutter's iOS framework).
     backend = QuranEngineAndroidBackend();
   } else if (capabilities.isWeb) {
     backend = QuranEngineWebBackend(
@@ -81,17 +83,6 @@ Future<QuranEngineMushafBackend> mushafQuranEngineBackend(Ref ref) async {
           : _quranEnginePageBaseUrlEnv,
       networkClient: ref.watch(networkClientProvider),
       logger: ref.watch(mushafQuranEngineLoggerProvider),
-    );
-  } else if (capabilities.isIOS) {
-    // Per the migration's explicit instruction not to fabricate iOS
-    // runtime success: no iOS integration has been implemented or
-    // verified (no macOS/Xcode environment is available in this
-    // sandbox). iOS is explicitly deferred/out of scope for this
-    // migration milestone — see docs/QURAN_ENGINE_MIGRATION.md's iOS
-    // status ("NOT IMPLEMENTED YET — FUTURE PLATFORM WORK").
-    throw UnsupportedError(
-      'The Quran Engine Mushaf backend has no iOS implementation yet — see '
-      'docs/QURAN_ENGINE_MIGRATION.md.',
     );
   } else {
     throw UnsupportedError(

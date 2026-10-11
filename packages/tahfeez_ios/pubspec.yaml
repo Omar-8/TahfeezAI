@@ -1,0 +1,18 @@
+name: tahfeez_ios
+description: Tahfeez AI's iOS side of its own platform channels — the on-device acoustic model (ONNX Runtime), the mistake alert and keeping the screen on. Android's are in the app (android/app/src/main/kotlin).
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ^3.9.0
+  flutter: '>=3.35.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+flutter:
+  plugin:
+    platforms:
+      ios:
+        pluginClass: TahfeezIosPlugin
