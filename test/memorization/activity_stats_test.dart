@@ -14,6 +14,7 @@ void main() {
     stats.mushafShown(true);
     await Future<void>.delayed(const Duration(milliseconds: 1100));
     stats.mushafShown(false);
+    await Future<void>.delayed(Duration.zero); // added just after
     final now = first.read(activityStatsProvider);
     expect((now.recitedWords, now.recitedAyahs, now.heardAyahs), (12, 2, 3));
     expect(now.mushafSeconds, 1);

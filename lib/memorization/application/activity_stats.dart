@@ -153,7 +153,13 @@ class ActivityStatsController extends Notifier<ActivityStats> {
     _mushafSince = null;
     if (since == null) return;
     final seconds = DateTime.now().difference(since).inSeconds;
-    if (seconds > 0) add(mushafSeconds: seconds);
+    // Counted now, added just after: this runs as the Mushaf leaves the
+    // widget tree, when providers can't change.
+    if (seconds > 0) {
+      Future.microtask(() {
+        if (ref.mounted) add(mushafSeconds: seconds);
+      });
+    }
   }
 }
 
