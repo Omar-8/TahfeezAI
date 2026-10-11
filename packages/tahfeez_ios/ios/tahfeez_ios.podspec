@@ -13,5 +13,8 @@ Pod::Spec.new do |s|
   s.dependency 'onnxruntime-objc', '1.30.0' # the version Android ships
   s.platform         = :ios, '15.1' # onnxruntime-objc 1.30.0's minimum
   s.swift_version    = '5.0'
+  # ONNX Runtime's pods are static libraries: so is this one (CocoaPods
+  # refuses a dynamic framework over them).
+  s.static_framework = true
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES' }
 end
