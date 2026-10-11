@@ -27,7 +27,10 @@ void main() {
     await binding.takeScreenshot('1-home');
 
     final router = GoRouter.of(tester.element(find.byType(Navigator).first));
-    for (final (surah, name) in [(1, 'al-fatiha'), (2, 'al-baqarah')]) {
+    for (final (surah, name, title) in [
+      (1, 'al-fatiha', 'Faatiha'),
+      (2, 'al-baqarah', 'Baqara'),
+    ]) {
       // From Home each time: one reader to the next keeps its page.
       router.go('/home');
       await run(2);
@@ -38,6 +41,11 @@ void main() {
         find.byType(QvpPageView),
         findsWidgets,
         reason: 'the native engine draws the page',
+      );
+      expect(
+        find.textContaining(title),
+        findsWidgets,
+        reason: 'the reader shows the surah asked for',
       );
     }
   });

@@ -31,6 +31,9 @@ List<RouteBase> quranLocationRoutes() {
     GoRoute(
       path: 'surah/:surahNo',
       builder: (context, state) => ReaderScreen(
+        // Per location: go_router keys a page by its route pattern, so going
+        // from one surah to another would otherwise keep the first reader.
+        key: ValueKey(state.matchedLocation),
         location: QuranLocation.surah(
           _parsePathInt(state.pathParameters, 'surahNo'),
         ),
@@ -39,6 +42,9 @@ List<RouteBase> quranLocationRoutes() {
     GoRoute(
       path: 'ayah/:chapterNo/:verseNo',
       builder: (context, state) => ReaderScreen(
+        // Per location: go_router keys a page by its route pattern, so going
+        // from one surah to another would otherwise keep the first reader.
+        key: ValueKey(state.matchedLocation),
         location: QuranLocation.ayah(
           _parsePathInt(state.pathParameters, 'chapterNo'),
           _parsePathInt(state.pathParameters, 'verseNo'),
@@ -48,6 +54,9 @@ List<RouteBase> quranLocationRoutes() {
     GoRoute(
       path: 'ayah-range/:chapterNo/:fromVerseNo/:toVerseNo',
       builder: (context, state) => ReaderScreen(
+        // Per location: go_router keys a page by its route pattern, so going
+        // from one surah to another would otherwise keep the first reader.
+        key: ValueKey(state.matchedLocation),
         location: QuranLocation.ayahRange(
           _parsePathInt(state.pathParameters, 'chapterNo'),
           _parsePathInt(state.pathParameters, 'fromVerseNo'),
@@ -58,6 +67,9 @@ List<RouteBase> quranLocationRoutes() {
     GoRoute(
       path: 'juz/:juzNo',
       builder: (context, state) => ReaderScreen(
+        // Per location: go_router keys a page by its route pattern, so going
+        // from one surah to another would otherwise keep the first reader.
+        key: ValueKey(state.matchedLocation),
         location: QuranLocation.juz(
           _parsePathInt(state.pathParameters, 'juzNo'),
         ),
@@ -66,6 +78,9 @@ List<RouteBase> quranLocationRoutes() {
     GoRoute(
       path: 'hizb/:hizbNo',
       builder: (context, state) => ReaderScreen(
+        // Per location: go_router keys a page by its route pattern, so going
+        // from one surah to another would otherwise keep the first reader.
+        key: ValueKey(state.matchedLocation),
         location: QuranLocation.hizb(
           _parsePathInt(state.pathParameters, 'hizbNo'),
         ),
@@ -74,6 +89,7 @@ List<RouteBase> quranLocationRoutes() {
     GoRoute(
       path: 'page/:mushafId/:pageNumber',
       builder: (context, state) => MushafReaderScreen(
+        key: ValueKey(state.matchedLocation),
         mushafId: _parsePathInt(state.pathParameters, 'mushafId'),
         initialPageNumber: _parsePathInt(state.pathParameters, 'pageNumber'),
       ),
