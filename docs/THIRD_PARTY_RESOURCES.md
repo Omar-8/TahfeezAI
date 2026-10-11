@@ -78,6 +78,10 @@ otherwise-consistent "blocked means not shipped" rule.
 ## Mushaf licensing, 2026-10-11
 
 Checked by the project owner (logged in to QUL) and in the sources below.
+Local copies of every source quoted here (the QUL threads with each comment's
+author and timestamp, quran-engine's `LICENSE` at the exact commits, the
+quran.ws licensing page, and the QUL screenshots), with SHA-256 checksums:
+`docs/licensing-evidence/`.
 None of QUL's resource pages show a licence; the FAQ says only "review the
 licensing terms for each resource".
 
