@@ -58,8 +58,19 @@ jobs:
       - name: Dependencies
         run: flutter pub get
 
+      # Unsigned, with xcodebuild itself: `flutter build ios --no-codesign`
+      # still asks for a team, and hides the compiler's errors.
       - name: iPhone build (release, unsigned) — compiles the Swift and links the engine
-        run: flutter build ios --release --no-codesign
+        shell: bash
+        run: |
+          flutter build ios --config-only --release
+          cd ios
+          xcodebuild -workspace Runner.xcworkspace -scheme Runner \
+            -configuration Release -sdk iphoneos -destination 'generic/platform=iOS' \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY= \
+            build > ../xcodebuild.log 2>&1 || status=$?
+          grep -E "error:|BUILD (SUCCEEDED|FAILED)" ../xcodebuild.log | sort -u | head -80 || true
+          exit ${status:-0}
 
       - name: Simulator
         id: sim
@@ -96,4 +107,5 @@ jobs:
             screenshots/
             smoke.log
             simulator.log
+            xcodebuild.log
           if-no-files-found: warn
