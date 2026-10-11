@@ -161,6 +161,7 @@ class PageBand {
   bool get isAyahs => surah > 0;
 
   /// The share of the line pitch each band reaches past its line's top and
-  /// bottom.
-  static const fill = 0.22;
+  /// bottom: half, since the page view spreads its lines apart to fill the
+  /// screen (the gaps are wider than the printed page's spacing says).
+  static const fill = 0.5;
 }
