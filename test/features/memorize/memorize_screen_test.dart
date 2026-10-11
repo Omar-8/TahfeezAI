@@ -114,15 +114,23 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Al-Ikhlas 1–4'), findsOneWidget);
     expect(find.text('Al-Falaq 1 – An-Nas 1'), findsOneWidget);
-    expect(find.text('Strength'), findsOneWidget);
-    expect(find.text('42%'), findsOneWidget);
+    expect(
+      find.textContaining('Strength 42%', findRichText: true),
+      findsOneWidget,
+    );
     expect(find.text('Start'), findsNWidgets(2));
     // Reviewed today: its scores (8 of 10 words right, 1 of those 8 with a
     // pronunciation mistake), shown for it and for today; recite it again.
     expect(find.text('Again'), findsOneWidget);
     expect(find.text('1 ayah recited today'), findsOneWidget);
-    expect(find.text('80%'), findsNWidgets(2));
-    expect(find.text('88%'), findsNWidgets(2));
+    expect(find.text('80%'), findsOneWidget);
+    expect(find.text('88%'), findsOneWidget);
+    expect(
+      find.textContaining('80% · ', findRichText: true),
+      findsOneWidget,
+      reason: 'the task: memorization and tajweed on one line',
+    );
+    expect(find.textContaining('88%', findRichText: true), findsNWidgets(2));
   });
 
   testWidgets('a session\'s results: an overview, and only the ayahs to '

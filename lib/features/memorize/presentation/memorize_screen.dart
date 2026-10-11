@@ -462,6 +462,21 @@ class _NewLessonCardState extends ConsumerState<_NewLessonCard> {
 class _TaskList extends ConsumerWidget {
   const _TaskList({required this.tasks, required this.names});
 
+  static final _compact = ButtonStyle(
+    visualDensity: VisualDensity.compact,
+    padding: const WidgetStatePropertyAll(
+      EdgeInsets.symmetric(horizontal: TahfeezSpacing.md),
+    ),
+  );
+
+  /// [spans] with " · " between them.
+  static List<InlineSpan> _joined(List<InlineSpan> spans) => [
+    for (final (i, span) in spans.indexed) ...[
+      if (i > 0) const TextSpan(text: ' · '),
+      span,
+    ],
+  ];
+
   final List<RevisionTask> tasks;
   final Map<int, String> names;
 
@@ -479,6 +494,19 @@ class _TaskList extends ConsumerWidget {
       return RecitationScore.of(today.where((a) => ids.contains(a.ayahId)));
     }
 
+    TextSpan percent(String label, double value) => TextSpan(
+      text: '$label ',
+      children: [
+        TextSpan(
+          text: '${(value * 100).round()}%',
+          style: TextStyle(
+            color: ScoreBar.colorOf(value, theme.colorScheme),
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
+
     return TahfeezCard(
       padding: EdgeInsets.zero,
       child: Column(
@@ -487,57 +515,60 @@ class _TaskList extends ConsumerWidget {
             if (i > 0) const Divider(height: 1),
             Padding(
               key: ValueKey('mem-task-${t.first}'),
-              padding: const EdgeInsets.symmetric(
-                horizontal: TahfeezSpacing.md,
-                vertical: TahfeezSpacing.smPlus,
+              padding: const EdgeInsetsDirectional.fromSTEB(
+                TahfeezSpacing.md,
+                TahfeezSpacing.xs,
+                TahfeezSpacing.sm,
+                TahfeezSpacing.xs,
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+              child: Row(
                 spacing: TahfeezSpacing.sm,
                 children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              ayahRangeLabel(t.first, t.last, names),
-                              style: theme.textTheme.bodyLarge,
-                            ),
-                            Text(
-                              [
-                                if (t.page != null) l10n.memPage(t.page!),
-                                if (t.unverified) l10n.memUnverified,
-                              ].join(' · '),
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                          ],
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          ayahRangeLabel(t.first, t.last, names),
+                          style: theme.textTheme.bodyMedium,
                         ),
-                      ),
-                      if (t.done)
-                        TextButton(
-                          onPressed: () => _start(context, ref, t),
-                          child: Text(l10n.memAgain),
-                        )
-                      else
-                        FilledButton.tonal(
-                          onPressed: () => _start(context, ref, t),
-                          child: Text(l10n.memStart),
+                        Text.rich(
+                          TextSpan(
+                            children: _joined([
+                              if (t.page != null)
+                                TextSpan(text: l10n.memPage(t.page!)),
+                              if (t.unverified)
+                                TextSpan(text: l10n.memUnverified),
+                              // Recited today: how it went. Otherwise its
+                              // memory's strength.
+                              if (scoreOf(t) case final s when !s.isEmpty) ...[
+                                percent(
+                                  l10n.memScoreMemorization,
+                                  s.memorization,
+                                ),
+                                percent(l10n.memScoreTajweed, s.tajweed),
+                              ] else if (t.strength case final s?)
+                                percent(l10n.memStrengthLabel, s),
+                            ]),
+                          ),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
                         ),
-                    ],
+                      ],
+                    ),
                   ),
-                  // Recited today: how it went. Otherwise its memory's
-                  // strength.
-                  if (scoreOf(t) case final s when !s.isEmpty)
-                    ScorePair(score: s, dense: true)
-                  else if (t.strength case final s?)
-                    ScoreBar(
-                      label: l10n.memStrengthLabel,
-                      value: s,
-                      dense: true,
+                  if (t.done)
+                    TextButton(
+                      style: _compact,
+                      onPressed: () => _start(context, ref, t),
+                      child: Text(l10n.memAgain),
+                    )
+                  else
+                    FilledButton.tonal(
+                      style: _compact,
+                      onPressed: () => _start(context, ref, t),
+                      child: Text(l10n.memStart),
                     ),
                 ],
               ),
