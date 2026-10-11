@@ -76,7 +76,16 @@ enum SoundGroup {
   hiddenNasal,
 
   /// The throat letters (ء ع ح ه خ غ) heard as each other.
-  throat;
+  throat,
+
+  /// A word's last vowel said as another short vowel, in flow: a case
+  /// ending, said in a frame or two — its evidence is weaker than a vowel's
+  /// inside a word.
+  wordFinalVowel,
+
+  /// A word's last vowel after a qalqala letter heard as a stop on the
+  /// letter (its echo) though the next word follows at once.
+  stopInFlow;
 
   /// Which group an alternative pronunciation of [ts]`[k]` belongs to, if
   /// any: [type] the mistake it would be, [heard] its token (a letter).
@@ -90,8 +99,17 @@ enum SoundGroup {
     switch (type) {
       case RecitationErrorType.shaddaError:
         return shadda;
+      case RecitationErrorType.missingVowel
+          when heard != null && heard == phoneticClassOf('ڇ'):
+        return stopInFlow;
       case RecitationErrorType.missingVowel:
         return t.unitFinalVowel ? finalVowel : reducedVowel;
+      case RecitationErrorType.wrongVowel:
+        for (var j = k + 1; j < ts.length; j++) {
+          if (ts[j].word != t.word) return wordFinalVowel;
+          if (ts[j].kind != PhoneticTokenKind.marker) return null;
+        }
+        return wordFinalVowel;
       case RecitationErrorType.wrongLetter when heard != null:
         final a = t.symbol, b = quranPhoneticVocabulary[heard];
         if ('ں۾'.contains(a) && 'نم'.contains(b)) return hiddenNasal;
@@ -1112,6 +1130,17 @@ class QuranAcousticVerifier {
     return (lo, hi, f0, f1);
   }
 
+  static const _qalqalaLetters = 'قطبجد';
+
+  /// Whether [ts]`[k]` is its word's last sound (markers aside).
+  static bool _wordFinal(List<PhoneticToken> ts, int k) {
+    for (var j = k + 1; j < ts.length; j++) {
+      if (ts[j].word != ts[k].word) return true;
+      if (ts[j].kind != PhoneticTokenKind.marker) return false;
+    }
+    return true;
+  }
+
   static List<_Alternative> _alternatives(List<PhoneticToken> ts, int k) {
     final t = ts[k];
     final vowel = ShortVowel.ofToken(t.token);
@@ -1123,6 +1152,14 @@ class QuranAcousticVerifier {
               v.token,
             ]),
         const _Alternative(RecitationErrorType.missingVowel, 'SUKUN', []),
+        // A word's last vowel after a qalqala letter, in flow, said as a
+        // stop on it (its echo, no vowel) and on into the next word.
+        if (k > 0 &&
+            _qalqalaLetters.contains(ts[k - 1].symbol) &&
+            _wordFinal(ts, k))
+          _Alternative(RecitationErrorType.missingVowel, 'STOP', [
+            phoneticClassOf('ڇ'),
+          ]),
       ];
     }
     // A hidden nūn or mīm (ghunnah): ikhfāʾ «ں», iqlāb or ikhfāʾ shafawī

@@ -365,6 +365,14 @@ class AcousticVerificationController
   /// qalqala letter with sukun or at a stop (its echo blurs it): +2 / +4 —
   /// on QDAT's amateur recitations judged good, its false mistakes 1.4 ->
   /// 0.8%, uncertain 6.3 -> 4.9%, with test mistakes found unchanged.
+  ///
+  /// A word's last vowel said as another (a case ending, a frame or two
+  /// long) needs 1 less; said as a stop on its qalqala letter, though the
+  /// next word follows at once, it is a missing vowel at 1 more. Measured
+  /// with v3.5 (`final_vowels.dart`, the session replay): QuranMB's
+  /// word-final swaps caught 54.9 -> 64.6%, correct words flagged in the
+  /// user's sessions 110 -> 111 of 1705, in QuranMB's / Al-Ikhlas's / QDAT's
+  /// correct clips 161 -> 162 / unchanged / 880 -> 881.
   static const learnerSounds = {
     SoundGroup.shadda: SoundMargins(uncertain: 2),
     SoundGroup.reducedVowel: SoundMargins(error: 1, uncertain: 2),
@@ -372,6 +380,20 @@ class AcousticVerificationController
     SoundGroup.qalqala: SoundMargins(error: 2, uncertain: 4),
     SoundGroup.nasal: SoundMargins(uncertain: 2),
     SoundGroup.throat: SoundMargins(uncertain: 2),
+    SoundGroup.wordFinalVowel: SoundMargins(error: -1),
+    SoundGroup.stopInFlow: SoundMargins(error: 1),
+  };
+
+  /// The quick check's: no lower margin for a case ending, a stop in flow
+  /// at 2 more (an early mark only for a clear mistake).
+  static const _quickSounds = {
+    SoundGroup.shadda: SoundMargins(uncertain: 2),
+    SoundGroup.reducedVowel: SoundMargins(error: 1, uncertain: 2),
+    SoundGroup.finalVowel: SoundMargins(error: 2, uncertain: 2),
+    SoundGroup.qalqala: SoundMargins(error: 2, uncertain: 4),
+    SoundGroup.nasal: SoundMargins(uncertain: 2),
+    SoundGroup.throat: SoundMargins(uncertain: 2),
+    SoundGroup.stopInFlow: SoundMargins(error: 2),
   };
 
   /// The quick per-word check's: stricter, as its frames (the tracker's
@@ -390,7 +412,7 @@ class AcousticVerificationController
     missingVowelError: 4,
     correct: 0,
     pauseFrames: 4,
-    sounds: learnerSounds,
+    sounds: _quickSounds,
   );
   final _quickVerifier = const QuranAcousticVerifier(
     thresholds: quickThresholds,
