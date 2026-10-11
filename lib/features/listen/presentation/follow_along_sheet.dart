@@ -1,3 +1,5 @@
+import '../../guide/guide.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -146,133 +148,153 @@ class _FollowAlongSheetState extends ConsumerState<_FollowAlongSheet> {
               color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
-          TahfeezCard(
-            padding: EdgeInsets.zero,
-            child: ListTile(
-              key: const ValueKey('follow-reciter'),
-              leading: const Icon(Icons.record_voice_over_outlined),
-              title: Text(l10n.listenReciter),
-              subtitle: Text(reciterName(context, reciter)),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => showReciterSheet(context),
+          GuideTarget(
+            id: 'follow-reciter',
+            child: TahfeezCard(
+              padding: EdgeInsets.zero,
+              child: ListTile(
+                key: const ValueKey('follow-reciter'),
+                leading: const Icon(Icons.record_voice_over_outlined),
+                title: Text(l10n.listenReciter),
+                subtitle: Text(reciterName(context, reciter)),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => showReciterSheet(context),
+              ),
             ),
           ),
-          TahfeezCard(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                label(l10n.recFrom),
-                VersePicker(
-                  id: 'follow-from',
-                  surahs: surahs,
-                  value: from,
-                  ayahCount: surahAyahCounts[from.chapterNo - 1],
-                  onSurah: (c) => _setFrom((chapterNo: c, verseNo: 1)),
-                  onAyah: (v) =>
-                      _setFrom((chapterNo: from.chapterNo, verseNo: v)),
-                ),
-                const SizedBox(height: TahfeezSpacing.md),
-                label(l10n.recTo),
-                VersePicker(
-                  id: 'follow-to',
-                  surahs: surahs,
-                  value: to,
-                  ayahCount: surahAyahCounts[to.chapterNo - 1],
-                  onSurah: (c) =>
-                      _setTo((chapterNo: c, verseNo: surahAyahCounts[c - 1])),
-                  onAyah: (v) => _setTo((chapterNo: to.chapterNo, verseNo: v)),
-                ),
-              ],
-            ),
-          ),
-          TahfeezCard(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              spacing: TahfeezSpacing.sm,
-              children: [
-                label(l10n.recLoopOrder),
-                SegmentedButton<FollowAlongUnit>(
-                  key: const ValueKey('follow-unit'),
-                  showSelectedIcon: false,
-                  segments: [
-                    ButtonSegment(
-                      value: FollowAlongUnit.eachAyah,
-                      label: Text(l10n.recLoopEachAyah),
-                    ),
-                    ButtonSegment(
-                      value: FollowAlongUnit.range,
-                      label: Text(l10n.recLoopRange),
-                    ),
-                  ],
-                  selected: {_options.unit},
-                  onSelectionChanged: (s) => setState(
-                    () => _options = _options.copyWith(unit: s.first),
+          GuideTarget(
+            id: 'follow-range',
+            child: TahfeezCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  label(l10n.recFrom),
+                  VersePicker(
+                    id: 'follow-from',
+                    surahs: surahs,
+                    value: from,
+                    ayahCount: surahAyahCounts[from.chapterNo - 1],
+                    onSurah: (c) => _setFrom((chapterNo: c, verseNo: 1)),
+                    onAyah: (v) =>
+                        _setFrom((chapterNo: from.chapterNo, verseNo: v)),
                   ),
-                ),
-                Text(
-                  eachAyah ? l10n.followEachAyahSub : l10n.followRangeSub,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
+                  const SizedBox(height: TahfeezSpacing.md),
+                  label(l10n.recTo),
+                  VersePicker(
+                    id: 'follow-to',
+                    surahs: surahs,
+                    value: to,
+                    ayahCount: surahAyahCounts[to.chapterNo - 1],
+                    onSurah: (c) =>
+                        _setTo((chapterNo: c, verseNo: surahAyahCounts[c - 1])),
+                    onAyah: (v) =>
+                        _setTo((chapterNo: to.chapterNo, verseNo: v)),
                   ),
-                ),
-                stepper(
-                  l10n.followReciterTimes,
-                  'follow-reciter-times',
-                  _options.reciterTimes,
-                  (n) => _options = _options.copyWith(reciterTimes: n),
-                ),
-                stepper(
-                  l10n.followYourTimes,
-                  'follow-user-times',
-                  _options.userTimes,
-                  (n) => _options = _options.copyWith(userTimes: n),
-                ),
-                SwitchListTile(
-                  key: const ValueKey('follow-strict'),
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(l10n.followStrict),
-                  subtitle: Text(l10n.followStrictSub),
-                  value: _options.strict,
-                  onChanged: (on) =>
-                      setState(() => _options = _options.copyWith(strict: on)),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-          TahfeezCard(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                label(l10n.listenSpeed),
-                Wrap(
-                  spacing: TahfeezSpacing.sm,
-                  runSpacing: TahfeezSpacing.sm,
-                  children: [
-                    for (final speed in listenSpeeds)
-                      ChoiceChip(
-                        key: ValueKey('follow-speed-$speed'),
-                        showCheckmark: false,
-                        label: Text(
-                          '${speed == speed.roundToDouble() ? speed.toInt() : speed}×',
-                        ),
-                        // The speed of all listening, kept for next time.
-                        selected: (currentSpeed - speed).abs() < 0.01,
-                        onSelected: (_) =>
-                            ref.read(listenSpeedProvider.notifier).set(speed),
+          GuideTarget(
+            id: 'follow-unit',
+            child: TahfeezCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                spacing: TahfeezSpacing.sm,
+                children: [
+                  label(l10n.recLoopOrder),
+                  SegmentedButton<FollowAlongUnit>(
+                    key: const ValueKey('follow-unit'),
+                    showSelectedIcon: false,
+                    segments: [
+                      ButtonSegment(
+                        value: FollowAlongUnit.eachAyah,
+                        label: Text(l10n.recLoopEachAyah),
                       ),
-                  ],
-                ),
-              ],
+                      ButtonSegment(
+                        value: FollowAlongUnit.range,
+                        label: Text(l10n.recLoopRange),
+                      ),
+                    ],
+                    selected: {_options.unit},
+                    onSelectionChanged: (s) => setState(
+                      () => _options = _options.copyWith(unit: s.first),
+                    ),
+                  ),
+                  Text(
+                    eachAyah ? l10n.followEachAyahSub : l10n.followRangeSub,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  stepper(
+                    l10n.followReciterTimes,
+                    'follow-reciter-times',
+                    _options.reciterTimes,
+                    (n) => _options = _options.copyWith(reciterTimes: n),
+                  ),
+                  stepper(
+                    l10n.followYourTimes,
+                    'follow-user-times',
+                    _options.userTimes,
+                    (n) => _options = _options.copyWith(userTimes: n),
+                  ),
+                  GuideTarget(
+                    id: 'follow-strict',
+                    child: SwitchListTile(
+                      key: const ValueKey('follow-strict'),
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(l10n.followStrict),
+                      subtitle: Text(l10n.followStrictSub),
+                      value: _options.strict,
+                      onChanged: (on) => setState(
+                        () => _options = _options.copyWith(strict: on),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-          FilledButton.icon(
-            key: const ValueKey('follow-start'),
-            style: FilledButton.styleFrom(
-              minimumSize: const Size.fromHeight(48),
+          GuideTarget(
+            id: 'follow-speed',
+            child: TahfeezCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  label(l10n.listenSpeed),
+                  Wrap(
+                    spacing: TahfeezSpacing.sm,
+                    runSpacing: TahfeezSpacing.sm,
+                    children: [
+                      for (final speed in listenSpeeds)
+                        ChoiceChip(
+                          key: ValueKey('follow-speed-$speed'),
+                          showCheckmark: false,
+                          label: Text(
+                            '${speed == speed.roundToDouble() ? speed.toInt() : speed}×',
+                          ),
+                          // The speed of all listening, kept for next time.
+                          selected: (currentSpeed - speed).abs() < 0.01,
+                          onSelected: (_) =>
+                              ref.read(listenSpeedProvider.notifier).set(speed),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
             ),
-            onPressed: _start,
-            icon: const Icon(Icons.play_arrow_rounded),
-            label: Text(l10n.followStart),
+          ),
+          GuideTarget(
+            id: 'follow-start',
+            child: FilledButton.icon(
+              key: const ValueKey('follow-start'),
+              style: FilledButton.styleFrom(
+                minimumSize: const Size.fromHeight(48),
+              ),
+              onPressed: _start,
+              icon: const Icon(Icons.play_arrow_rounded),
+              label: Text(l10n.followStart),
+            ),
           ),
         ],
       ),
@@ -303,46 +325,49 @@ class FollowAlongHint extends ConsumerWidget {
     final reciter = reciterFor(ref.watch(reciterProvider));
     final foreground = yours ? scheme.onPrimary : scheme.onSecondaryContainer;
     final style = theme.textTheme.labelMedium?.copyWith(color: foreground);
-    return AnimatedContainer(
-      key: ValueKey('follow-hint-${run.phase.name}'),
-      duration: const Duration(milliseconds: 250),
-      height: height,
-      padding: const EdgeInsets.symmetric(horizontal: 10),
-      decoration: BoxDecoration(
-        color: yours ? scheme.primary : scheme.secondaryContainer,
-        borderRadius: BorderRadius.circular(TahfeezRadii.pill),
-        boxShadow: [
-          BoxShadow(
-            color: scheme.shadow.withValues(alpha: 0.12),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        spacing: 6,
-        children: [
-          Icon(
-            yours ? Icons.mic_rounded : Icons.headphones_rounded,
-            color: foreground,
-            size: 16,
-          ),
-          Flexible(
-            child: Text(
-              !yours
-                  ? l10n.followReciterTurn(reciterName(context, reciter))
-                  : run.again
-                  ? l10n.followAgain
-                  : l10n.followYourTurn,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: style?.copyWith(fontWeight: FontWeight.w600),
+    return GuideTarget(
+      id: 'follow-hint',
+      child: AnimatedContainer(
+        key: ValueKey('follow-hint-${run.phase.name}'),
+        duration: const Duration(milliseconds: 250),
+        height: height,
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        decoration: BoxDecoration(
+          color: yours ? scheme.primary : scheme.secondaryContainer,
+          borderRadius: BorderRadius.circular(TahfeezRadii.pill),
+          boxShadow: [
+            BoxShadow(
+              color: scheme.shadow.withValues(alpha: 0.12),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
             ),
-          ),
-          if (run.parts.length > 1)
-            Text('${run.index + 1}/${run.parts.length}', style: style),
-        ],
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          spacing: 6,
+          children: [
+            Icon(
+              yours ? Icons.mic_rounded : Icons.headphones_rounded,
+              color: foreground,
+              size: 16,
+            ),
+            Flexible(
+              child: Text(
+                !yours
+                    ? l10n.followReciterTurn(reciterName(context, reciter))
+                    : run.again
+                    ? l10n.followAgain
+                    : l10n.followYourTurn,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: style?.copyWith(fontWeight: FontWeight.w600),
+              ),
+            ),
+            if (run.parts.length > 1)
+              Text('${run.index + 1}/${run.parts.length}', style: style),
+          ],
+        ),
       ),
     );
   }

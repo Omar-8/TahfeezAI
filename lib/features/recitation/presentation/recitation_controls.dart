@@ -24,6 +24,7 @@ import '../application/live_recognition_controller.dart';
 import '../application/recitation_providers.dart';
 import '../application/mushaf_recitation_target.dart';
 import '../application/sajdah_reminder.dart';
+import '../../guide/guide.dart';
 import '../../../memorization/application/activity_stats.dart';
 import '../../../ai/hifz/hifz_judge.dart';
 import '../../mushaf/application/mushaf_page_verses.dart';
@@ -588,21 +589,34 @@ class _ModeButtons extends ConsumerWidget {
     } else {
       // Each with a short name under its icon (the full one as its
       // tooltip and in the collapsed menu).
-      child = BarButtonGroup(
-        key: const ValueKey('modes-group'),
-        groupHeight: BarButtonGroup.labelledHeight,
-        expand: expand,
-        children: [
-          for (final m in modes)
-            _LabelledModeButton(
-              key: m.key == 'recite' ? null : ValueKey(m.key),
-              icon: m.icon,
-              label: m.short,
-              tooltip: m.label,
-              color: m.key == 'recite' ? scheme.primary : null,
-              onPressed: m.onPressed,
-            ),
-        ],
+      child = GuideTarget(
+        id: 'modes',
+        child: BarButtonGroup(
+          key: const ValueKey('modes-group'),
+          groupHeight: BarButtonGroup.labelledHeight,
+          expand: expand,
+          children: [
+            for (final m in modes)
+              GuideTarget(
+                id:
+                    'mode-${m.key == 'recite'
+                        ? 'recite'
+                        : m.key == 'hifz-loop'
+                        ? 'loop'
+                        : m.key == 'listen-open'
+                        ? 'listen'
+                        : 'follow'}',
+                child: _LabelledModeButton(
+                  key: m.key == 'recite' ? null : ValueKey(m.key),
+                  icon: m.icon,
+                  label: m.short,
+                  tooltip: m.label,
+                  color: m.key == 'recite' ? scheme.primary : null,
+                  onPressed: m.onPressed,
+                ),
+              ),
+          ],
+        ),
       );
     }
     // The layout changes at once — so the reveal buttons have their room
@@ -717,12 +731,15 @@ class _SessionControls extends ConsumerWidget {
       children: [
         BarButtonGroup(
           children: [
-            IconButton(
-              style: BarButtonGroup.buttonStyle,
-              color: scheme.error,
-              icon: const Icon(Icons.stop_rounded),
-              tooltip: l10n.recStop,
-              onPressed: canControl ? controller.stop : null,
+            GuideTarget(
+              id: 'session-stop',
+              child: IconButton(
+                style: BarButtonGroup.buttonStyle,
+                color: scheme.error,
+                icon: const Icon(Icons.stop_rounded),
+                tooltip: l10n.recStop,
+                onPressed: canControl ? controller.stop : null,
+              ),
             ),
             if (state.phase == RecitationPhase.paused)
               IconButton(
@@ -789,46 +806,49 @@ class _ListenControls extends ConsumerWidget {
               ? MainAxisAlignment.center
               : MainAxisAlignment.start,
           children: [
-            BarButtonGroup(
-              children: [
-                IconButton(
-                  key: const ValueKey('listen-stop'),
-                  style: BarButtonGroup.buttonStyle,
-                  color: scheme.error,
-                  icon: const Icon(Icons.stop_rounded),
-                  tooltip: l10n.listenStop,
-                  onPressed: player.stop,
-                ),
-                if (playback.isPlaying)
+            GuideTarget(
+              id: 'listen-controls',
+              child: BarButtonGroup(
+                children: [
                   IconButton(
-                    key: const ValueKey('listen-pause'),
+                    key: const ValueKey('listen-stop'),
                     style: BarButtonGroup.buttonStyle,
-                    icon: const Icon(Icons.pause_rounded),
-                    tooltip: l10n.recPause,
-                    onPressed: player.pause,
-                  )
-                else
-                  IconButton(
-                    key: const ValueKey('listen-resume'),
-                    style: BarButtonGroup.buttonStyle,
-                    icon: const Icon(Icons.play_arrow_rounded),
-                    tooltip: l10n.recResume,
-                    onPressed: player.resume,
+                    color: scheme.error,
+                    icon: const Icon(Icons.stop_rounded),
+                    tooltip: l10n.listenStop,
+                    onPressed: player.stop,
                   ),
-                TextButton(
-                  key: const ValueKey('listen-speed'),
-                  style: TextButton.styleFrom(
-                    minimumSize: const Size(46, BarButtonGroup.height),
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  if (playback.isPlaying)
+                    IconButton(
+                      key: const ValueKey('listen-pause'),
+                      style: BarButtonGroup.buttonStyle,
+                      icon: const Icon(Icons.pause_rounded),
+                      tooltip: l10n.recPause,
+                      onPressed: player.pause,
+                    )
+                  else
+                    IconButton(
+                      key: const ValueKey('listen-resume'),
+                      style: BarButtonGroup.buttonStyle,
+                      icon: const Icon(Icons.play_arrow_rounded),
+                      tooltip: l10n.recResume,
+                      onPressed: player.resume,
+                    ),
+                  TextButton(
+                    key: const ValueKey('listen-speed'),
+                    style: TextButton.styleFrom(
+                      minimumSize: const Size(46, BarButtonGroup.height),
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    onPressed: () => player.cycleSpeed(speed),
+                    child: Text(
+                      '${speed == speed.roundToDouble() ? speed.toInt() : speed}×',
+                      semanticsLabel: '${l10n.listenSpeed} $speed',
+                    ),
                   ),
-                  onPressed: () => player.cycleSpeed(speed),
-                  child: Text(
-                    '${speed == speed.roundToDouble() ? speed.toInt() : speed}×',
-                    semanticsLabel: '${l10n.listenSpeed} $speed',
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
             // Revealing follows the recitation: only the eye stays.
             if (centered)
@@ -953,11 +973,14 @@ class HifzSettingsButton extends ConsumerWidget {
     if (!ref.watch(liveRecognitionEnabledProvider)) {
       return const SizedBox.shrink();
     }
-    return IconButton(
-      key: const ValueKey('hifz-settings'),
-      icon: const Icon(Icons.settings_outlined),
-      tooltip: AppLocalizations.of(context).recHifzSettings,
-      onPressed: () => showHifzSettingsSheet(context),
+    return GuideTarget(
+      id: 'hifz-settings',
+      child: IconButton(
+        key: const ValueKey('hifz-settings'),
+        icon: const Icon(Icons.settings_outlined),
+        tooltip: AppLocalizations.of(context).recHifzSettings,
+        onPressed: () => showHifzSettingsSheet(context),
+      ),
     );
   }
 }
@@ -1065,21 +1088,26 @@ class MushafHideControls extends ConsumerWidget {
     // left, so "next" points left — and the eye at the end: turning hide
     // mode on or off adds the reveal/hide buttons on the far side, never
     // moving the eye.
-    final eye = IconButton(
-      key: const ValueKey('mushaf-hide-toggle'),
-      visualDensity: density,
-      isSelected: hide.enabled,
-      icon: const Icon(Icons.visibility_outlined),
-      selectedIcon: const Icon(Icons.visibility_off_outlined),
-      tooltip: hide.enabled
-          ? AppLocalizations.of(context).recShowAyahs
-          : AppLocalizations.of(context).recHideAyahs,
-      style: hide.enabled
-          ? IconButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
-            )
-          : null,
-      onPressed: notifier.toggle,
+    final eye = GuideTarget(
+      id: 'eye',
+      child: IconButton(
+        key: const ValueKey('mushaf-hide-toggle'),
+        visualDensity: density,
+        isSelected: hide.enabled,
+        icon: const Icon(Icons.visibility_outlined),
+        selectedIcon: const Icon(Icons.visibility_off_outlined),
+        tooltip: hide.enabled
+            ? AppLocalizations.of(context).recShowAyahs
+            : AppLocalizations.of(context).recHideAyahs,
+        style: hide.enabled
+            ? IconButton.styleFrom(
+                backgroundColor: Theme.of(context)
+                    .colorScheme
+                    .secondaryContainer,
+              )
+            : null,
+        onPressed: notifier.toggle,
+      ),
     );
     final steps = part == MushafHideControlsPart.pinned
         ? const <Widget>[]

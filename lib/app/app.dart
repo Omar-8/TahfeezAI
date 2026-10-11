@@ -1,3 +1,5 @@
+import '../features/guide/guide.dart';
+
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -77,6 +79,9 @@ class TahfeezApp extends ConsumerWidget {
             GlobalCupertinoLocalizations.delegate,
           ],
           routerConfig: router,
+          // The Mushaf's guide, above every screen and menu.
+          builder: (context, child) =>
+              GuideLayer(child: child ?? const SizedBox.shrink()),
         );
       },
     );

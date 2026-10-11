@@ -1,3 +1,5 @@
+import '../../guide/guide.dart';
+
 import 'package:flutter/material.dart';
 
 import '../../../core/localization/generated/app_localizations.dart';
@@ -60,6 +62,8 @@ class _MushafReaderScreenState extends ConsumerState<MushafReaderScreen> {
           // Hifz mode's feedback settings, beside the reader's own (loop
           // recitation is in the recitation bar).
           const HifzSettingsButton(),
+          // The guide to the modes (left of the reader's own settings).
+          const GuideButton(),
           IconButton(
             icon: const Icon(Icons.tune),
             tooltip: AppLocalizations.of(context).readerOptions,

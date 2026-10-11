@@ -1,3 +1,5 @@
+import '../../guide/guide.dart';
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -254,105 +256,122 @@ class _ListenSheetState extends ConsumerState<_ListenSheet> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: TahfeezSpacing.smPlus,
         children: [
-          TahfeezCard(
-            padding: EdgeInsets.zero,
-            child: ListTile(
-              key: const ValueKey('listen-reciter'),
-              leading: const Icon(Icons.record_voice_over_outlined),
-              title: Text(l10n.listenReciter),
-              subtitle: Text(reciterName(context, reciter)),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => showReciterSheet(context),
+          GuideTarget(
+            id: 'listen-reciter',
+            child: TahfeezCard(
+              padding: EdgeInsets.zero,
+              child: ListTile(
+                key: const ValueKey('listen-reciter'),
+                leading: const Icon(Icons.record_voice_over_outlined),
+                title: Text(l10n.listenReciter),
+                subtitle: Text(reciterName(context, reciter)),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => showReciterSheet(context),
+              ),
             ),
           ),
-          TahfeezCard(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                label(l10n.recFrom),
-                VersePicker(
-                  id: 'listen-from',
-                  surahs: surahs,
-                  value: from,
-                  ayahCount: surahAyahCounts[from.chapterNo - 1],
-                  onSurah: (c) => _setFrom((chapterNo: c, verseNo: 1)),
-                  onAyah: (v) =>
-                      _setFrom((chapterNo: from.chapterNo, verseNo: v)),
-                ),
-                const SizedBox(height: TahfeezSpacing.md),
-                label(l10n.recTo),
-                VersePicker(
-                  id: 'listen-to',
-                  surahs: surahs,
-                  value: to,
-                  ayahCount: surahAyahCounts[to.chapterNo - 1],
-                  onSurah: (c) =>
-                      _setTo((chapterNo: c, verseNo: surahAyahCounts[c - 1])),
-                  onAyah: (v) => _setTo((chapterNo: to.chapterNo, verseNo: v)),
-                ),
-              ],
-            ),
-          ),
-          TahfeezCard(
-            child: Column(
-              spacing: TahfeezSpacing.sm,
-              children: [
-                stepper(
-                  l10n.listenRepeatAyah,
-                  'listen-repeat-ayah',
-                  _options.ayahRepeats,
-                  (n) => _options = _options.copyWith(ayahRepeats: n),
-                ),
-                stepper(
-                  l10n.listenRepeatRange,
-                  'listen-repeat-range',
-                  _options.rangeRepeats,
-                  (n) => _options = _options.copyWith(rangeRepeats: n),
-                ),
-              ],
-            ),
-          ),
-          TahfeezCard(
-            padding: EdgeInsets.zero,
-            child: Column(
-              children: [
-                SwitchListTile(
-                  key: const ValueKey('listen-continue'),
-                  title: Text(l10n.listenContinue),
-                  value: _options.continueToNextSurahs,
-                  onChanged: (on) => setState(
-                    () =>
-                        _options = _options.copyWith(continueToNextSurahs: on),
+          GuideTarget(
+            id: 'listen-range',
+            child: TahfeezCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  label(l10n.recFrom),
+                  VersePicker(
+                    id: 'listen-from',
+                    surahs: surahs,
+                    value: from,
+                    ayahCount: surahAyahCounts[from.chapterNo - 1],
+                    onSurah: (c) => _setFrom((chapterNo: c, verseNo: 1)),
+                    onAyah: (v) =>
+                        _setFrom((chapterNo: from.chapterNo, verseNo: v)),
                   ),
-                ),
-                SwitchListTile(
-                  key: const ValueKey('listen-follow'),
-                  title: Text(l10n.listenFollow),
-                  value: _options.followPages,
-                  onChanged: (on) => setState(
-                    () => _options = _options.copyWith(followPages: on),
+                  const SizedBox(height: TahfeezSpacing.md),
+                  label(l10n.recTo),
+                  VersePicker(
+                    id: 'listen-to',
+                    surahs: surahs,
+                    value: to,
+                    ayahCount: surahAyahCounts[to.chapterNo - 1],
+                    onSurah: (c) =>
+                        _setTo((chapterNo: c, verseNo: surahAyahCounts[c - 1])),
+                    onAyah: (v) =>
+                        _setTo((chapterNo: to.chapterNo, verseNo: v)),
                   ),
-                ),
-                SwitchListTile(
-                  key: const ValueKey('listen-highlight'),
-                  title: Text(l10n.listenHighlight),
-                  subtitle: hideMode ? Text(l10n.listenRevealNote) : null,
-                  value: _options.highlight,
-                  onChanged: (on) => setState(
-                    () => _options = _options.copyWith(highlight: on),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-          FilledButton.icon(
-            key: const ValueKey('listen-play'),
-            style: FilledButton.styleFrom(
-              minimumSize: const Size.fromHeight(48),
+          GuideTarget(
+            id: 'listen-repeats',
+            child: TahfeezCard(
+              child: Column(
+                spacing: TahfeezSpacing.sm,
+                children: [
+                  stepper(
+                    l10n.listenRepeatAyah,
+                    'listen-repeat-ayah',
+                    _options.ayahRepeats,
+                    (n) => _options = _options.copyWith(ayahRepeats: n),
+                  ),
+                  stepper(
+                    l10n.listenRepeatRange,
+                    'listen-repeat-range',
+                    _options.rangeRepeats,
+                    (n) => _options = _options.copyWith(rangeRepeats: n),
+                  ),
+                ],
+              ),
             ),
-            onPressed: _play,
-            icon: const Icon(Icons.play_arrow_rounded),
-            label: Text(l10n.listenPlay),
+          ),
+          GuideTarget(
+            id: 'listen-options',
+            child: TahfeezCard(
+              padding: EdgeInsets.zero,
+              child: Column(
+                children: [
+                  SwitchListTile(
+                    key: const ValueKey('listen-continue'),
+                    title: Text(l10n.listenContinue),
+                    value: _options.continueToNextSurahs,
+                    onChanged: (on) => setState(
+                      () => _options = _options.copyWith(
+                        continueToNextSurahs: on,
+                      ),
+                    ),
+                  ),
+                  SwitchListTile(
+                    key: const ValueKey('listen-follow'),
+                    title: Text(l10n.listenFollow),
+                    value: _options.followPages,
+                    onChanged: (on) => setState(
+                      () => _options = _options.copyWith(followPages: on),
+                    ),
+                  ),
+                  SwitchListTile(
+                    key: const ValueKey('listen-highlight'),
+                    title: Text(l10n.listenHighlight),
+                    subtitle: hideMode ? Text(l10n.listenRevealNote) : null,
+                    value: _options.highlight,
+                    onChanged: (on) => setState(
+                      () => _options = _options.copyWith(highlight: on),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          GuideTarget(
+            id: 'listen-play',
+            child: FilledButton.icon(
+              key: const ValueKey('listen-play'),
+              style: FilledButton.styleFrom(
+                minimumSize: const Size.fromHeight(48),
+              ),
+              onPressed: _play,
+              icon: const Icon(Icons.play_arrow_rounded),
+              label: Text(l10n.listenPlay),
+            ),
           ),
         ],
       ),
