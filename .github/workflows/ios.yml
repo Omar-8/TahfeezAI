@@ -55,8 +55,12 @@ jobs:
       - name: Mushaf engine (qvp_ffi.xcframework from quran-engine v0.2.2)
         run: bash third_party/qvp_flutter/scripts/build-engine-ios.sh
 
-      - name: Dependencies
-        run: flutter pub get
+      - name: Dependencies and generated code
+        run: |
+          flutter pub get
+          # *.g.dart / *.freezed.dart are not committed (.gitignore).
+          dart run build_runner build --delete-conflicting-outputs
+          flutter gen-l10n
 
       # Unsigned, with xcodebuild itself: `flutter build ios --no-codesign`
       # still asks for a team, and hides the compiler's errors.
