@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tahfeez_ai/core/localization/generated/app_localizations.dart';
 import 'package:tahfeez_ai/features/guide/guide.dart';
+import 'package:tahfeez_ai/features/mushaf/application/mushaf_hide_mode.dart';
 
 void main() {
   late ProviderContainer container;
@@ -105,6 +106,16 @@ void main() {
       index: guideSteps(GuideTour.overview).length - 1,
     ));
     guide.next(); // Done on the choice: the guide ends.
+    expect(c.read(guideProvider), isNull);
+
+    // The eye's tour ended with the ayahs still hidden: shown again, so
+    // the modes are back.
+    guide.start(GuideTour.hide, guideSteps(GuideTour.hide).length - 1);
+    c.read(mushafHideModeProvider.notifier).toggle();
+    expect(c.read(mushafHideModeProvider).enabled, isTrue);
+    guide.next();
+    expect(c.read(mushafHideModeProvider).enabled, isFalse);
+    guide.close();
     expect(c.read(guideProvider), isNull);
   });
 

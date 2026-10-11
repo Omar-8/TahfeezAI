@@ -170,8 +170,13 @@ class GuideController extends Notifier<GuideState?> {
     }
   }
 
-  /// Stops a practice run: listening, Follow along, reciting.
+  /// Stops a practice run — listening, Follow along, reciting — and shows
+  /// the ayahs again (hide mode off), so the four modes are back in the
+  /// bar.
   void _stopModes() {
+    if (ref.read(mushafHideModeProvider).enabled) {
+      ref.read(mushafHideModeProvider.notifier).toggle();
+    }
     unawaited(ref.read(quranAudioPlayerProvider.notifier).stop());
     if (ref.exists(followAlongControllerProvider)) {
       unawaited(ref.read(followAlongControllerProvider.notifier).stop());
