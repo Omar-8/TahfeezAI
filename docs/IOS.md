@@ -1,8 +1,12 @@
 # iOS: what is prepared, and the steps on a Mac
 
-Written 2026-10-11 on Linux. **Nothing here has been built or run yet**:
-iOS needs macOS with Xcode. Android is untouched (its APK differs only in
-the compiled Dart code).
+Written 2026-10-11 on Linux. **Built and run in CI** (GitHub's Mac
+runner, `.github/workflows/ios.yml`, Xcode 26.3): the unsigned iPhone
+release build compiles and links (engine, Swift channels, ONNX Runtime),
+and on an iPhone simulator the app starts, Home shows, and the Mushaf is
+drawn by the native engine; the model channel answers (no model there).
+Not yet on a real iPhone (needs signing). Android is untouched (its APK
+differs only in the compiled Dart code).
 
 ## Prepared
 

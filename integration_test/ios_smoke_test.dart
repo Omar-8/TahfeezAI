@@ -28,6 +28,9 @@ void main() {
 
     final router = GoRouter.of(tester.element(find.byType(Navigator).first));
     for (final (surah, name) in [(1, 'al-fatiha'), (2, 'al-baqarah')]) {
+      // From Home each time: one reader to the next keeps its page.
+      router.go('/home');
+      await run(2);
       router.go('/quran/surah/$surah');
       await run(10);
       await binding.takeScreenshot('${surah + 1}-mushaf-$name');
