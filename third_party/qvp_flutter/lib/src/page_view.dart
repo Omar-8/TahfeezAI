@@ -651,11 +651,13 @@ class _QvpPainter extends CustomPainter {
       var x0 = b.x0, x1 = b.x1;
       if (slot != null) {
         for (final (m0, m1) in marks[b.line] ?? const <(double, double)>[]) {
-          // Beside the box (within a mark's width): taken in.
+          // At the box's left edge (within a mark's width): its own
+          // ayah's end — the Mushaf reads right to left, so an ayah's mark
+          // follows it on the left. A mark at the box's right edge ends
+          // the passage before and stays that one's.
           final w = m1 - m0;
-          if (m1 >= x0 - w && m0 <= x1 + w) {
+          if (m1 >= x0 - w && m1 <= x0 + w) {
             x0 = x0 < m0 ? x0 : m0;
-            x1 = x1 > m1 ? x1 : m1;
           }
         }
       }
