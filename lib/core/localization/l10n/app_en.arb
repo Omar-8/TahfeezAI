@@ -915,7 +915,7 @@
   "guideFollow": "Follow along: the reciter recites, then it's your turn. Learn by listening and repeating.",
   "guideEye": "The eye hides the ayahs so you recite from memory. With them hidden, buttons appear to reveal the next word or ayah.",
   "guideHifzSettings": "Hifz settings: how strict the checking is, colours, tajweed and mistake alerts.",
-  "guideChoose": "Tap a mode to learn how to use it.",
+  "guideChoose": "Tap a mode — or the eye — to learn how to use it.",
   "guideReciteSettings": "Before you start: choose how strict the checking is here.",
   "guideReciteEye": "Optional: hide the ayahs to recite from memory.",
   "guideReciteTap": "Tap Recite, then recite from the first ayah on the page.",
@@ -945,5 +945,11 @@
   "guideFollowStart": "Tap Start to practise.",
   "guideFollowListen": "Listen first: the reciter recites the ayah.",
   "guideFollowYourTurn": "Your turn: recite what you heard. Mistakes are marked as you go.",
-  "guideFollowStop": "That's Follow along. Stop whenever you like."
+  "guideFollowStop": "That's Follow along. Stop whenever you like.",
+  "guideHideTap": "Tap the eye to hide the ayahs and recite from memory.",
+  "guideRevealWord": "Show the next word, to help yourself along.",
+  "guideRevealAyah": "Show the rest of the ayah, or the next ayah.",
+  "guideHideWord": "Hide the last word shown again.",
+  "guideHideAyah": "Hide back to the start of the ayah.",
+  "guideHideDone": "Tap the eye again to show all the ayahs."
 }

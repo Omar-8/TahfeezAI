@@ -47,7 +47,7 @@ class GuideStep {
   final Map<String, (GuideTour, int)>? branches;
 }
 
-enum GuideTour { overview, recite, loop, listen, follow }
+enum GuideTour { overview, recite, loop, listen, follow, hide }
 
 List<GuideStep> guideSteps(GuideTour tour) => switch (tour) {
   GuideTour.overview => [
@@ -59,7 +59,7 @@ List<GuideStep> guideSteps(GuideTour tour) => switch (tour) {
     GuideStep('eye', (l) => l.guideEye),
     GuideStep('hifz-settings', (l) => l.guideHifzSettings),
     GuideStep(
-      'modes',
+      'bar',
       (l) => l.guideChoose,
       wait: GuideWait.tap,
       branches: {
@@ -67,8 +67,17 @@ List<GuideStep> guideSteps(GuideTour tour) => switch (tour) {
         'mode-loop': (GuideTour.loop, 1),
         'mode-listen': (GuideTour.listen, 1),
         'mode-follow': (GuideTour.follow, 1),
+        'eye': (GuideTour.hide, 1),
       },
     ),
+  ],
+  GuideTour.hide => [
+    GuideStep('eye', (l) => l.guideHideTap, wait: GuideWait.tap),
+    GuideStep('mushaf-reveal-word', (l) => l.guideRevealWord),
+    GuideStep('mushaf-reveal-ayah', (l) => l.guideRevealAyah),
+    GuideStep('mushaf-hide-word', (l) => l.guideHideWord),
+    GuideStep('mushaf-hide-ayah', (l) => l.guideHideAyah),
+    GuideStep('eye', (l) => l.guideHideDone, wait: GuideWait.tap),
   ],
   GuideTour.recite => [
     GuideStep('hifz-settings', (l) => l.guideReciteSettings),
@@ -143,10 +152,20 @@ class GuideController extends Notifier<GuideState?> {
     state = (tour: tour, index: index);
   }
 
+  /// The overview's last step: choosing a mode.
+  static final _choose = guideSteps(GuideTour.overview).length - 1;
+
   void next() {
     final s = state;
     if (s == null) return;
-    state = s.index + 1 < length ? (tour: s.tour, index: s.index + 1) : null;
+    if (s.index + 1 < length) {
+      state = (tour: s.tour, index: s.index + 1);
+    } else if (s.tour != GuideTour.overview) {
+      // A mode learned: back to choosing another.
+      state = (tour: GuideTour.overview, index: _choose);
+    } else {
+      state = null;
+    }
   }
 
   void back() {
@@ -284,8 +303,31 @@ class _GuideOverlayState extends ConsumerState<_GuideOverlay> {
 
   void _afterFrame(Duration _) {
     if (!mounted) return;
+    _scrollIntoView();
     _measure();
     WidgetsBinding.instance.addPostFrameCallback(_afterFrame);
+  }
+
+  /// The step whose control was last scrolled into view.
+  GuideState? _scrolledFor;
+
+  /// A new step's control in a scrolling list (a menu): scrolled into view.
+  void _scrollIntoView() {
+    final guide = ref.read(guideProvider);
+    if (guide == null || guide == _scrolledFor) return;
+    final id = ref.read(guideProvider.notifier).step?.target;
+    final target = id == null ? null : _targets[id]?.currentContext;
+    if (target == null) return;
+    _scrolledFor = guide;
+    if (Scrollable.maybeOf(target) != null) {
+      unawaited(
+        Scrollable.ensureVisible(
+          target,
+          alignment: 0.5,
+          duration: const Duration(milliseconds: 250),
+        ),
+      );
+    }
   }
 
   void _measure() {

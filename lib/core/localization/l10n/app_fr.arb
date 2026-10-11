@@ -444,7 +444,7 @@
   "guideFollow": "Suivre : le récitateur récite, puis c'est votre tour. Apprenez en écoutant et en répétant.",
   "guideEye": "L'œil masque les versets pour réciter de mémoire. Masqués, des boutons apparaissent pour révéler le mot ou le verset suivant.",
   "guideHifzSettings": "Réglages du hifz : la sévérité de la vérification, les couleurs, le tajwid et l'alerte d'erreur.",
-  "guideChoose": "Touchez un mode pour apprendre à l'utiliser.",
+  "guideChoose": "Touchez un mode — ou l'œil — pour apprendre à l'utiliser.",
   "guideReciteSettings": "Avant de commencer : choisissez ici la sévérité de la vérification.",
   "guideReciteEye": "Facultatif : masquez les versets pour réciter de mémoire.",
   "guideReciteTap": "Touchez Réciter, puis récitez à partir du premier verset de la page.",
@@ -474,5 +474,11 @@
   "guideFollowStart": "Touchez Commencer pour vous exercer.",
   "guideFollowListen": "Écoutez d'abord : le récitateur récite le verset.",
   "guideFollowYourTurn": "À vous : récitez ce que vous avez entendu. Les erreurs sont marquées au fur et à mesure.",
-  "guideFollowStop": "Voilà, c'est Suivre. Arrêtez quand vous voulez."
+  "guideFollowStop": "Voilà, c'est Suivre. Arrêtez quand vous voulez.",
+  "guideHideTap": "Touchez l'œil pour masquer les versets et réciter de mémoire.",
+  "guideRevealWord": "Révélez le mot suivant pour vous aider.",
+  "guideRevealAyah": "Révélez la suite du verset, ou le verset suivant.",
+  "guideHideWord": "Masquez à nouveau le dernier mot révélé.",
+  "guideHideAyah": "Masquez jusqu'au début du verset.",
+  "guideHideDone": "Touchez l'œil à nouveau pour afficher tous les versets."
 }

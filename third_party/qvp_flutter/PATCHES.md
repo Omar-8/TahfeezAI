@@ -129,3 +129,19 @@ around from the outside).
 - **To submit this upstream**: the patch file is a standard unified
   diff against the exact 0.2.2 source, ready to adapt into a PR against
   `https://github.com/quran-ws/quran-engine` (`packages/flutter/qvp_flutter`).
+
+## Patch 0003 — slot-filling highlight bands
+
+`patches/0003-slot-filling-highlight-bands.patch` adds
+`QvpPage.slotFillHighlights` (highlight handles, cleared with
+`clearHighlights`) and makes `QvpPageView` draw those highlights' band
+boxes over their line's whole layout slot (`QvpLayout.slots`, top to
+bottom) instead of the band's own height. Consecutive lines' bands then
+meet with no gap, even when `fillHeight` spreads the lines unevenly —
+which a band's `padY` could not do (the engine ignores it for
+`'lineSpacing'`-height bands; measured on the device, 2026-10-11).
+
+Used by `quran_engine_android_backend.dart` for the Mushaf's thematic
+passage tints (`PageBand`). Re-apply with
+`patch -p1 < patches/0003-slot-filling-highlight-bands.patch` after
+re-vendoring.

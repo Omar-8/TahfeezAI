@@ -379,15 +379,16 @@ class QuranEngineAndroidPage implements QuranEngineMushafPage {
     List<PageBand> bands = const [],
   }) {
     page.clearHighlights();
-    // The line pitch, in page units: the page's height over its lines.
-    final pitch = page.height / (page.nLines > 0 ? page.nLines : 15);
-    final padY = pitch * PageBand.fill;
+    // Each band fills its lines' whole slots (patch 0003): no gaps between
+    // lines, however the page spreads them.
     for (final b in bands) {
-      page.highlight(
-        b.isAyahs
-            ? T.ayahRange(b.surah, b.fromAyah, b.toAyah)
-            : T.words(b.words),
-        QvpHighlightStyle(band: b.color, padY: padY),
+      page.slotFillHighlights.add(
+        page.highlight(
+          b.isAyahs
+              ? T.ayahRange(b.surah, b.fromAyah, b.toAyah)
+              : T.words(b.words),
+          QvpHighlightStyle(band: b.color),
+        ),
       );
     }
     for (final h in highlights) {

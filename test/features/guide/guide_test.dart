@@ -24,7 +24,7 @@ void main() {
             body: Align(
               alignment: Alignment.bottomCenter,
               child: GuideTarget(
-                id: 'modes',
+                id: 'bar',
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -92,5 +92,28 @@ void main() {
     await tester.pumpAndSettle();
     expect(followTaps, 1, reason: 'the tap reached the button');
     expect(guide(), (tour: GuideTour.follow, index: 1));
+  });
+
+  test('finishing a mode tour goes back to choosing a mode', () {
+    final c = ProviderContainer();
+    addTearDown(c.dispose);
+    final guide = c.read(guideProvider.notifier);
+    guide.start(GuideTour.follow, guideSteps(GuideTour.follow).length - 1);
+    guide.next();
+    expect(c.read(guideProvider), (
+      tour: GuideTour.overview,
+      index: guideSteps(GuideTour.overview).length - 1,
+    ));
+    guide.next(); // Done on the choice: the guide ends.
+    expect(c.read(guideProvider), isNull);
+  });
+
+  test('the eye, chosen, opens the hide-and-reveal tour', () {
+    final c = ProviderContainer();
+    addTearDown(c.dispose);
+    final guide = c.read(guideProvider.notifier);
+    guide.start(GuideTour.overview, guideSteps(GuideTour.overview).length - 1);
+    guide.tapped('eye');
+    expect(c.read(guideProvider), (tour: GuideTour.hide, index: 1));
   });
 }

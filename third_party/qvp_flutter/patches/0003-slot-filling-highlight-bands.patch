@@ -1,0 +1,67 @@
+diff --git a/lib/src/engine.dart b/lib/src/engine.dart
+index 95572f9..d364777 100644
+--- a/lib/src/engine.dart
++++ b/lib/src/engine.dart
+@@ -1893,9 +1893,16 @@ class QvpPage extends ChangeNotifier {
+ 
+   void clearHighlights() {
+     _b.clearHighlights(_p);
++    slotFillHighlights.clear();
+     _touch();
+   }
+ 
++  /// Tahfeez patch 0003: highlights (by handle) whose band boxes
++  /// [QvpPageView] stretches to their line's whole slot (top to bottom),
++  /// so consecutive lines' bands meet with no gap whatever the line
++  /// spacing. Cleared with [clearHighlights].
++  final Set<int> slotFillHighlights = {};
++
+   List<int> highlightHandles() => _u32(
+     _b.highlightHandles(
+       _p,
+diff --git a/lib/src/page_view.dart b/lib/src/page_view.dart
+index 25f7711..9f698d9 100644
+--- a/lib/src/page_view.dart
++++ b/lib/src/page_view.dart
+@@ -602,7 +602,11 @@ class _QvpPainter extends CustomPainter {
+     );
+   }
+ 
+-  void _drawBoxes(ui.Canvas c, List<QvpBox> boxes) {
++  void _drawBoxes(
++    ui.Canvas c,
++    List<QvpBox> boxes, {
++    List<(double, double)>? slots,
++  }) {
+     if (boxes.isEmpty) return;
+     c.save();
+     c.translate(view.offsetX, view.offsetY);
+@@ -625,7 +629,18 @@ class _QvpPainter extends CustomPainter {
+         id = b.id;
+         col = b.color;
+       }
+-      final r = Rect.fromLTRB(b.x0, b.y0, b.x1, b.y1);
++      // Tahfeez patch 0003: a slot-filling highlight's box spans its
++      // line's whole slot.
++      final slot =
++          slots != null &&
++              page.slotFillHighlights.contains(b.id) &&
++              b.line >= 0 &&
++              b.line < slots.length
++          ? slots[b.line]
++          : null;
++      final r = slot == null
++          ? Rect.fromLTRB(b.x0, b.y0, b.x1, b.y1)
++          : Rect.fromLTRB(b.x0, slot.$1, b.x1, slot.$2);
+       if (b.radius > 0) {
+         cur!.addRRect(RRect.fromRectAndRadius(r, Radius.circular(b.radius)));
+       } else {
+@@ -712,7 +727,7 @@ class _QvpPainter extends CustomPainter {
+     final sw = Stopwatch()..start();
+     // 1. highlight bands (behind the ink)
+     final bands = page.highlightBoxesView();
+-    _drawBoxes(canvas, bands);
++    _drawBoxes(canvas, bands, slots: l?.slots);
+ 
+     // 2. base ink
+     final img = cache.image;

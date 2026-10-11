@@ -444,7 +444,7 @@
   "guideFollow": "Folgen: der Rezitator rezitiert, dann bist du dran. Lerne durch Zuhören und Nachsprechen.",
   "guideEye": "Das Auge blendet die Verse aus, damit du auswendig rezitierst. Dann erscheinen Schaltflächen, um das nächste Wort oder den nächsten Vers zu zeigen.",
   "guideHifzSettings": "Hifz-Einstellungen: wie streng geprüft wird, Farben, Tajwid und Fehlerhinweis.",
-  "guideChoose": "Tippe auf einen Modus, um ihn kennenzulernen.",
+  "guideChoose": "Tippe auf einen Modus — oder das Auge —, um ihn kennenzulernen.",
   "guideReciteSettings": "Bevor du beginnst: wähle hier, wie streng geprüft wird.",
   "guideReciteEye": "Optional: blende die Verse aus, um auswendig zu rezitieren.",
   "guideReciteTap": "Tippe auf Rezitieren und rezitiere ab dem ersten Vers der Seite.",
@@ -474,5 +474,11 @@
   "guideFollowStart": "Tippe auf Starten, um zu üben.",
   "guideFollowListen": "Erst zuhören: der Rezitator rezitiert den Vers.",
   "guideFollowYourTurn": "Du bist dran: rezitiere, was du gehört hast. Fehler werden laufend markiert.",
-  "guideFollowStop": "Das ist Folgen. Höre auf, wann du willst."
+  "guideFollowStop": "Das ist Folgen. Höre auf, wann du willst.",
+  "guideHideTap": "Tippe auf das Auge, um die Verse auszublenden und auswendig zu rezitieren.",
+  "guideRevealWord": "Zeige das nächste Wort als Hilfe.",
+  "guideRevealAyah": "Zeige den Rest des Verses oder den nächsten Vers.",
+  "guideHideWord": "Blende das zuletzt gezeigte Wort wieder aus.",
+  "guideHideAyah": "Blende bis zum Anfang des Verses wieder aus.",
+  "guideHideDone": "Tippe erneut auf das Auge, um alle Verse zu zeigen."
 }

@@ -444,7 +444,7 @@
   "guideFollow": "Takip: kâri okur, sonra sıra sizde. Dinleyip tekrarlayarak ezberleyin.",
   "guideEye": "Göz ayetleri gizler, böylece ezberden okursunuz. Gizliyken sonraki kelimeyi ya da ayeti gösteren düğmeler çıkar.",
   "guideHifzSettings": "Hafızlık ayarları: kontrolün katılığı, renkler, tecvid ve hata uyarısı.",
-  "guideChoose": "Kullanımını öğrenmek için bir moda dokunun.",
+  "guideChoose": "Kullanımını öğrenmek için bir moda — ya da göze — dokunun.",
   "guideReciteSettings": "Başlamadan önce: kontrolün ne kadar katı olacağını buradan seçin.",
   "guideReciteEye": "İsteğe bağlı: ezberden okumak için ayetleri gizleyin.",
   "guideReciteTap": "Oku'ya dokunun, sonra sayfanın ilk ayetinden okuyun.",
@@ -474,5 +474,11 @@
   "guideFollowStart": "Alıştırma için Başla'ya dokunun.",
   "guideFollowListen": "Önce dinleyin: kâri ayeti okur.",
   "guideFollowYourTurn": "Sıra sizde: duyduğunuzu okuyun. Hatalar okudukça işaretlenir.",
-  "guideFollowStop": "İşte Takip bu. İstediğiniz zaman durdurun."
+  "guideFollowStop": "İşte Takip bu. İstediğiniz zaman durdurun.",
+  "guideHideTap": "Ayetleri gizleyip ezberden okumak için göze dokunun.",
+  "guideRevealWord": "Yardım için sonraki kelimeyi gösterin.",
+  "guideRevealAyah": "Ayetin kalanını ya da sonraki ayeti gösterin.",
+  "guideHideWord": "Son gösterilen kelimeyi yeniden gizleyin.",
+  "guideHideAyah": "Ayetin başına kadar geri gizleyin.",
+  "guideHideDone": "Tüm ayetleri göstermek için göze yeniden dokunun."
 }

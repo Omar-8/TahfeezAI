@@ -1893,8 +1893,15 @@ class QvpPage extends ChangeNotifier {
 
   void clearHighlights() {
     _b.clearHighlights(_p);
+    slotFillHighlights.clear();
     _touch();
   }
+
+  /// Tahfeez patch 0003: highlights (by handle) whose band boxes
+  /// [QvpPageView] stretches to their line's whole slot (top to bottom),
+  /// so consecutive lines' bands meet with no gap whatever the line
+  /// spacing. Cleared with [clearHighlights].
+  final Set<int> slotFillHighlights = {};
 
   List<int> highlightHandles() => _u32(
     _b.highlightHandles(

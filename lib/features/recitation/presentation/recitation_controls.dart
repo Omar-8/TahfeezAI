@@ -396,28 +396,31 @@ class RecitationBottomBar extends ConsumerWidget {
                           ? const _ListenControls(
                               key: ValueKey('listen-controls'),
                             )
-                          : Row(
-                              key: const ValueKey('recitation-start'),
-                              // Web keeps the buttons together in the middle
-                              // of the (usually wide) bar; Android spreads them
-                              // to the edges, within thumb reach.
-                              mainAxisAlignment: centered
-                                  ? MainAxisAlignment.center
-                                  : MainAxisAlignment.spaceBetween,
-                              children: [
-                                ..._idleRow(
-                                  location: location,
-                                  starting:
-                                      state.phase == RecitationPhase.starting,
-                                  recognition: recognition != null,
-                                  hidden: ref.watch(
-                                    mushafHideModeProvider.select(
-                                      (h) => h.enabled,
+                          : GuideTarget(
+                              id: 'bar',
+                              child: Row(
+                                key: const ValueKey('recitation-start'),
+                                // Web keeps the buttons together in the middle
+                                // of the (usually wide) bar; Android spreads them
+                                // to the edges, within thumb reach.
+                                mainAxisAlignment: centered
+                                    ? MainAxisAlignment.center
+                                    : MainAxisAlignment.spaceBetween,
+                                children: [
+                                  ..._idleRow(
+                                    location: location,
+                                    starting:
+                                        state.phase == RecitationPhase.starting,
+                                    recognition: recognition != null,
+                                    hidden: ref.watch(
+                                      mushafHideModeProvider.select(
+                                        (h) => h.enabled,
+                                      ),
                                     ),
+                                    centered: centered,
                                   ),
-                                  centered: centered,
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                     ),
                   ),
@@ -1049,12 +1052,15 @@ class MushafHideControls extends ConsumerWidget {
     const density = VisualDensity.compact;
     const gap = SizedBox(width: MushafHideControls._hideControlsGap);
     Widget step(String key, IconData icon, String tip, VoidCallback? onTap) =>
-        IconButton(
-          key: ValueKey(key),
-          style: BarButtonGroup.buttonStyle,
-          icon: Icon(icon),
-          tooltip: tip,
-          onPressed: onTap,
+        GuideTarget(
+          id: key,
+          child: IconButton(
+            key: ValueKey(key),
+            style: BarButtonGroup.buttonStyle,
+            icon: Icon(icon),
+            tooltip: tip,
+            onPressed: onTap,
+          ),
         );
 
     // Hifz mode (every recitation is a test) needs live recognition. While

@@ -142,9 +142,9 @@ abstract class QuranEngineMushafPage {
 /// A tint behind part of a page, drawn as one seamless band: a run of
 /// whole ayahs of one surah ([surah], [fromAyah]..[toAyah], their ayah-end
 /// markers included), or else a set of engine word indices ([words]).
-/// Taller than the line — [fill] of the line pitch above and below — so a
-/// passage's lines meet, with no gaps between them; one band is one shape,
-/// so where its lines overlap it is not drawn twice.
+/// Filling its lines' whole height, so a passage's lines meet with no gaps:
+/// on Android each line's full layout slot (qvp_flutter patch 0003); on the
+/// web, [fill] of the line pitch above and below.
 class PageBand {
   const PageBand.ayahs(this.surah, this.fromAyah, this.toAyah, this.color)
     : words = const [];
@@ -160,8 +160,7 @@ class PageBand {
 
   bool get isAyahs => surah > 0;
 
-  /// The share of the line pitch each band reaches past its line's top and
-  /// bottom: half, since the page view spreads its lines apart to fill the
-  /// screen (the gaps are wider than the printed page's spacing says).
+  /// The web: the share of the line pitch each band reaches past its
+  /// line's top and bottom.
   static const fill = 0.5;
 }
