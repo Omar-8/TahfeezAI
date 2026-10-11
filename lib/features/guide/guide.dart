@@ -35,7 +35,18 @@ enum GuideWait {
 }
 
 class GuideStep {
-  const GuideStep(this.target, this.text, {this.wait, this.branches});
+  const GuideStep(
+    this.target,
+    this.text, {
+    this.wait,
+    this.branches,
+    this.quiet = false,
+  });
+
+  /// No dimming and no card (only a small way to close the guide): the
+  /// page stays in view — e.g. while practising, to see the recitation
+  /// marked — until the step's tap.
+  final bool quiet;
 
   /// The [GuideTarget] lit; `null`: the card alone.
   final String? target;
@@ -84,7 +95,12 @@ List<GuideStep> guideSteps(GuideTour tour) => switch (tour) {
     GuideStep('eye', (l) => l.guideReciteEye),
     GuideStep('mode-recite', (l) => l.guideReciteTap, wait: GuideWait.tap),
     GuideStep(null, (l) => l.guideReciteNow, wait: GuideWait.reciting),
-    GuideStep('session-stop', (l) => l.guideReciteStop),
+    GuideStep(
+      'session-stop',
+      (l) => l.guideReciteStop,
+      wait: GuideWait.tap,
+      quiet: true,
+    ),
   ],
   GuideTour.loop => [
     GuideStep('mode-loop', (l) => l.guideLoopTap, wait: GuideWait.tap),
@@ -93,7 +109,12 @@ List<GuideStep> guideSteps(GuideTour tour) => switch (tour) {
     GuideStep('loop-times', (l) => l.guideLoopTimes),
     GuideStep('loop-start', (l) => l.guideLoopStart, wait: GuideWait.tap),
     GuideStep(null, (l) => l.guideLoopRecite, wait: GuideWait.reciting),
-    GuideStep('session-stop', (l) => l.guideLoopStop),
+    GuideStep(
+      'session-stop',
+      (l) => l.guideLoopStop,
+      wait: GuideWait.tap,
+      quiet: true,
+    ),
   ],
   GuideTour.listen => [
     GuideStep('mode-listen', (l) => l.guideListenTap, wait: GuideWait.tap),
@@ -123,7 +144,12 @@ List<GuideStep> guideSteps(GuideTour tour) => switch (tour) {
       (l) => l.guideFollowYourTurn,
       wait: GuideWait.followUserTurnOver,
     ),
-    GuideStep('session-stop', (l) => l.guideFollowStop),
+    GuideStep(
+      'session-stop',
+      (l) => l.guideFollowStop,
+      wait: GuideWait.tap,
+      quiet: true,
+    ),
   ],
 };
 
@@ -371,6 +397,23 @@ class _GuideOverlayState extends ConsumerState<_GuideOverlay> {
     if (step == null) return const SizedBox.shrink();
     _listenFor(step.wait);
     final l10n = AppLocalizations.of(context);
+    if (step.quiet) {
+      // The page in full view; only a small way out of the guide.
+      return Align(
+        alignment: AlignmentDirectional.topEnd,
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.only(top: 64, right: 12, left: 12),
+            child: ActionChip(
+              key: const ValueKey('guide-quiet-close'),
+              avatar: const Icon(Icons.close_rounded, size: 18),
+              label: Text(l10n.guideClose),
+              onPressed: controller.close,
+            ),
+          ),
+        ),
+      );
+    }
     final size = MediaQuery.sizeOf(context);
     final hole = _hole;
     final passThrough = step.wait == GuideWait.tap && hole != null;

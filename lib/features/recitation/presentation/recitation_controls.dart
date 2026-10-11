@@ -281,6 +281,8 @@ class RecitationBottomBar extends ConsumerWidget {
     ref.listen(testSummaryProvider, (previous, next) {
       if (next == null || identical(previous, next)) return;
       if (ref.read(recitationSessionControllerProvider).isActive) return;
+      // Not while the guide runs: practice ends back at its choice of modes.
+      if (ref.read(guideProvider) != null) return;
       if (ref.exists(followAlongControllerProvider) &&
           ref.read(followAlongControllerProvider) != null) {
         return;
