@@ -946,5 +946,8 @@
   "guideHideAyah": "Hide back to the start of the ayah.",
   "guideHideDone": "Tap the eye again to show all the ayahs.",
   "guideFollowPractice": "Listen to the reciter, then recite when the hint above the bar says it's your turn. Press stop to finish.",
-  "guideListenPractice": "Listening. Pause, stop or change the speed in the bar. Press stop to finish."
+  "guideListenPractice": "Listening. Pause, stop or change the speed in the bar. Press stop to finish.",
+  "followMistakesFound": "Mistakes found — check them",
+  "followTryAgain": "Try again",
+  "followSkip": "Skip"
 }

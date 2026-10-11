@@ -475,5 +475,8 @@
   "guideHideAyah": "Blende bis zum Anfang des Verses wieder aus.",
   "guideHideDone": "Tippe erneut auf das Auge, um alle Verse zu zeigen.",
   "guideFollowPractice": "Höre dem Rezitator zu und rezitiere, wenn der Hinweis über der Leiste sagt, dass du dran bist. Drücke Stopp zum Beenden.",
-  "guideListenPractice": "Wird abgespielt. Pausieren, stoppen oder das Tempo ändern in der Leiste. Drücke Stopp zum Beenden."
+  "guideListenPractice": "Wird abgespielt. Pausieren, stoppen oder das Tempo ändern in der Leiste. Drücke Stopp zum Beenden.",
+  "followMistakesFound": "Fehler gefunden — sieh sie dir an",
+  "followTryAgain": "Nochmal",
+  "followSkip": "Überspringen"
 }

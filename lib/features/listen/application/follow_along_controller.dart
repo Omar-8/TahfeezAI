@@ -93,8 +93,9 @@ final followAlongOptionsProvider =
       FollowAlongOptionsController.new,
     );
 
-/// Whose turn it is.
-enum FollowAlongPhase { reciter, user }
+/// Whose turn it is — or, strict, a turn with mistakes to look over
+/// before trying again or skipping on.
+enum FollowAlongPhase { reciter, user, review }
 
 /// A Follow along run: its parts (each a run of ayah ids), the part now
 /// repeated, and whose turn it is.
@@ -157,7 +158,9 @@ class FollowAlongController extends Notifier<FollowAlongState?> {
     });
     ref.listen(recitationSessionControllerProvider, (previous, next) {
       final s = state;
-      if (s == null || s.phase != FollowAlongPhase.user || _advancing) return;
+      if (s == null || s.phase == FollowAlongPhase.reciter || _advancing) {
+        return;
+      }
       // The user stopped their turn, or the microphone was refused.
       if ((previous?.isActive ?? false) && !next.isActive) _end();
       if (next.phase == RecitationPhase.permissionDenied ||
@@ -276,20 +279,45 @@ class FollowAlongController extends Notifier<FollowAlongState?> {
               e.value.pass == pass &&
               e.value.isMistake,
         );
+    if (done.options.strict && mistake) {
+      // The session kept (paused), its marks in view: the user looks them
+      // over, then tries again or skips on.
+      state = done.copyWith(phase: FollowAlongPhase.review);
+      return;
+    }
+    await _stopTurn();
+    final s = state;
+    if (s != null) await _nextPart(s);
+  }
+
+  /// Strict, after a turn with mistakes: once more.
+  Future<void> tryAgain() async {
+    final s = state;
+    if (s == null || s.phase != FollowAlongPhase.review) return;
+    state = s.copyWith(phase: FollowAlongPhase.user, again: true);
+    await _stopTurn();
+    if (state != null) await _userTurn(times: 1);
+  }
+
+  /// Strict, after a turn with mistakes: on to the next part anyway.
+  Future<void> skip() async {
+    final s = state;
+    if (s == null || s.phase != FollowAlongPhase.review) return;
+    await _stopTurn();
+    if (identical(state, s)) await _nextPart(s);
+  }
+
+  /// Ends the user's turn's session without ending the run.
+  Future<void> _stopTurn() async {
     _advancing = true;
     try {
       await ref.read(recitationSessionControllerProvider.notifier).stop();
     } finally {
       _advancing = false;
     }
-    final s = state;
-    if (s == null) return;
-    if (s.options.strict && mistake) {
-      // Once more, until without a mistake.
-      state = s.copyWith(phase: FollowAlongPhase.user, again: true);
-      await _userTurn(times: 1);
-      return;
-    }
+  }
+
+  Future<void> _nextPart(FollowAlongState s) async {
     if (s.index + 1 >= s.parts.length) {
       _end();
       return;

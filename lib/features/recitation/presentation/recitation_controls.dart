@@ -725,6 +725,46 @@ class _SessionControls extends ConsumerWidget {
         state.phase == RecitationPhase.listening ||
         state.phase == RecitationPhase.paused;
     final centered = ref.watch(platformCapabilitiesProvider).isWeb;
+    // Follow along, strict: a turn with mistakes, its marks in view — try
+    // again or skip on (the hint above says so).
+    final follow = ref.watch(followAlongControllerProvider);
+    if (follow?.phase == FollowAlongPhase.review) {
+      final run = ref.read(followAlongControllerProvider.notifier);
+      return Row(
+        key: const ValueKey('follow-review'),
+        children: [
+          BarButtonGroup(
+            children: [
+              GuideTarget(
+                id: 'session-stop',
+                child: IconButton(
+                  style: BarButtonGroup.buttonStyle,
+                  color: scheme.error,
+                  icon: const Icon(Icons.stop_rounded),
+                  tooltip: l10n.recStop,
+                  onPressed: () => unawaited(run.stop()),
+                ),
+              ),
+            ],
+          ),
+          const Spacer(),
+          TextButton(
+            key: const ValueKey('follow-skip'),
+            onPressed: () => unawaited(run.skip()),
+            child: Text(l10n.followSkip),
+          ),
+          const SizedBox(width: 4),
+          FilledButton.icon(
+            key: const ValueKey('follow-try-again'),
+            onPressed: () => unawaited(run.tryAgain()),
+            icon: const Icon(Icons.replay_rounded, size: 18),
+            label: Text(l10n.followTryAgain),
+          ),
+          const SizedBox(width: 8),
+          const MushafHideControls(part: MushafHideControlsPart.pinned),
+        ],
+      );
+    }
     // Laid out like the bar before a session: stop and pause where the mic
     // was, the reveal/hide buttons and the eye at the end — so they never
     // move, recording or not. The web keeps the buttons together in the

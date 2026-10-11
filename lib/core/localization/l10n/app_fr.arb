@@ -475,5 +475,8 @@
   "guideHideAyah": "Masquez jusqu'au début du verset.",
   "guideHideDone": "Touchez l'œil à nouveau pour afficher tous les versets.",
   "guideFollowPractice": "Écoutez le récitateur, puis récitez quand l'indication au-dessus de la barre dit que c'est votre tour. Appuyez sur stop pour terminer.",
-  "guideListenPractice": "Écoute en cours. Pause, stop ou vitesse dans la barre. Appuyez sur stop pour terminer."
+  "guideListenPractice": "Écoute en cours. Pause, stop ou vitesse dans la barre. Appuyez sur stop pour terminer.",
+  "followMistakesFound": "Erreurs trouvées — vérifiez-les",
+  "followTryAgain": "Réessayer",
+  "followSkip": "Passer"
 }

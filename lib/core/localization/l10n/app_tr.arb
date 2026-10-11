@@ -475,5 +475,8 @@
   "guideHideAyah": "Ayetin başına kadar geri gizleyin.",
   "guideHideDone": "Tüm ayetleri göstermek için göze yeniden dokunun.",
   "guideFollowPractice": "Kâriyi dinleyin, çubuğun üstündeki ipucu sıra sizde dediğinde okuyun. Bitirmek için durdura basın.",
-  "guideListenPractice": "Dinleniyor. Çubuktan duraklatın, durdurun ya da hızı değiştirin. Bitirmek için durdura basın."
+  "guideListenPractice": "Dinleniyor. Çubuktan duraklatın, durdurun ya da hızı değiştirin. Bitirmek için durdura basın.",
+  "followMistakesFound": "Hatalar bulundu — kontrol edin",
+  "followTryAgain": "Tekrar dene",
+  "followSkip": "Atla"
 }

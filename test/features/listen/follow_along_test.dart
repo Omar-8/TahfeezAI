@@ -155,19 +155,27 @@ void main() {
     expect(run(), isNull, reason: 'the last ayah done');
   });
 
-  test('strict: a turn with a mistake is recited again, once, until '
-      'without', () async {
-    await container
-        .read(followAlongControllerProvider.notifier)
-        .start(
-          (chapterNo: 112, verseNo: 1),
-          (chapterNo: 112, verseNo: 2),
-          const FollowAlongOptions(userTimes: 3, strict: true),
-        );
+  test('strict: a turn with a mistake waits, its marks in view, to be '
+      'recited again (once, until without) or skipped', () async {
+    final follow = container.read(followAlongControllerProvider.notifier);
+    await follow.start(
+      (chapterNo: 112, verseNo: 1),
+      (chapterNo: 112, verseNo: 3),
+      const FollowAlongOptions(userTimes: 3, strict: true),
+    );
     audio.finish();
     await Future<void>.delayed(Duration.zero);
     await userRecites(3, wrong: 1);
     expect(run()!.index, 0, reason: 'not on to the next ayah');
+    expect(run()!.phase, FollowAlongPhase.review);
+    expect(
+      container.read(recitationSessionControllerProvider).isActive,
+      isTrue,
+      reason: 'the session kept, its marks in view',
+    );
+    expect(session.starts, 1, reason: 'not asked again yet');
+
+    await follow.tryAgain();
     expect(run()!.phase, FollowAlongPhase.user);
     expect(run()!.again, isTrue);
     expect(hifz.loop!.count, 1, reason: 'once more');
@@ -177,6 +185,23 @@ void main() {
     expect(run()!.index, 1);
     expect(run()!.phase, FollowAlongPhase.reciter);
     expect(run()!.again, isFalse);
+
+    // A mistake again, skipped: on to the next ayah.
+    audio.finish();
+    await Future<void>.delayed(Duration.zero);
+    await userRecites(3, wrong: 1);
+    expect(run()!.phase, FollowAlongPhase.review);
+    await follow.skip();
+    expect(run()!.index, 2);
+    expect(run()!.phase, FollowAlongPhase.reciter);
+
+    // Stopped while looking the mistakes over: the run ends.
+    audio.finish();
+    await Future<void>.delayed(Duration.zero);
+    await userRecites(3, wrong: 1);
+    expect(run()!.phase, FollowAlongPhase.review);
+    await session.stop();
+    expect(run(), isNull);
   });
 
   test('the whole range at once', () async {

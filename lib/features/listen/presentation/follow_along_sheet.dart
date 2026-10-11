@@ -322,8 +322,13 @@ class FollowAlongHint extends ConsumerWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final yours = run.phase == FollowAlongPhase.user;
+    final review = run.phase == FollowAlongPhase.review;
     final reciter = reciterFor(ref.watch(reciterProvider));
-    final foreground = yours ? scheme.onPrimary : scheme.onSecondaryContainer;
+    final foreground = review
+        ? scheme.onErrorContainer
+        : yours
+        ? scheme.onPrimary
+        : scheme.onSecondaryContainer;
     final style = theme.textTheme.labelMedium?.copyWith(color: foreground);
     return GuideTarget(
       id: 'follow-hint',
@@ -333,7 +338,11 @@ class FollowAlongHint extends ConsumerWidget {
         height: height,
         padding: const EdgeInsets.symmetric(horizontal: 10),
         decoration: BoxDecoration(
-          color: yours ? scheme.primary : scheme.secondaryContainer,
+          color: review
+              ? scheme.errorContainer
+              : yours
+              ? scheme.primary
+              : scheme.secondaryContainer,
           borderRadius: BorderRadius.circular(TahfeezRadii.pill),
           boxShadow: [
             BoxShadow(
@@ -348,13 +357,19 @@ class FollowAlongHint extends ConsumerWidget {
           spacing: 6,
           children: [
             Icon(
-              yours ? Icons.mic_rounded : Icons.headphones_rounded,
+              review
+                  ? Icons.error_outline_rounded
+                  : yours
+                  ? Icons.mic_rounded
+                  : Icons.headphones_rounded,
               color: foreground,
               size: 16,
             ),
             Flexible(
               child: Text(
-                !yours
+                review
+                    ? l10n.followMistakesFound
+                    : !yours
                     ? l10n.followReciterTurn(reciterName(context, reciter))
                     : run.again
                     ? l10n.followAgain
