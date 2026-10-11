@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
@@ -48,11 +50,26 @@ android {
         )
     }
 
+    // The Play upload key: android/key.properties (never in git — see
+    // android/.gitignore) names the keystore and its passwords. Without it a
+    // release is signed with the debug key, which Google Play rejects.
+    val keyProperties = rootProject.file("key.properties")
+    val upload = keyProperties.isFile
+    if (upload) {
+        val key = Properties().apply { keyProperties.inputStream().use { load(it) } }
+        signingConfigs.create("upload") {
+            storeFile = rootProject.file(key.getProperty("storeFile"))
+            storePassword = key.getProperty("storePassword")
+            keyAlias = key.getProperty("keyAlias")
+            keyPassword = key.getProperty("keyPassword")
+        }
+    } else {
+        logger.warn("android/key.properties not found: release builds use the debug key (not for Google Play)")
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName(if (upload) "upload" else "debug")
         }
     }
 }
@@ -69,7 +86,7 @@ flutter {
 
 dependencies {
     // On-device Quran acoustic model (QuranAcousticModelChannel). The model
-    // itself is never bundled; it is sideloaded on development devices.
+    // ships as a Flutter asset (assets/models/), extracted on first use.
     implementation("com.microsoft.onnxruntime:onnxruntime-android:1.30.0")
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }

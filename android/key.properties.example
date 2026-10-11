@@ -1,0 +1,6 @@
+# Copy to android/key.properties (never commit that file) and fill in.
+# storeFile is relative to android/.
+storeFile=upload-keystore.jks
+storePassword=CHANGE_ME
+keyAlias=upload
+keyPassword=CHANGE_ME
