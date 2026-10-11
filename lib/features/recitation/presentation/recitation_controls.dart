@@ -12,6 +12,7 @@ import '../../listen/presentation/listen_sheet.dart';
 import '../../listen/application/quran_audio_player.dart';
 
 import '../../../core/core_providers.dart';
+import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/components/tahfeez_bottom_sheet.dart';
 import '../../../core/ui/full_bleed_content.dart';
 import '../../../quran/domain/models/quran_location.dart';
@@ -27,7 +28,6 @@ import '../application/sajdah_reminder.dart';
 import '../../guide/guide.dart';
 import '../../../memorization/application/activity_stats.dart';
 import '../../../ai/hifz/hifz_judge.dart';
-import '../../mushaf/application/mushaf_page_verses.dart';
 import '../../mushaf/application/mushaf_word_overlay.dart';
 import '../../../ai/acoustic/quran_acoustic_verifier.dart';
 import '../application/acoustic_verification_controller.dart';
@@ -435,8 +435,69 @@ class RecitationBottomBar extends ConsumerWidget {
               top: -FollowAlongHint.height / 2 + 4,
               left: 16,
               right: 16,
-              child: IgnorePointer(child: Center(child: FollowAlongHint())),
+              child: IgnorePointer(
+                child: Center(
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [FollowAlongHint(), _LoopReviewHint()],
+                  ),
+                ),
+              ),
             ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A strict loop's pass with mistakes, on the bar's top border like
+/// Follow along's hint: look them over, then try again or skip.
+class _LoopReviewHint extends ConsumerWidget {
+  const _LoopReviewHint();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (!ref.watch(hifzControllerProvider.select((h) => h.loopReview))) {
+      return const SizedBox.shrink();
+    }
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final style = theme.textTheme.labelMedium?.copyWith(
+      color: scheme.onErrorContainer,
+      fontWeight: FontWeight.w600,
+    );
+    return Container(
+      key: const ValueKey('loop-review-hint'),
+      height: FollowAlongHint.height,
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      decoration: BoxDecoration(
+        color: scheme.errorContainer,
+        borderRadius: BorderRadius.circular(TahfeezRadii.pill),
+        boxShadow: [
+          BoxShadow(
+            color: scheme.shadow.withValues(alpha: 0.12),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        spacing: 6,
+        children: [
+          Icon(
+            Icons.error_outline_rounded,
+            color: scheme.onErrorContainer,
+            size: 16,
+          ),
+          Flexible(
+            child: Text(
+              AppLocalizations.of(context).followMistakesFound,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: style,
+            ),
+          ),
         ],
       ),
     );
@@ -727,9 +788,15 @@ class _SessionControls extends ConsumerWidget {
     final centered = ref.watch(platformCapabilitiesProvider).isWeb;
     // Follow along, strict: a turn with mistakes, its marks in view — try
     // again or skip on (the hint above says so).
+    // …or a strict loop's pass, the same way.
     final follow = ref.watch(followAlongControllerProvider);
-    if (follow?.phase == FollowAlongPhase.review) {
+    final loopReview = ref.watch(
+      hifzControllerProvider.select((h) => h.loopReview),
+    );
+    if (follow?.phase == FollowAlongPhase.review || loopReview) {
       final run = ref.read(followAlongControllerProvider.notifier);
+      final hifz = ref.read(hifzControllerProvider.notifier);
+      final inFollow = follow?.phase == FollowAlongPhase.review;
       return Row(
         key: const ValueKey('follow-review'),
         children: [
@@ -742,7 +809,15 @@ class _SessionControls extends ConsumerWidget {
                   color: scheme.error,
                   icon: const Icon(Icons.stop_rounded),
                   tooltip: l10n.recStop,
-                  onPressed: () => unawaited(run.stop()),
+                  onPressed: () => inFollow
+                      ? unawaited(run.stop())
+                      : unawaited(
+                          ref
+                              .read(
+                                recitationSessionControllerProvider.notifier,
+                              )
+                              .stop(),
+                        ),
                 ),
               ),
             ],
@@ -750,13 +825,14 @@ class _SessionControls extends ConsumerWidget {
           const Spacer(),
           TextButton(
             key: const ValueKey('follow-skip'),
-            onPressed: () => unawaited(run.skip()),
+            onPressed: () => inFollow ? unawaited(run.skip()) : hifz.loopSkip(),
             child: Text(l10n.followSkip),
           ),
           const SizedBox(width: 4),
           FilledButton.icon(
             key: const ValueKey('follow-try-again'),
-            onPressed: () => unawaited(run.tryAgain()),
+            onPressed: () =>
+                inFollow ? unawaited(run.tryAgain()) : hifz.loopTryAgain(),
             icon: const Icon(Icons.replay_rounded, size: 18),
             label: Text(l10n.followTryAgain),
           ),
@@ -1396,28 +1472,6 @@ class _HifzSettingsSheet extends ConsumerWidget {
     final capabilities = ref.watch(platformCapabilitiesProvider);
     // The mistake alert's vibration and beep: Android and iOS.
     final alerts = capabilities.isAndroid || capabilities.isIOS;
-    final hifz = ref.watch(hifzControllerProvider);
-    final corpus = ref.watch(quranWordCorpusProvider).value;
-    final location = ref.watch(mushafRecitationTargetProvider)?.location;
-    final spread = ref.watch(fullBleedContentProvider);
-    final spans = ref.watch(mushafPageVersesProvider);
-    final page = location is QuranLocationPage
-        ? firstVisiblePage(location.pageNumber, spread: spread)
-        : null;
-    final chapter = hifz.range?.from.chapterNo ?? spans[page]?.first.chapterNo;
-    var ayahCount = 0;
-    if (corpus != null && chapter != null) {
-      final start = corpus.verseStartPosition((chapterNo: chapter, verseNo: 1));
-      if (start != null) {
-        var p = start;
-        while (p + 1 < corpus.length &&
-            corpus.words[p + 1].verse.chapterNo == chapter) {
-          p++;
-        }
-        ayahCount = corpus.words[p].verse.verseNo;
-      }
-    }
-
     Widget toggle(
       String title,
       String subtitle,
@@ -1432,36 +1486,6 @@ class _HifzSettingsSheet extends ConsumerWidget {
       );
     }
 
-    final range = hifz.range;
-    Widget ayahPicker(
-      String id,
-      String label,
-      int? value,
-      void Function(int) onPick,
-    ) {
-      return Row(
-        children: [
-          Text(label),
-          const SizedBox(width: 12),
-          DropdownButton<int>(
-            key: ValueKey('hifz-range-$id'),
-            value: value,
-            hint: const Text('—'),
-            items: [
-              for (var v = 1; v <= ayahCount; v++)
-                DropdownMenuItem(value: v, child: Text('$chapter:$v')),
-            ],
-            onChanged: hifz.running || chapter == null
-                ? null
-                : (v) {
-                    if (v != null) onPick(v);
-                  },
-          ),
-        ],
-      );
-    }
-
-    final hifzController = ref.read(hifzControllerProvider.notifier);
     return SafeArea(
       child: SingleChildScrollView(
         child: Column(
@@ -1549,62 +1573,6 @@ class _HifzSettingsSheet extends ConsumerWidget {
                       ),
                     ),
                   ),
-                ),
-              ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-              child: Text(
-                range == null
-                    ? AppLocalizations.of(context).recRangeDefault
-                    : AppLocalizations.of(context).recRange(
-                        '${range.from.chapterNo}:${range.from.verseNo}',
-                        '${range.to.chapterNo}:${range.to.verseNo}',
-                      ),
-                key: const ValueKey('hifz-range-label'),
-              ),
-            ),
-            if (chapter != null && ayahCount > 0)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                child: Wrap(
-                  spacing: 24,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [
-                    ayahPicker(
-                      'From',
-                      AppLocalizations.of(context).recFrom,
-                      range?.from.verseNo,
-                      (v) {
-                        final to = range?.to.verseNo ?? ayahCount;
-                        hifzController.setRange((
-                          from: (chapterNo: chapter, verseNo: v),
-                          to: (chapterNo: chapter, verseNo: to < v ? v : to),
-                        ));
-                      },
-                    ),
-                    ayahPicker(
-                      'To',
-                      AppLocalizations.of(context).recTo,
-                      range?.to.verseNo,
-                      (v) {
-                        final from = range?.from.verseNo ?? 1;
-                        hifzController.setRange((
-                          from: (
-                            chapterNo: chapter,
-                            verseNo: from > v ? v : from,
-                          ),
-                          to: (chapterNo: chapter, verseNo: v),
-                        ));
-                      },
-                    ),
-                    if (range != null)
-                      TextButton(
-                        onPressed: hifz.running
-                            ? null
-                            : () => hifzController.setRange(null),
-                        child: Text(AppLocalizations.of(context).recUseVisible),
-                      ),
-                  ],
                 ),
               ),
           ],

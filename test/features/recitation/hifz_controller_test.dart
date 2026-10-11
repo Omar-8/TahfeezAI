@@ -831,6 +831,95 @@ void main() {
       expect(loopProgress(hifz(), corpus)?.value, 1);
     });
 
+    test('whole range, each ayah twice per pass: ayah by ayah, then the '
+        'range again from its start, hidden again', () async {
+      const second = (chapterNo: 2, verseNo: 256);
+      await setUpHifz(
+        from: kursiVerse,
+        to: second,
+        loop: const HifzLoop(mode: HifzLoopMode.range, count: 2, perAyah: 2),
+      );
+      expect(
+        (hifz().repetition, hifz().loopAyah, hifz().ayahRepetition),
+        (1, kursiVerse, 1),
+      );
+      await recite(kursi);
+      await pauseAndResume();
+      expect(
+        (hifz().repetition, hifz().loopAyah, hifz().ayahRepetition),
+        (1, kursiVerse, 2),
+        reason: 'the same ayah, its second time',
+      );
+      expect(loopProgress(hifz(), corpus)?.value, closeTo(0.125, 0.001));
+      await recite(kursi);
+      await pauseAndResume();
+      expect(
+        (hifz().repetition, hifz().loopAyah, hifz().ayahRepetition),
+        (1, second, 1),
+      );
+      expect(
+        container.read(mushafWordOverlayProvider)!.isHidden(kursiFirst),
+        isFalse,
+        reason: 'the ayah done is shown',
+      );
+      for (var k = 0; k < 2; k++) {
+        await recite(spoken(2, 256));
+        await pauseAndResume();
+      }
+      expect(
+        (hifz().repetition, hifz().loopAyah, hifz().ayahRepetition),
+        (2, kursiVerse, 1),
+        reason: 'the second pass, from the start',
+      );
+      expect(loopProgress(hifz(), corpus)?.value, closeTo(0.5, 0.001));
+      expect(
+        container.read(mushafWordOverlayProvider)!.isHidden(kursiFirst),
+        isTrue,
+        reason: 'the range hidden again',
+      );
+    });
+
+    test('strict: a pass with a mistake waits, its marks kept, to be '
+        'recited again or skipped', () async {
+      await setUpHifz(
+        from: kursiVerse,
+        to: kursiVerse,
+        loop: const HifzLoop(mode: HifzLoopMode.range, count: 2, strict: true),
+        // (The test's own strictness off: a skipped word does not hold it.)
+        strict: false,
+      );
+      // A word left out.
+      final words = kursi.split(' ')..removeAt(6);
+      await recite(words.join(' '));
+      await pauseAndResume();
+      await Future<void>.delayed(const Duration(milliseconds: 1700));
+      expect(hifz().loopReview, isTrue);
+      expect(hifz().repetition, 1, reason: 'not on to the next pass');
+      expect(hifz().counts[HifzVerdict.skipped], greaterThan(0));
+
+      container.read(hifzControllerProvider.notifier).loopTryAgain();
+      await pumpEventQueue();
+      expect(hifz().loopReview, isFalse);
+      expect(hifz().repetition, 1, reason: 'the same pass, not counted');
+      expect(hifz().expected, kursiFirst);
+
+      await recite(words.join(' '));
+      await pauseAndResume();
+      await Future<void>.delayed(const Duration(milliseconds: 1700));
+      expect(hifz().loopReview, isTrue);
+      container.read(hifzControllerProvider.notifier).loopSkip();
+      await pumpEventQueue();
+      expect((hifz().loopReview, hifz().repetition), (false, 2));
+      expect(hifz().expected, kursiFirst);
+
+      // Without a mistake: on, no review.
+      await recite(kursi);
+      await pauseAndResume();
+      await Future<void>.delayed(const Duration(milliseconds: 1700));
+      expect(hifz().loopReview, isFalse);
+      expect(hifz().completed, isTrue);
+    });
+
     test('whole range: recited again from its start; the session end ends '
         'the loop', () async {
       await setUpHifz(

@@ -330,7 +330,7 @@
   "recColour": "Colour recited words",
   "recColourSub": "Correct green, skipped yellow, wrong red",
   "recShowMistakes": "Show mistakes",
-  "recShowMistakesSub": "Mark wrong and skipped words",
+  "recShowMistakesSub": "Mark wrong, skipped and mispronounced words (off: only correct words are coloured)",
   "recRangeDefault": "Range: from the visible page to the end of the surah",
   "recRange": "Range: {from} – {to}",
   "@recRange": {
@@ -949,5 +949,8 @@
   "guideListenPractice": "Listening. Pause, stop or change the speed in the bar. Press stop to finish.",
   "followMistakesFound": "Mistakes found — check them",
   "followTryAgain": "Try again",
-  "followSkip": "Skip"
+  "followSkip": "Skip",
+  "recLoopPerAyah": "Each ayah (times)",
+  "recLoopPerAyahSub": "Within each pass, every ayah this many times before the next",
+  "recLoopStrictSub": "After a pass with a mistake, pause so you can check it, then try again or skip"
 }

@@ -340,6 +340,50 @@ class _RecitationLoopSheetState extends ConsumerState<_RecitationLoopSheet> {
                 ),
               ),
             ),
+            if (!eachAyah) ...[
+              const Divider(height: TahfeezSpacing.lg),
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.recLoopPerAyah,
+                          style: theme.textTheme.titleSmall,
+                        ),
+                        const SizedBox(height: TahfeezSpacing.xs),
+                        Text(
+                          l10n.recLoopPerAyahSub,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: scheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: TahfeezSpacing.sm),
+                  CountStepper(
+                    id: 'loop-per-ayah',
+                    value: _loop.perAyah,
+                    min: 1,
+                    max: HifzLoop.maxCount,
+                    onChanged: (n) =>
+                        setState(() => _loop = _loop.copyWith(perAyah: n)),
+                  ),
+                ],
+              ),
+            ],
+            const Divider(height: TahfeezSpacing.lg),
+            SwitchListTile(
+              key: const ValueKey('loop-strict'),
+              contentPadding: EdgeInsets.zero,
+              title: Text(l10n.followStrict),
+              subtitle: Text(l10n.recLoopStrictSub),
+              value: _loop.strict,
+              onChanged: (v) =>
+                  setState(() => _loop = _loop.copyWith(strict: v)),
+            ),
             const SizedBox(height: TahfeezSpacing.smPlus),
             Text(
               l10n.recLoopHint,
@@ -691,7 +735,7 @@ double pageProgress(int done, {required int first, required int last}) =>
   final words = first == null || last == null ? 0 : last - first + 1;
   final within = words == 0 ? 0.0 : hifz.revealed.length / words;
   final done = hifz.repetition - 1 + within.clamp(0.0, 1.0);
-  if (loop.mode == HifzLoopMode.range) {
+  if (loop.mode == HifzLoopMode.range && !loop.byAyah) {
     return (value: done / loop.count, segments: loop.count);
   }
   // Ayah by ayah: the ayahs before this one, each recited count times.
@@ -706,6 +750,16 @@ double pageProgress(int done, {required int first, required int last}) =>
       ayahs++;
       if (p < at) before++;
     }
+  }
+  if (loop.mode == HifzLoopMode.range) {
+    // A whole-range pass, each ayah perAyah times: this pass's ayahs done.
+    final inAyah =
+        (hifz.ayahRepetition - 1 + within.clamp(0.0, 1.0)) / loop.perAyah;
+    final pass = (before + inAyah) / ayahs;
+    return (
+      value: (hifz.repetition - 1 + pass) / loop.count,
+      segments: loop.count,
+    );
   }
   return (
     value: (before * loop.count + done) / (ayahs * loop.count),

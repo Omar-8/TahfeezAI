@@ -130,7 +130,7 @@
   "recColour": "Okunan kelimeleri renklendir",
   "recColourSub": "Doğru yeşil, atlanan sarı, yanlış kırmızı",
   "recShowMistakes": "Hataları göster",
-  "recShowMistakesSub": "Yanlış ve atlanan kelimeleri işaretle",
+  "recShowMistakesSub": "Yanlış, atlanan ve hatalı telaffuz edilen kelimeleri işaretle (kapalıyken yalnızca doğru kelimeler renklenir)",
   "recRangeDefault": "Aralık: görünen sayfadan surenin sonuna kadar",
   "recRange": "Aralık: {from} – {to}",
   "recFrom": "Başlangıç",
@@ -478,5 +478,8 @@
   "guideListenPractice": "Dinleniyor. Çubuktan duraklatın, durdurun ya da hızı değiştirin. Bitirmek için durdura basın.",
   "followMistakesFound": "Hatalar bulundu — kontrol edin",
   "followTryAgain": "Tekrar dene",
-  "followSkip": "Atla"
+  "followSkip": "Atla",
+  "recLoopPerAyah": "Her ayet (kez)",
+  "recLoopPerAyahSub": "Her turda her ayet, sonrakine geçmeden bu kadar",
+  "recLoopStrictSub": "Hatalı bir turdan sonra kontrol edebilmen için dur, sonra tekrar dene ya da atla"
 }

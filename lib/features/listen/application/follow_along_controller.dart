@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../ai/hifz/hifz_judge.dart' show HifzVerdict;
 import '../../../quran/domain/models/quran_refs.dart';
-import '../../recitation/application/acoustic_verification_controller.dart';
+import '../../recitation/application/acoustic_settle.dart';
 import '../../recitation/application/hifz_controller.dart';
 import '../../recitation/application/recitation_position.dart';
 import '../../recitation/application/mushaf_recitation_target.dart';
@@ -269,15 +269,18 @@ class FollowAlongController extends Notifier<FollowAlongState?> {
     // once, so the audio heard is checked now (no waiting to hear the
     // reciter stop), then on as soon as the last ayah's check is in.
     final pass = ref.read(recitationPassProvider);
-    final pronunciation = await _settle(done.part.last, pass);
+    final pronunciation = await settleAcousticCheck(
+      ref,
+      lastAyah: done.part.last,
+      pass: pass,
+    );
     if (!identical(state, done)) return;
     final mistake =
         wordMistakes > 0 ||
-        pronunciation.entries.any(
-          (e) =>
-              done.part.contains(e.key.ayahId) &&
-              e.value.pass == pass &&
-              e.value.isMistake,
+        hasPronunciationMistake(
+          pronunciation,
+          ayahIds: done.part.toSet(),
+          pass: pass,
         );
     if (done.options.strict && mistake) {
       // The session kept (paused), its marks in view: the user looks them
@@ -325,50 +328,6 @@ class FollowAlongController extends Notifier<FollowAlongState?> {
     state = s.copyWith(index: s.index + 1, phase: FollowAlongPhase.reciter);
     await _reciterTurn();
   }
-
-  /// Waits for the pronunciation check of the turn's last words (at most a
-  /// few seconds), then returns its verdicts; none without it.
-  /// Pauses the microphone and waits for the pronunciation check of
-  /// [lastAyah] (this [pass]'s, confirmed by its ayah's check) — at most
-  /// [_settleMax] — then returns the verdicts; none without the check.
-  Future<Map<WordRef, AcousticWordResult>> _settle(
-    int lastAyah,
-    int pass,
-  ) async {
-    // Out of the test's update, then the microphone off: what was heard is
-    // computed at once.
-    await Future<void>.delayed(Duration.zero);
-    ref.read(recitationSessionControllerProvider.notifier).pause();
-    if (!ref.exists(acousticVerificationControllerProvider)) {
-      await Future<void>.delayed(const Duration(milliseconds: 300));
-      return const {};
-    }
-    AcousticVerificationState acoustic() =>
-        ref.read(acousticVerificationControllerProvider);
-    final started = DateTime.now();
-    while (ref.mounted) {
-      final now = acoustic();
-      final waited = DateTime.now().difference(started);
-      final checked = now.words.entries.any(
-        (e) =>
-            e.key.ayahId == lastAyah &&
-            e.value.pass == pass &&
-            !e.value.provisional,
-      );
-      if (now.pending == 0 &&
-          (checked || waited >= _settleNothing || !now.active)) {
-        break;
-      }
-      if (waited >= _settleMax) break;
-      await Future<void>.delayed(const Duration(milliseconds: 50));
-    }
-    return ref.mounted ? acoustic().words : const {};
-  }
-
-  /// With nothing being checked this long after the pause, no check is
-  /// coming (no words of it were placed).
-  static const _settleNothing = Duration(milliseconds: 1500);
-  static const _settleMax = Duration(seconds: 4);
 
   void _end() => state = null;
 

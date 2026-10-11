@@ -130,7 +130,7 @@
   "recColour": "Rezitierte Wörter einfärben",
   "recColourSub": "Richtig grün, ausgelassen gelb, falsch rot",
   "recShowMistakes": "Fehler zeigen",
-  "recShowMistakesSub": "Falsche und ausgelassene Wörter markieren",
+  "recShowMistakesSub": "Falsche, ausgelassene und falsch ausgesprochene Wörter markieren (aus: nur richtige Wörter werden gefärbt)",
   "recRangeDefault": "Abschnitt: von der sichtbaren Seite bis zum Ende der Sure",
   "recRange": "Abschnitt: {from} – {to}",
   "recFrom": "Von",
@@ -478,5 +478,8 @@
   "guideListenPractice": "Wird abgespielt. Pausieren, stoppen oder das Tempo ändern in der Leiste. Drücke Stopp zum Beenden.",
   "followMistakesFound": "Fehler gefunden — sieh sie dir an",
   "followTryAgain": "Nochmal",
-  "followSkip": "Überspringen"
+  "followSkip": "Überspringen",
+  "recLoopPerAyah": "Jeder Vers (Mal)",
+  "recLoopPerAyahSub": "In jedem Durchgang jeden Vers so oft, dann den nächsten",
+  "recLoopStrictSub": "Nach einem Durchgang mit Fehler pausieren, um ihn anzusehen, dann nochmal oder überspringen"
 }

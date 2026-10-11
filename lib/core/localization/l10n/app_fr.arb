@@ -130,7 +130,7 @@
   "recColour": "Colorer les mots récités",
   "recColourSub": "Correct en vert, sauté en jaune, faux en rouge",
   "recShowMistakes": "Afficher les erreurs",
-  "recShowMistakesSub": "Marquer les mots faux et sautés",
+  "recShowMistakesSub": "Marquer les mots faux, sautés et mal prononcés (désactivé : seuls les mots corrects sont colorés)",
   "recRangeDefault": "Passage : de la page visible à la fin de la sourate",
   "recRange": "Passage : {from} – {to}",
   "recFrom": "De",
@@ -478,5 +478,8 @@
   "guideListenPractice": "Écoute en cours. Pause, stop ou vitesse dans la barre. Appuyez sur stop pour terminer.",
   "followMistakesFound": "Erreurs trouvées — vérifiez-les",
   "followTryAgain": "Réessayer",
-  "followSkip": "Passer"
+  "followSkip": "Passer",
+  "recLoopPerAyah": "Chaque verset (fois)",
+  "recLoopPerAyahSub": "À chaque passage, chaque verset autant de fois avant le suivant",
+  "recLoopStrictSub": "Après un passage avec une erreur, pause pour la vérifier, puis réessayer ou passer"
 }
