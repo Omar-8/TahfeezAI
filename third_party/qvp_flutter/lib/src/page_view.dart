@@ -602,11 +602,21 @@ class _QvpPainter extends CustomPainter {
     );
   }
 
-  void _drawBoxes(
-    ui.Canvas c,
-    List<QvpBox> boxes, {
-    List<(double, double)>? slots,
-  }) {
+  void _drawBoxes(ui.Canvas c, List<QvpBox> boxes, {QvpLayout? layout}) {
+    final slots = layout?.slots;
+    // Tahfeez patch 0003: the ayah marks per line, in layout px — a
+    // slot-filling box beside one (a mark hanging at the line's end, say)
+    // takes it in.
+    final marks = <int, List<(double, double)>>{};
+    if (layout != null && page.slotFillHighlights.isNotEmpty) {
+      for (final d in page.decorations) {
+        if (d.decoration != QvpDecorationKind.ayahMark) continue;
+        (marks[d.line] ??= []).add((
+          layout.offsetX + d.x0 * layout.scale,
+          layout.offsetX + d.x1 * layout.scale,
+        ));
+      }
+    }
     if (boxes.isEmpty) return;
     c.save();
     c.translate(view.offsetX, view.offsetY);
@@ -638,9 +648,20 @@ class _QvpPainter extends CustomPainter {
               b.line < slots.length
           ? slots[b.line]
           : null;
+      var x0 = b.x0, x1 = b.x1;
+      if (slot != null) {
+        for (final (m0, m1) in marks[b.line] ?? const <(double, double)>[]) {
+          // Beside the box (within a mark's width): taken in.
+          final w = m1 - m0;
+          if (m1 >= x0 - w && m0 <= x1 + w) {
+            x0 = x0 < m0 ? x0 : m0;
+            x1 = x1 > m1 ? x1 : m1;
+          }
+        }
+      }
       final r = slot == null
           ? Rect.fromLTRB(b.x0, b.y0, b.x1, b.y1)
-          : Rect.fromLTRB(b.x0, slot.$1, b.x1, slot.$2);
+          : Rect.fromLTRB(x0, slot.$1, x1, slot.$2);
       if (b.radius > 0) {
         cur!.addRRect(RRect.fromRectAndRadius(r, Radius.circular(b.radius)));
       } else {
@@ -727,7 +748,7 @@ class _QvpPainter extends CustomPainter {
     final sw = Stopwatch()..start();
     // 1. highlight bands (behind the ink)
     final bands = page.highlightBoxesView();
-    _drawBoxes(canvas, bands, slots: l?.slots);
+    _drawBoxes(canvas, bands, layout: l);
 
     // 2. base ink
     final img = cache.image;

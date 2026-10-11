@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart' show kTouchSlop;
 import 'package:flutter/material.dart';
 
 import '../app_spacing.dart';
@@ -76,27 +77,35 @@ class _PrimaryNavBarItem extends StatelessWidget {
     final icon = selected ? (item.selectedIcon ?? item.icon) : item.icon;
 
     final color = selected ? scheme.primary : scheme.onSurfaceVariant;
-    return InkWell(
+    // Switches on the finger lifting over the item (it barely moved): the
+    // tap recognizer alone dropped quick taps made just after a switch,
+    // while the new tab was being built. The InkWell gives the ripple.
+    return _LiftTap(
       onTap: onTap,
-      // The bar keeps its height at any text size: labels grow up to 1.3×,
-      // stay on one line, and the item scales down if that still doesn't
-      // fit (very large text, long Arabic labels).
-      child: FittedBox(
-        fit: BoxFit.scaleDown,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          spacing: TahfeezSpacing.xs,
-          children: [
-            Icon(icon, size: TahfeezIconSize.lg, color: color),
-            Text(
-              item.label,
-              maxLines: 1,
-              textScaler: MediaQuery.textScalerOf(context)
-                  .clamp(maxScaleFactor: 1.3),
-              style: Theme.of(context).textTheme.labelSmall
-                  ?.copyWith(color: color),
-            ),
-          ],
+      child: InkWell(
+        onTap: () {},
+        // (Screen readers tap through _LiftTap's own semantics.)
+        excludeFromSemantics: true,
+        // The bar keeps its height at any text size: labels grow up to 1.3×,
+        // stay on one line, and the item scales down if that still doesn't
+        // fit (very large text, long Arabic labels).
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            spacing: TahfeezSpacing.xs,
+            children: [
+              Icon(icon, size: TahfeezIconSize.lg, color: color),
+              Text(
+                item.label,
+                maxLines: 1,
+                textScaler: MediaQuery.textScalerOf(context)
+                    .clamp(maxScaleFactor: 1.3),
+                style: Theme.of(context).textTheme.labelSmall
+                    ?.copyWith(color: color),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -161,29 +170,72 @@ class _PrimaryNavRailItem extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final icon = selected ? (item.selectedIcon ?? item.icon) : item.icon;
 
-    return InkWell(
+    // Switches on the finger lifting over the item (it barely moved): the
+    // tap recognizer alone dropped quick taps made just after a switch,
+    // while the new tab was being built. The InkWell gives the ripple.
+    return _LiftTap(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(TahfeezSpacing.md),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: TahfeezSpacing.sm),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          spacing: TahfeezSpacing.xs,
-          children: [
-            Icon(
-              icon,
-              size: TahfeezIconSize.lg,
-              color: selected ? scheme.primary : scheme.onSurfaceVariant,
-            ),
-            Text(
-              item.label,
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+      child: InkWell(
+        onTap: () {},
+        // (Screen readers tap through _LiftTap's own semantics.)
+        excludeFromSemantics: true,
+        borderRadius: BorderRadius.circular(TahfeezSpacing.md),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: TahfeezSpacing.sm),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            spacing: TahfeezSpacing.xs,
+            children: [
+              Icon(
+                icon,
+                size: TahfeezIconSize.lg,
                 color: selected ? scheme.primary : scheme.onSurfaceVariant,
               ),
-            ),
-          ],
+              Text(
+                item.label,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: selected ? scheme.primary : scheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
+}
+
+/// Calls [onTap] when a pointer that went down on [child] lifts within a
+/// few pixels of where it went down — no gesture arena involved.
+class _LiftTap extends StatefulWidget {
+  const _LiftTap({required this.onTap, required this.child});
+
+  final VoidCallback onTap;
+  final Widget child;
+
+  @override
+  State<_LiftTap> createState() => _LiftTapState();
+}
+
+class _LiftTapState extends State<_LiftTap> {
+  Offset? _down;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    button: true,
+    onTap: widget.onTap,
+    child: Listener(
+      behavior: HitTestBehavior.opaque,
+      onPointerDown: (e) => _down = e.position,
+      onPointerCancel: (_) => _down = null,
+      onPointerUp: (e) {
+        final down = _down;
+        _down = null;
+        if (down != null && (e.position - down).distance < kTouchSlop) {
+          widget.onTap();
+        }
+      },
+      child: widget.child,
+    ),
+  );
 }

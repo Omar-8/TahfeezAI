@@ -141,6 +141,10 @@ meet with no gap, even when `fillHeight` spreads the lines unevenly —
 which a band's `padY` could not do (the engine ignores it for
 `'lineSpacing'`-height bands; measured on the device, 2026-10-11).
 
+A slot-filling box also takes in an ayah mark (`QvpPage.decorations`) on
+its line that sits beside it, so a mark hanging at a line's end is tinted
+with its passage.
+
 Used by `quran_engine_android_backend.dart` for the Mushaf's thematic
 passage tints (`PageBand`). Re-apply with
 `patch -p1 < patches/0003-slot-filling-highlight-bands.patch` after

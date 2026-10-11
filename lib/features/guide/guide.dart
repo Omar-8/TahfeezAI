@@ -161,10 +161,24 @@ class GuideController extends Notifier<GuideState?> {
     if (s.index + 1 < length) {
       state = (tour: s.tour, index: s.index + 1);
     } else if (s.tour != GuideTour.overview) {
-      // A mode learned: back to choosing another.
+      // A mode learned: what it started stops (so the modes show again),
+      // and back to choosing another.
+      _stopModes();
       state = (tour: GuideTour.overview, index: _choose);
     } else {
       state = null;
+    }
+  }
+
+  /// Stops a practice run: listening, Follow along, reciting.
+  void _stopModes() {
+    unawaited(ref.read(quranAudioPlayerProvider.notifier).stop());
+    if (ref.exists(followAlongControllerProvider)) {
+      unawaited(ref.read(followAlongControllerProvider.notifier).stop());
+    }
+    if (ref.exists(recitationSessionControllerProvider) &&
+        ref.read(recitationSessionControllerProvider).isActive) {
+      unawaited(ref.read(recitationSessionControllerProvider.notifier).stop());
     }
   }
 
@@ -578,7 +592,7 @@ class _GuideCard extends StatelessWidget {
                 if (tapToContinue && last)
                   TextButton(
                     key: const ValueKey('guide-finish'),
-                    onPressed: onClose,
+                    onPressed: onNext ?? onClose,
                     child: Text(l10n.guideDone),
                   ),
               ],
