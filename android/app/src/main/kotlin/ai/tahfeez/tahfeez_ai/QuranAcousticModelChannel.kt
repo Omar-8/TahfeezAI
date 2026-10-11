@@ -14,6 +14,7 @@ import android.os.Looper
 import android.os.Process
 import android.os.SystemClock
 import android.util.Log
+import io.flutter.FlutterInjector
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
@@ -27,12 +28,14 @@ import java.util.concurrent.Executors
  * The on-device Quran acoustic model (`LocalQuranAcousticModel` in Dart):
  * ONNX Runtime, loaded once and reused for every window.
  *
- * The model is never bundled. A development build finds it sideloaded at
+ * The model ships in the app (`assets/models/`, a Flutter asset) and is
+ * extracted once to `<files>/models/bundled/` — ONNX Runtime loads from a
+ * file. A development build may instead have one sideloaded at
  * `<external files>/models/quran_acoustic.onnx` (adb push) or
- * `<files>/models/quran_acoustic.onnx` (run-as copy), with its manifest
- * `quran_acoustic.json` beside it. The file's SHA-256 must match the
- * manifest; a verified hash is remembered by size and modification time,
- * so the 386 MB file is hashed once, not on every launch.
+ * `<files>/models/quran_acoustic.onnx` (run-as copy), which comes first.
+ * Each sits with its manifest `quran_acoustic.json`. The file's SHA-256 must
+ * match the manifest; a verified hash is remembered by size and
+ * modification time, so the file is hashed once, not on every launch.
  */
 class QuranAcousticModelChannel private constructor(
     private val context: Context,
@@ -110,10 +113,53 @@ class QuranAcousticModelChannel private constructor(
         }
     }
 
+    /** Where a sideloaded model may be (development builds). */
     private fun candidates(): List<File> = listOfNotNull(
         context.getExternalFilesDir(null)?.let { File(it, "models/$MODEL") },
         File(context.filesDir, "models/$MODEL"),
     )
+
+    /** The model to use: a sideloaded one, else the bundled one. */
+    private fun model(): File? = candidates().firstOrNull { it.isFile } ?: bundled()
+
+    /**
+     * The model shipped in the app, extracted to app storage (once per app
+     * version: re-extracted when its size differs from the bundled
+     * manifest's); `null` when the build has none.
+     */
+    private fun bundled(): File? {
+        val loader = FlutterInjector.instance().flutterLoader()
+        val assets = context.assets
+        val manifestAsset = loader.getLookupKeyForAsset("assets/models/$MANIFEST")
+        val modelAsset = loader.getLookupKeyForAsset("assets/models/$MODEL")
+        val manifestText = try {
+            assets.open(manifestAsset).bufferedReader().use { it.readText() }
+        } catch (e: java.io.IOException) {
+            return null
+        }
+        val dir = File(context.filesDir, "models/bundled")
+        val model = File(dir, MODEL)
+        val manifest = File(dir, MANIFEST)
+        val bytes = JSONObject(manifestText).getLong("bytes")
+        if (model.isFile && model.length() == bytes && manifest.isFile &&
+            manifest.readText() == manifestText
+        ) {
+            return model
+        }
+        dir.mkdirs()
+        val partial = File(dir, "$MODEL.part")
+        assets.open(modelAsset).use { input ->
+            partial.outputStream().use { input.copyTo(it, 1 shl 20) }
+        }
+        if (partial.length() != bytes) {
+            partial.delete()
+            throw IllegalStateException("Bundled model is ${partial.length()} bytes, manifest says $bytes")
+        }
+        if (!partial.renameTo(model)) throw IllegalStateException("Could not place the bundled model")
+        manifest.writeText(manifestText)
+        Log.i("TahfeezAcoustic", "extracted the bundled model ($bytes bytes)")
+        return model
+    }
 
     private fun manifestOf(model: File) = File(model.parentFile, MANIFEST)
 
@@ -133,7 +179,7 @@ class QuranAcousticModelChannel private constructor(
             )
         }
         val searched = candidates()
-        val model = searched.firstOrNull { it.isFile }
+        val model = model()
             ?: return mapOf(
                 "state" to "absent",
                 "searched" to searched.map { it.absolutePath },
@@ -160,7 +206,7 @@ class QuranAcousticModelChannel private constructor(
             return mapOf("provider" to loadedProvider, "loadMs" to 0, "cached" to true)
         }
         close()
-        val model = candidates().firstOrNull { it.isFile }
+        val model = model()
             ?: throw IllegalStateException("No acoustic model on this device")
         val manifest = JSONObject(manifestOf(model).readText())
         val started = SystemClock.elapsedRealtime()

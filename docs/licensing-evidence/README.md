@@ -37,3 +37,18 @@ licences.
 The King Fahd Complex's own site (qurancomplex.gov.sa) could not be reached
 from the machine that collected these; its statement is the copy in the
 `LICENSE` above.
+
+## The on-device acoustic model's training data (collected 2026-10-11)
+
+`model/` — what each source of v3.5's training audio says about its rights.
+
+| File | What it shows |
+|---|---|
+| `model/hf-obadx-muaalem-model-v3_2-api.json` | The teacher model `obadx/muaalem-model-v3_2`: tagged **MIT**. |
+| `model/hf-obadx-muaalem-annotated-v3-README.md` | Its training set (~850 h): tagged **MIT**; built from published recitations. |
+| `model/github-obadx-prepare-quran-dataset-README.md` | How that set was made: "downloading recitations form the web" (everyayah.com and mp3quran.net). |
+| `model/mp3quran-privacy-page-eng.html` | mp3quran.net, first-hand: "Copyrights: All rights are available to everyone, and we allow any visitor or developer to copy any material or use any link on the websites" (also mp3quran.org, qurango.net). |
+| `model/everyayah-home.html`, `model/everyayah-data-index.html` | everyayah.com: no licence or terms anywhere on the site — only file listings. |
+| `model/hf-RetaSy-quranic_audio_dataset-README.md` | RetaSy: **no licence** in the card (the paper, arXiv 2405.02675, is the authors' only other publication of it). |
+| `model/hf-MuazAhmad7-Surah_Ikhlas-Labeled_Dataset-README.md` | Al-Ikhlas learner set: **CC BY 4.0** (attribution required). |
+| `model/hf-obadx-qdat-README.md` | QDAT: **MIT**. |

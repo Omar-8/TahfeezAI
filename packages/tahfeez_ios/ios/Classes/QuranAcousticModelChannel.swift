@@ -8,11 +8,12 @@ import onnxruntime_objc
 /// ONNX Runtime, loaded once and reused for every window — the iOS twin of
 /// Android's `QuranAcousticModelChannel.kt`, method for method.
 ///
-/// The model is never bundled. A development build finds it sideloaded at
-/// `Documents/models/quran_acoustic.onnx` or
-/// `Library/Application Support/models/quran_acoustic.onnx`, with its
-/// manifest `quran_acoustic.json` beside it — copied in with
-/// `xcrun devicectl device copy to --domain-type appDataContainer ...`.
+/// The model ships in the app (`assets/models/`, a Flutter asset), read in
+/// place from the app bundle. A development build may instead have one
+/// sideloaded at `Documents/models/quran_acoustic.onnx` or
+/// `Library/Application Support/models/quran_acoustic.onnx` (copied in with
+/// `xcrun devicectl device copy to --domain-type appDataContainer ...`),
+/// which comes first. Each sits with its manifest `quran_acoustic.json`.
 /// The file's SHA-256 must match the manifest; a verified hash is
 /// remembered by size and modification time, so it is hashed once.
 final class QuranAcousticModelChannel {
@@ -109,8 +110,20 @@ final class QuranAcousticModelChannel {
     ].compactMap { $0?.appendingPathComponent("models", isDirectory: true) }
   }
 
+  /// Where a sideloaded model may be (development builds).
   private func candidates() -> [URL] {
     directories().map { $0.appendingPathComponent(Self.model) }
+  }
+
+  /// The model shipped in the app (Flutter's asset in the bundle).
+  private func bundled() -> URL? {
+    let key = FlutterDartProject.lookupKey(forAsset: "assets/models/\(Self.model)")
+    return Bundle.main.path(forResource: key, ofType: nil).map { URL(fileURLWithPath: $0) }
+  }
+
+  /// The model to use: a sideloaded one, else the bundled one.
+  private func modelFile() -> URL? {
+    candidates().first(where: isFile) ?? bundled().flatMap { isFile($0) ? $0 : nil }
   }
 
   private func manifestOf(_ model: URL) -> URL {
@@ -129,7 +142,7 @@ final class QuranAcousticModelChannel {
 
   private func status() -> [String: Any?] {
     let searched = candidates()
-    guard let model = searched.first(where: isFile) else {
+    guard let model = modelFile() else {
       return ["state": "absent", "searched": searched.map { $0.path }]
     }
     let manifest = manifestOf(model)
@@ -159,7 +172,7 @@ final class QuranAcousticModelChannel {
       return ["provider": loadedProvider, "loadMs": 0, "cached": true]
     }
     close()
-    guard let model = candidates().first(where: isFile) else {
+    guard let model = modelFile() else {
       throw Failure("No acoustic model on this device")
     }
     let started = DispatchTime.now()

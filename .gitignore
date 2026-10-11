@@ -164,3 +164,10 @@ tool/acoustic_verification/model_work/artifacts/
 
 # iOS smoke test screenshots (test_driver/integration_test.dart)
 /screenshots/
+
+# The on-device acoustic model, bundled into builds but never committed
+# (93 MB; its training-audio rights are unresolved — THIRD_PARTY_RESOURCES.md).
+# Local builds: copy it here (docs/ARCHITECTURE.md); CI: the private release
+# "model-v3.5" (.github/workflows/ios.yml).
+assets/models/*
+!assets/models/.gitkeep

@@ -205,6 +205,9 @@ flutter:
     # provenance question was resolved. See
     # docs/QURAN_ENGINE_MIGRATION.md's licensing section.
     - assets/quran/quran_engine/pages/
+    # The on-device acoustic model and its manifest (not in git — see
+    # .gitignore); extracted to app storage on Android on first use.
+    - assets/models/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

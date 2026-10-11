@@ -141,6 +141,26 @@ for commercial use", #719 the Complex's terms) and the Complex's usage rights.
 If QUL ever states other terms, follow them. Still open everywhere: the Complex's own page was not reached
 directly (its text is read from quran.ws's verbatim copy).
 
+## Acoustic model training data, 2026-10-11
+
+What each source of the shipped model v3.5 (`tahfeez-d6-v3.5-stream1.28-int4-b128-acc4`)
+says about its rights, checked at the source (copies: `docs/licensing-evidence/model/`):
+
+| Source | Role in v3.5 | What its source says | Status |
+|---|---|---|---|
+| Muaalem model (`obadx/muaalem-model-v3_2`) | The teacher (weights) | **MIT** | Permitted |
+| Muaalem's training set (`obadx/muaalem-annotated-v3`, ~850 h) | The teacher's training; most student audio | **MIT** by its author; audio "downloaded from the web" (everyayah.com, mp3quran.net) | MIT grant; recording rights as below |
+| mp3quran.net (also via the set above) | Student audio | "Copyrights: All rights are available to everyone, and we allow any visitor or developer to copy any material or use any link on the websites" (its privacy page) | **Permitted** (broad first-hand grant; it does not name ML training) |
+| everyayah.com (via the set above) | Student audio | **Nothing** — no licence or terms on the site | **Unknown** |
+| RetaSy (crowd-sourced learners) | Teacher fine-tune (ft4/ft5) | **No licence** (Hugging Face card); the paper is the authors' only statement | **Unknown** — ask the authors |
+| Surah Al-Ikhlas learners (MuazAhmad7) | Teacher fine-tune (ft5), half the speakers | **CC BY 4.0** | Permitted with attribution (credited on the About screen) |
+| QDAT (`obadx/qdat`) | Teacher fine-tune (ft5), half the speakers | **MIT** | Permitted |
+
+**Open:** everyayah.com and RetaSy. Remedies: written permission (everyayah's
+contact form is run by the Quran Foundation; RetaSy's authors: Salameh, Al Mdfaa,
+Askarbekuly, Mazzara, arXiv 2405.02675), or retrain without them (mp3quran.net
+audio only, and a teacher fine-tune without RetaSy).
+
 ## Provenance notes
 
 - Both files were fetched directly from Google's own `google/fonts` GitHub repository (the
