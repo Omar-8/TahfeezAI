@@ -952,5 +952,11 @@
   "followSkip": "Skip",
   "recLoopPerAyah": "Each ayah (times)",
   "recLoopPerAyahSub": "Within each pass, every ayah this many times before the next",
-  "recLoopStrictSub": "After a pass with a mistake, pause so you can check it, then try again or skip"
+  "recLoopStrictSub": "After a pass with a mistake, pause so you can check it, then try again or skip",
+  "tafsirView": "View",
+  "tafsirLayoutPaged": "Previous / next",
+  "tafsirLayoutContinuous": "Continuous",
+  "tafsirShowTranslation": "Translation",
+  "tafsirShowTransliteration": "Transliteration",
+  "tafsirOpen": "Tafsir"
 }

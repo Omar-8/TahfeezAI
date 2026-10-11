@@ -481,5 +481,11 @@
   "followSkip": "تخطَّ",
   "recLoopPerAyah": "كل آية (مرات)",
   "recLoopPerAyahSub": "في كل مرور، تُكرَّر كل آية هذا العدد قبل التالية",
-  "recLoopStrictSub": "بعد مرور فيه خطأ، توقّف لتراجعه ثم أعد المحاولة أو تخطَّ"
+  "recLoopStrictSub": "بعد مرور فيه خطأ، توقّف لتراجعه ثم أعد المحاولة أو تخطَّ",
+  "tafsirView": "العرض",
+  "tafsirLayoutPaged": "السابق / التالي",
+  "tafsirLayoutContinuous": "متواصل",
+  "tafsirShowTranslation": "الترجمة",
+  "tafsirShowTransliteration": "النطق بالحروف اللاتينية",
+  "tafsirOpen": "التفسير"
 }

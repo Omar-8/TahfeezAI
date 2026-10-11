@@ -481,5 +481,11 @@
   "followSkip": "Überspringen",
   "recLoopPerAyah": "Jeder Vers (Mal)",
   "recLoopPerAyahSub": "In jedem Durchgang jeden Vers so oft, dann den nächsten",
-  "recLoopStrictSub": "Nach einem Durchgang mit Fehler pausieren, um ihn anzusehen, dann nochmal oder überspringen"
+  "recLoopStrictSub": "Nach einem Durchgang mit Fehler pausieren, um ihn anzusehen, dann nochmal oder überspringen",
+  "tafsirView": "Ansicht",
+  "tafsirLayoutPaged": "Zurück / weiter",
+  "tafsirLayoutContinuous": "Fortlaufend",
+  "tafsirShowTranslation": "Übersetzung",
+  "tafsirShowTransliteration": "Umschrift",
+  "tafsirOpen": "Tafsir"
 }

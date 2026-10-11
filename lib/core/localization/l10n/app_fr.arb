@@ -481,5 +481,11 @@
   "followSkip": "Passer",
   "recLoopPerAyah": "Chaque verset (fois)",
   "recLoopPerAyahSub": "À chaque passage, chaque verset autant de fois avant le suivant",
-  "recLoopStrictSub": "Après un passage avec une erreur, pause pour la vérifier, puis réessayer ou passer"
+  "recLoopStrictSub": "Après un passage avec une erreur, pause pour la vérifier, puis réessayer ou passer",
+  "tafsirView": "Affichage",
+  "tafsirLayoutPaged": "Précédent / suivant",
+  "tafsirLayoutContinuous": "Continu",
+  "tafsirShowTranslation": "Traduction",
+  "tafsirShowTransliteration": "Translittération",
+  "tafsirOpen": "Tafsir"
 }

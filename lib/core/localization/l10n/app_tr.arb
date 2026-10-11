@@ -481,5 +481,11 @@
   "followSkip": "Atla",
   "recLoopPerAyah": "Her ayet (kez)",
   "recLoopPerAyahSub": "Her turda her ayet, sonrakine geçmeden bu kadar",
-  "recLoopStrictSub": "Hatalı bir turdan sonra kontrol edebilmen için dur, sonra tekrar dene ya da atla"
+  "recLoopStrictSub": "Hatalı bir turdan sonra kontrol edebilmen için dur, sonra tekrar dene ya da atla",
+  "tafsirView": "Görünüm",
+  "tafsirLayoutPaged": "Önceki / sonraki",
+  "tafsirLayoutContinuous": "Kesintisiz",
+  "tafsirShowTranslation": "Meal",
+  "tafsirShowTransliteration": "Okunuş",
+  "tafsirOpen": "Tefsir"
 }

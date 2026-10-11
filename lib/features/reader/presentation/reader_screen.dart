@@ -17,6 +17,7 @@ import '../../mushaf/presentation/mushaf_page_title.dart';
 import '../../mushaf/presentation/mushaf_page_view.dart';
 import '../../mushaf/presentation/mushaf_pager.dart';
 import '../../recitation/presentation/recitation_controls.dart';
+import '../../mushaf/presentation/mushaf_tafsir_button.dart';
 
 /// A Quran location (a surah, an ayah, an ayah range, a juz or a hizb)
 /// opened in the Mushaf at the page its first ayah is on. Opened at an
@@ -164,6 +165,8 @@ class _MushafModeScaffold extends ConsumerWidget {
           // Hifz mode's feedback settings, beside the reader's own (loop
           // recitation is in the recitation bar).
           const HifzSettingsButton(),
+          // The tafsir reader, at the ayah in view.
+          const MushafTafsirButton(),
           // The guide to the modes (left of the reader's own settings).
           const GuideButton(),
           IconButton(

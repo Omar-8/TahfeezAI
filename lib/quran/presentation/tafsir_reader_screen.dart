@@ -9,10 +9,17 @@ import '../../core/routing/app_routes.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/components/components.dart';
 import '../../core/theme/quran_text_style.dart';
+import '../application/ayah_reading_extras.dart';
 import '../application/canonical_ayah_word_text.dart';
+import '../application/tafsir_reader_preferences.dart';
+import '../application/translation_selection_controller.dart';
 import '../application/tafsir_selection_controller.dart';
 import '../application/tafsir_verse_text.dart';
 import '../domain/models/quran_refs.dart';
+import '../domain/models/translation_models.dart';
+import '../domain/quran_ayah_numbers.dart';
+import '../translation_providers.dart';
+import 'translation_block.dart';
 import '../domain/repositories/quran_repository.dart';
 import '../quran_providers.dart';
 import '../tafsir_providers.dart';
@@ -48,6 +55,8 @@ class TafsirReaderScreen extends ConsumerWidget {
     // A chosen tafsir that isn't installed counts as none.
     final work = chosen == null ? null : ref.watch(_tafsirWorkForId(chosen));
     final textScale = ref.watch(tafsirTextScaleControllerProvider);
+    final view = ref.watch(tafsirReaderPreferencesProvider);
+    final continuous = view.layout == TafsirLayout.continuous;
 
     return Scaffold(
       appBar: AppBar(
@@ -55,6 +64,12 @@ class TafsirReaderScreen extends ConsumerWidget {
           AppLocalizations.of(context).tafsirTitle('$chapterNo:$verseNo'),
         ),
         actions: [
+          IconButton(
+            key: const ValueKey('tafsir-view-options'),
+            icon: const Icon(Icons.view_agenda_outlined),
+            tooltip: AppLocalizations.of(context).tafsirView,
+            onPressed: () => _showViewSheet(context),
+          ),
           IconButton(
             icon: const Icon(Icons.text_fields),
             tooltip: AppLocalizations.of(context).tafsirTextSizeTooltip,
@@ -71,6 +86,12 @@ class TafsirReaderScreen extends ConsumerWidget {
         null => const _NoTafsirSelected(),
         AsyncValue(isLoading: true, hasValue: false) =>
           const TahfeezLoadingView(),
+        AsyncValue(value: final installed?) when continuous =>
+          _ContinuousTafsir(
+            tafsirId: installed.id,
+            start: _verse,
+            textScale: textScale,
+          ),
         AsyncValue(value: final installed?) => _TafsirContent(
           tafsirId: installed.id,
           verse: _verse,
@@ -78,7 +99,68 @@ class TafsirReaderScreen extends ConsumerWidget {
         ),
         _ => const _NoTafsirSelected(),
       },
-      bottomNavigationBar: _PrevNextBar(verse: _verse),
+      bottomNavigationBar: continuous ? null : _PrevNextBar(verse: _verse),
+    );
+  }
+
+  /// How the reader shows its ayahs: one at a time or continuous, and
+  /// with translation and transliteration or without (saved).
+  void _showViewSheet(BuildContext context) {
+    showTahfeezModalBottomSheet(
+      context: context,
+      title: AppLocalizations.of(context).tafsirView,
+      builder: (context) => Consumer(
+        builder: (context, ref, _) {
+          final l10n = AppLocalizations.of(context);
+          final view = ref.watch(tafsirReaderPreferencesProvider);
+          final controller = ref.read(tafsirReaderPreferencesProvider.notifier);
+          return Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SegmentedButton<TafsirLayout>(
+                  key: const ValueKey('tafsir-layout'),
+                  showSelectedIcon: false,
+                  segments: [
+                    ButtonSegment(
+                      value: TafsirLayout.paged,
+                      icon: const Icon(Icons.swap_horiz_rounded),
+                      label: Text(l10n.tafsirLayoutPaged),
+                    ),
+                    ButtonSegment(
+                      value: TafsirLayout.continuous,
+                      icon: const Icon(Icons.vertical_split_outlined),
+                      label: Text(l10n.tafsirLayoutContinuous),
+                    ),
+                  ],
+                  selected: {view.layout},
+                  onSelectionChanged: (s) =>
+                      controller.set(view.copyWith(layout: s.first)),
+                ),
+                const SizedBox(height: TahfeezSpacing.sm),
+                SwitchListTile(
+                  key: const ValueKey('tafsir-show-translation'),
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(l10n.tafsirShowTranslation),
+                  value: view.showTranslation,
+                  onChanged: (v) =>
+                      controller.set(view.copyWith(showTranslation: v)),
+                ),
+                SwitchListTile(
+                  key: const ValueKey('tafsir-show-transliteration'),
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(l10n.tafsirShowTransliteration),
+                  value: view.showTransliteration,
+                  onChanged: (v) =>
+                      controller.set(view.copyWith(showTransliteration: v)),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -137,7 +219,90 @@ class _TafsirContent extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final workAsync = ref.watch(_tafsirWorkForId(tafsirId));
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(TahfeezSpacing.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: TahfeezSpacing.md,
+        children: [
+          _AyahTafsirBlock(
+            tafsirId: tafsirId,
+            verse: verse,
+            textScale: textScale,
+          ),
+          _TafsirAttribution(tafsirId: tafsirId),
+        ],
+      ),
+    );
+  }
+}
+
+/// Ayah after ayah from [start] to the end of the Quran, scrolled through
+/// (built as they come into view).
+class _ContinuousTafsir extends StatelessWidget {
+  const _ContinuousTafsir({
+    required this.tafsirId,
+    required this.start,
+    required this.textScale,
+  });
+
+  final String tafsirId;
+  final VerseRef start;
+  final double textScale;
+
+  @override
+  Widget build(BuildContext context) {
+    final first = globalAyahNumber(start.chapterNo * 1000 + start.verseNo);
+    return ListView.separated(
+      key: const ValueKey('tafsir-continuous'),
+      padding: const EdgeInsets.all(TahfeezSpacing.md),
+      itemCount: ayahTotal - first + 2,
+      separatorBuilder: (_, i) => i == 0
+          ? const SizedBox(height: TahfeezSpacing.sm)
+          : const Divider(height: TahfeezSpacing.xl),
+      itemBuilder: (context, i) {
+        if (i == 0) return _TafsirAttribution(tafsirId: tafsirId);
+        final id = ayahIdAtGlobal(first + i - 1);
+        final verse = (chapterNo: id ~/ 1000, verseNo: id % 1000);
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: TahfeezSpacing.sm,
+          children: [
+            Text(
+              '${verse.chapterNo}:${verse.verseNo}',
+              key: ValueKey('tafsir-ref-${verse.chapterNo}:${verse.verseNo}'),
+              style: Theme.of(context).textTheme.labelLarge
+                  ?.copyWith(color: Theme.of(context).colorScheme.primary),
+            ),
+            _AyahTafsirBlock(
+              tafsirId: tafsirId,
+              verse: verse,
+              textScale: textScale,
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+/// One ayah: its text, then (as the view says) its translations and its
+/// transliteration, then the tafsir's commentary on it.
+class _AyahTafsirBlock extends ConsumerWidget {
+  const _AyahTafsirBlock({
+    required this.tafsirId,
+    required this.verse,
+    required this.textScale,
+  });
+
+  final String tafsirId;
+  final VerseRef verse;
+  final double textScale;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final view = ref.watch(tafsirReaderPreferencesProvider);
+    final ayahId = verse.chapterNo * 1000 + verse.verseNo;
     final verseTextAsync = ref.watch(
       tafsirVerseTextProvider(
         chapterNo: verse.chapterNo,
@@ -145,50 +310,119 @@ class _TafsirContent extends ConsumerWidget {
         tafsirId: tafsirId,
       ),
     );
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: TahfeezSpacing.md,
+      children: [
+        // The ayah itself, above its commentary.
+        _AyahText(ayahId: ayahId),
+        if (view.showTransliteration) _Transliteration(ayahId: ayahId),
+        if (view.showTranslation) _Translations(ayahId: ayahId),
+        verseTextAsync.when(
+          data: (text) => text == null
+              ? TahfeezEmptyView(
+                  icon: Icons.menu_book_outlined,
+                  message: AppLocalizations.of(context).tafsirNoCommentary,
+                )
+              : Text(
+                  text.text,
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    fontSize:
+                        (theme.textTheme.bodyLarge?.fontSize ?? 16) * textScale,
+                    height: 1.6,
+                  ),
+                ),
+          loading: () => const TahfeezLoadingView(),
+          error: (_, _) => TahfeezErrorView(
+            message: AppLocalizations.of(context).tafsirLoadError,
+          ),
+        ),
+      ],
+    );
+  }
+}
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(TahfeezSpacing.md),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        spacing: TahfeezSpacing.md,
-        children: [
-          // The ayah itself, above its commentary.
-          _AyahText(ayahId: verse.chapterNo * 1000 + verse.verseNo),
-          verseTextAsync.when(
-            data: (text) => text == null
-                ? TahfeezEmptyView(
-                    icon: Icons.menu_book_outlined,
-                    message: AppLocalizations.of(context).tafsirNoCommentary,
-                  )
-                : Text(
-                    text.text,
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      fontSize:
-                          (Theme.of(context).textTheme.bodyLarge?.fontSize ??
-                              16) *
-                          textScale,
-                      height: 1.6,
-                    ),
-                  ),
-            loading: () => const TahfeezLoadingView(),
-            error: (_, _) => TahfeezErrorView(
-              message: AppLocalizations.of(context).tafsirLoadError,
-            ),
-          ),
-          workAsync.when(
-            data: (work) => work == null
-                ? const SizedBox.shrink()
-                : Text(
-                    '${work.displayName} — ${work.author}',
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-            loading: () => const SizedBox.shrink(),
-            error: (_, _) => const SizedBox.shrink(),
-          ),
-        ],
+/// The ayah's transliteration (the word-by-word pack's, joined).
+class _Transliteration extends ConsumerWidget {
+  const _Transliteration({required this.ayahId});
+
+  final int ayahId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final text = ref.watch(ayahTransliterationProvider(ayahId)).value;
+    if (text == null) return const SizedBox.shrink();
+    final theme = Theme.of(context);
+    return Text(
+      text,
+      key: ValueKey('tafsir-transliteration-$ayahId'),
+      textDirection: TextDirection.ltr,
+      style: theme.textTheme.bodyMedium?.copyWith(
+        fontStyle: FontStyle.italic,
+        color: theme.colorScheme.onSurfaceVariant,
+        height: 1.5,
       ),
+    );
+  }
+}
+
+/// The ayah's chosen translations (Settings), each with its translator.
+class _Translations extends ConsumerWidget {
+  const _Translations({required this.ayahId});
+
+  final int ayahId;
+
+  static const _rtl = {'ar', 'ur', 'fa', 'he', 'ps', 'sd', 'ug', 'ckb'};
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final texts = ref.watch(ayahTranslationsProvider(ayahId)).value;
+    if (texts == null || texts.isEmpty) return const SizedBox.shrink();
+    final books = ref.watch(_translationBooks).value ?? const {};
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: TahfeezSpacing.sm,
+      children: [
+        for (final entry in texts.entries)
+          TranslationBlock(
+            verseText: entry.value,
+            authorName: books[entry.key]?.author ?? entry.key,
+            inlineFootnotes: true,
+            textDirection: _rtl.contains(books[entry.key]?.languageCode)
+                ? TextDirection.rtl
+                : TextDirection.ltr,
+          ),
+      ],
+    );
+  }
+}
+
+final _translationBooks = FutureProvider.autoDispose((ref) async {
+  final slugs = ref.watch(translationSelectionControllerProvider);
+  final repository = ref.watch(translationRepositoryProvider);
+  final books = <String, TranslationBook>{};
+  for (final slug in slugs) {
+    final book = await repository.getInstalledTranslation(slug);
+    if (book != null) books[slug] = book;
+  }
+  return books;
+});
+
+/// The tafsir's name and author.
+class _TafsirAttribution extends ConsumerWidget {
+  const _TafsirAttribution({required this.tafsirId});
+
+  final String tafsirId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final work = ref.watch(_tafsirWorkForId(tafsirId)).value;
+    if (work == null) return const SizedBox.shrink();
+    return Text(
+      '${work.displayName} — ${work.author}',
+      style: Theme.of(context).textTheme.labelSmall
+          ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
     );
   }
 }

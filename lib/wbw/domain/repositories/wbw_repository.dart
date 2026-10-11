@@ -35,4 +35,10 @@ abstract class WbwRepository {
     required int ayahId,
     required int wordIndex,
   });
+
+  /// Every word [packId] has for [ayahId], in word order (one query).
+  Future<List<WbwWordEntry>> getAyahWords({
+    required String packId,
+    required int ayahId,
+  });
 }

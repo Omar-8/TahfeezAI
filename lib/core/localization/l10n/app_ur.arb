@@ -481,5 +481,11 @@
   "followSkip": "آگے بڑھیں",
   "recLoopPerAyah": "ہر آیت (بار)",
   "recLoopPerAyahSub": "ہر دور میں، ہر آیت اتنی بار پھر اگلی",
-  "recLoopStrictSub": "غلطی والے دور کے بعد رکیں تاکہ دیکھ سکیں، پھر دوبارہ کوشش کریں یا آگے بڑھیں"
+  "recLoopStrictSub": "غلطی والے دور کے بعد رکیں تاکہ دیکھ سکیں، پھر دوبارہ کوشش کریں یا آگے بڑھیں",
+  "tafsirView": "منظر",
+  "tafsirLayoutPaged": "پچھلا / اگلا",
+  "tafsirLayoutContinuous": "مسلسل",
+  "tafsirShowTranslation": "ترجمہ",
+  "tafsirShowTransliteration": "رومن تلفظ",
+  "tafsirOpen": "تفسیر"
 }

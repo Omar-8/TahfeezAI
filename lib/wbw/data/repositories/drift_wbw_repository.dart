@@ -81,4 +81,17 @@ class DriftWbwRepository implements WbwRepository {
             .getSingleOrNull();
     return row?.toDomain();
   }
+
+  @override
+  Future<List<WbwWordEntry>> getAyahWords({
+    required String packId,
+    required int ayahId,
+  }) async {
+    final rows =
+        await (_db.select(_db.wbwWords)
+              ..where((w) => w.packId.equals(packId) & w.ayahId.equals(ayahId))
+              ..orderBy([(w) => OrderingTerm.asc(w.wordIndex)]))
+            .get();
+    return [for (final row in rows) row.toDomain()];
+  }
 }

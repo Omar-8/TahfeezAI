@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tahfeez_ai/core/routing/app_routes.dart';
 import 'package:tahfeez_ai/core/routing/tafsir_routing.dart';
+import 'package:tahfeez_ai/quran/application/tafsir_reader_preferences.dart';
 import 'package:tahfeez_ai/quran/application/tafsir_selection_controller.dart';
 import 'package:tahfeez_ai/quran/data/import/quran_dataset_importer.dart';
 import 'package:tahfeez_ai/quran/data/quran_database.dart';
@@ -22,6 +23,7 @@ void main() {
     QuranDatabase db,
     TafsirDatabase tafsirDb, {
     String? activeTafsirId,
+    TafsirReaderPreferences? view,
   }) {
     final router = GoRouter(
       initialLocation: '${AppRoutes.tafsir}/1/1',
@@ -44,6 +46,8 @@ void main() {
           tafsirSelectionControllerProvider.overrideWith(
             () => _FixedActiveTafsir(activeTafsirId),
           ),
+        if (view != null)
+          tafsirReaderPreferencesProvider.overrideWith(() => _FixedView(view)),
       ],
       child: MaterialApp.router(
         routerConfig: router,
@@ -114,6 +118,51 @@ void main() {
     expect(find.text('Tafsir · 1:2'), findsOneWidget);
     expect(find.textContaining('Test commentary for verse 2'), findsOneWidget);
   });
+
+  testWidgets('continuous: ayah after ayah in one scroll, no previous / '
+      'next', (tester) async {
+    final db = QuranDatabase(NativeDatabase.memory());
+    addTearDown(db.close);
+    await const QuranDatasetImporter().import(db, buildValidSyntheticPayload());
+    final tafsirDb = TafsirDatabase(NativeDatabase.memory());
+    addTearDown(tafsirDb.close);
+    final container = ProviderContainer(
+      overrides: [tafsirDatabaseProvider.overrideWith((ref) => tafsirDb)],
+    );
+    addTearDown(container.dispose);
+    await container
+        .read(tafsirRepositoryProvider)
+        .installTafsir(buildTestTafsirWork(), buildTestTafsirVerses());
+
+    await tester.pumpWidget(
+      wrap(
+        db,
+        tafsirDb,
+        activeTafsirId: testTafsirId,
+        view: const TafsirReaderPreferences(
+          layout: TafsirLayout.continuous,
+          showTranslation: false,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('tafsir-continuous')), findsOneWidget);
+    expect(find.byKey(const ValueKey('tafsir-ref-1:1')), findsOneWidget);
+    expect(find.byKey(const ValueKey('tafsir-ref-1:2')), findsOneWidget);
+    expect(find.textContaining('Test commentary for verse 1'), findsOneWidget);
+    expect(find.textContaining('Test commentary for verse 2'), findsOneWidget);
+    expect(find.text('Next'), findsNothing);
+  });
+}
+
+class _FixedView extends TafsirReaderPreferencesController {
+  _FixedView(this._view);
+
+  final TafsirReaderPreferences _view;
+
+  @override
+  TafsirReaderPreferences build() => _view;
 }
 
 class _FixedActiveTafsir extends TafsirSelectionController {

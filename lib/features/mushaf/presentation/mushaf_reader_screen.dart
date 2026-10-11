@@ -14,6 +14,7 @@ import '../domain/mushaf_appearance.dart';
 import 'mushaf_pager.dart';
 import 'mushaf_page_title.dart';
 import 'mushaf_appearance_sheet.dart';
+import 'mushaf_tafsir_button.dart';
 
 /// Tahfeez's standalone Mushaf (paginated, printed-page-style) reader route
 /// — reached from the Quran index's Page tab, with no underlying
@@ -62,6 +63,8 @@ class _MushafReaderScreenState extends ConsumerState<MushafReaderScreen> {
           // Hifz mode's feedback settings, beside the reader's own (loop
           // recitation is in the recitation bar).
           const HifzSettingsButton(),
+          // The tafsir reader, at the ayah in view.
+          const MushafTafsirButton(),
           // The guide to the modes (left of the reader's own settings).
           const GuideButton(),
           IconButton(
