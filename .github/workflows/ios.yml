@@ -119,6 +119,8 @@ jobs:
 
       - name: Smoke test on the simulator
         shell: bash  # -eo pipefail: the test's failure is not hidden by tee
+        # Normally ~2 min; `flutter drive` can hang waiting for the app.
+        timeout-minutes: 10
         run: |
           flutter drive \
             --driver=test_driver/integration_test.dart \
