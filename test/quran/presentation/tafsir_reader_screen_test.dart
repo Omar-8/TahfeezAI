@@ -24,9 +24,10 @@ void main() {
     TafsirDatabase tafsirDb, {
     String? activeTafsirId,
     TafsirReaderPreferences? view,
+    String at = '1/1',
   }) {
     final router = GoRouter(
-      initialLocation: '${AppRoutes.tafsir}/1/1',
+      initialLocation: '${AppRoutes.tafsir}/$at',
       routes: [
         ...tafsirRoutes(),
         GoRoute(
@@ -153,6 +154,56 @@ void main() {
     expect(find.textContaining('Test commentary for verse 1'), findsOneWidget);
     expect(find.textContaining('Test commentary for verse 2'), findsOneWidget);
     expect(find.text('Next'), findsNothing);
+  });
+
+  testWidgets('continuous, opened mid-surah: the earlier ayahs above, '
+      'reached by scrolling up', (tester) async {
+    final db = QuranDatabase(NativeDatabase.memory());
+    addTearDown(db.close);
+    await const QuranDatasetImporter().import(db, buildValidSyntheticPayload());
+    final tafsirDb = TafsirDatabase(NativeDatabase.memory());
+    addTearDown(tafsirDb.close);
+    final container = ProviderContainer(
+      overrides: [tafsirDatabaseProvider.overrideWith((ref) => tafsirDb)],
+    );
+    addTearDown(container.dispose);
+    await container
+        .read(tafsirRepositoryProvider)
+        .installTafsir(buildTestTafsirWork(), buildTestTafsirVerses());
+
+    await tester.pumpWidget(
+      wrap(
+        db,
+        tafsirDb,
+        activeTafsirId: testTafsirId,
+        at: '1/2',
+        view: const TafsirReaderPreferences(
+          layout: TafsirLayout.continuous,
+          showTranslation: false,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final opened = tester.getTopLeft(
+      find.byKey(const ValueKey('tafsir-ref-1:2')),
+    );
+    expect(opened.dy, lessThan(200), reason: 'opened at 1:2, at the top');
+    expect(find.byKey(const ValueKey('tafsir-ref-1:1')), findsNothing);
+
+    await tester.drag(
+      find.byKey(const ValueKey('tafsir-continuous')),
+      const Offset(0, 400),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('tafsir-ref-1:1')), findsOneWidget);
+    expect(find.textContaining('Test commentary for verse 1'), findsOneWidget);
+    expect(
+      tester.getTopLeft(find.byKey(const ValueKey('tafsir-ref-1:1'))).dy,
+      lessThan(
+        tester.getTopLeft(find.byKey(const ValueKey('tafsir-ref-1:2'))).dy,
+      ),
+      reason: '1:1 above 1:2',
+    );
   });
 }
 

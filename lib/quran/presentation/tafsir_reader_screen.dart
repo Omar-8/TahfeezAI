@@ -237,9 +237,10 @@ class _TafsirContent extends ConsumerWidget {
   }
 }
 
-/// Ayah after ayah from [start] to the end of the Quran, scrolled through
-/// (built as they come into view).
-class _ContinuousTafsir extends StatelessWidget {
+/// The whole Quran ayah after ayah, opened at [start]: scrolling down
+/// goes on to the ayahs after it, scrolling up back to the ones before
+/// (each built as it comes into view).
+class _ContinuousTafsir extends StatefulWidget {
   const _ContinuousTafsir({
     required this.tafsirId,
     required this.start,
@@ -251,37 +252,80 @@ class _ContinuousTafsir extends StatelessWidget {
   final double textScale;
 
   @override
+  State<_ContinuousTafsir> createState() => _ContinuousTafsirState();
+}
+
+class _ContinuousTafsirState extends State<_ContinuousTafsir> {
+  // Where the scroll view starts: [start] at the top, earlier ayahs above.
+  final _center = UniqueKey();
+
+  Widget _ayah(BuildContext context, int global) {
+    final id = ayahIdAtGlobal(global);
+    final verse = (chapterNo: id ~/ 1000, verseNo: id % 1000);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: TahfeezSpacing.sm,
+      children: [
+        Text(
+          '${verse.chapterNo}:${verse.verseNo}',
+          key: ValueKey('tafsir-ref-${verse.chapterNo}:${verse.verseNo}'),
+          style: Theme.of(context).textTheme.labelLarge
+              ?.copyWith(color: Theme.of(context).colorScheme.primary),
+        ),
+        _AyahTafsirBlock(
+          tafsirId: widget.tafsirId,
+          verse: verse,
+          textScale: widget.textScale,
+        ),
+      ],
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final first = globalAyahNumber(start.chapterNo * 1000 + start.verseNo);
-    return ListView.separated(
+    final first = globalAyahNumber(
+      widget.start.chapterNo * 1000 + widget.start.verseNo,
+    );
+    const pad = EdgeInsets.symmetric(horizontal: TahfeezSpacing.md);
+    return CustomScrollView(
       key: const ValueKey('tafsir-continuous'),
-      padding: const EdgeInsets.all(TahfeezSpacing.md),
-      itemCount: ayahTotal - first + 2,
-      separatorBuilder: (_, i) => i == 0
-          ? const SizedBox(height: TahfeezSpacing.sm)
-          : const Divider(height: TahfeezSpacing.xl),
-      itemBuilder: (context, i) {
-        if (i == 0) return _TafsirAttribution(tafsirId: tafsirId);
-        final id = ayahIdAtGlobal(first + i - 1);
-        final verse = (chapterNo: id ~/ 1000, verseNo: id % 1000);
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          spacing: TahfeezSpacing.sm,
-          children: [
-            Text(
-              '${verse.chapterNo}:${verse.verseNo}',
-              key: ValueKey('tafsir-ref-${verse.chapterNo}:${verse.verseNo}'),
-              style: Theme.of(context).textTheme.labelLarge
-                  ?.copyWith(color: Theme.of(context).colorScheme.primary),
+      center: _center,
+      slivers: [
+        // Before [start], nearest first, growing upwards.
+        SliverPadding(
+          padding: pad,
+          sliver: SliverList.builder(
+            itemCount: first - 1,
+            itemBuilder: (context, i) => Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _ayah(context, first - 1 - i),
+                const Divider(height: TahfeezSpacing.xl),
+              ],
             ),
-            _AyahTafsirBlock(
-              tafsirId: tafsirId,
-              verse: verse,
-              textScale: textScale,
+          ),
+        ),
+        // [start] and after.
+        SliverPadding(
+          key: _center,
+          padding: pad.copyWith(bottom: TahfeezSpacing.md),
+          sliver: SliverList.builder(
+            itemCount: ayahTotal - first + 1,
+            itemBuilder: (context, i) => Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (i == 0) ...[
+                  const SizedBox(height: TahfeezSpacing.md),
+                  _TafsirAttribution(tafsirId: widget.tafsirId),
+                  const SizedBox(height: TahfeezSpacing.sm),
+                ] else
+                  const Divider(height: TahfeezSpacing.xl),
+                _ayah(context, first + i),
+              ],
             ),
-          ],
-        );
-      },
+          ),
+        ),
+      ],
     );
   }
 }
