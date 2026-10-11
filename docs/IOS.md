@@ -22,8 +22,8 @@ the compiled Dart code).
 1. Flutter, Xcode, CocoaPods and rustup installed; this repository cloned.
 2. The engine: `bash third_party/qvp_flutter/scripts/build-engine-ios.sh`
    (clones upstream tag `v0.2.2`, the published package's commit).
-3. `flutter pub get && cd ios && pod install` (sets the platform to iOS
-   13+ if asked; brings `onnxruntime-objc` 1.30.0).
+3. `flutter pub get && cd ios && pod install` (brings `onnxruntime-objc`
+   1.30.0, which needs iOS 15.1 — the app's minimum).
 4. Signing: open `ios/Runner.xcworkspace`, set the team and bundle id.
 5. `flutter run --profile --dart-define=TAHFEEZ_KEEP_RECORDINGS=true` on
    an iPhone.

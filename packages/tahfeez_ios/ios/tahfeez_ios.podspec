@@ -11,7 +11,7 @@ Pod::Spec.new do |s|
   s.dependency 'Flutter'
   # ONNX Runtime with its Objective-C API (CPU, CoreML, XNNPACK).
   s.dependency 'onnxruntime-objc', '1.30.0' # the version Android ships
-  s.platform         = :ios, '15.0'
+  s.platform         = :ios, '15.1' # onnxruntime-objc 1.30.0's minimum
   s.swift_version    = '5.0'
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES' }
 end
