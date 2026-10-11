@@ -135,11 +135,16 @@ const credits = <Credit>[
     name: 'Quran Engine page corpus (KFGQPC Madinah Mushaf)',
     owner: 'quran.ws (Quran Engine); King Fahd Glorious Quran Printing Complex',
     licence:
-        'Not stated for the page material (derived from the KFGQPC print); '
-        'used with credit while its terms are clarified',
+        'quran.ws data: CC BY 4.0. The Mushaf: the King Fahd Complex’s '
+        'usage rights (free use, including in software)',
     url: 'https://github.com/quran-ws/quran-engine',
     useEn: 'The Mushaf pages as printed',
     useAr: 'صفحات المصحف كما طُبعت',
+    citation:
+        'Data from Quran Engine (quran-engine-pages-hafs-kfgqpc) by Quran.ws, '
+        'licensed under CC BY 4.0. Source: https://cdn.quran.ws/qvp/v0.3.0/. '
+        'Version: 0.3.0. Modified: no. Mus’haf al-Madinah © King Fahd '
+        'Glorious Qur’an Printing Complex, used under its usage rights.',
   ),
   Credit(
     group: CreditGroup.mushaf,
@@ -152,12 +157,16 @@ const credits = <Credit>[
   ),
   Credit(
     group: CreditGroup.mushaf,
-    name: 'Quranic Universal Library: KFGQPC layout, QPC fonts and data',
+    name: 'Quranic Universal Library: KFGQPC V2 layout and word data',
     owner: 'Tarteel (QUL); King Fahd Glorious Quran Printing Complex',
-    licence: 'Not stated per resource; used with credit while clarified',
+    licence:
+        'Layouts free for personal and commercial use (QUL); word data: '
+        'terms being confirmed. The Mushaf: the King Fahd Complex’s usage '
+        'rights',
     url: 'https://qul.tarteel.ai',
-    useEn: 'Mushaf layout, Quran fonts and word data',
-    useAr: 'تخطيط المصحف والخطوط القرآنية وبيانات الكلمات',
+    useEn: 'Mushaf layout and word data',
+    useAr: 'تخطيط المصحف وبيانات الكلمات',
+    citation: 'Data provided by QUL — https://qul.tarteel.ai',
   ),
   Credit(
     group: CreditGroup.mushaf,

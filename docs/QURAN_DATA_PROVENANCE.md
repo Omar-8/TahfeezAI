@@ -247,6 +247,18 @@ whenever a resource needs updating (obligation 6).
   this requires the project owner's direct QUL account access to the resource's own
   license/terms page.
 
+### Update 2026-10-11: licence
+
+QUL's team answered for all its layouts, this one included (`mushaf-layout/10`,
+2026-05-06, https://github.com/TarteelAI/quranic-universal-library/issues/596):
+free for personal and commercial use; bundling, offline use, modification and
+conversion to other formats allowed; attribution optional ("Data provided by
+QUL" appreciated). The underlying Mus'haf al-Madinah is the King Fahd
+Complex's, whose published usage rights allow free use "in websites, software,
+and other similar intermediates". Status: **permitted** (was
+`SHIP_BLOCKED_LICENSE`). Evidence in full: `docs/THIRD_PARTY_RESOURCES.md`,
+"Mushaf licensing, 2026-10-11".
+
 ## 7a. Quran script/word-by-word dataset — QUL KFGQPC V2 Glyph (word IDs)
 
 - **Source**: QUL, resource "QPC V2 Glyph - Word by Word"
@@ -263,6 +275,12 @@ whenever a resource needs updating (obligation 6).
 - **Why vendored rather than fetched by tooling**: same login gate as §7 — confirmed by
   inspecting the resource's own download links, which redirect to `/users/sign_in`.
 - **License**: **unverified**, same status and reasoning as §7 (`SHIP_BLOCKED_LICENSE`).
+
+### Update 2026-10-11: licence
+
+Still **unconfirmed by QUL**: its 2026-05-06 statement covers layouts, and
+this is a script resource. A question to QUL was drafted (GitHub). The glyph
+codes are the Complex's QCF V2 encoding, under its usage rights.
 
 ## 7b. Compatibility audit and the ayah-marker finding
 

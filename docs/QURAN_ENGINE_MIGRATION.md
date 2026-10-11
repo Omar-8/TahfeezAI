@@ -522,6 +522,16 @@ platforms, in every build including release — no gate, no exclusion.**
 
 ## 10. Licensing — the decision that was made, and exactly what was accepted
 
+> **Update 2026-10-11 — cleared.** quran-engine's `LICENSE` (2026-09-11)
+> now states the terms: quran.ws's data under CC BY 4.0 with attribution
+> waived for use inside a product, and the King Fahd Complex's material under
+> the Complex's published usage rights (reproduced there in full), which
+> allow free use "in websites, software, and other similar intermediates",
+> reserving only printing Mushafs in Saudi Arabia or importing them for sale.
+> The page corpus is therefore **permitted**; the decision below is kept as
+> the record of what was accepted before. Evidence: `docs/THIRD_PARTY_RESOURCES.md`,
+> "Mushaf licensing, 2026-10-11".
+
 Quran Engine's own page data is **KFGQPC-derived with the same unresolved
 redistribution status as Tahfeez's existing QPC V2 fonts** — confirmed by
 the engine maintainers' own README statement (quoted in
