@@ -379,7 +379,7 @@ class QuranEngineAndroidPage implements QuranEngineMushafPage {
     List<PageBand> bands = const [],
   }) {
     page.clearHighlights();
-    final padY = -page.lineSpacing * PageBand.inset;
+    final padY = page.lineSpacing * PageBand.fill;
     for (final b in bands) {
       page.highlight(
         b.isAyahs

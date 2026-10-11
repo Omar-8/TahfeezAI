@@ -376,7 +376,7 @@ class QuranEngineWebPage {
     // The line pitch, from the page's height and line count.
     final height = (_page.getProperty<JSNumber>('height'.toJS)).toDartDouble;
     final lines = (_page.getProperty<JSNumber>('nLines'.toJS)).toDartInt;
-    final padY = -height / (lines > 0 ? lines : 15) * PageBand.inset;
+    final padY = height / (lines > 0 ? lines : 15) * PageBand.fill;
     for (final (:band, :rgba) in bands) {
       final style = JSObject()
         ..setProperty('mode'.toJS, 'band'.toJS)

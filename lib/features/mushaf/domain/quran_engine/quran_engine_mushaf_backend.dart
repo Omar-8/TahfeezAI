@@ -126,8 +126,8 @@ abstract class QuranEngineMushafPage {
   int highlightWordAt(int wordIndex, {required Color color});
 
   /// Replaces every highlight on the page at once: first the [bands] —
-  /// each one seamless band (no darker seams where words meet), inset to
-  /// a slim, even height ([PageBand]) — then,
+  /// each one seamless band (no darker seams where words meet), reaching
+  /// into the gaps between lines ([PageBand]) — then,
   /// for each engine word index in [highlights], a [color] either as a
   /// band behind the word or, with `ink`, on the word's own letters. One
   /// repaint for the whole set.
@@ -142,8 +142,9 @@ abstract class QuranEngineMushafPage {
 /// A tint behind part of a page, drawn as one seamless band: a run of
 /// whole ayahs of one surah ([surah], [fromAyah]..[toAyah], their ayah-end
 /// markers included), or else a set of engine word indices ([words]).
-/// Slimmer than the line — [inset] of the line pitch off its top and
-/// bottom — so every line's band has the same height and gap.
+/// Taller than the line — [fill] of the line pitch above and below — so a
+/// passage's lines meet, with no gaps between them; one band is one shape,
+/// so where its lines overlap it is not drawn twice.
 class PageBand {
   const PageBand.ayahs(this.surah, this.fromAyah, this.toAyah, this.color)
     : words = const [];
@@ -159,6 +160,7 @@ class PageBand {
 
   bool get isAyahs => surah > 0;
 
-  /// The share of the line pitch left off each band's top and bottom.
-  static const inset = 0.16;
+  /// The share of the line pitch each band reaches past its line's top and
+  /// bottom.
+  static const fill = 0.22;
 }
