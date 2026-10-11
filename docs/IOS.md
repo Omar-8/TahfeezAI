@@ -31,15 +31,11 @@ differs only in the compiled Dart code).
 4. Signing: open `ios/Runner.xcworkspace`, set the team and bundle id.
 5. `flutter run --profile --dart-define=TAHFEEZ_KEEP_RECORDINGS=true` on
    an iPhone.
-6. The acoustic model (development, never bundled): copy
-   `quran_acoustic.onnx` and `quran_acoustic.json` into the app's
-   `Documents/models/`:
-   ```
-   xcrun devicectl device copy to --device <id> \
-     --domain-type appDataContainer --domain-identifier <bundle id> \
-     --source quran_acoustic.onnx --destination Documents/models/quran_acoustic.onnx
-   ```
-   (and the same for the `.json`).
+6. The acoustic model is bundled (`assets/models/`, from the release
+   `model-v3.5`: `gh release download model-v3.5 --dir assets/models`). A
+   different one can still be sideloaded into `Documents/models/` with
+   `xcrun devicectl device copy to --domain-type appDataContainer ...`;
+   it then comes first.
 7. Check, in this order:
    - the Mushaf renders, word taps work, passage tints;
    - the reciter plays, also with the screen locked (media controls);

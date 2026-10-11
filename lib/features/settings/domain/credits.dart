@@ -206,11 +206,29 @@ const credits = <Credit>[
   // ── Training and evaluation data ──
   Credit(
     group: CreditGroup.data,
-    name: 'Recitations from everyayah.com and mp3quran.net',
-    owner: 'The reciters; EveryAyah; mp3quran.net',
+    name: 'Muaalem annotated recitations (obadx/muaalem-annotated-v3)',
+    owner: 'Abdullah (obadx); the reciters',
+    licence: 'MIT (obadx/muaalem-annotated-v3)',
+    url: 'https://huggingface.co/datasets/obadx/muaalem-annotated-v3',
+    useEn: 'Training the recitation model (professional reciters)',
+    useAr: 'تدريب نموذج التلاوة (قرّاء متقنون)',
+  ),
+  Credit(
+    group: CreditGroup.data,
+    name: 'Recitations from mp3quran.net',
+    owner: 'The reciters; mp3quran.net',
     licence:
-        'Published for listening; no licence for training stated — used with '
-        'credit while clarified',
+        '“All rights are available to everyone”: any developer may copy any '
+        'material (mp3quran.net)',
+    url: 'https://www.mp3quran.net',
+    useEn: 'Training and testing the recitation model (professional reciters)',
+    useAr: 'تدريب نموذج التلاوة واختباره (قرّاء متقنون)',
+  ),
+  Credit(
+    group: CreditGroup.data,
+    name: 'Recitations from everyayah.com',
+    owner: 'The reciters; EveryAyah',
+    licence: 'No licence stated; used with credit',
     url: 'https://everyayah.com',
     useEn: 'Training and testing the recitation model (professional reciters)',
     useAr: 'تدريب نموذج التلاوة واختباره (قرّاء متقنون)',
@@ -219,7 +237,7 @@ const credits = <Credit>[
     group: CreditGroup.data,
     name: 'Quranic Audio Dataset (RetaSy)',
     owner: 'RetaSy',
-    licence: 'Not stated by the dataset; used with credit',
+    licence: 'No licence stated; used with credit',
     url: 'https://huggingface.co/datasets/RetaSy/quranic_audio_dataset',
     useEn: 'Training and testing on learners’ recitation',
     useAr: 'التدريب والاختبار على تلاوات المتعلّمين',
@@ -233,8 +251,10 @@ const credits = <Credit>[
     owner: 'QDAT authors; cleaned by obadx',
     licence: 'MIT (obadx/qdat)',
     url: 'https://huggingface.co/datasets/obadx/qdat',
-    useEn: 'Testing tajweed checks (madd, ghunnah, ikhfāʾ, qalqala)',
-    useAr: 'اختبار فحص التجويد (المدّ والغنّة والإخفاء والقلقلة)',
+    useEn:
+        'Training and testing tajweed checks (madd, ghunnah, ikhfāʾ, '
+        'qalqala)',
+    useAr: 'تدريب فحص التجويد واختباره (المدّ والغنّة والإخفاء والقلقلة)',
     citation: 'QDAT: A data set for Reciting the Quran',
   ),
   Credit(
@@ -255,8 +275,8 @@ const credits = <Credit>[
     owner: 'Muaz Ahmad (MuazAhmad7)',
     licence: 'CC BY 4.0',
     url: 'https://huggingface.co/datasets/MuazAhmad7/Surah_Ikhlas-Labeled_Dataset',
-    useEn: 'Testing on learners’ qalqala and vowel mistakes',
-    useAr: 'الاختبار على أخطاء المتعلّمين في القلقلة والحركات',
+    useEn: 'Training and testing on learners’ qalqala and vowel mistakes',
+    useAr: 'التدريب والاختبار على أخطاء المتعلّمين في القلقلة والحركات',
   ),
   // ── Software ──
   Credit(
