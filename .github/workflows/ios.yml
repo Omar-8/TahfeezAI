@@ -63,7 +63,7 @@ jobs:
       - name: iPhone build (release, unsigned) — compiles the Swift and links the engine
         shell: bash
         run: |
-          flutter build ios --config-only --release
+          flutter build ios --config-only --release --no-codesign
           cd ios
           xcodebuild -workspace Runner.xcworkspace -scheme Runner \
             -configuration Release -sdk iphoneos -destination 'generic/platform=iOS' \
