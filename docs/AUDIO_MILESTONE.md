@@ -69,6 +69,13 @@ Each phase: `flutter analyze` clean, tests, English + Arabic strings, credits an
    half the size of 128, hardly different); Al-Minshawi and Muhammad Ayyoub only exist
    at 128.
 
+6. **L6 — Background playback.** *(done 2026-10-11)* Recitation audio is a media session
+   (`just_audio_background` over `audio_service`): it keeps playing with the screen off
+   or the app in the background, with a notification and lock-screen controls (play /
+   pause, previous / next ayah, stop), each ayah titled "Surah · ayah" by the reciter;
+   headset, Bluetooth and car buttons work. Stopping from the notification clears the
+   app's bar. Listening only: recitation checking needs the microphone and the screen.
+
 ## Later
 
 Translation audio.

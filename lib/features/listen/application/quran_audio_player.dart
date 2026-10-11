@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/audio/audio_models.dart';
 import '../../../core/core_providers.dart';
+import '../../../core/localization/locale_controller.dart';
 import '../../../memorization/application/activity_stats.dart';
 import '../../../quran/quran_providers.dart';
 import '../../mushaf/application/mushaf_focus_ayah.dart';
@@ -90,6 +91,12 @@ class QuranAudioPlayer extends Notifier<NowPlaying?> {
     // The player reports the previous item's end until the new one loads:
     // only an end seen after this one started is its end.
     if (!playback.completed) _started = true;
+    if (playback.isPlaying) _played = true;
+    // Stopped from outside the app (the media notification): cleared too.
+    if (playback.stopped && _played) {
+      _clear();
+      return;
+    }
     if (playback.completed && _started) {
       final last = now.isWord ? null : now.ayahIds.last;
       if (!now.isWord) {
@@ -161,6 +168,10 @@ class QuranAudioPlayer extends Notifier<NowPlaying?> {
   /// "completed" is its own, not the previous item's).
   var _started = false;
 
+  /// Whether what is playing now has actually played (so "stopped" is a
+  /// stop, not the player's state before loading it).
+  var _played = false;
+
   /// Hide mode: uncovers the playing ayah's page through it.
   void _revealPlaying() {
     final ayahId = state?.ayahId;
@@ -210,6 +221,7 @@ class QuranAudioPlayer extends Notifier<NowPlaying?> {
     if (ayahIds.isEmpty) return false;
     final reciter = reciterFor(ref.read(reciterProvider));
     _started = false;
+    _played = false;
     state = NowPlaying.ayahs(ayahIds, 0, reciter, options: options);
     _follow();
     try {
@@ -219,18 +231,42 @@ class QuranAudioPlayer extends Notifier<NowPlaying?> {
       await downloads.ready();
       // The speed last chosen, wherever it was.
       await audio.setSpeed(ref.read(listenSpeedProvider));
-      await audio.playQueue([
-        for (final a in ayahIds)
-          switch (downloads.localFile(a, reciter)) {
-            final path? => Uri.file(path).toString(),
-            null => ayahAudioUrl(a, reciter),
-          },
-      ]);
+      await audio.playQueue(
+        [
+          for (final a in ayahIds)
+            switch (downloads.localFile(a, reciter)) {
+              final path? => Uri.file(path).toString(),
+              null => ayahAudioUrl(a, reciter),
+            },
+        ],
+        items: [for (final a in ayahIds) _info(a, reciter)],
+      );
       return true;
     } catch (_) {
       _clear();
       return false;
     }
+  }
+
+  /// [ayahId] as the media notification shows it: "Al-Baqara · 255", by
+  /// the reciter (names in the app's language).
+  AudioItemInfo _info(int ayahId, Reciter reciter) {
+    final surahNo = ayahId ~/ 1000;
+    // (The surah names once loaded — a Mushaf open has them.)
+    final names = ref.exists(indexedSurahsProvider)
+        ? ref.read(indexedSurahsProvider).value
+        : null;
+    final surah = [
+      for (final s in names ?? const <IndexedSurah>[])
+        if (s.surah.surahNo == surahNo) s.localizedName ?? s.arabicName,
+    ].firstOrNull;
+    final language = ref.read(localeControllerProvider)?.languageCode;
+    return AudioItemInfo(
+      title: '${surah ?? surahNo} · ${ayahId % 1000}',
+      subtitle: language == 'ar' || language == 'ur'
+          ? reciter.nameAr
+          : reciter.nameEn,
+    );
   }
 
   /// From [ayahId] to the end of its surah.
@@ -266,6 +302,7 @@ class QuranAudioPlayer extends Notifier<NowPlaying?> {
   Future<bool> playWord(int ayahId, int wordIndex) async {
     ref.read(mushafFocusAyahProvider.notifier).clear(this);
     _started = false;
+    _played = false;
     state = NowPlaying.word(ayahId, wordIndex);
     try {
       await ref

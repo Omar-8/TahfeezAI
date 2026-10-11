@@ -13,11 +13,12 @@ import 'audio_models.dart';
 abstract class AudioController {
   Stream<AudioPlaybackState> get state;
 
-  Future<void> playUrl(String url);
+  Future<void> playUrl(String url, {AudioItemInfo? info});
 
   /// Plays [urls] one after another; [AudioPlaybackState.currentIndex] says
-  /// which. Throws when the first can't be loaded (e.g. offline).
-  Future<void> playQueue(List<String> urls);
+  /// which. Throws when the first can't be loaded (e.g. offline). [items]:
+  /// each one's title for the media notification and lock screen.
+  Future<void> playQueue(List<String> urls, {List<AudioItemInfo>? items});
   Future<void> pause();
   Future<void> resume();
   Future<void> stop();

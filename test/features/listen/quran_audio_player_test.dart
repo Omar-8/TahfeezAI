@@ -41,6 +41,26 @@ void main() {
     expect(container.read(mushafFocusAyahProvider), isNull);
   });
 
+  test('each ayah is titled for the media notification; a stop from it '
+      'clears what plays', () async {
+    final audio = FakeAudioController();
+    final container = ProviderContainer(
+      overrides: [
+        audioControllerProvider.overrideWithValue(audio),
+        defaultMushafProvider.overrideWith((ref) async => null),
+      ],
+    );
+    addTearDown(container.dispose);
+    await container.read(quranAudioPlayerProvider.notifier).playFrom(112002);
+    expect(audio.items, hasLength(3));
+    expect(audio.items!.first.title, '112 · 2');
+    expect(audio.items!.first.subtitle, 'Mishary Alafasy');
+
+    audio.stopFromOutside();
+    await Future<void>.delayed(Duration.zero);
+    expect(container.read(quranAudioPlayerProvider), isNull);
+  });
+
   test('a word plays alone, without highlighting an ayah', () async {
     final audio = FakeAudioController();
     final container = ProviderContainer(

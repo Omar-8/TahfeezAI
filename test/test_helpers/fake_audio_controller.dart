@@ -25,20 +25,31 @@ class FakeAudioController implements AudioController {
   }
 
   @override
-  Future<void> playUrl(String url) async {
+  Future<void> playUrl(String url, {AudioItemInfo? info}) async {
     _emit((s) => s.copyWith(isPlaying: true, durationMs: 60000));
   }
 
   /// The last queue played.
   List<String> queue = const [];
 
+  /// The last queue's titles.
+  List<AudioItemInfo>? items;
+
   @override
-  Future<void> playQueue(List<String> urls) async {
+  Future<void> playQueue(
+    List<String> urls, {
+    List<AudioItemInfo>? items,
+  }) async {
     queue = urls;
+    this.items = items;
     _emit(
       (s) => s.copyWith(isPlaying: true, durationMs: 60000, currentIndex: 0),
     );
   }
+
+  /// Stopped from outside the app (the media notification's stop).
+  void stopFromOutside() =>
+      _emit((s) => s.copyWith(isPlaying: false, stopped: true));
 
   /// Moves the queue on, as the player would.
   void advanceTo(int index) => _emit((s) => s.copyWith(currentIndex: index));

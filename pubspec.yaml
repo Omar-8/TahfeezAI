@@ -70,6 +70,7 @@ dependencies:
   in_app_review: ^2.0.12
   in_app_update: ^5.0.0
   package_info_plus: ^10.2.2
+  just_audio_background: ^0.0.1-beta.17
 
 # A locally-vendored, minimally-patched copy of qvp_flutter 0.2.2 —
 # exposes QvpViewLayout.maxAspectSlack (already a real, documented,

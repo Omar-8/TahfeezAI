@@ -8,11 +8,13 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
 import android.view.WindowManager
-import io.flutter.embedding.android.FlutterActivity
+import com.ryanheise.audioservice.AudioServiceActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
 
-class MainActivity : FlutterActivity() {
+// AudioServiceActivity (a FlutterActivity): the recitation audio's media
+// session runs on this activity's engine.
+class MainActivity : AudioServiceActivity() {
     private var liveSpeech: LiveSpeechRecognizerChannel? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {

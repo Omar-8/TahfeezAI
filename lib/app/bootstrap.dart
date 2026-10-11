@@ -2,9 +2,11 @@ import '../features/settings/presentation/about_screen.dart';
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 
 import '../core/logging/error_reporting.dart';
 import '../core/logging/logging_package_logger.dart';
@@ -41,6 +43,15 @@ Future<void> bootstrap() async {
   WidgetsFlutterBinding.ensureInitialized();
   // The first frame is the app's own splash (bootstrap_gate.dart): the
   // system splash's icon, in place, with the app's name below it.
+  // Recitation audio as a media session (background playback, the
+  // notification and lock-screen controls); before any player exists.
+  if (!kIsWeb) {
+    await JustAudioBackground.init(
+      androidNotificationChannelId: 'ai.tahfeez.tahfeez_ai.audio',
+      androidNotificationChannelName: 'Recitation audio',
+      androidNotificationOngoing: true,
+    );
+  }
   // Portrait only, phones and tablets (the Android manifest says so too).
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,

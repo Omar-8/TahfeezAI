@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:just_audio/just_audio.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 
 import 'audio_controller.dart';
 import 'audio_models.dart';
@@ -37,7 +38,10 @@ class JustAudioController implements AudioController {
       ),
       _player.processingStateStream.listen(
         (p) => _update(
-          (s) => s.copyWith(completed: p == ProcessingState.completed),
+          (s) => s.copyWith(
+            completed: p == ProcessingState.completed,
+            stopped: p == ProcessingState.idle,
+          ),
         ),
       ),
     ];
@@ -57,15 +61,31 @@ class JustAudioController implements AudioController {
   Stream<AudioPlaybackState> get state => _stateController.stream;
 
   @override
-  Future<void> playUrl(String url) async {
-    await _player.setUrl(url);
+  Future<void> playUrl(String url, {AudioItemInfo? info}) async {
+    await _player.setAudioSource(_source(url, info));
     await _player.play();
   }
 
+  /// [url] tagged for the media session (notification, lock screen).
+  static AudioSource _source(String url, AudioItemInfo? info) =>
+      AudioSource.uri(
+        Uri.parse(url),
+        tag: MediaItem(
+          id: url,
+          title: info?.title ?? 'TahfeezAI',
+          artist: info?.subtitle,
+          album: 'TahfeezAI',
+        ),
+      );
+
   @override
-  Future<void> playQueue(List<String> urls) async {
+  Future<void> playQueue(
+    List<String> urls, {
+    List<AudioItemInfo>? items,
+  }) async {
     await _player.setAudioSources([
-      for (final url in urls) AudioSource.uri(Uri.parse(url)),
+      for (var i = 0; i < urls.length; i++)
+        _source(urls[i], items != null && i < items.length ? items[i] : null),
     ]);
     await _player.play();
   }

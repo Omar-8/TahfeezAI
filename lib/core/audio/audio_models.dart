@@ -14,6 +14,14 @@ enum AudioContentOption { quranOnly, translationOnly, both }
 enum AudioEndBehaviour { stopPlayback, nextChapter, repeatChapter }
 
 /// Immutable snapshot of what the audio subsystem is doing right now.
+/// What is playing, as the media notification and lock screen show it.
+class AudioItemInfo {
+  const AudioItemInfo({required this.title, this.subtitle});
+
+  final String title;
+  final String? subtitle;
+}
+
 class AudioPlaybackState {
   const AudioPlaybackState({
     this.isPlaying = false,
@@ -25,6 +33,7 @@ class AudioPlaybackState {
     this.repeatCount = 1,
     this.currentIndex,
     this.completed = false,
+    this.stopped = false,
   });
 
   final bool isPlaying;
@@ -45,6 +54,9 @@ class AudioPlaybackState {
   /// Played to the end.
   final bool completed;
 
+  /// Stopped (nothing loaded) — e.g. from the media notification.
+  final bool stopped;
+
   AudioPlaybackState copyWith({
     bool? isPlaying,
     int? positionMs,
@@ -55,6 +67,7 @@ class AudioPlaybackState {
     int? repeatCount,
     int? currentIndex,
     bool? completed,
+    bool? stopped,
   }) {
     return AudioPlaybackState(
       isPlaying: isPlaying ?? this.isPlaying,
@@ -66,6 +79,7 @@ class AudioPlaybackState {
       repeatCount: repeatCount ?? this.repeatCount,
       currentIndex: currentIndex ?? this.currentIndex,
       completed: completed ?? this.completed,
+      stopped: stopped ?? this.stopped,
     );
   }
 }

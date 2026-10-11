@@ -26,7 +26,8 @@ Audio requests to `cdn.islamic.network` and `audio.qurancdn.com` contain only th
 - **Ads:** No ads.
 - **Target audience:** All ages. (If the Families programme is chosen, re-check the third-party audio services' terms.)
 - **Privacy policy URL:** host `docs/PRIVACY_POLICY.md` publicly (fill in the contact email first) and enter its URL.
-- **Permissions:** `RECORD_AUDIO` (on-device recitation checking), `INTERNET` (recitation audio), `POST_NOTIFICATIONS` (daily reminder), `VIBRATE` (mistake alert), `RECEIVE_BOOT_COMPLETED` (reschedules the reminder).
+- **Permissions:** `RECORD_AUDIO` (on-device recitation checking), `INTERNET` (recitation audio), `POST_NOTIFICATIONS` (daily reminder), `VIBRATE` (mistake alert), `RECEIVE_BOOT_COMPLETED` (reschedules the reminder), `WAKE_LOCK` / `FOREGROUND_SERVICE` / `FOREGROUND_SERVICE_MEDIA_PLAYBACK` (recitation audio playing in the background).
+- **Foreground service declaration (Play Console → App content):** type *media playback* — the user plays Quran recitation and it continues with the screen off; the notification shows what plays, with controls.
 
 ## Basis (checked in the code, 2026-10-10)
 
