@@ -21,32 +21,17 @@ enum GuideWait {
   /// The user taps the highlighted control (the tap goes through to it).
   tap,
 
-  /// Follow along: the user's turn has come.
-  followUserTurn,
-
-  /// Follow along: the user's turn is over (the reciter's again, or done).
-  followUserTurnOver,
-
-  /// A recitation session is running.
-  reciting,
-
-  /// The reciter is playing.
-  listening,
+  /// A practice run is over: the recitation, Follow along or the reciter
+  /// stopped (by stop, or by itself).
+  practiceOver,
 }
 
 class GuideStep {
-  const GuideStep(
-    this.target,
-    this.text, {
-    this.wait,
-    this.branches,
-    this.quiet = false,
-  });
+  const GuideStep(this.target, this.text, {this.wait, this.branches});
 
-  /// No dimming and no card (only a small way to close the guide): the
-  /// page stays in view — e.g. while practising, to see the recitation
-  /// marked — until the step's tap.
-  final bool quiet;
+  /// A practice run: the page stays in full view (no dimming), the card at
+  /// the bottom (no Back / Next) until the run is over.
+  bool get practice => wait == GuideWait.practiceOver;
 
   /// The [GuideTarget] lit; `null`: the card alone.
   final String? target;
@@ -94,13 +79,7 @@ List<GuideStep> guideSteps(GuideTour tour) => switch (tour) {
     GuideStep('hifz-settings', (l) => l.guideReciteSettings),
     GuideStep('eye', (l) => l.guideReciteEye),
     GuideStep('mode-recite', (l) => l.guideReciteTap, wait: GuideWait.tap),
-    GuideStep(null, (l) => l.guideReciteNow, wait: GuideWait.reciting),
-    GuideStep(
-      'session-stop',
-      (l) => l.guideReciteStop,
-      wait: GuideWait.tap,
-      quiet: true,
-    ),
+    GuideStep(null, (l) => l.guideReciteNow, wait: GuideWait.practiceOver),
   ],
   GuideTour.loop => [
     GuideStep('mode-loop', (l) => l.guideLoopTap, wait: GuideWait.tap),
@@ -108,13 +87,7 @@ List<GuideStep> guideSteps(GuideTour tour) => switch (tour) {
     GuideStep('loop-range', (l) => l.guideLoopRange),
     GuideStep('loop-times', (l) => l.guideLoopTimes),
     GuideStep('loop-start', (l) => l.guideLoopStart, wait: GuideWait.tap),
-    GuideStep(null, (l) => l.guideLoopRecite, wait: GuideWait.reciting),
-    GuideStep(
-      'session-stop',
-      (l) => l.guideLoopStop,
-      wait: GuideWait.tap,
-      quiet: true,
-    ),
+    GuideStep(null, (l) => l.guideLoopRecite, wait: GuideWait.practiceOver),
   ],
   GuideTour.listen => [
     GuideStep('mode-listen', (l) => l.guideListenTap, wait: GuideWait.tap),
@@ -123,8 +96,7 @@ List<GuideStep> guideSteps(GuideTour tour) => switch (tour) {
     GuideStep('listen-repeats', (l) => l.guideListenRepeats),
     GuideStep('listen-options', (l) => l.guideListenOptions),
     GuideStep('listen-play', (l) => l.guideListenPlay, wait: GuideWait.tap),
-    GuideStep(null, (l) => l.guideListenWait, wait: GuideWait.listening),
-    GuideStep('listen-controls', (l) => l.guideListenControls),
+    GuideStep(null, (l) => l.guideListenPractice, wait: GuideWait.practiceOver),
   ],
   GuideTour.follow => [
     GuideStep('mode-follow', (l) => l.guideFollowTap, wait: GuideWait.tap),
@@ -134,22 +106,7 @@ List<GuideStep> guideSteps(GuideTour tour) => switch (tour) {
     GuideStep('follow-strict', (l) => l.guideFollowStrict),
     GuideStep('follow-speed', (l) => l.guideFollowSpeed),
     GuideStep('follow-start', (l) => l.guideFollowStart, wait: GuideWait.tap),
-    GuideStep(
-      'follow-hint',
-      (l) => l.guideFollowListen,
-      wait: GuideWait.followUserTurn,
-    ),
-    GuideStep(
-      'follow-hint',
-      (l) => l.guideFollowYourTurn,
-      wait: GuideWait.followUserTurnOver,
-    ),
-    GuideStep(
-      'session-stop',
-      (l) => l.guideFollowStop,
-      wait: GuideWait.tap,
-      quiet: true,
-    ),
+    GuideStep(null, (l) => l.guideFollowPractice, wait: GuideWait.practiceOver),
   ],
 };
 
@@ -397,21 +354,32 @@ class _GuideOverlayState extends ConsumerState<_GuideOverlay> {
     if (step == null) return const SizedBox.shrink();
     _listenFor(step.wait);
     final l10n = AppLocalizations.of(context);
-    if (step.quiet) {
-      // The page in full view; only a small way out of the guide.
-      return Align(
-        alignment: AlignmentDirectional.topEnd,
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.only(top: 64, right: 12, left: 12),
-            child: ActionChip(
-              key: const ValueKey('guide-quiet-close'),
-              avatar: const Icon(Icons.close_rounded, size: 18),
-              label: Text(l10n.guideClose),
-              onPressed: controller.close,
+    if (step.practice) {
+      // The page in full view and usable; the hint at the bottom, above
+      // the recitation bar, until the run is over.
+      return Stack(
+        children: [
+          Positioned(
+            left: 16,
+            right: 16,
+            bottom: MediaQuery.paddingOf(context).bottom + 72 + 12,
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 380),
+                child: _GuideCard(
+                  text: step.text(l10n),
+                  index: guide.index,
+                  length: controller.length,
+                  waiting: true,
+                  tapToContinue: false,
+                  onBack: null,
+                  onNext: null,
+                  onClose: controller.close,
+                ),
+              ),
             ),
           ),
-        ),
+        ],
       );
     }
     final size = MediaQuery.sizeOf(context);
@@ -477,51 +445,24 @@ class _GuideOverlayState extends ConsumerState<_GuideOverlay> {
     );
   }
 
-  /// Moves on when what the step waits for happens (or has already).
+  /// A practice step: on when its run is over — the recitation, Follow
+  /// along or the reciter stopped (by stop, or by itself).
   void _listenFor(GuideWait? wait) {
+    if (wait != GuideWait.practiceOver) return;
     final controller = ref.read(guideProvider.notifier);
-    final already = switch (wait) {
-      GuideWait.listening => switch (ref.read(quranAudioPlayerProvider)) {
-        final now? => !now.isWord,
-        null => false,
-      },
-      _ => false,
-    };
-    if (already) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (controller.step?.wait == wait) controller.next();
-      });
+    void over() {
+      if (controller.step?.wait == GuideWait.practiceOver) controller.next();
     }
-    switch (wait) {
-      case GuideWait.followUserTurn:
-        ref.listen(followAlongControllerProvider, (_, next) {
-          if (next?.phase == FollowAlongPhase.user) controller.next();
-        });
-      case GuideWait.followUserTurnOver:
-        ref.listen(followAlongControllerProvider, (_, next) {
-          if (next == null || next.phase == FollowAlongPhase.reciter) {
-            controller.next();
-          }
-        });
-      case GuideWait.reciting:
-        ref.listen(recitationSessionControllerProvider, (_, next) {
-          if (next.phase == RecitationPhase.listening) {
-            unawaited(
-              Future<void>.delayed(const Duration(seconds: 2), () {
-                if (mounted && controller.step?.wait == GuideWait.reciting) {
-                  controller.next();
-                }
-              }),
-            );
-          }
-        });
-      case GuideWait.listening:
-        ref.listen(quranAudioPlayerProvider, (_, next) {
-          if (next != null && !next.isWord) controller.next();
-        });
-      case GuideWait.tap || null:
-        break;
-    }
+
+    ref.listen(recitationSessionControllerProvider, (previous, next) {
+      if ((previous?.isActive ?? false) && !next.isActive) over();
+    });
+    ref.listen(followAlongControllerProvider, (previous, next) {
+      if (previous != null && next == null) over();
+    });
+    ref.listen(quranAudioPlayerProvider, (previous, next) {
+      if (previous != null && !previous.isWord && next == null) over();
+    });
   }
 }
 

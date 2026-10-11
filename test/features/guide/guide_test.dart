@@ -95,6 +95,23 @@ void main() {
     expect(guide(), (tour: GuideTour.follow, index: 1));
   });
 
+  testWidgets('practising: the page in full view and usable, the hint at '
+      'the bottom without Back', (tester) async {
+    await pump(tester);
+    container
+        .read(guideProvider.notifier)
+        .start(GuideTour.recite, guideSteps(GuideTour.recite).length - 1);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('guide-card')), findsOneWidget);
+    expect(find.byKey(const ValueKey('guide-back')), findsNothing);
+    expect(find.byKey(const ValueKey('guide-next')), findsNothing);
+    final card = tester.getRect(find.byKey(const ValueKey('guide-card')));
+    expect(card.center.dy, greaterThan(300), reason: 'at the bottom');
+    await tester.tap(find.text('recite'));
+    await tester.pumpAndSettle();
+    expect(reciteTaps, 1, reason: 'nothing blocks the page');
+  });
+
   test('finishing a mode tour goes back to choosing a mode', () {
     final c = ProviderContainer();
     addTearDown(c.dispose);
