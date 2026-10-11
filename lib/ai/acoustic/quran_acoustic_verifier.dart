@@ -355,11 +355,19 @@ class QuranAcousticVerifier {
     }
     final aligned = first.keys.toList()..sort();
     final pauseAfter = <int>{};
+    // …and the units followed by a real stop (a waqf, not a breath), or
+    // ending the recitation: a separated madd there needs no length.
+    final stopAfter = <int>{};
     for (var i = 0; i + 1 < aligned.length; i++) {
       final a = aligned[i], b = aligned[i + 1];
-      if (first[b]! - last[a]! - 1 >= thresholds.pauseFrames) pauseAfter.add(a);
+      final gap = first[b]! - last[a]! - 1;
+      if (gap >= thresholds.pauseFrames) pauseAfter.add(a);
+      if (gap >= stopFrames) stopAfter.add(a);
     }
-    if (aligned.isNotEmpty && !openEnd) pauseAfter.add(aligned.last);
+    if (aligned.isNotEmpty && !openEnd) {
+      pauseAfter.add(aligned.last);
+      stopAfter.add(aligned.last);
+    }
     final starts = <int>{
       for (var i = 0; i + 1 < aligned.length; i++)
         if (pauseAfter.contains(aligned[i])) aligned[i + 1],
@@ -480,7 +488,13 @@ class QuranAcousticVerifier {
       chosen.addAll(candidate);
     }
     spans = _alignWithWaqf(frames, chosen);
-    final out = _verifyAligned(frames, chosen, spans, beat);
+    final out = _verifyAligned(
+      frames,
+      chosen,
+      spans,
+      beat,
+      stoppedUnits: stopAfter,
+    );
     // A different vowel said just before a pause is still a mistake.
     for (final MapEntry(key: u, value: (vowel, lastWord))
         in finalVowel.entries) {
@@ -644,12 +658,14 @@ class QuranAcousticVerifier {
     return true;
   }
 
+  /// [stoppedUnits]: the sound units a pause was heard after.
   List<PhonemeVerdict> _verifyAligned(
     AcousticFrames frames,
     List<PhoneticToken> expected,
     List<FrameSpan?> spans,
-    BeatMeter? meter,
-  ) {
+    BeatMeter? meter, {
+    Set<int> stoppedUnits = const {},
+  }) {
     final labels = [for (final t in expected) t.token];
     final out = <PhonemeVerdict>[];
     // The reciter's beat: this audio's own, else the session's so far (a
@@ -660,12 +676,17 @@ class QuranAcousticVerifier {
     for (var k = 0; k < expected.length; k++) {
       final t = expected[k];
       final span = spans[k];
-      // A long madd held clearly short, against the reciter's own beat.
+      // A long madd held clearly short, against the reciter's own beat —
+      // not one ending a unit the reciter stopped after: a separated madd
+      // (munfaṣil, or a ṣila before a hamza: «فِيهَآ ۚ أُو۟لَـٰٓئِكَ»,
+      // «بِهِۦٓ أَحَدًا») is long only joined to the next word; at a stop
+      // it is a natural madd of two.
       if (beat != null &&
           span != null &&
           t.kind == PhoneticTokenKind.long &&
           t.count >= 4 &&
-          _plainOfHidden(t) == null) {
+          _plainOfHidden(t) == null &&
+          !(stoppedUnits.contains(t.unit) && _unitFinal(expected, k))) {
         final beats = _held(frames, expected, spans, k) / beat;
         if (beats < thresholds.maddShare * t.count) {
           out.add(
@@ -806,6 +827,12 @@ class QuranAcousticVerifier {
   /// held it, 50% of those heard to cut it short; 0.75 caught 57% but
   /// flagged more professional recitation.)
   static const maddShortShare = 0.65;
+
+  /// A gap (frames of 40 ms) long enough to be a stop (waqf) rather than a
+  /// breath, for a separated madd's length: 720 ms. On QDAT's held-out
+  /// learners («لَنَآ ۖ إِنَّكَ», 5:109) the separate madd done right and still
+  /// flagged 2.6 -> 0.8%, missed and flagged 39.0 -> 35.1% (160 ms: 25.1%).
+  static const stopFrames = 18;
 
   /// A long sound still heard: its probability at least this, …
   static const heldFloor = 0.15;
@@ -1131,6 +1158,15 @@ class QuranAcousticVerifier {
   }
 
   static const _qalqalaLetters = 'قطبجد';
+
+  /// Whether [ts]`[k]` is its sound unit's last sound (markers aside).
+  static bool _unitFinal(List<PhoneticToken> ts, int k) {
+    for (var j = k + 1; j < ts.length; j++) {
+      if (ts[j].unit != ts[k].unit) return true;
+      if (ts[j].kind != PhoneticTokenKind.marker) return false;
+    }
+    return true;
+  }
 
   /// Whether [ts]`[k]` is its word's last sound (markers aside).
   static bool _wordFinal(List<PhoneticToken> ts, int k) {

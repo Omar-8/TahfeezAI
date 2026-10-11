@@ -66,10 +66,24 @@ class JustAudioController implements AudioController {
     await _player.play();
   }
 
+  /// The recitation files are constant-bitrate MP3s, some (Ahmad al-Ajamy's
+  /// first ayah of a surah, cdn.islamic.network) with a Xing header from a
+  /// longer recording: 183,901 bytes claimed for a 39,618-byte 106:1.
+  /// ExoPlayer trusts the header ("Data size mismatch … using Xing value")
+  /// and waits for the rest — about 9 s of silence after the ayah. Seeking
+  /// by the constant bitrate always takes the file's real length instead.
+  static const _options = ProgressiveAudioSourceOptions(
+    androidExtractorOptions: AndroidExtractorOptions(
+      constantBitrateSeekingEnabled: true,
+      constantBitrateSeekingAlwaysEnabled: true,
+    ),
+  );
+
   /// [url] tagged for the media session (notification, lock screen).
   static AudioSource _source(String url, AudioItemInfo? info) =>
-      AudioSource.uri(
+      ProgressiveAudioSource(
         Uri.parse(url),
+        options: _options,
         tag: MediaItem(
           id: url,
           title: info?.title ?? 'TahfeezAI',
