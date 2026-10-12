@@ -324,6 +324,36 @@ class _ListenSheetState extends ConsumerState<_ListenSheet> {
               ),
             ),
           ),
+          // The speed of all listening (as in Follow along), kept for next
+          // time.
+          TahfeezCard(
+            key: const ValueKey('listen-speed-choice'),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                label(l10n.listenSpeed),
+                Wrap(
+                  spacing: TahfeezSpacing.sm,
+                  runSpacing: TahfeezSpacing.sm,
+                  children: [
+                    for (final speed in listenSpeeds)
+                      ChoiceChip(
+                        key: ValueKey('listen-speed-$speed'),
+                        showCheckmark: false,
+                        label: Text(
+                          '${speed == speed.roundToDouble() ? speed.toInt() : speed}×',
+                        ),
+                        selected:
+                            (ref.watch(listenSpeedProvider) - speed).abs() <
+                            0.01,
+                        onSelected: (_) =>
+                            ref.read(listenSpeedProvider.notifier).set(speed),
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          ),
           GuideTarget(
             id: 'listen-options',
             child: TahfeezCard(

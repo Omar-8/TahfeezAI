@@ -300,6 +300,18 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('tafsir-player')), findsOneWidget);
     expect(find.byKey(const ValueKey('tafsir-block-playing')), findsOneWidget);
+    // The speed, a tap for the next one.
+    final speed = find.byKey(const ValueKey('tafsir-player-speed'));
+    expect(
+      find.descendant(of: speed, matching: find.text('1×')),
+      findsOneWidget,
+    );
+    await tester.tap(speed);
+    await tester.pumpAndSettle();
+    expect(
+      find.descendant(of: speed, matching: find.text('1×')),
+      findsNothing,
+    );
     await tester.tap(find.byKey(const ValueKey('tafsir-player-stop')));
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('tafsir-player')), findsNothing);

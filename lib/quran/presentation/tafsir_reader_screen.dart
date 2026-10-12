@@ -749,6 +749,7 @@ class _TafsirPlayerBar extends ConsumerWidget {
             initialData: const AudioPlaybackState(isPlaying: true),
             builder: (context, snapshot) {
               final playing = snapshot.data?.isPlaying ?? true;
+              final speed = snapshot.data?.speed ?? 1.0;
               return Row(
                 children: [
                   Icon(
@@ -774,6 +775,20 @@ class _TafsirPlayerBar extends ConsumerWidget {
                         ? AppLocalizations.of(context).recPause
                         : AppLocalizations.of(context).recResume,
                     onPressed: playing ? player.pause : player.resume,
+                  ),
+                  // The speed, a tap for the next one (as in the Mushaf).
+                  TextButton(
+                    key: const ValueKey('tafsir-player-speed'),
+                    style: TextButton.styleFrom(
+                      minimumSize: const Size(46, 40),
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                    ),
+                    onPressed: () => player.cycleSpeed(speed),
+                    child: Text(
+                      '${speed == speed.roundToDouble() ? speed.toInt() : speed}×',
+                      semanticsLabel:
+                          '${AppLocalizations.of(context).listenSpeed} $speed',
+                    ),
                   ),
                   IconButton(
                     key: const ValueKey('tafsir-player-stop'),
