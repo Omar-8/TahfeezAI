@@ -9,6 +9,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/components/components.dart';
 import '../../../../quran/application/translation_library_controller.dart';
 import '../../application/search_filters_controller.dart';
+import '../../../../quran/application/translation_selection_controller.dart';
 
 /// Which search domains/translations a query runs against
 /// (`docs/reference/07_SEARCH_SPEC.md` §5's `SearchFilterSheet`) —
@@ -61,6 +62,9 @@ class _SearchFilterSheetBody extends ConsumerWidget {
           const SizedBox(height: TahfeezSpacing.xs),
           installedTranslations.when(
             data: (statuses) {
+              final settingsSlugs = ref
+                  .watch(translationSelectionControllerProvider)
+                  .toSet();
               final installedSlugs = [
                 for (final status in statuses)
                   if (status.state == ResourceDownloadState.completed ||
@@ -78,15 +82,13 @@ class _SearchFilterSheetBody extends ConsumerWidget {
                     if (installedSlugs.contains(status.book.slug))
                       TahfeezFilterChip(
                         label: status.book.displayName,
-                        selected:
-                            filters.translationSlugs == null ||
-                            filters.translationSlugs!.contains(
-                              status.book.slug,
-                            ),
+                        // No choice made here: the Settings' translations.
+                        selected: (filters.translationSlugs ?? settingsSlugs)
+                            .contains(status.book.slug),
                         onSelected: (selected) {
                           final current =
                               filters.translationSlugs?.toSet() ??
-                              installedSlugs.toSet();
+                              settingsSlugs.toSet();
                           final updated = selected
                               ? (current..add(status.book.slug))
                               : (current..remove(status.book.slug));

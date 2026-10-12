@@ -38,8 +38,11 @@ class HomeFeaturedReadingSection extends ConsumerWidget {
                 ),
               );
             }
+            // As tall as a card's content (a number badge, the name and a
+            // line under it), growing with the text size.
+            final textScale = MediaQuery.textScalerOf(context).scale(1);
             return SizedBox(
-              height: 132,
+              height: 44 + 40 * textScale,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 itemCount: list.length,

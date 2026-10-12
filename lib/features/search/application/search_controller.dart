@@ -7,6 +7,7 @@ import '../../../quran/search_providers.dart';
 import '../../../quran/translation_providers.dart';
 import 'search_filters_controller.dart';
 import 'search_history_controller.dart';
+import '../../../quran/application/translation_selection_controller.dart';
 
 part 'search_controller.g.dart';
 
@@ -41,20 +42,18 @@ class SearchController extends _$SearchController {
       await repository.indexQuranText(scriptCode: scriptCode);
     }
 
-    // Only index translations this search would actually use: every
-    // installed translation, narrowed to the filter's own slug scope when
-    // it has one — independent of which translations are merely active in
-    // the reader (`docs/reference/07_SEARCH_SPEC.md` §5's `selectedSlugs`
-    // is a search-specific filter, not the reader's active-translation
-    // selection).
+    // Only index translations this search would actually use.
     final translationRepository = ref.watch(translationRepositoryProvider);
     final installedSlugs =
         (await translationRepository.getInstalledTranslations()).map(
           (book) => book.slug,
         );
-    final relevantSlugs = filters.translationSlugs == null
-        ? installedSlugs
-        : installedSlugs.where(filters.translationSlugs!.contains);
+    // Without a choice in the filters: the translations chosen in Settings
+    // (more can be added in the filters).
+    final searched =
+        filters.translationSlugs ??
+        ref.watch(translationSelectionControllerProvider).toSet();
+    final relevantSlugs = installedSlugs.where(searched.contains);
     for (final slug in relevantSlugs) {
       if (!await repository.isTranslationIndexed(slug)) {
         await repository.indexTranslation(slug);
@@ -65,7 +64,7 @@ class SearchController extends _$SearchController {
       trimmed,
       scriptCode: scriptCode,
       languageCode: languageCode,
-      filters: filters,
+      filters: filters.copyWith(translationSlugs: searched),
     );
   }
 
