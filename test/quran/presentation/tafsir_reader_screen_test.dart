@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:drift/native.dart';
 import 'package:tahfeez_ai/core/localization/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -6,6 +8,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tahfeez_ai/core/routing/app_routes.dart';
 import 'package:tahfeez_ai/core/routing/tafsir_routing.dart';
+import 'package:tahfeez_ai/core/core_providers.dart';
+import 'package:tahfeez_ai/features/listen/application/quran_audio_player.dart';
+import 'package:tahfeez_ai/features/quran/application/quran_index_providers.dart';
 import 'package:tahfeez_ai/quran/application/tafsir_reader_preferences.dart';
 import 'package:tahfeez_ai/quran/application/tafsir_selection_controller.dart';
 import 'package:tahfeez_ai/quran/data/import/quran_dataset_importer.dart';
@@ -15,6 +20,7 @@ import 'package:tahfeez_ai/quran/presentation/tafsir_reader_screen.dart';
 import 'package:tahfeez_ai/quran/quran_providers.dart';
 import 'package:tahfeez_ai/quran/tafsir_providers.dart';
 
+import '../../test_helpers/fake_audio_controller.dart';
 import '../quran_test_fixtures.dart';
 import '../translation_tafsir_test_fixtures.dart';
 
@@ -25,6 +31,7 @@ void main() {
     String? activeTafsirId,
     TafsirReaderPreferences? view,
     String at = '1/1',
+    FakeAudioController? audio,
   }) {
     final router = GoRouter(
       initialLocation: '${AppRoutes.tafsir}/$at',
@@ -49,6 +56,10 @@ void main() {
           ),
         if (view != null)
           tafsirReaderPreferencesProvider.overrideWith(() => _FixedView(view)),
+        if (audio != null) ...[
+          audioControllerProvider.overrideWithValue(audio),
+          defaultMushafProvider.overrideWith((ref) async => null),
+        ],
       ],
       child: MaterialApp.router(
         routerConfig: router,
@@ -203,6 +214,137 @@ void main() {
         tester.getTopLeft(find.byKey(const ValueKey('tafsir-ref-1:2'))).dy,
       ),
       reason: '1:1 above 1:2',
+    );
+  });
+
+  testWidgets('continuous: the title follows the ayah at the top', (
+    tester,
+  ) async {
+    final db = QuranDatabase(NativeDatabase.memory());
+    addTearDown(db.close);
+    await const QuranDatasetImporter().import(db, buildValidSyntheticPayload());
+    final tafsirDb = TafsirDatabase(NativeDatabase.memory());
+    addTearDown(tafsirDb.close);
+    final container = ProviderContainer(
+      overrides: [tafsirDatabaseProvider.overrideWith((ref) => tafsirDb)],
+    );
+    addTearDown(container.dispose);
+    await container
+        .read(tafsirRepositoryProvider)
+        .installTafsir(buildTestTafsirWork(), buildTestTafsirVerses());
+    await tester.pumpWidget(
+      wrap(
+        db,
+        tafsirDb,
+        activeTafsirId: testTafsirId,
+        view: const TafsirReaderPreferences(
+          layout: TafsirLayout.continuous,
+          showTranslation: false,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Tafsir · 1:1'), findsOneWidget);
+    final second = tester.getTopLeft(
+      find.byKey(const ValueKey('tafsir-ref-1:2')),
+    );
+    final first = tester.getTopLeft(
+      find.byKey(const ValueKey('tafsir-ref-1:1')),
+    );
+    await tester.drag(
+      find.byKey(const ValueKey('tafsir-continuous')),
+      Offset(0, -(second.dy - first.dy)),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Tafsir · 1:2'), findsOneWidget);
+  });
+
+  Future<FakeAudioController> setUpPlaying(
+    WidgetTester tester, {
+    required TafsirLayout layout,
+  }) async {
+    final db = QuranDatabase(NativeDatabase.memory());
+    addTearDown(db.close);
+    await const QuranDatasetImporter().import(db, buildValidSyntheticPayload());
+    final tafsirDb = TafsirDatabase(NativeDatabase.memory());
+    addTearDown(tafsirDb.close);
+    final container = ProviderContainer(
+      overrides: [tafsirDatabaseProvider.overrideWith((ref) => tafsirDb)],
+    );
+    addTearDown(container.dispose);
+    await container
+        .read(tafsirRepositoryProvider)
+        .installTafsir(buildTestTafsirWork(), buildTestTafsirVerses());
+    final audio = FakeAudioController();
+    await tester.pumpWidget(
+      wrap(
+        db,
+        tafsirDb,
+        activeTafsirId: testTafsirId,
+        audio: audio,
+        view: TafsirReaderPreferences(layout: layout, showTranslation: false),
+      ),
+    );
+    await tester.pumpAndSettle();
+    return audio;
+  }
+
+  ProviderContainer containerOf(WidgetTester tester) =>
+      ProviderScope.containerOf(tester.element(find.byType(Scaffold).first));
+
+  testWidgets('play the ayah: highlighted, with the player bar to pause or '
+      'stop it', (tester) async {
+    await setUpPlaying(tester, layout: TafsirLayout.paged);
+    expect(find.byKey(const ValueKey('tafsir-player')), findsNothing);
+    await tester.tap(find.byKey(const ValueKey('tafsir-play-1001')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('tafsir-player')), findsOneWidget);
+    expect(find.byKey(const ValueKey('tafsir-block-playing')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('tafsir-player-stop')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('tafsir-player')), findsNothing);
+  });
+
+  testWidgets('one ayah at a time: on to the ayah the reciter reaches', (
+    tester,
+  ) async {
+    final audio = await setUpPlaying(tester, layout: TafsirLayout.paged);
+    unawaited(
+      containerOf(tester)
+          .read(quranAudioPlayerProvider.notifier)
+          .playRange(1001, 1002),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pumpAndSettle();
+    expect(find.text('Tafsir · 1:1'), findsOneWidget);
+    audio.advanceTo(1);
+    await tester.pumpAndSettle();
+    expect(find.text('Tafsir · 1:2'), findsOneWidget);
+    expect(find.byKey(const ValueKey('tafsir-player')), findsOneWidget);
+  });
+
+  testWidgets("continuous: the reciter's ayah highlighted and kept in view", (
+    tester,
+  ) async {
+    final audio = await setUpPlaying(tester, layout: TafsirLayout.continuous);
+    unawaited(
+      containerOf(tester)
+          .read(quranAudioPlayerProvider.notifier)
+          .playRange(1001, 1002),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    audio.advanceTo(1);
+    await tester.pumpAndSettle();
+    final playing = find.byKey(const ValueKey('tafsir-block-playing'));
+    expect(playing, findsOneWidget);
+    expect(
+      tester.getTopLeft(playing).dy,
+      greaterThan(
+        tester.getTopLeft(find.byKey(const ValueKey('tafsir-ref-1:2'))).dy,
+      ),
+      reason: "1:2's ayah, under its reference",
     );
   });
 }

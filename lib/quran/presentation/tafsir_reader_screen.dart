@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../core/localization/generated/app_localizations.dart';
@@ -5,7 +7,15 @@ import '../../core/localization/generated/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/audio/audio_models.dart';
+import '../../core/core_providers.dart';
 import '../../core/routing/app_routes.dart';
+import '../../features/listen/application/listen_options.dart';
+import '../../features/listen/application/quran_audio_player.dart';
+import '../../features/listen/application/reciter_controller.dart';
+import '../../features/listen/domain/quran_audio_sources.dart' show reciterFor;
+import '../../features/listen/presentation/listen_sheet.dart';
+import '../../features/quran/application/quran_index_providers.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/components/components.dart';
 import '../../core/theme/quran_text_style.dart';
@@ -57,12 +67,23 @@ class TafsirReaderScreen extends ConsumerWidget {
     final textScale = ref.watch(tafsirTextScaleControllerProvider);
     final view = ref.watch(tafsirReaderPreferencesProvider);
     final continuous = view.layout == TafsirLayout.continuous;
+    // One ayah at a time: on to the ayah the reciter reaches.
+    if (!continuous) {
+      ref.listen(quranAudioPlayerProvider.select((n) => n?.ayahId), (
+        previous,
+        playing,
+      ) {
+        if (playing == null || playing == previous) return;
+        if (playing == chapterNo * 1000 + verseNo) return;
+        GoRouter.of(context).pushReplacement(
+          '${AppRoutes.tafsir}/${playing ~/ 1000}/${playing % 1000}',
+        );
+      });
+    }
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          AppLocalizations.of(context).tafsirTitle('$chapterNo:$verseNo'),
-        ),
+        title: _TafsirTitle(opened: chapterNo * 1000 + verseNo),
         actions: [
           IconButton(
             key: const ValueKey('tafsir-view-options'),
@@ -99,7 +120,13 @@ class TafsirReaderScreen extends ConsumerWidget {
         ),
         _ => const _NoTafsirSelected(),
       },
-      bottomNavigationBar: continuous ? null : _PrevNextBar(verse: _verse),
+      bottomNavigationBar: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const _TafsirPlayerBar(),
+          if (!continuous) _PrevNextBar(verse: _verse),
+        ],
+      ),
     );
   }
 
@@ -240,7 +267,7 @@ class _TafsirContent extends ConsumerWidget {
 /// The whole Quran ayah after ayah, opened at [start]: scrolling down
 /// goes on to the ayahs after it, scrolling up back to the ones before
 /// (each built as it comes into view).
-class _ContinuousTafsir extends StatefulWidget {
+class _ContinuousTafsir extends ConsumerStatefulWidget {
   const _ContinuousTafsir({
     required this.tafsirId,
     required this.start,
@@ -252,17 +279,56 @@ class _ContinuousTafsir extends StatefulWidget {
   final double textScale;
 
   @override
-  State<_ContinuousTafsir> createState() => _ContinuousTafsirState();
+  ConsumerState<_ContinuousTafsir> createState() => _ContinuousTafsirState();
 }
 
-class _ContinuousTafsirState extends State<_ContinuousTafsir> {
+class _ContinuousTafsirState extends ConsumerState<_ContinuousTafsir> {
   // Where the scroll view starts: [start] at the top, earlier ayahs above.
   final _center = UniqueKey();
+  final _scroll = ScrollController();
+
+  /// Each built ayah's key (by its number in the whole Quran), to scroll
+  /// it into view.
+  final _keys = <int, GlobalKey>{};
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  /// Brings the ayah [ayahId] into view: at once when built, else a screen
+  /// at a time towards it until it is.
+  Future<void> _follow(int ayahId) async {
+    final target = globalAyahNumber(ayahId);
+    for (var tries = 0; tries < 60 && mounted; tries++) {
+      final built = _keys.entries.where((e) => e.value.currentContext != null);
+      final at = _keys[target]?.currentContext;
+      if (at != null && at.mounted) {
+        await Scrollable.ensureVisible(
+          at,
+          alignment: 0.05,
+          duration: const Duration(milliseconds: 400),
+          curve: Curves.easeInOut,
+        );
+        return;
+      }
+      if (built.isEmpty || !_scroll.hasClients) return;
+      final below = built.every((e) => e.key < target);
+      final position = _scroll.position;
+      _scroll.jumpTo(
+        (position.pixels + (below ? 1 : -1) * position.viewportDimension * 0.9)
+            .clamp(position.minScrollExtent, position.maxScrollExtent),
+      );
+      await WidgetsBinding.instance.endOfFrame;
+    }
+  }
 
   Widget _ayah(BuildContext context, int global) {
     final id = ayahIdAtGlobal(global);
     final verse = (chapterNo: id ~/ 1000, verseNo: id % 1000);
     return Column(
+      key: _keys.putIfAbsent(global, GlobalKey.new),
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: TahfeezSpacing.sm,
       children: [
@@ -286,43 +352,142 @@ class _ContinuousTafsirState extends State<_ContinuousTafsir> {
     final first = globalAyahNumber(
       widget.start.chapterNo * 1000 + widget.start.verseNo,
     );
+    // The reciter's ayah kept in view.
+    ref.listen(quranAudioPlayerProvider.select((n) => n?.ayahId), (
+      previous,
+      playing,
+    ) {
+      if (playing != null && playing != previous) unawaited(_follow(playing));
+    });
     const pad = EdgeInsets.symmetric(horizontal: TahfeezSpacing.md);
-    return CustomScrollView(
-      key: const ValueKey('tafsir-continuous'),
-      center: _center,
-      slivers: [
-        // Before [start], nearest first, growing upwards.
-        SliverPadding(
-          padding: pad,
-          sliver: SliverList.builder(
-            itemCount: first - 1,
-            itemBuilder: (context, i) => Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _ayah(context, first - 1 - i),
-                const Divider(height: TahfeezSpacing.xl),
-              ],
+    return NotificationListener<ScrollUpdateNotification>(
+      onNotification: (_) {
+        // After the frame, once the ayahs are laid out where they moved.
+        if (!_reportQueued) {
+          _reportQueued = true;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _reportQueued = false;
+            if (mounted) _reportTop();
+          });
+        }
+        return false;
+      },
+      child: CustomScrollView(
+        key: const ValueKey('tafsir-continuous'),
+        controller: _scroll,
+        center: _center,
+        slivers: [
+          // Before [start], nearest first, growing upwards.
+          SliverPadding(
+            padding: pad,
+            sliver: SliverList.builder(
+              itemCount: first - 1,
+              itemBuilder: (context, i) => Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _ayah(context, first - 1 - i),
+                  const Divider(height: TahfeezSpacing.xl),
+                ],
+              ),
             ),
           ),
-        ),
-        // [start] and after.
-        SliverPadding(
-          key: _center,
-          padding: pad.copyWith(bottom: TahfeezSpacing.md),
-          sliver: SliverList.builder(
-            itemCount: ayahTotal - first + 1,
-            itemBuilder: (context, i) => Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (i == 0) ...[
-                  const SizedBox(height: TahfeezSpacing.md),
-                  _TafsirAttribution(tafsirId: widget.tafsirId),
-                  const SizedBox(height: TahfeezSpacing.sm),
-                ] else
-                  const Divider(height: TahfeezSpacing.xl),
-                _ayah(context, first + i),
-              ],
+          // [start] and after.
+          SliverPadding(
+            key: _center,
+            padding: pad.copyWith(bottom: TahfeezSpacing.md),
+            sliver: SliverList.builder(
+              itemCount: ayahTotal - first + 1,
+              itemBuilder: (context, i) => Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (i == 0) ...[
+                    const SizedBox(height: TahfeezSpacing.md),
+                    _TafsirAttribution(tafsirId: widget.tafsirId),
+                    const SizedBox(height: TahfeezSpacing.sm),
+                  ] else
+                    const Divider(height: TahfeezSpacing.xl),
+                  _ayah(context, first + i),
+                ],
+              ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  var _reportQueued = false;
+
+  /// The ayah at the top of the screen, for the title.
+  void _reportTop() {
+    final list = context.findRenderObject();
+    if (list is! RenderBox) return;
+    final top = list.localToGlobal(Offset.zero).dy;
+    int? best;
+    var bestY = double.negativeInfinity;
+    for (final e in _keys.entries) {
+      final box = e.value.currentContext?.findRenderObject();
+      if (box is! RenderBox || !box.attached) continue;
+      final y = box.localToGlobal(Offset.zero).dy - top;
+      // The last ayah starting in the screen's upper quarter, or above it.
+      if (y <= list.size.height / 4 && y > bestY) {
+        bestY = y;
+        best = e.key;
+      }
+    }
+    if (best != null) {
+      ref.read(_tafsirTopAyahProvider.notifier).set(ayahIdAtGlobal(best));
+    }
+  }
+}
+
+/// Continuous: the ayah at the top of the screen (the title follows it).
+class _TafsirTopAyah extends Notifier<int?> {
+  @override
+  int? build() => null;
+
+  void set(int ayahId) {
+    if (state != ayahId) state = ayahId;
+  }
+}
+
+final _tafsirTopAyahProvider =
+    NotifierProvider.autoDispose<_TafsirTopAyah, int?>(_TafsirTopAyah.new);
+
+/// The surah's name, and "Tafsir · surah:ayah" under it: the ayah opened,
+/// or — scrolling through, continuous — the one at the top of the screen.
+class _TafsirTitle extends ConsumerWidget {
+  const _TafsirTitle({required this.opened});
+
+  final int opened;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final continuous =
+        ref.watch(tafsirReaderPreferencesProvider).layout ==
+        TafsirLayout.continuous;
+    final ayahId =
+        (continuous ? ref.watch(_tafsirTopAyahProvider) : null) ?? opened;
+    final surahs = ref.watch(indexedSurahsProvider).value;
+    final surah = surahs
+        ?.where((s) => s.surah.surahNo == ayahId ~/ 1000)
+        .firstOrNull;
+    final name = surah == null
+        ? null
+        : surah.localizedName ?? surah.arabicName ?? '${ayahId ~/ 1000}';
+    final theme = Theme.of(context);
+    final sub = AppLocalizations.of(context)
+        .tafsirTitle('${ayahId ~/ 1000}:${ayahId % 1000}');
+    if (name == null) return Text(sub);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(name, key: const ValueKey('tafsir-surah-name')),
+        Text(
+          sub,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
           ),
         ),
       ],
@@ -355,12 +520,17 @@ class _AyahTafsirBlock extends ConsumerWidget {
       ),
     );
     final theme = Theme.of(context);
+    final playing = ref.watch(
+      quranAudioPlayerProvider.select((n) => n?.ayahId == ayahId),
+    );
     return Column(
+      key: playing ? const ValueKey('tafsir-block-playing') : null,
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: TahfeezSpacing.md,
       children: [
         // The ayah itself, above its commentary.
         _AyahText(ayahId: ayahId),
+        _PlayButtons(ayahId: ayahId),
         if (view.showTransliteration) _Transliteration(ayahId: ayahId),
         if (view.showTranslation) _Translations(ayahId: ayahId),
         verseTextAsync.when(
@@ -483,12 +653,17 @@ class _AyahText extends ConsumerWidget {
     final text = ref.watch(canonicalAyahTextProvider(ayahId: ayahId)).value;
     if (text == null) return const SizedBox.shrink();
     final scheme = Theme.of(context).colorScheme;
-    return Container(
-      key: const ValueKey('tafsir-ayah'),
+    // Being recited: tinted, as the Mushaf highlights it.
+    final playing = ref.watch(
+      quranAudioPlayerProvider.select((n) => n?.ayahId == ayahId),
+    );
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 250),
+      key: ValueKey(playing ? 'tafsir-ayah-playing' : 'tafsir-ayah'),
       width: double.infinity,
       padding: const EdgeInsets.all(TahfeezSpacing.md),
       decoration: BoxDecoration(
-        color: scheme.surfaceContainerLow,
+        color: playing ? scheme.primaryContainer : scheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(TahfeezRadii.md),
       ),
       child: Text(
@@ -499,6 +674,117 @@ class _AyahText extends ConsumerWidget {
           color: scheme.onSurface,
           fontFamily: 'Scheherazade New',
           fontSize: 26,
+        ),
+      ),
+    );
+  }
+}
+
+/// Play the ayah, or from it on (the Mushaf's Listen menu, from here).
+class _PlayButtons extends ConsumerWidget {
+  const _PlayButtons({required this.ayahId});
+
+  final int ayahId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    return Wrap(
+      spacing: TahfeezSpacing.sm,
+      children: [
+        TextButton.icon(
+          key: ValueKey('tafsir-play-$ayahId'),
+          onPressed: () async {
+            final messenger = ScaffoldMessenger.of(context);
+            final played = await ref
+                .read(quranAudioPlayerProvider.notifier)
+                .playAyahs([
+                  ayahId,
+                ], options: const ListenOptions(followPages: false));
+            if (!played) showListenOffline(messenger, l10n.listenOffline);
+          },
+          icon: const Icon(Icons.play_arrow_rounded),
+          label: Text(l10n.listenPlayAyah),
+        ),
+        TextButton.icon(
+          key: ValueKey('tafsir-play-from-$ayahId'),
+          onPressed: () => showListenSheet(
+            context,
+            from: (chapterNo: ayahId ~/ 1000, verseNo: ayahId % 1000),
+          ),
+          icon: const Icon(Icons.playlist_play_rounded),
+          label: Text(l10n.listenPlayFrom),
+        ),
+      ],
+    );
+  }
+}
+
+/// While the reciter plays: which ayah, by whom, with pause / resume and
+/// stop.
+class _TafsirPlayerBar extends ConsumerWidget {
+  const _TafsirPlayerBar();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final now = ref.watch(quranAudioPlayerProvider);
+    final ayahId = now?.ayahId;
+    if (now == null || ayahId == null) return const SizedBox.shrink();
+    final player = ref.read(quranAudioPlayerProvider.notifier);
+    final audio = ref.watch(audioControllerProvider);
+    final theme = Theme.of(context);
+    final reciter = now.reciter ?? reciterFor(ref.watch(reciterProvider));
+    return Material(
+      key: const ValueKey('tafsir-player'),
+      color: theme.colorScheme.surfaceContainer,
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: TahfeezSpacing.md,
+            vertical: TahfeezSpacing.xs,
+          ),
+          child: StreamBuilder<AudioPlaybackState>(
+            stream: audio.state,
+            initialData: const AudioPlaybackState(isPlaying: true),
+            builder: (context, snapshot) {
+              final playing = snapshot.data?.isPlaying ?? true;
+              return Row(
+                children: [
+                  Icon(
+                    Icons.graphic_eq_rounded,
+                    color: theme.colorScheme.primary,
+                  ),
+                  const SizedBox(width: TahfeezSpacing.sm),
+                  Expanded(
+                    child: Text(
+                      '${ayahId ~/ 1000}:${ayahId % 1000} · '
+                      '${reciterName(context, reciter)}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodyMedium,
+                    ),
+                  ),
+                  IconButton(
+                    key: const ValueKey('tafsir-player-pause'),
+                    icon: Icon(
+                      playing ? Icons.pause_rounded : Icons.play_arrow_rounded,
+                    ),
+                    tooltip: playing
+                        ? AppLocalizations.of(context).recPause
+                        : AppLocalizations.of(context).recResume,
+                    onPressed: playing ? player.pause : player.resume,
+                  ),
+                  IconButton(
+                    key: const ValueKey('tafsir-player-stop'),
+                    icon: const Icon(Icons.stop_rounded),
+                    tooltip: AppLocalizations.of(context).recStop,
+                    onPressed: player.stop,
+                  ),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );
