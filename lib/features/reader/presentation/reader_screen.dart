@@ -11,6 +11,7 @@ import '../../../quran/quran_providers.dart';
 import '../../mushaf/application/mushaf_appearance_controller.dart';
 import '../../mushaf/application/mushaf_focus_ayah.dart';
 import '../../mushaf/application/mushaf_page_providers.dart';
+import '../../mushaf/application/reader_mode.dart';
 import '../../mushaf/domain/mushaf_appearance.dart';
 import '../../mushaf/presentation/mushaf_appearance_sheet.dart';
 import '../../mushaf/presentation/mushaf_page_title.dart';
@@ -85,6 +86,13 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
         await repository.getPageForAyah(mushafId: mushaf.id, ayahId: ayahId) ??
         1;
     if (!mounted) return;
+    // Ayah mode: a surah (a juz, a hizb, a range) begins partway down its
+    // page — its first ayah brought into view, with the surah's name. (An
+    // ayah opened at is, as the ayah in focus.)
+    if (widget.location is! QuranLocationAyah &&
+        ref.read(readerModeProvider) == ReaderMode.ayah) {
+      ref.read(ayahModeTargetProvider.notifier).show(ayahId);
+    }
     setState(() {
       _mushafId = mushaf.id;
       _pageNumber = page;

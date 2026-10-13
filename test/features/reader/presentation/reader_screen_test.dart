@@ -4,6 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tahfeez_ai/core/localization/generated/app_localizations.dart';
+import 'package:tahfeez_ai/features/mushaf/application/reader_mode.dart';
 import 'package:tahfeez_ai/features/reader/presentation/reader_screen.dart';
 import 'package:tahfeez_ai/quran/application/quran_script_code.dart';
 import 'package:tahfeez_ai/quran/data/import/quran_dataset_importer.dart';
@@ -64,4 +65,44 @@ void main() {
     expect(find.text('Test Chapter One'), findsWidgets);
     expect(find.textContaining('Page 1'), findsOneWidget);
   });
+
+  for (final mode in ReaderMode.values) {
+    testWidgets('a surah in ${mode.name} mode: its first ayah '
+        '${mode == ReaderMode.ayah ? 'brought into view' : 'left alone'}', (
+      tester,
+    ) async {
+      final db = QuranDatabase(NativeDatabase.memory());
+      await const QuranDatasetImporter().import(
+        db,
+        buildValidSyntheticPayload(),
+      );
+      addTearDown(db.close);
+      final container = ProviderContainer(
+        overrides: [
+          quranDatabaseProvider.overrideWith((ref) => db),
+          quranScriptCodeProvider.overrideWith((ref) => testScriptCode),
+        ],
+      );
+      addTearDown(container.dispose);
+      container.read(readerModeProvider);
+      await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+      await container.read(readerModeProvider.notifier).set(mode);
+      final shown = <int?>[];
+      container.listen(ayahModeTargetProvider, (_, id) => shown.add(id));
+
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: const ReaderScreen(location: QuranLocation.surah(1)),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(shown.contains(1001), mode == ReaderMode.ayah);
+    });
+  }
 }
