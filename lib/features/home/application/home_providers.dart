@@ -78,6 +78,7 @@ class DailyAyahReference {
     this.chapterName,
     this.words = const [],
     this.translation,
+    this.translationLanguage,
   });
 
   final int surahNo;
@@ -96,6 +97,9 @@ class DailyAyahReference {
 
   /// The first active translation's text, if any is installed and active.
   final String? translation;
+
+  /// [translation]'s language (`en`, `ur`…), for its writing direction.
+  final String? translationLanguage;
 }
 
 @riverpod
@@ -133,6 +137,7 @@ Future<DailyAyahReference?> dailyAyah(Ref ref) async {
     chapterName: localization?.name,
     words: [for (final w in words) w.text],
     translation: translation?.text,
+    translationLanguage: slugs.isEmpty ? null : slugs.first.split('-').first,
   );
 }
 

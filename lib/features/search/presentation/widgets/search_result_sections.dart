@@ -195,6 +195,16 @@ class _TranslationResultRow extends StatelessWidget {
                   ?.copyWith(color: scheme.onSurfaceVariant),
             ),
             Text.rich(
+              // The translation's own direction (an Urdu one in the English
+              // app, an English one in the Arabic app).
+              textDirection:
+                  const {
+                    'ar',
+                    'ur',
+                    'fa',
+                  }.contains(hit.translationSlug.split('-').first)
+                  ? TextDirection.rtl
+                  : TextDirection.ltr,
               TextSpan(
                 children: highlightMatches(
                   hit.matchedText,

@@ -96,6 +96,13 @@ class _DailyAyahCard extends ConsumerWidget {
           if (ayah.translation != null)
             Text(
               ayah.translation!,
+              // Its own language's direction, whatever the app's (an
+              // English translation in the Arabic app, an Urdu one in the
+              // English app).
+              textDirection:
+                  const {'ar', 'ur', 'fa'}.contains(ayah.translationLanguage)
+                  ? TextDirection.rtl
+                  : TextDirection.ltr,
               textAlign: TextAlign.center,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: scheme.onSurfaceVariant,

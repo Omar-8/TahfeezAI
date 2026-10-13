@@ -1011,7 +1011,7 @@ class _Translations extends ConsumerWidget {
   final int ayahId;
   final MushafAppearanceColors colors;
 
-  static const _rtl = {'ar', 'ur', 'fa', 'he', 'ps', 'sd', 'ug', 'ckb'};
+  static const _rtl = _rtlLanguages;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -1076,6 +1076,11 @@ class _Tafsir extends ConsumerWidget {
       ),
       child: Text(
         text.text,
+        // Its own language's direction (Al-Muyassar in the English app,
+        // Al-Mukhtasar in the Arabic one).
+        textDirection: _rtlLanguages.contains(tafsirId.split('-').first)
+            ? TextDirection.rtl
+            : TextDirection.ltr,
         style: theme.textTheme.bodyMedium?.copyWith(
           color: colors.text,
           height: 1.6,
@@ -1201,3 +1206,6 @@ class _PageDivider extends StatelessWidget {
     );
   }
 }
+
+/// Languages written right to left (a translation's or tafsir's own).
+const _rtlLanguages = {'ar', 'ur', 'fa', 'he', 'ps', 'sd', 'ug', 'ckb'};
