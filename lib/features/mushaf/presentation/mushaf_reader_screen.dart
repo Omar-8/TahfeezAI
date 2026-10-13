@@ -10,6 +10,7 @@ import '../../../quran/domain/models/quran_location.dart';
 import '../../recitation/presentation/recitation_controls.dart';
 import '../application/mushaf_appearance_controller.dart';
 import '../application/mushaf_page_providers.dart';
+import '../application/reader_mode.dart';
 import '../domain/mushaf_appearance.dart';
 import 'mushaf_pager.dart';
 import 'mushaf_page_title.dart';
@@ -38,6 +39,24 @@ class MushafReaderScreen extends ConsumerStatefulWidget {
 
 class _MushafReaderScreenState extends ConsumerState<MushafReaderScreen> {
   late int _currentPageNumber = widget.initialPageNumber;
+
+  // Captured up front: `ref` is unusable by the time dispose runs.
+  late final AyahModeTarget _target = ref.read(ayahModeTargetProvider.notifier);
+
+  @override
+  void initState() {
+    super.initState();
+    _target;
+  }
+
+  @override
+  void dispose() {
+    final target = _target;
+    // An ayah asked into view (Memorize's parts) but not yet shown: no
+    // longer asked once this closes.
+    Future.microtask(target.done);
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {

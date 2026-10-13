@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:tahfeez_ai/core/localization/generated/app_localizations.dart';
+import 'package:tahfeez_ai/features/mushaf/application/reader_mode.dart';
+import 'package:tahfeez_ai/quran/domain/models/mushaf_models.dart';
 import 'package:tahfeez_ai/features/home/presentation/sections/home_memorization_section.dart';
 import 'package:tahfeez_ai/features/memorize/presentation/mark_known_sheet.dart';
 import 'package:tahfeez_ai/features/memorize/presentation/memorize_screen.dart';
@@ -103,6 +106,67 @@ void main() {
       ),
       findsOneWidget,
     );
+  });
+
+  testWidgets("a part's Start: its first ayah asked into view in Ayah mode "
+      '(not the top of its page)', (tester) async {
+    tester.view.physicalSize = const Size(500, 1400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final container = ProviderContainer(
+      overrides: [
+        todayPlanProvider.overrideWith(
+          (ref) async => const TodayPlan(
+            recent: [
+              RevisionTask(ayahIds: [112001, 112002, 112003, 112004]),
+            ],
+          ),
+        ),
+        activePlanProvider.overrideWith((ref) => Stream.value(null)),
+        newLessonProvider.overrideWith((ref) async => null),
+        todayAttemptsProvider.overrideWith((ref) => Stream.value(const [])),
+        indexedSurahsProvider.overrideWith((ref) async => names),
+        defaultMushafProvider.overrideWith(
+          (ref) async => const Mushaf(
+            id: 1,
+            code: 'test',
+            scriptId: 1,
+            pageCount: 604,
+            linesPerPage: 15,
+            qiraah: 'Hafs',
+            edition: 'test',
+            renderingType: MushafRenderingType.unicodeText,
+          ),
+        ),
+        ayahPagesProvider.overrideWith((ref) async => {112001: 604}),
+      ],
+    );
+    addTearDown(container.dispose);
+    final router = GoRouter(
+      routes: [
+        GoRoute(path: '/', builder: (_, _) => const MemorizeScreen()),
+        GoRoute(
+          path: '/quran/page/:m/:p',
+          builder: (_, _) => const Scaffold(body: Text('reader')),
+        ),
+      ],
+    );
+    addTearDown(router.dispose);
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp.router(
+          routerConfig: router,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Start').first);
+    await tester.pumpAndSettle();
+    expect(find.text('reader'), findsOneWidget);
+    expect(container.read(ayahModeTargetProvider), 112001);
   });
 
   testWidgets('today: each part\'s strength, or how today\'s recitation of '

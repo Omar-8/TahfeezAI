@@ -14,6 +14,7 @@ import '../../../memorization/domain/today_scheduler.dart';
 import '../../../quran/domain/models/quran_location.dart';
 import '../../../quran/domain/models/quran_refs.dart';
 import '../../mushaf/application/mushaf_hide_mode.dart';
+import '../../mushaf/application/reader_mode.dart';
 import '../../quran/application/quran_index_providers.dart';
 import '../../recitation/application/hifz_controller.dart';
 import 'mark_known_sheet.dart';
@@ -292,6 +293,9 @@ Future<void> reciteAyahs(
   ));
   final hide = ref.read(mushafHideModeProvider.notifier);
   if (!ref.read(mushafHideModeProvider).enabled) hide.toggle();
+  // Ayah mode: the part's first ayah brought into view, not the page's top
+  // (Al-Qadr 1 is far down page 598).
+  ref.read(ayahModeTargetProvider.notifier).show(first);
   goToQuranLocation(context, QuranLocation.page(mushaf.id, page));
 }
 
