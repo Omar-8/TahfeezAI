@@ -40,13 +40,13 @@ class _Page implements QuranEngineMushafPage {
   ({VerseRef first, VerseRef last})? get verseSpan =>
       (first: (chapterNo: 1, verseNo: 2), last: (chapterNo: 1, verseNo: 3));
 
-  /// Page 10's ayahs are 1:2 and 1:3, page 11's 1:4 and 1:5, later
-  /// pages' 1:6 and 1:7, earlier pages' 1:1 and 1:2... (as words go).
+  /// Page 9's ayahs are 1:1 and 1:2, page 10's 1:3 and 1:4, page 11's
+  /// 1:5 and 1:6; any other page's, a surah's two (page 300's, surah 78's).
   int get _first => switch (pageNumber) {
-    10 => 1002,
-    11 => 1004,
-    > 11 => 1006,
-    _ => 1000,
+    1 || 9 => 1001,
+    10 => 1003,
+    11 => 1005,
+    _ => (2 + pageNumber % 112) * 1000 + 1,
   };
   @override
   List<WordRef> get wordRefs => [
@@ -112,17 +112,23 @@ class _Backend implements QuranEngineMushafBackend {
 /// Ayah mode in one continuous scroll.
 class _ContinuousView extends AyahViewPreferencesController {
   @override
-  AyahViewPreferences build() => const AyahViewPreferences(
-    layout: AyahLayout.continuous,
-    showTranslation: false,
-  );
+  AyahViewPreferences build() =>
+      AyahViewPreferences(layout: _layout, showTranslation: false);
 }
+
+var _layout = AyahLayout.continuous;
 
 void main() {
   late ProviderContainer container;
   late List<int> changes;
 
-  Future<void> pump(WidgetTester tester, {FakeAudioController? audio}) async {
+  Future<void> pump(
+    WidgetTester tester, {
+    FakeAudioController? audio,
+    AyahLayout layout = AyahLayout.continuous,
+    int initialPage = 10,
+  }) async {
+    _layout = layout;
     final db = QuranDatabase(NativeDatabase.memory());
     addTearDown(db.close);
     await const QuranDatasetImporter().import(db, buildValidSyntheticPayload());
@@ -155,7 +161,7 @@ void main() {
             body: MushafPager(
               mushafId: 1,
               pageCount: 604,
-              initialPageNumber: 10,
+              initialPageNumber: initialPage,
               onPageChanged: changes.add,
             ),
           ),
@@ -179,7 +185,7 @@ void main() {
     expect(divider(10), findsOneWidget);
     expect(divider(11), findsOneWidget);
     // Opened at its page's top.
-    expect(tester.getTopLeft(divider(10)).dy, lessThan(100));
+    expect(tester.getTopLeft(divider(10)).dy, inInclusiveRange(0, 100));
     expect(find.byKey(const ValueKey('ayah-mode-next-page')), findsNothing);
   });
 
@@ -205,7 +211,7 @@ void main() {
     container.read(mushafPageTurnRequestsProvider.notifier).next();
     await tester.pumpAndSettle();
     expect(changes.last, 11);
-    expect(tester.getTopLeft(divider(11)).dy, lessThan(100));
+    expect(tester.getTopLeft(divider(11)).dy, inInclusiveRange(0, 100));
 
     container.read(mushafPageTurnRequestsProvider.notifier).toPage(300);
     for (var i = 0; i < 3; i++) {
@@ -213,7 +219,7 @@ void main() {
       await tester.pumpAndSettle();
     }
     expect(changes.last, 300);
-    expect(tester.getTopLeft(divider(300)).dy, lessThan(100));
+    expect(tester.getTopLeft(divider(300)).dy, inInclusiveRange(0, 100));
   });
 
   void shortScreen(WidgetTester tester) {
@@ -236,7 +242,7 @@ void main() {
       hide.revealNextWord(10);
       await tester.pumpAndSettle();
     }
-    final word = rectOf(tester, 'ayah-word-1003:1');
+    final word = rectOf(tester, 'ayah-word-1004:1');
     expect(word.top, greaterThanOrEqualTo(0));
     expect(word.bottom, lessThanOrEqualTo(260));
     expect(changes, isEmpty, reason: 'still page 10');
@@ -248,15 +254,126 @@ void main() {
     final audio = FakeAudioController();
     await pump(tester, audio: audio);
     final player = container.read(quranAudioPlayerProvider.notifier);
-    unawaited(player.playAyahs([1003]));
+    unawaited(player.playAyahs([1004]));
     await tester.pump();
     await tester.pumpAndSettle();
-    var ayah = rectOf(tester, 'ayah-mode-1003');
+    var ayah = rectOf(tester, 'ayah-mode-1004');
     expect(ayah.top, inInclusiveRange(0, 130));
-    unawaited(player.playAyahs([1005]));
+    unawaited(player.playAyahs([1006]));
     await tester.pump();
     await tester.pumpAndSettle();
-    ayah = rectOf(tester, 'ayah-mode-1005');
+    ayah = rectOf(tester, 'ayah-mode-1006');
     expect(ayah.top, inInclusiveRange(0, 130));
+    unawaited(player.stop());
+    await tester.pump(const Duration(seconds: 2));
+  });
+
+  for (final layout in AyahLayout.values) {
+    testWidgets('${layout.name}: listening from an ayah on the page before '
+        '(1:1 from page 10): turned to and scrolled to it', (tester) async {
+      shortScreen(tester);
+      final audio = FakeAudioController();
+      await pump(tester, audio: audio, layout: layout);
+      unawaited(
+        container.read(quranAudioPlayerProvider.notifier).playAyahs([1001]),
+      );
+      await tester.pump();
+      // The player turns to the ayah's page.
+      container.read(mushafPageTurnRequestsProvider.notifier).toPage(9);
+      for (var i = 0; i < 3; i++) {
+        await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+        await tester.pumpAndSettle();
+      }
+      expect(changes.last, 9);
+      final ayah = rectOf(tester, 'ayah-mode-1001');
+      expect(ayah.top, inInclusiveRange(0, 130));
+      unawaited(container.read(quranAudioPlayerProvider.notifier).stop());
+      await tester.pump(const Duration(seconds: 2));
+    });
+
+    testWidgets('${layout.name}: revealing on the page before, after turning '
+        'back to it: scrolled to the word shown', (tester) async {
+      shortScreen(tester);
+      await pump(tester, layout: layout);
+      final hide = container.read(mushafHideModeProvider.notifier);
+      hide.toggle();
+      await tester.pumpAndSettle();
+      container.read(mushafPageTurnRequestsProvider.notifier).toPage(9);
+      for (var i = 0; i < 3; i++) {
+        await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+        await tester.pumpAndSettle();
+      }
+      for (var i = 0; i < 4; i++) {
+        hide.revealNextWord(9);
+        await tester.pumpAndSettle();
+      }
+      final word = rectOf(tester, 'ayah-word-1002:1');
+      expect(word.top, greaterThanOrEqualTo(0));
+      expect(word.bottom, lessThanOrEqualTo(260));
+    });
+
+    testWidgets('${layout.name}: listening from an ayah far away (page 300 '
+        'from page 10): turned to and scrolled to it', (tester) async {
+      shortScreen(tester);
+      final audio = FakeAudioController();
+      await pump(tester, audio: audio, layout: layout);
+      final player = container.read(quranAudioPlayerProvider.notifier);
+      unawaited(player.playAyahs([78002, 78002]));
+      await tester.pump();
+      container.read(mushafPageTurnRequestsProvider.notifier).toPage(300);
+      for (var i = 0; i < 3; i++) {
+        await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+        await tester.pumpAndSettle();
+      }
+      expect(changes.last, 300);
+      final ayah = rectOf(tester, 'ayah-mode-78002');
+      expect(ayah.top, inInclusiveRange(0, 130));
+      unawaited(container.read(quranAudioPlayerProvider.notifier).stop());
+      await tester.pump(const Duration(seconds: 2));
+    });
+
+    testWidgets('${layout.name}: listening from the first page, from far '
+        'down (page 1 from page 30)', (tester) async {
+      shortScreen(tester);
+      final audio = FakeAudioController();
+      await pump(tester, audio: audio, layout: layout, initialPage: 30);
+      final player = container.read(quranAudioPlayerProvider.notifier);
+      unawaited(player.playAyahs([1001, 1001]));
+      await tester.pump();
+      container.read(mushafPageTurnRequestsProvider.notifier).toPage(1);
+      for (var i = 0; i < 3; i++) {
+        await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+        await tester.pumpAndSettle();
+      }
+      expect(changes.last, 1);
+      final ayah = rectOf(tester, 'ayah-mode-1001');
+      expect(ayah.top, inInclusiveRange(0, 130));
+      unawaited(player.stop());
+      await tester.pump(const Duration(seconds: 2));
+    });
+  }
+
+  testWidgets('continuous: a list laid out afresh (page 1) after reading far '
+      "down another: at that page, not at the last list's place", (
+    tester,
+  ) async {
+    shortScreen(tester);
+    await pump(tester, initialPage: 1);
+    final turns = container.read(mushafPageTurnRequestsProvider.notifier);
+    turns.toPage(30);
+    for (var i = 0; i < 3; i++) {
+      await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+      await tester.pumpAndSettle();
+    }
+    // Read on from there, far down.
+    await tester.drag(find.byType(CustomScrollView), const Offset(0, -1500));
+    await tester.pumpAndSettle();
+    turns.toPage(1);
+    for (var i = 0; i < 3; i++) {
+      await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+      await tester.pumpAndSettle();
+    }
+    expect(changes.last, 1);
+    expect(tester.getTopLeft(divider(1)).dy, inInclusiveRange(0, 100));
   });
 }

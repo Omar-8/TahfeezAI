@@ -34,6 +34,7 @@ import '../domain/mushaf_appearance.dart';
 import '../../bookmarks/application/bookmarks_controller.dart';
 import '../application/mushaf_passages.dart';
 import 'mushaf_ayah_sheet.dart';
+import '../../../quran/presentation/meaning_resource_names.dart';
 
 /// Ayah mode's page: the Mushaf page's ayahs one after another — each
 /// one's Arabic word by word, then (as [AyahViewPreferences] says) its
@@ -76,7 +77,9 @@ class AyahModePageState extends ConsumerState<AyahModePage> {
   List<int> _ayahEnds = const [];
   Object? _error;
 
-  final _ownScroll = ScrollController();
+  // Not restored from page storage (shared by the pager's pages): a page
+  // opens at its top, or where a mode brings it.
+  final _ownScroll = ScrollController(keepScrollOffset: false);
   ScrollController get _scroll => widget.scrollController ?? _ownScroll;
   bool get _embedded => widget.scrollController != null;
 
@@ -416,12 +419,22 @@ class AyahModePageState extends ConsumerState<AyahModePage> {
     MushafWordMark? mark(int i) => overlay?.marks[words[i]];
 
     final ayahs = _ayahs();
-    final column = Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        for (var k = 0; k <= ayahs.length; k++)
-          _item(context, k, ayahs, hidden: hidden, mark: mark, words: words),
-      ],
+    // Ayah mode's text size (its view settings), over the reader's own.
+    final media = MediaQuery.of(context);
+    final column = MediaQuery(
+      data: media.copyWith(
+        textScaler: TextScaler.linear(
+          media.textScaler.scale(1) *
+              ref.watch(tafsirTextScaleControllerProvider),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (var k = 0; k <= ayahs.length; k++)
+            _item(context, k, ayahs, hidden: hidden, mark: mark, words: words),
+        ],
+      ),
     );
     if (_embedded) {
       // One page of the continuous scroll: its number, then its ayahs.
@@ -928,7 +941,13 @@ class _Translations extends ConsumerWidget {
           for (final entry in texts.entries)
             TranslationBlock(
               verseText: entry.value,
-              authorName: books[entry.key]?.author ?? entry.key,
+              authorName: switch (books[entry.key]) {
+                final book? => translationName(
+                  AppLocalizations.of(context),
+                  book,
+                ),
+                null => entry.key,
+              },
               inlineFootnotes: true,
               textDirection: _rtl.contains(books[entry.key]?.languageCode)
                   ? TextDirection.rtl
@@ -996,30 +1015,45 @@ class _PageButtons extends ConsumerWidget {
     final turn = ref.read(mushafPageTurnRequestsProvider.notifier);
     return Padding(
       padding: const EdgeInsets.only(top: TahfeezSpacing.lg),
+      // Read as a Mushaf's pages turn, in every language: the next page on
+      // the left, the previous on the right, each arrow pointing its way.
       child: Row(
+        textDirection: TextDirection.rtl,
         children: [
-          TextButton.icon(
+          TextButton(
             key: const ValueKey('ayah-mode-previous-page'),
             onPressed: pageNumber > 1
                 ? () => turn.toPage(pageNumber - 1)
                 : null,
-            icon: const Icon(Icons.chevron_left),
-            label: Text(l10n.commonPrevious),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              textDirection: TextDirection.ltr,
+              spacing: TahfeezSpacing.xs,
+              children: [
+                Text(l10n.commonPrevious),
+                const Icon(Icons.chevron_right),
+              ],
+            ),
           ),
-          const Spacer(),
-          Text(
-            l10n.ayahModePage(pageNumber),
-            style: TextStyle(color: colors.secondaryText),
+          Expanded(
+            child: Text(
+              l10n.ayahModePage(pageNumber),
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: colors.secondaryText),
+            ),
           ),
-          const Spacer(),
-          TextButton.icon(
+          TextButton(
             key: const ValueKey('ayah-mode-next-page'),
             onPressed: pageNumber < pageCount
                 ? () => turn.toPage(pageNumber + 1)
                 : null,
-            icon: const Icon(Icons.chevron_right),
-            iconAlignment: IconAlignment.end,
-            label: Text(l10n.commonNext),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              textDirection: TextDirection.ltr,
+              spacing: TahfeezSpacing.xs,
+              children: [const Icon(Icons.chevron_left), Text(l10n.commonNext)],
+            ),
           ),
         ],
       ),

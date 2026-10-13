@@ -8,7 +8,13 @@ import '../../../core/theme/components/components.dart';
 import '../../settings/presentation/theme_choices.dart';
 import '../application/mushaf_appearance_controller.dart';
 import '../application/mushaf_passages.dart';
+import '../application/mushaf_page_translations.dart';
 import '../application/reader_mode.dart';
+import '../../../quran/application/tafsir_library_controller.dart';
+import '../../../quran/application/tafsir_selection_controller.dart';
+import '../../../quran/presentation/meaning_resource_names.dart';
+import '../../../quran/presentation/tafsir_packs_sheet.dart';
+import '../../../quran/presentation/translation_packs_sheet.dart';
 import '../domain/mushaf_appearance.dart';
 
 /// Lets the user pick one of the five reader appearances
@@ -120,6 +126,19 @@ class _AyahViewOptions extends ConsumerWidget {
           view.showTranslation,
           (v) => view.copyWith(showTranslation: v),
         ),
+        // Which ones: the same choice as Settings'.
+        if (view.showTranslation)
+          _Choice(
+            key: const ValueKey('ayah-view-translations'),
+            label: l10n.searchTranslations,
+            value: switch (ref.watch(activeTranslationBooksProvider).value) {
+              final books? when books.isNotEmpty => [
+                for (final b in books.values) translationName(l10n, b),
+              ].join(', '),
+              _ => l10n.readerSelected(0),
+            },
+            onTap: () => showTranslationPacksSheet(context),
+          ),
         toggle(
           'ayah-view-transliteration',
           l10n.tafsirShowTransliteration,
@@ -132,14 +151,77 @@ class _AyahViewOptions extends ConsumerWidget {
           view.showTafsir,
           (v) => view.copyWith(showTafsir: v),
         ),
+        if (view.showTafsir)
+          _Choice(
+            key: const ValueKey('ayah-view-tafsir-choice'),
+            label: l10n.readerTafsir,
+            value:
+                [
+                  for (final t
+                      in ref.watch(tafsirLibraryControllerProvider).value ??
+                          const [])
+                    if (t.work.id ==
+                        ref.watch(tafsirSelectionControllerProvider))
+                      tafsirName(l10n, t.work),
+                ].firstOrNull ??
+                l10n.settingsTafsirNone,
+            onTap: () => showTafsirPacksSheet(context),
+          ),
         toggle(
           'ayah-view-meanings',
           l10n.ayahViewWordMeanings,
           view.showWordMeanings,
           (v) => view.copyWith(showWordMeanings: v),
         ),
+        // One size for all of it: the Arabic, word meanings,
+        // transliteration, translations and tafsir.
+        Row(
+          children: [
+            Text(l10n.tafsirTextSizeTooltip),
+            Expanded(
+              child: Slider(
+                key: const ValueKey('ayah-view-text-size'),
+                value: ref
+                    .watch(tafsirTextScaleControllerProvider)
+                    .clamp(0.8, 2.0),
+                min: 0.8,
+                max: 2.0,
+                divisions: 12,
+                label:
+                    '${(ref.watch(tafsirTextScaleControllerProvider) * 100).round()}%',
+                onChanged: (value) => ref
+                    .read(tafsirTextScaleControllerProvider.notifier)
+                    .setScale(value),
+              ),
+            ),
+          ],
+        ),
         const Divider(height: 24),
       ],
     );
   }
+}
+
+/// Which translations, or which tafsir: the current choice, opening the
+/// picker Settings uses.
+class _Choice extends StatelessWidget {
+  const _Choice({
+    super.key,
+    required this.label,
+    required this.value,
+    required this.onTap,
+  });
+
+  final String label, value;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => ListTile(
+    dense: true,
+    contentPadding: const EdgeInsetsDirectional.only(start: 16),
+    title: Text(label),
+    subtitle: Text(value, maxLines: 2, overflow: TextOverflow.ellipsis),
+    trailing: const Icon(Icons.chevron_right),
+    onTap: onTap,
+  );
 }

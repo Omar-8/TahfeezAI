@@ -7,6 +7,7 @@ import '../../../core/audio/audio_models.dart';
 import '../../../core/core_providers.dart';
 import '../../../core/localization/locale_controller.dart';
 import '../../../memorization/application/activity_stats.dart';
+import '../../../quran/domain/models/quran_location.dart';
 import '../../../quran/quran_providers.dart';
 import '../../mushaf/application/mushaf_focus_ayah.dart';
 import '../../mushaf/application/mushaf_hide_mode.dart';
@@ -154,7 +155,11 @@ class QuranAudioPlayer extends Notifier<NowPlaying?> {
           .read(quranRepositoryProvider)
           .getPageForAyah(mushafId: mushaf.id, ayahId: ayahId);
       if (page == null || !ref.mounted || state?.ayahId != ayahId) return;
-      if (follow && page != _turnedTo) {
+      // Turned to once per page — and again whenever the page on screen is
+      // another (the reader went elsewhere since, by hand).
+      final shown = ref.read(mushafRecitationTargetProvider)?.location;
+      final shownPage = shown is QuranLocationPage ? shown.pageNumber : null;
+      if (follow && (page != _turnedTo || page != shownPage)) {
         _turnedTo = page;
         ref.read(mushafPageTurnRequestsProvider.notifier).toPage(page);
       }

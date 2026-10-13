@@ -21,6 +21,7 @@ import 'package:tahfeez_ai/features/mushaf/presentation/mushaf_page_view.dart';
 import 'package:tahfeez_ai/features/mushaf/presentation/mushaf_token_hit_rect.dart';
 import 'package:tahfeez_ai/features/mushaf/presentation/reader_mode_toggle.dart';
 import 'package:tahfeez_ai/quran/application/quran_script_code.dart';
+import 'package:tahfeez_ai/quran/application/tafsir_selection_controller.dart';
 import 'package:tahfeez_ai/quran/data/import/quran_dataset_importer.dart';
 import 'package:tahfeez_ai/quran/data/quran_database.dart';
 import 'package:tahfeez_ai/quran/domain/models/quran_refs.dart';
@@ -353,6 +354,22 @@ void main() {
     await tester.pump();
     await tester.pumpAndSettle();
     expect(onScreen(tester, 'ayah-mode-1003'), isTrue);
+  });
+
+  testWidgets("Ayah mode's text size: everything in it larger", (tester) async {
+    await pump(tester, mode: ReaderMode.ayah);
+    final word = find.byKey(const ValueKey('ayah-word-1002:0'));
+    final before = tester.getSize(word);
+    await container
+        .read(tafsirTextScaleControllerProvider.notifier)
+        .setScale(1.5);
+    await tester.pumpAndSettle();
+    final after = tester.getSize(word);
+    expect(after.height, greaterThan(before.height * 1.3));
+    // Saved between tests: back to the base size.
+    await container
+        .read(tafsirTextScaleControllerProvider.notifier)
+        .setScale(1);
   });
 
   testWidgets('opened at an ayah (Daily ayah): scrolled to it', (tester) async {

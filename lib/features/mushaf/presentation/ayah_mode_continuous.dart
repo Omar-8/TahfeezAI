@@ -40,9 +40,10 @@ class _AyahModeContinuousState extends ConsumerState<AyahModeContinuous> {
   /// pages grow upwards from it (their loading never moves what is read).
   late int _anchor = widget.initialPageNumber;
   late int _current = widget.initialPageNumber;
-  var _controller = ScrollController();
+  // Never restored from page storage: a list laid out afresh from a page
+  // must start at that page, not where an earlier list from it was left.
+  var _controller = ScrollController(keepScrollOffset: false);
   var _pageKeys = <int, GlobalKey<AyahModePageState>>{};
-  final _anchorKey = GlobalKey();
 
   /// The reader is dragging the list (not a scroll of ours).
   var _userScrolling = false;
@@ -108,7 +109,7 @@ class _AyahModeContinuousState extends ConsumerState<AyahModeContinuous> {
     setState(() {
       _anchor = page;
       _current = page;
-      _controller = ScrollController();
+      _controller = ScrollController(keepScrollOffset: false);
       _pageKeys = {};
     });
     WidgetsBinding.instance.addPostFrameCallback((_) => old.dispose());
@@ -159,7 +160,9 @@ class _AyahModeContinuousState extends ConsumerState<AyahModeContinuous> {
         child: CustomScrollView(
           key: ValueKey('ayah-mode-continuous-$_anchor'),
           controller: _controller,
-          center: _anchorKey,
+          // Keyed by the anchor: a list laid out afresh gets its own (a
+          // global key would carry the old list's layout across).
+          center: ValueKey('ayah-mode-anchor-$_anchor'),
           scrollCacheExtent: const ScrollCacheExtent.viewport(2),
           slivers: [
             // Earlier pages, upwards from the anchor.
@@ -168,7 +171,7 @@ class _AyahModeContinuousState extends ConsumerState<AyahModeContinuous> {
               itemBuilder: (context, i) => _page(_anchor - 1 - i),
             ),
             SliverList.builder(
-              key: _anchorKey,
+              key: ValueKey('ayah-mode-anchor-$_anchor'),
               itemCount: widget.pageCount - _anchor + 1,
               itemBuilder: (context, i) => _page(_anchor + i),
             ),
