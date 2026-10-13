@@ -35,7 +35,8 @@ class _SearchFilterSheetBody extends ConsumerWidget {
       translationLibraryControllerProvider,
     );
 
-    return Padding(
+    // Scrolls when taller than the room it has (small screen, large text).
+    return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
       child: Column(
         mainAxisSize: MainAxisSize.min,

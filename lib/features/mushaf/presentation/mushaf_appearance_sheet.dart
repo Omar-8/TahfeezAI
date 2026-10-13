@@ -37,7 +37,9 @@ class _MushafAppearanceBody extends ConsumerWidget {
     final selected = ref.watch(mushafAppearanceControllerProvider);
 
     final l10n = AppLocalizations.of(context);
-    return Padding(
+    // Scrolls when taller than the room it has (Ayah mode's options, a
+    // small screen, large text).
+    return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
       child: Column(
         mainAxisSize: MainAxisSize.min,

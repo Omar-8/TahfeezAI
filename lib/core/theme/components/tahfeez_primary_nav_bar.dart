@@ -136,17 +136,26 @@ class TahfeezPrimaryNavigationRail extends StatelessWidget {
         left: false,
         child: SizedBox(
           width: 96,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            spacing: TahfeezSpacing.lg,
-            children: [
-              for (var i = 0; i < items.length; i++)
-                _PrimaryNavRailItem(
-                  item: items[i],
-                  selected: i == selectedIndex,
-                  onTap: () => onDestinationSelected(i),
+          // Centred; scrolling when taller than the screen (a phone on its
+          // side, large text).
+          child: LayoutBuilder(
+            builder: (context, constraints) => SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  spacing: TahfeezSpacing.lg,
+                  children: [
+                    for (var i = 0; i < items.length; i++)
+                      _PrimaryNavRailItem(
+                        item: items[i],
+                        selected: i == selectedIndex,
+                        onTap: () => onDestinationSelected(i),
+                      ),
+                  ],
                 ),
-            ],
+              ),
+            ),
           ),
         ),
       ),
@@ -191,10 +200,18 @@ class _PrimaryNavRailItem extends StatelessWidget {
                 size: TahfeezIconSize.lg,
                 color: selected ? scheme.primary : scheme.onSurfaceVariant,
               ),
-              Text(
-                item.label,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: selected ? scheme.primary : scheme.onSurfaceVariant,
+              // As the bar's: one line, up to 1.3× the text size, scaled
+              // down to the rail's width if still too wide.
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  item.label,
+                  maxLines: 1,
+                  textScaler: MediaQuery.textScalerOf(context)
+                      .clamp(maxScaleFactor: 1.3),
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: selected ? scheme.primary : scheme.onSurfaceVariant,
+                  ),
                 ),
               ),
             ],

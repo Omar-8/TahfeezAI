@@ -111,10 +111,18 @@ class _DailyAyahCard extends ConsumerWidget {
                   ),
                 ),
               ),
-              TextButton.icon(
-                onPressed: open,
-                icon: const Icon(Icons.menu_book_outlined, size: 18),
-                label: Text(l10n.homeDailyAyahOpen),
+              // Sharing the row: a long name at large text shortened, not
+              // pushed off.
+              Flexible(
+                child: TextButton.icon(
+                  onPressed: open,
+                  icon: const Icon(Icons.menu_book_outlined, size: 18),
+                  label: Text(
+                    l10n.homeDailyAyahOpen,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
               ),
             ],
           ),

@@ -58,9 +58,15 @@ class HomeFeaturedReadingSection extends ConsumerWidget {
                     FeaturedOccasion.night => l10n.homeFeaturedNight,
                     null => null,
                   };
+                  // Wider with larger text, never wider than most of the
+                  // screen; its lines shortened to fit (one line each).
                   return SizedBox(
-                    width: 240,
+                    width: (240 * textScale.clamp(1.0, 1.4)).clamp(
+                      0,
+                      MediaQuery.sizeOf(context).width * 0.85,
+                    ),
                     child: TahfeezQuranSectionCard(
+                      singleLine: true,
                       number: chapter.surah.surahNo,
                       title:
                           chapter.name ??

@@ -66,7 +66,8 @@ class _GoToAyahFormState extends ConsumerState<_GoToAyahForm> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    // Scrolls when taller than the room it has (small screen, large text).
+    return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(
         TahfeezSpacing.md,
         0,

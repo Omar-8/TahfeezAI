@@ -68,7 +68,8 @@ class _WordDetailSheetBody extends ConsumerWidget {
         .colors
         .text;
 
-    return Padding(
+    // Scrolls when taller than the room it has (small screen, large text).
+    return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(
         horizontal: TahfeezSpacing.md,
         vertical: TahfeezSpacing.sm,

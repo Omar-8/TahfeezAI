@@ -24,7 +24,13 @@ class TahfeezQuranSectionCard extends StatelessWidget {
     this.progress,
     this.progressColor,
     this.progressLabel,
+    this.singleLine = false,
   });
+
+  /// The title and the line under it one line each, shortened to fit — a
+  /// card of fixed size (a strip of cards), whatever the language or text
+  /// size.
+  final bool singleLine;
 
   final int number;
   final String title;
@@ -87,6 +93,8 @@ class TahfeezQuranSectionCard extends StatelessWidget {
                         Flexible(
                           child: Text(
                             title,
+                            maxLines: singleLine ? 1 : null,
+                            overflow: singleLine ? TextOverflow.ellipsis : null,
                             style: Theme.of(context).textTheme.bodyLarge,
                           ),
                         ),
@@ -107,6 +115,8 @@ class TahfeezQuranSectionCard extends StatelessWidget {
                     if (subtitle != null)
                       Text(
                         subtitle!,
+                        maxLines: singleLine ? 1 : null,
+                        overflow: singleLine ? TextOverflow.ellipsis : null,
                         style: Theme.of(context).textTheme.bodySmall
                             ?.copyWith(color: scheme.onSurfaceVariant),
                       ),

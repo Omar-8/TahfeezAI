@@ -372,7 +372,8 @@ void _showPage(BuildContext context, WidgetRef ref, PageProgress page) {
             sheetRef.watch(ayahMemoriesProvider).value ??
             const <int, AyahMemory>{};
         final memorized = page.memorizedIn(memories);
-        return Padding(
+        // Scrolls when taller than the room it has (small screen, large text).
+        return SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(
             TahfeezSpacing.md,
             0,

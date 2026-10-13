@@ -71,29 +71,50 @@ class _ContinueReadingCard extends StatelessWidget {
         spacing: TahfeezSpacing.smPlus,
         children: [
           if (location != null)
-            Row(
-              spacing: TahfeezSpacing.smPlus,
-              children: [
-                CircleAvatar(
-                  backgroundColor: scheme.primaryContainer,
-                  foregroundColor: scheme.onPrimaryContainer,
-                  child: const Icon(Icons.bookmark_outline),
-                ),
-                Expanded(
-                  child: Text(
-                    homeLocationLabel(
-                      l10n,
-                      location,
-                      chapterName: data.chapterName,
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final place = Row(
+                  spacing: TahfeezSpacing.smPlus,
+                  children: [
+                    CircleAvatar(
+                      backgroundColor: scheme.primaryContainer,
+                      foregroundColor: scheme.onPrimaryContainer,
+                      child: const Icon(Icons.bookmark_outline),
                     ),
-                    style: theme.textTheme.titleMedium,
-                  ),
-                ),
-                FilledButton(
+                    Expanded(
+                      child: Text(
+                        homeLocationLabel(
+                          l10n,
+                          location,
+                          chapterName: data.chapterName,
+                        ),
+                        style: theme.textTheme.titleMedium,
+                      ),
+                    ),
+                  ],
+                );
+                final button = FilledButton(
                   onPressed: () => goToQuranLocation(context, location),
                   child: Text(l10n.homeContinueReadingAction),
-                ),
-              ],
+                );
+                // Narrow for its text (a small screen, large text): the
+                // button under the place, not squeezed beside it.
+                final scale = MediaQuery.textScalerOf(context).scale(1);
+                if (constraints.maxWidth / scale < 220) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    spacing: TahfeezSpacing.sm,
+                    children: [place, button],
+                  );
+                }
+                return Row(
+                  spacing: TahfeezSpacing.smPlus,
+                  children: [
+                    Expanded(child: place),
+                    button,
+                  ],
+                );
+              },
             ),
           if (recitation != null)
             InkWell(
