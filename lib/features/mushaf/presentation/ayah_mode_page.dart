@@ -362,7 +362,9 @@ class AyahModePageState extends ConsumerState<AyahModePage> {
   /// Opened (or turned to) mid-recitation or mid-listening: straight to
   /// the ayah whose turn it is, if it is on this page.
   void _bringActiveIntoView() {
-    if (!widget.isCurrentPage) return;
+    // (An ayah asked for — a surah opened, a Memorize part — held already:
+    // it comes first.)
+    if (!widget.isCurrentPage || _pinIsTarget) return;
     final active = _activeAyah();
     if (active != null && (_words?.any((w) => w.ayahId == active) ?? false)) {
       _pin(active);
@@ -474,21 +476,42 @@ class AyahModePageState extends ConsumerState<AyahModePage> {
 
     final ayahs = _ayahs();
     // Ayah mode's text size (its view settings), over the reader's own.
+    // (The ayahs only: the page's buttons below keep the reader's size.)
     final media = MediaQuery.of(context);
-    final column = MediaQuery(
-      data: media.copyWith(
-        textScaler: TextScaler.linear(
-          media.textScaler.scale(1) *
-              ref.watch(tafsirTextScaleControllerProvider),
+    final column = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        MediaQuery(
+          data: media.copyWith(
+            textScaler: TextScaler.linear(
+              media.textScaler.scale(1) *
+                  ref.watch(tafsirTextScaleControllerProvider),
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              for (var k = 0; k < ayahs.length; k++)
+                _item(
+                  context,
+                  k,
+                  ayahs,
+                  hidden: hidden,
+                  mark: mark,
+                  words: words,
+                ),
+            ],
+          ),
         ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          for (var k = 0; k <= ayahs.length; k++)
-            _item(context, k, ayahs, hidden: hidden, mark: mark, words: words),
-        ],
-      ),
+        _item(
+          context,
+          ayahs.length,
+          ayahs,
+          hidden: hidden,
+          mark: mark,
+          words: words,
+        ),
+      ],
     );
     if (_embedded) {
       // One page of the continuous scroll: its number, then its ayahs.
@@ -1081,19 +1104,29 @@ class _PageButtons extends ConsumerWidget {
       child: Row(
         textDirection: TextDirection.rtl,
         children: [
-          TextButton(
-            key: const ValueKey('ayah-mode-previous-page'),
-            onPressed: pageNumber > 1
-                ? () => turn.toPage(pageNumber - 1)
-                : null,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              textDirection: TextDirection.ltr,
-              spacing: TahfeezSpacing.xs,
-              children: [
-                Text(l10n.commonPrevious),
-                const Icon(Icons.chevron_right),
-              ],
+          // Each giving way to the row, its name shortened (a narrow
+          // screen, large text).
+          Flexible(
+            child: TextButton(
+              key: const ValueKey('ayah-mode-previous-page'),
+              onPressed: pageNumber > 1
+                  ? () => turn.toPage(pageNumber - 1)
+                  : null,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                textDirection: TextDirection.ltr,
+                spacing: TahfeezSpacing.xs,
+                children: [
+                  Flexible(
+                    child: Text(
+                      l10n.commonPrevious,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const Icon(Icons.chevron_right),
+                ],
+              ),
             ),
           ),
           Expanded(
@@ -1104,16 +1137,27 @@ class _PageButtons extends ConsumerWidget {
               style: TextStyle(color: colors.secondaryText),
             ),
           ),
-          TextButton(
-            key: const ValueKey('ayah-mode-next-page'),
-            onPressed: pageNumber < pageCount
-                ? () => turn.toPage(pageNumber + 1)
-                : null,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              textDirection: TextDirection.ltr,
-              spacing: TahfeezSpacing.xs,
-              children: [const Icon(Icons.chevron_left), Text(l10n.commonNext)],
+          Flexible(
+            child: TextButton(
+              key: const ValueKey('ayah-mode-next-page'),
+              onPressed: pageNumber < pageCount
+                  ? () => turn.toPage(pageNumber + 1)
+                  : null,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                textDirection: TextDirection.ltr,
+                spacing: TahfeezSpacing.xs,
+                children: [
+                  const Icon(Icons.chevron_left),
+                  Flexible(
+                    child: Text(
+                      l10n.commonNext,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],

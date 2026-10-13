@@ -9,6 +9,7 @@ import 'package:tahfeez_ai/core/localization/generated/app_localizations.dart';
 import 'package:tahfeez_ai/features/mushaf/application/mushaf_quran_engine_providers.dart';
 import 'package:tahfeez_ai/features/mushaf/application/reader_mode.dart';
 import 'package:tahfeez_ai/features/mushaf/domain/quran_engine/quran_engine_mushaf_backend.dart';
+import 'package:tahfeez_ai/features/mushaf/application/mushaf_focus_ayah.dart';
 import 'package:tahfeez_ai/features/mushaf/application/mushaf_page_turn.dart';
 import 'package:tahfeez_ai/features/mushaf/application/mushaf_hide_mode.dart';
 import 'package:tahfeez_ai/features/listen/application/quran_audio_player.dart';
@@ -128,6 +129,7 @@ void main() {
     AyahLayout layout = AyahLayout.continuous,
     int initialPage = 10,
     int? target,
+    int? focus,
     AyahLayout? thenLayout,
   }) async {
     _layout = layout;
@@ -154,6 +156,9 @@ void main() {
     await container.read(readerModeProvider.notifier).set(ReaderMode.ayah);
     if (target != null) {
       container.read(ayahModeTargetProvider.notifier).show(target);
+    }
+    if (focus != null) {
+      container.read(mushafFocusAyahProvider.notifier).focus('test', focus);
     }
     changes = [];
     await tester.pumpWidget(
@@ -462,5 +467,26 @@ void main() {
     final card = rectOf(tester, 'ayah-mode-1004');
     final list = tester.getTopLeft(find.byType(CustomScrollView)).dy;
     expect(card.top - list, inInclusiveRange(0, 40));
+  });
+
+  testWidgets('an ayah asked for and another in focus on the same page: the '
+      'one asked for brought into view, and no longer asked once shown', (
+    tester,
+  ) async {
+    shortScreen(tester);
+    await pump(tester, layout: AyahLayout.paged, target: 1004, focus: 1003);
+    // Its card at the top — or as near as the page's end allows.
+    final card = find.byKey(const ValueKey('ayah-mode-1004'));
+    final position = Scrollable.of(tester.element(card)).position;
+    final list = tester.getTopLeft(find.byType(SingleChildScrollView).first).dy;
+    expect(
+      tester.getRect(card).top - list <= 40 ||
+          position.pixels == position.maxScrollExtent,
+      isTrue,
+    );
+    // Settled: no longer asked (nothing left to pull the page back to it).
+    await tester.pump(const Duration(seconds: 3));
+    await tester.pumpAndSettle();
+    expect(container.read(ayahModeTargetProvider), isNull);
   });
 }
