@@ -112,6 +112,12 @@ GoRouter appRouter(Ref ref) {
   // screen is shown again (the Quran tab's search).
   void unfocus() => FocusManager.instance.primaryFocus?.unfocus();
   router.routerDelegate.addListener(unfocus);
-  ref.onDispose(() => router.routerDelegate.removeListener(unfocus));
+  ref.onDispose(() {
+    router.routerDelegate.removeListener(unfocus);
+    // Released with its scope (the app keeps it for good; a test's scope
+    // ends, and a router left registered with the binding would hold all
+    // it reached).
+    router.dispose();
+  });
   return router;
 }

@@ -318,10 +318,11 @@ void main() {
     'Ayah mode continuous': (ReaderMode.ayah, AyahLayout.continuous),
   };
 
-  // The whole matrix (some 1,150 runs, about 20 minutes) with
-  // `TAHFEEZ_RESPONSIVE=all flutter test test/app/responsive_reader_test.dart`;
-  // otherwise a part of it on every test run: the sizes most likely to
-  // break, a language each in turn.
+  // The whole matrix (some 3,500 runs, about an hour) with
+  // `tool/test_responsive_all.sh`, in shards — never as one process (each
+  // reader run keeps memory until the process ends); otherwise a part of it
+  // on every test run: the sizes most likely to break, a language each in
+  // turn.
   final all = Platform.environment['TAHFEEZ_RESPONSIVE'] == 'all';
   const everyRun = {
     'narrow phone',
