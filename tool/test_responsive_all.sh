@@ -13,6 +13,7 @@
 set -u
 cd "$(dirname "$0")/.."
 
+TEST=${TEST:-test/app/responsive_reader_test.dart}
 SHARDS=${SHARDS:-60}
 MEMORY=${MEMORY:-3G}
 FROM=${FROM:-0}
@@ -31,8 +32,8 @@ capped() {
 failed=()
 for ((i = FROM; i < SHARDS; i++)); do
   log="$LOGS/shard-$i.txt"
-  if TAHFEEZ_RESPONSIVE=all capped flutter test \
-    test/app/responsive_reader_test.dart \
+  if TAHFEEZ_RESPONSIVE=all TAHFEEZ_CRAWL=1 capped flutter test \
+    "$TEST" \
     --total-shards "$SHARDS" --shard-index "$i" >"$log" 2>&1; then
     echo "shard $((i + 1))/$SHARDS: $(tail -1 "$log")"
   else
