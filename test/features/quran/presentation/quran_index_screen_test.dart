@@ -17,6 +17,8 @@ import 'package:tahfeez_ai/quran/quran_providers.dart';
 
 import '../../../quran/quran_test_fixtures.dart';
 
+import 'package:tahfeez_ai/core/ui/first_run.dart';
+
 void main() {
   Widget wrap(QuranDatabase db, {Map<int, SurahProgress> progress = const {}}) {
     final router = GoRouter(
@@ -32,6 +34,7 @@ void main() {
 
     return ProviderScope(
       overrides: [
+        firstRunPromptsProvider.overrideWithValue(false),
         quranDatabaseProvider.overrideWith((ref) => db),
         surahProgressProvider.overrideWith((ref) async => progress),
       ],

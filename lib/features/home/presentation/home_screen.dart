@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'home_store_prompts.dart';
 
+import '../../../core/app_store/app_store_service.dart';
 import '../../../core/ui/back_to_exit.dart';
+import '../../../core/ui/first_run.dart';
 
 import '../../../core/localization/generated/app_localizations.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -44,6 +47,8 @@ class HomeScreen extends StatelessWidget {
             spacing: TahfeezSpacing.lg,
             children: [
               _HomeBrandHeader(l10n: l10n),
+              // The first time Home shows: a word of welcome.
+              const _WelcomeOnce(),
               const HomeResourceUpdatesBanner(),
               const HomeDailyAyahSection(),
               const HomeReadHistorySection(),
@@ -97,4 +102,53 @@ class _HomeBrandHeader extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Nothing on screen: the first time Home shows, a welcome — what the app
+/// is for, that its recitation checking is still learning, and where
+/// feedback goes.
+class _WelcomeOnce extends ConsumerStatefulWidget {
+  const _WelcomeOnce();
+
+  @override
+  ConsumerState<_WelcomeOnce> createState() => _WelcomeOnceState();
+}
+
+class _WelcomeOnceState extends ConsumerState<_WelcomeOnce> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted || !await firstRunDue(ref, 'welcome') || !mounted) return;
+      final l10n = AppLocalizations.of(context);
+      final store = ref.read(appStoreServiceProvider);
+      await showDialog<void>(
+        context: context,
+        builder: (context) => AlertDialog(
+          key: const ValueKey('home-welcome'),
+          title: Text(l10n.homeWelcomeTitle),
+          content: SingleChildScrollView(child: Text(l10n.homeWelcomeBody)),
+          actions: [
+            // (Where feedback goes, once there is somewhere: Settings' too.)
+            if (kFeedbackUrl.isNotEmpty)
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  store.openUrl(kFeedbackUrl);
+                },
+                child: Text(l10n.homeWelcomeFeedback),
+              ),
+            FilledButton(
+              key: const ValueKey('home-welcome-continue'),
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(l10n.homeWelcomeContinue),
+            ),
+          ],
+        ),
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) => const SizedBox.shrink();
 }

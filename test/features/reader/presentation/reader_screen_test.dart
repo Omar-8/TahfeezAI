@@ -14,6 +14,8 @@ import 'package:tahfeez_ai/quran/quran_providers.dart';
 
 import '../../../quran/quran_test_fixtures.dart';
 
+import 'package:tahfeez_ai/core/ui/first_run.dart';
+
 void main() {
   Widget wrap(
     QuranDatabase db, {
@@ -21,6 +23,7 @@ void main() {
   }) {
     return ProviderScope(
       overrides: [
+        firstRunPromptsProvider.overrideWithValue(false),
         quranDatabaseProvider.overrideWith((ref) => db),
         quranScriptCodeProvider.overrideWith((ref) => testScriptCode),
       ],
@@ -77,6 +80,7 @@ void main() {
       addTearDown(db.close);
       final container = ProviderContainer(
         overrides: [
+          firstRunPromptsProvider.overrideWithValue(false),
           quranDatabaseProvider.overrideWith((ref) => db),
           quranScriptCodeProvider.overrideWith((ref) => testScriptCode),
         ],

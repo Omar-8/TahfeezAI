@@ -1,6 +1,7 @@
 import 'package:drift/native.dart';
 import 'package:tahfeez_ai/core/audio/audio_controller.dart';
 import 'package:tahfeez_ai/core/core_providers.dart';
+import 'package:tahfeez_ai/core/ui/first_run.dart';
 import 'package:tahfeez_ai/memorization/memorization_providers.dart';
 import 'package:tahfeez_ai/quran/data/quran_database.dart';
 import 'package:tahfeez_ai/quran/data/search_index_database.dart';
@@ -76,5 +77,7 @@ tahfeezWidgetTestOverrides({AudioController? audioController}) {
     audioControllerProvider.overrideWith(
       (ref) => audioController ?? FakeAudioController(),
     ),
+    // No welcome or guide popping up over what a test looks at.
+    firstRunPromptsProvider.overrideWithValue(false),
   ];
 }

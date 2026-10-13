@@ -15,6 +15,7 @@ import 'package:tahfeez_ai/core/theme/app_surface_tone.dart';
 import 'package:tahfeez_ai/core/theme/app_typography.dart';
 import 'package:tahfeez_ai/core/theme/quran_text_style.dart';
 import 'package:tahfeez_ai/core/theme/theme_controller.dart';
+import 'package:tahfeez_ai/core/ui/first_run.dart';
 import 'package:tahfeez_ai/features/mushaf/application/mushaf_appearance_controller.dart';
 import 'package:tahfeez_ai/features/mushaf/application/mushaf_passages.dart';
 import 'package:tahfeez_ai/features/mushaf/application/mushaf_quran_engine_providers.dart';
@@ -121,6 +122,7 @@ class RealApp {
     MushafAppearance readerTheme = MushafAppearance.light,
     AppThemeChoice appTheme = AppThemeChoice.light,
     bool passages = false,
+    bool firstRun = false,
   }) async {
     recordErrors();
     tester.view.physicalSize = size;
@@ -145,6 +147,7 @@ class RealApp {
         audioControllerProvider.overrideWith((ref) => FakeAudioController()),
         mushafQuranEngineBackendProvider.overrideWith((ref) async => _backend),
         localeControllerProvider.overrideWithBuild((ref, _) => Locale(locale)),
+        firstRunPromptsProvider.overrideWithValue(firstRun),
       ],
     );
     addTearDown(container.dispose);

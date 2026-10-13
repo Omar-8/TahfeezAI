@@ -20,6 +20,8 @@ import 'package:tahfeez_ai/quran/translation_providers.dart';
 
 import '../../../quran/quran_test_fixtures.dart';
 
+import 'package:tahfeez_ai/core/ui/first_run.dart';
+
 void main() {
   setUp(() async {
     final cleanup = ProviderContainer();
@@ -53,6 +55,7 @@ void main() {
 
     return ProviderScope(
       overrides: [
+        firstRunPromptsProvider.overrideWithValue(false),
         quranDatabaseProvider.overrideWith((ref) => db),
         translationDatabaseProvider.overrideWith((ref) => translationDb),
         searchIndexDatabaseProvider.overrideWith((ref) => indexDb),

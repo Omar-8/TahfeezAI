@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/localization/generated/app_localizations.dart';
 import '../../core/theme/app_spacing.dart';
+import '../../core/ui/first_run.dart';
 import '../listen/application/follow_along_controller.dart';
 import '../listen/application/quran_audio_player.dart';
 import '../mushaf/application/mushaf_hide_mode.dart';
@@ -240,12 +241,32 @@ class _GuideTargetState extends ConsumerState<GuideTarget> {
 }
 
 /// The Mushaf top bar's "?": starts the guide's overview (where the modes
-/// are: with live recognition).
-class GuideButton extends ConsumerWidget {
+/// are: with live recognition) — and, the first time the reader opens (the
+/// printed page or Ayah mode), starts it by itself.
+class GuideButton extends ConsumerStatefulWidget {
   const GuideButton({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<GuideButton> createState() => _GuideButtonState();
+}
+
+class _GuideButtonState extends ConsumerState<GuideButton> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted || !ref.read(liveRecognitionEnabledProvider)) return;
+      if (!await firstRunDue(ref, 'guide')) return;
+      // The page and its bar in place first.
+      await Future<void>.delayed(const Duration(milliseconds: 1200));
+      if (!mounted || ref.read(guideProvider) != null) return;
+      if (!(ModalRoute.of(context)?.isCurrent ?? true)) return;
+      ref.read(guideProvider.notifier).start();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     if (!ref.watch(liveRecognitionEnabledProvider)) {
       return const SizedBox.shrink();
     }
