@@ -15,6 +15,7 @@ on:
       - 'packages/tahfeez_ios/**'
       - 'third_party/qvp_flutter/**'
       - 'integration_test/ios_smoke_test.dart'
+      - 'integration_test/device_qa_test.dart'
       - 'pubspec.yaml'
       - 'pubspec.lock'
       - '.github/workflows/ios.yml'
@@ -127,6 +128,21 @@ jobs:
             --target=integration_test/ios_smoke_test.dart \
             -d "${{ steps.sim.outputs.udid }}" 2>&1 | tee smoke.log
 
+      # The same walk-through as on Android (integration_test/
+      # device_qa_test.dart): the reader's three layouts, hide mode,
+      # listening, reciting, Follow along, search, every main screen's every
+      # control. The microphone granted first (no prompt to answer).
+      - name: QA walk-through on the simulator
+        if: always() && steps.sim.outcome == 'success'
+        shell: bash
+        timeout-minutes: 30
+        run: |
+          xcrun simctl privacy "${{ steps.sim.outputs.udid }}" grant microphone ai.tahfeez.tahfeezAi || true
+          flutter drive \
+            --driver=test_driver/integration_test.dart \
+            --target=integration_test/device_qa_test.dart \
+            -d "${{ steps.sim.outputs.udid }}" 2>&1 | tee qa.log
+
       - name: Simulator log
         if: always()
         run: |
@@ -140,6 +156,7 @@ jobs:
           path: |
             screenshots/
             smoke.log
+            qa.log
             simulator.log
             xcodebuild.log
           if-no-files-found: warn

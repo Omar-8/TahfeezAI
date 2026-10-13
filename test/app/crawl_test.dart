@@ -73,8 +73,11 @@ void main() {
         'controls',
       );
     }
-    // More than this crawl reaches: none left untried unnoticed.
-    if (index == (long ? _mostLong : most) - 1 && count > index + 1) {
+    // More than this crawl reaches: none left untried unnoticed — but for
+    // a screen of many alike (Progress: a cell per page), tried in part.
+    if (index == (long ? _mostLong : most) - 1 &&
+        count > index + 1 &&
+        !_sampled.contains(screen)) {
       fail('$screen has $count controls; raise the limit');
     }
     if (index >= count) {
@@ -145,3 +148,6 @@ String _describe(WidgetTester tester, Finder control) {
 }
 
 const _mostLong = 16;
+
+/// Screens of many alike controls, crawled in part.
+const _sampled = {'Progress'};
