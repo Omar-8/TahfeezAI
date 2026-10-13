@@ -104,27 +104,49 @@ class _MarkKnownSheetState extends ConsumerState<_MarkKnownSheet> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: TahfeezSpacing.smPlus,
         children: [
-          Text(
-            l10n.memMarkSub,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
-          ),
-          SegmentedButton<bool>(
-            key: const ValueKey('mark-by'),
-            showSelectedIcon: false,
-            segments: [
-              ButtonSegment(value: false, label: Text(l10n.memMarkSurahs)),
-              ButtonSegment(value: true, label: Text(l10n.memMarkJuz)),
-            ],
-            selected: {_byJuz},
-            onSelectionChanged: (s) => setState(() => _byJuz = s.first),
-          ),
+          // The explanation and the surahs/juz choice scroll with the list:
+          // a short screen with large text still leaves it room.
           Expanded(
             child: ListView.builder(
-              itemCount: items.length,
+              itemCount: items.length + 1,
               itemBuilder: (context, i) {
-                final (item, title, trailing) = items[i];
+                if (i == 0) {
+                  return Padding(
+                    padding: const EdgeInsets.only(
+                      bottom: TahfeezSpacing.smPlus,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      spacing: TahfeezSpacing.smPlus,
+                      children: [
+                        Text(
+                          l10n.memMarkSub,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                        SegmentedButton<bool>(
+                          key: const ValueKey('mark-by'),
+                          showSelectedIcon: false,
+                          segments: [
+                            ButtonSegment(
+                              value: false,
+                              label: Text(l10n.memMarkSurahs),
+                            ),
+                            ButtonSegment(
+                              value: true,
+                              label: Text(l10n.memMarkJuz),
+                            ),
+                          ],
+                          selected: {_byJuz},
+                          onSelectionChanged: (s) =>
+                              setState(() => _byJuz = s.first),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+                final (item, title, trailing) = items[i - 1];
                 final value = _changes[item] ?? stored(item);
                 return CheckboxListTile(
                   key: ValueKey('mark-$item'),

@@ -54,14 +54,25 @@ class MemorizeScreen extends ConsumerWidget {
         title: Text(l10n.memTitle),
         centerTitle: false,
         actions: [
-          // Named, not only an icon: what it opens is plain to see.
+          // Named, not only an icon: what it opens is plain to see. At most
+          // under half the bar — a long name at large text shortened, the
+          // title kept.
           Padding(
             padding: const EdgeInsetsDirectional.only(end: TahfeezSpacing.sm),
-            child: TextButton.icon(
-              key: const ValueKey('mem-open-progress'),
-              onPressed: () => context.push(AppRoutes.memorizeProgress),
-              icon: const Icon(Icons.insights_outlined),
-              label: Text(l10n.memProgressTitle),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.sizeOf(context).width * 0.45,
+              ),
+              child: TextButton.icon(
+                key: const ValueKey('mem-open-progress'),
+                onPressed: () => context.push(AppRoutes.memorizeProgress),
+                icon: const Icon(Icons.insights_outlined),
+                label: Text(
+                  l10n.memProgressTitle,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
             ),
           ),
         ],

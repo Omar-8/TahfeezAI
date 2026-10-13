@@ -18,12 +18,42 @@ import '../test_helpers/widget_test_overrides.dart';
 /// text, in English and Arabic: laid out without overflow or error, scrolled
 /// through to the end.
 void main() {
+  /// Every layout error this test reports, with the widget it came from.
+  final reported = <FlutterErrorDetails>[];
+  void recordErrors() {
+    reported.clear();
+    final prior = FlutterError.onError;
+    FlutterError.onError = (details) {
+      reported.add(details);
+      prior?.call(details);
+    };
+    addTearDown(() => FlutterError.onError = prior);
+  }
+
+  /// Fails with what overflowed (the widget, where), not only that it did.
+  void fits(WidgetTester tester, String reason) {
+    final error = tester.takeException();
+    if (error == null) return;
+    final where = [
+      for (final d in reported)
+        d.toString().split('\n').where((l) => l.contains('file:///')).take(2),
+    ].expand((l) => l).toSet().join('\n');
+    fail('$reason: $error\n$where');
+  }
+
   const sizes = {
+    // A foldable's cover screen: the narrowest in use.
+    'narrow phone': Size(280, 653),
     'small phone': Size(320, 568),
     'phone': Size(390, 844),
     'large phone': Size(430, 932),
     'tablet': Size(800, 1280),
+    'tablet landscape': Size(1280, 800),
+    'desktop': Size(1440, 900),
   };
+  // Every UI language: German and French run longest, Arabic and Urdu
+  // right to left.
+  const locales = ['en', 'ar', 'de', 'fr', 'tr', 'ur'];
   const routes = [
     '/home',
     '/quran',
@@ -35,11 +65,13 @@ void main() {
   ];
 
   for (final MapEntry(key: name, value: size) in sizes.entries) {
-    for (final scale in const [1.0, 1.5]) {
-      for (final locale in const ['en', 'ar', 'de', 'ur']) {
+    // Up to Android's largest text (200%).
+    for (final scale in const [1.0, 1.5, 2.0]) {
+      for (final locale in locales) {
         testWidgets('$name, text ×$scale, $locale: every main screen fits', (
           tester,
         ) async {
+          recordErrors();
           tester.view.physicalSize = size;
           tester.view.devicePixelRatio = 1;
           tester.platformDispatcher.textScaleFactorTestValue = scale;
@@ -63,7 +95,7 @@ void main() {
           for (final route in routes) {
             router.go(route);
             await tester.pumpAndSettle();
-            expect(tester.takeException(), isNull, reason: '$route opens');
+            fits(tester, '$route opens');
             // Down to the end of every scrollable on the screen.
             final scrollables = find.byType(Scrollable);
             for (var i = 0; i < scrollables.evaluate().length; i++) {
@@ -83,7 +115,7 @@ void main() {
                 );
                 await tester.pumpAndSettle();
               }
-              expect(tester.takeException(), isNull, reason: '$route scrolled');
+              fits(tester, '$route scrolled');
             }
           }
         });
@@ -113,10 +145,11 @@ void main() {
     'mark what I know': (c) => showMarkKnownSheet(c),
   };
   for (final MapEntry(key: sheet, value: open) in sheets.entries) {
-    for (final locale in const ['en', 'ar', 'de', 'ur']) {
+    for (final locale in locales) {
       testWidgets('small phone, text ×1.5, $locale: the $sheet sheet fits', (
         tester,
       ) async {
+        recordErrors();
         tester.view.physicalSize = const Size(320, 568);
         tester.view.devicePixelRatio = 1;
         tester.platformDispatcher.textScaleFactorTestValue = 1.5;
@@ -150,7 +183,7 @@ void main() {
         );
         await tester.tap(find.text('open'));
         await tester.pumpAndSettle();
-        expect(tester.takeException(), isNull, reason: '$sheet opens');
+        fits(tester, '$sheet opens');
         final scrollable = find.byType(Scrollable).last;
         for (var n = 0; n < 10; n++) {
           await tester.drag(
@@ -160,7 +193,7 @@ void main() {
           );
           await tester.pumpAndSettle();
         }
-        expect(tester.takeException(), isNull, reason: '$sheet scrolled');
+        fits(tester, '$sheet scrolled');
       });
     }
   }

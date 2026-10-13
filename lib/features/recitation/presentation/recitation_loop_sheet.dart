@@ -485,11 +485,14 @@ class VersePicker extends StatelessWidget {
         const SizedBox(height: TahfeezSpacing.sm),
         Row(
           children: [
-            Text(
-              l10n.recLoopAyah,
-              style: Theme.of(context).textTheme.bodyMedium,
+            // Wraps rather than pushing the stepper off (long languages,
+            // large text).
+            Expanded(
+              child: Text(
+                l10n.recLoopAyah,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
             ),
-            const Spacer(),
             CountStepper(
               id: 'loop-$id-ayah',
               value: value.verseNo,
