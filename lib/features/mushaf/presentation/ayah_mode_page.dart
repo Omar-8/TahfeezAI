@@ -91,26 +91,40 @@ class AyahModePageState extends ConsumerState<AyahModePage> {
   final _wordKeys = <int, GlobalKey>{};
 
   /// Brings the page's word [index] into view (revealing and hiding).
+  ///
+  /// The top of its ayah's card, as the modes show an ayah — unless that
+  /// would leave the word below the screen (a card taller than it): then
+  /// just enough to show the word.
   void _scrollToWord(int index) {
     _unpin();
+    final ayahId = _words != null && index < _words!.length
+        ? _words![index].ayahId
+        : null;
     WidgetsBinding.instance.addPostFrameCallback(
-      (_) => _reveal(_wordKeys[index], alignment: 0.4),
+      (_) => _reveal(
+        _ayahKeys[ayahId] ?? _wordKeys[index],
+        keepInView: _wordKeys[index],
+      ),
     );
   }
 
   /// Scrolls this page's own list (never the pager around it) so [key]'s
   /// widget sits at [alignment] of the screen — or, [onlyIfHidden], just
   /// into view, and not at all when it already is.
-  void _reveal(
+  ///
+  /// With [keepInView], never so far that its widget ends below the screen.
+  /// Returns where it scrolls to (`null`: nothing there to scroll to).
+  double? _reveal(
     GlobalKey? key, {
     double alignment = 0.1,
     bool animate = true,
     bool onlyIfHidden = false,
+    GlobalKey? keepInView,
   }) {
     final box = key?.currentContext?.findRenderObject();
-    if (box == null || !box.attached || !_scroll.hasClients) return;
+    if (box == null || !box.attached || !_scroll.hasClients) return null;
     final viewport = RenderAbstractViewport.maybeOf(box);
-    if (viewport == null) return;
+    if (viewport == null) return null;
     final position = _scroll.position;
     double target;
     if (onlyIfHidden) {
@@ -121,13 +135,19 @@ class AyahModePageState extends ConsumerState<AyahModePage> {
       } else if (position.pixels < bottom) {
         target = bottom;
       } else {
-        return;
+        return position.pixels;
       }
     } else {
       target = viewport.getOffsetToReveal(box, alignment).offset;
     }
+    final inner = keepInView?.currentContext?.findRenderObject();
+    if (inner != null && inner.attached) {
+      // Where the inner widget's bottom meets the screen's.
+      final atBottom = viewport.getOffsetToReveal(inner, 1).offset;
+      if (atBottom > target) target = atBottom;
+    }
     target = target.clamp(position.minScrollExtent, position.maxScrollExtent);
-    if ((target - position.pixels).abs() < 1) return;
+    if ((target - position.pixels).abs() < 1) return target;
     if (animate) {
       unawaited(
         _scroll.animateTo(
@@ -139,20 +159,27 @@ class AyahModePageState extends ConsumerState<AyahModePage> {
     } else {
       _scroll.jumpTo(target);
     }
+    return target;
   }
 
   /// An ayah opened at (Daily ayah, Continue reading, the ayah sheet's
-  /// More): held in place while the page settles — translations, tafsir
-  /// and meanings arriving after it grow the ayahs above — until the
-  /// reader scrolls, a mode moves on (its scroll wins), or a moment has
-  /// passed.
+  /// More): its card's top held in place while the page settles —
+  /// translations, tafsir and meanings arriving after it grow the ayahs
+  /// above — until nothing has moved it for a moment (or a few seconds
+  /// at most), the reader scrolls, or a mode moves on to another ayah.
   int? _pinned;
-  Duration? _pinnedSince;
+  Duration? _pinnedSince, _pinMoved;
+  double? _pinAt;
+
+  static const _pinSettled = Duration(milliseconds: 1500);
+  static const _pinLongest = Duration(seconds: 6);
 
   void _pin(int ayahId) {
+    final holding = _pinned != null;
     _pinned = ayahId;
-    _pinnedSince = null;
-    _holdPin();
+    _pinnedSince = _pinMoved = null;
+    _pinAt = null;
+    if (!holding) _holdPin();
   }
 
   void _holdPin() {
@@ -160,11 +187,16 @@ class AyahModePageState extends ConsumerState<AyahModePage> {
       final id = _pinned;
       if (!mounted || id == null) return;
       final since = _pinnedSince ??= timeStamp;
-      if (timeStamp - since > const Duration(seconds: 2)) {
+      final at = _reveal(_ayahKeys[id], animate: false);
+      if (at != null && (_pinAt == null || (at - _pinAt!).abs() >= 1)) {
+        _pinAt = at;
+        _pinMoved = timeStamp;
+      }
+      final settled = timeStamp - (_pinMoved ?? since) > _pinSettled;
+      if (settled || timeStamp - since > _pinLongest) {
         _unpin();
         return;
       }
-      _reveal(_ayahKeys[id], animate: false);
       WidgetsBinding.instance.scheduleFrame();
       _holdPin();
     });
@@ -172,7 +204,8 @@ class AyahModePageState extends ConsumerState<AyahModePage> {
 
   void _unpin() {
     _pinned = null;
-    _pinnedSince = null;
+    _pinnedSince = _pinMoved = null;
+    _pinAt = null;
   }
 
   /// The reader took the list (the continuous layout).
@@ -301,7 +334,9 @@ class AyahModePageState extends ConsumerState<AyahModePage> {
 
   /// Scrolls to [ayahId]'s block, if it is on this page.
   void _scrollTo(int ayahId, {bool animate = true}) {
-    // A mode moved on: the ayah opened at no longer held.
+    // The ayah held already: it stays held. A mode moved on to another:
+    // that one's scroll wins.
+    if (_pinned == ayahId) return;
     _unpin();
     WidgetsBinding.instance.addPostFrameCallback(
       (_) => _reveal(_ayahKeys[ayahId], animate: animate),

@@ -245,6 +245,14 @@ void main() {
     final word = rectOf(tester, 'ayah-word-1004:1');
     expect(word.top, greaterThanOrEqualTo(0));
     expect(word.bottom, lessThanOrEqualTo(260));
+    // Its card's top at the top, as the modes show an ayah.
+    final card = find.byKey(const ValueKey('ayah-mode-1004'));
+    final position = Scrollable.of(tester.element(card)).position;
+    expect(
+      tester.getRect(card).top <= 40 ||
+          position.pixels == position.maxScrollExtent,
+      isTrue,
+    );
     expect(changes, isEmpty, reason: 'still page 10');
   });
 
@@ -310,6 +318,14 @@ void main() {
       final word = rectOf(tester, 'ayah-word-1002:1');
       expect(word.top, greaterThanOrEqualTo(0));
       expect(word.bottom, lessThanOrEqualTo(260));
+      // Its card's top at the top — or as near as the page's end allows.
+      final card = find.byKey(const ValueKey('ayah-mode-1002'));
+      final position = Scrollable.of(tester.element(card)).position;
+      expect(
+        tester.getRect(card).top <= 40 ||
+            position.pixels == position.maxScrollExtent,
+        isTrue,
+      );
     });
 
     testWidgets('${layout.name}: listening from an ayah far away (page 300 '
