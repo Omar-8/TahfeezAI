@@ -7,6 +7,8 @@ import '../../../core/localization/generated/app_localizations.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/quran_text_style.dart';
 import '../../../quran/application/ayah_reading_extras.dart';
+import '../../../quran/application/recent_quran_location.dart';
+import '../../../quran/domain/models/quran_location.dart';
 import '../../../quran/application/quran_script_code.dart';
 import '../../../quran/application/tafsir_selection_controller.dart';
 import '../../../quran/application/tafsir_verse_text.dart';
@@ -101,6 +103,7 @@ class _AyahModePageState extends ConsumerState<AyahModePage> {
     super.didUpdateWidget(oldWidget);
     if (widget.isCurrentPage && !oldWidget.isCurrentPage) {
       _bringActiveIntoView();
+      WidgetsBinding.instance.addPostFrameCallback((_) => _recordPosition());
     }
     if (oldWidget.pageNumber != widget.pageNumber) {
       setState(() => _words = null);
@@ -152,6 +155,7 @@ class _AyahModePageState extends ConsumerState<AyahModePage> {
       });
       _bringTargetIntoView();
       _bringActiveIntoView();
+      WidgetsBinding.instance.addPostFrameCallback((_) => _recordPosition());
     } catch (e) {
       if (mounted) setState(() => _error = e);
     }
@@ -314,29 +318,70 @@ class _AyahModePageState extends ConsumerState<AyahModePage> {
       // The whole page built at once (a page holds at most a few dozen
       // ayahs): every ayah and word is there to scroll to — revealing,
       // hiding and following the recitation need them.
-      child: SingleChildScrollView(
-        controller: _scroll,
-        padding: const EdgeInsets.fromLTRB(
-          TahfeezSpacing.md,
-          TahfeezSpacing.sm,
-          TahfeezSpacing.md,
-          TahfeezSpacing.lg,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            for (var k = 0; k <= ayahs.length; k++)
-              _item(
-                context,
-                k,
-                ayahs,
-                hidden: hidden,
-                mark: mark,
-                words: words,
-              ),
-          ],
+      // Where the reader stops is where Continue reading goes back to.
+      child: NotificationListener<ScrollEndNotification>(
+        onNotification: (_) {
+          _recordPosition();
+          return false;
+        },
+        child: SingleChildScrollView(
+          controller: _scroll,
+          padding: const EdgeInsets.fromLTRB(
+            TahfeezSpacing.md,
+            TahfeezSpacing.sm,
+            TahfeezSpacing.md,
+            TahfeezSpacing.lg,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              for (var k = 0; k <= ayahs.length; k++)
+                _item(
+                  context,
+                  k,
+                  ayahs,
+                  hidden: hidden,
+                  mark: mark,
+                  words: words,
+                ),
+            ],
+          ),
         ),
       ),
+    );
+  }
+
+  /// The ayah at the top of the page on screen, saved as the place to
+  /// continue reading from (Home).
+  void _recordPosition() {
+    if (!widget.isCurrentPage || !mounted) return;
+    final list = context.findRenderObject();
+    if (list is! RenderBox || !list.attached) return;
+    final top = list.localToGlobal(Offset.zero).dy;
+    int? best;
+    var bestY = double.negativeInfinity;
+    int? first;
+    var firstY = double.infinity;
+    for (final e in _ayahKeys.entries) {
+      final box = e.value.currentContext?.findRenderObject();
+      if (box is! RenderBox || !box.attached) continue;
+      final y = box.localToGlobal(Offset.zero).dy - top;
+      if (y < firstY) {
+        firstY = y;
+        first = e.key;
+      }
+      // The last ayah starting in the screen's upper quarter, or above it.
+      if (y <= list.size.height / 4 && y > bestY) {
+        bestY = y;
+        best = e.key;
+      }
+    }
+    final ayahId = best ?? first;
+    if (ayahId == null) return;
+    final location = QuranLocation.ayah(ayahId ~/ 1000, ayahId % 1000);
+    if (ref.read(recentQuranLocationControllerProvider) == location) return;
+    unawaited(
+      ref.read(recentQuranLocationControllerProvider.notifier).record(location),
     );
   }
 

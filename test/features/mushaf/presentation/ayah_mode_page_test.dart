@@ -1,9 +1,17 @@
+import 'dart:async';
+
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tahfeez_ai/core/localization/generated/app_localizations.dart';
+import 'package:tahfeez_ai/core/core_providers.dart';
+import 'package:tahfeez_ai/features/listen/application/quran_audio_player.dart';
+import 'package:tahfeez_ai/features/mushaf/application/mushaf_focus_ayah.dart';
 import 'package:tahfeez_ai/features/mushaf/application/mushaf_hide_mode.dart';
+import 'package:tahfeez_ai/features/quran/application/quran_index_providers.dart';
+import 'package:tahfeez_ai/quran/application/recent_quran_location.dart';
+import 'package:tahfeez_ai/quran/domain/models/quran_location.dart';
 import 'package:tahfeez_ai/features/mushaf/application/mushaf_passages.dart';
 import 'package:tahfeez_ai/features/mushaf/application/mushaf_quran_engine_providers.dart';
 import 'package:tahfeez_ai/features/mushaf/application/mushaf_word_overlay.dart';
@@ -19,6 +27,7 @@ import 'package:tahfeez_ai/quran/domain/models/quran_refs.dart';
 import 'package:tahfeez_ai/quran/quran_providers.dart';
 
 import '../../../quran/quran_test_fixtures.dart';
+import '../../../test_helpers/fake_audio_controller.dart';
 
 /// Page 2: ayahs 1:2 and 1:3, two words each (the synthetic dataset's).
 class _Page implements QuranEngineMushafPage {
@@ -114,6 +123,9 @@ void main() {
     WidgetTester tester, {
     ReaderMode mode = ReaderMode.mushaf,
     Color? tint,
+    bool current = false,
+    FakeAudioController? audio,
+    int? focus,
   }) async {
     final db = QuranDatabase(NativeDatabase.memory());
     addTearDown(db.close);
@@ -126,6 +138,10 @@ void main() {
         quranDatabaseProvider.overrideWith((ref) => db),
         quranScriptCodeProvider.overrideWith((ref) => testScriptCode),
         ayahViewPreferencesProvider.overrideWith(_PlainView.new),
+        if (audio != null) ...[
+          audioControllerProvider.overrideWithValue(audio),
+          defaultMushafProvider.overrideWith((ref) async => null),
+        ],
         if (tint != null) ...[
           mushafPassagesProvider.overrideWith(_PassagesOn.new),
           passageColorsProvider.overrideWith((ref) async => {1002: tint}),
@@ -137,6 +153,9 @@ void main() {
     await tester.runAsync(() => Future<void>.delayed(Duration.zero));
     // Saved between tests: each sets its own.
     await container.read(readerModeProvider.notifier).set(mode);
+    if (focus != null) {
+      container.read(mushafFocusAyahProvider.notifier).focus('test', focus);
+    }
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
@@ -145,7 +164,11 @@ void main() {
           supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(
             appBar: AppBar(actions: const [ReaderModeToggle()]),
-            body: const MushafPageView(mushafId: 1, pageNumber: 2),
+            body: MushafPageView(
+              mushafId: 1,
+              pageNumber: 2,
+              isCurrentPage: current,
+            ),
           ),
         ),
       ),
@@ -276,5 +299,55 @@ void main() {
     final word = tester.getRect(find.byKey(const ValueKey('ayah-word-1003:1')));
     expect(word.top, greaterThanOrEqualTo(0));
     expect(word.bottom, lessThanOrEqualTo(260));
+  });
+
+  void shortScreen(WidgetTester tester) {
+    tester.view.physicalSize = const Size(400, 260);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+  }
+
+  /// Whether 1:3 is wholly in view, down to its last word.
+  bool onScreen(WidgetTester tester, String key) {
+    final rect = tester.getRect(find.byKey(ValueKey(key)));
+    final last = tester.getRect(find.byKey(const ValueKey('ayah-word-1003:1')));
+    return rect.top >= 0 && last.bottom <= 260;
+  }
+
+  testWidgets("listening: the reciter's ayah scrolled into view", (
+    tester,
+  ) async {
+    shortScreen(tester);
+    final audio = FakeAudioController();
+    await pump(tester, mode: ReaderMode.ayah, current: true, audio: audio);
+    expect(onScreen(tester, 'ayah-mode-1003'), isFalse);
+    unawaited(
+      container.read(quranAudioPlayerProvider.notifier).playAyahs([1003]),
+    );
+    await tester.pump();
+    await tester.pumpAndSettle();
+    expect(onScreen(tester, 'ayah-mode-1003'), isTrue);
+  });
+
+  testWidgets('opened at an ayah (Daily ayah): scrolled to it', (tester) async {
+    shortScreen(tester);
+    await pump(tester, mode: ReaderMode.ayah, current: true, focus: 1003);
+    expect(onScreen(tester, 'ayah-mode-1003'), isTrue);
+  });
+
+  testWidgets('where the reader stops is saved for Continue reading', (
+    tester,
+  ) async {
+    shortScreen(tester);
+    await pump(tester, mode: ReaderMode.ayah, current: true);
+    await tester.drag(
+      find.byType(SingleChildScrollView),
+      const Offset(0, -400),
+    );
+    await tester.pumpAndSettle();
+    expect(
+      container.read(recentQuranLocationControllerProvider),
+      const QuranLocation.ayah(1, 3),
+    );
   });
 }
