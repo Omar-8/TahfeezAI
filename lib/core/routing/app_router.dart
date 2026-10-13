@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -21,7 +22,7 @@ part 'app_router.g.dart';
 
 @Riverpod(keepAlive: true)
 GoRouter appRouter(Ref ref) {
-  return GoRouter(
+  final router = GoRouter(
     initialLocation: AppRoutes.home,
     routes: [
       StatefulShellRoute.indexedStack(
@@ -106,4 +107,11 @@ GoRouter appRouter(Ref ref) {
       ),
     ],
   );
+  // Any navigation (a tab, a screen opened or closed) puts the keyboard
+  // away: a field left focused would otherwise bring it back each time its
+  // screen is shown again (the Quran tab's search).
+  void unfocus() => FocusManager.instance.primaryFocus?.unfocus();
+  router.routerDelegate.addListener(unfocus);
+  ref.onDispose(() => router.routerDelegate.removeListener(unfocus));
+  return router;
 }
