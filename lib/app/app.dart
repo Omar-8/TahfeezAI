@@ -14,7 +14,7 @@ import '../core/theme/app_theme.dart';
 import '../core/theme/theme_controller.dart';
 import '../features/memorize/application/memorization_reminder.dart';
 
-/// Tahfeez AI's root widget.
+/// TahfeezAI's root widget.
 ///
 /// Wires together theme (light/dark/family/optional dynamic color,
 /// `core/theme`), localization (RTL-capable, `core/localization`), and

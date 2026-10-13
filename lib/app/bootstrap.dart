@@ -18,7 +18,7 @@ import '../quran/tafsir_providers.dart';
 import '../quran/translation_providers.dart';
 import 'bootstrap_gate.dart';
 
-/// Single, explicit startup sequence for Tahfeez AI.
+/// Single, explicit startup sequence for TahfeezAI.
 ///
 /// Kept separate from `main()` so alternate entry points (tests, future
 /// build flavors) can reuse it without duplicating setup order. Order

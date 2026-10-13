@@ -1,11 +1,11 @@
 Pod::Spec.new do |s|
   s.name             = 'tahfeez_ios'
   s.version          = '0.1.0'
-  s.summary          = "Tahfeez AI's iOS platform channels."
+  s.summary          = "TahfeezAI's iOS platform channels."
   s.description      = 'The on-device acoustic model (ONNX Runtime), the mistake alert and keeping the screen on.'
   s.homepage         = 'http://example.com' # local pod, not published
   s.license          = { :type => 'AGPL-3.0' }
-  s.author           = 'Tahfeez AI'
+  s.author           = 'TahfeezAI'
   s.source           = { :path => '.' }
   s.source_files     = 'Classes/**/*'
   s.dependency 'Flutter'

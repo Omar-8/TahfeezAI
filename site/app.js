@@ -1,4 +1,4 @@
-// Tahfeez AI's site: English or Arabic, light or dark, the screens carousel.
+// TahfeezAI's site: English or Arabic, light or dark, the screens carousel.
 (() => {
   const ar = {
     "nav.features": "المزايا",

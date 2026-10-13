@@ -1,12 +1,12 @@
-# Tahfeez AI — Design Direction
+# TahfeezAI — Design Direction
 
 ## Design objective
 
-Tahfeez AI should use excellent modern Quran applications, including QuranApp, as **UX and visual-quality references**, not as designs to reproduce.
+TahfeezAI should use excellent modern Quran applications, including QuranApp, as **UX and visual-quality references**, not as designs to reproduce.
 
-Target approximately **50–60% familiarity in overall design language** while building a clearly independent Tahfeez AI identity.
+Target approximately **50–60% familiarity in overall design language** while building a clearly independent TahfeezAI identity.
 
-A QuranApp user should find the application intuitive quickly, but nobody should mistake Tahfeez AI for QuranApp.
+A QuranApp user should find the application intuitive quickly, but nobody should mistake TahfeezAI for QuranApp.
 
 ## Tahfeez character
 
@@ -273,10 +273,10 @@ If a reference specification and this document conflict on visual appearance:
 
 When choosing between:
 1. reproducing QuranApp more exactly; and
-2. improving the experience consistently with Tahfeez AI;
+2. improving the experience consistently with TahfeezAI;
 
 prefer option 2.
 
 The intended result is:
 
-> Clearly inspired by excellent modern Quran applications, including QuranApp, but recognizably and confidently Tahfeez AI.
+> Clearly inspired by excellent modern Quran applications, including QuranApp, but recognizably and confidently TahfeezAI.

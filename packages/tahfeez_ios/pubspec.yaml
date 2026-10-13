@@ -1,5 +1,5 @@
 name: tahfeez_ios
-description: Tahfeez AI's iOS side of its own platform channels — the on-device acoustic model (ONNX Runtime), the mistake alert and keeping the screen on. Android's are in the app (android/app/src/main/kotlin).
+description: TahfeezAI's iOS side of its own platform channels — the on-device acoustic model (ONNX Runtime), the mistake alert and keeping the screen on. Android's are in the app (android/app/src/main/kotlin).
 version: 0.1.0
 publish_to: none
 

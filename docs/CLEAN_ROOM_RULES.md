@@ -1,8 +1,8 @@
-# Tahfeez AI — Clean-Room Rules
+# TahfeezAI — Clean-Room Rules
 
 These rules are project requirements, not legal advice.
 
-Tahfeez AI is an independent Quran application.
+TahfeezAI is an independent Quran application.
 
 The public project **AlfaazPlus/QuranApp** may be studied to understand:
 
@@ -39,8 +39,8 @@ Do not:
 ## Tahfeez must use
 
 - independently written Dart/Flutter code;
-- Tahfeez AI naming;
-- Tahfeez AI branding;
+- TahfeezAI naming;
+- TahfeezAI branding;
 - independently selected theme tokens;
 - original or separately licensed icons/assets;
 - independently licensed Quran resources;

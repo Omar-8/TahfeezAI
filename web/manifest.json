@@ -5,7 +5,7 @@
     "display": "standalone",
     "background_color": "#03100C",
     "theme_color": "#03100C",
-    "description": "Tahfeez AI — an offline-first Quran and memorization app.",
+    "description": "TahfeezAI — an offline-first Quran and memorization app.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

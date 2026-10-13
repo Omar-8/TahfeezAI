@@ -1,4 +1,4 @@
-# Tahfeez AI — Data Resource Requirements
+# TahfeezAI — Data Resource Requirements
 
 **Superseded for the canonical Arabic text, Surah/navigation metadata, and translation/tafsir
 resources**: those were integrated in the "Production Quran Data Integration" milestone. See

@@ -1,6 +1,6 @@
 # Handoff: train the s150 student on this Windows GPU PC
 
-You are continuing Tahfeez AI's distillation milestone. Another Claude session, on a Linux laptop
+You are continuing TahfeezAI's distillation milestone. Another Claude session, on a Linux laptop
 without a GPU, prepared and tested everything in this kit. Your job here is training only. The
 trained student goes back to the laptop for export, quantization and the benchmark.
 

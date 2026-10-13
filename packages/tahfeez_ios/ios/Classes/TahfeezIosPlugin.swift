@@ -2,7 +2,7 @@ import AudioToolbox
 import Flutter
 import UIKit
 
-/// Tahfeez AI's own channels on iOS (Android: MainActivity.kt and
+/// TahfeezAI's own channels on iOS (Android: MainActivity.kt and
 /// QuranAcousticModelChannel.kt): the acoustic model, the mistake alert
 /// and keeping the screen on while the on-device recitation AI listens.
 public class TahfeezIosPlugin: NSObject, FlutterPlugin {

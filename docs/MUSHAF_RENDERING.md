@@ -1,4 +1,4 @@
-# Tahfeez AI — Mushaf Rendering Architecture (SUPERSEDED — describes the removed QPC V2 renderer)
+# TahfeezAI — Mushaf Rendering Architecture (SUPERSEDED — describes the removed QPC V2 renderer)
 
 **This document is historical.** It describes the QPC V2 `CustomPainter`-based
 line-shaping renderer (`MushafPageLayoutEngine`/`MushafPageRenderModel`/`MushafPagePainter`

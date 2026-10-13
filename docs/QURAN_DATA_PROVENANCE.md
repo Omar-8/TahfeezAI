@@ -1,4 +1,4 @@
-# Tahfeez AI — Quran Data Provenance
+# TahfeezAI — Quran Data Provenance
 
 This document records, per resource, exactly which upstream source Tahfeez's bundled
 production Quran dataset comes from, its edition/version, its content hash, its

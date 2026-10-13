@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="assets/branding/app_icon.png" alt="Tahfeez AI" width="128" height="128">
+<img src="assets/branding/app_icon.png" alt="TahfeezAI" width="128" height="128">
 
-# Tahfeez AI · تحفيظ
+# TahfeezAI · تحفيظ
 
 **Read, understand, memorize and recite the Holy Quran — with tajweed feedback from an AI that runs on your phone.**
 
@@ -27,7 +27,7 @@
 
 ## Contents
 
-- [Why Tahfeez AI](#why-tahfeez-ai)
+- [Why TahfeezAI](#why-tahfeez-ai)
 - [Features](#features)
   - [Read](#read)
   - [Understand](#understand)
@@ -45,9 +45,9 @@
 - [Credits](#credits)
 - [License](#license)
 
-## Why Tahfeez AI
+## Why TahfeezAI
 
-Memorizing the Quran is done by reciting — to a teacher who listens, catches the slip, and makes you say it again. Tahfeez AI brings a patient listener to your pocket: it follows you as you recite from memory, uncovers the words as you say them, and tells you when a word was wrong, skipped or mispronounced — including the **tajweed** of what you said.
+Memorizing the Quran is done by reciting — to a teacher who listens, catches the slip, and makes you say it again. TahfeezAI brings a patient listener to your pocket: it follows you as you recite from memory, uncovers the words as you say them, and tells you when a word was wrong, skipped or mispronounced — including the **tajweed** of what you said.
 
 It is a gift, not a product:
 
@@ -81,7 +81,7 @@ It is a gift, not a product:
 
 <img src="site/media/recite-from-memory.gif" width="240" align="right" alt="Reciting Al-Ikhlas from memory: each word appears as it is said">
 
-Tahfeez AI listens to how you recite, not only to which words you say. *On the right: Al-Ikhlas recited from memory with the page hidden — each word appears as it is said correctly.*
+TahfeezAI listens to how you recite, not only to which words you say. *On the right: Al-Ikhlas recited from memory with the page hidden — each word appears as it is said correctly.*
 
 With **Tajweed** on, the checking covers:
 
@@ -159,7 +159,7 @@ Until then, builds are on the [releases page](https://github.com/Omar-8/TahfeezA
 
 ## Build and run
 
-Tahfeez AI is a [Flutter](https://flutter.dev) app (Dart, Riverpod, go_router, Drift/SQLite). The Mushaf pages are drawn by the native [Quran Engine](https://github.com/quran-ws/quran-engine) (Rust, via `dart:ffi`), and the speech model runs with ONNX Runtime.
+TahfeezAI is a [Flutter](https://flutter.dev) app (Dart, Riverpod, go_router, Drift/SQLite). The Mushaf pages are drawn by the native [Quran Engine](https://github.com/quran-ws/quran-engine) (Rust, via `dart:ffi`), and the speech model runs with ONNX Runtime.
 
 ### Requirements
 
@@ -251,7 +251,7 @@ Please run `flutter analyze` and `flutter test` before a pull request.
 
 ## Credits
 
-Tahfeez AI stands on the generous work of others. Full details — versions, checksums and licence terms — are in [docs/THIRD_PARTY_RESOURCES.md](docs/THIRD_PARTY_RESOURCES.md) and on the app's Credits page.
+TahfeezAI stands on the generous work of others. Full details — versions, checksums and licence terms — are in [docs/THIRD_PARTY_RESOURCES.md](docs/THIRD_PARTY_RESOURCES.md) and on the app's Credits page.
 
 - **Quran text** — [Tanzil Project](https://tanzil.net) (Uthmani, verbatim).
 - **The Mushaf** — Mus'haf al-Madinah © [King Fahd Glorious Qur'an Printing Complex](https://qurancomplex.gov.sa); page data from [Quran Engine](https://github.com/quran-ws/quran-engine) by Quran.ws (CC BY 4.0); layout and word data provided by [QUL — Quranic Universal Library](https://qul.tarteel.ai) (Tarteel).
@@ -266,6 +266,6 @@ May Allah accept it from everyone who contributed.
 
 ## License
 
-Tahfeez AI's source code is licensed under the **GNU General Public License v3.0** — see [LICENSE](LICENSE). You may use, study, share and change it; apps built from it must stay open source under the same licence.
+TahfeezAI's source code is licensed under the **GNU General Public License v3.0** — see [LICENSE](LICENSE). You may use, study, share and change it; apps built from it must stay open source under the same licence.
 
 The bundled Quran text, Mushaf data, translations, tafsir, fonts, recitations and model keep their own licences and terms, listed in [docs/THIRD_PARTY_RESOURCES.md](docs/THIRD_PARTY_RESOURCES.md).

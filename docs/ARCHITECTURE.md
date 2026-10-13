@@ -1,4 +1,4 @@
-# Tahfeez AI — Architecture
+# TahfeezAI — Architecture
 
 This document records the engineering architecture established in Milestone 1 (Flutter
 Cross-Platform Foundation) and the decisions later milestones should build on rather than

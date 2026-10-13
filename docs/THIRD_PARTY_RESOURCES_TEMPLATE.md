@@ -1,4 +1,4 @@
-# Tahfeez AI — Third-Party Resource Register
+# TahfeezAI — Third-Party Resource Register
 
 Copy this file to `docs/THIRD_PARTY_RESOURCES.md` and maintain it throughout development.
 

@@ -1,8 +1,8 @@
-# Tahfeez AI — Product Brief
+# TahfeezAI — Product Brief
 
 ## Vision
 
-Tahfeez AI is a modern, elegant, offline-first Quran application that combines:
+TahfeezAI is a modern, elegant, offline-first Quran application that combines:
 
 - high-quality Quran reading;
 - accurate Mushaf presentation;
@@ -50,9 +50,9 @@ The network is otherwise used for obtaining optional resources, updates, and opt
 
 ## Brand
 
-Name: **Tahfeez AI**
+Name: **TahfeezAI**
 
-Tahfeez AI must have:
+TahfeezAI must have:
 
 - its own logo;
 - its own launcher icon;
@@ -67,7 +67,7 @@ QuranApp is a reference application, not a skin to reproduce.
 
 ## Design target
 
-Tahfeez AI should feel approximately 50–60% familiar to a QuranApp user because it uses successful Quran-reader conventions and Material patterns, but it should be immediately recognizable as a different product.
+TahfeezAI should feel approximately 50–60% familiar to a QuranApp user because it uses successful Quran-reader conventions and Material patterns, but it should be immediately recognizable as a different product.
 
 Tahfeez should generally feel:
 

@@ -1,4 +1,4 @@
-# Tahfeez AI — Offline Mobile Architecture
+# TahfeezAI — Offline Mobile Architecture
 
 How Tahfeez's bundled data reaches a local, queryable database on Android/iOS with no
 network call, and what that costs in startup time and package size. See
