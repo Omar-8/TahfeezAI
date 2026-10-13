@@ -184,6 +184,7 @@ class AyahModePageState extends ConsumerState<AyahModePage> {
 
   void _pin(int ayahId) {
     final holding = _pinned != null;
+    _pinIsTarget = false;
     _pinned = ayahId;
     _pinnedSince = _pinMoved = null;
     _pinAt = null;
@@ -210,7 +211,14 @@ class AyahModePageState extends ConsumerState<AyahModePage> {
     });
   }
 
+  /// The ayah held is the one asked for ([ayahModeTargetProvider]).
+  var _pinIsTarget = false;
+
   void _unpin() {
+    if (_pinIsTarget) {
+      _pinIsTarget = false;
+      ref.read(ayahModeTargetProvider.notifier).done();
+    }
     _pinned = null;
     _pinnedSince = _pinMoved = null;
     _pinAt = null;
@@ -384,10 +392,13 @@ class AyahModePageState extends ConsumerState<AyahModePage> {
   void _bringTargetIntoView() {
     final target = ref.read(ayahModeTargetProvider);
     final words = _words;
-    if (target == null || words == null) return;
+    if (target == null || words == null || _pinned == target) return;
     if (!words.any((w) => w.ayahId == target)) return;
     _pin(target);
-    ref.read(ayahModeTargetProvider.notifier).done();
+    // Asked until shown and settled (or the reader takes over): a page
+    // replaced meanwhile — the saved layout read back as the app starts —
+    // leaves it to the page that replaces it.
+    _pinIsTarget = true;
   }
 
   @override

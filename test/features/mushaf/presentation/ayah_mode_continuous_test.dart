@@ -127,6 +127,8 @@ void main() {
     FakeAudioController? audio,
     AyahLayout layout = AyahLayout.continuous,
     int initialPage = 10,
+    int? target,
+    AyahLayout? thenLayout,
   }) async {
     _layout = layout;
     final db = QuranDatabase(NativeDatabase.memory());
@@ -150,6 +152,9 @@ void main() {
     container.read(readerModeProvider);
     await tester.runAsync(() => Future<void>.delayed(Duration.zero));
     await container.read(readerModeProvider.notifier).set(ReaderMode.ayah);
+    if (target != null) {
+      container.read(ayahModeTargetProvider.notifier).show(target);
+    }
     changes = [];
     await tester.pumpWidget(
       UncontrolledProviderScope(
@@ -168,6 +173,16 @@ void main() {
         ),
       ),
     );
+    if (thenLayout != null) {
+      // The saved layout read back a moment later, the first page loaded.
+      await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+      await tester.pump();
+      await tester.pump();
+      final view = container.read(ayahViewPreferencesProvider);
+      await container
+          .read(ayahViewPreferencesProvider.notifier)
+          .set(view.copyWith(layout: thenLayout));
+    }
     for (var i = 0; i < 3; i++) {
       await tester.runAsync(() => Future<void>.delayed(Duration.zero));
       await tester.pumpAndSettle();
@@ -433,4 +448,19 @@ void main() {
       await tester.pump(const Duration(seconds: 2));
     });
   }
+
+  testWidgets('a surah opened as the app starts: brought into view though '
+      'the saved layout (continuous) arrives after the pages', (tester) async {
+    shortScreen(tester);
+    await pump(
+      tester,
+      layout: AyahLayout.paged,
+      target: 1004,
+      thenLayout: AyahLayout.continuous,
+    );
+    expect(find.byType(PageView), findsNothing);
+    final card = rectOf(tester, 'ayah-mode-1004');
+    final list = tester.getTopLeft(find.byType(CustomScrollView)).dy;
+    expect(card.top - list, inInclusiveRange(0, 40));
+  });
 }
