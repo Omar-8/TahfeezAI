@@ -39,6 +39,11 @@ class _AyahModeContinuousState extends ConsumerState<AyahModeContinuous> {
   /// The page the list is laid out from: it starts at the top, earlier
   /// pages grow upwards from it (their loading never moves what is read).
   late int _anchor = widget.initialPageNumber;
+
+  /// Counts the lists laid out: each its own keys, even from the same page
+  /// again (one kept would keep its place — far down, where the reader left
+  /// it).
+  var _layout = 0;
   late int _current = widget.initialPageNumber;
   // Never restored from page storage: a list laid out afresh from a page
   // must start at that page, not where an earlier list from it was left.
@@ -108,6 +113,7 @@ class _AyahModeContinuousState extends ConsumerState<AyahModeContinuous> {
     final old = _controller;
     setState(() {
       _anchor = page;
+      _layout++;
       _current = page;
       _controller = ScrollController(keepScrollOffset: false);
       _pageKeys = {};
@@ -158,11 +164,11 @@ class _AyahModeContinuousState extends ConsumerState<AyahModeContinuous> {
           return false;
         },
         child: CustomScrollView(
-          key: ValueKey('ayah-mode-continuous-$_anchor'),
+          key: ValueKey('ayah-mode-continuous-$_layout'),
           controller: _controller,
-          // Keyed by the anchor: a list laid out afresh gets its own (a
+          // Keyed by the layout: a list laid out afresh gets its own (a
           // global key would carry the old list's layout across).
-          center: ValueKey('ayah-mode-anchor-$_anchor'),
+          center: ValueKey('ayah-mode-anchor-$_layout'),
           scrollCacheExtent: const ScrollCacheExtent.viewport(2),
           slivers: [
             // Earlier pages, upwards from the anchor.
@@ -171,7 +177,7 @@ class _AyahModeContinuousState extends ConsumerState<AyahModeContinuous> {
               itemBuilder: (context, i) => _page(_anchor - 1 - i),
             ),
             SliverList.builder(
-              key: ValueKey('ayah-mode-anchor-$_anchor'),
+              key: ValueKey('ayah-mode-anchor-$_layout'),
               itemCount: widget.pageCount - _anchor + 1,
               itemBuilder: (context, i) => _page(_anchor + i),
             ),

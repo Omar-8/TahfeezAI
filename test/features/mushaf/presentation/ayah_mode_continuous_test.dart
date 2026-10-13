@@ -376,4 +376,45 @@ void main() {
     expect(changes.last, 1);
     expect(tester.getTopLeft(divider(1)).dy, inInclusiveRange(0, 100));
   });
+  for (final layout in AyahLayout.values) {
+    testWidgets('${layout.name}: read on from page 1 far down, then listening '
+        'from 1:1: back at 1:1', (tester) async {
+      shortScreen(tester);
+      final audio = FakeAudioController();
+      await pump(tester, audio: audio, layout: layout, initialPage: 1);
+      final turns = container.read(mushafPageTurnRequestsProvider.notifier);
+      // Down to page 5, by hand (continuous) or by turning (pages).
+      if (layout == AyahLayout.continuous) {
+        for (var i = 0; i < 4; i++) {
+          await tester.drag(
+            find.byType(CustomScrollView),
+            const Offset(0, -400),
+          );
+          await tester.pumpAndSettle();
+          await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+          await tester.pumpAndSettle();
+        }
+      } else {
+        turns.toPage(5);
+        for (var i = 0; i < 3; i++) {
+          await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+          await tester.pumpAndSettle();
+        }
+      }
+      expect(changes.last, greaterThanOrEqualTo(4));
+      final player = container.read(quranAudioPlayerProvider.notifier);
+      unawaited(player.playAyahs([1001, 1001]));
+      await tester.pump();
+      turns.toPage(1);
+      for (var i = 0; i < 3; i++) {
+        await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+        await tester.pumpAndSettle();
+      }
+      expect(changes.last, 1);
+      final ayah = rectOf(tester, 'ayah-mode-1001');
+      expect(ayah.top, inInclusiveRange(0, 130));
+      unawaited(player.stop());
+      await tester.pump(const Duration(seconds: 2));
+    });
+  }
 }
