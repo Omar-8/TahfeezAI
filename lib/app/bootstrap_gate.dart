@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import 'app.dart';
+import '../core/theme/app_colors.dart';
+import '../core/ui/app_name_text.dart';
 
 /// Shown for the (typically brief, but real on a cold/first launch — see
 /// `bootstrap.dart`'s own doc comment) window while [BundledDatasetSeeder]
@@ -77,8 +79,10 @@ class _BootstrapSplash extends StatelessWidget {
             Transform.translate(
               offset: const Offset(0, 120),
               child: const _FadeIn(
-                child: Text(
+                child: AppNameText(
                   'TahfeezAI',
+                  // On the splash's dark green: the mint.
+                  aiColor: TahfeezExplorationPalette.darkPrimary,
                   style: TextStyle(
                     fontFamily: 'Noto Sans',
                     fontSize: 30,

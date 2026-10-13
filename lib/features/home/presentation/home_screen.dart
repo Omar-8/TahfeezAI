@@ -14,6 +14,7 @@ import 'sections/home_featured_reading_section.dart';
 import 'sections/home_memorization_section.dart';
 import 'sections/home_read_history_section.dart';
 import 'sections/home_resource_updates_banner.dart';
+import '../../../core/ui/app_name_text.dart';
 
 /// Tahfeez's Home screen — the app's single non-tabbed landing screen
 /// (`docs/reference/03_NAVIGATION_MAP.md`), composed from the
@@ -76,7 +77,7 @@ class _HomeBrandHeader extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          AppNameText(
             l10n.appName,
             style: theme.textTheme.headlineMedium?.copyWith(
               fontWeight: FontWeight.w700,

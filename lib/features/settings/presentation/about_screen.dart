@@ -10,6 +10,7 @@ import '../../../core/localization/generated/app_localizations.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/components/components.dart';
 import '../domain/credits.dart';
+import '../../../core/ui/app_name_text.dart';
 
 /// Settings → About: what Tahfeez is, every source it uses with its owner,
 /// licence and purpose (tap a link to copy it), and Flutter's licence page
@@ -37,7 +38,7 @@ class AboutScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(TahfeezSpacing.md),
         children: [
-          Text(l10n.appName, style: theme.textTheme.headlineSmall),
+          AppNameText(l10n.appName, style: theme.textTheme.headlineSmall),
           Text(
             l10n.aboutVersion(version),
             style: theme.textTheme.bodySmall?.copyWith(

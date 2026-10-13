@@ -39,6 +39,7 @@ import 'arabic_font_choices.dart';
 import 'theme_choices.dart';
 import '../../../quran/presentation/meaning_resource_names.dart';
 import '../../../core/ui/back_to_exit.dart';
+import '../../../core/ui/app_name_text.dart';
 
 /// The Settings tab: the app's language and theme (the Quran page's own
 /// theme is chosen in the Mushaf, independently, so the two can be mixed).
@@ -719,7 +720,10 @@ class _AboutAppState extends ConsumerState<_AboutApp> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(l10n.appName, style: theme.textTheme.titleMedium),
+                    AppNameText(
+                      l10n.appName,
+                      style: theme.textTheme.titleMedium,
+                    ),
                     if (version.isNotEmpty)
                       Text(
                         l10n.aboutVersion(version),
