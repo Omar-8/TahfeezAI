@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tahfeez_ai/core/localization/generated/app_localizations.dart';
 import 'package:tahfeez_ai/features/mushaf/application/mushaf_hide_mode.dart';
+import 'package:tahfeez_ai/features/mushaf/application/mushaf_passages.dart';
 import 'package:tahfeez_ai/features/mushaf/application/mushaf_quran_engine_providers.dart';
 import 'package:tahfeez_ai/features/mushaf/application/mushaf_word_overlay.dart';
 import 'package:tahfeez_ai/features/mushaf/application/reader_mode.dart';
@@ -101,12 +102,18 @@ class _PlainView extends AyahViewPreferencesController {
       const AyahViewPreferences(showTranslation: false);
 }
 
+class _PassagesOn extends MushafPassagesController {
+  @override
+  bool build() => true;
+}
+
 void main() {
   late ProviderContainer container;
 
   Future<void> pump(
     WidgetTester tester, {
     ReaderMode mode = ReaderMode.mushaf,
+    Color? tint,
   }) async {
     final db = QuranDatabase(NativeDatabase.memory());
     addTearDown(db.close);
@@ -119,6 +126,10 @@ void main() {
         quranDatabaseProvider.overrideWith((ref) => db),
         quranScriptCodeProvider.overrideWith((ref) => testScriptCode),
         ayahViewPreferencesProvider.overrideWith(_PlainView.new),
+        if (tint != null) ...[
+          mushafPassagesProvider.overrideWith(_PassagesOn.new),
+          passageColorsProvider.overrideWith((ref) async => {1002: tint}),
+        ],
       ],
     );
     addTearDown(container.dispose);
@@ -218,5 +229,23 @@ void main() {
     await tester.runAsync(() => Future<void>.delayed(Duration.zero));
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('printed-page')), findsOneWidget);
+  });
+
+  testWidgets('passage tints: the ayah tinted, not while words of it are '
+      'hidden', (tester) async {
+    const tint = Color(0x5543A047);
+    await pump(tester, mode: ReaderMode.ayah, tint: tint);
+    Color? colorOf(int ayahId) {
+      final box = tester.widget<AnimatedContainer>(
+        find.byKey(ValueKey('ayah-mode-$ayahId')),
+      );
+      return (box.decoration as BoxDecoration?)?.color;
+    }
+
+    expect(colorOf(1002), tint);
+    expect(colorOf(1003), Colors.transparent, reason: 'no tint of its own');
+    container.read(mushafHideModeProvider.notifier).toggle();
+    await tester.pumpAndSettle();
+    expect(colorOf(1002), Colors.transparent);
   });
 }

@@ -27,6 +27,8 @@ import '../application/mushaf_quran_engine_providers.dart';
 import '../application/mushaf_word_overlay.dart';
 import '../application/reader_mode.dart';
 import '../domain/mushaf_appearance.dart';
+import '../../bookmarks/application/bookmarks_controller.dart';
+import '../application/mushaf_passages.dart';
 import 'mushaf_ayah_sheet.dart';
 
 /// Ayah mode's page: the Mushaf page's ayahs one after another — each
@@ -392,6 +394,13 @@ class _AyahBlock extends ConsumerWidget {
         ref.watch(mushafFocusAyahProvider.select((f) => f?.ayahId)) == ayahId;
     final theme = Theme.of(context);
     final anyHidden = hidden.contains(true);
+    ref.watch(bookmarksProvider);
+    final bookmarked = ref.read(bookmarksProvider.notifier).hasAyah(ayahId);
+    // The passage's tint (as on the printed page): under the blue of the
+    // ayah in focus, and not while words of it are hidden.
+    final tint = ref.watch(mushafPassagesProvider) && !anyHidden
+        ? (ref.watch(passageColorsProvider).value ?? const {})[ayahId]
+        : null;
     final verse = (chapterNo: ayahId ~/ 1000, verseNo: ayahId % 1000);
 
     // Each page word's text: its canonical word, with any canonical words
@@ -415,7 +424,7 @@ class _AyahBlock extends ConsumerWidget {
       decoration: BoxDecoration(
         color: focused
             ? theme.colorScheme.primary.withValues(alpha: 0.12)
-            : Colors.transparent,
+            : tint ?? Colors.transparent,
         borderRadius: BorderRadius.circular(TahfeezRadii.md),
       ),
       child: Column(
@@ -457,17 +466,22 @@ class _AyahBlock extends ConsumerWidget {
                   if (!played) showListenOffline(messenger, message);
                 },
               ),
+              // Bookmarked from here too (the ayah sheet, a long press on a
+              // word, has the rest).
               IconButton(
-                key: ValueKey('ayah-mode-more-$ayahId'),
+                key: ValueKey('ayah-mode-bookmark-$ayahId'),
                 visualDensity: VisualDensity.compact,
-                icon: Icon(Icons.more_horiz_rounded, color: colors.text),
-                tooltip: AppLocalizations.of(context).ayahDetails,
-                onPressed: () => showAyahDetailSheet(
-                  context,
-                  mushafId: mushafId,
-                  pageNumber: pageNumber,
-                  ayahId: ayahId,
+                isSelected: bookmarked,
+                icon: Icon(Icons.bookmark_border_rounded, color: colors.text),
+                selectedIcon: Icon(
+                  Icons.bookmark_rounded,
+                  color: theme.colorScheme.primary,
                 ),
+                tooltip: bookmarked
+                    ? AppLocalizations.of(context).bookmarkRemove
+                    : AppLocalizations.of(context).bookmarkAyah,
+                onPressed: () =>
+                    ref.read(bookmarksProvider.notifier).toggleAyah(ayahId),
               ),
             ],
           ),
