@@ -1,6 +1,7 @@
 import 'dart:async' show unawaited;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show RenderAbstractViewport;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/localization/generated/app_localizations.dart';
@@ -78,19 +79,90 @@ class _AyahModePageState extends ConsumerState<AyahModePage> {
 
   /// Brings the page's word [index] into view (revealing and hiding).
   void _scrollToWord(int index) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final context = _wordKeys[index]?.currentContext;
-      if (context == null || !context.mounted) return;
+    _unpin();
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _reveal(_wordKeys[index], alignment: 0.4),
+    );
+  }
+
+  /// Scrolls this page's own list (never the pager around it) so [key]'s
+  /// widget sits at [alignment] of the screen — or, [onlyIfHidden], just
+  /// into view, and not at all when it already is.
+  void _reveal(
+    GlobalKey? key, {
+    double alignment = 0.1,
+    bool animate = true,
+    bool onlyIfHidden = false,
+  }) {
+    final box = key?.currentContext?.findRenderObject();
+    if (box == null || !box.attached || !_scroll.hasClients) return;
+    final viewport = RenderAbstractViewport.maybeOf(box);
+    if (viewport == null) return;
+    final position = _scroll.position;
+    double target;
+    if (onlyIfHidden) {
+      final top = viewport.getOffsetToReveal(box, 0).offset;
+      final bottom = viewport.getOffsetToReveal(box, 1).offset;
+      if (position.pixels > top) {
+        target = top;
+      } else if (position.pixels < bottom) {
+        target = bottom;
+      } else {
+        return;
+      }
+    } else {
+      target = viewport.getOffsetToReveal(box, alignment).offset;
+    }
+    target = target.clamp(position.minScrollExtent, position.maxScrollExtent);
+    if ((target - position.pixels).abs() < 1) return;
+    if (animate) {
       unawaited(
-        Scrollable.ensureVisible(
-          context,
-          alignment: 0.4,
+        _scroll.animateTo(
+          target,
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,
         ),
       );
+    } else {
+      _scroll.jumpTo(target);
+    }
+  }
+
+  /// An ayah opened at (Daily ayah, Continue reading, the ayah sheet's
+  /// More): held in place while the page settles — translations, tafsir
+  /// and meanings arriving after it grow the ayahs above — until the
+  /// reader scrolls or a moment has passed.
+  int? _pinned;
+  Duration? _pinnedSince;
+
+  void _pin(int ayahId) {
+    _pinned = ayahId;
+    _pinnedSince = null;
+    _holdPin();
+  }
+
+  void _holdPin() {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      final id = _pinned;
+      if (!mounted || id == null) return;
+      final since = _pinnedSince ??= timeStamp;
+      if (timeStamp - since > const Duration(seconds: 2)) {
+        _unpin();
+        return;
+      }
+      _reveal(_ayahKeys[id], animate: false);
+      WidgetsBinding.instance.scheduleFrame();
+      _holdPin();
     });
   }
+
+  void _unpin() {
+    _pinned = null;
+    _pinnedSince = null;
+  }
+
+  /// The reader is dragging the list (not a scroll of ours).
+  var _userScrolling = false;
 
   @override
   void initState() {
@@ -103,7 +175,9 @@ class _AyahModePageState extends ConsumerState<AyahModePage> {
     super.didUpdateWidget(oldWidget);
     if (widget.isCurrentPage && !oldWidget.isCurrentPage) {
       _bringActiveIntoView();
-      WidgetsBinding.instance.addPostFrameCallback((_) => _recordPosition());
+      if (_pinned == null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) => _recordPosition());
+      }
     }
     if (oldWidget.pageNumber != widget.pageNumber) {
       setState(() => _words = null);
@@ -155,7 +229,10 @@ class _AyahModePageState extends ConsumerState<AyahModePage> {
       });
       _bringTargetIntoView();
       _bringActiveIntoView();
-      WidgetsBinding.instance.addPostFrameCallback((_) => _recordPosition());
+      // A page turned to, nothing to bring into view: its top is the place.
+      if (_pinned == null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) => _recordPosition());
+      }
     } catch (e) {
       if (mounted) setState(() => _error = e);
     }
@@ -188,18 +265,9 @@ class _AyahModePageState extends ConsumerState<AyahModePage> {
 
   /// Scrolls to [ayahId]'s block, if it is on this page.
   void _scrollTo(int ayahId, {bool animate = true}) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final context = _ayahKeys[ayahId]?.currentContext;
-      if (context == null || !context.mounted) return;
-      unawaited(
-        Scrollable.ensureVisible(
-          context,
-          alignment: 0.1,
-          duration: animate ? const Duration(milliseconds: 350) : Duration.zero,
-          curve: Curves.easeInOut,
-        ),
-      );
-    });
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _reveal(_ayahKeys[ayahId], animate: animate),
+    );
   }
 
   /// Opened (or turned to) mid-recitation or mid-listening: straight to
@@ -213,7 +281,7 @@ class _AyahModePageState extends ConsumerState<AyahModePage> {
             : null) ??
         ref.read(mushafFocusAyahProvider)?.ayahId;
     if (active != null && (_words?.any((w) => w.ayahId == active) ?? false)) {
-      _scrollTo(active, animate: false);
+      _pin(active);
     }
   }
 
@@ -222,17 +290,9 @@ class _AyahModePageState extends ConsumerState<AyahModePage> {
   void _keepWordVisible(WordRef word) {
     final index = _words?.indexOf(word) ?? -1;
     if (index < 0) return;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final context = _wordKeys[index]?.currentContext;
-      if (context == null || !context.mounted) return;
-      unawaited(
-        Scrollable.ensureVisible(
-          context,
-          duration: const Duration(milliseconds: 250),
-          alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
-        ),
-      );
-    });
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _reveal(_wordKeys[index], onlyIfHidden: true),
+    );
   }
 
   void _bringTargetIntoView() {
@@ -240,7 +300,7 @@ class _AyahModePageState extends ConsumerState<AyahModePage> {
     final words = _words;
     if (target == null || words == null) return;
     if (!words.any((w) => w.ayahId == target)) return;
-    _scrollTo(target, animate: false);
+    _pin(target);
     ref.read(ayahModeTargetProvider.notifier).done();
   }
 
@@ -319,9 +379,16 @@ class _AyahModePageState extends ConsumerState<AyahModePage> {
       // ayahs): every ayah and word is there to scroll to — revealing,
       // hiding and following the recitation need them.
       // Where the reader stops is where Continue reading goes back to.
-      child: NotificationListener<ScrollEndNotification>(
-        onNotification: (_) {
-          _recordPosition();
+      child: NotificationListener<ScrollNotification>(
+        onNotification: (n) {
+          if (n.depth != 0) return false;
+          if (n is ScrollStartNotification && n.dragDetails != null) {
+            _userScrolling = true;
+            _unpin();
+          } else if (n is ScrollEndNotification && _userScrolling) {
+            _userScrolling = false;
+            _recordPosition();
+          }
           return false;
         },
         child: SingleChildScrollView(
