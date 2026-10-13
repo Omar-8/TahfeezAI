@@ -170,6 +170,15 @@ const credits = <Credit>[
   ),
   Credit(
     group: CreditGroup.mushaf,
+    name: 'Scheherazade New and Amiri Quran',
+    owner: 'SIL Global; the Amiri Project Authors',
+    licence: 'SIL Open Font License 1.1',
+    url: 'https://github.com/aliftype/amiri',
+    useEn: 'The Quran text outside the printed pages',
+    useAr: 'نص القرآن خارج صفحات المصحف',
+  ),
+  Credit(
+    group: CreditGroup.mushaf,
     name: 'Noto Sans, Noto Kufi Arabic, Almarai and Tajawal',
     owner:
         'The Noto Project Authors; the Almarai Project Authors; '

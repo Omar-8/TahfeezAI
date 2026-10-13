@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/components/components.dart';
 import '../../settings/presentation/arabic_font_choices.dart';
 import '../../settings/presentation/theme_choices.dart';
+import '../../../core/theme/quran_text_style.dart';
 import '../application/mushaf_appearance_controller.dart';
 import '../application/mushaf_passages.dart';
 import '../application/mushaf_page_translations.dart';
@@ -200,6 +201,32 @@ class _AyahViewOptions extends ConsumerWidget {
         // The Arabic font (Settings' own choice): Arabic tafsir and
         // translations, and the app's Arabic. The Quran's text keeps its
         // own font.
+        // The Quran text's own font: only fonts made for Uthmani text.
+        Text(l10n.ayahViewQuranFont),
+        const SizedBox(height: 8),
+        Wrap(
+          key: const ValueKey('ayah-view-quran-font'),
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final font in QuranFont.values)
+              ChoiceChip(
+                key: ValueKey('ayah-view-quran-font-${font.name}'),
+                // Each one showing itself.
+                label: Text(
+                  'بِسْمِ ٱللَّهِ',
+                  textDirection: TextDirection.rtl,
+                  style: TextStyle(fontFamily: font.family, fontSize: 20),
+                ),
+                tooltip: font.arabicName,
+                selected: font == view.quranFont,
+                showCheckmark: false,
+                onSelected: (_) =>
+                    controller.set(view.copyWith(quranFont: font)),
+              ),
+          ],
+        ),
+        const SizedBox(height: 12),
         Text(l10n.settingsArabicFont),
         const SizedBox(height: 8),
         const ArabicFontChoices(),

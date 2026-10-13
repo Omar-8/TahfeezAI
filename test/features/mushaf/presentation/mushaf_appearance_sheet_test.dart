@@ -3,13 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tahfeez_ai/core/localization/generated/app_localizations.dart';
 import 'package:tahfeez_ai/core/theme/app_typography.dart';
+import 'package:tahfeez_ai/core/theme/quran_text_style.dart';
 import 'package:tahfeez_ai/core/theme/theme_controller.dart';
 import 'package:tahfeez_ai/features/mushaf/application/reader_mode.dart';
 import 'package:tahfeez_ai/features/mushaf/presentation/mushaf_appearance_sheet.dart';
 
 void main() {
   testWidgets("Ayah mode's view settings: the Arabic font chosen there is "
-      "Settings' own", (tester) async {
+      "Settings' own; the Quran font its own", (tester) async {
     tester.view.physicalSize = const Size(800, 2400);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -43,5 +44,15 @@ void main() {
     await tester.tap(almarai);
     await tester.pumpAndSettle();
     expect(container.read(arabicFontControllerProvider), ArabicUiFont.almarai);
+
+    // The Quran text's own font, beside it.
+    final amiri = find.byKey(const ValueKey('ayah-view-quran-font-amiri'));
+    await tester.ensureVisible(amiri);
+    await tester.tap(amiri);
+    await tester.pumpAndSettle();
+    expect(
+      container.read(ayahViewPreferencesProvider).quranFont,
+      QuranFont.amiri,
+    );
   });
 }

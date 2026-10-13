@@ -668,7 +668,11 @@ class _SurahHeader extends ConsumerWidget {
                 textDirection: TextDirection.rtl,
                 style: quranTextStyle(
                   color: colors.text,
-                  fontFamily: 'Scheherazade New',
+                  fontFamily: ref
+                      .watch(
+                        ayahViewPreferencesProvider.select((v) => v.quranFont),
+                      )
+                      .family,
                   fontSize: 24,
                 ),
               ),
@@ -851,6 +855,7 @@ class _AyahBlock extends ConsumerWidget {
                       hidden: hidden[k],
                       style: _markStyles[marks[k]],
                       colors: colors,
+                      fontFamily: view.quranFont.family,
                       onTap: hidden[k]
                           ? null
                           : () =>
@@ -886,10 +891,12 @@ class _Word extends StatelessWidget {
     required this.hidden,
     required this.style,
     required this.colors,
+    required this.fontFamily,
     this.onTap,
     this.onLongPress,
   });
 
+  final String fontFamily;
   final String text;
   final String? meaning;
   final bool hidden;
@@ -910,7 +917,7 @@ class _Word extends StatelessWidget {
         // Hidden: its place kept (the line does not reflow), the word not
         // shown.
         color: hidden ? Colors.transparent : ink,
-        fontFamily: 'Scheherazade New',
+        fontFamily: fontFamily,
         fontSize: 28,
       ),
     );

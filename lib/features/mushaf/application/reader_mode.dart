@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/storage/storage_providers.dart';
+import '../../../core/theme/quran_text_style.dart';
 
 /// How the Mushaf's pages are shown: as printed, or ayah by ayah with
 /// their translation, transliteration, tafsir and word meanings (Ayah
@@ -27,11 +28,15 @@ class AyahViewPreferences {
     this.showTransliteration = false,
     this.showTafsir = false,
     this.showWordMeanings = false,
+    this.quranFont = QuranFont.scheherazade,
   });
 
   final AyahLayout layout;
   final bool showTranslation, showTransliteration, showTafsir;
   final bool showWordMeanings;
+
+  /// The Quran text's font.
+  final QuranFont quranFont;
 
   AyahViewPreferences copyWith({
     AyahLayout? layout,
@@ -39,12 +44,14 @@ class AyahViewPreferences {
     bool? showTransliteration,
     bool? showTafsir,
     bool? showWordMeanings,
+    QuranFont? quranFont,
   }) => AyahViewPreferences(
     layout: layout ?? this.layout,
     showTranslation: showTranslation ?? this.showTranslation,
     showTransliteration: showTransliteration ?? this.showTransliteration,
     showTafsir: showTafsir ?? this.showTafsir,
     showWordMeanings: showWordMeanings ?? this.showWordMeanings,
+    quranFont: quranFont ?? this.quranFont,
   );
 }
 
@@ -94,6 +101,7 @@ class AyahViewPreferencesController extends Notifier<AyahViewPreferences> {
     final transliteration = await s.getBool('${_prefix}transliteration');
     final tafsir = await s.getBool('${_prefix}tafsir');
     final meanings = await s.getBool('${_prefix}meanings');
+    final font = await s.getString('${_prefix}font');
     if (!ref.mounted) return;
     state = state.copyWith(
       layout: AyahLayout.values.asNameMap()[layout],
@@ -101,6 +109,7 @@ class AyahViewPreferencesController extends Notifier<AyahViewPreferences> {
       showTransliteration: transliteration,
       showTafsir: tafsir,
       showWordMeanings: meanings,
+      quranFont: QuranFont.values.asNameMap()[font],
     );
   }
 
@@ -112,6 +121,7 @@ class AyahViewPreferencesController extends Notifier<AyahViewPreferences> {
     await s.setBool('${_prefix}transliteration', value.showTransliteration);
     await s.setBool('${_prefix}tafsir', value.showTafsir);
     await s.setBool('${_prefix}meanings', value.showWordMeanings);
+    await s.setString('${_prefix}font', value.quranFont.name);
   }
 }
 

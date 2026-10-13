@@ -228,6 +228,10 @@ flutter:
     - family: Scheherazade New
       fonts:
         - asset: assets/fonts/ScheherazadeNew-Regular.ttf
+    # Ayah mode's other Quran font (QuranFont), chosen in its view settings.
+    - family: Amiri Quran
+      fonts:
+        - asset: assets/fonts/AmiriQuran.ttf
     # The Arabic UI fonts, one chosen in Settings (ArabicUiFont).
     - family: Noto Kufi Arabic
       fonts:

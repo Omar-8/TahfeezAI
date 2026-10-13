@@ -20,6 +20,7 @@ import 'package:tahfeez_ai/features/mushaf/domain/quran_engine/quran_engine_mush
 import 'package:tahfeez_ai/features/mushaf/presentation/mushaf_page_view.dart';
 import 'package:tahfeez_ai/features/mushaf/presentation/mushaf_token_hit_rect.dart';
 import 'package:tahfeez_ai/features/mushaf/presentation/reader_mode_toggle.dart';
+import 'package:tahfeez_ai/core/theme/quran_text_style.dart';
 import 'package:tahfeez_ai/quran/application/quran_script_code.dart';
 import 'package:tahfeez_ai/quran/application/tafsir_selection_controller.dart';
 import 'package:tahfeez_ai/quran/data/import/quran_dataset_importer.dart';
@@ -109,8 +110,10 @@ class _Backend implements QuranEngineMushafBackend {
 class _PlainView extends AyahViewPreferencesController {
   @override
   AyahViewPreferences build() =>
-      const AyahViewPreferences(showTranslation: false);
+      AyahViewPreferences(showTranslation: false, quranFont: _font);
 }
+
+var _font = QuranFont.scheherazade;
 
 class _PassagesOn extends MushafPassagesController {
   @override
@@ -128,7 +131,9 @@ void main() {
     FakeAudioController? audio,
     int? focus,
     bool settle = true,
+    QuranFont quranFont = QuranFont.scheherazade,
   }) async {
+    _font = quranFont;
     final db = QuranDatabase(NativeDatabase.memory());
     addTearDown(db.close);
     await const QuranDatasetImporter().import(db, buildValidSyntheticPayload());
@@ -182,6 +187,18 @@ void main() {
       await tester.pump();
       await tester.pump();
     }
+  }
+
+  String? inkFamily(WidgetTester tester, int ayahId, int wordIndex) {
+    final text = tester.widget<Text>(
+      find
+          .descendant(
+            of: find.byKey(ValueKey('ayah-word-$ayahId:$wordIndex')),
+            matching: find.byType(Text),
+          )
+          .first,
+    );
+    return text.style?.fontFamily;
   }
 
   Color? inkOf(WidgetTester tester, int ayahId, int wordIndex) {
@@ -354,6 +371,11 @@ void main() {
     await tester.pump();
     await tester.pumpAndSettle();
     expect(onScreen(tester, 'ayah-mode-1003'), isTrue);
+  });
+
+  testWidgets('the Quran font chosen: the words drawn in it', (tester) async {
+    await pump(tester, mode: ReaderMode.ayah, quranFont: QuranFont.amiri);
+    expect(inkFamily(tester, 1002, 0), 'Amiri Quran');
   });
 
   testWidgets("Ayah mode's text size: everything in it larger", (tester) async {

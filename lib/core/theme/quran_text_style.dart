@@ -9,6 +9,25 @@ import 'package:flutter/material.dart';
 /// text relative to how it looked with the font.
 const quranVerseFontSize = 30.0;
 
+/// The fonts Quran text may be drawn in (Ayah mode's choice): each built
+/// for Uthmani Quran text, its annotation marks included — never a UI
+/// font (`docs/DESIGN_DIRECTION.md`).
+enum QuranFont {
+  /// SIL's Scheherazade New: the default (as the Daily Ayah).
+  scheherazade('Scheherazade New', 'شهرزاد'),
+
+  /// Amiri Quran: classic Naskh, set for the Quran.
+  amiri('Amiri Quran', 'الأميري');
+
+  const QuranFont(this.family, this.arabicName);
+
+  /// The `pubspec.yaml` font family.
+  final String family;
+
+  /// Its name, in Arabic.
+  final String arabicName;
+}
+
 /// Builds the text style used to render Quran Arabic text in the
 /// verse-by-verse reader.
 ///
