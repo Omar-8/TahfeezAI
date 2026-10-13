@@ -494,5 +494,11 @@
   "readerModeMushaf": "عرض المصحف",
   "ayahView": "عرض الآيات",
   "ayahViewTafsir": "التفسير",
-  "ayahViewWordMeanings": "معاني الكلمات"
+  "ayahViewWordMeanings": "معاني الكلمات",
+  "packRowwad": "مركز رواد الترجمة",
+  "packNoor": "مركز نور الدولي",
+  "packIndonesiaMinistry": "وزارة الشؤون الدينية الإندونيسية",
+  "packJunagarhi": "محمد جوناكري",
+  "tafsirMuyassar": "التفسير الميسر",
+  "tafsirMukhtasar": "المختصر في تفسير القرآن الكريم"
 }

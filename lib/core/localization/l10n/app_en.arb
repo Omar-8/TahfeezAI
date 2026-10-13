@@ -966,6 +966,12 @@
   "ayahView": "Ayah view",
   "ayahViewTafsir": "Tafsir",
   "ayahViewWordMeanings": "Word meanings",
+  "packRowwad": "Rowwad Translation Center",
+  "packNoor": "Noor International Center",
+  "packIndonesiaMinistry": "Ministry of Religious Affairs (Indonesia)",
+  "packJunagarhi": "Muhammad Junagarhi",
+  "tafsirMuyassar": "At-Tafsir Al-Muyassar",
+  "tafsirMukhtasar": "Al-Mukhtasar in Interpreting the Noble Quran",
   "@ayahModePage": {
     "placeholders": {
       "page": {

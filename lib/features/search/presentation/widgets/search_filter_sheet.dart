@@ -10,6 +10,7 @@ import '../../../../core/theme/components/components.dart';
 import '../../../../quran/application/translation_library_controller.dart';
 import '../../application/search_filters_controller.dart';
 import '../../../../quran/application/translation_selection_controller.dart';
+import '../../../../quran/presentation/meaning_resource_names.dart';
 
 /// Which search domains/translations a query runs against
 /// (`docs/reference/07_SEARCH_SPEC.md` §5's `SearchFilterSheet`) —
@@ -81,7 +82,10 @@ class _SearchFilterSheetBody extends ConsumerWidget {
                   for (final status in statuses)
                     if (installedSlugs.contains(status.book.slug))
                       TahfeezFilterChip(
-                        label: status.book.displayName,
+                        label: translationNameWithLanguage(
+                          AppLocalizations.of(context),
+                          status.book,
+                        ),
                         // No choice made here: the Settings' translations.
                         selected: (filters.translationSlugs ?? settingsSlugs)
                             .contains(status.book.slug),

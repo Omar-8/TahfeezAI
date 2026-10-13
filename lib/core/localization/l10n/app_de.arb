@@ -494,5 +494,11 @@
   "readerModeMushaf": "Mushaf-Ansicht",
   "ayahView": "Versansicht",
   "ayahViewTafsir": "Tafsir",
-  "ayahViewWordMeanings": "Wortbedeutungen"
+  "ayahViewWordMeanings": "Wortbedeutungen",
+  "packRowwad": "Rowwad-Übersetzungszentrum",
+  "packNoor": "Internationales Noor-Zentrum",
+  "packIndonesiaMinistry": "Ministerium für religiöse Angelegenheiten (Indonesien)",
+  "packJunagarhi": "Muhammad Junagarhi",
+  "tafsirMuyassar": "At-Tafsir al-Muyassar",
+  "tafsirMukhtasar": "Al-Mukhtasar – Kurzauslegung des edlen Korans"
 }

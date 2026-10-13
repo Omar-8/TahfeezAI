@@ -9,6 +9,7 @@ import '../../core/theme/components/tahfeez_state_views.dart';
 import '../application/translation_library_controller.dart';
 import '../application/translation_selection_controller.dart';
 import 'meaning_language_names.dart';
+import 'meaning_resource_names.dart';
 
 /// Which of the bundled translations to show (any number), each with its
 /// language — checked ones appear in the ayah sheet and the reader, in the
@@ -59,7 +60,7 @@ class _TranslationPacksSheetBody extends ConsumerWidget {
               CheckboxListTile(
                 key: ValueKey('translation-${book.slug}'),
                 value: active.contains(book.slug),
-                title: Text(book.author),
+                title: Text(translationName(l10n, book)),
                 subtitle: Text(nativeLanguageName(book.languageCode)),
                 onChanged: (_) => ref
                     .read(translationSelectionControllerProvider.notifier)

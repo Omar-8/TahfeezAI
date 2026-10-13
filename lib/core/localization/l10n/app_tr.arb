@@ -494,5 +494,11 @@
   "readerModeMushaf": "Mushaf görünümü",
   "ayahView": "Ayet görünümü",
   "ayahViewTafsir": "Tefsir",
-  "ayahViewWordMeanings": "Kelime anlamları"
+  "ayahViewWordMeanings": "Kelime anlamları",
+  "packRowwad": "Rowwad Tercüme Merkezi",
+  "packNoor": "Uluslararası Nur Merkezi",
+  "packIndonesiaMinistry": "Din İşleri Bakanlığı (Endonezya)",
+  "packJunagarhi": "Muhammed Cunagarhi",
+  "tafsirMuyassar": "Tefsîr-i Müyesser",
+  "tafsirMukhtasar": "Muhtasar Kur'an-ı Kerim Tefsiri"
 }

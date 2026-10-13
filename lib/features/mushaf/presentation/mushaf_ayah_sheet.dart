@@ -21,6 +21,7 @@ import '../application/mushaf_appearance_controller.dart';
 import '../application/mushaf_page_translations.dart';
 import '../application/reader_mode.dart';
 import '../domain/mushaf_appearance.dart';
+import '../../../quran/presentation/meaning_resource_names.dart';
 
 /// The Mushaf's "long-press a word" destination: the word's whole ayah —
 /// its reference, its canonical text, its active translations and a way
@@ -125,7 +126,10 @@ class _AyahDetailSheetBody extends ConsumerWidget {
               for (final entry in translations.entries)
                 TranslationBlock(
                   verseText: entry.value,
-                  authorName: books[entry.key]?.author ?? entry.key,
+                  authorName: switch (books[entry.key]) {
+                    final book? => translationName(l10n, book),
+                    null => entry.key,
+                  },
                   inlineFootnotes: true,
                   textDirection:
                       _AyahTafsir._rtl.contains(books[entry.key]?.languageCode)
@@ -201,7 +205,7 @@ class _AyahTafsir extends ConsumerWidget {
         Text(
           work == null
               ? l10n.readerTafsir
-              : '${l10n.readerTafsir} · ${work.displayName}',
+              : '${l10n.readerTafsir} · ${tafsirName(l10n, work)}',
           style: theme.textTheme.labelMedium?.copyWith(
             color: theme.colorScheme.primary,
           ),

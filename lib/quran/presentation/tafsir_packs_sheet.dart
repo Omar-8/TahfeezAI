@@ -9,6 +9,7 @@ import '../../core/theme/components/tahfeez_state_views.dart';
 import '../application/tafsir_library_controller.dart';
 import '../application/tafsir_selection_controller.dart';
 import 'meaning_language_names.dart';
+import 'meaning_resource_names.dart';
 
 /// Which bundled tafsir to show (one, or none), each with its language.
 void showTafsirPacksSheet(BuildContext context) {
@@ -62,7 +63,7 @@ class _TafsirPacksSheetBody extends ConsumerWidget {
                 RadioListTile<String>(
                   key: ValueKey('tafsir-${work.id}'),
                   value: work.id,
-                  title: Text(work.displayName),
+                  title: Text(tafsirName(l10n, work)),
                   subtitle: Text(nativeLanguageName(work.languageCode)),
                 ),
               RadioListTile<String>(

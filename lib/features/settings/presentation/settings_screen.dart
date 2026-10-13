@@ -36,6 +36,7 @@ import '../../recitation/application/hifz_controller.dart';
 import '../../listen/domain/quran_audio_sources.dart';
 import '../../listen/presentation/listen_sheet.dart';
 import 'theme_choices.dart';
+import '../../../quran/presentation/meaning_resource_names.dart';
 
 /// The Settings tab: the app's language and theme (the Quran page's own
 /// theme is chosen in the Mushaf, independently, so the two can be mixed).
@@ -455,9 +456,9 @@ class _MeaningSettings extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final books = ref.watch(activeTranslationBooksProvider).value;
     final tafsirId = ref.watch(tafsirSelectionControllerProvider);
-    final tafsirName = [
+    final tafsirLabel = [
       for (final t in ref.watch(tafsirLibraryControllerProvider).value ?? [])
-        if (t.work.id == tafsirId) t.work.displayName,
+        if (t.work.id == tafsirId) tafsirName(l10n, t.work),
     ].firstOrNull;
     final content = ref.watch(ayahSheetContentProvider);
     final transliteration = ref.watch(
@@ -473,7 +474,8 @@ class _MeaningSettings extends ConsumerWidget {
           subtitle: Text(
             books == null || books.isEmpty
                 ? l10n.readerSelected(0)
-                : [for (final b in books.values) b.author].join(', '),
+                : [for (final b in books.values) translationName(l10n, b)]
+                      .join(', '),
           ),
           trailing: const Icon(Icons.chevron_right),
           onTap: () => showTranslationPacksSheet(context),
@@ -482,7 +484,7 @@ class _MeaningSettings extends ConsumerWidget {
           key: const ValueKey('settings-tafsir'),
           contentPadding: EdgeInsets.zero,
           title: Text(l10n.readerTafsir),
-          subtitle: Text(tafsirName ?? l10n.settingsTafsirNone),
+          subtitle: Text(tafsirLabel ?? l10n.settingsTafsirNone),
           trailing: const Icon(Icons.chevron_right),
           onTap: () => showTafsirPacksSheet(context),
         ),
