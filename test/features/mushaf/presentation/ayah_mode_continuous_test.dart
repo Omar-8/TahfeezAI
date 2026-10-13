@@ -1,4 +1,7 @@
 import 'package:drift/native.dart';
+
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -7,6 +10,10 @@ import 'package:tahfeez_ai/features/mushaf/application/mushaf_quran_engine_provi
 import 'package:tahfeez_ai/features/mushaf/application/reader_mode.dart';
 import 'package:tahfeez_ai/features/mushaf/domain/quran_engine/quran_engine_mushaf_backend.dart';
 import 'package:tahfeez_ai/features/mushaf/application/mushaf_page_turn.dart';
+import 'package:tahfeez_ai/features/mushaf/application/mushaf_hide_mode.dart';
+import 'package:tahfeez_ai/features/listen/application/quran_audio_player.dart';
+import 'package:tahfeez_ai/features/quran/application/quran_index_providers.dart';
+import 'package:tahfeez_ai/core/core_providers.dart';
 import 'package:tahfeez_ai/features/mushaf/presentation/mushaf_pager.dart';
 import 'package:tahfeez_ai/features/mushaf/presentation/mushaf_token_hit_rect.dart';
 import 'package:tahfeez_ai/quran/application/quran_script_code.dart';
@@ -16,6 +23,7 @@ import 'package:tahfeez_ai/quran/domain/models/quran_refs.dart';
 import 'package:tahfeez_ai/quran/quran_providers.dart';
 
 import '../../../quran/quran_test_fixtures.dart';
+import '../../../test_helpers/fake_audio_controller.dart';
 
 /// Every page: ayahs 1:2 and 1:3, two words each (the synthetic dataset's).
 class _Page implements QuranEngineMushafPage {
@@ -31,12 +39,21 @@ class _Page implements QuranEngineMushafPage {
   @override
   ({VerseRef first, VerseRef last})? get verseSpan =>
       (first: (chapterNo: 1, verseNo: 2), last: (chapterNo: 1, verseNo: 3));
+
+  /// Page 10's ayahs are 1:2 and 1:3, page 11's 1:4 and 1:5, later
+  /// pages' 1:6 and 1:7, earlier pages' 1:1 and 1:2... (as words go).
+  int get _first => switch (pageNumber) {
+    10 => 1002,
+    11 => 1004,
+    > 11 => 1006,
+    _ => 1000,
+  };
   @override
-  List<WordRef> get wordRefs => const [
-    (ayahId: 1002, wordIndex: 0),
-    (ayahId: 1002, wordIndex: 1),
-    (ayahId: 1003, wordIndex: 0),
-    (ayahId: 1003, wordIndex: 1),
+  List<WordRef> get wordRefs => [
+    (ayahId: _first, wordIndex: 0),
+    (ayahId: _first, wordIndex: 1),
+    (ayahId: _first + 1, wordIndex: 0),
+    (ayahId: _first + 1, wordIndex: 1),
   ];
   @override
   double get aspectRatio => 0.6;
@@ -105,7 +122,7 @@ void main() {
   late ProviderContainer container;
   late List<int> changes;
 
-  Future<void> pump(WidgetTester tester) async {
+  Future<void> pump(WidgetTester tester, {FakeAudioController? audio}) async {
     final db = QuranDatabase(NativeDatabase.memory());
     addTearDown(db.close);
     await const QuranDatasetImporter().import(db, buildValidSyntheticPayload());
@@ -117,6 +134,10 @@ void main() {
         quranDatabaseProvider.overrideWith((ref) => db),
         quranScriptCodeProvider.overrideWith((ref) => testScriptCode),
         ayahViewPreferencesProvider.overrideWith(_ContinuousView.new),
+        if (audio != null) ...[
+          audioControllerProvider.overrideWithValue(audio),
+          defaultMushafProvider.overrideWith((ref) async => null),
+        ],
       ],
     );
     addTearDown(container.dispose);
@@ -193,5 +214,49 @@ void main() {
     }
     expect(changes.last, 300);
     expect(tester.getTopLeft(divider(300)).dy, lessThan(100));
+  });
+
+  void shortScreen(WidgetTester tester) {
+    tester.view.physicalSize = const Size(400, 260);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+  }
+
+  Rect rectOf(WidgetTester tester, String key) =>
+      tester.getRect(find.byKey(ValueKey(key)));
+
+  testWidgets('continuous: revealing scrolls to the word shown, on the page '
+      'being read', (tester) async {
+    shortScreen(tester);
+    await pump(tester);
+    final hide = container.read(mushafHideModeProvider.notifier);
+    hide.toggle();
+    await tester.pumpAndSettle();
+    for (var i = 0; i < 4; i++) {
+      hide.revealNextWord(10);
+      await tester.pumpAndSettle();
+    }
+    final word = rectOf(tester, 'ayah-word-1003:1');
+    expect(word.top, greaterThanOrEqualTo(0));
+    expect(word.bottom, lessThanOrEqualTo(260));
+    expect(changes, isEmpty, reason: 'still page 10');
+  });
+
+  testWidgets("continuous: listening, the reciter's ayah scrolled into view "
+      'on the next page too', (tester) async {
+    shortScreen(tester);
+    final audio = FakeAudioController();
+    await pump(tester, audio: audio);
+    final player = container.read(quranAudioPlayerProvider.notifier);
+    unawaited(player.playAyahs([1003]));
+    await tester.pump();
+    await tester.pumpAndSettle();
+    var ayah = rectOf(tester, 'ayah-mode-1003');
+    expect(ayah.top, inInclusiveRange(0, 130));
+    unawaited(player.playAyahs([1005]));
+    await tester.pump();
+    await tester.pumpAndSettle();
+    ayah = rectOf(tester, 'ayah-mode-1005');
+    expect(ayah.top, inInclusiveRange(0, 130));
   });
 }

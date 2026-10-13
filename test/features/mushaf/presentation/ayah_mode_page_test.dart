@@ -126,6 +126,7 @@ void main() {
     bool current = false,
     FakeAudioController? audio,
     int? focus,
+    bool settle = true,
   }) async {
     final db = QuranDatabase(NativeDatabase.memory());
     addTearDown(db.close);
@@ -174,7 +175,12 @@ void main() {
       ),
     );
     await tester.runAsync(() => Future<void>.delayed(Duration.zero));
-    await tester.pumpAndSettle();
+    if (settle) {
+      await tester.pumpAndSettle();
+    } else {
+      await tester.pump();
+      await tester.pump();
+    }
   }
 
   Color? inkOf(WidgetTester tester, int ayahId, int wordIndex) {
@@ -321,6 +327,26 @@ void main() {
     final audio = FakeAudioController();
     await pump(tester, mode: ReaderMode.ayah, current: true, audio: audio);
     expect(onScreen(tester, 'ayah-mode-1003'), isFalse);
+    unawaited(
+      container.read(quranAudioPlayerProvider.notifier).playAyahs([1003]),
+    );
+    await tester.pump();
+    await tester.pumpAndSettle();
+    expect(onScreen(tester, 'ayah-mode-1003'), isTrue);
+  });
+
+  testWidgets('opened at an ayah, then listening at once: the reciter '
+      "followed, not held at the ayah opened at", (tester) async {
+    shortScreen(tester);
+    final audio = FakeAudioController();
+    await pump(
+      tester,
+      mode: ReaderMode.ayah,
+      current: true,
+      audio: audio,
+      focus: 1002,
+      settle: false,
+    );
     unawaited(
       container.read(quranAudioPlayerProvider.notifier).playAyahs([1003]),
     );

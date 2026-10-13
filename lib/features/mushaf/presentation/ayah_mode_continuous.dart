@@ -60,6 +60,10 @@ class _AyahModeContinuousState extends ConsumerState<AyahModeContinuous> {
 
   /// After the frame (the pages laid out where the scroll put them): the
   /// page crossing the screen's upper quarter.
+  ///
+  /// Only for the reader's own scrolling: the app's (revealing, following
+  /// the recitation) never changes the page being read under the mode
+  /// that scrolled — a mode moves on to a page by turning to it.
   void _scheduleUpdate() {
     if (_updateScheduled) return;
     _updateScheduled = true;
@@ -95,6 +99,8 @@ class _AyahModeContinuousState extends ConsumerState<AyahModeContinuous> {
     if (page == _current) return;
     final state = _pageKeys[page]?.currentState;
     if (state != null) {
+      setState(() => _current = page);
+      widget.onPageChanged(page);
       state.bringIntoView();
       return;
     }
@@ -138,17 +144,15 @@ class _AyahModeContinuousState extends ConsumerState<AyahModeContinuous> {
             for (final key in _pageKeys.values) {
               key.currentState?.releasePin();
             }
-          } else if (n is ScrollUpdateNotification) {
+          } else if (n is ScrollUpdateNotification && _userScrolling) {
             _scheduleUpdate();
-          } else if (n is ScrollEndNotification) {
+          } else if (n is ScrollEndNotification && _userScrolling) {
             _scheduleUpdate();
-            if (_userScrolling) {
+            // Where the reader stops is where Continue reading goes back to.
+            WidgetsBinding.instance.addPostFrameCallback((_) {
               _userScrolling = false;
-              // Where the reader stops is where Continue reading goes back to.
-              WidgetsBinding.instance.addPostFrameCallback(
-                (_) => _pageKeys[_current]?.currentState?.recordPosition(),
-              );
-            }
+              _pageKeys[_current]?.currentState?.recordPosition();
+            });
           }
           return false;
         },

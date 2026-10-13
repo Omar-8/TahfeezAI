@@ -141,7 +141,8 @@ class AyahModePageState extends ConsumerState<AyahModePage> {
   /// An ayah opened at (Daily ayah, Continue reading, the ayah sheet's
   /// More): held in place while the page settles — translations, tafsir
   /// and meanings arriving after it grow the ayahs above — until the
-  /// reader scrolls or a moment has passed.
+  /// reader scrolls, a mode moves on (its scroll wins), or a moment has
+  /// passed.
   int? _pinned;
   Duration? _pinnedSince;
 
@@ -297,6 +298,8 @@ class AyahModePageState extends ConsumerState<AyahModePage> {
 
   /// Scrolls to [ayahId]'s block, if it is on this page.
   void _scrollTo(int ayahId, {bool animate = true}) {
+    // A mode moved on: the ayah opened at no longer held.
+    _unpin();
     WidgetsBinding.instance.addPostFrameCallback(
       (_) => _reveal(_ayahKeys[ayahId], animate: animate),
     );
@@ -326,6 +329,7 @@ class AyahModePageState extends ConsumerState<AyahModePage> {
   void _keepWordVisible(WordRef word) {
     final index = _words?.indexOf(word) ?? -1;
     if (index < 0) return;
+    _unpin();
     WidgetsBinding.instance.addPostFrameCallback(
       (_) => _reveal(_wordKeys[index], onlyIfHidden: true),
     );
