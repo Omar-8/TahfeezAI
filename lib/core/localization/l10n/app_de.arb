@@ -487,5 +487,12 @@
   "tafsirLayoutContinuous": "Fortlaufend",
   "tafsirShowTranslation": "Übersetzung",
   "tafsirShowTransliteration": "Umschrift",
-  "tafsirOpen": "Tafsir"
+  "tafsirOpen": "Tafsir",
+  "ayahModePage": "Seite {page}",
+  "ayahModeUnavailable": "Diese Seite konnte nicht geladen werden.",
+  "readerModeAyah": "Versansicht",
+  "readerModeMushaf": "Mushaf-Ansicht",
+  "ayahView": "Versansicht",
+  "ayahViewTafsir": "Tafsir",
+  "ayahViewWordMeanings": "Wortbedeutungen"
 }

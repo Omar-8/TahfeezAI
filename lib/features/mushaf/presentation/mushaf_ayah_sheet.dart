@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/localization/generated/app_localizations.dart';
-import '../../../core/routing/tafsir_routing.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/components/components.dart';
 import '../../../core/theme/quran_text_style.dart';
@@ -20,6 +19,7 @@ import '../../listen/application/quran_audio_player.dart';
 import '../../listen/presentation/listen_sheet.dart';
 import '../application/mushaf_appearance_controller.dart';
 import '../application/mushaf_page_translations.dart';
+import '../application/reader_mode.dart';
 import '../domain/mushaf_appearance.dart';
 
 /// The Mushaf's "long-press a word" destination: the word's whole ayah —
@@ -216,11 +216,20 @@ class _AyahTafsir extends ConsumerWidget {
         Align(
           alignment: AlignmentDirectional.centerEnd,
           child: TextButton(
-            onPressed: () => openTafsirReader(
-              context,
-              chapterNo: chapterNo,
-              verseNo: verseNo,
-            ),
+            // Ayah mode, with the tafsir, at this ayah.
+            onPressed: () {
+              final view = ref.read(ayahViewPreferencesProvider);
+              if (!view.showTafsir) {
+                ref
+                    .read(ayahViewPreferencesProvider.notifier)
+                    .set(view.copyWith(showTafsir: true));
+              }
+              ref
+                  .read(ayahModeTargetProvider.notifier)
+                  .show(chapterNo * 1000 + verseNo);
+              ref.read(readerModeProvider.notifier).set(ReaderMode.ayah);
+              Navigator.of(context).pop();
+            },
             child: Text(l10n.ayahSheetReadMore),
           ),
         ),

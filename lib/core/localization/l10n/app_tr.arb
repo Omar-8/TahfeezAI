@@ -487,5 +487,12 @@
   "tafsirLayoutContinuous": "Kesintisiz",
   "tafsirShowTranslation": "Meal",
   "tafsirShowTransliteration": "Okunuş",
-  "tafsirOpen": "Tefsir"
+  "tafsirOpen": "Tefsir",
+  "ayahModePage": "Sayfa {page}",
+  "ayahModeUnavailable": "Bu sayfa yüklenemedi.",
+  "readerModeAyah": "Ayet görünümü",
+  "readerModeMushaf": "Mushaf görünümü",
+  "ayahView": "Ayet görünümü",
+  "ayahViewTafsir": "Tefsir",
+  "ayahViewWordMeanings": "Kelime anlamları"
 }

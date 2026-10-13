@@ -487,5 +487,12 @@
   "tafsirLayoutContinuous": "متواصل",
   "tafsirShowTranslation": "الترجمة",
   "tafsirShowTransliteration": "النطق بالحروف اللاتينية",
-  "tafsirOpen": "التفسير"
+  "tafsirOpen": "التفسير",
+  "ayahModePage": "صفحة {page}",
+  "ayahModeUnavailable": "تعذّر تحميل هذه الصفحة.",
+  "readerModeAyah": "عرض الآيات",
+  "readerModeMushaf": "عرض المصحف",
+  "ayahView": "عرض الآيات",
+  "ayahViewTafsir": "التفسير",
+  "ayahViewWordMeanings": "معاني الكلمات"
 }

@@ -487,5 +487,12 @@
   "tafsirLayoutContinuous": "Continu",
   "tafsirShowTranslation": "Traduction",
   "tafsirShowTransliteration": "Translittération",
-  "tafsirOpen": "Tafsir"
+  "tafsirOpen": "Tafsir",
+  "ayahModePage": "Page {page}",
+  "ayahModeUnavailable": "Cette page n'a pas pu être chargée.",
+  "readerModeAyah": "Mode versets",
+  "readerModeMushaf": "Mode Mushaf",
+  "ayahView": "Affichage des versets",
+  "ayahViewTafsir": "Tafsir",
+  "ayahViewWordMeanings": "Sens des mots"
 }

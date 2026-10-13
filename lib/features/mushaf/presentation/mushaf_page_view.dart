@@ -5,6 +5,9 @@ import '../application/mushaf_appearance_controller.dart';
 import '../domain/mushaf_appearance.dart';
 import 'mushaf_token_hit_rect.dart';
 import 'quran_engine_mushaf_page_content.dart';
+import '../application/mushaf_page_providers.dart';
+import '../application/reader_mode.dart';
+import 'ayah_mode_page.dart';
 
 /// Renders one printed Mushaf page through Quran Engine
 /// (`QuranEngineMushafPageContent`) — Tahfeez's Mushaf rendering backend
@@ -50,6 +53,18 @@ class MushafPageView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = ref.watch(mushafAppearanceControllerProvider).colors;
+
+    // Ayah mode: the same page, ayah by ayah.
+    if (ref.watch(readerModeProvider) == ReaderMode.ayah) {
+      return AyahModePage(
+        mushafId: mushafId,
+        pageNumber: pageNumber,
+        pageCount:
+            ref.watch(mushafByIdProvider(mushafId)).value?.pageCount ?? 604,
+        colors: colors,
+        isCurrentPage: isCurrentPage,
+      );
+    }
 
     return Container(
       color: colors.background,

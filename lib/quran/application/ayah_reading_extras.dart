@@ -42,3 +42,25 @@ final ayahTransliterationProvider = FutureProvider.autoDispose
       ].join(' ');
       return text.isEmpty ? null : text;
     });
+
+/// An ayah's word meanings (the word-by-word pack's translation), by word
+/// index; empty without a pack.
+final ayahWordMeaningsProvider = FutureProvider.autoDispose
+    .family<Map<int, String>, int>((ref, ayahId) async {
+      final repository = ref.watch(wbwRepositoryProvider);
+      var pack = await ref.watch(activeWbwPackProvider.future);
+      if (pack == null || !pack.hasTranslation) {
+        final installed = await repository.getInstalledPacks();
+        pack = installed.where((p) => p.hasTranslation).firstOrNull;
+      }
+      if (pack == null) return const {};
+      final words = await repository.getAyahWords(
+        packId: pack.id,
+        ayahId: ayahId,
+      );
+      return {
+        for (final w in words)
+          if (w.translation case final t? when t.trim().isNotEmpty)
+            w.wordIndex: t.trim(),
+      };
+    });

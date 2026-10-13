@@ -958,5 +958,19 @@
   "tafsirLayoutContinuous": "Continuous",
   "tafsirShowTranslation": "Translation",
   "tafsirShowTransliteration": "Transliteration",
-  "tafsirOpen": "Tafsir"
+  "tafsirOpen": "Tafsir",
+  "ayahModePage": "Page {page}",
+  "ayahModeUnavailable": "This page couldn't be loaded.",
+  "readerModeAyah": "Ayah mode",
+  "readerModeMushaf": "Mushaf mode",
+  "ayahView": "Ayah view",
+  "ayahViewTafsir": "Tafsir",
+  "ayahViewWordMeanings": "Word meanings",
+  "@ayahModePage": {
+    "placeholders": {
+      "page": {
+        "type": "int"
+      }
+    }
+  }
 }

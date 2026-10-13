@@ -487,5 +487,12 @@
   "tafsirLayoutContinuous": "مسلسل",
   "tafsirShowTranslation": "ترجمہ",
   "tafsirShowTransliteration": "رومن تلفظ",
-  "tafsirOpen": "تفسیر"
+  "tafsirOpen": "تفسیر",
+  "ayahModePage": "صفحہ {page}",
+  "ayahModeUnavailable": "یہ صفحہ لوڈ نہیں ہو سکا۔",
+  "readerModeAyah": "آیات کا منظر",
+  "readerModeMushaf": "مصحف کا منظر",
+  "ayahView": "آیات کا منظر",
+  "ayahViewTafsir": "تفسیر",
+  "ayahViewWordMeanings": "الفاظ کے معانی"
 }
