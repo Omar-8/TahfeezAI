@@ -248,4 +248,33 @@ void main() {
     await tester.pumpAndSettle();
     expect(colorOf(1002), Colors.transparent);
   });
+
+  testWidgets('revealing scrolls to the word shown, even off screen', (
+    tester,
+  ) async {
+    // A short screen: the page's second ayah starts below it.
+    tester.view.physicalSize = const Size(400, 260);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await pump(tester, mode: ReaderMode.ayah);
+    final hide = container.read(mushafHideModeProvider.notifier);
+    hide.toggle();
+    await tester.pumpAndSettle();
+    final scrollable = tester.state<ScrollableState>(
+      find.byType(Scrollable).first,
+    );
+    expect(scrollable.position.pixels, 0);
+    for (var i = 0; i < 4; i++) {
+      hide.revealNextWord(2);
+      await tester.pumpAndSettle();
+    }
+    expect(
+      scrollable.position.pixels,
+      greaterThan(0),
+      reason: "scrolled down to 1:3's last word",
+    );
+    final word = tester.getRect(find.byKey(const ValueKey('ayah-word-1003:1')));
+    expect(word.top, greaterThanOrEqualTo(0));
+    expect(word.bottom, lessThanOrEqualTo(260));
+  });
 }

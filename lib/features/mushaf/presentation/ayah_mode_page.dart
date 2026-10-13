@@ -311,7 +311,10 @@ class _AyahModePageState extends ConsumerState<AyahModePage> {
     final ayahs = _ayahs();
     return Container(
       color: colors.background,
-      child: ListView.builder(
+      // The whole page built at once (a page holds at most a few dozen
+      // ayahs): every ayah and word is there to scroll to — revealing,
+      // hiding and following the recitation need them.
+      child: SingleChildScrollView(
         controller: _scroll,
         padding: const EdgeInsets.fromLTRB(
           TahfeezSpacing.md,
@@ -319,45 +322,66 @@ class _AyahModePageState extends ConsumerState<AyahModePage> {
           TahfeezSpacing.md,
           TahfeezSpacing.lg,
         ),
-        itemCount: ayahs.length + 1,
-        itemBuilder: (context, k) {
-          if (k == ayahs.length) {
-            return _PageButtons(
-              pageNumber: widget.pageNumber,
-              pageCount: widget.pageCount,
-              colors: colors,
-            );
-          }
-          final (ayahId, indices) = ayahs[k];
-          return KeyedSubtree(
-            key: _ayahKeys.putIfAbsent(ayahId, GlobalKey.new),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (ayahId % 1000 == 1)
-                  _SurahHeader(surahNo: ayahId ~/ 1000, colors: colors),
-                _AyahBlock(
-                  mushafId: widget.mushafId,
-                  pageNumber: widget.pageNumber,
-                  ayahId: ayahId,
-                  words: [for (final i in indices) words[i]],
-                  wordKeys: [
-                    for (final i in indices)
-                      _wordKeys.putIfAbsent(i, GlobalKey.new),
-                  ],
-                  hidden: [for (final i in indices) hidden(i)],
-                  marks: [for (final i in indices) mark(i)],
-                  colors: colors,
-                ),
-                if (k < ayahs.length - 1)
-                  Divider(
-                    height: TahfeezSpacing.xl,
-                    color: colors.secondaryText.withValues(alpha: 0.2),
-                  ),
-              ],
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            for (var k = 0; k <= ayahs.length; k++)
+              _item(
+                context,
+                k,
+                ayahs,
+                hidden: hidden,
+                mark: mark,
+                words: words,
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _item(
+    BuildContext context,
+    int k,
+    List<(int, List<int>)> ayahs, {
+    required bool Function(int) hidden,
+    required MushafWordMark? Function(int) mark,
+    required List<WordRef> words,
+  }) {
+    final colors = widget.colors;
+    if (k == ayahs.length) {
+      return _PageButtons(
+        pageNumber: widget.pageNumber,
+        pageCount: widget.pageCount,
+        colors: colors,
+      );
+    }
+    final (ayahId, indices) = ayahs[k];
+    return KeyedSubtree(
+      key: _ayahKeys.putIfAbsent(ayahId, GlobalKey.new),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (ayahId % 1000 == 1)
+            _SurahHeader(surahNo: ayahId ~/ 1000, colors: colors),
+          _AyahBlock(
+            mushafId: widget.mushafId,
+            pageNumber: widget.pageNumber,
+            ayahId: ayahId,
+            words: [for (final i in indices) words[i]],
+            wordKeys: [
+              for (final i in indices) _wordKeys.putIfAbsent(i, GlobalKey.new),
+            ],
+            hidden: [for (final i in indices) hidden(i)],
+            marks: [for (final i in indices) mark(i)],
+            colors: colors,
+          ),
+          if (k < ayahs.length - 1)
+            Divider(
+              height: TahfeezSpacing.xl,
+              color: colors.secondaryText.withValues(alpha: 0.2),
             ),
-          );
-        },
+        ],
       ),
     );
   }
