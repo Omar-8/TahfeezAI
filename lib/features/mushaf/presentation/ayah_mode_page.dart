@@ -138,7 +138,15 @@ class AyahModePageState extends ConsumerState<AyahModePage> {
         return position.pixels;
       }
     } else {
-      target = viewport.getOffsetToReveal(box, alignment).offset;
+      // Its top [alignment] of the way down the room it leaves — and for
+      // one taller than the screen (a long ayah with its meanings), its
+      // top just below the screen's: aligning a tall one would lift its
+      // top off the screen.
+      final height = box is RenderBox && box.hasSize ? box.size.height : 0.0;
+      final room = position.viewportDimension - height;
+      target =
+          viewport.getOffsetToReveal(box, 0).offset -
+          (room > 0 ? room * alignment : TahfeezSpacing.sm);
     }
     final inner = keepInView?.currentContext?.findRenderObject();
     if (inner != null && inner.attached) {

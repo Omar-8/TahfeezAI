@@ -372,6 +372,18 @@ void main() {
         .setScale(1);
   });
 
+  testWidgets('opened at an ayah taller than the screen: its top in view, '
+      'not lifted above it', (tester) async {
+    tester.view.physicalSize = const Size(400, 80);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await pump(tester, mode: ReaderMode.ayah, current: true, focus: 1003);
+    final card = tester.getRect(find.byKey(const ValueKey('ayah-mode-1003')));
+    expect(card.height, greaterThan(80), reason: 'taller than the screen');
+    final list = tester.getTopLeft(find.byType(SingleChildScrollView)).dy;
+    expect(card.top - list, inInclusiveRange(0, 20));
+  });
+
   testWidgets('opened at an ayah (Daily ayah): scrolled to it', (tester) async {
     shortScreen(tester);
     await pump(tester, mode: ReaderMode.ayah, current: true, focus: 1003);
