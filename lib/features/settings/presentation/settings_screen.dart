@@ -35,6 +35,7 @@ import '../../listen/application/reciter_controller.dart';
 import '../../recitation/application/hifz_controller.dart';
 import '../../listen/domain/quran_audio_sources.dart';
 import '../../listen/presentation/listen_sheet.dart';
+import 'arabic_font_choices.dart';
 import 'theme_choices.dart';
 import '../../../quran/presentation/meaning_resource_names.dart';
 
@@ -206,27 +207,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               spacing: TahfeezSpacing.smPlus,
               children: [
-                Wrap(
-                  key: const ValueKey('settings-arabic-font'),
-                  spacing: TahfeezSpacing.sm,
-                  runSpacing: TahfeezSpacing.sm,
-                  children: [
-                    for (final font in ArabicUiFont.values)
-                      ChoiceChip(
-                        key: ValueKey('settings-arabic-font-${font.name}'),
-                        // Each name in its own font.
-                        label: Text(
-                          font.arabicName,
-                          style: TextStyle(fontFamily: font.family),
-                        ),
-                        selected: font == arabicFont,
-                        showCheckmark: false,
-                        onSelected: (_) => ref
-                            .read(arabicFontControllerProvider.notifier)
-                            .setFont(font),
-                      ),
-                  ],
-                ),
+                const ArabicFontChoices(),
                 Text(
                   'مساء الخير · آية اليوم · متابعة القراءة',
                   textDirection: TextDirection.rtl,

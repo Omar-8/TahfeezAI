@@ -5,6 +5,7 @@ import '../../../core/localization/generated/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/components/components.dart';
+import '../../settings/presentation/arabic_font_choices.dart';
 import '../../settings/presentation/theme_choices.dart';
 import '../application/mushaf_appearance_controller.dart';
 import '../application/mushaf_passages.dart';
@@ -196,6 +197,12 @@ class _AyahViewOptions extends ConsumerWidget {
             ),
           ],
         ),
+        // The Arabic font (Settings' own choice): Arabic tafsir and
+        // translations, and the app's Arabic. The Quran's text keeps its
+        // own font.
+        Text(l10n.settingsArabicFont),
+        const SizedBox(height: 8),
+        const ArabicFontChoices(),
         const Divider(height: 24),
       ],
     );
