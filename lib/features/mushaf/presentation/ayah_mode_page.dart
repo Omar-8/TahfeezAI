@@ -52,6 +52,7 @@ class AyahModePage extends ConsumerStatefulWidget {
     required this.pageCount,
     required this.colors,
     this.isCurrentPage = false,
+    this.scrollController,
   });
 
   final int mushafId;
@@ -60,18 +61,27 @@ class AyahModePage extends ConsumerStatefulWidget {
   final MushafAppearanceColors colors;
   final bool isCurrentPage;
 
+  /// The continuous layout's list, this page laid in it
+  /// (`AyahModeContinuous`); without it the page scrolls on its own.
+  final ScrollController? scrollController;
+
   @override
-  ConsumerState<AyahModePage> createState() => _AyahModePageState();
+  ConsumerState<AyahModePage> createState() => AyahModePageState();
 }
 
-class _AyahModePageState extends ConsumerState<AyahModePage> {
+class AyahModePageState extends ConsumerState<AyahModePage> {
   /// The page's words in reading order (the engine's), and each ayah's
   /// end as a count of them.
   List<WordRef>? _words;
   List<int> _ayahEnds = const [];
   Object? _error;
 
-  final _scroll = ScrollController();
+  final _ownScroll = ScrollController();
+  ScrollController get _scroll => widget.scrollController ?? _ownScroll;
+  bool get _embedded => widget.scrollController != null;
+
+  /// The page's top (in the continuous layout).
+  final _topKey = GlobalKey();
   final _ayahKeys = <int, GlobalKey>{};
 
   /// Each page word's key (by its page index), to scroll a word into view.
@@ -161,6 +171,26 @@ class _AyahModePageState extends ConsumerState<AyahModePage> {
     _pinnedSince = null;
   }
 
+  /// The reader took the list (the continuous layout).
+  void releasePin() => _unpin();
+
+  /// Turned to in the continuous layout: the ayah in turn brought into
+  /// view if it is on this page, else the page's top.
+  void bringIntoView() {
+    final active = _activeAyah();
+    if (active != null && (_words?.any((w) => w.ayahId == active) ?? false)) {
+      _scrollTo(active);
+    } else {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _reveal(_topKey, alignment: 0),
+      );
+    }
+  }
+
+  /// Saves the ayah at the top of the screen (the continuous layout,
+  /// after the reader scrolls).
+  void recordPosition() => _recordPosition();
+
   /// The reader is dragging the list (not a scroll of ours).
   var _userScrolling = false;
 
@@ -173,7 +203,9 @@ class _AyahModePageState extends ConsumerState<AyahModePage> {
   @override
   void didUpdateWidget(covariant AyahModePage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.isCurrentPage && !oldWidget.isCurrentPage) {
+    // (In the continuous layout a page becomes current by the reader's
+    // scrolling: nothing to bring into view.)
+    if (widget.isCurrentPage && !oldWidget.isCurrentPage && !_embedded) {
       _bringActiveIntoView();
       if (_pinned == null) {
         WidgetsBinding.instance.addPostFrameCallback((_) => _recordPosition());
@@ -187,7 +219,7 @@ class _AyahModePageState extends ConsumerState<AyahModePage> {
 
   @override
   void dispose() {
-    _scroll.dispose();
+    _ownScroll.dispose();
     super.dispose();
   }
 
@@ -274,16 +306,20 @@ class _AyahModePageState extends ConsumerState<AyahModePage> {
   /// the ayah whose turn it is, if it is on this page.
   void _bringActiveIntoView() {
     if (!widget.isCurrentPage) return;
-    final active =
-        ref.read(quranAudioPlayerProvider)?.ayahId ??
-        (ref.read(hifzControllerProvider).running
-            ? ref.read(hifzControllerProvider).expected?.ayahId
-            : null) ??
-        ref.read(mushafFocusAyahProvider)?.ayahId;
+    final active = _activeAyah();
     if (active != null && (_words?.any((w) => w.ayahId == active) ?? false)) {
       _pin(active);
     }
   }
+
+  /// The ayah whose turn it is: the reciter's, the recitation's, or the
+  /// ayah in focus.
+  int? _activeAyah() =>
+      ref.read(quranAudioPlayerProvider)?.ayahId ??
+      (ref.read(hifzControllerProvider).running
+          ? ref.read(hifzControllerProvider).expected?.ayahId
+          : null) ??
+      ref.read(mushafFocusAyahProvider)?.ayahId;
 
   /// Within a long ayah: the word due next kept on screen, scrolling no
   /// more than needed.
@@ -309,15 +345,17 @@ class _AyahModePageState extends ConsumerState<AyahModePage> {
     final colors = widget.colors;
     final words = _words;
     if (_error != null) {
-      return Center(
+      final message = Center(
         child: Text(
           AppLocalizations.of(context).ayahModeUnavailable,
           style: TextStyle(color: colors.secondaryText),
         ),
       );
+      return _embedded ? SizedBox(height: 300, child: message) : message;
     }
     if (words == null) {
-      return const Center(child: CircularProgressIndicator());
+      const loading = Center(child: CircularProgressIndicator());
+      return _embedded ? const SizedBox(height: 600, child: loading) : loading;
     }
     // The recitation's place, and the reciter's ayah, kept in view on the
     // page being read.
@@ -325,7 +363,8 @@ class _AyahModePageState extends ConsumerState<AyahModePage> {
     // page being read: the reciter's (Listen, Follow along's reciter), the
     // reciter's next word (Recite, Loop, Follow along's user turn), or the
     // ayah in focus — whether highlighted or not.
-    if (widget.isCurrentPage) {
+    // (In the continuous layout, whichever page holds it.)
+    if (widget.isCurrentPage || _embedded) {
       ref.listen(mushafFocusAyahProvider.select((f) => f?.ayahId), (_, id) {
         if (id != null) _scrollTo(id);
       });
@@ -373,6 +412,27 @@ class _AyahModePageState extends ConsumerState<AyahModePage> {
     MushafWordMark? mark(int i) => overlay?.marks[words[i]];
 
     final ayahs = _ayahs();
+    final column = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (var k = 0; k <= ayahs.length; k++)
+          _item(context, k, ayahs, hidden: hidden, mark: mark, words: words),
+      ],
+    );
+    if (_embedded) {
+      // One page of the continuous scroll: its number, then its ayahs.
+      return Padding(
+        key: _topKey,
+        padding: const EdgeInsets.symmetric(horizontal: TahfeezSpacing.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _PageDivider(pageNumber: widget.pageNumber, colors: colors),
+            column,
+          ],
+        ),
+      );
+    }
     return Container(
       color: colors.background,
       // The whole page built at once (a page holds at most a few dozen
@@ -399,20 +459,7 @@ class _AyahModePageState extends ConsumerState<AyahModePage> {
             TahfeezSpacing.md,
             TahfeezSpacing.lg,
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              for (var k = 0; k <= ayahs.length; k++)
-                _item(
-                  context,
-                  k,
-                  ayahs,
-                  hidden: hidden,
-                  mark: mark,
-                  words: words,
-                ),
-            ],
-          ),
+          child: column,
         ),
       ),
     );
@@ -422,7 +469,10 @@ class _AyahModePageState extends ConsumerState<AyahModePage> {
   /// continue reading from (Home).
   void _recordPosition() {
     if (!widget.isCurrentPage || !mounted) return;
-    final list = context.findRenderObject();
+    // The screen: the continuous list, or this page's own.
+    final list = _embedded
+        ? Scrollable.maybeOf(context)?.context.findRenderObject()
+        : context.findRenderObject();
     if (list is! RenderBox || !list.attached) return;
     final top = list.localToGlobal(Offset.zero).dy;
     int? best;
@@ -462,6 +512,7 @@ class _AyahModePageState extends ConsumerState<AyahModePage> {
   }) {
     final colors = widget.colors;
     if (k == ayahs.length) {
+      if (_embedded) return const SizedBox(height: TahfeezSpacing.lg);
       return _PageButtons(
         pageNumber: widget.pageNumber,
         pageCount: widget.pageCount,
@@ -966,6 +1017,39 @@ class _PageButtons extends ConsumerWidget {
             iconAlignment: IconAlignment.end,
             label: Text(l10n.commonNext),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A page's start in the continuous layout: its number between rules.
+class _PageDivider extends StatelessWidget {
+  const _PageDivider({required this.pageNumber, required this.colors});
+
+  final int pageNumber;
+  final MushafAppearanceColors colors;
+
+  @override
+  Widget build(BuildContext context) {
+    final rule = Expanded(
+      child: Divider(color: colors.secondaryText.withValues(alpha: 0.25)),
+    );
+    return Padding(
+      key: ValueKey('ayah-mode-page-divider-$pageNumber'),
+      padding: const EdgeInsets.symmetric(vertical: TahfeezSpacing.sm),
+      child: Row(
+        children: [
+          rule,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: TahfeezSpacing.sm),
+            child: Text(
+              AppLocalizations.of(context).ayahModePage(pageNumber),
+              style: Theme.of(context).textTheme.labelSmall
+                  ?.copyWith(color: colors.secondaryText),
+            ),
+          ),
+          rule,
         ],
       ),
     );

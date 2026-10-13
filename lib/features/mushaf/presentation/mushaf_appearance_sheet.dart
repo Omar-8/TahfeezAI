@@ -94,6 +94,26 @@ class _AyahViewOptions extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(l10n.ayahView, style: Theme.of(context).textTheme.titleSmall),
+        const SizedBox(height: 8),
+        SegmentedButton<AyahLayout>(
+          key: const ValueKey('ayah-view-layout'),
+          segments: [
+            ButtonSegment(
+              value: AyahLayout.paged,
+              label: Text(l10n.tafsirLayoutPaged),
+              icon: const Icon(Icons.auto_stories_outlined),
+            ),
+            ButtonSegment(
+              value: AyahLayout.continuous,
+              label: Text(l10n.tafsirLayoutContinuous),
+              icon: const Icon(Icons.view_day_outlined),
+            ),
+          ],
+          selected: {view.layout},
+          showSelectedIcon: false,
+          onSelectionChanged: (s) =>
+              controller.set(view.copyWith(layout: s.first)),
+        ),
         toggle(
           'ayah-view-translation',
           l10n.tafsirShowTranslation,

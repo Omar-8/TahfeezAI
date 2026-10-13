@@ -12,7 +12,9 @@ import '../../../wbw/presentation/word_detail_sheet.dart';
 import '../application/mushaf_appearance_controller.dart';
 import '../application/mushaf_page_turn.dart';
 import '../application/mushaf_quran_engine_providers.dart';
+import '../application/reader_mode.dart';
 import '../domain/mushaf_appearance.dart';
+import 'ayah_mode_continuous.dart';
 import 'mushaf_ayah_sheet.dart';
 import 'mushaf_token_hit_rect.dart';
 import 'mushaf_page_view.dart';
@@ -114,11 +116,11 @@ class _MushafPagerState extends ConsumerState<MushafPager> {
     if (_twoPageSpread != null) _controller.dispose();
     _twoPageSpread = useTwoPageSpread;
     final initialIndex = useTwoPageSpread
-        ? ((widget.initialPageNumber - 1) ~/ 2).clamp(
+        ? ((_currentPageNumber - 1) ~/ 2).clamp(
             0,
             (widget.pageCount / 2).ceil() - 1,
           )
-        : (widget.initialPageNumber - 1).clamp(0, widget.pageCount - 1);
+        : (_currentPageNumber - 1).clamp(0, widget.pageCount - 1);
     _controller = PageController(initialPage: initialIndex);
     _lastSettledIndex = initialIndex;
   }
@@ -465,8 +467,30 @@ class _MushafPagerState extends ConsumerState<MushafPager> {
     final breakpoint = TahfeezBreakpoint.of(context);
     final size = MediaQuery.sizeOf(context);
     final isLandscape = size.width > size.height;
+    // Ayah mode's continuous layout: one scroll, no pages to swipe.
+    final continuous =
+        ref.watch(readerModeProvider) == ReaderMode.ayah &&
+        ref.watch(ayahViewPreferencesProvider.select((v) => v.layout)) ==
+            AyahLayout.continuous;
     final useTwoPageSpread =
-        breakpoint.isAtLeastTablet && isLandscape && size.width > 700;
+        !continuous &&
+        breakpoint.isAtLeastTablet &&
+        isLandscape &&
+        size.width > 700;
+    if (continuous) {
+      // Back to pages later: a pager opened where the scroll left off.
+      if (_twoPageSpread != null) _controller.dispose();
+      _twoPageSpread = null;
+      _requestedFullBleed = false;
+      _scheduleFullBleedApply();
+      return AyahModeContinuous(
+        key: const ValueKey('continuous'),
+        mushafId: widget.mushafId,
+        pageCount: widget.pageCount,
+        initialPageNumber: _currentPageNumber,
+        onPageChanged: _onPageChanged,
+      );
+    }
     _ensureController(useTwoPageSpread);
     // Page-turn requests from the shell's bottom bar (hide mode's buttons at
     // either end of a page) — only for the pager on screen.
