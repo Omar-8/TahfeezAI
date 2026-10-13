@@ -83,35 +83,41 @@ Future<T?> showTahfeezModalBottomSheet<T>({
     // tab's own navigator, where that bar would cover its bottom.
     useRootNavigator: true,
     constraints: constraints ?? sheetBelowAppBar(context),
-    builder: (context) => SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.only(top: TahfeezSpacing.sm),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 36,
-              height: 4,
-              margin: const EdgeInsets.only(bottom: TahfeezSpacing.md),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.outlineVariant,
-                borderRadius: BorderRadius.circular(TahfeezSpacing.xs),
-              ),
-            ),
-            if (title != null)
-              Padding(
-                padding: const EdgeInsets.only(
-                  bottom: TahfeezSpacing.md,
-                  left: TahfeezSpacing.md,
-                  right: TahfeezSpacing.md,
-                ),
-                child: Text(
-                  title,
-                  style: Theme.of(context).textTheme.titleMedium,
+    // Lifted above the keyboard while a field in it is being typed into.
+    builder: (context) => AnimatedPadding(
+      duration: const Duration(milliseconds: 150),
+      curve: Curves.easeOut,
+      padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.only(top: TahfeezSpacing.sm),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 36,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: TahfeezSpacing.md),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.outlineVariant,
+                  borderRadius: BorderRadius.circular(TahfeezSpacing.xs),
                 ),
               ),
-            Flexible(child: builder(context)),
-          ],
+              if (title != null)
+                Padding(
+                  padding: const EdgeInsets.only(
+                    bottom: TahfeezSpacing.md,
+                    left: TahfeezSpacing.md,
+                    right: TahfeezSpacing.md,
+                  ),
+                  child: Text(
+                    title,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                ),
+              Flexible(child: builder(context)),
+            ],
+          ),
         ),
       ),
     ),

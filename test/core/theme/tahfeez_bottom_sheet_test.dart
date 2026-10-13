@@ -52,4 +52,43 @@ void main() {
     expect(tester.getTopLeft(sheet).dy, closeTo(appBarBottom, 0.5));
     expect(tester.getBottomLeft(sheet).dy, 800, reason: 'over the shell bar');
   });
+
+  testWidgets('with the keyboard up, the sheet is lifted above it', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(400, 800);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (context) => TextButton(
+              onPressed: () => showTahfeezModalBottomSheet<void>(
+                context: context,
+                title: 'Go to ayah',
+                builder: (_) => Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const TextField(key: Key('field')),
+                    FilledButton(onPressed: () {}, child: const Text('Go')),
+                  ],
+                ),
+              ),
+              child: const Text('open'),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    tester.view.viewInsets = const FakeViewPadding(bottom: 300);
+    await tester.pumpAndSettle();
+    expect(tester.getBottomLeft(find.text('Go')).dy, lessThanOrEqualTo(500));
+    expect(
+      tester.getTopLeft(find.byKey(const Key('field'))).dy,
+      greaterThan(0),
+    );
+  });
 }
