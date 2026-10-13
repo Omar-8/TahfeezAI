@@ -46,11 +46,13 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
 
   // Captured up front: `ref` is unusable by the time dispose runs.
   late final MushafFocusAyah _focus;
+  late final AyahModeTarget _target;
 
   @override
   void initState() {
     super.initState();
     _focus = ref.read(mushafFocusAyahProvider.notifier);
+    _target = ref.read(ayahModeTargetProvider.notifier);
     if (widget.location case QuranLocationAyah(
       :final chapterNo,
       :final verseNo,
@@ -64,8 +66,12 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
 
   @override
   void dispose() {
-    final focus = _focus;
-    Future.microtask(() => focus.clear(this));
+    final focus = _focus, target = _target;
+    Future.microtask(() {
+      focus.clear(this);
+      // Not brought into view by the time this closes: no longer asked.
+      target.done();
+    });
     super.dispose();
   }
 
@@ -88,10 +94,11 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
     if (!mounted) return;
     // Ayah mode: a surah (a juz, a hizb, a range) begins partway down its
     // page — its first ayah brought into view, with the surah's name. (An
-    // ayah opened at is, as the ayah in focus.)
-    if (widget.location is! QuranLocationAyah &&
-        ref.read(readerModeProvider) == ReaderMode.ayah) {
-      ref.read(ayahModeTargetProvider.notifier).show(ayahId);
+    // ayah opened at is, as the ayah in focus.) Asked whichever mode shows:
+    // the saved mode may not be read back yet (the app just started), and
+    // the printed page leaves it for Ayah mode, if turned to.
+    if (widget.location is! QuranLocationAyah) {
+      _target.show(ayahId);
     }
     setState(() {
       _mushafId = mushaf.id;

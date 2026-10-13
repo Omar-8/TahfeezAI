@@ -67,10 +67,8 @@ void main() {
   });
 
   for (final mode in ReaderMode.values) {
-    testWidgets('a surah in ${mode.name} mode: its first ayah '
-        '${mode == ReaderMode.ayah ? 'brought into view' : 'left alone'}', (
-      tester,
-    ) async {
+    testWidgets('a surah in ${mode.name} mode: its first ayah asked '
+        'into view (the saved mode may not be read back yet)', (tester) async {
       final db = QuranDatabase(NativeDatabase.memory());
       await const QuranDatasetImporter().import(
         db,
@@ -102,7 +100,11 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(shown.contains(1001), mode == ReaderMode.ayah);
+      expect(shown, contains(1001));
+      // Closed: no longer asked.
+      await tester.pumpWidget(const SizedBox());
+      await tester.pump();
+      expect(container.read(ayahModeTargetProvider), isNull);
     });
   }
 }

@@ -128,7 +128,10 @@ class AyahModeTarget extends Notifier<int?> {
 
   void show(int ayahId) => state = ayahId;
 
-  void done() => state = null;
+  void done() {
+    // (Also called as a reader closes — maybe with the whole scope.)
+    if (ref.mounted) state = null;
+  }
 }
 
 final ayahModeTargetProvider = NotifierProvider<AyahModeTarget, int?>(
