@@ -88,6 +88,23 @@ void main() {
     expect(find.text('Start'), findsNothing);
   });
 
+  testWidgets('the progress button named, beside its icon', (tester) async {
+    await tester.pumpWidget(app(const TodayPlan()));
+    await tester.pumpAndSettle();
+    final button = find.byKey(const ValueKey('mem-open-progress'));
+    expect(
+      find.descendant(of: button, matching: find.text('Progress')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: button,
+        matching: find.byIcon(Icons.insights_outlined),
+      ),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('today: each part\'s strength, or how today\'s recitation of '
       'it went', (tester) async {
     tester.view.physicalSize = const Size(500, 1400);

@@ -53,11 +53,15 @@ class MemorizeScreen extends ConsumerWidget {
         title: Text(l10n.memTitle),
         centerTitle: false,
         actions: [
-          IconButton(
-            key: const ValueKey('mem-open-progress'),
-            tooltip: l10n.memProgressTitle,
-            onPressed: () => context.push(AppRoutes.memorizeProgress),
-            icon: const Icon(Icons.insights_outlined),
+          // Named, not only an icon: what it opens is plain to see.
+          Padding(
+            padding: const EdgeInsetsDirectional.only(end: TahfeezSpacing.sm),
+            child: TextButton.icon(
+              key: const ValueKey('mem-open-progress'),
+              onPressed: () => context.push(AppRoutes.memorizeProgress),
+              icon: const Icon(Icons.insights_outlined),
+              label: Text(l10n.memProgressTitle),
+            ),
           ),
         ],
       ),
