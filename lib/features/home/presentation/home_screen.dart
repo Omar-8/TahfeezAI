@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show SystemNavigator;
 
 import 'home_store_prompts.dart';
+
+import '../../../core/ui/back_to_exit.dart';
 
 import '../../../core/localization/generated/app_localizations.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -25,10 +26,6 @@ import 'sections/home_resource_updates_banner.dart';
 /// every section exists in the widget tree for widget tests without needing
 /// to scroll first (the same lesson recorded for `ComponentGalleryScreen`
 /// in `docs/ARCHITECTURE.md` §11a).
-/// When back was last pressed on Home (see [HomeScreen]).
-DateTime? _backPressedAt;
-const _exitWindow = Duration(seconds: 2);
-
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -37,23 +34,7 @@ class HomeScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
 
     // Back on Home: once to be told, twice (within 2 s) to leave the app.
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, _) {
-        if (didPop) return;
-        final now = DateTime.now();
-        final last = _backPressedAt;
-        if (last != null && now.difference(last) < _exitWindow) {
-          SystemNavigator.pop();
-          return;
-        }
-        _backPressedAt = now;
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(
-            SnackBar(duration: _exitWindow, content: Text(l10n.homeBackToExit)),
-          );
-      },
+    return BackToExit(
       child: SafeArea(
         bottom: false,
         child: SingleChildScrollView(

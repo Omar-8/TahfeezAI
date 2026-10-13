@@ -38,6 +38,7 @@ import '../../listen/presentation/listen_sheet.dart';
 import 'arabic_font_choices.dart';
 import 'theme_choices.dart';
 import '../../../quran/presentation/meaning_resource_names.dart';
+import '../../../core/ui/back_to_exit.dart';
 
 /// The Settings tab: the app's language and theme (the Quran page's own
 /// theme is chosen in the Mushaf, independently, so the two can be mixed).
@@ -104,311 +105,320 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       ),
     ));
 
-    return Scaffold(
-      appBar: TahfeezAppBar(
-        title: Text(l10n.settingsTitle),
-        centerTitle: false,
-      ),
-      body: Builder(
-        builder: (context) {
-          sections.add((
-            words: [
-              l10n.appName,
-              l10n.settingsFeedback,
-              'GitHub',
-              l10n.settingsRate,
-              l10n.settingsShare,
-              l10n.settingsCheckUpdates,
-              l10n.settingsUpdateOffers,
-              l10n.aboutTitle,
-              l10n.aboutSubtitle,
-              l10n.privacyTitle,
-            ],
-            // First: the app — its version, feedback, rating, sharing,
-            // updates, and its sources.
-            widget: const _AboutApp(),
-          ));
-          group(
-            l10n.settingsLanguage,
-            Icons.translate,
-            DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                key: const ValueKey('settings-language'),
-                isExpanded: true,
-                borderRadius: BorderRadius.circular(TahfeezRadii.md),
-                value: locale?.languageCode ?? '',
-                onChanged: (code) => ref
-                    .read(localeControllerProvider.notifier)
-                    .setLocale(
-                      code == null || code.isEmpty ? null : Locale(code),
-                    ),
-                items: [
-                  for (final (code, flag, label) in [
-                    ('', '🌐', l10n.settingsLanguageSystem),
-                    ...kAppLanguages,
-                  ])
-                    DropdownMenuItem(
-                      value: code,
-                      child: Row(
-                        spacing: TahfeezSpacing.smPlus,
-                        children: [
-                          Text(flag, style: const TextStyle(fontSize: 22)),
-                          Flexible(
-                            child: Text(
-                              label,
-                              overflow: TextOverflow.ellipsis,
-                              style: theme.textTheme.bodyLarge,
-                            ),
-                          ),
-                        ],
+    return BackToExit(
+      child: Scaffold(
+        appBar: TahfeezAppBar(
+          title: Text(l10n.settingsTitle),
+          centerTitle: false,
+        ),
+        body: Builder(
+          builder: (context) {
+            sections.add((
+              words: [
+                l10n.appName,
+                l10n.settingsFeedback,
+                'GitHub',
+                l10n.settingsRate,
+                l10n.settingsShare,
+                l10n.settingsCheckUpdates,
+                l10n.settingsUpdateOffers,
+                l10n.aboutTitle,
+                l10n.aboutSubtitle,
+                l10n.privacyTitle,
+              ],
+              // First: the app — its version, feedback, rating, sharing,
+              // updates, and its sources.
+              widget: const _AboutApp(),
+            ));
+            group(
+              l10n.settingsLanguage,
+              Icons.translate,
+              DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  key: const ValueKey('settings-language'),
+                  isExpanded: true,
+                  borderRadius: BorderRadius.circular(TahfeezRadii.md),
+                  value: locale?.languageCode ?? '',
+                  onChanged: (code) => ref
+                      .read(localeControllerProvider.notifier)
+                      .setLocale(
+                        code == null || code.isEmpty ? null : Locale(code),
                       ),
+                  items: [
+                    for (final (code, flag, label) in [
+                      ('', '🌐', l10n.settingsLanguageSystem),
+                      ...kAppLanguages,
+                    ])
+                      DropdownMenuItem(
+                        value: code,
+                        child: Row(
+                          spacing: TahfeezSpacing.smPlus,
+                          children: [
+                            Text(flag, style: const TextStyle(fontSize: 22)),
+                            Flexible(
+                              child: Text(
+                                label,
+                                overflow: TextOverflow.ellipsis,
+                                style: theme.textTheme.bodyLarge,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              words: [
+                l10n.settingsLanguageSystem,
+                for (final (_, _, name) in kAppLanguages) name,
+              ],
+            );
+            group(
+              l10n.settingsAppTheme,
+              Icons.palette_outlined,
+              Wrap(
+                key: const ValueKey('settings-app-theme'),
+                spacing: TahfeezSpacing.sm,
+                runSpacing: TahfeezSpacing.sm,
+                children: [
+                  for (final choice in AppThemeChoice.values)
+                    ChoiceChip(
+                      avatar: choice == AppThemeChoice.system
+                          ? const Icon(Icons.brightness_auto_outlined)
+                          : ThemeSwatch(
+                              paper: _paper(choice),
+                              ink: _ink(choice),
+                            ),
+                      label: Text(choice.label(l10n)),
+                      selected: choice == appTheme,
+                      showCheckmark: false,
+                      onSelected: (_) {
+                        ref
+                            .read(themeModeControllerProvider.notifier)
+                            .setThemeMode(choice.mode);
+                        ref
+                            .read(appSurfaceToneProvider.notifier)
+                            .setTone(choice.tone);
+                      },
                     ),
                 ],
               ),
-            ),
-            words: [
-              l10n.settingsLanguageSystem,
-              for (final (_, _, name) in kAppLanguages) name,
-            ],
-          );
-          group(
-            l10n.settingsAppTheme,
-            Icons.palette_outlined,
-            Wrap(
-              key: const ValueKey('settings-app-theme'),
-              spacing: TahfeezSpacing.sm,
-              runSpacing: TahfeezSpacing.sm,
-              children: [
-                for (final choice in AppThemeChoice.values)
-                  ChoiceChip(
-                    avatar: choice == AppThemeChoice.system
-                        ? const Icon(Icons.brightness_auto_outlined)
-                        : ThemeSwatch(paper: _paper(choice), ink: _ink(choice)),
-                    label: Text(choice.label(l10n)),
-                    selected: choice == appTheme,
-                    showCheckmark: false,
-                    onSelected: (_) {
-                      ref
-                          .read(themeModeControllerProvider.notifier)
-                          .setThemeMode(choice.mode);
-                      ref
-                          .read(appSurfaceToneProvider.notifier)
-                          .setTone(choice.tone);
-                    },
-                  ),
-              ],
-            ),
-            words: [for (final c in AppThemeChoice.values) c.label(l10n)],
-          );
-          group(
-            l10n.settingsArabicFont,
-            Icons.font_download_outlined,
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              spacing: TahfeezSpacing.smPlus,
-              children: [
-                const ArabicFontChoices(),
-                Text(
-                  'مساء الخير · آية اليوم · متابعة القراءة',
-                  textDirection: TextDirection.rtl,
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    fontFamily: arabicFont.family,
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-            words: [for (final f in ArabicUiFont.values) f.arabicName],
-          );
-          group(
-            l10n.readerTranslationTafsir,
-            Icons.translate_outlined,
-            const _MeaningSettings(),
-            words: [
-              l10n.searchTranslations,
-              l10n.readerTafsir,
-              l10n.settingsLongPressShows,
-              l10n.settingsTransliteration,
-            ],
-          );
-          group(
-            l10n.settingsRecitation,
-            Icons.mic_none_rounded,
-            // Also in the Mushaf's Hifz settings.
-            SwitchListTile(
-              key: const ValueKey('settings-sajdah-reminder'),
-              contentPadding: EdgeInsets.zero,
-              title: Text(l10n.sajdahReminder),
-              subtitle: Text(l10n.sajdahReminderSub),
-              value: ref.watch(
-                hifzSettingsProvider.select((s) => s.sajdahReminder),
-              ),
-              onChanged: (on) => ref
-                  .read(hifzSettingsProvider.notifier)
-                  .update(
-                    ref.read(hifzSettingsProvider).copyWith(sajdahReminder: on),
-                  ),
-            ),
-            words: [l10n.sajdahReminder, l10n.sajdahReminderSub],
-          );
-          group(
-            l10n.listenTitle,
-            Icons.headphones_outlined,
-            const _ListenSettings(),
-            words: [
-              l10n.listenReciter,
-              l10n.listenDownload,
-              l10n.listenSearchReciters,
-            ],
-          );
-          if (reminderSupported) {
+              words: [for (final c in AppThemeChoice.values) c.label(l10n)],
+            );
             group(
-              l10n.memReminderTitle,
-              Icons.notifications_outlined,
+              l10n.settingsArabicFont,
+              Icons.font_download_outlined,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                spacing: TahfeezSpacing.smPlus,
+                children: [
+                  const ArabicFontChoices(),
+                  Text(
+                    'مساء الخير · آية اليوم · متابعة القراءة',
+                    textDirection: TextDirection.rtl,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      fontFamily: arabicFont.family,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+              words: [for (final f in ArabicUiFont.values) f.arabicName],
+            );
+            group(
+              l10n.readerTranslationTafsir,
+              Icons.translate_outlined,
+              const _MeaningSettings(),
+              words: [
+                l10n.searchTranslations,
+                l10n.readerTafsir,
+                l10n.settingsLongPressShows,
+                l10n.settingsTransliteration,
+              ],
+            );
+            group(
+              l10n.settingsRecitation,
+              Icons.mic_none_rounded,
+              // Also in the Mushaf's Hifz settings.
+              SwitchListTile(
+                key: const ValueKey('settings-sajdah-reminder'),
+                contentPadding: EdgeInsets.zero,
+                title: Text(l10n.sajdahReminder),
+                subtitle: Text(l10n.sajdahReminderSub),
+                value: ref.watch(
+                  hifzSettingsProvider.select((s) => s.sajdahReminder),
+                ),
+                onChanged: (on) => ref
+                    .read(hifzSettingsProvider.notifier)
+                    .update(
+                      ref
+                          .read(hifzSettingsProvider)
+                          .copyWith(sajdahReminder: on),
+                    ),
+              ),
+              words: [l10n.sajdahReminder, l10n.sajdahReminderSub],
+            );
+            group(
+              l10n.listenTitle,
+              Icons.headphones_outlined,
+              const _ListenSettings(),
+              words: [
+                l10n.listenReciter,
+                l10n.listenDownload,
+                l10n.listenSearchReciters,
+              ],
+            );
+            if (reminderSupported) {
+              group(
+                l10n.memReminderTitle,
+                Icons.notifications_outlined,
+                Column(
+                  children: [
+                    SwitchListTile(
+                      key: const ValueKey('settings-reminder'),
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(l10n.memReminderSwitch),
+                      subtitle: Text(
+                        l10n.memReminderAt(reminderTime.format(context)),
+                      ),
+                      value: reminder.enabled,
+                      onChanged: (on) async {
+                        final messenger = ScaffoldMessenger.of(context);
+                        final done = await ref
+                            .read(memorizationReminderProvider.notifier)
+                            .setEnabled(on);
+                        if (!done) {
+                          messenger.showSnackBar(
+                            SnackBar(content: Text(l10n.memReminderDenied)),
+                          );
+                        }
+                      },
+                    ),
+                    ListTile(
+                      key: const ValueKey('settings-reminder-time'),
+                      contentPadding: EdgeInsets.zero,
+                      enabled: reminder.enabled,
+                      leading: const Icon(Icons.schedule),
+                      title: Text(l10n.memReminderTime),
+                      trailing: Text(reminderTime.format(context)),
+                      onTap: () async {
+                        final picked = await showTimePicker(
+                          context: context,
+                          initialTime: reminderTime,
+                        );
+                        if (picked == null) return;
+                        await ref
+                            .read(memorizationReminderProvider.notifier)
+                            .setTime(picked.hour * 60 + picked.minute);
+                      },
+                    ),
+                  ],
+                ),
+                words: [l10n.memReminderSwitch, l10n.memReminderTime],
+              );
+            }
+            group(
+              l10n.settingsBackupTitle,
+              Icons.save_alt_rounded,
               Column(
                 children: [
-                  SwitchListTile(
-                    key: const ValueKey('settings-reminder'),
+                  ListTile(
+                    key: const ValueKey('settings-export'),
                     contentPadding: EdgeInsets.zero,
-                    title: Text(l10n.memReminderSwitch),
-                    subtitle: Text(
-                      l10n.memReminderAt(reminderTime.format(context)),
-                    ),
-                    value: reminder.enabled,
-                    onChanged: (on) async {
-                      final messenger = ScaffoldMessenger.of(context);
-                      final done = await ref
-                          .read(memorizationReminderProvider.notifier)
-                          .setEnabled(on);
-                      if (!done) {
-                        messenger.showSnackBar(
-                          SnackBar(content: Text(l10n.memReminderDenied)),
-                        );
-                      }
-                    },
+                    leading: const Icon(Icons.upload_file_rounded),
+                    title: Text(l10n.settingsExportTitle),
+                    subtitle: Text(l10n.settingsExportSub),
+                    onTap: () => _export(context, ref),
                   ),
                   ListTile(
-                    key: const ValueKey('settings-reminder-time'),
+                    key: const ValueKey('settings-import'),
                     contentPadding: EdgeInsets.zero,
-                    enabled: reminder.enabled,
-                    leading: const Icon(Icons.schedule),
-                    title: Text(l10n.memReminderTime),
-                    trailing: Text(reminderTime.format(context)),
-                    onTap: () async {
-                      final picked = await showTimePicker(
-                        context: context,
-                        initialTime: reminderTime,
-                      );
-                      if (picked == null) return;
-                      await ref
-                          .read(memorizationReminderProvider.notifier)
-                          .setTime(picked.hour * 60 + picked.minute);
-                    },
+                    leading: const Icon(Icons.download_rounded),
+                    title: Text(l10n.settingsImportTitle),
+                    subtitle: Text(l10n.settingsImportSub),
+                    onTap: () => _import(context, ref),
+                  ),
+                  ListTile(
+                    key: const ValueKey('settings-reset'),
+                    contentPadding: EdgeInsets.zero,
+                    leading: Icon(
+                      Icons.delete_forever_outlined,
+                      color: theme.colorScheme.error,
+                    ),
+                    title: Text(
+                      l10n.settingsResetTitle,
+                      style: TextStyle(color: theme.colorScheme.error),
+                    ),
+                    subtitle: Text(l10n.settingsResetSub),
+                    onTap: () => _confirmReset(context, ref),
                   ),
                 ],
               ),
-              words: [l10n.memReminderSwitch, l10n.memReminderTime],
-            );
-          }
-          group(
-            l10n.settingsBackupTitle,
-            Icons.save_alt_rounded,
-            Column(
-              children: [
-                ListTile(
-                  key: const ValueKey('settings-export'),
-                  contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.upload_file_rounded),
-                  title: Text(l10n.settingsExportTitle),
-                  subtitle: Text(l10n.settingsExportSub),
-                  onTap: () => _export(context, ref),
-                ),
-                ListTile(
-                  key: const ValueKey('settings-import'),
-                  contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.download_rounded),
-                  title: Text(l10n.settingsImportTitle),
-                  subtitle: Text(l10n.settingsImportSub),
-                  onTap: () => _import(context, ref),
-                ),
-                ListTile(
-                  key: const ValueKey('settings-reset'),
-                  contentPadding: EdgeInsets.zero,
-                  leading: Icon(
-                    Icons.delete_forever_outlined,
-                    color: theme.colorScheme.error,
-                  ),
-                  title: Text(
-                    l10n.settingsResetTitle,
-                    style: TextStyle(color: theme.colorScheme.error),
-                  ),
-                  subtitle: Text(l10n.settingsResetSub),
-                  onTap: () => _confirmReset(context, ref),
-                ),
+              words: [
+                l10n.settingsExportTitle,
+                l10n.settingsImportTitle,
+                l10n.settingsResetTitle,
+                l10n.settingsResetSub,
               ],
-            ),
-            words: [
-              l10n.settingsExportTitle,
-              l10n.settingsImportTitle,
-              l10n.settingsResetTitle,
-              l10n.settingsResetSub,
-            ],
-          );
-          final query = _fold(_query.trim());
-          final shown = [
-            for (final section in sections)
-              if (query.isEmpty ||
-                  section.words.any((w) => _fold(w).contains(query)))
-                section.widget,
-          ];
-          // Rows and switches compact throughout.
-          return Theme(
-            data: theme.copyWith(visualDensity: VisualDensity.compact),
-            child: ListTileTheme(
-              dense: true,
-              minVerticalPadding: 2,
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(
-                  TahfeezSpacing.md,
-                  TahfeezSpacing.sm,
-                  TahfeezSpacing.md,
-                  TahfeezSpacing.md,
-                ),
-                children: [
-                  TextField(
-                    key: const ValueKey('settings-search'),
-                    onChanged: (text) => setState(() => _query = text),
-                    textInputAction: TextInputAction.search,
-                    decoration: InputDecoration(
-                      prefixIcon: const Icon(Icons.search_rounded),
-                      hintText: l10n.settingsSearchHint,
-                      isDense: true,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(TahfeezRadii.pill),
-                      ),
-                    ),
+            );
+            final query = _fold(_query.trim());
+            final shown = [
+              for (final section in sections)
+                if (query.isEmpty ||
+                    section.words.any((w) => _fold(w).contains(query)))
+                  section.widget,
+            ];
+            // Rows and switches compact throughout.
+            return Theme(
+              data: theme.copyWith(visualDensity: VisualDensity.compact),
+              child: ListTileTheme(
+                dense: true,
+                minVerticalPadding: 2,
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(
+                    TahfeezSpacing.md,
+                    TahfeezSpacing.sm,
+                    TahfeezSpacing.md,
+                    TahfeezSpacing.md,
                   ),
-                  const SizedBox(height: TahfeezSpacing.md),
-                  if (shown.isEmpty)
-                    Padding(
-                      padding: const EdgeInsets.all(TahfeezSpacing.lg),
-                      child: Text(
-                        l10n.settingsNoMatch,
-                        textAlign: TextAlign.center,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
+                  children: [
+                    TextField(
+                      key: const ValueKey('settings-search'),
+                      onChanged: (text) => setState(() => _query = text),
+                      textInputAction: TextInputAction.search,
+                      decoration: InputDecoration(
+                        prefixIcon: const Icon(Icons.search_rounded),
+                        hintText: l10n.settingsSearchHint,
+                        isDense: true,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(
+                            TahfeezRadii.pill,
+                          ),
                         ),
                       ),
                     ),
-                  for (var i = 0; i < shown.length; i++) ...[
-                    if (i > 0) const SizedBox(height: TahfeezSpacing.md),
-                    shown[i],
+                    const SizedBox(height: TahfeezSpacing.md),
+                    if (shown.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.all(TahfeezSpacing.lg),
+                        child: Text(
+                          l10n.settingsNoMatch,
+                          textAlign: TextAlign.center,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                    for (var i = 0; i < shown.length; i++) ...[
+                      if (i > 0) const SizedBox(height: TahfeezSpacing.md),
+                      shown[i],
+                    ],
                   ],
-                ],
+                ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
