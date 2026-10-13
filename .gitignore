@@ -171,3 +171,11 @@ tool/acoustic_verification/model_work/artifacts/
 # "model-v3.5" (.github/workflows/ios.yml).
 assets/models/*
 !assets/models/.gitkeep
+
+# Planning and working notes: kept locally, not published.
+/00_START_HERE.md
+/CLAUDE.md
+/MASTER_MILESTONE_PROMPTS.md
+/MILESTONES_OVERVIEW.md
+/prompts/
+/docs/reference/
