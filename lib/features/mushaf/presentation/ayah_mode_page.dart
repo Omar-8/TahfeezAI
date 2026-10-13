@@ -35,6 +35,7 @@ import '../../bookmarks/application/bookmarks_controller.dart';
 import '../application/mushaf_passages.dart';
 import 'mushaf_ayah_sheet.dart';
 import '../../../quran/presentation/meaning_resource_names.dart';
+import '../application/reading_surah.dart';
 
 /// Ayah mode's page: the Mushaf page's ayahs one after another — each
 /// one's Arabic word by word, then (as [AyahViewPreferences] says) its
@@ -589,6 +590,8 @@ class AyahModePageState extends ConsumerState<AyahModePage> {
     }
     final ayahId = best ?? first;
     if (ayahId == null) return;
+    // The title follows the surah scrolled into.
+    ref.read(readingSurahProvider.notifier).read(widget.pageNumber, ayahId);
     final location = QuranLocation.ayah(ayahId ~/ 1000, ayahId % 1000);
     if (ref.read(recentQuranLocationControllerProvider) == location) return;
     unawaited(

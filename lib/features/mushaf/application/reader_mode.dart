@@ -65,13 +65,17 @@ class ReaderModeController extends Notifier<ReaderMode> {
     return ReaderMode.mushaf;
   }
 
+  /// Set since this started: the saved value, read back after, is older.
+  var _set = false;
+
   Future<void> _restore() async {
     final stored = await ref.read(browserStorageProvider).getString(_key);
     final mode = ReaderMode.values.asNameMap()[stored];
-    if (mode != null && ref.mounted) state = mode;
+    if (mode != null && ref.mounted && !_set) state = mode;
   }
 
   Future<void> set(ReaderMode mode) async {
+    _set = true;
     state = mode;
     await ref.read(browserStorageProvider).setString(_key, mode.name);
   }
@@ -102,7 +106,8 @@ class AyahViewPreferencesController extends Notifier<AyahViewPreferences> {
     final tafsir = await s.getBool('${_prefix}tafsir');
     final meanings = await s.getBool('${_prefix}meanings');
     final font = await s.getString('${_prefix}font');
-    if (!ref.mounted) return;
+    // (Changed meanwhile: the saved view is older.)
+    if (!ref.mounted || _set) return;
     state = state.copyWith(
       layout: AyahLayout.values.asNameMap()[layout],
       showTranslation: translation,
@@ -113,7 +118,11 @@ class AyahViewPreferencesController extends Notifier<AyahViewPreferences> {
     );
   }
 
+  /// Set since this started: the saved view, read back after, is older.
+  var _set = false;
+
   Future<void> set(AyahViewPreferences value) async {
+    _set = true;
     state = value;
     final s = ref.read(browserStorageProvider);
     await s.setString('${_prefix}layout', value.layout.name);

@@ -19,6 +19,7 @@ import '../../mushaf/presentation/mushaf_page_view.dart';
 import '../../mushaf/presentation/mushaf_pager.dart';
 import '../../recitation/presentation/recitation_controls.dart';
 import '../../mushaf/presentation/reader_mode_toggle.dart';
+import '../../mushaf/application/reading_surah.dart';
 
 /// A Quran location (a surah, an ayah, an ayah range, a juz or a hizb)
 /// opened in the Mushaf at the page its first ayah is on. Opened at an
@@ -47,12 +48,14 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
   // Captured up front: `ref` is unusable by the time dispose runs.
   late final MushafFocusAyah _focus;
   late final AyahModeTarget _target;
+  late final ReadingSurah _reading;
 
   @override
   void initState() {
     super.initState();
     _focus = ref.read(mushafFocusAyahProvider.notifier);
     _target = ref.read(ayahModeTargetProvider.notifier);
+    _reading = ref.read(readingSurahProvider.notifier);
     if (widget.location case QuranLocationAyah(
       :final chapterNo,
       :final verseNo,
@@ -66,9 +69,10 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
 
   @override
   void dispose() {
-    final focus = _focus, target = _target;
+    final focus = _focus, target = _target, reading = _reading;
     Future.microtask(() {
       focus.clear(this);
+      reading.clear();
       // Not brought into view by the time this closes: no longer asked.
       target.done();
     });
@@ -100,6 +104,8 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
     if (widget.location is! QuranLocationAyah) {
       _target.show(ayahId);
     }
+    // Titled by the surah opened (its page may start with another's end).
+    _reading.read(page, ayahId);
     setState(() {
       _mushafId = mushaf.id;
       _pageNumber = page;

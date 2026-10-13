@@ -8,6 +8,7 @@ import '../../../core/localization/locale_controller.dart';
 import '../../../quran/application/quran_chapter_localization.dart';
 import '../../../quran/domain/models/mushaf_token_models.dart';
 import '../application/mushaf_page_providers.dart';
+import '../application/reading_surah.dart';
 
 /// A Mushaf app bar's title: the current page's Surah name, page number,
 /// and Juz number — live, computed from whatever page is actually on
@@ -58,7 +59,14 @@ class MushafPageTitle extends ConsumerWidget {
       );
     }
 
-    final surahNo = surahNoOverride ?? _firstSurahNo(bundle);
+    // The surah being read, while on its page (opened at, or scrolled into
+    // in Ayah mode); else the one the page starts with.
+    final reading = ref.watch(readingSurahProvider);
+    final surahNo =
+        surahNoOverride ??
+        (reading != null && reading.page == pageNumber
+            ? reading.surah
+            : _firstSurahNo(bundle));
     final languageCode =
         ref.watch(localeControllerProvider)?.languageCode ?? 'en';
     final localizedName = surahNo == null

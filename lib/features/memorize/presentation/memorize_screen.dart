@@ -20,6 +20,7 @@ import '../../recitation/application/hifz_controller.dart';
 import 'mark_known_sheet.dart';
 import 'plan_sheet.dart';
 import '../../../core/ui/back_to_exit.dart';
+import '../../mushaf/application/reading_surah.dart';
 
 /// The Memorize tab: today's memorization, the three parts of a Hifz day
 /// (`docs/MEMORIZATION_MILESTONE.md`), with how today's recitation went.
@@ -310,6 +311,7 @@ Future<void> reciteAyahs(
   // Ayah mode: the part's first ayah brought into view, not the page's top
   // (Al-Qadr 1 is far down page 598).
   ref.read(ayahModeTargetProvider.notifier).show(first);
+  ref.read(readingSurahProvider.notifier).read(page, first);
   goToQuranLocation(context, QuranLocation.page(mushaf.id, page));
 }
 

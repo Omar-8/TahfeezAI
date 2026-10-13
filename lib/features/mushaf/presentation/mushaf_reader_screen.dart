@@ -16,6 +16,7 @@ import 'mushaf_pager.dart';
 import 'mushaf_page_title.dart';
 import 'mushaf_appearance_sheet.dart';
 import 'reader_mode_toggle.dart';
+import '../application/reading_surah.dart';
 
 /// Tahfeez's standalone Mushaf (paginated, printed-page-style) reader route
 /// — reached from the Quran index's Page tab, with no underlying
@@ -42,19 +43,24 @@ class _MushafReaderScreenState extends ConsumerState<MushafReaderScreen> {
 
   // Captured up front: `ref` is unusable by the time dispose runs.
   late final AyahModeTarget _target = ref.read(ayahModeTargetProvider.notifier);
+  late final ReadingSurah _reading = ref.read(readingSurahProvider.notifier);
 
   @override
   void initState() {
     super.initState();
     _target;
+    _reading;
   }
 
   @override
   void dispose() {
-    final target = _target;
+    final target = _target, reading = _reading;
     // An ayah asked into view (Memorize's parts) but not yet shown: no
-    // longer asked once this closes.
-    Future.microtask(target.done);
+    // longer asked once this closes; nothing being read.
+    Future.microtask(() {
+      target.done();
+      reading.clear();
+    });
     super.dispose();
   }
 
