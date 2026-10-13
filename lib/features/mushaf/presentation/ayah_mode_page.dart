@@ -70,6 +70,25 @@ class _AyahModePageState extends ConsumerState<AyahModePage> {
   final _scroll = ScrollController();
   final _ayahKeys = <int, GlobalKey>{};
 
+  /// Each page word's key (by its page index), to scroll a word into view.
+  final _wordKeys = <int, GlobalKey>{};
+
+  /// Brings the page's word [index] into view (revealing and hiding).
+  void _scrollToWord(int index) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final context = _wordKeys[index]?.currentContext;
+      if (context == null || !context.mounted) return;
+      unawaited(
+        Scrollable.ensureVisible(
+          context,
+          alignment: 0.4,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        ),
+      );
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -217,6 +236,19 @@ class _AyahModePageState extends ConsumerState<AyahModePage> {
       });
     }
     ref.listen(ayahModeTargetProvider, (_, _) => _bringTargetIntoView());
+    // Revealing or hiding word by word (the bar's buttons): the boundary
+    // kept in view — the last word shown.
+    ref.listen(
+      mushafHideModeProvider.select(
+        (h) => h.enabled ? h.revealedOn(widget.pageNumber) : null,
+      ),
+      (previous, revealed) {
+        if (revealed == null || previous == null || revealed == previous) {
+          return;
+        }
+        _scrollToWord((revealed - 1).clamp(0, words.length - 1));
+      },
+    );
 
     final overlay = ref.watch(mushafWordOverlayProvider);
     final hide = ref.watch(mushafHideModeProvider);
@@ -261,6 +293,10 @@ class _AyahModePageState extends ConsumerState<AyahModePage> {
                   pageNumber: widget.pageNumber,
                   ayahId: ayahId,
                   words: [for (final i in indices) words[i]],
+                  wordKeys: [
+                    for (final i in indices)
+                      _wordKeys.putIfAbsent(i, GlobalKey.new),
+                  ],
                   hidden: [for (final i in indices) hidden(i)],
                   marks: [for (final i in indices) mark(i)],
                   colors: colors,
@@ -356,12 +392,16 @@ class _AyahBlock extends ConsumerWidget {
     required this.pageNumber,
     required this.ayahId,
     required this.words,
+    required this.wordKeys,
     required this.hidden,
     required this.marks,
     required this.colors,
   });
 
   final int mushafId, pageNumber, ayahId;
+
+  /// Each word's key on the page (to scroll it into view).
+  final List<GlobalKey> wordKeys;
 
   /// The page's words of this ayah (the engine's), and each one's mask and
   /// mark.
@@ -494,23 +534,27 @@ class _AyahBlock extends ConsumerWidget {
               crossAxisAlignment: WrapCrossAlignment.start,
               children: [
                 for (var k = 0; k < words.length; k++)
-                  _Word(
-                    key: ValueKey(
-                      'ayah-word-${words[k].ayahId}:${words[k].wordIndex}',
-                    ),
-                    text: textOf(k),
-                    meaning: meanings[words[k].wordIndex],
-                    hidden: hidden[k],
-                    style: _markStyles[marks[k]],
-                    colors: colors,
-                    onTap: hidden[k]
-                        ? null
-                        : () => showWordDetailSheet(context, wordRef: words[k]),
-                    onLongPress: () => showAyahDetailSheet(
-                      context,
-                      mushafId: mushafId,
-                      pageNumber: pageNumber,
-                      ayahId: ayahId,
+                  KeyedSubtree(
+                    key: wordKeys[k],
+                    child: _Word(
+                      key: ValueKey(
+                        'ayah-word-${words[k].ayahId}:${words[k].wordIndex}',
+                      ),
+                      text: textOf(k),
+                      meaning: meanings[words[k].wordIndex],
+                      hidden: hidden[k],
+                      style: _markStyles[marks[k]],
+                      colors: colors,
+                      onTap: hidden[k]
+                          ? null
+                          : () =>
+                                showWordDetailSheet(context, wordRef: words[k]),
+                      onLongPress: () => showAyahDetailSheet(
+                        context,
+                        mushafId: mushafId,
+                        pageNumber: pageNumber,
+                        ayahId: ayahId,
+                      ),
                     ),
                   ),
               ],
