@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tahfeez AI — Read, memorize and recite the Quran</title>
+  <meta name="description" content="A free, offline Quran app with no ads: the Madinah Mushaf, word-by-word meanings, translations and tafsir, 18 reciters, a memorization plan, and tajweed feedback from an AI that runs on your phone.">
+  <meta name="theme-color" content="#03100C">
+  <meta property="og:title" content="Tahfeez AI — the Quran, memorized">
+  <meta property="og:description" content="Free · Offline · No ads · Tajweed feedback from AI on your phone.">
+  <meta property="og:image" content="images/screens/10-hide-mode-dark.webp">
+  <link rel="icon" href="images/favicon.png">
+  <link rel="apple-touch-icon" href="images/icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Noto+Kufi+Arabic:wght@400;600;700&family=Noto+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- ─── Top bar ─── -->
+  <header class="topbar">
+    <a class="brand" href="#top">
+      <img src="images/icon-192.png" alt="" width="36" height="36">
+      <span>Tahfeez <b>AI</b></span>
+    </a>
+    <nav class="links">
+      <a href="#features" data-i18n="nav.features">Features</a>
+      <a href="#tajweed" data-i18n="nav.tajweed">Tajweed</a>
+      <a href="#screens" data-i18n="nav.screens">Screens</a>
+      <a href="#privacy" data-i18n="nav.privacy">Privacy</a>
+    </nav>
+    <div class="actions">
+      <button class="pill" id="lang" aria-label="Language">العربية</button>
+      <button class="icon-btn" id="theme" aria-label="Light or dark">◐</button>
+    </div>
+  </header>
+
+  <main id="top">
+    <!-- ─── Hero ─── -->
+    <section class="hero">
+      <div class="hero-text">
+        <p class="eyebrow" data-i18n="hero.eyebrow">Free · Offline · No ads</p>
+        <h1 data-i18n="hero.title">Memorize the Quran with a listener in your pocket</h1>
+        <p class="lead" data-i18n="hero.lead">Read the Madinah Mushaf, understand every word, and recite from memory while an AI on your phone follows along — catching the slipped word and the missed madd.</p>
+        <ul class="chips">
+          <li data-i18n="chip.free">100% free</li>
+          <li data-i18n="chip.offline">Works offline</li>
+          <li data-i18n="chip.ads">No ads</li>
+          <li data-i18n="chip.account">No account</li>
+          <li data-i18n="chip.ai">AI runs on your phone</li>
+        </ul>
+        <div class="stores">
+          <a class="store" href="#download" aria-disabled="true">
+            <span class="store-icon">▶</span>
+            <span><small data-i18n="store.soon">Coming soon on</small><b>Google Play</b></span>
+          </a>
+          <a class="store" href="#download" aria-disabled="true">
+            <span class="store-icon">📱</span>
+            <span><small data-i18n="store.soon">Coming soon on</small><b>App Store</b></span>
+          </a>
+          <a class="store ghost" href="https://github.com/Omar-8/TahfeezAI">
+            <span class="store-icon">★</span>
+            <span><small data-i18n="store.open">Open source on</small><b>GitHub</b></span>
+          </a>
+        </div>
+      </div>
+      <div class="hero-phones">
+        <img class="phone back" src="images/screens/04-ayah-mode-light.webp" alt="Ayah mode with word-by-word meanings" loading="eager">
+        <img class="phone front" src="images/screens/10-hide-mode-dark.webp" alt="Hide mode for memorizing" loading="eager">
+      </div>
+    </section>
+
+    <!-- ─── Ayah ─── -->
+    <section class="ayah-band">
+      <p class="ayah" lang="ar" dir="rtl">وَلَقَدْ يَسَّرْنَا ٱلْقُرْءَانَ لِلذِّكْرِ فَهَلْ مِن مُّدَّكِرٍ</p>
+      <p class="ayah-meaning" data-i18n="ayah.meaning">“And We have certainly made the Quran easy to remember — so is there any who will remember?” — Al-Qamar 54:17</p>
+    </section>
+
+    <!-- ─── Features ─── -->
+    <section id="features" class="features">
+      <h2 data-i18n="features.title">Everything for your journey with the Quran</h2>
+      <div class="grid">
+        <article class="card">
+          <div class="icon">📖</div>
+          <h3 data-i18n="f.read.t">Read the Mushaf</h3>
+          <p data-i18n="f.read.d">The Madinah Mushaf page by page, exactly as printed — or ayah by ayah, swiped or in one continuous scroll.</p>
+        </article>
+        <article class="card">
+          <div class="icon">💡</div>
+          <h3 data-i18n="f.understand.t">Understand every word</h3>
+          <p data-i18n="f.understand.d">Word-by-word meanings, transliteration, translations in 6 languages and tafsir beside every ayah.</p>
+        </article>
+        <article class="card">
+          <div class="icon">🎧</div>
+          <h3 data-i18n="f.listen.t">Listen to 18 reciters</h3>
+          <p data-i18n="f.listen.d">Alafasy, Al-Husary, Al-Minshawi, Abdul Basit, As-Sudais and more — the ayah lights up as it is recited.</p>
+        </article>
+        <article class="card accent">
+          <div class="icon">🎙️</div>
+          <h3 data-i18n="f.recite.t">Recite with feedback</h3>
+          <p data-i18n="f.recite.d">Recite from memory: words are coloured right, wrong, skipped or mispronounced — with tajweed checked too.</p>
+        </article>
+        <article class="card">
+          <div class="icon">🧠</div>
+          <h3 data-i18n="f.memorize.t">Memorize with a plan</h3>
+          <p data-i18n="f.memorize.d">Hide mode, Loop, Follow along, a daily lesson and spaced revision — every part's strength tracked.</p>
+        </article>
+        <article class="card">
+          <div class="icon">🎨</div>
+          <h3 data-i18n="f.yours.t">Make it yours</h3>
+          <p data-i18n="f.yours.d">Light, dark, warm, sepia and black themes; 4 Quran fonts; text up to 200%; Arabic, English, German, French, Turkish, Urdu.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- ─── Tajweed ─── -->
+    <section id="tajweed" class="tajweed">
+      <div class="tajweed-text">
+        <p class="eyebrow" data-i18n="tj.eyebrow">Tajweed feedback</p>
+        <h2 data-i18n="tj.title">It listens to <em>how</em> you recite — not only what</h2>
+        <p data-i18n="tj.lead">An acoustic model compares every word you say with its expected Ḥafṣ pronunciation, sound by sound — on your phone, without internet.</p>
+        <ul class="rules">
+          <li><b data-i18n="tj.madd">Madd</b><span data-i18n="tj.madd.d">elongations held their full length</span></li>
+          <li><b data-i18n="tj.qalqala">Qalqala</b><span data-i18n="tj.qalqala.d">the echo of ق ط ب ج د</span></li>
+          <li><b data-i18n="tj.ghunnah">Ghunnah</b><span data-i18n="tj.ghunnah.d">ikhfāʾ, iqlāb and idghām</span></li>
+          <li><b data-i18n="tj.heavy">Heavy &amp; light</b><span data-i18n="tj.heavy.d">ط ت · ص س · ض د · ظ ذ · ق ك</span></li>
+          <li><b data-i18n="tj.throat">Throat letters</b><span data-i18n="tj.throat.d">ء ع ح ه خ غ</span></li>
+          <li><b data-i18n="tj.shadda">Shadda &amp; vowels</b><span data-i18n="tj.shadda.d">doubled letters, ḥarakāt, case endings</span></li>
+        </ul>
+        <p class="note" data-i18n="tj.note">The model is young and still learning: it may miss a mistake or flag a correct word. Every version gets better — your feedback helps.</p>
+      </div>
+      <div class="tajweed-phone">
+        <img class="phone" src="images/screens/06-tajweed-settings-light.webp" alt="Tajweed settings" loading="lazy">
+      </div>
+    </section>
+
+    <!-- ─── Screens ─── -->
+    <section id="screens" class="screens">
+      <h2 data-i18n="screens.title">A closer look</h2>
+      <div class="carousel" id="carousel">
+        <img src="images/screens/01-home-light.webp" alt="Home" loading="lazy">
+        <img src="images/screens/02-mushaf-light.webp" alt="The Mushaf" loading="lazy">
+        <img src="images/screens/03-listening-light.webp" alt="Translations with footnotes" loading="lazy">
+        <img src="images/screens/04-ayah-mode-light.webp" alt="Ayah mode" loading="lazy">
+        <img src="images/screens/05-follow-along-light.webp" alt="Follow along" loading="lazy">
+        <img src="images/screens/06-tajweed-settings-light.webp" alt="Tajweed" loading="lazy">
+        <img src="images/screens/07-search-light.webp" alt="Search" loading="lazy">
+        <img src="images/screens/08-ayah-mode-dark.webp" alt="Tafsir" loading="lazy">
+        <img src="images/screens/09-view-settings-dark.webp" alt="Fonts and view" loading="lazy">
+        <img src="images/screens/10-hide-mode-dark.webp" alt="Hide mode" loading="lazy">
+        <img src="images/screens/11-mushaf-sepia-passages.webp" alt="Reader themes" loading="lazy">
+        <img src="images/screens/12-memorize-dark.webp" alt="Memorize" loading="lazy">
+        <img src="images/screens/13-progress-dark.webp" alt="Progress" loading="lazy">
+        <img src="images/screens/14-settings-dark.webp" alt="Settings" loading="lazy">
+        <img src="images/screens/15-home-arabic-light.webp" alt="In Arabic" loading="lazy">
+        <img src="images/screens/16-ayah-mode-arabic-light.webp" alt="Ayah mode in Arabic" loading="lazy">
+      </div>
+      <div class="carousel-nav">
+        <button class="icon-btn" data-dir="-1" aria-label="Previous">‹</button>
+        <button class="icon-btn" data-dir="1" aria-label="Next">›</button>
+      </div>
+    </section>
+
+    <!-- ─── Privacy ─── -->
+    <section id="privacy" class="privacy">
+      <h2 data-i18n="pv.title">A gift, not a product</h2>
+      <div class="grid three">
+        <article class="card">
+          <div class="big">0</div>
+          <h3 data-i18n="pv.ads.t">ads, subscriptions or purchases</h3>
+          <p data-i18n="pv.ads.d">Free for everyone, forever.</p>
+        </article>
+        <article class="card">
+          <div class="big">🔒</div>
+          <h3 data-i18n="pv.voice.t">Your voice stays on your phone</h3>
+          <p data-i18n="pv.voice.d">Recitation is checked on the device and discarded. No account, no analytics, no tracking.</p>
+        </article>
+        <article class="card">
+          <div class="big">✈️</div>
+          <h3 data-i18n="pv.offline.t">Works offline</h3>
+          <p data-i18n="pv.offline.d">Reading, translations, tafsir, search, memorization and recitation checking — no internet needed. Download a reciter to listen offline too.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- ─── Download ─── -->
+    <section id="download" class="download">
+      <img src="images/icon-192.png" alt="" width="96" height="96">
+      <h2 data-i18n="dl.title">Coming soon to Android and iOS</h2>
+      <p data-i18n="dl.lead">Tahfeez AI is open source under GPL-3.0. Star it on GitHub to follow the launch — or build it yourself today.</p>
+      <div class="stores center">
+        <a class="store" href="#download" aria-disabled="true"><span class="store-icon">▶</span><span><small data-i18n="store.soon">Coming soon on</small><b>Google Play</b></span></a>
+        <a class="store" href="#download" aria-disabled="true"><span class="store-icon">📱</span><span><small data-i18n="store.soon">Coming soon on</small><b>App Store</b></span></a>
+        <a class="store ghost" href="https://github.com/Omar-8/TahfeezAI"><span class="store-icon">★</span><span><small data-i18n="store.open">Open source on</small><b>GitHub</b></span></a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p data-i18n="ft.credits">With thanks to Tanzil, the King Fahd Complex, Quran Engine, QUL (Tarteel), QuranEnc, quran.com, the reciters, and the Muaalem model's authors.</p>
+    <p><a href="https://github.com/Omar-8/TahfeezAI">GitHub</a> · <a href="https://github.com/Omar-8/TahfeezAI/blob/main/LICENSE">GPL-3.0</a> · <a href="https://github.com/Omar-8/TahfeezAI/blob/main/docs/PRIVACY_POLICY.md" data-i18n="ft.privacy">Privacy</a></p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
