@@ -35,7 +35,11 @@ NIGHT_GREEN = (16, 48, 40)
 CAPTIONS = {
     "01-home-light": ("Your daily Quran companion", "Daily ayah, continue reading, today's revision", False, False),
     "02-mushaf-light": ("The Madinah Mushaf", "Every page as printed — crisp on any screen", False, False),
-    "03-listening-light": ("Translations, with footnotes", "Rowwad, Noor, Junagarhi and more — in 6 languages", False, False),
+    "03-listening-dark": ("Listen to 18 reciters", "The ayah being recited lights up and follows", True, False),
+    "05b-recite-marks-dark": ("Every word, checked", "Recite from the page: right in green, mistakes in red", True, False),
+    "06b-pronunciation-dark": ("Hears the vowel you said", "On the hamza: ḍamma expected, fatḥa heard", True, False),
+    "10b-hide-recite-dark": ("Recite it from memory", "Each word appears as you say it right", True, False),
+    "17-translations-light": ("Translations, with footnotes", "Rowwad, Noor, Junagarhi and more — in 6 languages", False, False),
     "04-ayah-mode-light": ("Understand every word", "Word meanings, transliteration and translation", False, False),
     "05-follow-along-light": ("Recite after the reciter", "Follow along: listen, then it's your turn", False, False),
     "06-tajweed-settings-light": ("Tajweed feedback", "Madd, qalqala, ghunnah, ikhfāʾ, iqlāb — checked as you recite", False, False),
@@ -154,7 +158,10 @@ def frame(shot: Path, headline, sub, dark, arabic):
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
     made = 0
-    for shot in sorted(SRC.glob("shot-*.png")):
+    # The app's own screenshots, and those taken by hand during a real
+    # recitation (tool/store_media/: a script can't recite).
+    shots = sorted([*SRC.glob("shot-*.png"), *(ROOT / "tool/store_media").glob("shot-*.png")])
+    for shot in shots:
         name = shot.stem[len("shot-"):]
         if name not in CAPTIONS:
             print("no caption, skipped:", name)

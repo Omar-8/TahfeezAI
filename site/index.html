@@ -8,7 +8,7 @@
   <meta name="theme-color" content="#03100C">
   <meta property="og:title" content="Tahfeez AI — the Quran, memorized">
   <meta property="og:description" content="Free · Offline · No ads · Tajweed feedback from AI on your phone.">
-  <meta property="og:image" content="images/screens/10-hide-mode-dark.webp">
+  <meta property="og:image" content="images/screens/06b-pronunciation-dark.webp">
   <link rel="icon" href="images/favicon.png">
   <link rel="apple-touch-icon" href="images/icon-192.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -65,8 +65,13 @@
         </div>
       </div>
       <div class="hero-phones">
-        <img class="phone back" src="images/screens/04-ayah-mode-light.webp" alt="Ayah mode with word-by-word meanings" loading="eager">
-        <img class="phone front" src="images/screens/10-hide-mode-dark.webp" alt="Hide mode for memorizing" loading="eager">
+        <img class="phone back" src="images/screens/06b-pronunciation-dark.webp" alt="Pronunciation feedback on a word" loading="eager">
+        <!-- A real recitation from memory: Al-Ikhlas, the words appearing as they are said (muted). -->
+        <div class="phone front video-phone">
+          <video autoplay muted loop playsinline poster="media/recite-from-memory-poster.jpg" aria-label="Reciting Al-Ikhlas from memory: each word appears as it is said">
+            <source src="media/recite-from-memory.mp4" type="video/mp4">
+          </video>
+        </div>
       </div>
     </section>
 
@@ -130,7 +135,7 @@
         <p class="note" data-i18n="tj.note">The model is young and still learning: it may miss a mistake or flag a correct word. Every version gets better — your feedback helps.</p>
       </div>
       <div class="tajweed-phone">
-        <img class="phone" src="images/screens/06-tajweed-settings-light.webp" alt="Tajweed settings" loading="lazy">
+        <img class="phone" src="images/screens/06b-pronunciation-dark.webp" alt="Pronunciation feedback: the vowel expected, the vowel heard" loading="lazy">
       </div>
     </section>
 
@@ -140,8 +145,11 @@
       <div class="carousel" id="carousel">
         <img src="images/screens/01-home-light.webp" alt="Home" loading="lazy">
         <img src="images/screens/02-mushaf-light.webp" alt="The Mushaf" loading="lazy">
-        <img src="images/screens/03-listening-light.webp" alt="Translations with footnotes" loading="lazy">
+        <img src="images/screens/03-listening-dark.webp" alt="Listening, the ayah lit" loading="lazy">
         <img src="images/screens/04-ayah-mode-light.webp" alt="Ayah mode" loading="lazy">
+        <img src="images/screens/05b-recite-marks-dark.webp" alt="Every word checked" loading="lazy">
+        <img src="images/screens/06b-pronunciation-dark.webp" alt="Pronunciation feedback" loading="lazy">
+        <img src="images/screens/10b-hide-recite-dark.webp" alt="Reciting from memory" loading="lazy">
         <img src="images/screens/05-follow-along-light.webp" alt="Follow along" loading="lazy">
         <img src="images/screens/06-tajweed-settings-light.webp" alt="Tajweed" loading="lazy">
         <img src="images/screens/07-search-light.webp" alt="Search" loading="lazy">
@@ -154,6 +162,7 @@
         <img src="images/screens/14-settings-dark.webp" alt="Settings" loading="lazy">
         <img src="images/screens/15-home-arabic-light.webp" alt="In Arabic" loading="lazy">
         <img src="images/screens/16-ayah-mode-arabic-light.webp" alt="Ayah mode in Arabic" loading="lazy">
+        <img src="images/screens/17-translations-light.webp" alt="Translations with footnotes" loading="lazy">
       </div>
       <div class="carousel-nav">
         <button class="icon-btn" data-dir="-1" aria-label="Previous">‹</button>

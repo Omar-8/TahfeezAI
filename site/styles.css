@@ -60,7 +60,7 @@ section { padding: 88px max(16px, calc((100vw - 1160px) / 2)); }
 
 /* ─── Top bar ─── */
 .topbar {
-  position: sticky; top: 0; z-index: 10;
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 10;
   display: flex; align-items: center; gap: 20px;
   padding: 12px max(16px, calc((100vw - 1160px) / 2));
   background: color-mix(in srgb, var(--bg) 82%, transparent);
@@ -117,6 +117,9 @@ h1 { font-size: clamp(2.2rem, 5.2vw, 4rem); font-weight: 800; letter-spacing: -0
   position: absolute; width: 58%; border-radius: 26px; box-shadow: var(--shadow);
 }
 .phone.back { inset-inline-start: 0; top: 4%; transform: rotate(-4deg); opacity: 0.95; }
+/* The recitation recording, in a phone's bezel. */
+.video-phone { width: 46%; padding: 10px; background: #080c0a; border-radius: 40px; top: 6%; }
+.video-phone video { display: block; width: 100%; border-radius: 30px; }
 .phone.front { inset-inline-end: 0; top: 0; transform: rotate(3deg); }
 [dir="rtl"] .phone.back { transform: rotate(4deg); }
 [dir="rtl"] .phone.front { transform: rotate(-3deg); }

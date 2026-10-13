@@ -19,7 +19,7 @@
 
 [**Website**](https://omar-8.github.io/TahfeezAI/) · [Features](#features) · [Tajweed](#tajweed-feedback) · [Screenshots](#screenshots) · [Build it](#build-and-run)
 
-<img src="site/images/screens/02-mushaf-light.webp" width="24%" alt="The Madinah Mushaf"> <img src="site/images/screens/04-ayah-mode-light.webp" width="24%" alt="Word by word"> <img src="site/images/screens/10-hide-mode-dark.webp" width="24%" alt="Memorize from memory"> <img src="site/images/screens/06-tajweed-settings-light.webp" width="24%" alt="Tajweed feedback">
+<img src="site/images/screens/06b-pronunciation-dark.webp" width="24%" alt="Hears the vowel you said"> <img src="site/images/screens/10b-hide-recite-dark.webp" width="24%" alt="Recite it from memory"> <img src="site/images/screens/04-ayah-mode-light.webp" width="24%" alt="Understand every word"> <img src="site/images/screens/02-mushaf-light.webp" width="24%" alt="The Madinah Mushaf">
 
 </div>
 
@@ -79,7 +79,11 @@ It is a gift, not a product:
 
 ### Tajweed feedback
 
-Tahfeez AI listens to how you recite, not only to which words you say. With **Tajweed** on, the checking covers:
+<img src="site/media/recite-from-memory.gif" width="240" align="right" alt="Reciting Al-Ikhlas from memory: each word appears as it is said">
+
+Tahfeez AI listens to how you recite, not only to which words you say. *On the right: Al-Ikhlas recited from memory with the page hidden — each word appears as it is said correctly.*
+
+With **Tajweed** on, the checking covers:
 
 | Rule | What is checked |
 |---|---|
@@ -91,7 +95,13 @@ Tahfeez AI listens to how you recite, not only to which words you say. With **Ta
 | **Shadda** | doubled letters held, single ones not doubled |
 | **Vowels and case endings** | ḥarakāt, including the last vowel of a word |
 
-Each word is coloured as you go — right, wrong, skipped or mispronounced — with a short explanation of the mistake and, if you like, a vibration the moment it happens.
+Each word is coloured as you go — right, wrong, skipped or mispronounced — with a short explanation of the mistake and, if you like, a vibration the moment it happens. Tap a word to see what was heard: *“On «ء»: ḍamma expected, fatḥa heard.”*
+
+<p align="center">
+  <img src="site/images/screens/05b-recite-marks-dark.webp" width="30%" alt="Every word checked">
+  <img src="site/images/screens/06b-pronunciation-dark.webp" width="30%" alt="Hears the vowel you said">
+  <img src="site/images/screens/06-tajweed-settings-light.webp" width="30%" alt="Tajweed settings">
+</p>
 
 > **An honest note:** the model is young. It will sometimes miss a mistake or flag a correct word. It is improving with every version — please [tell us](https://github.com/Omar-8/TahfeezAI/issues) when it gets something wrong.
 
@@ -116,11 +126,13 @@ Each word is coloured as you go — right, wrong, skipped or mispronounced — w
 
 | | | |
 |:-:|:-:|:-:|
-| <img src="site/images/screens/01-home-light.webp" width="260"> | <img src="site/images/screens/02-mushaf-light.webp" width="260"> | <img src="site/images/screens/03-listening-light.webp" width="260"> |
+| <img src="site/images/screens/01-home-light.webp" width="260"> | <img src="site/images/screens/02-mushaf-light.webp" width="260"> | <img src="site/images/screens/03-listening-dark.webp" width="260"> |
+| <img src="site/images/screens/05b-recite-marks-dark.webp" width="260"> | <img src="site/images/screens/06b-pronunciation-dark.webp" width="260"> | <img src="site/images/screens/10b-hide-recite-dark.webp" width="260"> |
 | <img src="site/images/screens/04-ayah-mode-light.webp" width="260"> | <img src="site/images/screens/05-follow-along-light.webp" width="260"> | <img src="site/images/screens/06-tajweed-settings-light.webp" width="260"> |
 | <img src="site/images/screens/08-ayah-mode-dark.webp" width="260"> | <img src="site/images/screens/09-view-settings-dark.webp" width="260"> | <img src="site/images/screens/10-hide-mode-dark.webp" width="260"> |
 | <img src="site/images/screens/11-mushaf-sepia-passages.webp" width="260"> | <img src="site/images/screens/12-memorize-dark.webp" width="260"> | <img src="site/images/screens/13-progress-dark.webp" width="260"> |
 | <img src="site/images/screens/07-search-light.webp" width="260"> | <img src="site/images/screens/15-home-arabic-light.webp" width="260"> | <img src="site/images/screens/16-ayah-mode-arabic-light.webp" width="260"> |
+| <img src="site/images/screens/17-translations-light.webp" width="260"> | <img src="site/images/screens/14-settings-dark.webp" width="260"> | |
 
 ## Privacy
 

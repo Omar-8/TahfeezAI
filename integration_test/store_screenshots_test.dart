@@ -156,7 +156,7 @@ void main() {
         .read(quranAudioPlayerProvider.notifier)
         .playRange(1001, 1007, options: const ListenOptions());
     await run(7);
-    await shot('03-listening-light');
+    await shot('17-translations-light');
     await container.read(quranAudioPlayerProvider.notifier).stop();
     await run(1);
 
