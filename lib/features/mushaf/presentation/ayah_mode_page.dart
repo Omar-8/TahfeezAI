@@ -17,6 +17,7 @@ import '../../../quran/quran_providers.dart';
 import '../../../wbw/presentation/word_detail_sheet.dart';
 import '../../listen/application/listen_options.dart';
 import '../../listen/application/quran_audio_player.dart';
+import '../../recitation/application/hifz_controller.dart';
 import '../../quran/application/quran_index_providers.dart';
 import '../application/mushaf_focus_ayah.dart';
 import '../application/mushaf_hide_mode.dart';
@@ -98,6 +99,9 @@ class _AyahModePageState extends ConsumerState<AyahModePage> {
   @override
   void didUpdateWidget(covariant AyahModePage oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (widget.isCurrentPage && !oldWidget.isCurrentPage) {
+      _bringActiveIntoView();
+    }
     if (oldWidget.pageNumber != widget.pageNumber) {
       setState(() => _words = null);
       _load();
@@ -147,6 +151,7 @@ class _AyahModePageState extends ConsumerState<AyahModePage> {
         _ayahEnds = ends;
       });
       _bringTargetIntoView();
+      _bringActiveIntoView();
     } catch (e) {
       if (mounted) setState(() => _error = e);
     }
@@ -193,6 +198,39 @@ class _AyahModePageState extends ConsumerState<AyahModePage> {
     });
   }
 
+  /// Opened (or turned to) mid-recitation or mid-listening: straight to
+  /// the ayah whose turn it is, if it is on this page.
+  void _bringActiveIntoView() {
+    if (!widget.isCurrentPage) return;
+    final active =
+        ref.read(quranAudioPlayerProvider)?.ayahId ??
+        (ref.read(hifzControllerProvider).running
+            ? ref.read(hifzControllerProvider).expected?.ayahId
+            : null) ??
+        ref.read(mushafFocusAyahProvider)?.ayahId;
+    if (active != null && (_words?.any((w) => w.ayahId == active) ?? false)) {
+      _scrollTo(active, animate: false);
+    }
+  }
+
+  /// Within a long ayah: the word due next kept on screen, scrolling no
+  /// more than needed.
+  void _keepWordVisible(WordRef word) {
+    final index = _words?.indexOf(word) ?? -1;
+    if (index < 0) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final context = _wordKeys[index]?.currentContext;
+      if (context == null || !context.mounted) return;
+      unawaited(
+        Scrollable.ensureVisible(
+          context,
+          duration: const Duration(milliseconds: 250),
+          alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
+        ),
+      );
+    });
+  }
+
   void _bringTargetIntoView() {
     final target = ref.read(ayahModeTargetProvider);
     final words = _words;
@@ -219,21 +257,31 @@ class _AyahModePageState extends ConsumerState<AyahModePage> {
     }
     // The recitation's place, and the reciter's ayah, kept in view on the
     // page being read.
+    // Whichever mode runs, the ayah whose turn it is kept in view on the
+    // page being read: the reciter's (Listen, Follow along's reciter), the
+    // reciter's next word (Recite, Loop, Follow along's user turn), or the
+    // ayah in focus — whether highlighted or not.
     if (widget.isCurrentPage) {
       ref.listen(mushafFocusAyahProvider.select((f) => f?.ayahId), (_, id) {
         if (id != null) _scrollTo(id);
       });
-      ref.listen(mushafWordOverlayProvider, (previous, next) {
-        final current = next?.marks.entries
-            .where((e) => e.value == MushafWordMark.current)
-            .map((e) => e.key.ayahId)
-            .firstOrNull;
-        final before = previous?.marks.entries
-            .where((e) => e.value == MushafWordMark.current)
-            .map((e) => e.key.ayahId)
-            .firstOrNull;
-        if (current != null && current != before) _scrollTo(current);
+      ref.listen(quranAudioPlayerProvider.select((n) => n?.ayahId), (
+        previous,
+        id,
+      ) {
+        if (id != null && id != previous) _scrollTo(id);
       });
+      ref.listen(
+        hifzControllerProvider.select((h) => h.running ? h.expected : null),
+        (previous, next) {
+          if (next == null) return;
+          if (previous == null || previous.ayahId != next.ayahId) {
+            _scrollTo(next.ayahId);
+          } else {
+            _keepWordVisible(next);
+          }
+        },
+      );
     }
     ref.listen(ayahModeTargetProvider, (_, _) => _bringTargetIntoView());
     // Revealing or hiding word by word (the bar's buttons): the boundary
