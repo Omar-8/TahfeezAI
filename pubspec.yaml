@@ -232,6 +232,12 @@ flutter:
     - family: Amiri Quran
       fonts:
         - asset: assets/fonts/AmiriQuran.ttf
+    - family: Lateef
+      fonts:
+        - asset: assets/fonts/Lateef-Regular.ttf
+    - family: Noto Naskh Arabic
+      fonts:
+        - asset: assets/fonts/NotoNaskhArabic-Variable.ttf
     # The Arabic UI fonts, one chosen in Settings (ArabicUiFont).
     - family: Noto Kufi Arabic
       fonts:

@@ -17,7 +17,13 @@ enum QuranFont {
   scheherazade('Scheherazade New', 'شهرزاد'),
 
   /// Amiri Quran: classic Naskh, set for the Quran.
-  amiri('Amiri Quran', 'الأميري');
+  amiri('Amiri Quran', 'الأميري'),
+
+  /// Noto Naskh Arabic: a plain, modern Naskh.
+  notoNaskh('Noto Naskh Arabic', 'نوتو نسخ'),
+
+  /// SIL's Lateef: a light Naskh, open and easy to read.
+  lateef('Lateef', 'لطيف');
 
   const QuranFont(this.family, this.arabicName);
 
