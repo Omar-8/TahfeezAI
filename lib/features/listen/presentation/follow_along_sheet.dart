@@ -17,6 +17,7 @@ import '../../recitation/application/mushaf_recitation_target.dart';
 import '../../recitation/presentation/recitation_loop_sheet.dart'
     show CountStepper, VersePicker;
 import '../application/follow_along_controller.dart';
+import '../../recitation/application/hifz_controller.dart';
 import '../application/listen_options.dart';
 import '../application/quran_audio_player.dart';
 import '../application/reciter_controller.dart';
@@ -45,9 +46,19 @@ class _FollowAlongSheetState extends ConsumerState<_FollowAlongSheet> {
   VerseRef? _from, _to;
 
   /// The menu's choices, each saved as soon as it changes.
-  FollowAlongOptions get _options => ref.read(followAlongOptionsProvider);
-  set _options(FollowAlongOptions options) =>
-      ref.read(followAlongOptionsProvider.notifier).set(options);
+  // Strict is one setting, shared with Hifz settings and Loop.
+  FollowAlongOptions get _options => ref
+      .read(followAlongOptionsProvider)
+      .copyWith(strict: ref.read(hifzSettingsProvider).strict);
+  set _options(FollowAlongOptions options) {
+    ref.read(followAlongOptionsProvider.notifier).set(options);
+    final settings = ref.read(hifzSettingsProvider);
+    if (settings.strict != options.strict) {
+      ref
+          .read(hifzSettingsProvider.notifier)
+          .update(settings.copyWith(strict: options.strict));
+    }
+  }
 
   static int _id(VerseRef v) => v.chapterNo * 1000 + v.verseNo;
 

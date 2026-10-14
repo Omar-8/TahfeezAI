@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tahfeez_ai/core/routing/app_router.dart';
 import 'package:tahfeez_ai/core/theme/app_typography.dart';
@@ -21,6 +22,7 @@ import 'package:tahfeez_ai/wbw/presentation/wbw_packs_sheet.dart';
 import 'package:tahfeez_ai/wbw/presentation/word_detail_sheet.dart';
 import 'package:tahfeez_ai/features/mushaf/application/mushaf_hide_mode.dart';
 import 'package:tahfeez_ai/features/mushaf/application/reader_mode.dart';
+import 'package:tahfeez_ai/quran/application/tafsir_selection_controller.dart';
 import 'package:tahfeez_ai/features/mushaf/domain/mushaf_appearance.dart';
 import 'package:tahfeez_ai/features/settings/presentation/theme_choices.dart';
 
@@ -269,8 +271,24 @@ void main() {
     'follow along': (c) => showFollowAlongSheet(c),
     'loop': (c) => showRecitationLoopSheet(c),
     'hifz settings': (c) => showHifzSettingsSheet(c),
-    'ayah': (c) =>
-        showAyahDetailSheet(c, mushafId: 1, pageNumber: 48, ayahId: 2282),
+    'ayah': (c) => showAyahDetailSheet(c, ayahId: 2282),
+    // Everything it can show, at its largest text.
+    'ayah, everything ×2.0': (c) {
+      final container = ProviderScope.containerOf(c);
+      container
+          .read(ayahViewPreferencesProvider.notifier)
+          .set(
+            const AyahViewPreferences(
+              showTranslation: true,
+              showTransliteration: true,
+              showTafsir: true,
+              showWordMeanings: true,
+              quranFont: QuranFont.amiri,
+            ),
+          );
+      container.read(tafsirTextScaleControllerProvider.notifier).setScale(2);
+      showAyahDetailSheet(c, ayahId: 2282);
+    },
     'word': (c) =>
         showWordDetailSheet(c, wordRef: (ayahId: 2282, wordIndex: 0)),
     'quick reference': (c) =>

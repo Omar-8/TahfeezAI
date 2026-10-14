@@ -4,81 +4,67 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/localization/generated/app_localizations.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/components/components.dart';
-import '../../../core/theme/quran_text_style.dart';
-import '../../../quran/application/canonical_ayah_word_text.dart';
-import '../../../quran/domain/models/translation_models.dart';
-import '../../../quran/presentation/translation_block.dart';
-import '../../../quran/application/ayah_sheet_content.dart';
-import '../../../quran/application/tafsir_library_controller.dart';
+import '../../../quran/application/ayah_reading_extras.dart';
 import '../../../quran/application/tafsir_selection_controller.dart';
-import '../../../quran/application/tafsir_verse_text.dart';
 import '../../quran/application/quran_index_providers.dart';
 import '../../bookmarks/application/bookmarks_controller.dart';
 import '../../listen/application/listen_options.dart';
 import '../../listen/application/quran_audio_player.dart';
 import '../../listen/presentation/listen_sheet.dart';
-import '../application/mushaf_appearance_controller.dart';
 import '../application/mushaf_page_translations.dart';
 import '../application/reader_mode.dart';
 import '../domain/mushaf_appearance.dart';
-import '../../../quran/presentation/meaning_resource_names.dart';
+import 'ayah_view_options.dart';
+import 'ayah_view_parts.dart';
 
-/// The Mushaf's "long-press a word" destination: the word's whole ayah —
-/// its reference, its canonical text, its active translations and a way
-/// to its tafsir. The ayah stays highlighted on the page while this is
-/// open (`QuranEngineMushafPageContent.onWordLongPress`).
+/// The "long-press a word" destination, in the Mushaf and in Ayah mode:
+/// the word's whole ayah, shown as Ayah mode shows it — its words (with
+/// their meanings), transliteration, translations and tafsir, in its
+/// Quran font and text size — with the same view settings, shared with
+/// Ayah mode (the tune button). The ayah stays highlighted on the page
+/// while this is open (`QuranEngineMushafPageContent.onWordLongPress`).
 ///
-/// The Arabic is the ayah's canonical words ([canonicalAyahTextProvider]),
-/// never the page's own glyph data, in Scheherazade New — the Quran-text
-/// font Home's Daily Ayah uses.
-Future<void> showAyahDetailSheet(
-  BuildContext context, {
-  required int mushafId,
-  required int pageNumber,
-  required int ayahId,
-}) => showTahfeezModalBottomSheet<void>(
-  context: context,
-  title: AppLocalizations.of(context).ayahDetails,
-  builder: (context) => _AyahDetailSheetBody(
-    mushafId: mushafId,
-    pageNumber: pageNumber,
-    ayahId: ayahId,
-  ),
-);
+/// The Arabic is the ayah's canonical words ([ayahCanonicalWordsProvider]),
+/// never the page's own glyph data.
+Future<void> showAyahDetailSheet(BuildContext context, {required int ayahId}) =>
+    showTahfeezModalBottomSheet<void>(
+      context: context,
+      title: AppLocalizations.of(context).ayahDetails,
+      builder: (context) => _AyahDetailSheetBody(ayahId: ayahId),
+    );
 
 class _AyahDetailSheetBody extends ConsumerWidget {
-  const _AyahDetailSheetBody({
-    required this.mushafId,
-    required this.pageNumber,
-    required this.ayahId,
-  });
+  const _AyahDetailSheetBody({required this.ayahId});
 
-  final int mushafId;
-  final int pageNumber;
   final int ayahId;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final view = ref.watch(ayahViewPreferencesProvider);
     final chapterNo = ayahId ~/ 1000;
     final verseNo = ayahId % 1000;
     final surahName = [
       for (final s in ref.watch(indexedSurahsProvider).value ?? const [])
         if (s.surah.surahNo == chapterNo) s.localizedName ?? s.arabicName,
     ].firstOrNull;
-    final text = ref.watch(canonicalAyahTextProvider(ayahId: ayahId)).value;
-    final translations = ref
-        .watch(mushafPageTranslationsProvider(mushafId, pageNumber))
-        .value?[ayahId];
-    final books =
-        ref.watch(activeTranslationBooksProvider).value ??
-        const <String, TranslationBook>{};
-    final content = ref.watch(ayahSheetContentProvider);
-    final quranTextColor = ref
-        .watch(mushafAppearanceControllerProvider)
-        .colors
-        .text;
+    final words = ref.watch(ayahCanonicalWordsProvider(ayahId)).value;
+    final meanings = view.showWordMeanings
+        ? ref.watch(ayahWordMeaningsProvider(ayahId)).value ?? const {}
+        : const <int, String>{};
+    final books = ref.watch(activeTranslationBooksProvider).value;
+    final tafsirId = ref.watch(tafsirSelectionControllerProvider);
+    // The sheet's own colours (it sits on the app's surface, not the page).
+    final colors = MushafAppearanceColors(
+      background: scheme.surface,
+      text: scheme.onSurface,
+      secondaryText: scheme.onSurfaceVariant,
+      headerInk: scheme.onSurface,
+    );
+    // Ayah mode's text size, over the app's own.
+    final media = MediaQuery.of(context);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(
@@ -100,7 +86,20 @@ class _AyahDetailSheetBody extends ConsumerWidget {
                       ? '$chapterNo:$verseNo'
                       : l10n.homeDailyAyahReferenceNamed(surahName, verseNo),
                   style: theme.textTheme.labelMedium?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+              IconButton(
+                key: const ValueKey('ayah-sheet-view-options'),
+                icon: const Icon(Icons.tune_rounded),
+                tooltip: l10n.ayahView,
+                onPressed: () => showTahfeezModalBottomSheet<void>(
+                  context: context,
+                  title: l10n.ayahView,
+                  builder: (context) => const SingleChildScrollView(
+                    padding: EdgeInsets.fromLTRB(16, 0, 16, 24),
+                    child: AyahViewOptions(showLayout: false),
                   ),
                 ),
               ),
@@ -108,136 +107,62 @@ class _AyahDetailSheetBody extends ConsumerWidget {
             ],
           ),
           _ListenButtons(ayahId: ayahId),
-          if (text != null)
-            Directionality(
-              textDirection: TextDirection.rtl,
-              child: Text(
-                text,
-                textAlign: TextAlign.center,
-                style: quranTextStyle(
-                  color: quranTextColor,
-                  fontFamily: 'Scheherazade New',
-                  fontSize: 26,
-                ),
+          MediaQuery(
+            data: media.copyWith(
+              textScaler: TextScaler.linear(
+                media.textScaler.scale(1) *
+                    ref.watch(tafsirTextScaleControllerProvider),
               ),
             ),
-          if (content != AyahSheetContent.tafsir) ...[
-            if (translations != null && translations.isNotEmpty)
-              for (final entry in translations.entries)
-                TranslationBlock(
-                  verseText: entry.value,
-                  authorName: switch (books[entry.key]) {
-                    final book? => translationName(l10n, book),
-                    null => entry.key,
-                  },
-                  inlineFootnotes: true,
-                  textDirection:
-                      _AyahTafsir._rtl.contains(books[entry.key]?.languageCode)
-                      ? TextDirection.rtl
-                      : TextDirection.ltr,
-                )
-            // Asked for the translation alone, with none chosen.
-            else if (books.isEmpty && content == AyahSheetContent.translation)
-              _ChooseInSettings(l10n.ayahSheetNoTranslation),
-          ],
-          if (content != AyahSheetContent.translation)
-            _AyahTafsir(
-              chapterNo: chapterNo,
-              verseNo: verseNo,
-              hintIfNone: content == AyahSheetContent.tafsir,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              spacing: TahfeezSpacing.md,
+              children: [
+                if (words != null)
+                  Directionality(
+                    textDirection: TextDirection.rtl,
+                    child: Wrap(
+                      key: const ValueKey('ayah-sheet-words'),
+                      alignment: WrapAlignment.center,
+                      spacing: 6,
+                      runSpacing: 10,
+                      children: [
+                        for (final w in words)
+                          AyahWordView(
+                            key: ValueKey(
+                              'ayah-sheet-word-$ayahId:${w.wordIndex}',
+                            ),
+                            text: w.text,
+                            meaning: meanings[w.wordIndex],
+                            hidden: false,
+                            style: null,
+                            colors: colors,
+                            fontFamily: view.quranFont.family,
+                          ),
+                      ],
+                    ),
+                  ),
+                if (view.showTransliteration)
+                  AyahTransliteration(ayahId: ayahId, colors: colors),
+                if (view.showTranslation)
+                  if (books != null && books.isEmpty)
+                    _ChooseInSettings(l10n.ayahSheetNoTranslation)
+                  else
+                    AyahTranslations(ayahId: ayahId, colors: colors),
+                if (view.showTafsir)
+                  if (tafsirId == null)
+                    _ChooseInSettings(l10n.ayahSheetNoTafsir)
+                  else
+                    AyahTafsir(
+                      key: const ValueKey('ayah-sheet-tafsir-text'),
+                      verse: (chapterNo: chapterNo, verseNo: verseNo),
+                      colors: colors,
+                    ),
+              ],
             ),
+          ),
         ],
       ),
-    );
-  }
-}
-
-/// The ayah's tafsir: its opening, and "Read more" for the full reader.
-class _AyahTafsir extends ConsumerWidget {
-  const _AyahTafsir({
-    required this.chapterNo,
-    required this.verseNo,
-    required this.hintIfNone,
-  });
-
-  final int chapterNo, verseNo;
-
-  /// With no tafsir chosen: say where to choose one (asked for the tafsir
-  /// alone), or show nothing.
-  final bool hintIfNone;
-
-  /// Languages written right to left.
-  static const _rtl = {'ar', 'ur', 'fa', 'ps', 'ku', 'he', 'dv', 'ug', 'sd'};
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context);
-    final theme = Theme.of(context);
-    final tafsirId = ref.watch(tafsirSelectionControllerProvider);
-    if (tafsirId == null) {
-      return hintIfNone
-          ? _ChooseInSettings(l10n.ayahSheetNoTafsir)
-          : const SizedBox.shrink();
-    }
-    final work = [
-      for (final t in ref.watch(tafsirLibraryControllerProvider).value ?? [])
-        if (t.work.id == tafsirId) t.work,
-    ].firstOrNull;
-    final text = ref
-        .watch(
-          tafsirVerseTextProvider(
-            chapterNo: chapterNo,
-            verseNo: verseNo,
-            tafsirId: tafsirId,
-          ),
-        )
-        .value
-        ?.text;
-    if (text == null) return const SizedBox.shrink();
-    final direction = _rtl.contains(work?.languageCode)
-        ? TextDirection.rtl
-        : TextDirection.ltr;
-    return Column(
-      key: const ValueKey('ayah-sheet-tafsir-text'),
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: TahfeezSpacing.xs,
-      children: [
-        Text(
-          work == null
-              ? l10n.readerTafsir
-              : '${l10n.readerTafsir} · ${tafsirName(l10n, work)}',
-          style: theme.textTheme.labelMedium?.copyWith(
-            color: theme.colorScheme.primary,
-          ),
-        ),
-        Text(
-          text,
-          textDirection: direction,
-          maxLines: 8,
-          overflow: TextOverflow.ellipsis,
-          style: theme.textTheme.bodyMedium?.copyWith(height: 1.6),
-        ),
-        Align(
-          alignment: AlignmentDirectional.centerEnd,
-          child: TextButton(
-            // Ayah mode, with the tafsir, at this ayah.
-            onPressed: () {
-              final view = ref.read(ayahViewPreferencesProvider);
-              if (!view.showTafsir) {
-                ref
-                    .read(ayahViewPreferencesProvider.notifier)
-                    .set(view.copyWith(showTafsir: true));
-              }
-              ref
-                  .read(ayahModeTargetProvider.notifier)
-                  .show(chapterNo * 1000 + verseNo);
-              ref.read(readerModeProvider.notifier).set(ReaderMode.ayah);
-              Navigator.of(context).pop();
-            },
-            child: Text(l10n.ayahSheetReadMore),
-          ),
-        ),
-      ],
     );
   }
 }

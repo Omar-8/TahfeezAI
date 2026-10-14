@@ -55,7 +55,11 @@ class _RecitationLoopSheetState extends ConsumerState<_RecitationLoopSheet> {
   void initState() {
     super.initState();
     final hifz = ref.read(hifzControllerProvider);
-    _loop = ref.read(hifzControllerProvider.notifier).lastLoop;
+    // Strict is one setting, shared with Hifz settings and Follow along.
+    _loop = ref
+        .read(hifzControllerProvider.notifier)
+        .lastLoop
+        .copyWith(strict: ref.read(hifzSettingsProvider).strict);
     _from = hifz.range?.from;
     _to = hifz.range?.to;
   }
@@ -381,8 +385,12 @@ class _RecitationLoopSheetState extends ConsumerState<_RecitationLoopSheet> {
               title: Text(l10n.followStrict),
               subtitle: Text(l10n.recLoopStrictSub),
               value: _loop.strict,
-              onChanged: (v) =>
-                  setState(() => _loop = _loop.copyWith(strict: v)),
+              onChanged: (v) => setState(() {
+                _loop = _loop.copyWith(strict: v);
+                ref
+                    .read(hifzSettingsProvider.notifier)
+                    .update(ref.read(hifzSettingsProvider).copyWith(strict: v));
+              }),
             ),
             const SizedBox(height: TahfeezSpacing.smPlus),
             Text(

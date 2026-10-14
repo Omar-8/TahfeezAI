@@ -741,12 +741,7 @@ class _MushafPagerState extends ConsumerState<MushafPager> {
     if (hitRect.tokenType != MushafTokenType.quranWord || ayahId == null) {
       return;
     }
-    await showAyahDetailSheet(
-      context,
-      mushafId: widget.mushafId,
-      pageNumber: pageNumber,
-      ayahId: ayahId,
-    );
+    await showAyahDetailSheet(context, ayahId: ayahId);
   }
 
   void _showWordInfo(BuildContext context, MushafTokenHitRect hitRect) {

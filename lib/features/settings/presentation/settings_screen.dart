@@ -17,7 +17,6 @@ import '../../../core/notifications/daily_reminder_scheduler.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../memorize/application/memorization_reminder.dart';
 import '../../../core/theme/theme_controller.dart';
-import '../../../quran/application/ayah_sheet_content.dart';
 import '../../../quran/application/tafsir_library_controller.dart';
 import '../../../quran/application/tafsir_selection_controller.dart';
 import '../../../quran/presentation/tafsir_packs_sheet.dart';
@@ -233,7 +232,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               words: [
                 l10n.searchTranslations,
                 l10n.readerTafsir,
-                l10n.settingsLongPressShows,
                 l10n.settingsTransliteration,
               ],
             );
@@ -438,8 +436,8 @@ Color _ink(AppThemeChoice c) =>
         ? const Color(0xFFECF2EF)
         : const Color(0xFF1C1C1C));
 
-/// Settings → Translation & tafsir: what the ayah sheet shows, and whether
-/// word meanings show the transliteration too.
+/// Settings → Translation & tafsir: which translations and tafsir, and
+/// whether word meanings show the transliteration too.
 class _MeaningSettings extends ConsumerWidget {
   const _MeaningSettings();
 
@@ -452,7 +450,6 @@ class _MeaningSettings extends ConsumerWidget {
       for (final t in ref.watch(tafsirLibraryControllerProvider).value ?? [])
         if (t.work.id == tafsirId) tafsirName(l10n, t.work),
     ].firstOrNull;
-    final content = ref.watch(ayahSheetContentProvider);
     final transliteration = ref.watch(
       wbwShowTransliterationPreferenceControllerProvider,
     );
@@ -480,34 +477,6 @@ class _MeaningSettings extends ConsumerWidget {
           trailing: const Icon(Icons.chevron_right),
           onTap: () => showTafsirPacksSheet(context),
         ),
-        const SizedBox(height: TahfeezSpacing.sm),
-        Text(
-          l10n.settingsLongPressShows,
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
-        const SizedBox(height: TahfeezSpacing.sm),
-        SegmentedButton<AyahSheetContent>(
-          key: const ValueKey('settings-ayah-sheet-content'),
-          showSelectedIcon: false,
-          segments: [
-            ButtonSegment(
-              value: AyahSheetContent.translation,
-              label: Text(l10n.settingsShowTranslation),
-            ),
-            ButtonSegment(
-              value: AyahSheetContent.tafsir,
-              label: Text(l10n.settingsShowTafsir),
-            ),
-            ButtonSegment(
-              value: AyahSheetContent.both,
-              label: Text(l10n.settingsShowBoth),
-            ),
-          ],
-          selected: {content},
-          onSelectionChanged: (s) =>
-              ref.read(ayahSheetContentProvider.notifier).set(s.first),
-        ),
-        const SizedBox(height: TahfeezSpacing.sm),
         SwitchListTile(
           key: const ValueKey('settings-transliteration'),
           contentPadding: EdgeInsets.zero,

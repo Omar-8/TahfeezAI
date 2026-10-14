@@ -7,7 +7,6 @@ import 'package:tahfeez_ai/core/localization/locale_controller.dart';
 import 'package:tahfeez_ai/core/storage/storage_providers.dart';
 import 'package:tahfeez_ai/core/theme/app_surface_tone.dart';
 import 'package:tahfeez_ai/core/theme/app_typography.dart';
-import 'package:tahfeez_ai/quran/application/ayah_sheet_content.dart';
 import 'package:tahfeez_ai/core/theme/theme_controller.dart';
 import 'package:tahfeez_ai/features/settings/domain/credits.dart';
 import 'package:tahfeez_ai/features/settings/presentation/about_screen.dart';
@@ -83,17 +82,6 @@ void main() {
       Theme.of(tester.element(tajawal)).textTheme.bodyLarge?.fontFamilyFallback,
       ['Tajawal'],
     );
-
-    // Translation & tafsir: what a long-pressed ayah shows.
-    expect(container.read(ayahSheetContentProvider), AyahSheetContent.both);
-    final tafsirOnly = find.descendant(
-      of: find.byKey(const ValueKey('settings-ayah-sheet-content')),
-      matching: find.text('Tafsir'),
-    );
-    await tester.ensureVisible(tafsirOnly);
-    await tester.tap(tafsirOnly);
-    await tester.pumpAndSettle();
-    expect(container.read(ayahSheetContentProvider), AyahSheetContent.tafsir);
 
     // The language list: each with its flag.
     await tester.drag(find.byType(ListView).first, const Offset(0, 2000));
