@@ -68,7 +68,7 @@ It is a gift, not a product:
 
 ### Understand
 
-- **Word by word**: the meaning under every word, with **transliteration**.
+- **Word by word**: the meaning under every word — in English, Urdu, Indonesian, Turkish, Persian or Bengali — with **transliteration**. Tap a word for its details and audio.
 - **Translations** in 10 languages: English, German, French, Spanish, Russian, Turkish, Indonesian, Urdu, Persian and Bengali.
 - **Tafsir**: At-Tafsir Al-Muyassar (Arabic) and Al-Mukhtasar (English, French, Spanish, Russian, Turkish, Indonesian, Persian, Bengali).
 

@@ -8,6 +8,8 @@ import '../../core/downloads/resource_download_status.dart';
 import '../../core/theme/components/tahfeez_bottom_sheet.dart';
 import '../../core/theme/components/tahfeez_resource_row.dart';
 import '../../core/theme/components/tahfeez_state_views.dart';
+import '../../quran/presentation/meaning_language_names.dart';
+import '../application/active_wbw_pack.dart';
 import '../application/wbw_library_controller.dart';
 import '../application/wbw_preferences_controller.dart';
 
@@ -32,7 +34,8 @@ class _WbwPacksSheetBody extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final library = ref.watch(wbwLibraryControllerProvider);
-    final selectedPackId = ref.watch(wbwSelectedPackControllerProvider);
+    // The one in use: chosen, or the default (the app language's).
+    final selectedPackId = ref.watch(activeWbwPackProvider).value?.id;
 
     return library.when(
       data: (statuses) {
@@ -52,12 +55,15 @@ class _WbwPacksSheetBody extends ConsumerWidget {
           itemBuilder: (context, index) {
             final status = statuses[index];
             final isActive = status.pack.id == selectedPackId;
+            // Each by its language, in that language.
+            final name = nativeLanguageName(status.pack.languageCode);
             return TahfeezResourceRow(
               title: isActive
-                  ? AppLocalizations.of(context)
-                        .packsActive(status.pack.displayName)
-                  : status.pack.displayName,
-              subtitle: status.pack.languageCode,
+                  ? AppLocalizations.of(context).packsActive(name)
+                  : name,
+              subtitle: status.pack.source.startsWith('Quran.com')
+                  ? 'Quran.com'
+                  : status.pack.source,
               state: _rowState(status.state),
               onAction: () => _onAction(context, ref, status),
             );

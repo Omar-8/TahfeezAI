@@ -7,6 +7,7 @@ import '../../../core/theme/components/components.dart';
 import '../../../quran/application/ayah_reading_extras.dart';
 import '../../../quran/application/tafsir_selection_controller.dart';
 import '../../quran/application/quran_index_providers.dart';
+import '../../../wbw/presentation/word_detail_sheet.dart';
 import '../../bookmarks/application/bookmarks_controller.dart';
 import '../../listen/application/listen_options.dart';
 import '../../listen/application/quran_audio_player.dart';
@@ -138,6 +139,11 @@ class _AyahDetailSheetBody extends ConsumerWidget {
                             style: null,
                             colors: colors,
                             fontFamily: view.quranFont.family,
+                            // Its meaning, transliteration and audio.
+                            onTap: () => showWordDetailSheet(
+                              context,
+                              wordRef: (ayahId: ayahId, wordIndex: w.wordIndex),
+                            ),
                           ),
                       ],
                     ),

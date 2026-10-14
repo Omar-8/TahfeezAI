@@ -112,11 +112,15 @@ class BundledDatasetSeeder {
       assetPath: 'assets/quran/tafsir/ar_muyassar.json',
       hashKey: 'tafsir/ar_muyassar.json',
     );
-    await _seedWbw(
-      hashes,
-      assetPath: 'assets/quran/wbw/en_qurancom.json',
-      hashKey: 'wbw/en_qurancom.json',
-    );
+    // Word meanings: English (with the transliteration), then each
+    // language Quran.com has them in.
+    for (final language in const ['en', 'ur', 'id', 'tr', 'fa', 'bn']) {
+      await _seedWbw(
+        hashes,
+        assetPath: 'assets/quran/wbw/${language}_qurancom.json',
+        hashKey: 'wbw/${language}_qurancom.json',
+      );
+    }
     // The translation milestone's launch languages (T4).
     for (final name in const [
       'ur_junagarhi',

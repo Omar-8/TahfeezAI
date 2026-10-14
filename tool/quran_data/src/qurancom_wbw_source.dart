@@ -41,11 +41,29 @@ String _skeleton(String word) {
   return t.replaceAll('ى', 'ي');
 }
 
+/// Quran.com's name for each language it serves word meanings in.
+const quranComLanguageNames = {
+  'en': 'english',
+  'ur': 'urdu',
+  'id': 'indonesian',
+  'tr': 'turkish',
+  'fa': 'persian',
+  'bn': 'bengali',
+};
+
+/// [languageCode]'s meanings, aligned. A meaning Quran.com serves in
+/// another language (its English, where it has none in this one) is left
+/// out — the app shows the English pack's for that word instead. The
+/// transliteration (the same in every language) is kept in English's only.
 QuranComWbwResult alignQuranComWbw({
   required Directory cacheDir,
   required List<AyahWord> canonicalWords,
   required String packId,
+  String languageCode = 'en',
+  String displayName = 'English word by word (Quran.com)',
 }) {
+  final languageName = quranComLanguageNames[languageCode]!;
+  final withTransliteration = languageCode == 'en';
   final canon = <int, List<AyahWord>>{};
   for (final w in canonicalWords) {
     (canon[w.ayahId] ??= []).add(w);
@@ -75,8 +93,19 @@ QuranComWbwResult alignQuranComWbw({
   var joined = 0, respelled = 0;
   for (final MapEntry(key: ayahId, value: cw) in canon.entries) {
     final qw = source[ayahId] ?? const [];
-    String? meaning(Map w) => (w['translation'] as Map?)?['text'] as String?;
-    String? latin(Map w) => (w['transliteration'] as Map?)?['text'] as String?;
+    String? meaning(Map w) {
+      final t = w['translation'] as Map?;
+      final text = (t?['text'] as String?)?.trim();
+      return t?['language_name'] == languageName &&
+              text != null &&
+              text.isNotEmpty
+          ? text
+          : null;
+    }
+
+    String? latin(Map w) => withTransliteration
+        ? ((w['transliteration'] as Map?)?['text'] as String?)
+        : null;
     void add(AyahWord c, Map q) => words.add(
       WbwWordEntry(
         packId: packId,
@@ -129,19 +158,21 @@ QuranComWbwResult alignQuranComWbw({
 
   final pack = WbwLanguagePack(
     id: packId,
-    languageCode: 'en',
-    displayName: 'English word by word (Quran.com)',
+    languageCode: languageCode,
+    displayName: displayName,
     version: 1,
     checksum: computeResourceChecksum([
       for (final w in words)
         '${w.ayahId}:${w.wordIndex}:${w.translation}:${w.transliteration}',
     ]),
-    source: 'Quran.com API v4 (QUL resource 92)',
+    source: languageCode == 'en'
+        ? 'Quran.com API v4 (QUL resource 92)'
+        : 'Quran.com API v4',
     license:
         'Unverified — shipped by owner decision 2026-10-09 '
         '(docs/THIRD_PARTY_RESOURCES.md)',
     hasTranslation: true,
-    hasTransliteration: true,
+    hasTransliteration: withTransliteration,
   );
   return QuranComWbwResult(
     pack: pack,

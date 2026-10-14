@@ -31,7 +31,11 @@ Future<void> main(List<String> args) async {
     _cacheDir.createSync(recursive: true);
   }
   if (args.contains('wbw')) {
-    await _fetchQuranComWbw();
+    // `wbw ur bn`: only those languages.
+    final only = args.where((a) => a != 'wbw').toList();
+    for (final language in only.isEmpty ? wbwLanguages : only) {
+      await _fetchQuranComWbw(language);
+    }
     return;
   }
 
@@ -175,14 +179,20 @@ Future<void> _fetchQuranEnc({required String key, required String url}) async {
   }
 }
 
-/// Quran.com's word-by-word English (meaning + transliteration), from its
-/// public API v4, one JSON file per surah under `.cache/qurancom_wbw/`
-/// (the same data QUL lists as resource 92; licence unverified — an owner
-/// decision, `docs/THIRD_PARTY_RESOURCES.md`).
-Future<void> _fetchQuranComWbw() async {
-  stdout.writeln('Fetching Quran.com word-by-word (English)...');
-  final dir = Directory('${_cacheDir.path}/qurancom_wbw')
-    ..createSync(recursive: true);
+/// The languages Quran.com has word meanings in, of the app's (French,
+/// German, Spanish and Russian it serves in English only).
+const wbwLanguages = ['en', 'ur', 'id', 'tr', 'fa', 'bn'];
+
+/// Quran.com's word-by-word meanings in [language] (and the
+/// transliteration), from its public API v4, one JSON file per surah under
+/// `.cache/qurancom_wbw/` (English) or `.cache/qurancom_wbw_<language>/`
+/// (the same data QUL lists as resource 92 for English; licence unverified
+/// — an owner decision, `docs/THIRD_PARTY_RESOURCES.md`).
+Future<void> _fetchQuranComWbw(String language) async {
+  stdout.writeln('Fetching Quran.com word-by-word ($language)...');
+  final dir = Directory(
+    '${_cacheDir.path}/qurancom_wbw${language == 'en' ? '' : '_$language'}',
+  )..createSync(recursive: true);
   final client = HttpClient();
   try {
     for (var surah = 1; surah <= 114; surah++) {
@@ -191,7 +201,8 @@ Future<void> _fetchQuranComWbw() async {
         final request = await client.getUrl(
           Uri.parse(
             'https://api.quran.com/api/v4/verses/by_chapter/$surah'
-            '?words=true&word_fields=text_uthmani&per_page=50&page=$page',
+            '?words=true&word_fields=text_uthmani&per_page=50&page=$page'
+            '&language=$language',
           ),
         );
         final response = await request.close();

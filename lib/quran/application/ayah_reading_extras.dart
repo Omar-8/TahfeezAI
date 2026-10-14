@@ -38,13 +38,15 @@ final ayahTransliterationProvider = FutureProvider.autoDispose
       );
       final text = [
         for (final w in words)
-          if (w.transliteration case final t? when t.trim().isNotEmpty) t.trim(),
+          if (w.transliteration case final t? when t.trim().isNotEmpty)
+            t.trim(),
       ].join(' ');
       return text.isEmpty ? null : text;
     });
 
 /// An ayah's word meanings (the word-by-word pack's translation), by word
-/// index; empty without a pack.
+/// index; empty without a pack. A word the pack has no meaning for takes
+/// the English pack's.
 final ayahWordMeaningsProvider = FutureProvider.autoDispose
     .family<Map<int, String>, int>((ref, ayahId) async {
       final repository = ref.watch(wbwRepositoryProvider);
@@ -54,13 +56,15 @@ final ayahWordMeaningsProvider = FutureProvider.autoDispose
         pack = installed.where((p) => p.hasTranslation).firstOrNull;
       }
       if (pack == null) return const {};
-      final words = await repository.getAyahWords(
-        packId: pack.id,
-        ayahId: ayahId,
-      );
-      return {
-        for (final w in words)
+      Future<Map<int, String>> meanings(String packId) async => {
+        for (final w in await repository.getAyahWords(
+          packId: packId,
+          ayahId: ayahId,
+        ))
           if (w.translation case final t? when t.trim().isNotEmpty)
             w.wordIndex: t.trim(),
       };
+      final own = await meanings(pack.id);
+      if (pack.languageCode == 'en') return own;
+      return {...await meanings(englishWbwPackId), ...own};
     });

@@ -56,7 +56,7 @@ void main() {
     }
   });
 
-  test('word meanings: every canonical word, exactly once, with a meaning', () {
+  test('word meanings: every canonical word, exactly once, in each pack', () {
     final dataset = jsonDecode(
       File('assets/quran/quran_dataset.json').readAsStringSync(),
     ) as Map;
@@ -64,19 +64,31 @@ void main() {
       for (final w in (dataset['ayahWords'] as List).cast<Map>())
         '${w['ayahId']}:${w['wordIndex']}',
     };
-    final pack = jsonDecode(
-      File('assets/quran/wbw/en_qurancom.json').readAsStringSync(),
-    ) as Map;
-    final words = (pack['words'] as List).cast<List>();
-    final keys = {for (final w in words) '${w[0]}:${w[1]}'};
-    expect(words, hasLength(canonical.length));
-    // Differences, not set equality: a deep compare of ~77k items is slow.
-    expect(keys.difference(canonical), isEmpty);
-    expect(canonical.difference(keys), isEmpty);
-    expect(
-      words.where((w) => '${w[2] ?? ''}'.trim().isEmpty),
-      isEmpty,
-      reason: 'every word has a meaning',
-    );
+    final names = hashes.keys.where((n) => n.startsWith('wbw/')).toList();
+    expect(names, hasLength(6));
+    for (final name in names) {
+      final pack =
+          jsonDecode(File('assets/quran/$name').readAsStringSync()) as Map;
+      final words = (pack['words'] as List).cast<List>();
+      final keys = {for (final w in words) '${w[0]}:${w[1]}'};
+      expect(words, hasLength(canonical.length), reason: name);
+      // Differences, not set equality: a deep compare of ~77k items is slow.
+      expect(keys.difference(canonical), isEmpty, reason: name);
+      expect(canonical.difference(keys), isEmpty, reason: name);
+      final without = words.where((w) => '${w[2] ?? ''}'.trim().isEmpty);
+      // English has every meaning (and the transliteration); another
+      // language may lack a few, which the English fills in the app
+      // (Turkish the most: about 9 %).
+      if (name == 'wbw/en_qurancom.json') {
+        expect(without, isEmpty, reason: 'every word has a meaning');
+        expect(
+          words.where((w) => '${w[3] ?? ''}'.trim().isEmpty),
+          isEmpty,
+          reason: 'every word has its transliteration',
+        );
+      } else {
+        expect(without.length, lessThan(words.length ~/ 10), reason: name);
+      }
+    }
   });
 }

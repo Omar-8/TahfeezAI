@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/localization/generated/app_localizations.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/ui/script_direction.dart';
 import '../../../core/theme/quran_text_style.dart';
 import '../../../quran/application/ayah_reading_extras.dart';
 import '../../../quran/application/quran_script_code.dart';
@@ -93,7 +94,7 @@ class AyahWordView extends StatelessWidget {
               child: Text(
                 meaning!,
                 textAlign: TextAlign.center,
-                textDirection: TextDirection.ltr,
+                textDirection: meaningDirection(meaning!),
                 style: Theme.of(context).textTheme.labelSmall
                     ?.copyWith(color: colors.secondaryText),
               ),

@@ -177,6 +177,17 @@ const _tafsirMergedAyahs = {
   'spanish_mokhtasar': {'59:24'},
 };
 
+/// Quran.com's word meanings bundled, by language (fetched with
+/// `fetch_sources.dart wbw`); English carries the transliteration.
+const _wbwLanguages = [
+  ('en', 'English word by word (Quran.com)'),
+  ('ur', 'Urdu word by word (Quran.com)'),
+  ('id', 'Indonesian word by word (Quran.com)'),
+  ('tr', 'Turkish word by word (Quran.com)'),
+  ('fa', 'Persian word by word (Quran.com)'),
+  ('bn', 'Bengali word by word (Quran.com)'),
+];
+
 const _cache = 'tool/quran_data/.cache';
 const _outDir = 'assets/quran';
 
@@ -356,24 +367,30 @@ Future<void> main() async {
   // Word meanings (docs/TRANSLATION_TAFSIR_MILESTONE.md, T3): Quran.com's
   // English, aligned to the canonical words — licence unverified, shipped
   // by owner decision (docs/THIRD_PARTY_RESOURCES.md).
-  QuranComWbwResult? wbw;
-  final wbwCache = Directory('$_cache/qurancom_wbw');
-  if (wbwCache.existsSync()) {
-    wbw = alignQuranComWbw(
+  final wbwPacks = <QuranComWbwResult>[];
+  for (final (language, name) in _wbwLanguages) {
+    final wbwCache = Directory(
+      '$_cache/qurancom_wbw${language == 'en' ? '' : '_$language'}',
+    );
+    if (!wbwCache.existsSync()) continue;
+    final result = alignQuranComWbw(
       cacheDir: wbwCache,
       canonicalWords: tanzil.payload.ayahWords,
-      packId: 'en-qurancom',
+      packId: '$language-qurancom',
+      languageCode: language,
+      displayName: name,
     );
-    if (wbw.words.length != tanzil.payload.ayahWords.length) {
+    if (result.words.length != tanzil.payload.ayahWords.length) {
       throw StateError(
-        'Word meanings: ${wbw.words.length} words, expected '
+        'Word meanings ($language): ${result.words.length} words, expected '
         '${tanzil.payload.ayahWords.length}',
       );
     }
+    wbwPacks.add(result);
     Directory('$_outDir/wbw').createSync(recursive: true);
-    final p = wbw.pack;
-    packagedAssetHashes['wbw/en_qurancom.json'] = _writeJson(
-      '$_outDir/wbw/en_qurancom.json',
+    final p = result.pack;
+    packagedAssetHashes['wbw/${language}_qurancom.json'] = _writeJson(
+      '$_outDir/wbw/${language}_qurancom.json',
       {
         'pack': {
           'id': p.id,
@@ -388,14 +405,16 @@ Future<void> main() async {
         },
         // [ayahId, wordIndex, meaning, transliteration] per word.
         'words': [
-          for (final w in wbw.words)
+          for (final w in result.words)
             [w.ayahId, w.wordIndex, w.translation, w.transliteration],
         ],
       },
     );
+    final missing = result.words.where((w) => w.translation == null).length;
     stdout.writeln(
-      'Word meanings: ${wbw.words.length} words aligned '
-      '(${wbw.joined} joined, ${wbw.respelled} spelled differently).',
+      'Word meanings ($language): ${result.words.length} words aligned '
+      '(${result.joined} joined, ${result.respelled} spelled differently, '
+      '$missing without a meaning in the language).',
     );
   }
 
@@ -581,15 +600,20 @@ Future<void> main() async {
         },
     ],
     'wbwResources': [
-      if (wbw != null)
+      for (final w in wbwPacks)
         {
-          'id': wbw.pack.id,
-          'resourceId': 'tahfeez.wbw.en.qurancom',
-          'source':
-              'Quran.com API v4 (api.quran.com/api/v4), = QUL resource 92',
-          'licenseStatus': 'UNVERIFIED — shipped by owner decision 2026-10-09',
-          'sourceHash': wbw.sourceHash,
-          'wordCount': wbw.words.length,
+          'id': w.pack.id,
+          'resourceId': 'tahfeez.wbw.${w.pack.languageCode}.qurancom',
+          'source': w.pack.languageCode == 'en'
+              ? 'Quran.com API v4 (api.quran.com/api/v4), = QUL resource 92'
+              : 'Quran.com API v4 (api.quran.com/api/v4), '
+                    'language=${w.pack.languageCode}',
+          'licenseStatus': w.pack.languageCode == 'en'
+              ? 'UNVERIFIED — shipped by owner decision 2026-10-09'
+              : 'UNVERIFIED — as the English pack (owner decision '
+                    '2026-10-09), extended 2026-10-14',
+          'sourceHash': w.sourceHash,
+          'wordCount': w.words.length,
         },
     ],
     'tafsirResources': [

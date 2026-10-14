@@ -4,6 +4,7 @@ import '../../core/localization/generated/app_localizations.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/ui/script_direction.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/components/tahfeez_bottom_sheet.dart';
 import '../../core/theme/components/tahfeez_state_views.dart';
@@ -164,9 +165,29 @@ class _WbwWordContent extends ConsumerWidget {
         wordIndex: wordRef.wordIndex,
       ),
     );
+    // Another language's pack: the English one's transliteration, and its
+    // meaning where this one has none.
+    final english = packId == englishWbwPackId
+        ? null
+        : ref
+              .watch(
+                wbwWordLookupProvider(
+                  packId: englishWbwPackId,
+                  ayahId: wordRef.ayahId,
+                  wordIndex: wordRef.wordIndex,
+                ),
+              )
+              .value;
 
     return wordAsync.when(
-      data: (word) {
+      data: (own) {
+        final word = own == null
+            ? english
+            : own.copyWith(
+                translation: own.translation ?? english?.translation,
+                transliteration:
+                    own.transliteration ?? english?.transliteration,
+              );
         if (word == null ||
             ((!showTranslation || word.translation == null) &&
                 (!showTransliteration || word.transliteration == null))) {
@@ -191,6 +212,7 @@ class _WbwWordContent extends ConsumerWidget {
             if (showTranslation && word.translation != null)
               Text(
                 word.translation!,
+                textDirection: meaningDirection(word.translation!),
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
           ],

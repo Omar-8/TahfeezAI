@@ -152,6 +152,11 @@ flutter:
     # Word meanings (translation milestone T3; licence unverified, owner
     # decision — docs/THIRD_PARTY_RESOURCES.md).
     - assets/quran/wbw/en_qurancom.json
+    - assets/quran/wbw/ur_qurancom.json
+    - assets/quran/wbw/id_qurancom.json
+    - assets/quran/wbw/tr_qurancom.json
+    - assets/quran/wbw/fa_qurancom.json
+    - assets/quran/wbw/bn_qurancom.json
     # The translation milestone's launch languages (T4).
     - assets/quran/translations/ur_junagarhi.json
     - assets/quran/translations/id_affairs.json
