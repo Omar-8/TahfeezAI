@@ -13,6 +13,7 @@ import '../../../quran/domain/models/quran_location.dart';
 import '../../../quran/domain/models/quran_refs.dart';
 import '../../mushaf/application/mushaf_hide_mode.dart';
 import '../../mushaf/application/mushaf_page_verses.dart';
+import '../../../quran/application/meaning_defaults.dart';
 import '../../quran/application/quran_index_providers.dart';
 import '../../recitation/application/mushaf_recitation_target.dart';
 import '../../recitation/presentation/recitation_loop_sheet.dart'
@@ -134,12 +135,12 @@ class _ReciterPickerState extends ConsumerState<_ReciterPicker> {
   }
 }
 
-/// [reciter]'s name in the UI language: Arabic script for Arabic and Urdu.
+/// [reciter]'s name in the UI language: Arabic script for the languages
+/// written in it (Arabic, Urdu, Persian).
 String reciterName(BuildContext context, Reciter reciter) =>
-    switch (Localizations.localeOf(context).languageCode) {
-      'ar' || 'ur' => reciter.nameAr,
-      _ => reciter.nameEn,
-    };
+    usesArabicScript(Localizations.localeOf(context).languageCode)
+    ? reciter.nameAr
+    : reciter.nameEn;
 
 class _ListenSheet extends ConsumerStatefulWidget {
   const _ListenSheet({this.from});

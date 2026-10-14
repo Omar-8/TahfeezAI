@@ -8,5 +8,9 @@ String nativeLanguageName(String code) => switch (code) {
   'id' => 'Bahasa Indonesia',
   'tr' => 'Türkçe',
   'ur' => 'اردو',
+  'es' => 'Español',
+  'ru' => 'Русский',
+  'fa' => 'فارسی',
+  'bn' => 'বাংলা',
   _ => code,
 };

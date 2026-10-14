@@ -12,6 +12,11 @@ const kTahfeezSupportedLocales = <Locale>[
   Locale('tr'),
   Locale('fr'),
   Locale('de'),
+  Locale('id'),
+  Locale('es'),
+  Locale('ru'),
+  Locale('fa'),
+  Locale('bn'),
 ];
 
 /// Settings → Language: each UI language's code, flag and own name.
@@ -22,4 +27,9 @@ const kAppLanguages = <(String, String, String)>[
   ('tr', '🇹🇷', 'Türkçe'),
   ('fr', '🇫🇷', 'Français'),
   ('de', '🇩🇪', 'Deutsch'),
+  ('id', '🇮🇩', 'Bahasa Indonesia'),
+  ('es', '🇪🇸', 'Español'),
+  ('ru', '🇷🇺', 'Русский'),
+  ('fa', '🇮🇷', 'فارسی'),
+  ('bn', '🇧🇩', 'বাংলা'),
 ];

@@ -123,6 +123,10 @@ class BundledDatasetSeeder {
       'id_affairs',
       'tr_rowwad',
       'fr_noor',
+      'es_noor',
+      'ru_rowwad',
+      'fa_rowwad',
+      'bn_rowwad',
     ]) {
       await _seedTranslation(
         hashes,
@@ -135,6 +139,10 @@ class BundledDatasetSeeder {
       'id_mukhtasar',
       'tr_mukhtasar',
       'fr_mukhtasar',
+      'es_mukhtasar',
+      'ru_mukhtasar',
+      'fa_mukhtasar',
+      'bn_mukhtasar',
     ]) {
       await _seedTafsir(
         hashes,

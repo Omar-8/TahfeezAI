@@ -28,6 +28,12 @@ void main() {
     }
   });
 
+  // Ayahs a tafsir explains together with the one before, so has no row
+  // of their own (tool/quran_data/build_production_data.dart).
+  const merged = {
+    'tafsir/es_mukhtasar.json': {'59:24'},
+  };
+
   test('each translation and tafsir: all 6,236 ayahs, none empty', () {
     for (final name in hashes.keys.where(
       (n) => n.startsWith('translations/') || n.startsWith('tafsir/'),
@@ -35,17 +41,18 @@ void main() {
       final json =
           jsonDecode(File('assets/quran/$name').readAsStringSync()) as Map;
       final verses = (json['verses'] as List).cast<Map>();
-      expect(verses, hasLength(6236), reason: name);
+      final absent = merged[name] ?? const <String>{};
+      expect(verses, hasLength(6236 - absent.length), reason: name);
       expect(
         verses.where((v) => '${v['text']}'.trim().isEmpty),
         isEmpty,
         reason: name,
       );
-      expect(
-        {for (final v in verses) '${v['chapterNo']}:${v['verseNo']}'},
-        hasLength(6236),
-        reason: '$name: no ayah twice',
-      );
+      final keys = {
+        for (final v in verses) '${v['chapterNo']}:${v['verseNo']}',
+      };
+      expect(keys, hasLength(verses.length), reason: '$name: no ayah twice');
+      expect(keys.intersection(absent), isEmpty, reason: name);
     }
   });
 

@@ -69,8 +69,8 @@ It is a gift, not a product:
 ### Understand
 
 - **Word by word**: the meaning under every word, with **transliteration**.
-- **Translations** in English, German, French, Turkish, Urdu and Indonesian.
-- **Tafsir**: At-Tafsir Al-Muyassar (Arabic) and Al-Mukhtasar (English, French, Turkish, Indonesian).
+- **Translations** in 10 languages: English, German, French, Spanish, Russian, Turkish, Indonesian, Urdu, Persian and Bengali.
+- **Tafsir**: At-Tafsir Al-Muyassar (Arabic) and Al-Mukhtasar (English, French, Spanish, Russian, Turkish, Indonesian, Persian, Bengali).
 
 ### Listen
 
@@ -119,7 +119,7 @@ Each word is coloured as you go — right, wrong, skipped or mispronounced — w
 - **Reader themes** for the page — light, warm, sepia, dark, black.
 - **4 Quran fonts** for Ayah mode (Scheherazade New, Amiri Quran, Noto Naskh Arabic, Lateef) and **3 Arabic fonts** for the app (Noto Kufi, Almarai, Tajawal).
 - **Text size** from 80 % to 200 %, and the app follows your phone's own text size.
-- **6 languages** — العربية · English · Deutsch · Français · Türkçe · اردو — with full right-to-left layout.
+- **11 languages** — العربية · English · Deutsch · Français · Español · Русский · Türkçe · Bahasa Indonesia · اردو · فارسی · বাংলা — with full right-to-left layout; the translation and tafsir follow your language.
 - Tested for phones from 280 px foldable cover screens to tablets, in portrait and landscape.
 
 ## Screenshots
@@ -174,7 +174,7 @@ git clone https://github.com/Omar-8/TahfeezAI.git
 cd TahfeezAI
 flutter pub get
 dart run build_runner build --delete-conflicting-outputs   # Drift, Freezed, Riverpod
-flutter gen-l10n                                           # the 6 languages
+flutter gen-l10n                                           # the 11 languages
 ```
 
 ### 2. Quran data (not in git: rebuilt from its sources, checksums verified)
@@ -215,7 +215,7 @@ More detail: [docs/IOS.md](docs/IOS.md). The `iOS` GitHub workflow builds all of
 ```sh
 flutter analyze
 flutter test                                  # ~1,000 tests
-tool/test_responsive_all.sh                   # every screen × 18 sizes × 6 languages × text sizes (~1 h)
+tool/test_responsive_all.sh                   # every screen × 18 sizes × 11 languages × text sizes (~1 h)
 tool/test_crawl.sh                            # every control on every screen, tapped
 flutter drive --driver=test_driver/integration_test.dart \
   --target=integration_test/device_qa_test.dart -d <device>   # the walk-through on a real device

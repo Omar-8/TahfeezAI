@@ -22,6 +22,10 @@ source-verified resources with their provenance recorded
 - **(decided)** Launch languages: **English, Arabic, Urdu, Indonesian, Turkish, French** —
   an ayah translation in each (none needed for Arabic) and a short tafsir where a
   license-clean one exists (Al-Muyassar for Arabic; Al-Mukhtasar candidates for the others).
+  **Added 2026-10-14:** Spanish (Noor International), Russian, Persian and Bengali (Rowwad),
+  each with Al-Mukhtasar, plus the interface in Indonesian, Spanish, Russian, Persian and
+  Bengali — about 1.4–1.7 MB of download each; the arm64 release download measured
+  155.7 MB before them (bundletool), well under Play's 200 MB base-module limit.
 - **(decided)** **Everything bundled**: fully offline from install, no downloads. The app
   grows about 1–2 MB (compressed) per language; T4 becomes adding the remaining launch
   languages to the bundle rather than a download system.

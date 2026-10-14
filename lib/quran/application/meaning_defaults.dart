@@ -12,10 +12,15 @@ String meaningLanguage(Ref ref) =>
     PlatformDispatcher.instance.locale.languageCode;
 
 /// The language of the surah names shown for the UI [language]: the
-/// dataset has Arabic names (also used for Urdu) and English
+/// dataset has Arabic names (also used for Urdu and Persian) and English
 /// transliterations (used for every other language).
 String surahNameLanguage(String language) =>
-    language == 'ar' || language == 'ur' ? 'ar' : 'en';
+    usesArabicScript(language) ? 'ar' : 'en';
+
+/// Whether [language] is written in Arabic script, so Arabic names (of
+/// surahs, reciters) read naturally in it.
+bool usesArabicScript(String language) =>
+    const {'ar', 'ur', 'fa'}.contains(language);
 
 /// The bundled translation shown by default for each language; none for
 /// Arabic; English for any other.
@@ -26,6 +31,10 @@ List<String> defaultTranslationSlugs(String language) => switch (language) {
   'id' => const ['id-affairs'],
   'tr' => const ['tr-rowwad'],
   'fr' => const ['fr-noor'],
+  'es' => const ['es-noor'],
+  'ru' => const ['ru-rowwad'],
+  'fa' => const ['fa-rowwad'],
+  'bn' => const ['bn-rowwad'],
   _ => const ['en-rowwad'],
 };
 
@@ -38,6 +47,10 @@ String? defaultTafsirId(String language) => switch (language) {
   'id' => 'id-mukhtasar',
   'tr' => 'tr-mukhtasar',
   'fr' => 'fr-mukhtasar',
+  'es' => 'es-mukhtasar',
+  'ru' => 'ru-mukhtasar',
+  'fa' => 'fa-mukhtasar',
+  'bn' => 'bn-mukhtasar',
   'ur' || 'de' => null,
   _ => 'en-mukhtasar',
 };

@@ -36,6 +36,11 @@ void main() {
         ('en', ['en-rowwad']),
         ('ur', ['ur-junagarhi']),
         ('fr', ['fr-noor']),
+        ('id', ['id-affairs']),
+        ('es', ['es-noor']),
+        ('ru', ['ru-rowwad']),
+        ('fa', ['fa-rowwad']),
+        ('bn', ['bn-rowwad']),
         ('ar', <String>[]),
       ]) {
         final container = ProviderContainer(

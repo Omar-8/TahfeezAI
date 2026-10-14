@@ -144,7 +144,9 @@ void main() {
     'desktop': const Size(1440, 900),
     'large desktop': const Size(1920, 1080),
   };
-  const locales = ['en', 'ar', 'de', 'fr', 'tr', 'ur'];
+  const locales = [
+    'en', 'ar', 'de', 'fr', 'tr', 'ur', 'id', 'es', 'ru', 'fa', 'bn', //
+  ];
   // Long (2:282, the longest ayah), medium (Ya-Sin's start, after a
   // surah's end) and short ayahs (page 604: three surahs, their headers).
   const pages = {
@@ -325,9 +327,9 @@ void main() {
         ),
       );
     }
-    // Every Arabic font, in both right-to-left languages.
+    // Every Arabic font, in each right-to-left language.
     for (final font in ArabicUiFont.values) {
-      for (final locale in const ['ar', 'ur']) {
+      for (final locale in const ['ar', 'ur', 'fa']) {
         testWidgets(
           '$sizeName, $locale, Ayah mode, long ayah — text ×2.0, '
           '${font.name}',

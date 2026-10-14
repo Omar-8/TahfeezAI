@@ -18,10 +18,14 @@ import 'package:sqlite3/sqlite3.dart';
 
 final _cacheDir = Directory('tool/quran_data/.cache');
 
-/// `dart run tool/quran_data/fetch_sources.dart [quranenc | wbw]`:
-/// everything; with `quranenc` only the QuranEnc translations and tafsir;
-/// with `wbw` only the word-by-word data (the canonical Tanzil text is left
-/// as cached in both).
+/// The QuranEnc resources with no sqlite export, fetched through its API.
+const _viaApi = ['english_mokhtasar', 'russian_mokhtasar'];
+
+/// `dart run tool/quran_data/fetch_sources.dart [quranenc [key...] | wbw]`:
+/// everything; with `quranenc` only the QuranEnc translations and tafsir
+/// (with keys, only those, leaving the others as cached); with `wbw` only
+/// the word-by-word data (the canonical Tanzil text is left as cached in
+/// all three).
 Future<void> main(List<String> args) async {
   if (!_cacheDir.existsSync()) {
     _cacheDir.createSync(recursive: true);
@@ -34,6 +38,20 @@ Future<void> main(List<String> args) async {
   if (!args.contains('quranenc')) {
     await _fetchTanzilText();
     await _fetchTanzilMetadata();
+  }
+  final only = args.where((a) => a != 'quranenc').toSet();
+  if (only.isNotEmpty) {
+    for (final key in only) {
+      if (_viaApi.contains(key)) {
+        await _fetchQuranEncViaApi(key);
+      } else {
+        await _fetchQuranEnc(
+          key: key,
+          url: 'https://quranenc.com/downloads/sqlite/$key.zip',
+        );
+      }
+    }
+    return;
   }
   await _fetchQuranEnc(
     key: 'english_rwwad',
@@ -57,15 +75,25 @@ Future<void> main(List<String> args) async {
     'indonesian_mokhtasar',
     'turkish_mokhtasar',
     'french_mokhtasar',
+    // Added 2026-10-14: Spanish, Russian, Persian and Bengali.
+    'spanish_montada_eu',
+    'russian_rwwad',
+    'persian_ih',
+    'bengali_rwwad',
+    'spanish_mokhtasar',
+    'persian_mokhtasar',
+    'bengali_mokhtasar',
   ]) {
     await _fetchQuranEnc(
       key: key,
       url: 'https://quranenc.com/downloads/sqlite/$key.zip',
     );
   }
-  // No sqlite export is published for this one; its API serves the same
+  // No sqlite export is published for these; their API serves the same
   // rows, written here into the same table shape.
-  await _fetchQuranEncViaApi('english_mokhtasar');
+  for (final key in _viaApi) {
+    await _fetchQuranEncViaApi(key);
+  }
 
   stdout.writeln('All sources fetched into ${_cacheDir.path}');
 }
@@ -190,8 +218,8 @@ Future<void> _fetchQuranComWbw() async {
 /// (`/api/v1/translation/sura/{key}/{n}`) into
 /// `.cache/{key}/{key}.sqlite`, in the exports' own
 /// `translations(id, sura, aya, translation, footnotes)` shape. The API
-/// prefixes each text with its ayah number ("7. …"), dropped here only
-/// where it matches.
+/// prefixes each text with its ayah number ("7. …", or "7) …" in
+/// Russian), dropped here only where it matches.
 Future<void> _fetchQuranEncViaApi(String key) async {
   stdout.writeln('Fetching QuranEnc resource "$key" via its API...');
   final dir = Directory('${_cacheDir.path}/$key')..createSync(recursive: true);
@@ -224,7 +252,7 @@ Future<void> _fetchQuranEncViaApi(String key) async {
       for (final r in rows.cast<Map>()) {
         final aya = int.parse('${r['aya']}');
         var text = '${r['translation']}'.trim();
-        final prefix = RegExp(r'^(\d+)\.\s*').firstMatch(text);
+        final prefix = RegExp(r'^(\d+)[.)]\s*').firstMatch(text);
         if (prefix != null && int.parse(prefix.group(1)!) == aya) {
           text = text.substring(prefix.end);
         }

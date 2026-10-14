@@ -51,9 +51,11 @@ void main() {
     'tablet landscape': Size(1280, 800),
     'desktop': Size(1440, 900),
   };
-  // Every UI language: German and French run longest, Arabic and Urdu
-  // right to left.
-  const locales = ['en', 'ar', 'de', 'fr', 'tr', 'ur'];
+  // Every UI language: German, French and Russian run longest; Arabic,
+  // Urdu and Persian right to left.
+  const locales = [
+    'en', 'ar', 'de', 'fr', 'tr', 'ur', 'id', 'es', 'ru', 'fa', 'bn', //
+  ];
   const routes = [
     '/home',
     '/quran',

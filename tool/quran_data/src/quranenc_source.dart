@@ -127,6 +127,7 @@ QuranEncTafsirResult parseQuranEncTafsir({
   required String languageCode,
   required String author,
   required int version,
+  Set<String> leaveOut = const {},
 }) {
   final bytes = sqliteFile.readAsBytesSync();
   final sourceHash = sha256.convert(bytes).toString();
@@ -138,6 +139,13 @@ QuranEncTafsirResult parseQuranEncTafsir({
     );
     final verses = <TafsirVerseText>[];
     for (final row in rows) {
+      // An ayah the source leaves empty because the entry before covers
+      // it too: no row at all, rather than an empty one. Only while empty:
+      // if the source fills it in, it is kept (and the build's check fails).
+      if (leaveOut.contains('${row['sura']}:${row['aya']}') &&
+          '${row['translation'] ?? ''}'.trim().isEmpty) {
+        continue;
+      }
       verses.add(
         TafsirVerseText(
           tafsirId: tafsirId,

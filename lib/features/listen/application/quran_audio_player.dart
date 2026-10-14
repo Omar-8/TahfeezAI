@@ -13,6 +13,7 @@ import '../../mushaf/application/mushaf_focus_ayah.dart';
 import '../../mushaf/application/mushaf_hide_mode.dart';
 import '../../mushaf/application/mushaf_page_turn.dart';
 import '../../mushaf/application/mushaf_page_verses.dart';
+import '../../../quran/application/meaning_defaults.dart';
 import '../../quran/application/quran_index_providers.dart';
 import '../../recitation/application/mushaf_recitation_target.dart';
 import '../../recitation/application/recitation_session_controller.dart';
@@ -268,7 +269,7 @@ class QuranAudioPlayer extends Notifier<NowPlaying?> {
     final language = ref.read(localeControllerProvider)?.languageCode;
     return AudioItemInfo(
       title: '${surah ?? surahNo} · ${ayahId % 1000}',
-      subtitle: language == 'ar' || language == 'ur'
+      subtitle: language != null && usesArabicScript(language)
           ? reciter.nameAr
           : reciter.nameEn,
     );

@@ -24,6 +24,11 @@ void main() {
         ('ar', 'ar-muyassar'),
         ('en', 'en-mukhtasar'),
         ('tr', 'tr-mukhtasar'),
+        ('id', 'id-mukhtasar'),
+        ('es', 'es-mukhtasar'),
+        ('ru', 'ru-mukhtasar'),
+        ('fa', 'fa-mukhtasar'),
+        ('bn', 'bn-mukhtasar'),
         ('ur', null),
       ]) {
         final container = ProviderContainer(

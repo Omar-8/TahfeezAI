@@ -157,10 +157,18 @@ flutter:
     - assets/quran/translations/id_affairs.json
     - assets/quran/translations/tr_rowwad.json
     - assets/quran/translations/fr_noor.json
+    - assets/quran/translations/es_noor.json
+    - assets/quran/translations/ru_rowwad.json
+    - assets/quran/translations/fa_rowwad.json
+    - assets/quran/translations/bn_rowwad.json
     - assets/quran/tafsir/en_mukhtasar.json
     - assets/quran/tafsir/id_mukhtasar.json
     - assets/quran/tafsir/tr_mukhtasar.json
     - assets/quran/tafsir/fr_mukhtasar.json
+    - assets/quran/tafsir/es_mukhtasar.json
+    - assets/quran/tafsir/ru_mukhtasar.json
+    - assets/quran/tafsir/fa_mukhtasar.json
+    - assets/quran/tafsir/bn_mukhtasar.json
     # Expected Hafs pronunciation of every ayah for acoustic verification —
     # tool/acoustic_verification/build_reference.py.
     - assets/quran/recitation/phonetic_reference_hafs.json

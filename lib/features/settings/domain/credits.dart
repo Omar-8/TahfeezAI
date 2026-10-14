@@ -83,8 +83,8 @@ const credits = <Credit>[
     group: CreditGroup.translations,
     name:
         'Urdu (Muhammad Junagarhi), Indonesian (Ministry of Religious '
-        'Affairs), Turkish (Rowwad) and French (Noor International Center) '
-        'translations',
+        'Affairs), Turkish, Russian, Persian and Bengali (Rowwad), and French '
+        'and Spanish (Noor International Center) translations',
     owner: 'QuranEnc',
     licence: 'QuranEnc terms: unmodified, with attribution and version',
     url: 'https://quranenc.com',
@@ -95,7 +95,7 @@ const credits = <Credit>[
     group: CreditGroup.translations,
     name:
         'Al-Mukhtasar in Interpreting the Noble Quran (English, Indonesian, '
-        'Turkish, French)',
+        'Turkish, French, Spanish, Russian, Persian, Bengali)',
     owner: 'QuranEnc — Tafsir Center for Quranic Studies',
     licence: 'QuranEnc terms: unmodified, with attribution',
     url: 'https://quranenc.com',

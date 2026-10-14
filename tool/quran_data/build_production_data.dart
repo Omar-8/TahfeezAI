@@ -74,6 +74,44 @@ const _launchTranslations = [
     version: '1.0.0',
     versionCode: 1000,
   ),
+  // Added 2026-10-14. QuranEnc's API lists no version for the Russian and
+  // Bengali ones; they are tracked by sourceHash.
+  (
+    key: 'spanish_montada_eu',
+    slug: 'es-noor',
+    displayName: 'Spanish Translation - Noor International Center',
+    language: 'es',
+    author: 'Noor International Center',
+    version: '1.0.1',
+    versionCode: 1001,
+  ),
+  (
+    key: 'russian_rwwad',
+    slug: 'ru-rowwad',
+    displayName: 'Russian Translation - Rowwad Translation Center',
+    language: 'ru',
+    author: 'Rowwad Translation Center',
+    version: 'unversioned upstream (tracked by sourceHash)',
+    versionCode: 1,
+  ),
+  (
+    key: 'persian_ih',
+    slug: 'fa-rowwad',
+    displayName: 'Persian Translation - Rowwad Translation Center',
+    language: 'fa',
+    author: 'Rowwad Translation Center',
+    version: '1.1.3',
+    versionCode: 1103,
+  ),
+  (
+    key: 'bengali_rwwad',
+    slug: 'bn-rowwad',
+    displayName: 'Bengali Translation - Rowwad Translation Center',
+    language: 'bn',
+    author: 'Rowwad Translation Center',
+    version: 'unversioned upstream (tracked by sourceHash)',
+    versionCode: 1,
+  ),
 ];
 
 const _mukhtasarAuthor = 'Tafsir Center for Quranic Studies';
@@ -105,7 +143,40 @@ const _launchTafsirs = [
     displayName: 'Al-Mukhtasar : exégèse abrégée du Coran (Français)',
     language: 'fr',
   ),
+  (
+    key: 'spanish_mokhtasar',
+    id: 'es-mukhtasar',
+    displayName: 'Al-Mukhtasar: exégesis resumida del Corán (Español)',
+    language: 'es',
+  ),
+  (
+    key: 'russian_mokhtasar',
+    id: 'ru-mukhtasar',
+    displayName: 'Аль-Мухтасар: краткий тафсир Корана (Русский)',
+    language: 'ru',
+  ),
+  (
+    key: 'persian_mokhtasar',
+    id: 'fa-mukhtasar',
+    displayName: 'المختصر في تفسير القرآن الکریم (فارسی)',
+    language: 'fa',
+  ),
+  (
+    key: 'bengali_mokhtasar',
+    id: 'bn-mukhtasar',
+    displayName: 'আল-মুখতাসার ফী তাফসীরিল কুরআনিল কারীম (বাংলা)',
+    language: 'bn',
+  ),
 ];
+
+/// Ayahs a tafsir leaves empty upstream because the one before covers them
+/// too (Spanish 59:23 explains 59:23–24); their empty rows are left out
+/// (and out of the checksum the app verifies).
+/// Any other empty ayah fails the build.
+const _tafsirMergedAyahs = {
+  'spanish_mokhtasar': {'59:24'},
+};
+
 const _cache = 'tool/quran_data/.cache';
 const _outDir = 'assets/quran';
 
@@ -218,7 +289,12 @@ Future<void> main() async {
   final canonicalAyahs = {
     for (final a in tanzil.payload.ayahs) '${a.chapterNo}:${a.verseNo}',
   };
-  void requireEveryAyah(String what, Iterable<(int, int, String)> rows) {
+  // [merged]: ayahs deliberately absent (_tafsirMergedAyahs).
+  void requireEveryAyah(
+    String what,
+    Iterable<(int, int, String)> rows, {
+    Set<String> merged = const {},
+  }) {
     final seen = <String>{};
     for (final (sura, aya, text) in rows) {
       final key = '$sura:$aya';
@@ -227,7 +303,8 @@ Future<void> main() async {
       }
       seen.add(key);
     }
-    if (seen.length != canonicalAyahs.length) {
+    if (seen.length + merged.length != canonicalAyahs.length ||
+        merged.any(seen.contains)) {
       throw StateError(
         '$what: ${seen.length} ayahs, expected ${canonicalAyahs.length}',
       );
@@ -256,6 +333,7 @@ Future<void> main() async {
   }
   final extraTafsirs = <(QuranEncTafsirResult, String)>[];
   for (final t in _launchTafsirs) {
+    final merged = _tafsirMergedAyahs[t.key] ?? const <String>{};
     final r = parseQuranEncTafsir(
       sqliteFile: File('$_cache/${t.key}/${t.key}.sqlite'),
       tafsirId: t.id,
@@ -263,10 +341,11 @@ Future<void> main() async {
       languageCode: t.language,
       author: _mukhtasarAuthor,
       version: 1,
+      leaveOut: merged,
     );
     requireEveryAyah(t.key, [
       for (final v in r.verses) (v.chapterNo, v.verseNo, v.text),
-    ]);
+    ], merged: merged);
     final asset = 'tafsir/${t.id.replaceAll('-', '_')}.json';
     packagedAssetHashes[asset] = _writeJson('$_outDir/$asset', {
       'work': tafsirWorkToJson(r.work),
