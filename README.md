@@ -215,7 +215,7 @@ More detail: [docs/IOS.md](docs/IOS.md). The `iOS` GitHub workflow builds all of
 ```sh
 flutter analyze
 flutter test                                  # ~1,000 tests
-tool/test_responsive_all.sh                   # every screen × 18 sizes × 11 languages × text sizes (~1 h)
+tool/test_responsive_all.sh                   # every screen × 18 sizes × 11 languages × text sizes (~3 h)
 tool/test_crawl.sh                            # every control on every screen, tapped
 flutter drive --driver=test_driver/integration_test.dart \
   --target=integration_test/device_qa_test.dart -d <device>   # the walk-through on a real device
