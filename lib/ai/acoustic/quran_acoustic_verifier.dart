@@ -822,10 +822,12 @@ class QuranAcousticVerifier {
   static final _qalqalaEcho = phoneticClassOf('ڇ');
 
   /// A madd of 4 or 6 harakat is short when held for less than this share
-  /// of its length, in the reciter's own beats. (On QDAT's expert labels
-  /// for the 4-count madd of «لَنَآ إِنَّكَ»: flagged 1.9% of readers who
-  /// held it, 50% of those heard to cut it short; 0.75 caught 57% but
-  /// flagged more professional recitation.)
+  /// of its length, in the reciter's own beats (measured while its sound
+  /// keeps returning, [_held]). Rechecked on the streaming v3.5
+  /// (2026-10-16): on QDAT's held-out learners («لَنَآ إِنَّكَ», 5:109) the
+  /// madd held right flagged 0.8% at 0.6–0.7 (1.0% at 0.75), cut short
+  /// caught 30.9 / 35.1 / 35.9%; but 0.7 flagged a correct «وَمَآ» (2:4,
+  /// 2.67 beats) in the user's own replayed sessions, so 0.65 stays.
   static const maddShortShare = 0.65;
 
   /// A gap (frames of 40 ms) long enough to be a stop (waqf) rather than a

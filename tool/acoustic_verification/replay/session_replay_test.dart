@@ -71,8 +71,25 @@ void main() {
         frameDuration: const Duration(milliseconds: 40),
       );
       final log = <String>[];
+      // How late each word is placed and judged (`<name>.latency.json`):
+      // the audio fed so far then, against the word's end in the audio.
+      var fed = 0.0;
+      final placed = <String, Map<String, Object?>>{};
+      final placedAt = RegExp(r'placed (\d+:\d+:\d+) at \d+\.\.(\d+)');
       final print = debugPrint;
-      debugPrint = (message, {wrapWidth}) => log.add(message ?? '');
+      debugPrint = (message, {wrapWidth}) {
+        log.add(message ?? '');
+        if (placedAt.firstMatch(message ?? '') case final m?) {
+          placed.putIfAbsent(
+            m.group(1)!,
+            () => {
+              'word': m.group(1),
+              'endS': (int.parse(m.group(2)!) + 1) * 0.04,
+              'placedS': fed,
+            },
+          );
+        }
+      };
       addTearDown(() => debugPrint = print);
 
       final mic = FakeAudioSource();
@@ -111,8 +128,14 @@ void main() {
       // Every quick early mistake verdict, and what its ayah's check then
       // made of it (confirmed or withdrawn): `<name>.early.json`.
       final early = <String, Map<String, Object?>>{};
+      final judged = <String, double>{};
       container.listen(acousticVerificationControllerProvider, (_, next) {
         for (final MapEntry(key: w, value: r) in next.words.entries) {
+          // (Placement names words 1-based, ayah:verse:word.)
+          judged.putIfAbsent(
+            '${w.ayahId ~/ 1000}:${w.ayahId % 1000}:${w.wordIndex + 1}',
+            () => fed,
+          );
           final key = '${w.ayahId}:${w.wordIndex}:${r.pass}';
           final seen = early[key];
           if (r.provisional && r.isMistake && seen == null) {
@@ -155,6 +178,7 @@ void main() {
         mic.mic!.add(
           Uint8List.sublistView(pcm, i, (i + step).clamp(0, pcm.length)),
         );
+        fed = (i + step).clamp(0, pcm.length) / 32000;
         await pumpEventQueue(times: 3);
       }
       session.pause();
@@ -187,6 +211,11 @@ void main() {
         }),
       );
       File('${out.path}/$name.log').writeAsStringSync(log.join('\n'));
+      File('${out.path}/$name.latency.json').writeAsStringSync(
+        const JsonEncoder.withIndent(' ').convert([
+          for (final p in placed.values) {...p, 'judgedS': judged[p['word']]},
+        ]),
+      );
       File('${out.path}/$name.early.json').writeAsStringSync(
         const JsonEncoder.withIndent(' ').convert(early.values.toList()),
       );
