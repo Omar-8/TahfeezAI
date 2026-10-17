@@ -224,7 +224,8 @@ void main(List<String> args) {
 
   // Mistakes: (word-final?, from -> to, llr, verdict).
   final found = <(bool, String, double, String)>[];
-  final mb = _Pack('quranmb_$tag');
+  // FV_PACK=quranmbh: QuranMB's held-out speakers only (learner_data.py).
+  final mb = _Pack('${Platform.environment['FV_PACK'] ?? 'quranmb'}_$tag');
   for (var i = 0; i < mb.cases.length; i++) {
     final c = mb.cases[i];
     if (c['kind'] != 'mistake') continue;

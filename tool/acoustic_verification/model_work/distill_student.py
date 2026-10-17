@@ -154,15 +154,15 @@ def clips(path):
     return [(a[o[i]:o[i + 1]].astype(np.float32) / 32767, list(t[i])) for i in range(len(t))]
 
 
-REPEAT = ('', 1)   # (shard name prefix, times): oversampled shards (set by --repeat)
+REPEAT = []   # [(shard name prefix, times)]: oversampled shards (set by --repeat)
 
 
 def batches(data_dir, max_audio_s, seed):
     """Endless batches with at most max_audio_s seconds of (padded) audio."""
     rng = random.Random(seed)
     shards = sorted(glob.glob(os.path.join(data_dir, 'shard_[0-9][0-9][0-9][0-9].npz')))
-    if REPEAT[0]:
-        shards += [sh for sh in shards if os.path.basename(sh).startswith(REPEAT[0])] * (REPEAT[1] - 1)
+    for prefix, times in REPEAT:
+        shards += [sh for sh in shards if os.path.basename(sh).startswith(prefix)] * (times - 1)
     while True:
         rng.shuffle(shards)
         for sh in shards:
@@ -804,8 +804,8 @@ def train(a):
     TEMPO, EXTRA = a.tempo, a.phone_extra
     HARD_W, FOCUS_W, VOWEL_W = a.hard, a.focus, a.vowel
     if a.repeat:
-        pre, times = a.repeat.split('=')
-        REPEAT = (pre, int(times))
+        REPEAT = [(pre, int(times)) for pre, times in
+                  (spec.split('=') for spec in a.repeat.split(','))]
     # A fixed seed per run: screening runs see the same batches and draws.
     rng = random.Random(a.seed * 1000003 + step)
     torch.manual_seed(a.seed * 1000003 + step)
@@ -932,7 +932,7 @@ def main():
     p.add_argument('--pitch', type=float, default=0.0,
                    help='share of degraded clips pitch-shifted up (higher voices)')
     p.add_argument('--repeat', default='',
-                   help='shard name prefix to repeat, and how often: e.g. shard_99=8')
+                   help='shard name prefixes to repeat, and how often: e.g. shard_95=6,shard_97=8')
     p.add_argument('--crop', type=float, default=0.0,
                    help='share of clips the student hears as a short window (short-context training)')
     p.add_argument('--stream', default='',
