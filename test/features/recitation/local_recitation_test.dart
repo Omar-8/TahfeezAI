@@ -32,6 +32,7 @@ import 'package:tahfeez_ai/features/recitation/application/quran_match_controlle
 import 'package:tahfeez_ai/features/recitation/application/recitation_ai_config.dart';
 import 'package:tahfeez_ai/features/recitation/application/recitation_providers.dart';
 import 'package:tahfeez_ai/features/recitation/application/recitation_session_controller.dart';
+import 'package:tahfeez_ai/features/mushaf/application/mushaf_hide_mode.dart';
 import 'package:tahfeez_ai/quran/domain/models/quran_location.dart';
 
 import '../../ai/acoustic/local_quran_acoustic_model_test.dart'
@@ -571,6 +572,10 @@ void main() {
       ({int chapterNo, int verseNo})? to,
       _RecordedInference? recorded,
       HifzLoop? loop,
+      // The page on screen, its first and last ayah (default: page 42,
+      // 2:253–2:256); and hide mode.
+      (int, int, int)? page,
+      bool hidden = false,
     }) async {
       inference = recorded ?? _ReplayInference();
       container = ProviderContainer(
@@ -604,16 +609,24 @@ void main() {
         ],
       );
       addTearDown(container.dispose);
-      // Page 42 (2:253–2:256) is on screen.
-      final first = corpus.verseStartPosition((chapterNo: 2, verseNo: 253))!;
-      final last = corpus.verseEndPosition((chapterNo: 2, verseNo: 256))!;
+      // Page 42 (2:253–2:256) is on screen, or [page].
+      final (number, a, b) = page ?? (42, 2253, 2256);
+      final first = corpus.verseStartPosition((
+        chapterNo: a ~/ 1000,
+        verseNo: a % 1000,
+      ))!;
+      final last = corpus.verseEndPosition((
+        chapterNo: b ~/ 1000,
+        verseNo: b % 1000,
+      ))!;
       container
           .read(mushafRecitationTargetProvider.notifier)
-          .show('screen', const QuranLocation.page(1, 42));
-      container.read(mushafPageWordRangesProvider.notifier).report(42, (
+          .show('screen', QuranLocation.page(1, number));
+      container.read(mushafPageWordRangesProvider.notifier).report(number, (
         first: corpus.words[first].ref,
         last: corpus.words[last].ref,
       ));
+      if (hidden) container.read(mushafHideModeProvider.notifier).toggle();
       container.listen(liveRecognitionControllerProvider, (_, _) {});
       container.listen(hifzControllerProvider, (_, _) {});
       container.listen(acousticVerificationControllerProvider, (_, _) {});
@@ -793,6 +806,30 @@ void main() {
       expect(a.words.values.where((w) => w.provisional), isEmpty);
       expect(a.words, hasLength(37));
     });
+
+    test(
+      'hide mode: a reciter starting further down the page is picked up '
+      'there, the ayahs before given — not skipped, not revealed by hand',
+      () async {
+        // Ya-Sin 36:1–36:12 on screen, hidden; the reciter begins at 36:9
+        // (as Al-Hadid after Al-Waqi'a's last ayahs).
+        await setUpHifz(range: false, page: (440, 36001, 36012), hidden: true);
+        expect(
+          hifz().expected,
+          corpus
+              .words[corpus.verseStartPosition((chapterNo: 36, verseNo: 1))!]
+              .ref,
+        );
+        await play('ayahs_away');
+        expect(hifz().counts[HifzVerdict.skipped] ?? 0, 0);
+        expect(hifz().counts[HifzVerdict.correct] ?? 0, greaterThan(20));
+        final s9 = corpus.verseStartPosition((chapterNo: 36, verseNo: 9))!;
+        expect(hifz().revealed, contains(corpus.words[s9].ref));
+        // 36:1–36:8 shown (given), not tested.
+        expect(hifz().revealed, contains(corpus.words[s9 - 1].ref));
+        expect(hifz().marked[corpus.words[s9 - 1].ref], isNull);
+      },
+    );
 
     test('page visible: the reciter is looked for on that page only', () async {
       await setUpHifz(range: false);

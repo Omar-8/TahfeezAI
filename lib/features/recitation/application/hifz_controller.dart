@@ -1,6 +1,7 @@
 import '../../../memorization/application/activity_stats.dart';
 
 import 'dart:async';
+import 'dart:math' as math;
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -738,6 +739,7 @@ class HifzController extends Notifier<HifzState> {
     _loopEnd = null;
     _loopDone.clear();
     _checkingPass = false;
+    _startWindow = null;
     _alerted.clear();
     _heardAt.clear();
     _correctedAt.clear();
@@ -784,6 +786,16 @@ class HifzController extends Notifier<HifzState> {
         already += hideMode.revealedOn(pages.$2);
       }
       _startJudge(pageStart, _corpus!.length - 1, preRevealed: already);
+      // The reciter may begin further down instead: see _startWindow.
+      final lastRange = ranges[pages.$2] ?? firstRange;
+      final pageEnd = corpus.positionOf(lastRange.last);
+      if (pageEnd != null) {
+        _startWindow = (
+          pageStart: pageStart,
+          pageEnd: pageEnd,
+          uncovered: already,
+        );
+      }
       return;
     }
     // The page is visible: locate the reciter first.
@@ -930,6 +942,18 @@ class HifzController extends Notifier<HifzState> {
     }
   }
 
+  /// Hide mode, until the reciter is settled: the page's first word, its
+  /// last, and how many of its words were uncovered before the test. A
+  /// reciter may begin further down than the first hidden word (a surah
+  /// starting mid-page: Al-Hadid after Al-Waqi'a's last ayahs); the tracker
+  /// finds them there, and the test starts again at that word — the words
+  /// before it given (shown, never graded), not revealed by hand and marked
+  /// for revision. Settled once a few words in a row are accepted.
+  ({int pageStart, int pageEnd, int uncovered})? _startWindow;
+
+  /// Words accepted in a row: past this the reciter is settled.
+  static const _settledWords = 3;
+
   void _judgeAll(List<QuranMatchEvent> out) {
     if (_judge == null && _locating) {
       // The first located word starts the test.
@@ -948,6 +972,26 @@ class HifzController extends Notifier<HifzState> {
     }
     final judge = _judge;
     if (judge == null) return;
+    final window = _startWindow;
+    if (window != null) {
+      final heard = out.whereType<WordHeard>().where((h) => h.ref != null);
+      final at = heard.isEmpty
+          ? null
+          : judge.corpus.positionOf(heard.first.ref!);
+      if (at != null && at > judge.expected && at <= window.pageEnd) {
+        // Further down the page than expected: the test starts again
+        // there, clean — the shaky first seconds' marks dropped.
+        final fresh = HifzJudge(
+          judge.corpus,
+          start: window.pageStart,
+          end: judge.end,
+          config: judge.config,
+        )..preReveal(math.max(window.uncovered, at - window.pageStart));
+        _judge = fresh;
+        _judgeAll(out);
+        return;
+      }
+    }
     if (_relocating) {
       final located = out.whereType<WordHeard>().where((h) => h.ref != null);
       final at = located.isEmpty
@@ -961,6 +1005,10 @@ class HifzController extends Notifier<HifzState> {
     final events = [
       for (final heard in out.whereType<WordHeard>()) ...judge.onHeard(heard),
     ];
+    if (_startWindow != null &&
+        (judge.counts[HifzVerdict.correct] ?? 0) >= _settledWords) {
+      _startWindow = null;
+    }
     if (events.isEmpty && state.active && judge.reviewing == reviewBefore) {
       return;
     }
