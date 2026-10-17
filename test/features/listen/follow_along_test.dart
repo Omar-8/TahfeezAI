@@ -220,6 +220,23 @@ void main() {
     expect(hifz.loop!.count, 3);
   });
 
+  test('the whole range, each ayah twice: the reciter repeats each ayah in '
+      'turn, and the user loop repeats each ayah too', () async {
+    await container
+        .read(followAlongControllerProvider.notifier)
+        .start(
+          (chapterNo: 112, verseNo: 1),
+          (chapterNo: 112, verseNo: 3),
+          const FollowAlongOptions(unit: FollowAlongUnit.range, perAyah: 2),
+        );
+    expect(container.read(quranAudioPlayerProvider)?.ayahIds, [
+      112001, 112001, 112002, 112002, 112003, 112003, //
+    ]);
+    audio.finish();
+    await Future<void>.delayed(Duration.zero);
+    expect(hifz.loop!.perAyah, 2);
+  });
+
   test('stopping the reciter, or the user\'s turn, ends the run', () async {
     final follow = container.read(followAlongControllerProvider.notifier);
     await follow.start(

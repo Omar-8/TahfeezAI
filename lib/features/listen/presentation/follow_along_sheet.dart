@@ -237,6 +237,14 @@ class _FollowAlongSheetState extends ConsumerState<_FollowAlongSheet> {
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
+                  // The whole range: each ayah repeated within it.
+                  if (!eachAyah)
+                    stepper(
+                      l10n.recLoopPerAyah,
+                      'follow-per-ayah',
+                      _options.perAyah,
+                      (n) => _options = _options.copyWith(perAyah: n),
+                    ),
                   stepper(
                     l10n.followReciterTimes,
                     'follow-reciter-times',

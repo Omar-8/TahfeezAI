@@ -25,11 +25,17 @@ class FollowAlongOptions {
     this.unit = FollowAlongUnit.eachAyah,
     this.reciterTimes = 1,
     this.userTimes = 1,
+    this.perAyah = 1,
     this.strict = false,
   });
 
   final FollowAlongUnit unit;
   final int reciterTimes, userTimes;
+
+  /// The whole range: within each time through it, every ayah this many
+  /// times before the next — by the reciter, then by the user (as Loop's
+  /// [HifzLoop.perAyah]).
+  final int perAyah;
 
   /// After the user's turn, a mistake in it (a word wrong or skipped, or a
   /// pronunciation mistake) means reciting it once more, until without.
@@ -41,11 +47,13 @@ class FollowAlongOptions {
     FollowAlongUnit? unit,
     int? reciterTimes,
     int? userTimes,
+    int? perAyah,
     bool? strict,
   }) => FollowAlongOptions(
     unit: unit ?? this.unit,
     reciterTimes: reciterTimes ?? this.reciterTimes,
     userTimes: userTimes ?? this.userTimes,
+    perAyah: perAyah ?? this.perAyah,
     strict: strict ?? this.strict,
   );
 }
@@ -60,6 +68,7 @@ class FollowAlongOptionsController
     'unit': value.unit.name,
     'reciterTimes': value.reciterTimes,
     'userTimes': value.userTimes,
+    'perAyah': value.perAyah,
     'strict': value.strict,
   };
 
@@ -75,6 +84,7 @@ class FollowAlongOptionsController
           FollowAlongUnit.eachAyah,
       reciterTimes: times('reciterTimes'),
       userTimes: times('userTimes'),
+      perAyah: times('perAyah'),
       strict: json['strict'] == true,
     );
   }
@@ -220,8 +230,14 @@ class FollowAlongController extends Notifier<FollowAlongState?> {
   Future<bool> _reciterTurn() async {
     final s = state;
     if (s == null) return false;
+    // The whole range with each ayah repeated: a, a, b, b, … each time.
+    final each = s.options.unit == FollowAlongUnit.range
+        ? s.options.perAyah
+        : 1;
     final played = await ref.read(quranAudioPlayerProvider.notifier).playAyahs([
-      for (var r = 0; r < s.options.reciterTimes; r++) ...s.part,
+      for (var r = 0; r < s.options.reciterTimes; r++)
+        for (final a in s.part)
+          for (var k = 0; k < each; k++) a,
     ], options: const ListenOptions());
     if (!played) _end();
     return played;
@@ -252,6 +268,9 @@ class FollowAlongController extends Notifier<FollowAlongState?> {
           HifzLoop(
             mode: HifzLoopMode.range,
             count: times ?? s.options.userTimes,
+            perAyah: s.options.unit == FollowAlongUnit.range
+                ? s.options.perAyah
+                : 1,
           ),
           // The ayahs before the one recited stay readable.
           showBefore: true,
