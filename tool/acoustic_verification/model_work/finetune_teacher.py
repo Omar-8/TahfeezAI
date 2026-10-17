@@ -32,6 +32,36 @@ def labelled(dirs, prefix='shard_'):
     return out
 
 
+def judged(dirs, prefix='shard_'):
+    """(audio, targets, judged indices) of every labelled clip in [dirs]' shards that
+    records which of its target's sounds its labels judge (real_mistakes_data.py)."""
+    out = []
+    for d in dirs:
+        for sh in sorted(glob.glob(os.path.join(d, prefix + '[0-9][0-9][0-9][0-9].npz'))):
+            z = np.load(sh, allow_pickle=True)
+            if 'rules' not in z.files:
+                continue
+            for (x, t), r in zip(ds.clips(sh), z['rules']):
+                if len(t) > 0:
+                    out.append((x, t, list(r)))
+    return out
+
+
+def rule_frames(lp, target, rules, pad=2):
+    """The frames (of one clip's [lp], its anchor's log-probabilities) its judged
+    sounds [rules] occupy: the transcript force-aligned to them, each judged token's
+    frames widened by [pad] on both sides."""
+    import torchaudio
+    tgt = torch.tensor([target], dtype=torch.int32, device=lp.device)
+    labels, scores = torchaudio.functional.forced_align(lp[None].float(), tgt, blank=0)
+    spans = torchaudio.functional.merge_tokens(labels[0], scores[0].exp())
+    out = set()
+    for k in rules:
+        if k < len(spans):
+            out.update(range(max(0, spans[k].start - pad), min(lp.shape[0], spans[k].end + pad)))
+    return out
+
+
 def nasal(target):
     """Whether a transcript holds nasal tajweed: a hidden noon or meem, or a ghunnah
     (a noon or meem held two counts or more)."""
@@ -60,9 +90,11 @@ def batches(items, max_audio_s, rng):
             yield cur
 
 
-def ctc(model, fe, items, anchor=None, free=()):
+def ctc(model, fe, items, anchor=None, free=(), local=None):
     """CTC loss on [items]; with [anchor], also the frames' KL from the anchor's
-    distribution (clips whose index is in [free] are not held), returned beside it."""
+    distribution (clips whose index is in [free] are not held), returned beside it.
+    [local] (rule-local): clip index -> its judged sounds; such a clip is held to the
+    anchor everywhere but around those sounds."""
     x, mask = ds.featurize(fe, items)
     with torch.autocast('cuda', dtype=torch.bfloat16):
         out = model(input_features=x, attention_mask=mask, return_dict=True)
@@ -75,6 +107,11 @@ def ctc(model, fe, items, anchor=None, free=()):
         fm = mask[:, ::2][:, :n].float()
         for j in free:
             fm[j] = 0
+        for j, rules in (local or {}).items():
+            lens_j = int(mask[j, ::2].sum())
+            for f in rule_frames(alp[j, :lens_j], items[j][1], rules):
+                if f < n:
+                    fm[j, f] = 0
         kl = F.kl_div(lp[:, :n], alp[:, :n], log_target=True, reduction='none').sum(-1)
         akl = (kl * fm).sum() / fm.sum().clamp_min(1)
     n = lp.shape[1]
@@ -109,6 +146,10 @@ def main():
     p.add_argument('--anchor-weight', type=float, default=1.0)
     p.add_argument('--anchor-real', action='store_true',
                    help='hold the real-mistake clips to the anchor too (by default they are free)')
+    p.add_argument('--rule-local', action='store_true',
+                   help="with --anchor: hold the real-mistake clips to the anchor too, except around "
+                        'the sounds their labels judge (real_mistakes_data.py rules): the teacher learns '
+                        'tajweed there without its letters and vowels drifting elsewhere')
     p.add_argument('--held', nargs='*', default=[],
                    help='held-out mistake shards (spliced, other reciters): validated beside the amateur '
                         'clips, and the best step is chosen on the sum of the two losses')
@@ -133,8 +174,14 @@ def main():
     if a.no_nasal:
         ama = [c for c in ama if not nasal(c[1])]
     real = labelled(a.real)
+    rules = {}
+    if a.rule_local:
+        withrules = judged(a.real)
+        real = [(x, t) for x, t, _ in withrules]
+        rules = {id(x): r for x, _, r in withrules}
+        print(f'rule-local: {sum(1 for r in rules.values() if r)} clips with judged sounds', flush=True)
     ama += real
-    real_ids = set() if a.anchor_real else {id(x) for x, _ in real}
+    real_ids = set() if (a.anchor_real or a.rule_local) else {id(x) for x, _ in real}
     anchor = None
     if a.anchor:
         from quran_muaalem import Muaalem
@@ -176,7 +223,8 @@ def main():
     for step in range(1, a.steps + 1):
         items = next(ga) if rng.random() < a.amateur_share else next(gp)
         if anchor is not None:
-            loss, akl = ctc(model, fe, items, anchor, [j for j, (x, _) in enumerate(items) if id(x) in real_ids])
+            loss, akl = ctc(model, fe, items, anchor, [j for j, (x, _) in enumerate(items) if id(x) in real_ids],
+                            {j: rules[id(x)] for j, (x, _) in enumerate(items) if id(x) in rules})
             loss = loss + a.anchor_weight * akl
         else:
             loss = ctc(model, fe, items)

@@ -40,6 +40,11 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 # feature projection, adapter and phoneme head), so they start from its pre-training.
 DEPTH = {'d6': [0, 4, 8, 13, 18, 23], 'd8': [0, 3, 6, 9, 12, 15, 19, 23],
          'd10': [0, 2, 5, 7, 10, 12, 15, 17, 20, 23]}
+# Slimmer students: a depth student's layers with a narrower feed-forward (the
+# teacher's 4096): d6h is d6 at 2048, 120M parameters instead of 170M. Started from a
+# d6 (--init) by keeping each feed-forward's most important neurons (prune_ffn).
+FFN = {'d6h': 2048}
+DEPTH['d6h'] = DEPTH['d6']
 SIZES = {'s150': (640, 16, 10), 's100': (512, 16, 8), 's75': (512, 12, 8),
          's50': (384, 16, 6), 's25': (256, 16, 4)}
 VOCAB = ['', 'ء', 'ب', 'ت', 'ث', 'ج', 'ح', 'خ', 'د', 'ذ', 'ر', 'ز', 'س', 'ش', 'ص', 'ض',
@@ -312,6 +317,8 @@ def student_config(teacher_model, size):
         cfg.num_hidden_layers = len(DEPTH[size])
         cfg.level_to_vocab_size = {'phonemes': 43}
         cfg.level_to_loss_weight = {'phonemes': 1.0}
+        if size in FFN:
+            cfg.intermediate_size = FFN[size]
         return cfg
     width, layers, heads = SIZES[size]
     cfg.hidden_size = cfg.output_hidden_size = width
@@ -336,9 +343,68 @@ def make_student(teacher_model, size):
                 i, tail = rest.split('.', 1)
                 name = f'{pre}.encoder.layers.{keep[int(i)]}.{tail}'
             out[k] = src[name].to(v.dtype)
+        if size in FFN:       # (a slimmer student's real start is its --init, pruned)
+            out = prune_ffn(out, FFN[size])
         s.load_state_dict(out)
     print(f'student {size}: {sum(p.numel() for p in s.parameters()) / 1e6:.1f}M parameters')
     return s
+
+
+def prune_ffn(state, width, scores=None):
+    """[state] (any depth student's, or a teacher's layers) with every feed-forward
+    (encoder ffn1 / ffn2, the adapter's ffn) cut to its [width] most important inner
+    neurons, kept in their original order. Importance: [scores] (per feed-forward,
+    from ffn_activity: each neuron's mean activation on real audio), else the product
+    of its input row's and output column's norms. (Started from v3.5, by activity the
+    pruned model's frames were 2.6x closer to v3.5's on the benchmark — KL 0.23
+    against 0.59; activity times the output norm was worse than either, 1.27.)"""
+    out = dict(state)
+    for k in list(state):
+        if not k.endswith('.intermediate_dense.weight'):
+            continue
+        base = k[:-len('.intermediate_dense.weight')]
+        w1, w2 = state[k], state[base + '.output_dense.weight']
+        if w1.shape[0] <= width:
+            continue
+        if scores is not None and base in scores:
+            score = scores[base].to(w2.device)
+        else:
+            score = w1.float().norm(dim=1) * w2.float().norm(dim=0)
+        keep = torch.topk(score, width).indices.sort().values
+        out[k] = w1[keep].clone()
+        out[base + '.intermediate_dense.bias'] = state[base + '.intermediate_dense.bias'][keep].clone()
+        out[base + '.output_dense.weight'] = w2[:, keep].clone()
+    return out
+
+
+def ffn_activity(teacher_model, size, init, data_dir, fe, clips_n=600):
+    """Per feed-forward of the full-width student [init] (a d6's weights), each inner
+    neuron's mean absolute activation over [clips_n] training clips."""
+    full = make_student(teacher_model, 'd6' if size == 'd6h' else size).to(DEV).eval()
+    full.load_state_dict(torch.load(init, map_location=DEV))
+    sums, counts, hooks = {}, {}, []
+    for name, mod in full.named_modules():
+        if name.endswith('.output_dense') and hasattr(mod, 'weight'):
+            base = name[:-len('.output_dense')]
+            def pre(m, inp, _b=base):
+                a = inp[0].detach().float().abs()
+                sums[_b] = sums.get(_b, 0) + a.reshape(-1, a.shape[-1]).sum(0)
+                counts[_b] = counts.get(_b, 0) + a.reshape(-1, a.shape[-1]).shape[0]
+            hooks.append(mod.register_forward_pre_hook(pre))
+    shards = sorted(glob.glob(os.path.join(data_dir, 'shard_[0-9][0-9][0-9][0-9].npz')))
+    rng, items = random.Random(0), []
+    for sh in rng.sample(shards, min(6, len(shards))):
+        c = clips(sh)
+        items += rng.sample(c, min(clips_n // 6, 100, len(c)))
+    with torch.no_grad():
+        for i in range(0, len(items), 8):
+            x, mask = featurize(fe, items[i:i + 8])
+            full(input_features=x, attention_mask=mask)
+    for h in hooks:
+        h.remove()
+    del full
+    prefix = 'wav2vec2_bert.'
+    return {(k if k.startswith(prefix) else prefix + k): sums[k] / counts[k] for k in sums}
 
 
 _gpu_fbank = None
@@ -417,6 +483,12 @@ TEMPO = 0.0   # share of clips sped up / slowed down, for teacher and student (-
 # marker), and frames where student and teacher disagree most, weigh more in the KL.
 HARD_W, FOCUS_W = 0.0, 0.0
 HARD_SYMBOLS = 'ن ں م ق ط ب ج د ذ ز ظ ث ض ص س ڇ'.split()
+# Short vowels (--vowel): frames the teacher hears as a fatha, damma or kasra weigh
+# more. The teachers catch case-ending swaps (-u said -a) 76-86% of the time, v3.5 10%:
+# a short final vowel is a frame or two among hundreds, and the plain KL lets the
+# student blur fatha / damma there.
+VOWEL_W = 0.0
+VOWEL_SYMBOLS = ['َ', 'ُ', 'ِ']
 VOCAB = ['', 'ء', 'ب', 'ت', 'ث', 'ج', 'ح', 'خ', 'د', 'ذ', 'ر', 'ز', 'س', 'ش', 'ص', 'ض', 'ط', 'ظ',
          'ع', 'غ', 'ف', 'ق', 'ك', 'ل', 'م', 'ن', 'ه', 'و', 'ي', 'ا', 'ۦ', 'ۥ', 'َ', 'ُ', 'ِ', '۪', 'ـ',
          'ٲ', 'ڇ', 'ں', '۾', 'ۜ', 'ؙ']   # the 43 phoneme classes (the app's own order)
@@ -617,8 +689,15 @@ def losses(teacher, student, fe, items, T, ctc_w, aug=0.0, coded=None, layers=No
         fm = mask[:, ::2][:, :n].float()
     kl = F.kl_div(F.log_softmax(sl / T, -1), F.log_softmax(tl / T, -1), log_target=True,
                   reduction='none').sum(-1)
-    if HARD_W > 0 or FOCUS_W > 0:
+    if HARD_W > 0 or FOCUS_W > 0 or VOWEL_W > 0:
         w = torch.ones_like(kl)
+        if VOWEL_W > 0:
+            vowel = torch.zeros(tl.shape[-1], device=tl.device)
+            for c in VOWEL_SYMBOLS:
+                vowel[VOCAB.index(c)] = 1.0
+            # The teacher's own weight on any short vowel (not only its top class):
+            # where it hears a vowel at all.
+            w = w + VOWEL_W * (F.softmax(tl, -1) * vowel).sum(-1).clamp(0, 1)
         if HARD_W > 0:
             hard = torch.zeros(tl.shape[-1], device=tl.device)
             for c in HARD_SYMBOLS:
@@ -704,6 +783,12 @@ def train(a):
     if a.init and not (a.resume and os.path.exists(ck)):
         # Continue from an earlier student of the same size (its EMA weights).
         w = torch.load(a.init, map_location=DEV)
+        if a.size in FFN:     # a wider student's weights, its feed-forwards pruned
+            scores = None
+            if a.prune_by_activity:
+                scores = ffn_activity(_base(t.model), a.size, a.init, a.data, fe)
+                print(f'pruning by activity on real audio ({len(scores)} feed-forwards)')
+            w = prune_ffn(w, FFN[a.size], scores)
         s.load_state_dict(w); ema.load_state_dict(w)
         print(f'initialised from {a.init}')
     if a.resume and os.path.exists(ck):
@@ -714,10 +799,10 @@ def train(a):
         print(f'resumed at step {step}')
     json.dump(dict(vars(a)), open(os.path.join(a.out, 'run.json'), 'w'), indent=1)
     val = clips(os.path.join(a.data, 'val.npz'))
-    global PITCH, REPEAT, TEMPO, EXTRA, HARD_W, FOCUS_W
+    global PITCH, REPEAT, TEMPO, EXTRA, HARD_W, FOCUS_W, VOWEL_W
     PITCH = a.pitch
     TEMPO, EXTRA = a.tempo, a.phone_extra
-    HARD_W, FOCUS_W = a.hard, a.focus
+    HARD_W, FOCUS_W, VOWEL_W = a.hard, a.focus, a.vowel
     if a.repeat:
         pre, times = a.repeat.split('=')
         REPEAT = (pre, int(times))
@@ -832,6 +917,11 @@ def main():
     p.add_argument('--seed', type=int, default=0)
     p.add_argument('--hard', type=float, default=0.0,
                    help='extra KL weight on frames of the hard sounds (HARD_SYMBOLS)')
+    p.add_argument('--prune-by-activity', action='store_true',
+                   help='a slimmer student (d6h): keep the feed-forward neurons that pass on the most '
+                        'on real training audio, not those with the largest weights')
+    p.add_argument('--vowel', type=float, default=0.0,
+                   help="extra KL weight on frames the teacher hears as a short vowel (case endings)")
     p.add_argument('--focus', type=float, default=0.0,
                    help='extra KL weight (up to this) on frames the student gets most wrong')
     p.add_argument('--tempo', type=float, default=0.0,

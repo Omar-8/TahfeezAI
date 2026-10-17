@@ -38,15 +38,32 @@ def sounds(aid, first, last):
     return [s for s in sounds_of(REF[str(aid)]) if first <= s[2] <= last]
 
 
+def marked(sounds, judged):
+    """(spoken ids, the indices among them of the sounds [judged] by the labels): the
+    rule-local teacher fine-tune learns from these clips only there."""
+    ids, rules = [], []
+    for k in range(len(sounds)):
+        n = len(spoken(sounds[:k + 1])) - len(ids)
+        if judged(k, sounds[k]):
+            rules += range(len(ids), len(ids) + n)
+        ids = spoken(sounds[:k + 1])
+    return ids, rules
+
+
 def ikhlas_target(case):
-    """The clip's transcript, or None when its mistakes are not known well enough."""
+    """(The clip's transcript, its judged sounds: every qalqala letter and its echo),
+    or None when its mistakes are not known well enough."""
     s = sounds(case['ayahId'], case['firstWord'], case['lastWord'])
     if case['category'] == 'ikhlas_correct':
-        return spoken(s)
-    if case['category'] == 'ikhlas_qalqala':
+        said = s
+    elif case['category'] == 'ikhlas_qalqala':
         words = set(case['targetWords'])
-        return spoken([x for x in s if not (x[0] == 'ڇ' and x[2] in words)])
-    return None
+        said = [x for x in s if not (x[0] == 'ڇ' and x[2] in words)]
+    else:
+        return None
+    # A qalqala letter: the sound before an echo in the expected text, said or not.
+    letters = {(s[k - 1][2], s[k - 1][0]) for k in range(1, len(s)) if s[k][0] == 'ڇ'}
+    return marked(said, lambda k, x: x[0] == 'ڇ' or (x[2], x[0]) in letters)
 
 
 def qdat_target(labels):
@@ -54,8 +71,10 @@ def qdat_target(labels):
     if labels is None or any(v is None for v in labels.values()):
         return None
     ok = {k: int(float(v)) == 1 for k, v in labels.items()}
-    out = []
+    out, judged = [], []
     for c, n, w in sounds(5109, 7, 14):
+        judged.append((w == 10 and c == 'ا' and n == 4) or (w == 11 and c == 'ن' and n == 4)
+                      or (w == 12 and c == 'ں'))
         if w == 10 and c == 'ا' and n == 4 and not ok['separate_tide']:
             n = 2  # «لَنَآ» before «إِنَّكَ»: the separate madd cut to 2
         if w == 11 and c == 'ن' and n == 4 and not ok['the_tight_noon']:
@@ -63,7 +82,7 @@ def qdat_target(labels):
         if w == 12 and c == 'ں' and not ok['concealment']:
             c, n = 'ن', 1  # «أَنتَ»: a plain noon, no ikhfa
         out.append((c, n, w))
-    return spoken(out)
+    return marked(out, lambda k, x: judged[k])
 
 
 def main():
@@ -88,10 +107,11 @@ def main():
                 blobs[f'c{len(held)}'] = audio[f'c{i}']
                 held.append(c)
                 continue
-            t = target(c)
-            if t is None:
+            got = target(c)
+            if got is None:
                 continue
-            train.append((audio[f'c{i}'], t, c['ayahId'], pack, c['category']))
+            t, rules = got
+            train.append((audio[f'c{i}'], t, c['ayahId'], pack, c['category'], rules))
         json.dump(held, open(os.path.join(ART, f'{pack}h_cases.json'), 'w'), ensure_ascii=False)
         np.savez(os.path.join(ART, f'{pack}h_audio.npz'), **blobs)
         stats[pack] = dict(speakers=len(speakers), test_speakers=len(test), test_clips=len(held))
@@ -104,10 +124,11 @@ def main():
                  audio=np.concatenate([np.clip(x, -1, 1) * 32767 for x, *_ in part]).astype(np.int16),
                  offsets=np.cumsum([0] + [len(x) for x, *_ in part]),
                  targets=np.array([t for _, t, *_ in part] + [None], dtype=object)[:-1],
+                 rules=np.array([r[-1] for r in part] + [None], dtype=object)[:-1],
                  ayahs=np.array([aid for _, _, aid, *_ in part], np.int32))
     from collections import Counter
     print(stats)
-    print(len(train), 'training clips:', dict(Counter(f'{p}/{c}' for *_, p, c in train)))
+    print(len(train), 'training clips:', dict(Counter(f'{x[3]}/{x[4]}' for x in train)))
 
 
 if __name__ == '__main__':
