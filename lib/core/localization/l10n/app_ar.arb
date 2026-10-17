@@ -355,6 +355,7 @@
   "followRangeSub": "المقطع كاملًا: القارئ، ثم أنت.",
   "followReciterTimes": "يتلو القارئ (مرات)",
   "followYourTimes": "تتلو أنت (مرات)",
+  "countUntilStopped": "حتى الإيقاف",
   "followStart": "ابدأ",
   "followYourTurn": "دورك — اتلُ الآن",
   "followReciterTurn": "استمع إلى {reciter}",

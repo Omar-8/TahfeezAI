@@ -355,6 +355,7 @@
   "followRangeSub": "পুরো পরিসর: কারী, তারপর আপনি।",
   "followReciterTimes": "কারী পড়বেন (বার)",
   "followYourTimes": "আপনি পড়বেন (বার)",
+  "countUntilStopped": "থামানো পর্যন্ত",
   "followStart": "শুরু",
   "followYourTurn": "আপনার পালা — এখন পড়ুন",
   "followReciterTurn": "{reciter}-এর তিলাওয়াত শুনুন",

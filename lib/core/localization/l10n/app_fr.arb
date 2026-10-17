@@ -355,6 +355,7 @@
   "followRangeSub": "Tout le passage : le récitateur, puis vous.",
   "followReciterTimes": "Le récitateur récite (fois)",
   "followYourTimes": "Vous récitez (fois)",
+  "countUntilStopped": "Jusqu'à l'arrêt",
   "followStart": "Commencer",
   "followYourTurn": "À vous — récitez maintenant",
   "followReciterTurn": "Écoutez {reciter}",

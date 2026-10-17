@@ -355,6 +355,7 @@
   "followRangeSub": "Todo el rango: el recitador, luego tú.",
   "followReciterTimes": "Recita el recitador (veces)",
   "followYourTimes": "Recitas tú (veces)",
+  "countUntilStopped": "Hasta detenerlo",
   "followStart": "Empezar",
   "followYourTurn": "Tu turno — recita ahora",
   "followReciterTurn": "Escucha a {reciter}",

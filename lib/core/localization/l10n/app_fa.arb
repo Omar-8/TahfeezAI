@@ -355,6 +355,7 @@
   "followRangeSub": "کل بازه: قاری، سپس شما.",
   "followReciterTimes": "تلاوت قاری (بار)",
   "followYourTimes": "تلاوت شما (بار)",
+  "countUntilStopped": "تا توقف",
   "followStart": "شروع",
   "followYourTurn": "نوبت شما — اکنون بخوانید",
   "followReciterTurn": "به {reciter} گوش دهید",

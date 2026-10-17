@@ -220,21 +220,49 @@ void main() {
     expect(hifz.loop!.count, 3);
   });
 
-  test('the whole range, each ayah twice: the reciter repeats each ayah in '
-      'turn, and the user loop repeats each ayah too', () async {
+  test('the whole range twice: the reciter, the user, then both again; '
+      'done after the second time', () async {
     await container
         .read(followAlongControllerProvider.notifier)
         .start(
           (chapterNo: 112, verseNo: 1),
-          (chapterNo: 112, verseNo: 3),
-          const FollowAlongOptions(unit: FollowAlongUnit.range, perAyah: 2),
+          (chapterNo: 112, verseNo: 2),
+          const FollowAlongOptions(unit: FollowAlongUnit.range, rangeRounds: 2),
         );
-    expect(container.read(quranAudioPlayerProvider)?.ayahIds, [
-      112001, 112001, 112002, 112002, 112003, 112003, //
-    ]);
-    audio.finish();
-    await Future<void>.delayed(Duration.zero);
-    expect(hifz.loop!.perAyah, 2);
+    for (final round in [1, 2]) {
+      expect(run()!.round, round);
+      expect(run()!.phase, FollowAlongPhase.reciter);
+      expect(container.read(quranAudioPlayerProvider)?.ayahIds, [
+        112001,
+        112002,
+      ]);
+      audio.finish();
+      await Future<void>.delayed(Duration.zero);
+      await userRecites(1);
+    }
+    expect(run(), isNull);
+  });
+
+  test('the whole range until stopped: round after round', () async {
+    await container
+        .read(followAlongControllerProvider.notifier)
+        .start(
+          (chapterNo: 112, verseNo: 1),
+          (chapterNo: 112, verseNo: 1),
+          const FollowAlongOptions(
+            unit: FollowAlongUnit.range,
+            rangeRounds: FollowAlongOptions.untilStopped,
+          ),
+        );
+    for (var i = 0; i < 12; i++) {
+      audio.finish();
+      await Future<void>.delayed(Duration.zero);
+      await userRecites(1);
+    }
+    expect(run()!.round, 13);
+    expect(run()!.phase, FollowAlongPhase.reciter);
+    await container.read(followAlongControllerProvider.notifier).stop();
+    expect(run(), isNull);
   });
 
   test('stopping the reciter, or the user\'s turn, ends the run', () async {

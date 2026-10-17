@@ -355,6 +355,7 @@
   "followRangeSub": "Seluruh rentang: qari, lalu Anda.",
   "followReciterTimes": "Qari membaca (kali)",
   "followYourTimes": "Anda membaca (kali)",
+  "countUntilStopped": "Sampai dihentikan",
   "followStart": "Mulai",
   "followYourTurn": "Giliran Anda — bacalah sekarang",
   "followReciterTurn": "Dengarkan {reciter}",

@@ -25,17 +25,17 @@ class FollowAlongOptions {
     this.unit = FollowAlongUnit.eachAyah,
     this.reciterTimes = 1,
     this.userTimes = 1,
-    this.perAyah = 1,
+    this.rangeRounds = 1,
     this.strict = false,
   });
 
   final FollowAlongUnit unit;
   final int reciterTimes, userTimes;
 
-  /// The whole range: within each time through it, every ayah this many
-  /// times before the next — by the reciter, then by the user (as Loop's
-  /// [HifzLoop.perAyah]).
-  final int perAyah;
+  /// The whole range: how many times through it (the reciter's turn and
+  /// the user's each time); [untilStopped] goes round until stopped.
+  final int rangeRounds;
+  static const untilStopped = 0;
 
   /// After the user's turn, a mistake in it (a word wrong or skipped, or a
   /// pronunciation mistake) means reciting it once more, until without.
@@ -47,13 +47,13 @@ class FollowAlongOptions {
     FollowAlongUnit? unit,
     int? reciterTimes,
     int? userTimes,
-    int? perAyah,
+    int? rangeRounds,
     bool? strict,
   }) => FollowAlongOptions(
     unit: unit ?? this.unit,
     reciterTimes: reciterTimes ?? this.reciterTimes,
     userTimes: userTimes ?? this.userTimes,
-    perAyah: perAyah ?? this.perAyah,
+    rangeRounds: rangeRounds ?? this.rangeRounds,
     strict: strict ?? this.strict,
   );
 }
@@ -68,7 +68,7 @@ class FollowAlongOptionsController
     'unit': value.unit.name,
     'reciterTimes': value.reciterTimes,
     'userTimes': value.userTimes,
-    'perAyah': value.perAyah,
+    'rangeRounds': value.rangeRounds,
     'strict': value.strict,
   };
 
@@ -84,7 +84,9 @@ class FollowAlongOptionsController
           FollowAlongUnit.eachAyah,
       reciterTimes: times('reciterTimes'),
       userTimes: times('userTimes'),
-      perAyah: times('perAyah'),
+      rangeRounds: json['rangeRounds'] is int
+          ? (json['rangeRounds'] as int).clamp(0, FollowAlongOptions.maxTimes)
+          : 1,
       strict: json['strict'] == true,
     );
   }
@@ -115,6 +117,7 @@ class FollowAlongState {
     required this.index,
     required this.phase,
     required this.options,
+    this.round = 1,
     this.again = false,
   });
 
@@ -122,6 +125,9 @@ class FollowAlongState {
   final int index;
   final FollowAlongPhase phase;
   final FollowAlongOptions options;
+
+  /// The whole range: which time through it this is (from 1).
+  final int round;
 
   /// Strict: the user's turn again, after a mistake.
   final bool again;
@@ -131,12 +137,14 @@ class FollowAlongState {
   FollowAlongState copyWith({
     int? index,
     FollowAlongPhase? phase,
+    int? round,
     bool again = false,
   }) => FollowAlongState(
     parts: parts,
     index: index ?? this.index,
     phase: phase ?? this.phase,
     options: options,
+    round: round ?? this.round,
     again: again,
   );
 }
@@ -230,14 +238,8 @@ class FollowAlongController extends Notifier<FollowAlongState?> {
   Future<bool> _reciterTurn() async {
     final s = state;
     if (s == null) return false;
-    // The whole range with each ayah repeated: a, a, b, b, … each time.
-    final each = s.options.unit == FollowAlongUnit.range
-        ? s.options.perAyah
-        : 1;
     final played = await ref.read(quranAudioPlayerProvider.notifier).playAyahs([
-      for (var r = 0; r < s.options.reciterTimes; r++)
-        for (final a in s.part)
-          for (var k = 0; k < each; k++) a,
+      for (var r = 0; r < s.options.reciterTimes; r++) ...s.part,
     ], options: const ListenOptions());
     if (!played) _end();
     return played;
@@ -268,9 +270,6 @@ class FollowAlongController extends Notifier<FollowAlongState?> {
           HifzLoop(
             mode: HifzLoopMode.range,
             count: times ?? s.options.userTimes,
-            perAyah: s.options.unit == FollowAlongUnit.range
-                ? s.options.perAyah
-                : 1,
           ),
           // The ayahs before the one recited stay readable.
           showBefore: true,
@@ -341,7 +340,19 @@ class FollowAlongController extends Notifier<FollowAlongState?> {
 
   Future<void> _nextPart(FollowAlongState s) async {
     if (s.index + 1 >= s.parts.length) {
-      _end();
+      // The whole range: round again, from its reciter's turn.
+      final rounds = s.options.rangeRounds;
+      if (s.options.unit == FollowAlongUnit.range &&
+          (rounds == FollowAlongOptions.untilStopped || s.round < rounds)) {
+        state = s.copyWith(
+          index: 0,
+          phase: FollowAlongPhase.reciter,
+          round: s.round + 1,
+        );
+        await _reciterTurn();
+      } else {
+        _end();
+      }
       return;
     }
     state = s.copyWith(index: s.index + 1, phase: FollowAlongPhase.reciter);

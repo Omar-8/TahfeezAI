@@ -355,6 +355,7 @@
   "followRangeSub": "Tüm aralık: kâri, sonra siz.",
   "followReciterTimes": "Kâri okur (kez)",
   "followYourTimes": "Siz okursunuz (kez)",
+  "countUntilStopped": "Durdurulana kadar",
   "followStart": "Başla",
   "followYourTurn": "Sıra sizde — şimdi okuyun",
   "followReciterTurn": "{reciter} dinleniyor",

@@ -355,6 +355,7 @@
   "followRangeSub": "Весь диапазон: чтец, затем вы.",
   "followReciterTimes": "Читает чтец (раз)",
   "followYourTimes": "Читаете вы (раз)",
+  "countUntilStopped": "До остановки",
   "followStart": "Начать",
   "followYourTurn": "Ваша очередь — читайте",
   "followReciterTurn": "Слушайте: {reciter}",

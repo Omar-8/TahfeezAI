@@ -778,6 +778,7 @@
   "followRangeSub": "The whole range: the reciter, then you.",
   "followReciterTimes": "Reciter recites (times)",
   "followYourTimes": "You recite (times)",
+  "countUntilStopped": "Until stopped",
   "followStart": "Start",
   "followYourTurn": "Your turn — recite now",
   "followReciterTurn": "Listen to {reciter}",

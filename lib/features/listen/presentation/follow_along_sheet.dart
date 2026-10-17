@@ -128,19 +128,25 @@ class _FollowAlongSheetState extends ConsumerState<_FollowAlongSheet> {
         ),
       ),
     );
-    Widget stepper(String text, String id, int value, ValueChanged<int> set) =>
-        Row(
-          children: [
-            Expanded(child: Text(text, style: theme.textTheme.bodyLarge)),
-            CountStepper(
-              id: id,
-              value: value,
-              min: 1,
-              max: FollowAlongOptions.maxTimes,
-              onChanged: (n) => setState(() => set(n)),
-            ),
-          ],
-        );
+    Widget stepper(
+      String text,
+      String id,
+      int value,
+      ValueChanged<int> set, {
+      bool untilStopped = false,
+    }) => Row(
+      children: [
+        Expanded(child: Text(text, style: theme.textTheme.bodyLarge)),
+        CountStepper(
+          id: id,
+          value: value,
+          min: 1,
+          max: FollowAlongOptions.maxTimes,
+          untilStopped: untilStopped,
+          onChanged: (n) => setState(() => set(n)),
+        ),
+      ],
+    );
 
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(
@@ -237,14 +243,6 @@ class _FollowAlongSheetState extends ConsumerState<_FollowAlongSheet> {
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
                   ),
-                  // The whole range: each ayah repeated within it.
-                  if (!eachAyah)
-                    stepper(
-                      l10n.recLoopPerAyah,
-                      'follow-per-ayah',
-                      _options.perAyah,
-                      (n) => _options = _options.copyWith(perAyah: n),
-                    ),
                   stepper(
                     l10n.followReciterTimes,
                     'follow-reciter-times',
@@ -257,6 +255,15 @@ class _FollowAlongSheetState extends ConsumerState<_FollowAlongSheet> {
                     _options.userTimes,
                     (n) => _options = _options.copyWith(userTimes: n),
                   ),
+                  // The whole range: round again, or until stopped.
+                  if (!eachAyah)
+                    stepper(
+                      l10n.listenRepeatRange,
+                      'follow-range-rounds',
+                      _options.rangeRounds,
+                      (n) => _options = _options.copyWith(rangeRounds: n),
+                      untilStopped: true,
+                    ),
                   GuideTarget(
                     id: 'follow-strict',
                     child: SwitchListTile(

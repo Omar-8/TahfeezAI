@@ -355,6 +355,7 @@
   "followRangeSub": "Der ganze Abschnitt: der Rezitator, dann du.",
   "followReciterTimes": "Rezitator rezitiert (Mal)",
   "followYourTimes": "Du rezitierst (Mal)",
+  "countUntilStopped": "Bis zum Stoppen",
   "followStart": "Starten",
   "followYourTurn": "Du bist dran — rezitiere jetzt",
   "followReciterTurn": "Hör {reciter} zu",

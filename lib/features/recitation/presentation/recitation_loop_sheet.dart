@@ -525,15 +525,27 @@ class CountStepper extends StatelessWidget {
     required this.min,
     required this.max,
     required this.onChanged,
+    this.untilStopped = false,
   });
 
   final String id;
   final int value, min, max;
   final ValueChanged<int> onChanged;
 
+  /// One more choice past [max]: ∞, until stopped, as the value 0.
+  final bool untilStopped;
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final endless = untilStopped && value == 0;
+    Widget shown(int v) => v == 0
+        ? Semantics(
+            label: AppLocalizations.of(context).countUntilStopped,
+            excludeSemantics: true,
+            child: const Text('∞'),
+          )
+        : Text('$v');
     return Container(
       key: ValueKey(id),
       padding: const EdgeInsets.all(TahfeezSpacing.xs),
@@ -548,7 +560,11 @@ class CountStepper extends StatelessWidget {
             key: ValueKey('$id-minus'),
             visualDensity: VisualDensity.compact,
             icon: const Icon(Icons.remove_rounded),
-            onPressed: value > min ? () => onChanged(value - 1) : null,
+            onPressed: endless
+                ? () => onChanged(max)
+                : value > min
+                ? () => onChanged(value - 1)
+                : null,
           ),
           PopupMenuButton<int>(
             key: ValueKey('$id-value'),
@@ -557,16 +573,18 @@ class CountStepper extends StatelessWidget {
             constraints: const BoxConstraints(maxHeight: 320),
             itemBuilder: (context) => [
               for (var v = min; v <= max; v++)
-                PopupMenuItem(value: v, height: 40, child: Text('$v')),
+                PopupMenuItem(value: v, height: 40, child: shown(v)),
+              if (untilStopped)
+                PopupMenuItem(value: 0, height: 40, child: shown(0)),
             ],
             child: SizedBox(
               width: 48,
-              child: Text(
-                '$value',
+              child: DefaultTextStyle.merge(
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontFeatures: const [FontFeature.tabularFigures()],
                 ),
+                child: shown(value),
               ),
             ),
           ),
@@ -574,7 +592,13 @@ class CountStepper extends StatelessWidget {
             key: ValueKey('$id-plus'),
             visualDensity: VisualDensity.compact,
             icon: const Icon(Icons.add_rounded),
-            onPressed: value < max ? () => onChanged(value + 1) : null,
+            onPressed: endless
+                ? null
+                : value < max
+                ? () => onChanged(value + 1)
+                : untilStopped
+                ? () => onChanged(0)
+                : null,
           ),
         ],
       ),
