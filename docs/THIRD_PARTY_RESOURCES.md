@@ -195,6 +195,9 @@ on RetaSy's amateur clips (`distill_student.py --guide`).
 | Iqra_Extra_IS26 (Iqra'Eval, gated) | Student audio, 1,330 learner clips | **No licence** on its Hugging Face card | **Shipped with credit by owner decision, 2026-10-18** |
 | QuranMB.v2 (Iqra'Eval), even-numbered speakers | Student audio (the odd-numbered speakers stay a held-out test) | **Not stated** by the dataset | **Shipped with credit by owner decision, 2026-10-18** |
 | The owner's own recordings | Student audio | The owner agreed to training on them, 2026-10-17 | Permitted |
+| Quran-Lab quran-tajweed-phonetics (https://huggingface.co/datasets/Quran-Lab/quran-tajweed-phonetics) | Reference (not shipped): audit of the app's pronunciation reference (2026-10-18) | **Quran-Lab No-Profit License 1.2**: free to use and adapt, share-alike, never sold nor powering a paid feature | Usable: owner decision 2026-10-18, Tahfeez stays free. Audit result: all 51,304 madd lengths and every nasal rule agree; differences only in labelling (disconnected letters split per letter; idgham into meem written as a doubled meem). Anything derived from it falls under the same licence |
+| Quran-Lab quranic-asr-benchmark, Tarteel users' part (`tlog_holdout`, 200 clips) | Test pack `tlog` (laptop only) | Quran-Lab NPL 1.2, gated: evaluation only, no redistribution | Evaluation only; never trained on, never shipped |
+| Quran-Lab mfa-quran-hafs (MFA aligner) | Tool (not shipped): ghunnah length measurement | **Apache 2.0** | Permitted |
 | Quran Juz 30 Recitation Audio (Kaggle `afsahurrehman11/quran-juz-30-recitation-audio-dataset`), crowd-sourced part only | Candidate G4 (not shipped): student audio judged by v3.5 (`juz30_data.py`) | **Apache 2.0** | Permitted (credit if shipped) |
 
 **Owner decision, 2026-10-18: v3.6 replaces v3.5 in the app**, at its strict
