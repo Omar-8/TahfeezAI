@@ -148,6 +148,29 @@ class SoundMargins {
   final double error, uncertain;
 }
 
+/// The tajweed rules the pronunciation check can judge, each on or off
+/// ([AcousticThresholds.tajweedRules]).
+enum TajweedRule {
+  /// Ikhfāʾ: a sākin nūn or tanween hidden («ں»), not said as a clear «ن».
+  ikhfa,
+
+  /// Iqlāb: a nūn or tanween before «ب» turned to a hidden «م» («۾»).
+  iqlab,
+
+  /// Ikhfāʾ shafawī: a sākin mīm before «ب» hidden («۾»).
+  ikhfaShafawi,
+
+  /// Idghām of a nūn or tanween: merged into the next letter, not said
+  /// clearly.
+  idgham,
+
+  /// Qalqala: the echo of a sākin «ق ط ب ج د».
+  qalqala,
+
+  /// A madd of four or six counts held long enough.
+  madd,
+}
+
 /// Configurable decision thresholds, in nats of log-likelihood.
 class AcousticThresholds {
   const AcousticThresholds({
@@ -165,7 +188,15 @@ class AcousticThresholds {
     this.maddShare = QuranAcousticVerifier.maddShortShare,
     this.mistakeEntropy,
     this.ghunnahHold,
+    this.tajweedRules,
   });
+
+  /// With [tajweed]: the rules judged; `null`: every one.
+  final Set<TajweedRule>? tajweedRules;
+
+  /// Whether [rule] is judged.
+  bool judges(TajweedRule rule) =>
+      tajweed && (tajweedRules?.contains(rule) ?? true);
 
   /// With [tajweed]: a doubled «ن» / «م» (ghunnah) whose plain letter stays
   /// likely (≥ 30%, its frames and 3 either side) for more than this many of
@@ -239,6 +270,7 @@ class AcousticThresholds {
     double? maddShare,
     double? mistakeEntropy,
     double? ghunnahHold,
+    Set<TajweedRule>? tajweedRules,
   }) => AcousticThresholds(
     error: error ?? this.error,
     letterError: letterError ?? this.letterError,
@@ -254,6 +286,7 @@ class AcousticThresholds {
     maddShare: maddShare ?? this.maddShare,
     mistakeEntropy: mistakeEntropy ?? this.mistakeEntropy,
     ghunnahHold: ghunnahHold ?? this.ghunnahHold,
+    tajweedRules: tajweedRules ?? this.tajweedRules,
   );
 
   /// The expected pronunciation must beat every alternative by this much
@@ -712,6 +745,7 @@ class QuranAcousticVerifier {
       // «بِهِۦٓ أَحَدًا») is long only joined to the next word; at a stop
       // it is a natural madd of two.
       if (beat != null &&
+          thresholds.judges(TajweedRule.madd) &&
           span != null &&
           t.kind == PhoneticTokenKind.long &&
           t.count >= 4 &&
@@ -760,7 +794,9 @@ class QuranAcousticVerifier {
           continue;
         }
       }
-      if (thresholds.tajweed && t.optional && t.token == _qalqalaEcho) {
+      if (thresholds.judges(TajweedRule.qalqala) &&
+          t.optional &&
+          t.token == _qalqalaEcho) {
         out.add(_qalqala(frames, expected, spans, labels, k));
         continue;
       }
@@ -788,7 +824,7 @@ class QuranAcousticVerifier {
       final competitor = quranPhoneticVocabulary[best];
       final alternatives = [
         for (final a in _alternatives(expected, k))
-          if (thresholds.tajweed || !a.tajweed) a,
+          if (a.rule == null || thresholds.judges(a.rule!)) a,
       ];
       if (alternatives.isEmpty) {
         out.add(
@@ -1289,7 +1325,11 @@ class QuranAcousticVerifier {
                 RecitationErrorType.wrongLetter,
                 quranPhoneticVocabulary[plain],
                 [plain],
-                tajweed: true,
+                rule: t.symbol == 'ں'
+                    ? TajweedRule.ikhfa
+                    : t.sourceChar == 'م'
+                    ? TajweedRule.ikhfaShafawi
+                    : TajweedRule.iqlab,
               ),
             ];
     }
@@ -1303,7 +1343,7 @@ class QuranAcousticVerifier {
           RecitationErrorType.shaddaError,
           'NO_SHADDA',
           const [],
-          tajweed: merged != null,
+          rule: merged != null ? TajweedRule.idgham : null,
         ),
       ];
     }
@@ -1326,7 +1366,7 @@ class QuranAcousticVerifier {
             RecitationErrorType.wrongLetter,
             quranPhoneticVocabulary[c],
             [c],
-            tajweed: c == merged,
+            rule: c == merged ? TajweedRule.idgham : null,
           ),
       if (!followsVowel && !doubled && !qalqala)
         for (final v in ShortVowel.values)
@@ -1367,18 +1407,13 @@ int? _mergedFrom(PhoneticToken t) {
 }
 
 class _Alternative {
-  const _Alternative(
-    this.type,
-    this.observed,
-    this.tokens, {
-    this.tajweed = false,
-  });
+  const _Alternative(this.type, this.observed, this.tokens, {this.rule});
   final RecitationErrorType type;
   final String observed;
   final List<int> tokens;
 
-  /// A tajweed mistake (not judged with tajweed off).
-  final bool tajweed;
+  /// A tajweed mistake's rule (judged only when it is on); `null`: not tajweed.
+  final TajweedRule? rule;
 }
 
 /// The reciter's beat (one haraka, in frames) across a session: each check

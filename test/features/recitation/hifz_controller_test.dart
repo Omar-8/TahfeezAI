@@ -343,6 +343,23 @@ void main() {
     },
   );
 
+  test('tajweed rules: every one until chosen, then as saved', () {
+    expect(
+      HifzSettings.fromJson({}).tajweedRules,
+      HifzSettings.allTajweedRules,
+    );
+    final some = HifzSettings(tajweedRules: {TajweedRule.madd});
+    expect(HifzSettings.fromJson(some.toJson()).tajweedRules, {
+      TajweedRule.madd,
+    });
+    expect(
+      HifzSettings.fromJson({
+        'tajweedRules': ['qalqala', 'unknown'],
+      }).tajweedRules,
+      {TajweedRule.qalqala},
+    );
+  });
+
   test('a saved vibrate switch becomes the vibrate alert', () {
     expect(HifzSettings.fromJson({'vibrate': false}).alert, MistakeAlert.off);
     expect(

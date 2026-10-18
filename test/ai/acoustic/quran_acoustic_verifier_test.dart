@@ -287,6 +287,41 @@ void main() {
       isNot(RecitationErrorType.maddShort),
       reason: 'tajweed off',
     );
+    // The madd rule alone off; another rule's mistake is still judged.
+    const noMadd = QuranAcousticVerifier(
+      thresholds: AcousticThresholds(
+        tajweedRules: {TajweedRule.ikhfa, TajweedRule.qalqala},
+      ),
+    );
+    expect(
+      noMadd.verify(clearFrames(said(cut: true)), expected)[k].type,
+      isNot(RecitationErrorType.maddShort),
+      reason: 'madd off',
+    );
+    final ikhfa = expected.indexWhere((t) => t.symbol == 'ں');
+    // «أَنتَ»'s hidden noon said as a clear «ن».
+    final plain = [
+      for (var i = 0; i < expected.length; i++)
+        if (expected[i].kind == PhoneticTokenKind.long)
+          ...List.filled(
+            expected[i].count,
+            i == ikhfa ? phoneticClassOf('ن') : expected[i].token,
+          )
+        else
+          expected[i].token,
+    ];
+    expect(
+      noMadd.verify(clearFrames(plain), expected)[ikhfa].type,
+      RecitationErrorType.wrongLetter,
+      reason: 'ikhfa still on',
+    );
+    expect(
+      const QuranAcousticVerifier(
+        thresholds: AcousticThresholds(tajweedRules: {TajweedRule.madd}),
+      ).verify(clearFrames(plain), expected)[ikhfa].type,
+      isNot(RecitationErrorType.wrongLetter),
+      reason: 'ikhfa off',
+    );
   });
 
   test(

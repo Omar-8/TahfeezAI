@@ -487,6 +487,13 @@
   "recIkhfaShafawi": "ikhfāʾ shafawī: the «م» before «ب» is hidden with ghunnah",
   "recTajweed": "Tajweed",
   "recTajweedSub": "Check tajweed rules too: idghām, ikhfāʾ, iqlāb, qalqala and madd length. Off: only letters and vowels.",
+  "ruleIkhfa": "Ikhfa (hidden noon)",
+  "ruleIqlab": "Iqlab (noon before ب)",
+  "ruleIkhfaShafawi": "Ikhfa shafawi (meem before ب)",
+  "ruleIdgham": "Idgham (noon merged)",
+  "ruleQalqala": "Qalqala",
+  "ruleMadd": "Madd length",
+  "tajweedRulesNote": "Not checked yet: how long a ghunnah is held, and idgham of meem.",
   "recQalqala": "qalqala: «{letter}» with sukun needs its echo (a slight bounce)",
   "@recQalqala": {
     "placeholders": {

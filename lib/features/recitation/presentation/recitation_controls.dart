@@ -1526,6 +1526,46 @@ class _HifzSettingsSheet extends ConsumerWidget {
               settings.tajweed,
               (v) => settings.copyWith(tajweed: v),
             ),
+            // Each rule on or off, under tajweed.
+            if (settings.tajweed) ...[
+              for (final (rule, name) in [
+                (TajweedRule.ikhfa, AppLocalizations.of(context).ruleIkhfa),
+                (TajweedRule.iqlab, AppLocalizations.of(context).ruleIqlab),
+                (
+                  TajweedRule.ikhfaShafawi,
+                  AppLocalizations.of(context).ruleIkhfaShafawi,
+                ),
+                (TajweedRule.idgham, AppLocalizations.of(context).ruleIdgham),
+                (TajweedRule.qalqala, AppLocalizations.of(context).ruleQalqala),
+                (TajweedRule.madd, AppLocalizations.of(context).ruleMadd),
+              ])
+                CheckboxListTile(
+                  key: ValueKey('tajweed-rule-${rule.name}'),
+                  dense: true,
+                  contentPadding: const EdgeInsetsDirectional.only(
+                    start: 32,
+                    end: 16,
+                  ),
+                  title: Text(name),
+                  value: settings.tajweedRules.contains(rule),
+                  onChanged: (v) => controller.update(
+                    settings.copyWith(
+                      tajweedRules: v == true
+                          ? {...settings.tajweedRules, rule}
+                          : ({...settings.tajweedRules}..remove(rule)),
+                    ),
+                  ),
+                ),
+              Padding(
+                padding: const EdgeInsetsDirectional.fromSTEB(32, 0, 16, 8),
+                child: Text(
+                  AppLocalizations.of(context).tajweedRulesNote,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+            ],
             toggle(
               AppLocalizations.of(context).recShowMistakes,
               AppLocalizations.of(context).recShowMistakesSub,

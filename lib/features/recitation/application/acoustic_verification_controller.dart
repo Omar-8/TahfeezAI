@@ -433,15 +433,16 @@ class AcousticVerificationController
 
   /// [verifier] judging tajweed or not, as the Hifz settings say.
   QuranAcousticVerifier _withTajweed(QuranAcousticVerifier verifier) {
-    final tajweed = ref.read(hifzSettingsProvider).tajweed;
+    final settings = ref.read(hifzSettingsProvider);
+    final tajweed = settings.tajweed;
     // The streaming model (v3.4): a missing vowel or sukun at 2, not 3.
     // Learners' «كُفُوًا» said «كُفْوًا» (Surah Al-Ikhlas set): marked 24% -> 34%;
     // the user's correct words flagged 6.1% -> 6.3%, amateurs' correct clips
     // 8.7% -> 10.1%, calibration unchanged.
-    if (tajweed && !_streaming) return verifier;
     return QuranAcousticVerifier(
       thresholds: verifier.thresholds.copyWith(
         tajweed: tajweed,
+        tajweedRules: settings.tajweedRules,
         error: _streaming ? streamingError : null,
         letterError: _streaming ? streamingError : null,
         shaddaError: _streaming ? streamingError : null,

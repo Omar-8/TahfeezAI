@@ -1,3 +1,4 @@
+import '../../../ai/acoustic/quran_acoustic_verifier.dart' show TajweedRule;
 import '../../../memorization/application/activity_stats.dart';
 
 import 'dart:async';
@@ -65,8 +66,21 @@ class HifzSettings {
     this.alert = MistakeAlert.vibrate,
     this.colorWords = true,
     this.tajweed = true,
+    this.tajweedRules = allTajweedRules,
     this.sajdahReminder = true,
   });
+
+  static const allTajweedRules = {
+    TajweedRule.ikhfa,
+    TajweedRule.iqlab,
+    TajweedRule.ikhfaShafawi,
+    TajweedRule.idgham,
+    TajweedRule.qalqala,
+    TajweedRule.madd,
+  };
+
+  /// With [tajweed]: the rules judged (each can be turned off).
+  final Set<TajweedRule> tajweedRules;
 
   /// Reciting an ayah of prostration: a reminder of Sujood al-Tilawah
   /// (once per app session).
@@ -98,6 +112,7 @@ class HifzSettings {
     MistakeAlert? alert,
     bool? colorWords,
     bool? tajweed,
+    Set<TajweedRule>? tajweedRules,
     bool? sajdahReminder,
   }) => HifzSettings(
     strict: strict ?? this.strict,
@@ -106,6 +121,7 @@ class HifzSettings {
     alert: alert ?? this.alert,
     colorWords: colorWords ?? this.colorWords,
     tajweed: tajweed ?? this.tajweed,
+    tajweedRules: tajweedRules ?? this.tajweedRules,
     sajdahReminder: sajdahReminder ?? this.sajdahReminder,
   );
 
@@ -116,6 +132,7 @@ class HifzSettings {
     'alert': alert.name,
     'colorWords': colorWords,
     'tajweed': tajweed,
+    'tajweedRules': [for (final r in tajweedRules) r.name],
     'sajdahReminder': sajdahReminder,
   };
 
@@ -133,6 +150,13 @@ class HifzSettings {
           (read('vibrate', true) ? MistakeAlert.vibrate : MistakeAlert.off),
       colorWords: read('colorWords', true),
       tajweed: read('tajweed', true),
+      // (Saved before the per-rule choice: every rule.)
+      tajweedRules: json['tajweedRules'] is List
+          ? {
+              for (final n in json['tajweedRules'] as List)
+                ?TajweedRule.values.asNameMap()[n],
+            }
+          : allTajweedRules,
       sajdahReminder: read('sajdahReminder', true),
     );
   }
