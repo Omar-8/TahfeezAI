@@ -156,6 +156,20 @@ def clips(path):
 
 REPEAT = []   # [(shard name prefix, times)]: oversampled shards (set by --repeat)
 
+# --trust: shards (name prefixes) whose transcripts outrank the teacher. A clip of theirs
+# with a transcript (retasy_data.py: an amateur's ayah judged correct) has its KL to the
+# teacher scaled by TRUST_KL and its CTC by TRUST_CTC — the teachers flag 9-13% of such
+# amateurs' correct words (v3.5 2-3%), and a student close to them inherits it.
+TRUST, TRUST_KL, TRUST_CTC = [], 1.0, 1.0
+# --guide: a second teacher (an earlier student, e.g. v3.5, gentle with amateurs where the
+# teachers are not) for the shards GUIDE_PRE, its KL weighed GUIDE_W against the teachers'.
+GUIDE, GUIDE_PRE, GUIDE_W = None, [], 0.0
+
+
+class Tagged(list):
+    """A transcript from a --trust (its [trusted]) or --guide ([guided]) shard."""
+    trusted = guided = False
+
 
 def batches(data_dir, max_audio_s, seed):
     """Endless batches with at most max_audio_s seconds of (padded) audio."""
@@ -167,6 +181,15 @@ def batches(data_dir, max_audio_s, seed):
         rng.shuffle(shards)
         for sh in shards:
             items = clips(sh)
+            base = os.path.basename(sh)
+            trusted = any(base.startswith(pre) for pre in TRUST)
+            guided = GUIDE is not None and any(base.startswith(pre) for pre in GUIDE_PRE)
+            if trusted or guided:
+                tagged = []
+                for x, t in items:
+                    t = Tagged(t); t.trusted, t.guided = trusted, guided
+                    tagged.append((x, t))
+                items = tagged
             items.sort(key=lambda c: len(c[0]))
             groups, cur = [], []
             for c in items:                       # length-bucketed batches
@@ -689,6 +712,16 @@ def losses(teacher, student, fe, items, T, ctc_w, aug=0.0, coded=None, layers=No
         fm = mask[:, ::2][:, :n].float()
     kl = F.kl_div(F.log_softmax(sl / T, -1), F.log_softmax(tl / T, -1), log_target=True,
                   reduction='none').sum(-1)
+    guided = [getattr(t, 'guided', False) for _, t in items]
+    if any(guided):
+        # The second teacher hears what the student hears (it streams the same chunks).
+        with torch.no_grad(), torch.autocast(DEV, dtype=torch.bfloat16, enabled=DEV == 'cuda'):
+            gl = GUIDE(input_features=xs, attention_mask=smask, return_dict=True).logits['phonemes']
+        gl = gl.float()[:, :sl.shape[1]]
+        kl_g = F.kl_div(F.log_softmax(sl / T, -1), F.log_softmax(gl / T, -1), log_target=True,
+                        reduction='none').sum(-1)
+        g = torch.tensor(guided, device=kl.device)[:, None]
+        kl = torch.where(g, (1 - GUIDE_W) * kl + GUIDE_W * kl_g, kl)
     if HARD_W > 0 or FOCUS_W > 0 or VOWEL_W > 0:
         w = torch.ones_like(kl)
         if VOWEL_W > 0:
@@ -707,9 +740,12 @@ def losses(teacher, student, fe, items, T, ctc_w, aug=0.0, coded=None, layers=No
             mean = (kl * fm).sum() / fm.sum().clamp_min(1)
             w = w + FOCUS_W * (kl.detach() / mean.detach().clamp_min(1e-6)).clamp(0, 3) / 3
         w = w / ((w * fm).sum() / fm.sum().clamp_min(1))   # same overall scale
-        loss_kl = (kl * w * fm).sum() / fm.sum() * T * T
     else:
-        loss_kl = (kl * fm).sum() / fm.sum() * T * T
+        w = torch.ones_like(kl)
+    trusted = [getattr(t, 'trusted', False) and len(t) > 0 for _, t in items]
+    if any(trusted):
+        w = w * torch.tensor([TRUST_KL if tr else 1.0 for tr in trusted], device=kl.device)[:, None]
+    loss_kl = (kl * w * fm).sum() / fm.sum() * T * T
     # CTC only for clips with a transcript (diverse_data.py clips have none: there the
     # teacher's distribution is the whole target).
     keep = [j for j, (_, t) in enumerate(items)
@@ -717,9 +753,11 @@ def losses(teacher, student, fe, items, T, ctc_w, aug=0.0, coded=None, layers=No
     if keep:
         targets = torch.tensor([i for j in keep for i in items[j][1]], device=DEV)
         lengths = torch.tensor([len(items[j][1]) for j in keep], device=DEV)
-        loss_ctc = F.ctc_loss(F.log_softmax(sl[keep], -1).transpose(0, 1), targets,
-                              fm[keep].sum(1).long(), lengths, blank=0, zero_infinity=True,
-                              reduction='mean')
+        per = F.ctc_loss(F.log_softmax(sl[keep], -1).transpose(0, 1), targets,
+                         fm[keep].sum(1).long(), lengths, blank=0, zero_infinity=True,
+                         reduction='none') / lengths.clamp_min(1)
+        cw = torch.tensor([TRUST_CTC if trusted[j] else 1.0 for j in keep], device=per.device)
+        loss_ctc = (per * cw).mean()   # as reduction='mean', the trusted clips weighed
     else:
         loss_ctc = torch.zeros((), device=sl.device)
     return loss_kl, loss_ctc, loss_hid
@@ -799,7 +837,22 @@ def train(a):
         print(f'resumed at step {step}')
     json.dump(dict(vars(a)), open(os.path.join(a.out, 'run.json'), 'w'), indent=1)
     val = clips(os.path.join(a.data, 'val.npz'))
-    global PITCH, REPEAT, TEMPO, EXTRA, HARD_W, FOCUS_W, VOWEL_W
+    global PITCH, REPEAT, TEMPO, EXTRA, HARD_W, FOCUS_W, VOWEL_W, TRUST, TRUST_KL, TRUST_CTC
+    global GUIDE, GUIDE_PRE, GUIDE_W
+    if a.guide:
+        path, pre, gw = a.guide.split(':')
+        GUIDE = make_student(_base(t.model), 'd6').to(DEV).eval()
+        GUIDE.load_state_dict(torch.load(path, map_location=DEV))
+        for p in GUIDE.parameters():
+            p.requires_grad_(False)
+        if a.stream:
+            import streaming
+            print('guide streaming:', streaming.enable(GUIDE, *streaming.parse(a.stream)), 'attention layers')
+        GUIDE_PRE, GUIDE_W = pre.split('+'), float(gw)
+        print(f'guide {path} on {GUIDE_PRE}, weight {GUIDE_W}')
+    if a.trust:
+        pre, kl_s, ctc_s = a.trust.split(':')
+        TRUST, TRUST_KL, TRUST_CTC = pre.split('+'), float(kl_s), float(ctc_s)
     PITCH = a.pitch
     TEMPO, EXTRA = a.tempo, a.phone_extra
     HARD_W, FOCUS_W, VOWEL_W = a.hard, a.focus, a.vowel
@@ -931,6 +984,12 @@ def main():
                         'larger rooms')
     p.add_argument('--pitch', type=float, default=0.0,
                    help='share of degraded clips pitch-shifted up (higher voices)')
+    p.add_argument('--trust', default='',
+                   help='shard prefixes (+-joined) whose transcripts outrank the teacher, '
+                        'with the KL and CTC scales: shard_95:0.2:20 (see TRUST)')
+    p.add_argument('--guide', default='',
+                   help='a second teacher for some shards: its d6 student.pt, the shard '
+                        'prefixes (+-joined) and its weight: init/v35s/student.pt:shard_95:0.7')
     p.add_argument('--repeat', default='',
                    help='shard name prefixes to repeat, and how often: e.g. shard_95=6,shard_97=8')
     p.add_argument('--crop', type=float, default=0.0,
