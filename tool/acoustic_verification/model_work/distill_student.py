@@ -335,6 +335,13 @@ class TeacherMix(torch.nn.Module):
     def forward(self, **kw):
         outs = [m(**kw) for m in self.models]
         lps = torch.stack([F.log_softmax(o.logits['phonemes'].float(), -1) for o in outs])
+        # TEACHER_CAL: a JSON list, one {T, bias} per teacher in TEACHER_WEIGHTS'
+        # order (calibrate_teacher.py): each teacher's lp' = log_softmax(lp / T + bias).
+        if os.environ.get('TEACHER_CAL'):
+            if not hasattr(self, '_cal'):
+                cal = json.load(open(os.environ['TEACHER_CAL']))
+                self._cal = [(c['T'], torch.tensor(c['bias'], device=lps.device)) for c in cal]
+            lps = torch.stack([F.log_softmax(lps[i] / t + b, -1) for i, (t, b) in enumerate(self._cal)])
         out = outs[0]
         if os.environ.get('TEACHER_SELECT') and len(outs) == 2:
             ids = torch.tensor([VOCAB.index(c) for c in self.TAJWEED], device=lps.device)

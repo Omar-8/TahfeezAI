@@ -45,8 +45,12 @@ AcousticThresholds _settings(String preset) {
   final entropy = preset.contains('@')
       ? double.parse(preset.split('@')[1])
       : null;
-  final v36 = preset.split('@')[0] == 'v36';
-  final e = v36 ? 3.0 : 4.0, m = v36 ? 3.0 : 2.0;
+  final name = preset.split('@')[0];
+  // e4.5m3: those thresholds with v3.6's margins
+  final custom = RegExp(r'^e([\d.]+)m([\d.]+)$').firstMatch(name);
+  final v36 = name == 'v36' || custom != null;
+  final e = custom != null ? double.parse(custom[1]!) : (v36 ? 3.0 : 4.0);
+  final m = custom != null ? double.parse(custom[2]!) : (v36 ? 3.0 : 2.0);
   return AcousticThresholds(
     error: e,
     letterError: e,
@@ -58,8 +62,7 @@ AcousticThresholds _settings(String preset) {
     mistakeEntropy: entropy,
     sounds: {
       ..._margins,
-      if (v36)
-        SoundGroup.hiddenNasal: const SoundMargins(error: 2, uncertain: 4),
+      if (v36) SoundGroup.hiddenNasal: const SoundMargins(error: -1),
     },
   );
 }
