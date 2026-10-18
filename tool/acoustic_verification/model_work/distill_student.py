@@ -162,13 +162,15 @@ REPEAT = []   # [(shard name prefix, times)]: oversampled shards (set by --repea
 # amateurs' correct words (v3.5 2-3%), and a student close to them inherits it.
 TRUST, TRUST_KL, TRUST_CTC = [], 1.0, 1.0
 # --guide: a second teacher (an earlier student, e.g. v3.5, gentle with amateurs where the
-# teachers are not) for the shards GUIDE_PRE, its KL weighed GUIDE_W against the teachers'.
-GUIDE, GUIDE_PRE, GUIDE_W = None, [], 0.0
+# teachers are not) for the shards GUIDE_PRE ([(prefix, weight)], the longest prefix
+# matching), its KL weighed against the teachers' by that weight.
+GUIDE, GUIDE_PRE = None, []
 
 
 class Tagged(list):
     """A transcript from a --trust (its [trusted]) or --guide ([guided]) shard."""
-    trusted = guided = False
+    trusted = False
+    guided = 0.0
 
 
 def batches(data_dir, max_audio_s, seed):
@@ -183,7 +185,8 @@ def batches(data_dir, max_audio_s, seed):
             items = clips(sh)
             base = os.path.basename(sh)
             trusted = any(base.startswith(pre) for pre in TRUST)
-            guided = GUIDE is not None and any(base.startswith(pre) for pre in GUIDE_PRE)
+            guided = next((w for pre, w in GUIDE_PRE if base.startswith(pre)), 0.0) \
+                if GUIDE is not None else 0.0
             if trusted or guided:
                 tagged = []
                 for x, t in items:
@@ -712,8 +715,8 @@ def losses(teacher, student, fe, items, T, ctc_w, aug=0.0, coded=None, layers=No
         fm = mask[:, ::2][:, :n].float()
     kl = F.kl_div(F.log_softmax(sl / T, -1), F.log_softmax(tl / T, -1), log_target=True,
                   reduction='none').sum(-1)
-    guided = [getattr(t, 'guided', False) for _, t in items]
-    if any(guided):
+    guided = [getattr(t, 'guided', 0.0) for _, t in items]
+    if any(g > 0 for g in guided):
         # The second teacher hears what the student hears (it streams the same chunks).
         with torch.no_grad(), torch.autocast(DEV, dtype=torch.bfloat16, enabled=DEV == 'cuda'):
             gl = GUIDE(input_features=xs, attention_mask=smask, return_dict=True).logits['phonemes']
@@ -721,7 +724,7 @@ def losses(teacher, student, fe, items, T, ctc_w, aug=0.0, coded=None, layers=No
         kl_g = F.kl_div(F.log_softmax(sl / T, -1), F.log_softmax(gl / T, -1), log_target=True,
                         reduction='none').sum(-1)
         g = torch.tensor(guided, device=kl.device)[:, None]
-        kl = torch.where(g, (1 - GUIDE_W) * kl + GUIDE_W * kl_g, kl)
+        kl = (1 - g) * kl + g * kl_g
     if HARD_W > 0 or FOCUS_W > 0 or VOWEL_W > 0:
         w = torch.ones_like(kl)
         if VOWEL_W > 0:
@@ -838,7 +841,7 @@ def train(a):
     json.dump(dict(vars(a)), open(os.path.join(a.out, 'run.json'), 'w'), indent=1)
     val = clips(os.path.join(a.data, 'val.npz'))
     global PITCH, REPEAT, TEMPO, EXTRA, HARD_W, FOCUS_W, VOWEL_W, TRUST, TRUST_KL, TRUST_CTC
-    global GUIDE, GUIDE_PRE, GUIDE_W
+    global GUIDE, GUIDE_PRE
     if a.guide:
         path, pre, gw = a.guide.split(':')
         GUIDE = make_student(_base(t.model), 'd6').to(DEV).eval()
@@ -848,8 +851,10 @@ def train(a):
         if a.stream:
             import streaming
             print('guide streaming:', streaming.enable(GUIDE, *streaming.parse(a.stream)), 'attention layers')
-        GUIDE_PRE, GUIDE_W = pre.split('+'), float(gw)
-        print(f'guide {path} on {GUIDE_PRE}, weight {GUIDE_W}')
+        # prefix+prefix:weight, or prefix=weight+prefix=weight (gw then empty)
+        GUIDE_PRE = sorted(((q.split('=')[0], float(q.split('=')[1]) if '=' in q else float(gw))
+                            for q in pre.split('+')), key=lambda x: -len(x[0]))
+        print(f'guide {path} on {GUIDE_PRE}')
     if a.trust:
         pre, kl_s, ctc_s = a.trust.split(':')
         TRUST, TRUST_KL, TRUST_CTC = pre.split('+'), float(kl_s), float(ctc_s)
@@ -989,7 +994,8 @@ def main():
                         'with the KL and CTC scales: shard_95:0.2:20 (see TRUST)')
     p.add_argument('--guide', default='',
                    help='a second teacher for some shards: its d6 student.pt, the shard '
-                        'prefixes (+-joined) and its weight: init/v35s/student.pt:shard_95:0.7')
+                        'prefixes (+-joined) and its weight: init/v35s/student.pt:shard_95:0.7, '
+                        'or a weight per prefix: init/v35s/student.pt:shard_95=0.7+shard_=0.25:')
     p.add_argument('--repeat', default='',
                    help='shard name prefixes to repeat, and how often: e.g. shard_95=6,shard_97=8')
     p.add_argument('--crop', type=float, default=0.0,
