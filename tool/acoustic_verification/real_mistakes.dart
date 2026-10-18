@@ -1,6 +1,7 @@
 // Real mistakes (QuranMB.v2: experts' annotation of what was said; pack
 // built by model_work/quranmb_pack.py), judged as the app judges them:
 //   dart run tool/acoustic_verification/real_mistakes.dart <data.json> <data.f32> [--minor M]
+//       [--error E] [--margins group=error/uncertain,...]
 // (any pack in the bench format: a pack without targetWords is all correct
 // words). Also counts words heard said as another word of the passage
 // (QuranAcousticVerifier.wordSwaps): on target words, and on words heard
@@ -46,14 +47,24 @@ void main(List<String> args) {
       missingVowelError: minor,
       correct: -1,
       pauseFrames: 4,
-      sounds: {
-        SoundGroup.shadda: SoundMargins(uncertain: 2),
-        SoundGroup.reducedVowel: SoundMargins(error: 1, uncertain: 2),
-        SoundGroup.finalVowel: SoundMargins(error: 2, uncertain: 2),
-        SoundGroup.qalqala: SoundMargins(error: 2, uncertain: 4),
-        SoundGroup.nasal: SoundMargins(uncertain: 2),
-        SoundGroup.throat: SoundMargins(uncertain: 2),
-      },
+      // --margins group=error/uncertain,...: in place of these (as
+      // tune_sound_margins.dart takes them).
+      sounds: args.contains('--margins')
+          ? {
+              for (final part in args[args.indexOf('--margins') + 1].split(','))
+                SoundGroup.values.byName(part.split('=')[0]): SoundMargins(
+                  error: double.parse(part.split('=')[1].split('/')[0]),
+                  uncertain: double.parse(part.split('=')[1].split('/')[1]),
+                ),
+            }
+          : const {
+              SoundGroup.shadda: SoundMargins(uncertain: 2),
+              SoundGroup.reducedVowel: SoundMargins(error: 1, uncertain: 2),
+              SoundGroup.finalVowel: SoundMargins(error: 2, uncertain: 2),
+              SoundGroup.qalqala: SoundMargins(error: 2, uncertain: 4),
+              SoundGroup.nasal: SoundMargins(uncertain: 2),
+              SoundGroup.throat: SoundMargins(uncertain: 2),
+            },
     ),
   );
   var clips = 0, found = 0, noticed = 0;

@@ -457,11 +457,13 @@ class AcousticVerificationController
   /// (feed-forwards 2048, pruned by activity; 8-bit, the rest 4-bit) distilled
   /// further on learners' real mistakes, with v3.5 a second teacher on
   /// amateurs' clips (the teachers flag 9-13% of their correct words). Chosen
-  /// strict (owner, 2026-10-18): at 3 its real mistakes found match v3.5's at
-  /// 4 — QuranMB's held-out speakers 68.9 vs 68.6% (correct words flagged
-  /// 30.0 vs 32.7%), Al-Ikhlas learners 13.1 vs 13.8% — with spliced mistakes
-  /// 88.7 vs 85.1%, case endings u -> a 10 vs 2 of 21; the price: correct
-  /// words flagged, the user's 5.5 vs 5.1%, amateurs' 4.6 vs 3.4%.
+  /// strict (owner, 2026-10-18): at 3, against v3.5 at 4 (both with these
+  /// margins; `real_mistakes.dart --margins`), real mistakes found nearly as
+  /// many — QuranMB's held-out speakers 67.9 vs 68.7% (their correct words
+  /// flagged 29.6 vs 32.7%), Al-Ikhlas learners 12.7 vs 13.8% (2.4 vs 2.8%) —
+  /// spliced mistakes 88.7 vs 85.1%, case endings u -> a 10 vs 2 of 21; the
+  /// price: correct words flagged, the user's 5.5 vs 5.1%, amateurs' 4.6 vs
+  /// 3.4%. (At 2.5: QuranMB 70.1%, Al-Ikhlas 13.6%, more flagged.)
   static const streamingError = 3.0;
 
   /// A missing qalqala echo, at 2: v3.5s on the held-out Surah Al-Ikhlas
