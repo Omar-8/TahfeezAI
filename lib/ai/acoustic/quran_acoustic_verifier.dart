@@ -158,7 +158,13 @@ class AcousticThresholds {
     this.tajweed = true,
     this.qalqalaError = 3,
     this.maddShare = QuranAcousticVerifier.maddShortShare,
+    this.mistakeEntropy,
   });
+
+  /// A sound's mistake is reported only as uncertain when its frames are
+  /// this unsure of anything (their mean entropy, in nats, above it): an
+  /// alternative may win there with no clear sound heard. `null`: off.
+  final double? mistakeEntropy;
 
   /// With [tajweed]: a madd of 4 or 6 counts is short when held for less
   /// than this share of its length, in the reciter's beats. (A ghunnah's
@@ -216,6 +222,7 @@ class AcousticThresholds {
     bool? tajweed,
     double? qalqalaError,
     double? maddShare,
+    double? mistakeEntropy,
   }) => AcousticThresholds(
     error: error ?? this.error,
     letterError: letterError ?? this.letterError,
@@ -229,6 +236,7 @@ class AcousticThresholds {
     tajweed: tajweed ?? this.tajweed,
     qalqalaError: qalqalaError ?? this.qalqalaError,
     maddShare: maddShare ?? this.maddShare,
+    mistakeEntropy: mistakeEntropy ?? this.mistakeEntropy,
   );
 
   /// The expected pronunciation must beat every alternative by this much
@@ -799,9 +807,13 @@ class QuranAcousticVerifier {
           : doubt != null
           ? doubtLlr
           : bestLlr;
-      final type = mistake != null
+      final murky =
+          mistake != null &&
+          thresholds.mistakeEntropy != null &&
+          _meanEntropy(frames, span) > thresholds.mistakeEntropy!;
+      final type = mistake != null && !murky
           ? mistake.type
-          : doubt != null
+          : mistake != null || doubt != null
           ? RecitationErrorType.uncertain
           : RecitationErrorType.correct;
       out.add(
@@ -820,6 +832,18 @@ class QuranAcousticVerifier {
   }
 
   static final _qalqalaEcho = phoneticClassOf('ڇ');
+
+  /// Mean entropy (nats) of [span]'s frames.
+  static double _meanEntropy(AcousticFrames frames, FrameSpan span) {
+    var sum = 0.0;
+    for (var f = span.start; f <= span.end; f++) {
+      for (var c = 0; c < frames.classes; c++) {
+        final lp = frames.at(f, c);
+        sum -= math.exp(lp) * lp;
+      }
+    }
+    return sum / (span.end - span.start + 1);
+  }
 
   /// A madd of 4 or 6 harakat is short when held for less than this share
   /// of its length, in the reciter's own beats (measured while its sound

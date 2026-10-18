@@ -41,7 +41,11 @@ const _margins = {
 };
 
 AcousticThresholds _settings(String preset) {
-  final v36 = preset == 'v36';
+  // v36@1.2: with AcousticThresholds.mistakeEntropy 1.2
+  final entropy = preset.contains('@')
+      ? double.parse(preset.split('@')[1])
+      : null;
+  final v36 = preset.split('@')[0] == 'v36';
   final e = v36 ? 3.0 : 4.0, m = v36 ? 3.0 : 2.0;
   return AcousticThresholds(
     error: e,
@@ -51,6 +55,7 @@ AcousticThresholds _settings(String preset) {
     missingVowelError: m,
     correct: -1,
     pauseFrames: 4,
+    mistakeEntropy: entropy,
     sounds: {
       ..._margins,
       if (v36)
@@ -70,7 +75,7 @@ void main(List<String> args) {
       : 2000;
   final models = [
     for (final a in args.where((a) => a.contains('=')))
-      (tag: a.split('=')[0], th: _settings(a.split('=')[1])),
+      (tag: a.split('=')[0], label: a, th: _settings(a.split('=')[1])),
   ];
   _reference = QuranPhoneticReference.fromJson(
     jsonDecode(
@@ -143,7 +148,7 @@ void main(List<String> args) {
 
   final rng = Random(1);
   stdout.writeln(
-    'measure   model      value   95% interval     vs ${models.first.tag} (95% interval)',
+    'measure   model      value   95% interval     vs ${models.first.label} (95% interval)',
   );
   for (final e in all.entries) {
     final speakers = e.value.first.keys.toList();
@@ -179,7 +184,7 @@ void main(List<String> args) {
     for (var j = 0; j < e.value.length; j++) {
       final v = pct(e.value[j], speakers);
       stdout.writeln(
-        '${e.key.padRight(9)} ${models[j].tag.padRight(9)} '
+        '${e.key.padRight(9)} ${models[j].label.padRight(16)} '
         '${v.toStringAsFixed(1).padLeft(5)}   ${ci(draws[j]).padRight(15)}'
         '${j == 0 ? '  (${speakers.length} speakers)' : '  ${ci(diffs[j])}'}',
       );

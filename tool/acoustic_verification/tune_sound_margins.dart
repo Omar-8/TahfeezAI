@@ -75,6 +75,9 @@ void main(List<String> args) {
     pauseFrames: int.parse(opt('pause') ?? '6'),
     sounds: _parse(opt('margins') ?? ''),
     maddShare: double.parse(opt('madd') ?? '0.65'),
+    mistakeEntropy: opt('entropy') == null
+        ? null
+        : double.parse(opt('entropy')!),
   );
 
   stdout.writeln(
