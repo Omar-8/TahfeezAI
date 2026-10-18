@@ -216,6 +216,7 @@
   "recTajweed": "Tecvid",
   "recTajweedSub": "Tecvid kurallarını da kontrol et: idgam, ihfa, iklab, kalkale ve med uzunluğu. Kapalıyken: yalnızca harfler ve harekeler.",
   "recQalqala": "kalkale: sakin «{letter}» yankılanmalı (hafif bir sekme)",
+  "recGhunnah": "gunne: şeddeli «{letter}» harfinde genizden sesi 2 hareke tutun",
   "recMaddShort": "med: «{letter}» harfini daha uzun tutun (burada 4–6 elif)",
   "recAlert": "Hata uyarısı",
   "recAlertVibrate": "Titreşim",

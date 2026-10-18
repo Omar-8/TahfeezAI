@@ -216,6 +216,7 @@
   "recTajweed": "Tajwid",
   "recTajweedSub": "Periksa juga hukum tajwid: idgham, ikhfa, iqlab, qalqalah, dan panjang mad. Mati: hanya huruf dan harakat.",
   "recQalqala": "qalqalah: «{letter}» bersukun perlu dipantulkan (sedikit memantul)",
+  "recGhunnah": "ghunnah: tahan dengung «{letter}» bertasydid (2 harakat)",
   "recMaddShort": "mad: tahan «{letter}» lebih panjang (4–6 harakat di sini)",
   "recAlert": "Peringatan kesalahan",
   "recAlertVibrate": "Getar",

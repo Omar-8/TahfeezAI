@@ -216,6 +216,7 @@
   "recTajweed": "Tajwid",
   "recTajweedSub": "Vérifier aussi les règles du tajwid : idghâm, ikhfâ', iqlâb, qalqala et longueur des madd. Désactivé : seulement les lettres et les voyelles.",
   "recQalqala": "qalqala : « {letter} » avec soukoun doit résonner (un léger rebond)",
+  "recGhunnah": "ghunna : tenez le son nasal de « {letter} » avec chadda (2 temps)",
   "recMaddShort": "madd : prolongez « {letter} » davantage (4 à 6 temps ici)",
   "recAlert": "Alerte d'erreur",
   "recAlertVibrate": "Vibration",

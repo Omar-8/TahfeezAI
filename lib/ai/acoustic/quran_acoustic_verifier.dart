@@ -21,6 +21,10 @@ enum RecitationErrorType {
   /// A madd of four or six harakat held clearly shorter (tajweed).
   maddShort,
 
+  /// A doubled «ن» / «م» said as a plain doubled letter, its ghunnah not
+  /// held (tajweed): [AcousticThresholds.ghunnahHold].
+  ghunnahMissing,
+
   /// Another word of the passage said in this word's place (a word
   /// swapped, out of order, or said instead): its sounds fit the audio
   /// clearly better ([QuranAcousticVerifier.wordSwaps]).
@@ -43,6 +47,7 @@ enum RecitationErrorType {
       this == shaddaError ||
       this == qalqalaMissing ||
       this == maddShort ||
+      this == ghunnahMissing ||
       this == wrongWord;
 }
 
@@ -159,7 +164,17 @@ class AcousticThresholds {
     this.qalqalaError = 3,
     this.maddShare = QuranAcousticVerifier.maddShortShare,
     this.mistakeEntropy,
+    this.ghunnahHold,
   });
+
+  /// With [tajweed]: a doubled «ن» / «م» (ghunnah) whose plain letter stays
+  /// likely (≥ 30%, its frames and 3 either side) for more than this many of
+  /// the reciter's sound lengths here was said without its ghunnah — held,
+  /// the nasal sound is not the plain letter. On QDAT's expert labels for
+  /// «إِنَّكَ» (5:109, held-out learners), v3.6 at 1.2: missed ghunnah caught
+  /// 66.9% (17.4% without), correct ones flagged 2.7%
+  /// (`ghunnah_length.dart`). `null`: off.
+  final double? ghunnahHold;
 
   /// A sound's mistake is reported only as uncertain when its frames are
   /// this unsure of anything (their mean entropy, in nats, above it): an
@@ -223,6 +238,7 @@ class AcousticThresholds {
     double? qalqalaError,
     double? maddShare,
     double? mistakeEntropy,
+    double? ghunnahHold,
   }) => AcousticThresholds(
     error: error ?? this.error,
     letterError: letterError ?? this.letterError,
@@ -237,6 +253,7 @@ class AcousticThresholds {
     qalqalaError: qalqalaError ?? this.qalqalaError,
     maddShare: maddShare ?? this.maddShare,
     mistakeEntropy: mistakeEntropy ?? this.mistakeEntropy,
+    ghunnahHold: ghunnahHold ?? this.ghunnahHold,
   );
 
   /// The expected pronunciation must beat every alternative by this much
@@ -681,6 +698,11 @@ class QuranAcousticVerifier {
     final own = thresholds.tajweed ? _beat(frames, expected, spans) : null;
     if (own != null) meter?.add(own);
     final beat = thresholds.tajweed ? own ?? meter?.value : null;
+    // The reciter's pace here: frames per aligned sound.
+    final aligned = [for (final s in spans) ?s];
+    final pace = aligned.length < 4
+        ? null
+        : (aligned.last.end - aligned.first.start + 1) / aligned.length;
     for (var k = 0; k < expected.length; k++) {
       final t = expected[k];
       final span = spans[k];
@@ -704,6 +726,35 @@ class QuranAcousticVerifier {
               span: span,
               likelihoodRatio: beats,
               observed: '${beats.round()}',
+            ),
+          );
+          continue;
+        }
+      }
+      // A ghunnah not held: the doubled noon / meem heard as its plain
+      // letter for long.
+      if (thresholds.tajweed &&
+          thresholds.ghunnahHold != null &&
+          pace != null &&
+          span != null &&
+          t.geminate &&
+          (t.token == _noon || t.token == _meem)) {
+        var held = 0;
+        for (
+          var f = math.max(0, span.start - 3);
+          f <= math.min(frames.frames - 1, span.end + 3);
+          f++
+        ) {
+          if (frames.at(f, t.token) >= _ghunnahPlainLog) held++;
+        }
+        if (held / pace > thresholds.ghunnahHold!) {
+          out.add(
+            PhonemeVerdict(
+              token: t,
+              type: RecitationErrorType.ghunnahMissing,
+              span: span,
+              likelihoodRatio: held / pace,
+              observed: 'NO_GHUNNAH',
             ),
           );
           continue;
@@ -832,6 +883,9 @@ class QuranAcousticVerifier {
   }
 
   static final _qalqalaEcho = phoneticClassOf('ڇ');
+  static final _noon = phoneticClassOf('ن');
+  static final _meem = phoneticClassOf('م');
+  static final _ghunnahPlainLog = math.log(0.3);
 
   /// Mean entropy (nats) of [span]'s frames.
   static double _meanEntropy(AcousticFrames frames, FrameSpan span) {

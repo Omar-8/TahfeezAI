@@ -1338,6 +1338,9 @@ class HifzStatusStrip extends StatelessWidget {
       final sign = e.expected.split(' ').first;
       return l10n.recMaddShort(const {'ۦ': 'ي', 'ۥ': 'و'}[sign] ?? sign);
     }
+    if (e.type == RecitationErrorType.ghunnahMissing) {
+      return l10n.recGhunnah(expected);
+    }
     if (e.type == RecitationErrorType.qalqalaMissing) {
       // The echo's mark is listed on its letter (in its source).
       return l10n.recQalqala(source ?? expected);
