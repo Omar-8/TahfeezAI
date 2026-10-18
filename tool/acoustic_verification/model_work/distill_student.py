@@ -291,9 +291,10 @@ def load_teacher():
     from quran_muaalem import Muaalem
     # TEACHER_WEIGHTS: a fine-tuned teacher (finetune_teacher.py) instead; several,
     # comma-separated, are one teacher: their distributions averaged per frame.
+    # `base`: the original Muaalem, unchanged.
     paths = [w for w in os.environ.get('TEACHER_WEIGHTS', '').split(',') if w]
     models = []
-    for path in paths or [None]:
+    for path in [None if p == 'base' else p for p in paths] or [None]:
         m = Muaalem(model_name_or_path='obadx/muaalem-model-v3_2', device=DEV,
                     dtype=torch.bfloat16 if DEV == 'cuda' else torch.float32)
         if path:
@@ -331,6 +332,12 @@ class TeacherMix(torch.nn.Module):
     # most likely sound there is a tajweed sound (a hidden noon / meem, the qalqala echo,
     # a madd, a ghunnah's noon / meem): then from the second.
     TAJWEED = 'ں۾ڇاۥۦنم'
+    # A third teacher (the original Muaalem, which still holds a ghunnah's length —
+    # «إِنَّ» as four noons — where the fine-tuned ones lost it): every frame within
+    # NASAL_REACH of one where any teacher's likeliest sound is a noon / meem (plain or
+    # hidden) is taken from it.
+    NASAL = 'نمں۾'
+    NASAL_REACH = 4
 
     def forward(self, **kw):
         outs = [m(**kw) for m in self.models]
@@ -348,6 +355,16 @@ class TeacherMix(torch.nn.Module):
             tj = torch.isin(lps[0].argmax(-1), ids) | torch.isin(lps[1].argmax(-1), ids)
             out.logits['phonemes'] = torch.where(tj[..., None], lps[1], lps[0])
             self.last = lps   # both teachers, for --gate
+        elif os.environ.get('TEACHER_SELECT') and len(outs) == 3:
+            ids = torch.tensor([VOCAB.index(c) for c in self.TAJWEED], device=lps.device)
+            tj = torch.isin(lps[0].argmax(-1), ids) | torch.isin(lps[1].argmax(-1), ids)
+            sel = torch.where(tj[..., None], lps[1], lps[0])
+            nids = torch.tensor([VOCAB.index(c) for c in self.NASAL], device=lps.device)
+            nasal = (torch.isin(lps.argmax(-1), nids).any(0)).float()        # (B, T)
+            r = self.NASAL_REACH
+            nasal = F.max_pool1d(nasal[:, None], 2 * r + 1, stride=1, padding=r)[:, 0] > 0
+            out.logits['phonemes'] = torch.where(nasal[..., None], lps[2], sel)
+            self.last = lps[:2]
         else:
             out.logits['phonemes'] = torch.logsumexp(lps, 0) - math.log(len(outs))
         return out
