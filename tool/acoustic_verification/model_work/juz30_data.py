@@ -10,7 +10,9 @@ no ayah in blocked_ayahs.json is written, as for every source.
 EXPERIMENTAL / NOT YET CLEARED FOR DISTRIBUTION (docs/THIRD_PARTY_RESOURCES.md).
 
   python juz30_data.py <out dir> [--src artifacts/external/juz30/quran_juz30/local_dataset]
-      [--hold N]   # the N reciters with the fewest clips kept out (a later test)
+      [--test NAME,NAME,...]   # these reciters' clips kept out of the shards and written
+                               # as the test pack juz30h (artifacts/juz30h_cases.json +
+                               # juz30h_audio.npz, every ayah, judged as correct speech)
 """
 import argparse, collections, csv, json, os, subprocess
 
@@ -42,22 +44,23 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument('out')
     p.add_argument('--src', default=os.path.join(HERE, 'artifacts/external/juz30/quran_juz30/local_dataset'))
-    p.add_argument('--hold', type=int, default=0)
+    p.add_argument('--test', default='')
     a = p.parse_args()
     os.makedirs(a.out, exist_ok=True)
     blocked = {tuple(x) for x in json.load(open(os.path.join(HERE, 'blocked_ayahs.json')))}
     where = verses()
     rows = list(csv.DictReader(open(os.path.join(a.src, 'para30_complete_recordings_uthmani.csv'),
                                     encoding='utf-8')))
-    per = collections.Counter(r['Recorder_Name'] for r in rows)
-    held = {name for name, _ in sorted(per.items(), key=lambda x: x[1])[:a.hold]}
-    clips, skipped = [], collections.Counter()
+    held = {n for n in a.test.split(',') if n}
+    words = collections.Counter(
+        w['ayahId'] for w in json.load(open(os.path.join(ROOT, 'assets/quran/quran_dataset.json'),
+                                            encoding='utf-8'))['ayahWords'])
+    clips, cases, blobs, skipped = [], [], [], collections.Counter()
     for r in rows:
         ayah = where[int(r['Ayat_Number'])]
-        if ayah in blocked:
+        test = r['Recorder_Name'] in held
+        if ayah in blocked and not test:
             skipped['blocked'] += 1; continue
-        if r['Recorder_Name'] in held:
-            skipped['held'] += 1; continue
         path = os.path.join(a.src, 'audios', os.path.basename(r['Recording_Path']))
         try:
             x = decode(path)
@@ -65,7 +68,16 @@ def main():
             skipped['undecodable'] += 1; continue
         if not MIN_S * 16000 <= len(x) <= MAX_S * 16000:
             skipped['length'] += 1; continue
-        clips.append(x)
+        if test:
+            aid = ayah[0] * 1000 + ayah[1]
+            cases.append(dict(set='clean', category='juz30_amateur', kind='clean',
+                              name=f'juz30_{len(cases)}', ayahId=aid, firstWord=0,
+                              lastWord=words[aid] - 1, targetWords=[], openStart=False,
+                              openEnd=False, screen=True, reciter=r['Recorder_Name'],
+                              verified=r['Verified'] == 'Yes'))
+            blobs.append(x)
+        else:
+            clips.append(x)
     for k in range(0, len(clips), 400):
         part = clips[k:k + 400]
         np.savez(os.path.join(a.out, f'shard_{9400 + k // 400:04d}.npz'),
@@ -73,8 +85,13 @@ def main():
                  offsets=np.cumsum([0] + [len(x) for x in part]),
                  targets=np.array([[] for _ in part] + [None], dtype=object)[:-1])
     json.dump(sorted(held), open(os.path.join(a.out, 'held_reciters.json'), 'w'), ensure_ascii=False)
+    if cases:
+        art = os.path.join(HERE, 'artifacts')
+        json.dump(cases, open(os.path.join(art, 'juz30h_cases.json'), 'w'), ensure_ascii=False)
+        np.savez(os.path.join(art, 'juz30h_audio.npz'), **{f'c{i}': b for i, b in enumerate(blobs)})
     print(dict(clips=len(clips), hours=round(sum(map(len, clips)) / 16000 / 3600, 2),
-               shards=(len(clips) + 399) // 400, skipped=dict(skipped), held=sorted(held)))
+               shards=(len(clips) + 399) // 400, test_cases=len(cases), skipped=dict(skipped),
+               test_reciters=sorted(held)))
 
 
 if __name__ == '__main__':

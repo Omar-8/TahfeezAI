@@ -165,11 +165,18 @@ TRUST, TRUST_KL, TRUST_CTC = [], 1.0, 1.0
 # teachers are not) for the shards GUIDE_PRE ([(prefix, weight)], the longest prefix
 # matching), its KL weighed against the teachers' by that weight.
 GUIDE, GUIDE_PRE = None, []
+# --gate (two teachers, TEACHER_SELECT): each frame's teacher target weighed by how far the
+# teachers can be trusted there, not by a fixed share. Where ft4 and ft5 disagree on the
+# most likely sound, GATE_DIS; on a --trust clip with a transcript, where the teacher's most
+# likely sound is not in it at all, GATE_TRUST; in the learners' shards (GATE_LEARN), where
+# they disagree, ft5 (fine-tuned on real mistakes) is the target, at full weight. Weights are
+# renormalized per batch (the same overall scale); a --guide teacher's share is unchanged.
+GATE, GATE_DIS, GATE_TRUST, GATE_LEARN = False, 1.0, 1.0, []
 
 
 class Tagged(list):
     """A transcript from a --trust (its [trusted]) or --guide ([guided]) shard."""
-    trusted = False
+    trusted = learner = False
     guided = 0.0
 
 
@@ -187,10 +194,11 @@ def batches(data_dir, max_audio_s, seed):
             trusted = any(base.startswith(pre) for pre in TRUST)
             guided = next((w for pre, w in GUIDE_PRE if base.startswith(pre)), 0.0) \
                 if GUIDE is not None else 0.0
-            if trusted or guided:
+            learner = any(base.startswith(pre) for pre in GATE_LEARN)
+            if trusted or guided or learner:
                 tagged = []
                 for x, t in items:
-                    t = Tagged(t); t.trusted, t.guided = trusted, guided
+                    t = Tagged(t); t.trusted, t.guided, t.learner = trusted, guided, learner
                     tagged.append((x, t))
                 items = tagged
             items.sort(key=lambda c: len(c[0]))
@@ -332,6 +340,7 @@ class TeacherMix(torch.nn.Module):
             ids = torch.tensor([VOCAB.index(c) for c in self.TAJWEED], device=lps.device)
             tj = torch.isin(lps[0].argmax(-1), ids) | torch.isin(lps[1].argmax(-1), ids)
             out.logits['phonemes'] = torch.where(tj[..., None], lps[1], lps[0])
+            self.last = lps   # both teachers, for --gate
         else:
             out.logits['phonemes'] = torch.logsumexp(lps, 0) - math.log(len(outs))
         return out
@@ -713,8 +722,30 @@ def losses(teacher, student, fe, items, T, ctc_w, aug=0.0, coded=None, layers=No
         n = min(tl.shape[1], sl.shape[1])
         tl, sl = tl[:, :n], sl[:, :n]
         fm = mask[:, ::2][:, :n].float()
+    gate = None
+    if GATE and getattr(teacher.model, 'last', None) is not None:
+        lp = teacher.model.last
+        if starts is not None:
+            lp = torch.gather(lp, 2, idx.clamp(max=lp.shape[2] - 1)[None, :, :, None]
+                              .expand(2, -1, -1, lp.shape[3]))
+        else:
+            lp = lp[:, :, :n]
+        disagree = lp[0].argmax(-1) != lp[1].argmax(-1)
+        learner = torch.tensor([getattr(t, 'learner', False) for _, t in items],
+                               device=tl.device)[:, None]
+        tl = torch.where((learner & disagree)[..., None], lp[1], tl)
+        gate = torch.where(disagree & ~learner, torch.full_like(fm, GATE_DIS), torch.ones_like(fm))
+        for j, (_, t) in enumerate(items):
+            if getattr(t, 'trusted', False) and len(t) > 0:
+                allowed = torch.zeros(tl.shape[-1], dtype=torch.bool, device=tl.device)
+                allowed[sorted(set(t)) + [0]] = True
+                gate[j] = torch.where(allowed[tl[j].argmax(-1)], gate[j],
+                                      torch.full_like(gate[j], GATE_TRUST))
+        gate = gate / ((gate * fm).sum() / fm.sum().clamp_min(1)).clamp_min(1e-6)
     kl = F.kl_div(F.log_softmax(sl / T, -1), F.log_softmax(tl / T, -1), log_target=True,
                   reduction='none').sum(-1)
+    if gate is not None:
+        kl = kl * gate
     guided = [getattr(t, 'guided', 0.0) for _, t in items]
     if any(g > 0 for g in guided):
         # The second teacher hears what the student hears (it streams the same chunks).
@@ -855,6 +886,11 @@ def train(a):
         GUIDE_PRE = sorted(((q.split('=')[0], float(q.split('=')[1]) if '=' in q else float(gw))
                             for q in pre.split('+')), key=lambda x: -len(x[0]))
         print(f'guide {path} on {GUIDE_PRE}')
+    global GATE, GATE_DIS, GATE_TRUST, GATE_LEARN
+    if a.gate:
+        dis, untrusted, learn = a.gate.split(':')
+        GATE, GATE_DIS, GATE_TRUST, GATE_LEARN = True, float(dis), float(untrusted), learn.split('+')
+        print(f'gate: disagree {GATE_DIS}, untrusted {GATE_TRUST}, learners {GATE_LEARN}')
     if a.trust:
         pre, kl_s, ctc_s = a.trust.split(':')
         TRUST, TRUST_KL, TRUST_CTC = pre.split('+'), float(kl_s), float(ctc_s)
@@ -996,6 +1032,9 @@ def main():
                    help='a second teacher for some shards: its d6 student.pt, the shard '
                         'prefixes (+-joined) and its weight: init/v35s/student.pt:shard_95:0.7, '
                         'or a weight per prefix: init/v35s/student.pt:shard_95=0.7+shard_=0.25:')
+    p.add_argument('--gate', default='',
+                   help='teacher weights by agreement (see GATE): disagree:untrusted:learner '
+                        'prefixes, e.g. 0.25:0.1:shard_97+shard_98+shard_99')
     p.add_argument('--repeat', default='',
                    help='shard name prefixes to repeat, and how often: e.g. shard_95=6,shard_97=8')
     p.add_argument('--crop', type=float, default=0.0,

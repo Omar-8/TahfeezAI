@@ -10,6 +10,9 @@
 //   mine      the user's correct words flagged (phone..phone7), speaker = session
 //   amateur   RetaSy correct clips' words flagged, speaker = reciter
 //             (model_work/retasy_reciters.py)
+//   amat.unl  RetaSy unlabelled clips (mostly correct) of the same reciters
+//   juz30     held-out Juz 30 reciters' clips (juz30_data.py --test; unverified, mostly
+//             correct), speaker = reciter
 //   qmb       QuranMB held-out (quranmbh): clips whose mistake is marked on a wrong word;
 //   qmb.fl    and its words heard right flagged; speaker = QuranMB speaker
 //   ikh       Al-Ikhlas held-out (ikhlash) the same; speaker = reciter
@@ -100,12 +103,19 @@ void main(List<String> args) {
         );
       }
     }
-    final amateur = <String, List<int>>{};
+    final amateur = <String, List<int>>{}, unlabelled = <String, List<int>>{};
     final retasy = _load('retasy_${m.tag}');
     for (var i = 0; i < retasy.length; i++) {
-      if (retasy[i].m['category'] == 'retasy_correct') {
+      final category = retasy[i].m['category'];
+      if (category == 'retasy_correct') {
         _addClean(amateur, reciters[i], retasy[i], m.th);
+      } else if (category == 'retasy_unlabelled') {
+        _addClean(unlabelled, reciters[i], retasy[i], m.th);
       }
+    }
+    final juz30 = <String, List<int>>{};
+    for (final c in _load('juz30h_${m.tag}')) {
+      _addClean(juz30, '${c.m['reciter']}', c, m.th);
     }
     final (qmb, qmbFl) = _real(
       _load('quranmbh_${m.tag}'),
@@ -120,6 +130,8 @@ void main(List<String> args) {
     for (final (k, v) in [
       ('mine', mine),
       ('amateur', amateur),
+      ('amat.unl', unlabelled),
+      ('juz30', juz30),
       ('qmb', qmb),
       ('qmb.fl', qmbFl),
       ('ikh', ikh),
@@ -198,8 +210,9 @@ void _addClean(Counts out, String speaker, _Case c, AcousticThresholds th) {
     if (c.targets.isNotEmpty) {
       final k = found[s] ??= [0, 0];
       k[1]++;
-      if (c.targets.any((w) => judged[w]?.any((t) => t.isError) ?? false))
+      if (c.targets.any((w) => judged[w]?.any((t) => t.isError) ?? false)) {
         k[0]++;
+      }
     }
     final k = flagged[s] ??= [0, 0];
     for (final e in judged.entries) {
