@@ -356,6 +356,7 @@
   "followReciterTimes": "Recita el recitador (veces)",
   "followYourTimes": "Recitas tú (veces)",
   "countUntilStopped": "Hasta detenerlo",
+  "tafsirNoNote": "Este tafsir no tiene nota sobre esta aleya.",
   "followStart": "Empezar",
   "followYourTurn": "Tu turno — recita ahora",
   "followReciterTurn": "Escucha a {reciter}",

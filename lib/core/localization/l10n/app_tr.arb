@@ -356,6 +356,7 @@
   "followReciterTimes": "Kâri okur (kez)",
   "followYourTimes": "Siz okursunuz (kez)",
   "countUntilStopped": "Durdurulana kadar",
+  "tafsirNoNote": "Bu tefsirde bu ayete dair bir not yok.",
   "followStart": "Başla",
   "followYourTurn": "Sıra sizde — şimdi okuyun",
   "followReciterTurn": "{reciter} dinleniyor",

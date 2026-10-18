@@ -42,7 +42,12 @@ void main() {
           jsonDecode(File('assets/quran/$name').readAsStringSync()) as Map;
       final verses = (json['verses'] as List).cast<Map>();
       final absent = merged[name] ?? const <String>{};
-      expect(verses, hasLength(6236 - absent.length), reason: name);
+      if (name == 'tafsir/ur_ahsanulbayan.json') {
+        // A translation's notes: only the ayahs they comment on.
+        expect(verses.length, inInclusiveRange(4000, 6236), reason: name);
+      } else {
+        expect(verses, hasLength(6236 - absent.length), reason: name);
+      }
       expect(
         verses.where((v) => '${v['text']}'.trim().isEmpty),
         isEmpty,
@@ -65,7 +70,7 @@ void main() {
         '${w['ayahId']}:${w['wordIndex']}',
     };
     final names = hashes.keys.where((n) => n.startsWith('wbw/')).toList();
-    expect(names, hasLength(6));
+    expect(names, hasLength(7));
     for (final name in names) {
       final pack =
           jsonDecode(File('assets/quran/$name').readAsStringSync()) as Map;

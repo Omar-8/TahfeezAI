@@ -356,6 +356,7 @@
   "followReciterTimes": "Rezitator rezitiert (Mal)",
   "followYourTimes": "Du rezitierst (Mal)",
   "countUntilStopped": "Bis zum Stoppen",
+  "tafsirNoNote": "Dieser Tafsir hat zu diesem Vers keine Anmerkung.",
   "followStart": "Starten",
   "followYourTurn": "Du bist dran — rezitiere jetzt",
   "followReciterTurn": "Hör {reciter} zu",

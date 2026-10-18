@@ -779,6 +779,7 @@
   "followReciterTimes": "Reciter recites (times)",
   "followYourTimes": "You recite (times)",
   "countUntilStopped": "Until stopped",
+  "tafsirNoNote": "This tafsir has no note on this ayah.",
   "followStart": "Start",
   "followYourTurn": "Your turn — recite now",
   "followReciterTurn": "Listen to {reciter}",

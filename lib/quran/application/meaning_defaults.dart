@@ -39,8 +39,8 @@ List<String> defaultTranslationSlugs(String language) => switch (language) {
 };
 
 /// The bundled tafsir shown by default for each language: Al-Muyassar for
-/// Arabic, Al-Mukhtasar where it exists in the language, none otherwise
-/// (Urdu, German).
+/// Arabic, Al-Mukhtasar where it exists in the language; Urdu,
+/// Ahsan-ul-Bayan; German, which has neither, the English Al-Mukhtasar.
 String? defaultTafsirId(String language) => switch (language) {
   'ar' => 'ar-muyassar',
   'en' => 'en-mukhtasar',
@@ -51,6 +51,7 @@ String? defaultTafsirId(String language) => switch (language) {
   'ru' => 'ru-mukhtasar',
   'fa' => 'fa-mukhtasar',
   'bn' => 'bn-mukhtasar',
-  'ur' || 'de' => null,
+  'de' => 'en-mukhtasar',
+  'ur' => 'ur-ahsanulbayan',
   _ => 'en-mukhtasar',
 };

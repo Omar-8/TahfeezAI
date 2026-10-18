@@ -356,6 +356,7 @@
   "followReciterTimes": "Le récitateur récite (fois)",
   "followYourTimes": "Vous récitez (fois)",
   "countUntilStopped": "Jusqu'à l'arrêt",
+  "tafsirNoNote": "Ce tafsir n’a pas de note sur ce verset.",
   "followStart": "Commencer",
   "followYourTurn": "À vous — récitez maintenant",
   "followReciterTurn": "Écoutez {reciter}",

@@ -356,6 +356,7 @@
   "followReciterTimes": "يتلو القارئ (مرات)",
   "followYourTimes": "تتلو أنت (مرات)",
   "countUntilStopped": "حتى الإيقاف",
+  "tafsirNoNote": "لا تعليق في هذا التفسير على هذه الآية.",
   "followStart": "ابدأ",
   "followYourTurn": "دورك — اتلُ الآن",
   "followReciterTurn": "استمع إلى {reciter}",

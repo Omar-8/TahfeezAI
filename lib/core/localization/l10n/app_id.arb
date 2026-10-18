@@ -356,6 +356,7 @@
   "followReciterTimes": "Qari membaca (kali)",
   "followYourTimes": "Anda membaca (kali)",
   "countUntilStopped": "Sampai dihentikan",
+  "tafsirNoNote": "Tafsir ini tidak memiliki catatan untuk ayat ini.",
   "followStart": "Mulai",
   "followYourTurn": "Giliran Anda — bacalah sekarang",
   "followReciterTurn": "Dengarkan {reciter}",

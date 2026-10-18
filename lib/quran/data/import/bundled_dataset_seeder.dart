@@ -114,7 +114,7 @@ class BundledDatasetSeeder {
     );
     // Word meanings: English (with the transliteration), then each
     // language Quran.com has them in.
-    for (final language in const ['en', 'ur', 'id', 'tr', 'fa', 'bn']) {
+    for (final language in const ['en', 'ur', 'id', 'tr', 'fa', 'bn', 'fr']) {
       await _seedWbw(
         hashes,
         assetPath: 'assets/quran/wbw/${language}_qurancom.json',
@@ -147,6 +147,7 @@ class BundledDatasetSeeder {
       'ru_mukhtasar',
       'fa_mukhtasar',
       'bn_mukhtasar',
+      'ur_ahsanulbayan',
     ]) {
       await _seedTafsir(
         hashes,

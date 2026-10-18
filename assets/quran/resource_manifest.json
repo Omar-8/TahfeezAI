@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "buildDate": "2026-10-14T13:28:20.626121Z",
+  "buildDate": "2026-10-18T16:36:42.162481Z",
   "canonicalQuranSource": "Tanzil Project (tanzil.net)",
   "canonicalQuranVersion": "Uthmani, Version 1.1",
   "canonicalQuranHash": "bf4f57b968d03f4131c070b1e285da9be0e0a108a21c910e872801ca273312c8",
@@ -156,6 +156,14 @@
       "licenseStatus": "UNVERIFIED — as the English pack (owner decision 2026-10-09), extended 2026-10-14",
       "sourceHash": "c19d64f3e82ac56f3dae42345632f6b0073dd2109a9c57dba56545f538ec8931",
       "wordCount": 77433
+    },
+    {
+      "id": "fr-qurancom",
+      "resourceId": "tahfeez.wbw.fr.qurancom",
+      "source": "Quran.com API v4 (api.quran.com/api/v4), language=fr",
+      "licenseStatus": "UNVERIFIED — as the English pack (owner decision 2026-10-09), extended 2026-10-14",
+      "sourceHash": "8e8a89a294c4211162cb86f02238e213b5262c662f981ccb9b1538d859a0237d",
+      "wordCount": 77433
     }
   ],
   "tafsirResources": [
@@ -230,6 +238,14 @@
       "version": "unversioned upstream (QuranEnc lists no version for Al-Mukhtasar; tracked by sourceHash)",
       "sourceHash": "e83997f5b7d4628d3d159fc8f4484238f33c502659270034322bd7d264ff4672",
       "ayahCount": 6236
+    },
+    {
+      "id": "ur-ahsanulbayan",
+      "resourceId": "tahfeez.tafsir.ur.ahsanulbayan",
+      "quranEncKey": "urdu_junagarhi",
+      "version": "unversioned upstream (QuranEnc lists no version for Al-Mukhtasar; tracked by sourceHash)",
+      "sourceHash": "20ccc96bd25e481ca248e8a02d354a316bda2b6fc325fd2aeb5cdd26f7fb11bb",
+      "ayahCount": 4813
     }
   ],
   "toolVersion": "1.1.0",
@@ -254,11 +270,13 @@
     "tafsir/ru_mukhtasar.json": "73ee2e06947a25f9fab5ff410de22c349d5251cb1d0f53b6b4a03381433f3878",
     "tafsir/fa_mukhtasar.json": "af4f76fbf3123d59c20c501d22492f75438db85f21822a909824809ef3f39110",
     "tafsir/bn_mukhtasar.json": "d80621d22f9df0fbb34077167743bd97522a2a6c03e66a8f0b9e4140946df419",
+    "tafsir/ur_ahsanulbayan.json": "6e4c8206ca46916c65fe31cb7c61d2b80aaea309ee10fb52c40d736386380d33",
     "wbw/en_qurancom.json": "f90d1299fad3cb11b7e449024cba009e0bd32d4740434aba7edb1d57c7fb6a88",
     "wbw/ur_qurancom.json": "d0bf7635f029a72e6e0d3b8182c385564583036f0cb897385540a70fffc72416",
     "wbw/id_qurancom.json": "46dcee8b6450de7457f14d506e9791cf2d9bc7171ae213d6c91850fee0dc5e01",
     "wbw/tr_qurancom.json": "d6a6fb12eb0ddb93788df772392c3280a5238f1099db9a4c65525e3f87e8374b",
     "wbw/fa_qurancom.json": "e20ad7ab64ead232679a1f8012fe035c3f0862ff08d7460fda14a2db2f38c2c1",
-    "wbw/bn_qurancom.json": "26b2945a663b1ce1b8c8813d6d22d0257a1bcef58458c4084bb78ed789a7e6db"
+    "wbw/bn_qurancom.json": "26b2945a663b1ce1b8c8813d6d22d0257a1bcef58458c4084bb78ed789a7e6db",
+    "wbw/fr_qurancom.json": "88c8e3532a0a924484133f2d02ab90513da78e8b502535ef26e690781aefef9b"
   }
 }

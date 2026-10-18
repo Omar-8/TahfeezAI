@@ -29,7 +29,8 @@ void main() {
         ('ru', 'ru-mukhtasar'),
         ('fa', 'fa-mukhtasar'),
         ('bn', 'bn-mukhtasar'),
-        ('ur', null),
+        ('ur', 'ur-ahsanulbayan'),
+        ('de', 'en-mukhtasar'),
       ]) {
         final container = ProviderContainer(
           overrides: [

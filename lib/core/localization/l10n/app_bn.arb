@@ -356,6 +356,7 @@
   "followReciterTimes": "কারী পড়বেন (বার)",
   "followYourTimes": "আপনি পড়বেন (বার)",
   "countUntilStopped": "থামানো পর্যন্ত",
+  "tafsirNoNote": "এই তাফসীরে এই আয়াতের কোনো টীকা নেই।",
   "followStart": "শুরু",
   "followYourTurn": "আপনার পালা — এখন পড়ুন",
   "followReciterTurn": "{reciter}-এর তিলাওয়াত শুনুন",

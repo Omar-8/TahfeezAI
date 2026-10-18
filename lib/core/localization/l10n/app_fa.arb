@@ -356,6 +356,7 @@
   "followReciterTimes": "تلاوت قاری (بار)",
   "followYourTimes": "تلاوت شما (بار)",
   "countUntilStopped": "تا توقف",
+  "tafsirNoNote": "این تفسیر برای این آیه توضیحی ندارد.",
   "followStart": "شروع",
   "followYourTurn": "نوبت شما — اکنون بخوانید",
   "followReciterTurn": "به {reciter} گوش دهید",

@@ -186,6 +186,7 @@ const _wbwLanguages = [
   ('tr', 'Turkish word by word (Quran.com)'),
   ('fa', 'Persian word by word (Quran.com)'),
   ('bn', 'Bengali word by word (Quran.com)'),
+  ('fr', 'French word by word (QUL)'),
 ];
 
 const _cache = 'tool/quran_data/.cache';
@@ -364,10 +365,44 @@ Future<void> main() async {
     });
     extraTafsirs.add((r, t.key));
   }
+  // Urdu (owner decision 2026-10-18): Ahsan-ul-Bayan, the commentary of Hafiz
+  // Salahuddin Yusuf that QuranEnc's Junagarhi translation carries as its
+  // footnotes. Only the ayahs it comments on have a row.
+  {
+    final r = parseQuranEncTafsir(
+      sqliteFile: File('$_cache/urdu_junagarhi/urdu_junagarhi.sqlite'),
+      tafsirId: 'ur-ahsanulbayan',
+      displayName: 'احسن البیان (اردو)',
+      languageCode: 'ur',
+      author: 'Hafiz Salahuddin Yusuf',
+      version: 1,
+      fromFootnotes: true,
+      source: 'QuranEnc.com (footnotes of urdu_junagarhi)',
+    );
+    if (r.verses.length < 2000) {
+      throw StateError('Ahsan-ul-Bayan: only ${r.verses.length} ayahs');
+    }
+    packagedAssetHashes['tafsir/ur_ahsanulbayan.json'] = _writeJson(
+      '$_outDir/tafsir/ur_ahsanulbayan.json',
+      {
+        'work': tafsirWorkToJson(r.work),
+        'verses': r.verses.map(tafsirVerseToJson).toList(),
+      },
+    );
+    extraTafsirs.add((r, 'urdu_junagarhi'));
+    stdout.writeln(
+      'Ahsan-ul-Bayan (Urdu): ${r.verses.length} ayahs with commentary.',
+    );
+  }
   // Word meanings (docs/TRANSLATION_TAFSIR_MILESTONE.md, T3): Quran.com's
   // English, aligned to the canonical words — licence unverified, shipped
   // by owner decision (docs/THIRD_PARTY_RESOURCES.md).
   final wbwPacks = <QuranComWbwResult>[];
+  _qulWbwCache(
+    'fr',
+    File('tool/quran_data/sources/qul-french-wbw-translation.json.zip'),
+    'french-wbw-translation.json',
+  );
   for (final (language, name) in _wbwLanguages) {
     final wbwCache = Directory(
       '$_cache/qurancom_wbw${language == 'en' ? '' : '_$language'}',
@@ -379,6 +414,9 @@ Future<void> main() async {
       packId: '$language-qurancom',
       languageCode: language,
       displayName: name,
+      packSource: language == 'fr'
+          ? 'QUL (qul.tarteel.ai) French word by word, by Quran.com word position'
+          : null,
     );
     if (result.words.length != tanzil.payload.ayahWords.length) {
       throw StateError(
@@ -420,7 +458,8 @@ Future<void> main() async {
 
   stdout.writeln(
     'Launch languages: ${extraTranslations.length} translations, '
-    '${extraTafsirs.length} tafsirs, every ayah present.',
+    '${extraTafsirs.length} tafsirs, every ayah present (Ahsan-ul-Bayan: '
+    'the ayahs it comments on).',
   );
 
   // The Mushaf layer: real layout + real word-by-word data, combined and
@@ -649,6 +688,39 @@ Future<void> main() async {
   _writeJson('$_outDir/resource_manifest.json', manifest);
 
   stdout.writeln('Done. Assets written under $_outDir/.');
+}
+
+/// A word meanings cache in Quran.com's form for a language QUL has and Quran.com
+/// does not: Quran.com's English word list (the cache `fetch_sources.dart wbw`
+/// writes), each word's meaning replaced by QUL's at the same `surah:ayah:word`
+/// position. A word QUL has no meaning for keeps the English one, marked as
+/// English (so the alignment leaves it to the English pack).
+void _qulWbwCache(String language, File zip, String member) {
+  final en = Directory('$_cache/qurancom_wbw');
+  if (!zip.existsSync() || !en.existsSync()) return;
+  final tmp = Directory('$_cache/qul_wbw_$language')
+    ..createSync(recursive: true);
+  _unzip(zip, tmp);
+  final meanings = (jsonDecode(
+    File('${tmp.path}/$member').readAsStringSync(),
+  ) as Map).cast<String, String>();
+  final out = Directory('$_cache/qurancom_wbw_$language')
+    ..createSync(recursive: true);
+  final name = quranComLanguageNames[language]!;
+  for (var surah = 1; surah <= 114; surah++) {
+    final verses =
+        jsonDecode(File('${en.path}/$surah.json').readAsStringSync()) as List;
+    for (final v in verses.cast<Map<String, Object?>>()) {
+      for (final w in (v['words']! as List).cast<Map<String, Object?>>()) {
+        if (w['char_type_name'] != 'word') continue;
+        final m = meanings['${v['verse_key']}:${w['position']}']?.trim();
+        if (m != null && m.isNotEmpty) {
+          w['translation'] = {'text': m, 'language_name': name};
+        }
+      }
+    }
+    File('${out.path}/$surah.json').writeAsStringSync(jsonEncode(verses));
+  }
 }
 
 void _unzip(File zip, Directory destDir) {

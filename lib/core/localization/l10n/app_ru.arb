@@ -356,6 +356,7 @@
   "followReciterTimes": "Читает чтец (раз)",
   "followYourTimes": "Читаете вы (раз)",
   "countUntilStopped": "До остановки",
+  "tafsirNoNote": "В этом тафсире нет примечания к этому аяту.",
   "followStart": "Начать",
   "followYourTurn": "Ваша очередь — читайте",
   "followReciterTurn": "Слушайте: {reciter}",

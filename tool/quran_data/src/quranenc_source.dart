@@ -120,6 +120,9 @@ class QuranEncTafsirResult {
 /// Parses QuranEnc's Al-Muyassar tafsir sqlite export (same table shape as a
 /// translation export, but the `translation` column holds tafsir
 /// commentary, and there is no separate footnotes model on [TafsirVerseText]).
+///
+/// [fromFootnotes]: a translation's own footnotes as its tafsir (Junagarhi's Urdu
+/// carries Ahsan-ul-Bayan as footnotes); an ayah without any has no row.
 QuranEncTafsirResult parseQuranEncTafsir({
   required File sqliteFile,
   required String tafsirId,
@@ -128,6 +131,8 @@ QuranEncTafsirResult parseQuranEncTafsir({
   required String author,
   required int version,
   Set<String> leaveOut = const {},
+  bool fromFootnotes = false,
+  String source = 'QuranEnc.com',
 }) {
   final bytes = sqliteFile.readAsBytesSync();
   final sourceHash = sha256.convert(bytes).toString();
@@ -135,14 +140,17 @@ QuranEncTafsirResult parseQuranEncTafsir({
   final db = sqlite3.open(sqliteFile.path);
   try {
     final rows = db.select(
-      'SELECT sura, aya, translation FROM translations ORDER BY sura, aya',
+      fromFootnotes
+          ? 'SELECT sura, aya, footnotes AS translation FROM translations ORDER BY sura, aya'
+          : 'SELECT sura, aya, translation FROM translations ORDER BY sura, aya',
     );
     final verses = <TafsirVerseText>[];
     for (final row in rows) {
       // An ayah the source leaves empty because the entry before covers
       // it too: no row at all, rather than an empty one. Only while empty:
       // if the source fills it in, it is kept (and the build's check fails).
-      if (leaveOut.contains('${row['sura']}:${row['aya']}') &&
+      if ((fromFootnotes ||
+              leaveOut.contains('${row['sura']}:${row['aya']}')) &&
           '${row['translation'] ?? ''}'.trim().isEmpty) {
         continue;
       }
@@ -166,7 +174,7 @@ QuranEncTafsirResult parseQuranEncTafsir({
       languageCode: languageCode,
       author: author,
       version: version,
-      source: 'QuranEnc.com',
+      source: source,
       license:
           'QuranEnc Terms and Policies (see docs/QURAN_DATA_PROVENANCE.md)',
       checksum: checksum,

@@ -157,6 +157,7 @@ flutter:
     - assets/quran/wbw/tr_qurancom.json
     - assets/quran/wbw/fa_qurancom.json
     - assets/quran/wbw/bn_qurancom.json
+    - assets/quran/wbw/fr_qurancom.json
     # The translation milestone's launch languages (T4).
     - assets/quran/translations/ur_junagarhi.json
     - assets/quran/translations/id_affairs.json
@@ -174,6 +175,7 @@ flutter:
     - assets/quran/tafsir/ru_mukhtasar.json
     - assets/quran/tafsir/fa_mukhtasar.json
     - assets/quran/tafsir/bn_mukhtasar.json
+    - assets/quran/tafsir/ur_ahsanulbayan.json
     # Expected Hafs pronunciation of every ayah for acoustic verification —
     # tool/acoustic_verification/build_reference.py.
     - assets/quran/recitation/phonetic_reference_hafs.json

@@ -186,17 +186,26 @@ class AyahTafsir extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final tafsirId = ref.watch(tafsirSelectionControllerProvider);
     if (tafsirId == null) return const SizedBox.shrink();
-    final text = ref
-        .watch(
-          tafsirVerseTextProvider(
-            chapterNo: verse.chapterNo,
-            verseNo: verse.verseNo,
-            tafsirId: tafsirId,
-          ),
-        )
-        .value;
-    if (text == null) return const SizedBox.shrink();
+    final loaded = ref.watch(
+      tafsirVerseTextProvider(
+        chapterNo: verse.chapterNo,
+        verseNo: verse.verseNo,
+        tafsirId: tafsirId,
+      ),
+    );
     final theme = Theme.of(context);
+    if (!loaded.hasValue) return const SizedBox.shrink();
+    final text = loaded.value;
+    if (text == null) {
+      // A tafsir that comments only on some ayahs (Ahsan-ul-Bayan).
+      return Text(
+        AppLocalizations.of(context).tafsirNoNote,
+        key: ValueKey(
+          'ayah-mode-no-tafsir-${verse.chapterNo}:${verse.verseNo}',
+        ),
+        style: theme.textTheme.bodySmall?.copyWith(color: colors.secondaryText),
+      );
+    }
     return Container(
       key: ValueKey('ayah-mode-tafsir-${verse.chapterNo}:${verse.verseNo}'),
       padding: const EdgeInsets.all(TahfeezSpacing.smPlus),

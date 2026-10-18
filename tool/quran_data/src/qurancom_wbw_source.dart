@@ -49,6 +49,9 @@ const quranComLanguageNames = {
   'tr': 'turkish',
   'fa': 'persian',
   'bn': 'bengali',
+  // Not served by Quran.com: QUL's French word by word, laid over Quran.com's
+  // English word list by position (build_production_data.dart).
+  'fr': 'french',
 };
 
 /// [languageCode]'s meanings, aligned. A meaning Quran.com serves in
@@ -61,6 +64,7 @@ QuranComWbwResult alignQuranComWbw({
   required String packId,
   String languageCode = 'en',
   String displayName = 'English word by word (Quran.com)',
+  String? packSource,
 }) {
   final languageName = quranComLanguageNames[languageCode]!;
   final withTransliteration = languageCode == 'en';
@@ -165,9 +169,11 @@ QuranComWbwResult alignQuranComWbw({
       for (final w in words)
         '${w.ayahId}:${w.wordIndex}:${w.translation}:${w.transliteration}',
     ]),
-    source: languageCode == 'en'
-        ? 'Quran.com API v4 (QUL resource 92)'
-        : 'Quran.com API v4',
+    source:
+        packSource ??
+        (languageCode == 'en'
+            ? 'Quran.com API v4 (QUL resource 92)'
+            : 'Quran.com API v4'),
     license:
         'Unverified — shipped by owner decision 2026-10-09 '
         '(docs/THIRD_PARTY_RESOURCES.md)',
