@@ -52,6 +52,7 @@ void main(List<String> args) {
       sukunError: opt('minor', 3),
       maddShare: opt('madd', QuranAcousticVerifier.maddShortShare),
       ghunnahHold: args.contains('--ghunnah') ? opt('ghunnah', 0) : null,
+      ghunnahSplit: args.contains('--ghunnah-split'),
       missingVowelError: opt('minor', 3),
       correct: -1,
       pauseFrames: 4,

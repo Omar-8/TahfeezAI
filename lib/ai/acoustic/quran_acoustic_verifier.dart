@@ -188,8 +188,17 @@ class AcousticThresholds {
     this.maddShare = QuranAcousticVerifier.maddShortShare,
     this.mistakeEntropy,
     this.ghunnahHold,
+    this.ghunnahSplit = false,
     this.tajweedRules,
   });
+
+  /// With [tajweed]: a doubled «ن» / «م» heard as two separate sounds (its
+  /// letter the likeliest sound twice, something else between, in its frames
+  /// and 3 either side) was said without its ghunnah — held, it is one
+  /// continuous nasal sound. On QDAT's expert labels for «إِنَّكَ» (held-out
+  /// learners), v3.6: missed ghunnah caught 61%, correct ones flagged 5.5%
+  /// (`ghunnah_length.dart`).
+  final bool ghunnahSplit;
 
   /// With [tajweed]: the rules judged; `null`: every one.
   final Set<TajweedRule>? tajweedRules;
@@ -270,6 +279,7 @@ class AcousticThresholds {
     double? maddShare,
     double? mistakeEntropy,
     double? ghunnahHold,
+    bool? ghunnahSplit,
     Set<TajweedRule>? tajweedRules,
   }) => AcousticThresholds(
     error: error ?? this.error,
@@ -286,6 +296,7 @@ class AcousticThresholds {
     maddShare: maddShare ?? this.maddShare,
     mistakeEntropy: mistakeEntropy ?? this.mistakeEntropy,
     ghunnahHold: ghunnahHold ?? this.ghunnahHold,
+    ghunnahSplit: ghunnahSplit ?? this.ghunnahSplit,
     tajweedRules: tajweedRules ?? this.tajweedRules,
   );
 
@@ -768,20 +779,30 @@ class QuranAcousticVerifier {
       // A ghunnah not held: the doubled noon / meem heard as its plain
       // letter for long.
       if (thresholds.tajweed &&
-          thresholds.ghunnahHold != null &&
+          (thresholds.ghunnahHold != null || thresholds.ghunnahSplit) &&
           pace != null &&
           span != null &&
           t.geminate &&
           (t.token == _noon || t.token == _meem)) {
-        var held = 0;
+        var held = 0, pieces = 0;
+        var inside = false;
         for (
           var f = math.max(0, span.start - 3);
           f <= math.min(frames.frames - 1, span.end + 3);
           f++
         ) {
           if (frames.at(f, t.token) >= _ghunnahPlainLog) held++;
+          var best = 0;
+          for (var c = 1; c < frames.classes; c++) {
+            if (frames.at(f, c) > frames.at(f, best)) best = c;
+          }
+          final now = best == t.token;
+          if (now && !inside) pieces++;
+          inside = now;
         }
-        if (held / pace > thresholds.ghunnahHold!) {
+        if ((thresholds.ghunnahSplit && pieces >= 2) ||
+            (thresholds.ghunnahHold != null &&
+                held / pace > thresholds.ghunnahHold!)) {
           out.add(
             PhonemeVerdict(
               token: t,

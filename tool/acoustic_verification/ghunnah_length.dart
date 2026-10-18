@@ -37,6 +37,7 @@ void main(List<String> args) {
     thresholds: AcousticThresholds(error: 3, pauseFrames: 4),
   );
   final feats = <bool, List<(double, double)>>{true: [], false: []};
+  final peakCount = <bool, List<int>>{true: [], false: []};
   for (final m in meta) {
     final l = labels[m['name']] as Map?;
     final v = l?['the_tight_noon'];
@@ -63,11 +64,31 @@ void main(List<String> args) {
     if (target.isEmpty) continue;
     final s = target.first.span!;
     // frames around the noon's span where «ن» is at least 30% likely
-    var held = 0;
+    var held = 0, peaks = 0;
+    var inNoon = false;
     for (var f = max(0, s.start - 3); f <= min(n - 1, s.end + 3); f++) {
       if (exp(frames.at(f, noon)) >= 0.3) held++;
+      // a CTC repeat: «ن» the likeliest sound again after a blank or other sound
+      var best = 0;
+      for (var c = 1; c < 43; c++) {
+        if (frames.at(f, c) > frames.at(f, best)) best = c;
+      }
+      final isNoon = best == noon;
+      if (isNoon && !inNoon) peaks++;
+      inNoon = isNoon;
     }
+    peakCount[(v as num) >= 1]!.add(peaks);
     feats[(v as num) >= 1]!.add(((s.end - s.start + 1) / pace, held / pace));
+  }
+  for (final applied in [true, false]) {
+    final h = <int, int>{};
+    for (final p in peakCount[applied]!) {
+      h[p] = (h[p] ?? 0) + 1;
+    }
+    stdout.writeln(
+      'noon peaks, ${applied ? 'applied' : 'missed '}: '
+      '${(h.keys.toList()..sort()).map((k) => '$k:${h[k]}').join('  ')}',
+    );
   }
   for (final (name, pick) in [
     ('aligned span', (double a, double b) => a),
