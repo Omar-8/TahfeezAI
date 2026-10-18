@@ -379,16 +379,17 @@ class AcousticVerificationController
   /// user's sessions 110 -> 111 of 1705, in QuranMB's / Al-Ikhlas's / QDAT's
   /// correct clips 161 -> 162 / unchanged / 880 -> 881.
   ///
-  /// A hidden nūn or mīm heard as a clear one: +2 / +4 — with v3.6, amateurs'
-  /// correct words flagged 3.0 -> 2.5% (`tune_sound_margins.dart`), nothing
-  /// else changed.
+  /// No extra margin for a hidden nūn or mīm heard as a clear one: at v3.6's
+  /// strict thresholds +2 / +4 left amateurs' false flags unchanged and cost
+  /// missed ikhfāʾ caught on QDAT's held-out learners 63.5 -> 55.1%
+  /// (`qdat_rules.dart --pack qdath`; v3.5: 57.9%), reported by the owner as
+  /// noon and meem rarely marked (2026-10-18).
   static const learnerSounds = {
     SoundGroup.shadda: SoundMargins(uncertain: 2),
     SoundGroup.reducedVowel: SoundMargins(error: 1, uncertain: 2),
     SoundGroup.finalVowel: SoundMargins(error: 2, uncertain: 2),
     SoundGroup.qalqala: SoundMargins(error: 2, uncertain: 4),
     SoundGroup.nasal: SoundMargins(uncertain: 2),
-    SoundGroup.hiddenNasal: SoundMargins(error: 2, uncertain: 4),
     SoundGroup.throat: SoundMargins(uncertain: 2),
     SoundGroup.wordFinalVowel: SoundMargins(error: -1),
     SoundGroup.stopInFlow: SoundMargins(error: 1),
