@@ -15,7 +15,11 @@ const _results = 'tool/acoustic_verification/model_work/artifacts/results';
 
 void main(List<String> args) {
   final pack = args[0], tag = args[1];
-  final ayahs = args.sublist(2).map(int.parse).toList();
+  final ayahs = args
+      .sublist(2)
+      .where((a) => !a.startsWith('--'))
+      .map(int.parse)
+      .toList();
   final reference = QuranPhoneticReference.fromJson(
     jsonDecode(
       File('assets/quran/recitation/phonetic_reference_hafs.json')
@@ -23,13 +27,15 @@ void main(List<String> args) {
     ) as Map<String, Object?>,
   );
   // The app's (AcousticVerificationController.calibratedThresholds).
-  const verifier = QuranAcousticVerifier(
+  // --v36: v3.6's strict ones (3 / 3).
+  final v36 = args.contains('--v36');
+  final verifier = QuranAcousticVerifier(
     thresholds: AcousticThresholds(
-      error: 4,
-      letterError: 4,
-      shaddaError: 4,
-      sukunError: 3,
-      missingVowelError: 3,
+      error: v36 ? 3 : 4,
+      letterError: v36 ? 3 : 4,
+      shaddaError: v36 ? 3 : 4,
+      sukunError: v36 ? 3 : 2,
+      missingVowelError: v36 ? 3 : 2,
       correct: -1,
       pauseFrames: 4,
       sounds: {
@@ -39,6 +45,8 @@ void main(List<String> args) {
         SoundGroup.qalqala: SoundMargins(error: 2, uncertain: 4),
         SoundGroup.nasal: SoundMargins(uncertain: 2),
         SoundGroup.throat: SoundMargins(uncertain: 2),
+        SoundGroup.wordFinalVowel: SoundMargins(error: -1),
+        SoundGroup.stopInFlow: SoundMargins(error: 1),
       },
     ),
   );
