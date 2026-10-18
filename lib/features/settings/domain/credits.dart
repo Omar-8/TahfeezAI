@@ -272,8 +272,20 @@ const credits = <Credit>[
     owner: 'Iqra’Eval / ArabicSpeech',
     licence: 'Not stated by the dataset; used with credit',
     url: 'https://huggingface.co/IqraEval',
-    useEn: 'Testing on real, expert-annotated mistakes',
-    useAr: 'الاختبار على أخطاء حقيقية علّمها خبراء',
+    useEn: 'Training and testing on real, expert-annotated mistakes',
+    useAr: 'التدريب والاختبار على أخطاء حقيقية علّمها خبراء',
+    citation:
+        'Iqra’Eval: A Shared Task on Qur’anic Pronunciation Assessment '
+        '(ArabicNLP 2025)',
+  ),
+  Credit(
+    group: CreditGroup.data,
+    name: 'Iqra_Extra_IS26 (Iqra’Eval)',
+    owner: 'Iqra’Eval / ArabicSpeech',
+    licence: 'No licence stated; used with credit',
+    url: 'https://huggingface.co/datasets/IqraEval/Iqra_Extra_IS26',
+    useEn: 'Training on learners’ real recitation mistakes',
+    useAr: 'التدريب على أخطاء حقيقية في تلاوات المتعلّمين',
     citation:
         'Iqra’Eval: A Shared Task on Qur’anic Pronunciation Assessment '
         '(ArabicNLP 2025)',

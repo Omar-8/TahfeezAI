@@ -378,12 +378,17 @@ class AcousticVerificationController
   /// word-final swaps caught 54.9 -> 64.6%, correct words flagged in the
   /// user's sessions 110 -> 111 of 1705, in QuranMB's / Al-Ikhlas's / QDAT's
   /// correct clips 161 -> 162 / unchanged / 880 -> 881.
+  ///
+  /// A hidden nūn or mīm heard as a clear one: +2 / +4 — with v3.6, amateurs'
+  /// correct words flagged 3.0 -> 2.5% (`tune_sound_margins.dart`), nothing
+  /// else changed.
   static const learnerSounds = {
     SoundGroup.shadda: SoundMargins(uncertain: 2),
     SoundGroup.reducedVowel: SoundMargins(error: 1, uncertain: 2),
     SoundGroup.finalVowel: SoundMargins(error: 2, uncertain: 2),
     SoundGroup.qalqala: SoundMargins(error: 2, uncertain: 4),
     SoundGroup.nasal: SoundMargins(uncertain: 2),
+    SoundGroup.hiddenNasal: SoundMargins(error: 2, uncertain: 4),
     SoundGroup.throat: SoundMargins(uncertain: 2),
     SoundGroup.wordFinalVowel: SoundMargins(error: -1),
     SoundGroup.stopInFlow: SoundMargins(error: 1),
@@ -444,17 +449,20 @@ class AcousticVerificationController
     );
   }
 
-  static const streamingMinorError = 2.0;
+  /// A missing vowel or sukun, at 3 (v3.5: 2): v3.6 at 2 flagged more of the
+  /// user's correct words (5.9 vs 5.5%) for the same mistakes found.
+  static const streamingMinorError = 3.0;
 
-  /// The streaming model v3.5s: v3.4 distilled further from two teachers
-  /// chosen per frame - the tajweed sounds (hidden noon / meem, qalqala echo,
-  /// madd, ghunnah) from one fine-tuned on learners' labelled mistakes, the rest
-  /// from the old one. At a vowel / letter / shadda margin of 4, against v3.4:
-  /// the user's correct words flagged 6.3 -> 6.2%, amateurs' 3.8 -> 3.4%;
-  /// QuranMB mistakes marked 68.8 -> 68.2%; held-out learners' missed ikhfa
-  /// flagged 40 -> 58% (correct ikhfa 5.8 -> 9.0%), qalqala misses caught
-  /// ~6 -> 19% (at [streamingQalqalaError]).
-  static const streamingError = 4.0;
+  /// The streaming model v3.6 (`model_work`, round 6, G2e): a slimmer student
+  /// (feed-forwards 2048, pruned by activity; 8-bit, the rest 4-bit) distilled
+  /// further on learners' real mistakes, with v3.5 a second teacher on
+  /// amateurs' clips (the teachers flag 9-13% of their correct words). Chosen
+  /// strict (owner, 2026-10-18): at 3 its real mistakes found match v3.5's at
+  /// 4 — QuranMB's held-out speakers 68.9 vs 68.6% (correct words flagged
+  /// 30.0 vs 32.7%), Al-Ikhlas learners 13.1 vs 13.8% — with spliced mistakes
+  /// 88.7 vs 85.1%, case endings u -> a 10 vs 2 of 21; the price: correct
+  /// words flagged, the user's 5.5 vs 5.1%, amateurs' 4.6 vs 3.4%.
+  static const streamingError = 3.0;
 
   /// A missing qalqala echo, at 2: v3.5s on the held-out Surah Al-Ikhlas
   /// learners catches 19.2% of labelled misses, flags 2.5% of correct ones; the

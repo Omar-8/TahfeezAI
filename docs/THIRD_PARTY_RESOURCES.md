@@ -181,6 +181,24 @@ fine-tune without RetaSy). Written permission remains worth asking for
 (everyayah's contact form is run by the Quran Foundation; RetaSy's authors:
 Salameh, Al Mdfaa, Askarbekuly, Mazzara, arXiv 2405.02675).
 
+### v3.6 (`tahfeez-d6h-v3.6-stream1.28-int4ffn8-b128-acc4`), 2026-10-18
+
+v3.6 (built as G2e, round 6 of `model_work/`) is v3.5's sources plus three more,
+used as student audio only: learners' real mistakes, with the teachers' frames as
+the target (no transcripts; `learner_data.py`). v3.5 itself is a second teacher
+on RetaSy's amateur clips (`distill_student.py --guide`).
+
+| Source | Role in v3.6 | What its source says | Status |
+|---|---|---|---|
+| Iqra_Extra_IS26 (Iqra'Eval, gated) | Student audio, 1,330 learner clips | **No licence** on its Hugging Face card | **Shipped with credit by owner decision, 2026-10-18** |
+| QuranMB.v2 (Iqra'Eval), even-numbered speakers | Student audio (the odd-numbered speakers stay a held-out test) | **Not stated** by the dataset | **Shipped with credit by owner decision, 2026-10-18** |
+| The owner's own recordings | Student audio | The owner agreed to training on them, 2026-10-17 | Permitted |
+
+**Owner decision, 2026-10-18: v3.6 replaces v3.5 in the app**, at its strict
+thresholds, with Iqra_Extra and QuranMB credited on the About screen as
+RetaSy is: credited, not cleared. The remedy if either objects: v3.5's recipe
+without their clips.
+
 ## Provenance notes
 
 - Both files were fetched directly from Google's own `google/fonts` GitHub repository (the
