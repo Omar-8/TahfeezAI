@@ -13,6 +13,8 @@
 //   amat.unl  RetaSy unlabelled clips (mostly correct) of the same reciters
 //   juz30     held-out Juz 30 reciters' clips (juz30_data.py --test; unverified, mostly
 //             correct), speaker = reciter
+//   tlog      Tarteel app users' phone recordings (Quran-Lab benchmark, evaluation
+//             only), words flagged; one speaker per clip
 //   qmb       QuranMB held-out (quranmbh): clips whose mistake is marked on a wrong word;
 //   qmb.fl    and its words heard right flagged; speaker = QuranMB speaker
 //   ikh       Al-Ikhlas held-out (ikhlash) the same; speaker = reciter
@@ -121,6 +123,10 @@ void main(List<String> args) {
         _addClean(unlabelled, reciters[i], retasy[i], m.th);
       }
     }
+    final tlog = <String, List<int>>{};
+    for (final c in _load('tlog_${m.tag}')) {
+      _addClean(tlog, '${c.m['reciter']}', c, m.th);
+    }
     final juz30 = <String, List<int>>{};
     for (final c in _load('juz30h_${m.tag}')) {
       _addClean(juz30, '${c.m['reciter']}', c, m.th);
@@ -140,6 +146,7 @@ void main(List<String> args) {
       ('amateur', amateur),
       ('amat.unl', unlabelled),
       ('juz30', juz30),
+      ('tlog', tlog),
       ('qmb', qmb),
       ('qmb.fl', qmbFl),
       ('ikh', ikh),
