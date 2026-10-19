@@ -20,9 +20,8 @@ const kAppStoreUrl = '';
 /// exists. Empty: Settings' "Send feedback" does nothing yet.
 const kFeedbackUrl = '';
 
-/// The project's GitHub repository, once it exists. Empty: Settings'
-/// "GitHub" does nothing yet.
-const kGitHubUrl = '';
+/// The project's GitHub repository (public since 2026-10-19).
+const kGitHubUrl = 'https://github.com/Omar-8/TahfeezAI';
 
 /// The app's dealings with its store and the system: its version, updates
 /// (Google Play's in-app update), rating (the store's in-app review),
