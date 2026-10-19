@@ -2,7 +2,7 @@
 // resampling whole speakers (not words), and each model's difference from the first
 // model's on the same resamples (paired).
 //
-//   dart run tool/acoustic_verification/bootstrap.dart v35ss=v35 r6g2e8=v36 r7g48=v36 ...
+//   dart run tool/acoustic_verification/bootstrap.dart v35ss=v35 r6g2e8=v36 r6g2e8=v36+s2 ...
 //       [--n 2000]
 //
 // A model's settings: v35 = v3.5 as the app ran it (vowel / letter / shadda 4, sukun /
@@ -47,7 +47,9 @@ AcousticThresholds _settings(String preset) {
   final entropy = preset.contains('@')
       ? double.parse(preset.split('@')[1])
       : null;
-  final name = preset.split('@')[0];
+  // v36+s2: with 2 more for letters that sound alike (SoundGroup.similarLetter)
+  final similar = RegExp(r'\+s([\d.]+)').firstMatch(preset);
+  final name = preset.split('@')[0].split('+')[0];
   // e4.5m3: those thresholds with v3.6's margins
   final custom = RegExp(r'^e([\d.]+)m([\d.]+)$').firstMatch(name);
   final v36 = name == 'v36' || custom != null;
@@ -65,6 +67,10 @@ AcousticThresholds _settings(String preset) {
     sounds: {
       ..._margins,
       if (v36) SoundGroup.hiddenNasal: const SoundMargins(error: -1),
+      if (similar != null)
+        SoundGroup.similarLetter: SoundMargins(
+          error: double.parse(similar[1]!),
+        ),
     },
   );
 }

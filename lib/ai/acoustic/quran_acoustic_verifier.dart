@@ -83,6 +83,10 @@ enum SoundGroup {
   /// The throat letters (ء ع ح ه خ غ) heard as each other.
   throat,
 
+  /// Other letters that sound alike, above all in phone audio (see
+  /// [_similar]): a stop's soft release, a weak frication, a sonorant.
+  similarLetter,
+
   /// A word's last vowel said as another short vowel, in flow: a case
   /// ending, said in a frame or two — its evidence is weaker than a vowel's
   /// inside a word.
@@ -123,6 +127,9 @@ enum SoundGroup {
         }
         if ('نم'.contains(a) && 'نم'.contains(b)) return nasal;
         if (_throat.contains(a) && _throat.contains(b)) return throat;
+        if (_similar.contains('$a$b') || _similar.contains('$b$a')) {
+          return similarLetter;
+        }
         final next = k + 1 < ts.length ? ts[k + 1] : null;
         final sakin =
             next == null ||
@@ -138,6 +145,14 @@ enum SoundGroup {
 
   static const _pairs = {'طت', 'صس', 'ضد', 'ظذ', 'قك', 'ضظ'};
   static const _throat = 'ءعحهخغ';
+
+  /// ك ء (a stop whose soft release is lost: only its closure is left); the
+  /// weak voiceless ف ث ت; the interdentals and their neighbours ذ د, ذ ز,
+  /// ث س, ظ ز; ج د; the sonorants ل ن ر; the labials ب م.
+  static const _similar = {
+    'كء', 'فت', 'فث', 'تث', 'ذد', 'ذز', 'ثس', 'ظز', 'جد', //
+    'لن', 'لر', 'نر', 'بم',
+  };
   static const _qalqala = 'قطبجد';
 }
 

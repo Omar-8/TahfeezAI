@@ -143,7 +143,9 @@ void main() {
     expect(letter(find('ص'), 'ش'), isNull);
     expect(letter(find('ن', word: 2), 'م'), SoundGroup.nasal);
     expect(letter(find('ع', word: 2), 'ء'), SoundGroup.throat);
-    expect(letter(find('ر'), 'ل'), isNull);
+    expect(letter(find('ر'), 'ل'), SoundGroup.similarLetter);
+    expect(letter(find('ت', word: 2), 'ف'), SoundGroup.similarLetter);
+    expect(letter(find('ر'), 'ق'), isNull);
     final vowel = ts.indexWhere((t) => t.kind == PhoneticTokenKind.vowel);
     expect(
       SoundGroup.of(ts, vowel, RecitationErrorType.missingVowel, null),

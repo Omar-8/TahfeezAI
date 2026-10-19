@@ -385,6 +385,14 @@ class AcousticVerificationController
   /// marked (2026-10-18). On QDAT's held-out learners missed ikhfāʾ caught
   /// 63.5 -> 66.9%, correct flagged 10.8 -> 11.8%; the user's and amateurs'
   /// correct words flagged unchanged. (+2 / +4 had cost 63.5 -> 55.1%.)
+  ///
+  /// Letters that sound alike (ك ء, ف ت, ذ د, ل ن …: [SoundGroup.similarLetter])
+  /// need 2 more: reported as letters heard wrongly while said right
+  /// (2026-10-19). With v3.6 (`bootstrap.dart`, speaker-resampled), correct
+  /// words flagged: the user's 5.5 -> 5.2%, amateurs' 4.6 -> 4.2%, held-out
+  /// Juz 30 reciters' 35.4 -> 33.6%, Tarteel users' 16.1 -> 15.6%; QuranMB's
+  /// real mistakes caught 68.2 -> 68.1%, Al-Ikhlas's unchanged. (+3: the
+  /// user's 5.1%, QuranMB 67.7%.)
   static const learnerSounds = {
     SoundGroup.shadda: SoundMargins(uncertain: 2),
     SoundGroup.reducedVowel: SoundMargins(error: 1, uncertain: 2),
@@ -393,6 +401,7 @@ class AcousticVerificationController
     SoundGroup.nasal: SoundMargins(uncertain: 2),
     SoundGroup.hiddenNasal: SoundMargins(error: -1),
     SoundGroup.throat: SoundMargins(uncertain: 2),
+    SoundGroup.similarLetter: SoundMargins(error: 2),
     SoundGroup.wordFinalVowel: SoundMargins(error: -1),
     SoundGroup.stopInFlow: SoundMargins(error: 1),
   };
@@ -406,6 +415,7 @@ class AcousticVerificationController
     SoundGroup.qalqala: SoundMargins(error: 2, uncertain: 4),
     SoundGroup.nasal: SoundMargins(uncertain: 2),
     SoundGroup.throat: SoundMargins(uncertain: 2),
+    SoundGroup.similarLetter: SoundMargins(error: 2),
     SoundGroup.stopInFlow: SoundMargins(error: 2),
   };
 
