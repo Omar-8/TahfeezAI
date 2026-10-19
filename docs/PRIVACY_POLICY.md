@@ -50,4 +50,4 @@ If this policy changes, the new version will be published here with a new date.
 
 ## Contact
 
-Questions about privacy: **[contact email]**
+Questions about privacy: **tahfeez.ai.app@gmail.com**
