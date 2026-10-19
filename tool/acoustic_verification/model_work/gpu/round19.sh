@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
-# Round 19 (2026-10-19): G10 — v3.6 (G2e) continued on the audio where it is confidently
-# wrong against its teachers. disagree_mine.py runs the teachers (ft4 + ft5, as in
+# Round 19 (2026-10-19): G10 — v3.6 (G2e) continued on the audio where it is wrong or in
+# doubt against its teachers. disagree_mine.py runs the teachers (ft4 + ft5, as in
 # training) and the shipped streaming student (r6g2e8, ONNX) over the learner / amateur /
-# phone-like pools and lists, per clip, the sounds the teachers are sure of that the
-# student rules out; disagree_shard.py makes the worst clips shard_91NN, oversampled. The
+# phone-like pools and lists, per clip, the sounds the teachers are sure of (>= 0.8) that
+# the student doubts (< 0.5) — not only its confident errors: «لَمُنقَلِبُونَ» (43:14) was
+# flagged live from three such doubts (its hidden noon, second ل, kasra); disagree_shard.py makes the worst clips shard_91NN, oversampled. The
 # owner's own sessions (half of them: owner_holdout.json keeps the rest back for judging)
 # come mined and sharded from the laptop as data_mined/shard_9190.npz.
 #
@@ -27,7 +28,7 @@ if [ ! -f mine_pools.done ]; then
   log "mining start"
   $PY disagree_mine.py mine_pools.json artifacts/r6g2e8_acc4.onnx artifacts/r6g2e8_stream.json \
     data_retasy/shard_95*.npz data_learn/shard_9*.npz data_real/shard_96*.npz \
-    data_juz30/shard_94*.npz > mine.out 2>&1 && touch mine_pools.done
+    data_juz30/shard_94*.npz --sure 0.8 --ruled-out 0.5 > mine.out 2>&1 && touch mine_pools.done
   log "mining: $(tail -n 1 mine.out)"
 fi
 [ -f mine_pools.done ] || { log "mining FAILED: $(tail -n 1 mine.out)"; exit 1; }
