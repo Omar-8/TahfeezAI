@@ -43,7 +43,7 @@ jobs:
           ssh-key: ${{ secrets.QUL_SOURCES_KEY }}
           path: qul-sources
       - name: QUL sources
-        run: cp qul-sources/*.zip tool/quran_data/sources/ && rm -rf qul-sources
+        run: mkdir -p tool/quran_data/sources && cp qul-sources/*.zip tool/quran_data/sources/ && rm -rf qul-sources
 
       # The newest Xcode on the runner: plugins use the iOS 26 SDK
       # (connectivity_plus: NWPath.isUltraConstrained).
