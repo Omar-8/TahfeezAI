@@ -131,8 +131,11 @@ jobs:
 
       - name: Smoke test on the simulator
         shell: bash  # -eo pipefail: the test's failure is not hidden by tee
-        # Normally ~2 min; `flutter drive` can hang waiting for the app.
-        timeout-minutes: 10
+        # It builds the app for the simulator first: ~9 min on a cold runner
+        # (pub get 2, Xcode 6), the test itself ~2. A step that times out
+        # leaves its `flutter drive` running, which then attaches to the next
+        # step's app and breaks it too.
+        timeout-minutes: 25
         run: |
           flutter drive \
             --driver=test_driver/integration_test.dart \
