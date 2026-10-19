@@ -75,6 +75,8 @@ void main() {
     expect(container.read(arabicFontControllerProvider), ArabicUiFont.kufi);
     final tajawal = find.byKey(const ValueKey('settings-arabic-font-tajawal'));
     await tester.scrollUntilVisible(tajawal, 200, scrollable: _list);
+    await tester.ensureVisible(tajawal);
+    await tester.pumpAndSettle();
     await tester.tap(tajawal);
     await tester.pumpAndSettle();
     expect(container.read(arabicFontControllerProvider), ArabicUiFont.tajawal);

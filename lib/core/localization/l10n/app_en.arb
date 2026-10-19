@@ -889,8 +889,6 @@
     }
   },
   "homeBackToExit": "Press back again to exit",
-  "settingsFeedback": "Send feedback",
-  "settingsFeedbackSub": "Report a problem or suggest an idea",
   "settingsRate": "Rate TahfeezAI",
   "settingsRateSub": "On Google Play",
   "settingsShare": "Share TahfeezAI",
@@ -981,7 +979,6 @@
   "ayahViewWordMeanings": "Word meanings",
   "homeWelcomeTitle": "Welcome",
   "homeWelcomeBody": "TahfeezAI is here to help you recite, memorize and understand the Holy Quran.\n\nIts recitation checking is still learning and won't always be right — we are working to improve it. Please tell us what you think: we are listening.",
-  "homeWelcomeFeedback": "Send feedback",
   "homeWelcomeContinue": "Continue",
   "ayahViewQuranFont": "Quran font",
   "packRowwad": "Rowwad Translation Center",

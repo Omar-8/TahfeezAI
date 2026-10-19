@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'home_store_prompts.dart';
 
-import '../../../core/app_store/app_store_service.dart';
 import '../../../core/ui/back_to_exit.dart';
 import '../../../core/ui/first_run.dart';
 
@@ -106,8 +105,7 @@ class _HomeBrandHeader extends StatelessWidget {
 }
 
 /// Nothing on screen: the first time Home shows, a welcome — what the app
-/// is for, that its recitation checking is still learning, and where
-/// feedback goes.
+/// is for, and that its recitation checking is still learning.
 class _WelcomeOnce extends ConsumerStatefulWidget {
   const _WelcomeOnce();
 
@@ -122,7 +120,6 @@ class _WelcomeOnceState extends ConsumerState<_WelcomeOnce> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted || !await firstRunDue(ref, 'welcome') || !mounted) return;
       final l10n = AppLocalizations.of(context);
-      final store = ref.read(appStoreServiceProvider);
       await showDialog<void>(
         context: context,
         builder: (context) => AlertDialog(
@@ -130,15 +127,6 @@ class _WelcomeOnceState extends ConsumerState<_WelcomeOnce> {
           title: Text(l10n.homeWelcomeTitle),
           content: SingleChildScrollView(child: Text(l10n.homeWelcomeBody)),
           actions: [
-            // (Where feedback goes, once there is somewhere: Settings' too.)
-            if (kFeedbackUrl.isNotEmpty)
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  store.openUrl(kFeedbackUrl);
-                },
-                child: Text(l10n.homeWelcomeFeedback),
-              ),
             FilledButton(
               key: const ValueKey('home-welcome-continue'),
               onPressed: () => Navigator.of(context).pop(),

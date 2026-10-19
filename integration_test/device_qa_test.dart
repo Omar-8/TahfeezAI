@@ -33,7 +33,6 @@ import 'package:tahfeez_ai/features/recitation/application/recitation_session_co
 /// Controls that leave the app (a browser, the share sheet, the file
 /// picker, the store): not tapped.
 const _leavesApp = {
-  'settings-feedback',
   'settings-github',
   'settings-rate',
   'settings-share',

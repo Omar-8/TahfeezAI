@@ -116,7 +116,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             sections.add((
               words: [
                 l10n.appName,
-                l10n.settingsFeedback,
                 'GitHub',
                 l10n.settingsRate,
                 l10n.settingsShare,
@@ -126,7 +125,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 l10n.aboutSubtitle,
                 l10n.privacyTitle,
               ],
-              // First: the app — its version, feedback, rating, sharing,
+              // First: the app — its version, source code, rating, sharing,
               // updates, and its sources.
               widget: const _AboutApp(),
             ));
@@ -609,8 +608,8 @@ Future<void> _import(BuildContext context, WidgetRef ref) async {
   }
 }
 
-/// Settings' first section: the app's name and version, then send
-/// feedback, rate, share, check for updates (and whether to be told of
+/// Settings' first section: the app's name and version, then the
+/// GitHub, rate, share, check for updates (and whether to be told of
 /// them), and its sources and licences.
 class _AboutApp extends ConsumerStatefulWidget {
   const _AboutApp();
@@ -707,16 +706,6 @@ class _AboutAppState extends ConsumerState<_AboutApp> {
             ],
           ),
           const SizedBox(height: TahfeezSpacing.sm),
-          // (Both do nothing until the GitHub repository exists.)
-          row(
-            'settings-feedback',
-            Icons.feedback_outlined,
-            l10n.settingsFeedback,
-            l10n.settingsFeedbackSub,
-            () {
-              if (kFeedbackUrl.isNotEmpty) store.openUrl(kFeedbackUrl);
-            },
-          ),
           row(
             'settings-github',
             Icons.code_rounded,

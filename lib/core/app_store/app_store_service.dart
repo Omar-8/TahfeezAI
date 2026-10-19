@@ -16,10 +16,6 @@ const kPlayStoreUrl =
 /// nothing beyond the in-app prompt, and sharing links Google Play.
 const kAppStoreUrl = '';
 
-/// Where feedback goes: the project's GitHub issues, once the repository
-/// exists. Empty: Settings' "Send feedback" does nothing yet.
-const kFeedbackUrl = '';
-
 /// The project's GitHub repository (public since 2026-10-19).
 const kGitHubUrl = 'https://github.com/Omar-8/TahfeezAI';
 
