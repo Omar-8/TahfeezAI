@@ -124,7 +124,8 @@ class LocalQuranAcousticModel implements QuranAcousticModel {
   final MethodChannel _channel;
   final AcousticExecutionProvider provider;
 
-  /// Intra-op threads; 0 lets ONNX Runtime choose.
+  /// Intra-op threads; 0: the phone's fast cores less one (2-4), on Android
+  /// (`QuranAcousticModelChannel.fastCoreThreads`).
   final int threads;
 
   /// How often [status] retries a channel not registered yet (300 ms apart).

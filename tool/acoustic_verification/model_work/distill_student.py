@@ -45,6 +45,11 @@ DEPTH = {'d6': [0, 4, 8, 13, 18, 23], 'd8': [0, 3, 6, 9, 12, 15, 19, 23],
 # d6 (--init) by keeping each feed-forward's most important neurons (prune_ffn).
 FFN = {'d6h': 2048}
 DEPTH['d6h'] = DEPTH['d6']
+# Deeper slim students (2026-10-19): v3.6's width (d6h) with more of the teacher's layers.
+DEPTH['d12'] = [0, 2, 4, 6, 8, 10, 13, 15, 17, 19, 21, 23]
+for _d in ('d8', 'd10', 'd12'):
+    DEPTH[_d + 'h'] = DEPTH[_d]
+    FFN[_d + 'h'] = 2048
 SIZES = {'s150': (640, 16, 10), 's100': (512, 16, 8), 's75': (512, 12, 8),
          's50': (384, 16, 6), 's25': (256, 16, 4)}
 VOCAB = ['', 'ء', 'ب', 'ت', 'ث', 'ج', 'ح', 'خ', 'د', 'ذ', 'ر', 'ز', 'س', 'ش', 'ص', 'ض',

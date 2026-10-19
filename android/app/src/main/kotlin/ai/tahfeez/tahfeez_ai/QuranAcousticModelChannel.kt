@@ -201,6 +201,24 @@ class QuranAcousticModelChannel private constructor(
         )
     }
 
+    /**
+     * Threads for the model when the caller leaves it to us: the phone's fast cores
+     * (every core faster than its slowest tier) less one, kept for the microphone and
+     * the UI — 2 to 4. ONNX Runtime's own choice spreads the work onto the slow cores,
+     * which hold the fast ones back: on a POCO F3 (4 fast + 4 slow) v3.6's 1.28 s
+     * chunk took 1018 ms with it, 943 ms with 4 threads, 525 ms with 3, 688 ms with 2.
+     */
+    private fun fastCoreThreads(): Int {
+        val speeds = (0 until Runtime.getRuntime().availableProcessors()).mapNotNull {
+            File("/sys/devices/system/cpu/cpu$it/cpufreq/cpuinfo_max_freq")
+                .takeIf { f -> f.canRead() }?.readText()?.trim()?.toLongOrNull()
+        }
+        if (speeds.isEmpty()) return 2
+        val slowest = speeds.min()
+        val fast = speeds.count { it > slowest }.let { if (it == 0) speeds.size else it }
+        return (fast - 1).coerceIn(2, 4)
+    }
+
     private fun load(provider: String, threads: Int): Map<String, Any?> {
         if (session != null && provider == loadedProvider) {
             return mapOf("provider" to loadedProvider, "loadMs" to 0, "cached" to true)
@@ -225,7 +243,7 @@ class QuranAcousticModelChannel private constructor(
         val environment = OrtEnvironment.getEnvironment()
         val options = OrtSession.SessionOptions().apply {
             setOptimizationLevel(OrtSession.SessionOptions.OptLevel.ALL_OPT)
-            if (threads > 0) setIntraOpNumThreads(threads)
+            setIntraOpNumThreads(if (threads > 0) threads else fastCoreThreads())
             when (provider) {
                 "nnapi" -> addNnapi()
                 "xnnpack" -> addXnnpack(

@@ -10,7 +10,7 @@
 // CPU share; peak PSS; battery and temperature before and after.
 //
 //   flutter test integration_test/acoustic_stream_android_test.dart -d <id> \
-//     [--dart-define=ACOUSTIC_MINUTES=5]
+//     [--dart-define=ACOUSTIC_MINUTES=5] [--dart-define=ACOUSTIC_THREADS=4]
 
 import 'dart:io';
 import 'dart:math' as math;
@@ -32,7 +32,9 @@ void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('streaming model on this device', (_) async {
-    final model = LocalQuranAcousticModel();
+    final model = LocalQuranAcousticModel(
+      threads: const int.fromEnvironment('ACOUSTIC_THREADS'),
+    );
     // Installing the test app clears its files: the model may be pushed
     // only now — wait for it (and the recitation).
     var status = await model.status();
