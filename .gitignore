@@ -63,10 +63,13 @@ lib/core/localization/generated/
 
 # Re-fetchable raw upstream sources for the production Quran dataset
 # (tool/quran_data/fetch_sources.dart repopulates this). The vendored QUL
-# layout/word-by-word zips under tool/quran_data/sources/ are NOT ignored —
-# they cannot be re-fetched automatically (see docs/QURAN_DATA_PROVENANCE.md)
-# and are committed deliberately, small enough to be reasonable in git.
+# layout/word-by-word zips under tool/quran_data/sources/ cannot be re-fetched
+# automatically (see docs/QURAN_DATA_PROVENANCE.md); with the repository public
+# they are not committed either, while QUL's redistribution terms are
+# unverified: CI checks them out from the private Omar-8/TahfeezAI-qul-sources.
 tool/quran_data/.cache/
+tool/quran_data/sources/qpc-*.zip
+tool/quran_data/sources/qul-*.zip
 
 # The QPC V2 per-page font package (~136MB, 604 individual TTFs) is
 # deliberately NOT committed yet — its packaging strategy (which formats,
@@ -106,7 +109,7 @@ tool/quran_data/sources/UthmanicHafs_V22.ttf.zip
 # Regenerate locally with
 # `dart run tool/quran_data/build_qpc_hafs_display.dart` (the vendored
 # source zip it needs, tool/quran_data/sources/qpc-hafs-word-by-word.db.zip,
-# is committed).
+# is vendored locally, see above).
 assets/quran/quran_display/
 
 # The generated production Mushaf dataset (assets/quran/mushaf/) is real,
@@ -116,7 +119,7 @@ assets/quran/quran_display/
 # committing it to the shared repository would distribute that content
 # before the release gate clears. Regenerate locally with
 # `dart run tool/quran_data/build_production_data.dart` (the vendored source
-# zips it needs are committed); test/quran_data/mushaf_*_test.dart require
+# zips it needs: tool/quran_data/sources/, see above); test/quran_data/mushaf_*_test.dart require
 # this file to exist and are skipped-by-failure otherwise, the same
 # prerequisite the other qul_*_test.dart real-data tests already have.
 assets/quran/mushaf/

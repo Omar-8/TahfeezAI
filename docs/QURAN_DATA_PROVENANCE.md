@@ -805,8 +805,9 @@ dart run tool/quran_data/build_production_data.dart # writes assets/quran/*.json
 
 The QUL layout and word-by-word files must already exist at
 `tool/quran_data/sources/qpc-v2-15-lines.db.zip` and
-`tool/quran_data/sources/qpc-v2-word-by-word.db.zip` (both committed to this repository,
-since neither can be re-fetched automatically — see §7/§7a) for the Mushaf layer
+`tool/quran_data/sources/qpc-v2-word-by-word.db.zip` (neither can be re-fetched automatically — see §7/§7a; since the
+repository went public on 2026-10-19 they, like every raw QUL zip, are not in git: CI checks
+them out from the private `Omar-8/TahfeezAI-qul-sources`, developers copy them in by hand) for the Mushaf layer
 (`assets/quran/mushaf/kfgqpc_v2.json`) to build; if either is absent the build still
 succeeds for the canonical/translation/tafsir layers and reports the Mushaf layer as
 `SHIP_BLOCKED_MISSING_SOURCE`. The QPC V2 font package is **not** committed (see §8) and

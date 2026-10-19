@@ -34,6 +34,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # The raw QUL source zips (not in this public repository while QUL's
+      # redistribution terms are unverified): a private repository, read with
+      # a read-only deploy key.
+      - uses: actions/checkout@v4
+        with:
+          repository: Omar-8/TahfeezAI-qul-sources
+          ssh-key: ${{ secrets.QUL_SOURCES_KEY }}
+          path: qul-sources
+      - name: QUL sources
+        run: cp qul-sources/*.zip tool/quran_data/sources/ && rm -rf qul-sources
+
       # The newest Xcode on the runner: plugins use the iOS 26 SDK
       # (connectivity_plus: NWPath.isUltraConstrained).
       - name: Xcode
