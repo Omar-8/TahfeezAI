@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# Round 20 (2026-10-19): G11 — an 8-layer student at v3.6's width (d8h: the teacher's
-# layers 0 3 6 9 12 15 19 23, feed-forwards cut to 2048), trained from the teacher
-# itself. v3.6 (6 layers) is confidently wrong where the teachers are sure (owner's
+# Round 20 (2026-10-19): G11 — an 8-layer student at v3.6's width (d8h), grown from v3.6
+# (init/G2e8: G2e's six layers with its 3rd and 5th doubled — agrees with v3.6 on 92% of
+# frames before training; built from the teacher's own layers instead it was still at
+# validation KL 0.46 after 4000 steps, v3.6 0.086). v3.6 (6 layers) is confidently wrong where the teachers are sure (owner's
 # «تَذْكُرُوا۟», 43:13: teachers llr −11, v3.5 / v3.6 +7); one more round on hard clips
 # (G10) only moved errors around. With the app's thread fix d8h runs 703 ms per 1.28 s
 # chunk on a POCO F3 (v3.6 538 ms) and is 117 MB (fits the Play download). 8 layers
@@ -32,13 +33,19 @@ for f in data_mined/shard_91*.npz data_retasy/shard_95*.npz data_learn/shard_9*.
 done
 ln -s ../data_orig/val.npz data_mix/val.npz
 log "G11 start ($(ls data_mix/shard_*.npz | wc -l) shards)"
+# --max-audio 45: at 60 a batch of long clips ran out of the 3090's 24 GB after step 1000.
+# A crash resumes from the last checkpoint (every 1000 steps), up to 5 times.
+for attempt in 1 2 3 4 5; do
 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
-$PY distill_student.py train d8h data_mix runs/G11 \
-  --steps 20000 --max-audio 60 --lr 2e-4 --augment 0.6 --phone-extra --pitch 0.25 \
+$PY distill_student.py train d8h data_mix runs/G11 --init init/G2e8/student.pt \
+  --steps 15000 --max-audio 45 --lr 3e-5 --augment 0.6 --phone-extra --pitch 0.25 \
   --tempo 0.3 --hard 0.75 --focus 0.5 --crop 0.5 --repeat shard_91=4,shard_95=16,shard_97=2,shard_98=2,shard_99=2 \
   --trust shard_95:0.2:10 --guide init/v35s/student.pt:shard_95:0.7 \
   --spike-mode clip --val-every 1000 --save-every 1000 --resume --seed 211 --vowel 1 \
-  --stream 0.96,5.12 --stream-chunks 0.64,1.28 > train_G11.out 2>&1
+  --stream 0.96,5.12 --stream-chunks 0.64,1.28 >> train_G11.out 2>&1
+[ -f runs/G11/student.pt ] && break
+log "G11 attempt $attempt stopped: $(grep -E 'Error|error' train_G11.out | tail -n 1 | cut -c1-120)"
+done
 [ -f runs/G11/student.pt ] || { log "G11 FAILED: $(tail -n 1 train_G11.out)"; exit 1; }
 mkdir -p out/G11
 cp runs/G11/{student.pt,config.json,run.json,train.log} out/G11/
