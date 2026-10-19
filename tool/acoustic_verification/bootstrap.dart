@@ -77,6 +77,14 @@ AcousticThresholds _settings(String preset) {
 
 late QuranPhoneticReference _reference;
 
+/// MINE_ONLY=(a JSON list of session names): "mine" counts only those sessions (the ones
+/// kept out of a round's training, model_work/artifacts/owner_holdout.json).
+final Set<String>? _mineOnly = Platform.environment['MINE_ONLY'] == null
+    ? null
+    : (jsonDecode(
+        File(Platform.environment['MINE_ONLY']!).readAsStringSync(),
+      ) as List).cast<String>().toSet();
+
 /// Per speaker: [numerator, denominator] of a measure.
 typedef Counts = Map<String, List<int>>;
 
@@ -109,8 +117,11 @@ void main(List<String> args) {
       'phone4',
       'phone6',
       'phone7',
+      if (_mineOnly != null) ...['phone8', 'phone9'],
     ]) {
       for (final c in _load('${s}_${m.tag}')) {
+        final session = (c.m['name']! as String).split('_').first;
+        if (_mineOnly != null && !_mineOnly!.contains(session)) continue;
         _addClean(
           mine,
           '$s/${(c.m['name']! as String).split('_').first}',
