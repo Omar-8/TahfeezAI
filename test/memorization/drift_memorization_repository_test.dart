@@ -32,16 +32,16 @@ void main() {
       attempt(112002, AyahGrade.fail, t0),
     ]);
     await repo.recordTest([
-      attempt(112001, AyahGrade.good, t0.add(const Duration(days: 1))),
+      attempt(112001, AyahGrade.good, t0.add(const Duration(days: 2))),
     ]);
     final m = await repo.watchMemories().first;
-    expect(m[112001]!.stability, closeTo(2.5, 1e-6));
+    expect(m[112001]!.stability, closeTo(5, 1e-6));
     expect(m[112001]!.reviews, 2);
     expect(m[112001]!.status, MemoryStatus.memorized);
     expect(m[112002]!.stability, 0.25);
     expect(m[112002]!.status, MemoryStatus.learning);
     final history = await repo.attemptsFor(112001);
-    expect(history.map((a) => a.at), [t0, t0.add(const Duration(days: 1))]);
+    expect(history.map((a) => a.at), [t0, t0.add(const Duration(days: 2))]);
     expect((await repo.attemptsFor(112002)).single.wrong, 1);
   });
 

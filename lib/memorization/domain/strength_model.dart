@@ -16,10 +16,11 @@ import 'models/memorization_models.dart';
 ///
 /// The constants are a starting point, to be tuned on real use.
 abstract final class StrengthModel {
-  /// S after a part's first graded test.
+  /// S after a part's first graded test. (Was 1 / ½ / ¼ day: pages felt
+  /// weak too early, 2026-10-19.)
   static const firstStability = {
-    AyahGrade.good: 1.0,
-    AyahGrade.hard: 0.5,
+    AyahGrade.good: 2.0,
+    AyahGrade.hard: 1.0,
     AyahGrade.fail: 0.25,
   };
 
@@ -30,8 +31,12 @@ abstract final class StrengthModel {
   static const failShrink = 0.3;
   static const minStability = 0.25;
 
-  /// Below this strength a part is weak.
+  /// Below this strength a part is weak: listed among the pages to revise,
+  /// red on the strength map (3.9 S after its last review).
   static const weak = 0.7;
+
+  /// Below this strength a part is fading: amber on the map (S after it).
+  static const fading = 0.9;
 
   /// Strength (0-1) [memory] has at [now]; `null` without a test yet.
   static double? strength(AyahMemory memory, DateTime now) {

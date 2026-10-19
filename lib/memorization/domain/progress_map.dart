@@ -76,8 +76,8 @@ class ProgressMap {
 }
 
 abstract final class ProgressMapBuilder {
-  /// A page under this strength is weak.
-  static const weakBelow = 0.8;
+  /// A page under this strength is weak (the map's red line too).
+  static const weakBelow = StrengthModel.weak;
 
   /// [pages]: each ayah's Mushaf page; [juzOfAyah]: each ayah's juz.
   static ProgressMap build({

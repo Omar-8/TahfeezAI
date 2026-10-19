@@ -10,6 +10,7 @@ import '../../../core/theme/components/components.dart';
 import '../../../memorization/application/memorization_today.dart';
 import '../../../memorization/domain/models/memorization_models.dart';
 import '../../../memorization/domain/recitation_score.dart';
+import '../../../memorization/domain/strength_model.dart';
 import '../../../memorization/domain/today_scheduler.dart';
 import '../../../quran/domain/models/quran_location.dart';
 import '../../../quran/domain/models/quran_refs.dart';
@@ -178,9 +179,10 @@ class ScoreBar extends StatelessWidget {
   /// Thinner, with smaller text (in a list row).
   final bool dense;
 
-  static Color colorOf(double value, ColorScheme scheme) => value >= 0.9
+  static Color colorOf(double value, ColorScheme scheme) =>
+      value >= StrengthModel.fading
       ? scheme.primary
-      : value >= 0.7
+      : value >= StrengthModel.weak
       ? scheme.tertiary
       : scheme.error;
 

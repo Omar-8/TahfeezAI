@@ -60,12 +60,16 @@ void main() {
 
   test('weak pages: below the weak line, weakest first', () {
     final map = build({
-      // Strength (1 + t/9S)^-1: 9 days at S=1 → 0.5; 3 days → 0.75.
+      // Strength (1 + t/9S)^-1 at S=1: 9 days → 0.5; 5 days → 0.64 (weak,
+      // under 0.7).
       112001: recited(112001, daysAgo: 9),
-      109001: recited(109001, daysAgo: 3),
+      109001: recited(109001, daysAgo: 5),
       67001: recited(67001, daysAgo: 0),
     });
     expect([for (final p in map.weak) p.page], [604, 603]);
     expect(map.weak.first.strength, closeTo(0.5, 1e-9));
+    // 3 days → 0.75: fading, not weak.
+    final fading = build({109001: recited(109001, daysAgo: 3)});
+    expect(fading.weak, isEmpty);
   });
 }
