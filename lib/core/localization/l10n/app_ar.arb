@@ -370,8 +370,6 @@
   "followReciterTurn": "استمع إلى {reciter}",
   "sajdahReminder": "التذكير بسجود التلاوة",
   "sajdahReminderSub": "بعد تلاوة آية سجدة (مرة واحدة في كل جلسة)",
-  "micProcessing": "مرشّح ضوضاء الهاتف",
-  "micProcessingSub": "ينقّي الهاتف صوت الميكروفون. عند إيقافه يُستخدم الصوت كما هو، وقد يساعد ذلك على سماع الحروف الرخوة (ذ ث ف).",
   "sajdahReminderMessage": "في هذه الآية سجدة تلاوة.",
   "sajdahReminderOff": "إيقاف",
   "settingsRecitation": "التلاوة",

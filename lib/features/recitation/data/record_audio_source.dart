@@ -6,13 +6,16 @@ import '../domain/recitation_audio_source.dart';
 /// [RecitationAudioSource] backed by `package:record`'s PCM stream mode
 /// (Android `AudioRecord`, Web `getUserMedia` + AudioWorklet).
 class RecordPackageAudioSource implements RecitationAudioSource {
-  RecordPackageAudioSource({AudioRecorder? recorder, this.processing = true})
+  RecordPackageAudioSource({AudioRecorder? recorder, this.processing = false})
     : _recorder = recorder ?? AudioRecorder();
 
   final AudioRecorder _recorder;
 
-  /// The platform's noise suppression, echo cancelling and level control
-  /// (`HifzSettings.micProcessing`); off, the raw microphone.
+  /// The platform's noise suppression, echo cancelling and level control —
+  /// off by default: suppression strips the soft hiss of ذ ث ف خ that the
+  /// pronunciation check needs (owner's phone takes, 2026-10-20: one of two
+  /// with it on had 6 such letters flagged, none of the takes without it
+  /// more than 1).
   final bool processing;
 
   @override
@@ -37,9 +40,7 @@ class RecordPackageAudioSource implements RecitationAudioSource {
         encoder: AudioEncoder.pcm16bits,
         sampleRate: requested.sampleRate,
         numChannels: requested.channels,
-        // The platform's clean-up (on by default): noise suppression can
-        // strip the soft hiss of ذ ث ف that the pronunciation check needs,
-        // so it can be turned off (HifzSettings.micProcessing).
+        // The platform's clean-up: off by default (see [processing]).
         echoCancel: processing,
         noiseSuppress: processing,
         autoGain: processing,

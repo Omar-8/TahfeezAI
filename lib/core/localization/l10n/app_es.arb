@@ -370,8 +370,6 @@
   "followReciterTurn": "Escucha a {reciter}",
   "sajdahReminder": "Recordatorio de suyud at-tilawa",
   "sajdahReminderSub": "Tras recitar una aleya de postración (una vez por sesión)",
-  "micProcessing": "Filtro de ruido del teléfono",
-  "micProcessingSub": "El teléfono limpia el sonido del micrófono. Desactivado: el sonido sin procesar, que puede ayudar a oír las letras suaves (ذ ث ف).",
   "sajdahReminderMessage": "Esta aleya tiene una postración de recitación (suyud at-tilawa).",
   "sajdahReminderOff": "Desactivar",
   "settingsRecitation": "Recitación",

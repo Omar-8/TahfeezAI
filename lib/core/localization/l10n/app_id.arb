@@ -370,8 +370,6 @@
   "followReciterTurn": "Dengarkan {reciter}",
   "sajdahReminder": "Pengingat sujud tilawah",
   "sajdahReminderSub": "Setelah membaca ayat sajdah (sekali per sesi)",
-  "micProcessing": "Filter derau ponsel",
-  "micProcessingSub": "Ponsel membersihkan suara mikrofon. Mati: suara asli, yang dapat membantu pemeriksaan mendengar huruf lembut (ذ ث ف).",
   "sajdahReminderMessage": "Ayat ini memiliki sujud tilawah.",
   "sajdahReminderOff": "Matikan",
   "settingsRecitation": "Bacaan",

@@ -370,8 +370,6 @@
   "followReciterTurn": "Écoutez {reciter}",
   "sajdahReminder": "Rappel de la prosternation de récitation",
   "sajdahReminderSub": "Après avoir récité un verset de prosternation (une fois par session)",
-  "micProcessing": "Filtre anti-bruit du téléphone",
-  "micProcessingSub": "Le téléphone nettoie le son du micro. Désactivé : le son brut, qui peut aider à entendre les lettres douces (ذ ث ف).",
   "sajdahReminderMessage": "Ce verset comporte une prosternation de récitation (soujoud at-tilawa).",
   "sajdahReminderOff": "Désactiver",
   "settingsRecitation": "Récitation",

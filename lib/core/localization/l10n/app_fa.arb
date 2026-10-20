@@ -370,8 +370,6 @@
   "followReciterTurn": "به {reciter} گوش دهید",
   "sajdahReminder": "یادآور سجدهٔ تلاوت",
   "sajdahReminderSub": "پس از خواندن آیهٔ سجده (یک بار در هر جلسه)",
-  "micProcessing": "فیلتر نویز گوشی",
-  "micProcessingSub": "گوشی صدای میکروفون را پاک‌سازی می‌کند. خاموش: صدای خام، که به شنیدن حروف نرم (ذ ث ف) کمک می‌کند.",
   "sajdahReminderMessage": "این آیه سجدهٔ تلاوت دارد.",
   "sajdahReminderOff": "خاموش کردن",
   "settingsRecitation": "تلاوت",

@@ -1578,15 +1578,6 @@ class _HifzSettingsSheet extends ConsumerWidget {
               settings.sajdahReminder,
               (v) => settings.copyWith(sajdahReminder: v),
             ),
-            KeyedSubtree(
-              key: const ValueKey('hifz-mic-processing'),
-              child: toggle(
-                AppLocalizations.of(context).micProcessing,
-                AppLocalizations.of(context).micProcessingSub,
-                settings.micProcessing,
-                (v) => settings.copyWith(micProcessing: v),
-              ),
-            ),
             if (alerts)
               ListTile(
                 key: const ValueKey('hifz-mistake-alert'),

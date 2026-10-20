@@ -370,8 +370,6 @@
   "followReciterTurn": "{reciter} کو سنیں",
   "sajdahReminder": "سجدۂ تلاوت کی یاد دہانی",
   "sajdahReminderSub": "سجدے والی آیت پڑھنے کے بعد (ہر نشست میں ایک بار)",
-  "micProcessing": "فون کا شور فلٹر",
-  "micProcessingSub": "فون مائیکروفون کی آواز صاف کرتا ہے۔ بند ہو تو اصل آواز استعمال ہوتی ہے، جس سے نرم حروف (ذ ث ف) بہتر سنے جا سکتے ہیں۔",
   "sajdahReminderMessage": "اس آیت میں سجدۂ تلاوت ہے۔",
   "sajdahReminderOff": "بند کریں",
   "settingsRecitation": "تلاوت",
