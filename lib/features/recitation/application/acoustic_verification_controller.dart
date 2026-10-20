@@ -962,6 +962,9 @@ class AcousticVerificationController
       for (final t in span.tokens)
         if (t.unit >= lo && t.unit <= hi) t,
     ];
+    final leadJudged = expected.any(
+      (t) => t.unit == lo && job.targets.contains(t.word),
+    );
     // A streaming model's frames are as good for one word as for its ayah:
     // its quick check is judged as fully.
     final verifier = _withTajweed(
@@ -976,6 +979,9 @@ class AcousticVerificationController
       },
       openStart: job.openStart,
       openEnd: job.openEnd,
+      // Cut before its words: a first unit holding none of them is only
+      // lead-in, whose start the cut may have taken.
+      startInside: job.openStart && !leadJudged,
       beat: _beat,
     );
     // Only this piece's own words, and none cut off where the audio was

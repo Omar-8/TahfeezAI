@@ -416,17 +416,26 @@ class QuranAcousticVerifier {
   /// where the audio supports it better, expects the unit as said at that
   /// pause (waqf after, ibtida before). [openStart] / [openEnd]: the audio
   /// was cut mid-recitation on that side, so no pause is assumed there.
+  ///
+  /// [startInside]: the first unit is only lead-in, its start possibly cut
+  /// off — the frames may begin anywhere inside it, not cram it whole into
+  /// the frames before the next. (A piece's second of lead-in cut into
+  /// «مَآءًۢ بِقَدَرٍ فَأَنشَرْنَا», one unit: all three words were squeezed
+  /// into it, «بِهِۦ» pushed onto «بَلْدَةً»'s sounds, and «بَلْدَةً», said
+  /// correctly, flagged as another word.) Not for a unit being judged: its
+  /// first sound would be free to go unheard.
   List<PhonemeVerdict> verify(
     AcousticFrames frames,
     List<PhoneticToken> expected, {
     Map<int, PauseForms> pauses = const {},
     bool openStart = false,
     bool openEnd = false,
+    bool startInside = false,
     BeatMeter? beat,
   }) {
     if (expected.isEmpty) return const [];
     final t = frames.frames;
-    var spans = _alignWithWaqf(frames, expected);
+    var spans = _alignWithWaqf(frames, expected, startInside: startInside);
     final first = <int, int>{}, last = <int, int>{};
     final byUnit = <int, List<PhoneticToken>>{};
     for (var k = 0; k < expected.length; k++) {
@@ -571,7 +580,7 @@ class QuranAcousticVerifier {
       }
       chosen.addAll(candidate);
     }
-    spans = _alignWithWaqf(frames, chosen);
+    spans = _alignWithWaqf(frames, chosen, startInside: startInside);
     final out = _verifyAligned(
       frames,
       chosen,
@@ -1244,13 +1253,27 @@ class QuranAcousticVerifier {
   /// Unit-final vowels may be dropped only at a pause: aligned first as
   /// optional; one dropped with no pause after it is aligned again as
   /// required, so it is verified.
+  ///
+  /// [startInside]: see [verify].
   List<FrameSpan?> _alignWithWaqf(
     AcousticFrames frames,
-    List<PhoneticToken> expected,
-  ) {
+    List<PhoneticToken> expected, {
+    bool startInside = false,
+  }) {
     final labels = [for (final t in expected) t.token];
     final optional = [for (final t in expected) t.optional || t.unitFinalVowel];
-    var spans = ctcForcedAlign(frames, labels, optional: optional).spans;
+    final startAt = !startInside || expected.isEmpty
+        ? null
+        : {
+            for (var k = 0; k < expected.length; k++)
+              if (expected[k].unit == expected.first.unit) k,
+          };
+    var spans = ctcForcedAlign(
+      frames,
+      labels,
+      optional: optional,
+      startAt: startAt,
+    ).spans;
     var redo = false;
     for (var k = 0; k + 1 < expected.length; k++) {
       if (!expected[k].unitFinalVowel || spans[k] != null) continue;
@@ -1274,7 +1297,12 @@ class QuranAcousticVerifier {
       }
     }
     if (redo) {
-      spans = ctcForcedAlign(frames, labels, optional: optional).spans;
+      spans = ctcForcedAlign(
+        frames,
+        labels,
+        optional: optional,
+        startAt: startAt,
+      ).spans;
     }
     return spans;
   }
