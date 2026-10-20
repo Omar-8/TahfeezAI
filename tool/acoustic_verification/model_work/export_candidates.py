@@ -5,6 +5,7 @@
          [--group REGEX=BITS:BLOCK ...] [--src fp32dir]
   python export_candidates.py fp32 [--drop 7,18]   # also: drop encoder layers
   python export_candidates.py fp32 --student <run dir> --out <dir>   # a distilled student
+  python export_candidates.py fp32 --weights <teacher.pt> --out <dir>  # a fine-tuned teacher
 
 The teacher's 1x1 "pointwise" convolutions are matrix multiplications
 written as Conv1d, and the adapter's stride-2 convolutions are unfold +
@@ -85,9 +86,11 @@ class Wrapped(nn.Module):
         return F.log_softmax(logits, dim=-1)
 
 
-def export_fp32(drop=(), out_dir='fp32', student=None):
+def export_fp32(drop=(), out_dir='fp32', student=None, weights=None):
     from quran_muaalem import Muaalem
     m = Muaalem(model_name_or_path='obadx/muaalem-model-v3_2', device='cpu', dtype=torch.float32)
+    if weights:   # a fine-tuned teacher (finetune_teacher.py), e.g. teachers/teacher_ft5.pt
+        m.model.load_state_dict(torch.load(weights, map_location='cpu'))
     model, fe = m.model.eval(), getattr(m.processor, 'feature_extractor', m.processor)
     if student:
         # a distilled student: the teacher's class, the student's config/weights
@@ -176,7 +179,8 @@ if __name__ == '__main__':
         student = a[a.index('--student') + 1] if '--student' in a else None
         out = a[a.index('--out') + 1] if '--out' in a else (
             'fp32' if not drop else 'fp32_drop' + '_'.join(map(str, drop)))
-        export_fp32(drop, out, student)
+        weights = a[a.index('--weights') + 1] if '--weights' in a else None
+        export_fp32(drop, out, student, weights)
     else:
         only = a[a.index('--only') + 1] if '--only' in a else None
         rest = int(a[a.index('--rest-bits') + 1]) if '--rest-bits' in a else None

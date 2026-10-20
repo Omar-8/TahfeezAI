@@ -9,6 +9,7 @@ import '../data/record_audio_source.dart';
 import '../domain/recitation_audio_source.dart';
 import '../domain/recitation_recording_store.dart';
 import '../domain/recitation_session.dart';
+import 'hifz_controller.dart' show hifzSettingsProvider;
 
 /// Live recitation: Android, iOS (its microphone usage string in
 /// Info.plist) and the web.
@@ -22,7 +23,10 @@ final recitationSupportedProvider = Provider<bool>((ref) {
 /// after it has finished writing the recording.
 final recitationAudioSourceFactoryProvider =
     Provider<RecitationAudioSource Function()>(
-      (ref) => RecordPackageAudioSource.new,
+      (ref) =>
+          () => RecordPackageAudioSource(
+            processing: ref.read(hifzSettingsProvider).micProcessing,
+          ),
     );
 
 final recitationRecordingStoreProvider = Provider<RecitationRecordingStore>(

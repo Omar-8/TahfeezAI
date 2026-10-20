@@ -360,6 +360,13 @@ void main() {
     );
   });
 
+  test('the phone noise filter: on until turned off, then as saved', () {
+    expect(HifzSettings.fromJson({}).micProcessing, isTrue);
+    const off = HifzSettings(micProcessing: false);
+    expect(HifzSettings.fromJson(off.toJson()).micProcessing, isFalse);
+    expect(off.copyWith(strict: false).micProcessing, isFalse);
+  });
+
   test('a saved vibrate switch becomes the vibrate alert', () {
     expect(HifzSettings.fromJson({'vibrate': false}).alert, MistakeAlert.off);
     expect(

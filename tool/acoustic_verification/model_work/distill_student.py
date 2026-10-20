@@ -47,7 +47,11 @@ FFN = {'d6h': 2048}
 DEPTH['d6h'] = DEPTH['d6']
 # Deeper slim students (2026-10-19): v3.6's width (d6h) with more of the teacher's layers.
 DEPTH['d12'] = [0, 2, 4, 6, 8, 10, 13, 15, 17, 19, 21, 23]
-for _d in ('d8', 'd10', 'd12'):
+DEPTH['d16'] = [0, 1, 3, 4, 6, 7, 9, 10, 12, 13, 15, 16, 18, 19, 21, 23]
+# d12g: v3.6's six layers (at the teacher's 0 4 8 13 18 23) with ft5's 2 6 10 15 16 20
+# between them (round 23: artifacts/G2e12_ft5, built from G2e + ft5).
+DEPTH['d12g'] = [0, 2, 4, 6, 8, 10, 13, 15, 16, 18, 20, 23]
+for _d in ('d8', 'd10', 'd12', 'd16', 'd12g'):
     DEPTH[_d + 'h'] = DEPTH[_d]
     FFN[_d + 'h'] = 2048
 SIZES = {'s150': (640, 16, 10), 's100': (512, 16, 8), 's75': (512, 12, 8),
@@ -160,6 +164,7 @@ def clips(path):
 
 
 REPEAT = []   # [(shard name prefix, times)]: oversampled shards (set by --repeat)
+MAX_CLIP_S = float(os.environ.get('MAX_CLIP_S', 0))   # training clips longer are skipped
 
 # --trust: shards (name prefixes) whose transcripts outrank the teacher. A clip of theirs
 # with a transcript (retasy_data.py: an amateur's ayah judged correct) has its KL to the
@@ -195,6 +200,10 @@ def batches(data_dir, max_audio_s, seed):
         rng.shuffle(shards)
         for sh in shards:
             items = clips(sh)
+            if MAX_CLIP_S:
+                # A very long clip alone can exhaust the GPU: the teacher attends over the
+                # whole clip (its relative-position table grows with length squared).
+                items = [c for c in items if len(c[0]) <= MAX_CLIP_S * 16000]
             base = os.path.basename(sh)
             trusted = any(base.startswith(pre) for pre in TRUST)
             guided = next((w for pre, w in GUIDE_PRE if base.startswith(pre)), 0.0) \
@@ -442,9 +451,9 @@ def prune_ffn(state, width, scores=None):
 
 
 def ffn_activity(teacher_model, size, init, data_dir, fe, clips_n=600):
-    """Per feed-forward of the full-width student [init] (a d6's weights), each inner
+    """Per feed-forward of the full-width student [init] (a d6's / d12's weights), each inner
     neuron's mean absolute activation over [clips_n] training clips."""
-    full = make_student(teacher_model, 'd6' if size == 'd6h' else size).to(DEV).eval()
+    full = make_student(teacher_model, size[:-1] if size in FFN else size).to(DEV).eval()
     full.load_state_dict(torch.load(init, map_location=DEV))
     sums, counts, hooks = {}, {}, []
     for name, mod in full.named_modules():

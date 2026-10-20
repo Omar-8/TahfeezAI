@@ -68,6 +68,7 @@ class HifzSettings {
     this.tajweed = true,
     this.tajweedRules = allTajweedRules,
     this.sajdahReminder = true,
+    this.micProcessing = true,
   });
 
   static const allTajweedRules = {
@@ -85,6 +86,12 @@ class HifzSettings {
   /// Reciting an ayah of prostration: a reminder of Sujood al-Tilawah
   /// (once per app session).
   final bool sajdahReminder;
+
+  /// The phone's own noise suppression, echo cancelling and level control on
+  /// the microphone. They can strip the soft hiss of ذ ث ف and a stop's
+  /// release — sounds the pronunciation check then hears as other letters
+  /// (2026-10-20: owner's «تَذْكُرُوا۟» heard with ل); off, the raw microphone.
+  final bool micProcessing;
 
   /// Judge tajweed in the pronunciation check (idghām, ikhfāʾ, iqlāb …);
   /// off, only the letters and vowels.
@@ -114,6 +121,7 @@ class HifzSettings {
     bool? tajweed,
     Set<TajweedRule>? tajweedRules,
     bool? sajdahReminder,
+    bool? micProcessing,
   }) => HifzSettings(
     strict: strict ?? this.strict,
     highlightCurrent: highlightCurrent ?? this.highlightCurrent,
@@ -123,6 +131,7 @@ class HifzSettings {
     tajweed: tajweed ?? this.tajweed,
     tajweedRules: tajweedRules ?? this.tajweedRules,
     sajdahReminder: sajdahReminder ?? this.sajdahReminder,
+    micProcessing: micProcessing ?? this.micProcessing,
   );
 
   Map<String, Object> toJson() => {
@@ -134,6 +143,7 @@ class HifzSettings {
     'tajweed': tajweed,
     'tajweedRules': [for (final r in tajweedRules) r.name],
     'sajdahReminder': sajdahReminder,
+    'micProcessing': micProcessing,
   };
 
   static HifzSettings fromJson(Object? json) {
@@ -158,6 +168,7 @@ class HifzSettings {
             }
           : allTajweedRules,
       sajdahReminder: read('sajdahReminder', true),
+      micProcessing: read('micProcessing', true),
     );
   }
 }

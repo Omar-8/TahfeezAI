@@ -370,6 +370,8 @@
   "followReciterTurn": "Hör {reciter} zu",
   "sajdahReminder": "Erinnerung an die Rezitationsniederwerfung",
   "sajdahReminderSub": "Nach einem Vers der Niederwerfung (einmal pro Sitzung)",
+  "micProcessing": "Rauschfilter des Telefons",
+  "micProcessingSub": "Das Telefon bereinigt den Mikrofonton. Aus: der unbearbeitete Ton – hilft der Prüfung, leise Buchstaben (ذ ث ف) zu hören.",
   "sajdahReminderMessage": "Bei diesem Vers gibt es eine Niederwerfung der Rezitation (Sujud at-Tilawa).",
   "sajdahReminderOff": "Ausschalten",
   "settingsRecitation": "Rezitation",

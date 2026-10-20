@@ -370,6 +370,8 @@
   "followReciterTurn": "{reciter} dinleniyor",
   "sajdahReminder": "Tilavet secdesi hatırlatıcısı",
   "sajdahReminderSub": "Secde ayeti okunduktan sonra (oturum başına bir kez)",
+  "micProcessing": "Telefon gürültü filtresi",
+  "micProcessingSub": "Telefon mikrofon sesini temizler. Kapalıyken ham ses kullanılır; bu, yumuşak harflerin (ذ ث ف) duyulmasına yardımcı olabilir.",
   "sajdahReminderMessage": "Bu ayette tilavet secdesi vardır.",
   "sajdahReminderOff": "Kapat",
   "settingsRecitation": "Okuma",

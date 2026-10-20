@@ -370,6 +370,8 @@
   "followReciterTurn": "{reciter}-এর তিলাওয়াত শুনুন",
   "sajdahReminder": "সিজদায়ে তিলাওয়াতের রিমাইন্ডার",
   "sajdahReminderSub": "সিজদার আয়াত তিলাওয়াতের পর (প্রতি সেশনে একবার)",
+  "micProcessing": "ফোনের নয়েজ ফিল্টার",
+  "micProcessingSub": "ফোন মাইক্রোফোনের শব্দ পরিষ্কার করে। বন্ধ থাকলে মূল শব্দ ব্যবহৃত হয়, যা নরম হরফ (ذ ث ف) শুনতে সাহায্য করতে পারে।",
   "sajdahReminderMessage": "এই আয়াতে সিজদায়ে তিলাওয়াত আছে।",
   "sajdahReminderOff": "বন্ধ করুন",
   "settingsRecitation": "তিলাওয়াত",

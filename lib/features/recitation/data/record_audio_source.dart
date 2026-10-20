@@ -6,10 +6,14 @@ import '../domain/recitation_audio_source.dart';
 /// [RecitationAudioSource] backed by `package:record`'s PCM stream mode
 /// (Android `AudioRecord`, Web `getUserMedia` + AudioWorklet).
 class RecordPackageAudioSource implements RecitationAudioSource {
-  RecordPackageAudioSource({AudioRecorder? recorder})
+  RecordPackageAudioSource({AudioRecorder? recorder, this.processing = true})
     : _recorder = recorder ?? AudioRecorder();
 
   final AudioRecorder _recorder;
+
+  /// The platform's noise suppression, echo cancelling and level control
+  /// (`HifzSettings.micProcessing`); off, the raw microphone.
+  final bool processing;
 
   @override
   Future<MicrophonePermission> checkPermission({bool request = true}) async {
@@ -33,14 +37,12 @@ class RecordPackageAudioSource implements RecitationAudioSource {
         encoder: AudioEncoder.pcm16bits,
         sampleRate: requested.sampleRate,
         numChannels: requested.channels,
-        // Recitation is long-form speech in a possibly noisy room; let the
-        // platform clean it up — a recognizer benefits, and the recording
-        // is for the reciter's own review, not archival.
-        echoCancel: true,
-        noiseSuppress: true,
-        // Even levels whether the phone is near or far (the acoustic
-        // pronunciation check reads the audio itself).
-        autoGain: true,
+        // The platform's clean-up (on by default): noise suppression can
+        // strip the soft hiss of ذ ث ف that the pronunciation check needs,
+        // so it can be turned off (HifzSettings.micProcessing).
+        echoCancel: processing,
+        noiseSuppress: processing,
+        autoGain: processing,
         // A phone call or another app taking the mic shouldn't silently
         // end the session.
         audioInterruption: AudioInterruptionMode.pauseResume,
