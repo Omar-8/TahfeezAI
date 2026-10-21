@@ -96,7 +96,16 @@ missed needed **only the vowel margins** to change (`learnerSounds` in
 | reducedVowel (error margin) | +1 | **0** |
 | finalVowel (a unit's last vowel) | +2 | **+1** |
 | wordFinalVowel (a case ending) | −1 | **−2** |
-| Letters, shadda, sukun, missing vowel (threshold 3), similarLetter +2, hiddenNasal −1, quick check | unchanged | unchanged |
+| similarLetter (letters that sound alike), ayah and quick check | +2 | **+4** |
+| Letters, shadda, sukun, missing vowel (threshold 3), hiddenNasal −1 | unchanged | unchanged |
+
+**Similar letters at +4** (added 2026-10-21): false letter flags on phones drop further
+(the owner's sets 31 → 30, Tarteel-200 205 → 200, Juz 30 unseen reciters 1,759 → 1,678,
+71% of the gap to the teacher closed there) and no real mistake was lost on any test:
+sobolev's reviewed letter mistakes caught 16 → 16 (ص→س, ق→ك, ح→خ among them), QuranMB,
+Al-Ikhlas, the spliced pairs, amateurs' and the owner's correct words unchanged. A
+similar-letter mistake said only slightly wrong could still slip through; the phone trial
+checks that.
 
 Lowering the overall threshold instead (2.75) gave back the whole phone gain
 (owner 37, Tarteel 226). Stronger vowel margins (−0.5 / +0.5 / −2.5) caught
