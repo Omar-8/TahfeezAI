@@ -146,6 +146,13 @@ void main() {
     expect(letter(find('ر'), 'ل'), SoundGroup.similarLetter);
     expect(letter(find('ت', word: 2), 'ف'), SoundGroup.similarLetter);
     expect(letter(find('ر'), 'ق'), isNull);
+    // Phone-weak pairs, one direction each: «ٱلْمَغْضُوبِ»'s ض heard as د and
+    // «أَنْعَمْتَ»'s ء heard as ي are judged leniently; ي heard as ء is not,
+    // and ض heard as ظ stays a heavy/light pair.
+    expect(letter(find('ض', word: 5), 'د'), SoundGroup.phoneWeak);
+    expect(letter(find('ء', word: 2), 'ي'), SoundGroup.phoneWeak);
+    expect(letter(find('ي', word: 3), 'ء'), isNull);
+    expect(letter(find('ض', word: 5), 'ظ'), SoundGroup.heavyLight);
     final vowel = ts.indexWhere((t) => t.kind == PhoneticTokenKind.vowel);
     expect(
       SoundGroup.of(ts, vowel, RecitationErrorType.missingVowel, null),

@@ -87,6 +87,11 @@ enum SoundGroup {
   /// [_similar]): a stop's soft release, a weak frication, a sonorant.
   similarLetter,
 
+  /// The letters the on-device model most often hears wrongly in phone audio
+  /// while the reciter said them right, each in one direction only (see
+  /// [_phoneWeak]: «expected → heard»): judged more leniently.
+  phoneWeak,
+
   /// A word's last vowel said as another short vowel, in flow: a case
   /// ending, said in a frame or two — its evidence is weaker than a vowel's
   /// inside a word.
@@ -122,6 +127,7 @@ enum SoundGroup {
       case RecitationErrorType.wrongLetter when heard != null:
         final a = t.symbol, b = quranPhoneticVocabulary[heard];
         if ('ں۾'.contains(a) && 'نم'.contains(b)) return hiddenNasal;
+        if (_phoneWeak.contains('$a$b')) return phoneWeak;
         if (_pairs.contains('$a$b') || _pairs.contains('$b$a')) {
           return heavyLight;
         }
@@ -154,6 +160,14 @@ enum SoundGroup {
     'لن', 'لر', 'نر', 'بم',
   };
   static const _qalqala = 'قطبجد';
+
+  /// expected → heard, one direction each: on the owner's phone sets, Tarteel
+  /// users' recordings and unseen Juz 30 reciters, v3.7's commonest letter
+  /// flags on correct recitation (2026-10-21; owner's decision to judge them
+  /// more leniently). ث→ت and ل→ن are [similarLetter]s, already at +4.
+  static const _phoneWeak = {
+    'حه', 'ضد', 'قك', 'ءي', 'ني', 'كق', 'خف', 'ظض', 'لذ', //
+  };
 }
 
 /// Extra margins for a [SoundGroup], added to the type's own: a mistake

@@ -97,6 +97,7 @@ missed needed **only the vowel margins** to change (`learnerSounds` in
 | finalVowel (a unit's last vowel) | +2 | **+1** |
 | wordFinalVowel (a case ending) | −1 | **−2** |
 | similarLetter (letters that sound alike), ayah and quick check | +2 | **+4** |
+| phoneWeak (new: ح→ه ض→د ق→ك ء→ي ن→ي ك→ق خ→ف ظ→ض ل→ذ, one direction each), ayah and quick check | — | **+2** |
 | Letters, shadda, sukun, missing vowel (threshold 3), hiddenNasal −1 | unchanged | unchanged |
 
 **Similar letters at +4** (added 2026-10-21): false letter flags on phones drop further
@@ -106,6 +107,15 @@ sobolev's reviewed letter mistakes caught 16 → 16 (ص→س, ق→ك, ح→خ a
 Al-Ikhlas, the spliced pairs, amateurs' and the owner's correct words unchanged. A
 similar-letter mistake said only slightly wrong could still slip through; the phone trial
 checks that.
+
+**Phone-weak pairs at +2** (owner's decision, 2026-10-21): the letters v3.7 most often
+hears wrongly on phones while said right, each in one direction. False letter flags on
+phones: owner's sets 30 → 29, Tarteel-200 200 → 187, Juz 30 unseen 1,678 → 1,576 (below the
+teacher's 1,606 there). Cost: QuranMB real mistakes caught 66.7 → 66.4%, Al-Ikhlas 12.7 →
+12.4%; sobolev's reviewed mistakes, the spliced pairs and phone-degraded pairs unchanged.
+Several of these pairs (ق→ك, ض→د, ح→ه) are classic real learner mistakes, so a learner who
+says them only slightly wrong is now less likely to be flagged. (+4 would give Tarteel-200
+180 and QuranMB 66.2%.)
 
 Lowering the overall threshold instead (2.75) gave back the whole phone gain
 (owner 37, Tarteel 226). Stronger vowel margins (−0.5 / +0.5 / −2.5) caught

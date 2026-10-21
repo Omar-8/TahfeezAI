@@ -412,6 +412,14 @@ class AcousticVerificationController
   /// and no real mistake is lost: sobolev's reviewed letter mistakes caught
   /// 16 -> 16 (ص→س, ق→ك, ح→خ among them), QuranMB, Al-Ikhlas, the spliced
   /// pairs, amateurs' and the user's correct words unchanged (2026-10-21).
+  ///
+  /// The letters v3.7 most often hears wrongly on phones while said right
+  /// ([SoundGroup.phoneWeak]: ح→ه ض→د ق→ك ء→ي ن→ي ك→ق خ→ف ظ→ض ل→ذ, one
+  /// direction each) at +2, by the owner's decision (2026-10-21): false letter
+  /// flags on phones the owner's sets 30 -> 29, Tarteel users' 200 -> 187,
+  /// unseen Juz 30 reciters 1,678 -> 1,576; real mistakes caught QuranMB 66.7
+  /// -> 66.4%, Al-Ikhlas 12.7 -> 12.4%, sobolev's reviewed and the spliced
+  /// pairs unchanged. (+4: Tarteel users' 180, QuranMB 66.2%.)
   static const learnerSounds = {
     SoundGroup.shadda: SoundMargins(uncertain: 2),
     SoundGroup.reducedVowel: SoundMargins(error: 0, uncertain: 2),
@@ -421,6 +429,7 @@ class AcousticVerificationController
     SoundGroup.hiddenNasal: SoundMargins(error: -1),
     SoundGroup.throat: SoundMargins(uncertain: 2),
     SoundGroup.similarLetter: SoundMargins(error: 4),
+    SoundGroup.phoneWeak: SoundMargins(error: 2, uncertain: 2),
     SoundGroup.wordFinalVowel: SoundMargins(error: -2),
     SoundGroup.stopInFlow: SoundMargins(error: 1),
   };
@@ -434,8 +443,9 @@ class AcousticVerificationController
     SoundGroup.qalqala: SoundMargins(error: 2, uncertain: 4),
     SoundGroup.nasal: SoundMargins(uncertain: 2),
     SoundGroup.throat: SoundMargins(uncertain: 2),
-    // As the ayah check's (v3.7: +4), or early marks it then clears.
+    // As the ayah check's (v3.7: +4, +2), or early marks it then clears.
     SoundGroup.similarLetter: SoundMargins(error: 4),
+    SoundGroup.phoneWeak: SoundMargins(error: 2, uncertain: 2),
     SoundGroup.stopInFlow: SoundMargins(error: 2),
   };
 

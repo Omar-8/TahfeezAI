@@ -27,11 +27,13 @@ const _margins = {
 };
 
 /// v35, v36, or v36+sN (N more for [SoundGroup.similarLetter]); +eX: v36's margins at X
-/// instead of 3 (a model's own threshold).
+/// instead of 3 (a model's own threshold); +wN: [SoundGroup.phoneWeak] at N more.
 AcousticThresholds _settings(String preset) {
   final v36 = preset.startsWith('v36');
   final similar = RegExp(r'\+s([\d.]+)').firstMatch(preset);
   final e = double.parse(RegExp(r'\+e([\d.]+)').firstMatch(preset)?[1] ?? '3');
+  // +wN: [SoundGroup.phoneWeak] at N more.
+  final weak = RegExp(r'\+w([\d.]+)').firstMatch(preset);
   return AcousticThresholds(
     error: v36 ? e : 4,
     letterError: v36 ? e : 4,
@@ -47,14 +49,27 @@ AcousticThresholds _settings(String preset) {
         SoundGroup.similarLetter: SoundMargins(
           error: double.parse(similar[1]!),
         ),
+      if (weak != null)
+        SoundGroup.phoneWeak: SoundMargins(
+          error: double.parse(weak[1]!),
+          uncertain: 2,
+        ),
     },
   );
 }
 
-void main(List<String> arguments) {
+Future<void> main(List<String> arguments) async {
   final args = [...arguments];
   // --all: every confusion, not the 25 commonest.
   final all = args.remove('--all');
+  // --dump FILE: every letter flag as a JSON line (pack, a real mistake's word or
+  // not, expected, heard, likelihood ratio) — margins per pair worked out after.
+  final dumpAt = args.indexOf('--dump');
+  IOSink? dump;
+  if (dumpAt >= 0) {
+    dump = File(args[dumpAt + 1]).openWrite();
+    args.removeRange(dumpAt, dumpAt + 2);
+  }
   final tag = args[0], packs = args.sublist(2);
   final reference = QuranPhoneticReference.fromJson(
     jsonDecode(
@@ -108,6 +123,17 @@ void main(List<String> arguments) {
       );
       words += {for (final t in expected) t.word}.difference(targets).length;
       for (final v in verdicts) {
+        if (v.type == RecitationErrorType.wrongLetter) {
+          dump?.writeln(
+            jsonEncode({
+              'pack': pack,
+              'mistake': targets.contains(v.token.word),
+              'exp': v.token.symbol,
+              'heard': v.observed,
+              'llr': v.likelihoodRatio,
+            }),
+          );
+        }
         if (targets.contains(v.token.word)) {
           if (v.type == RecitationErrorType.wrongLetter) {
             caught['${v.token.symbol} → ${v.observed}'] =
@@ -132,6 +158,7 @@ void main(List<String> arguments) {
       }
     }
   }
+  await dump?.close();
   print(
     '$words correct words, $letters letters judged, '
     '$flagged heard as another letter',
