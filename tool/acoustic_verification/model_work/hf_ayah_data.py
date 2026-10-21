@@ -2,8 +2,8 @@
 written as training shards in distill_student.py's format, with EMPTY transcripts (the
 teacher's probabilities are the target, as for diverse_data.py).
 
-  python hf_ayah_data.py <out dir> --source qud|tadabur|iqra [--hours-per-reciter 0.6]
-                         [--hours 40] [--part K --parts N]
+  python hf_ayah_data.py <out dir> --source qud|tadabur|iqra|tlog [--hours-per-reciter 0.6]
+                         [--hours 40] [--part K --parts N] [--max-cost 0.6]
 
 Sources (credited in docs/THIRD_PARTY_RESOURCES.md and the app's About page):
 - qud: QUD-Technologies/quranic-universal-ayahs (CC BY 4.0), one config per recitation;
@@ -12,6 +12,12 @@ Sources (credited in docs/THIRD_PARTY_RESOURCES.md and the app's About page):
   spread over the dataset, up to --hours-per-reciter each.
 - iqra: IqraEval/Iqra_train (train split): read speech; only the rows whose text is a
   Quran ayah or part of one (matched by consonant skeleton) are kept.
+- tlog: tarteel-ai/tlog (CC BY 4.0, gated: HF_TOKEN of an account that accepted its
+  terms), the `clean` split: Tarteel app users reciting single ayahs on their own phones —
+  the audio the students fail on (2026-10-20). The ayah from the file name
+  (<surah>_<ayah>_<id>), else the label's skeleton; a share (--keep) of the rows of
+  --files random files. Never the 200 clips of the `tlog` test pack (Quran-Lab's
+  tlog_holdout, artifacts/tlog_cases.json).
 
 Never used: the calibration and test reciters (Shuraym, Ghamdi (Saad), Shaatree, Maher,
 Alafasy, Husary), any ayah in blocked_ayahs.json, clips outside 1-20 s, and clips the
@@ -30,9 +36,9 @@ from diverse_data import teacher_frames
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 MAX_COST = 0.6
-BASE = {'qud': 8000, 'tadabur': 8400, 'iqra': 8800}
+BASE = {'qud': 8000, 'tadabur': 8400, 'iqra': 8800, 'tlog': 7000}
 REPO = {'qud': 'QUD-Technologies/quranic-universal-ayahs', 'tadabur': 'FaisaI/tadabur',
-        'iqra': 'IqraEval/Iqra_train'}
+        'iqra': 'IqraEval/Iqra_train', 'tlog': 'tarteel-ai/tlog'}
 QUD_EXCLUDED = ('maher_al_muaiqly', 'mahmoud_khalil_al_husary', 'mishary_rashid_al_afasy',
                 'saad_al_ghamdi', 'saud_al_shuraim', 'abu_bakr_al_shatri')
 TADABUR_EXCLUDED = {8, 9, 33, 63, 71, 179}   # sheikh_dict.json ids of the same reciters
@@ -196,15 +202,59 @@ def iqra_rows(a, rng):
         os.remove(path)
 
 
+def tlog_held_out():
+    """The `tlog` test pack's clips (<surah>_<ayah>_<id>): never trained on."""
+    try:
+        cases = json.load(open(find('artifacts/tlog_cases.json',
+                                    'tool/acoustic_verification/model_work/artifacts/tlog_cases.json')))
+    except FileNotFoundError:
+        return set(json.load(open(find('tlog_held_out.json'))))
+    return {re.search(r'\d+_\d+_\d+', c.get('reciter') or c['name']).group(0) for c in cases}
+
+
+def tlog_rows(a, rng):
+    held = tlog_held_out()
+    assert len(held) >= 200, 'the tlog test clips must be known before sampling TLOG'
+    spans = span_index()
+    api = HfApi()
+    files = sorted(f for f in api.list_repo_files(REPO['tlog'], repo_type='dataset')
+                   if f.endswith('.parquet') and 'unclean' not in f)
+    pick = sorted(rng.sample(files, min(a.files, len(files))))[a.part::a.parts]
+    for f in pick:
+        path = download(REPO['tlog'], f, a.cache)
+        pf = pq.ParquetFile(path)
+        cols = [c for c in ('audio', 'label', 'sentence') if c in pf.schema_arrow.names]
+        for batch in pf.iter_batches(batch_size=64, columns=cols):
+            for row in batch.to_pylist():
+                if rng.random() > a.keep:
+                    continue
+                cell = row['audio']
+                name = os.path.basename((cell.get('path') if isinstance(cell, dict) else '') or '')
+                m = re.search(r'(\d+)_(\d+)_(\d+)', name)
+                if m and m.group(0) in held:
+                    continue
+                if m and 1 <= int(m.group(1)) <= 114:
+                    yield 'tlog', int(m.group(1)) * 1000 + int(m.group(2)), None, None, cell
+                    continue
+                hit = spans.get(skeleton(str(row.get('label') or row.get('sentence') or '')))
+                if hit:
+                    aid, lo, hi = hit
+                    yield 'tlog', aid, lo, hi, cell
+        os.remove(path)
+
+
 def main():
     p = argparse.ArgumentParser()
     p.add_argument('out')
     p.add_argument('--source', choices=sorted(BASE), required=True)
     p.add_argument('--hours', type=float, default=40, help='total for this part')
     p.add_argument('--hours-per-reciter', type=float, default=0.6)
-    p.add_argument('--files', type=int, default=24, help='tadabur: files sampled')
+    p.add_argument('--files', type=int, default=24, help='tadabur / tlog: files sampled')
+    p.add_argument('--max-cost', type=float, default=MAX_COST,
+                   help='teacher fit: clips costing more per frame are dropped (tlog: phone '
+                        'audio of learners fits less tidily than a reciter\'s)')
     p.add_argument('--keep', type=float, default=0.4,
-                   help='qud: share of a file\'s rows considered (spreads the clips over the file)')
+                   help='qud / tlog: share of a file\'s rows considered (spreads the clips over the file)')
     p.add_argument('--part', type=int, default=0)
     p.add_argument('--parts', type=int, default=1)
     p.add_argument('--shard-clips', type=int, default=2000)
@@ -215,7 +265,8 @@ def main():
     blocked = {s * 1000 + o for s, o in json.load(open(find('blocked_ayahs.json')))}
     fit = Fit()
     rng = random.Random(a.part)
-    rows = {'qud': qud_rows, 'tadabur': tadabur_rows, 'iqra': iqra_rows}[a.source](a, rng)
+    rows = {'qud': qud_rows, 'tadabur': tadabur_rows, 'iqra': iqra_rows,
+            'tlog': tlog_rows}[a.source](a, rng)
     shard, n_shard = [], 0
     stats = collections.defaultdict(lambda: collections.Counter())
     hours = collections.Counter()
@@ -254,7 +305,7 @@ def main():
         if not 1 <= len(w) / 16000 <= 20:
             st['length'] += 1; continue
         c = fit.cost(w, fit.tokens(aid, lo, hi))
-        if c is None or c > MAX_COST:
+        if c is None or c > a.max_cost:
             st['poor fit'] += 1; continue
         st['kept'] += 1
         shard.append(((np.clip(w, -1, 1) * 32767).astype(np.int16), aid))

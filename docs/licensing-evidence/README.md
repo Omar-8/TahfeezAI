@@ -52,3 +52,4 @@ from the machine that collected these; its statement is the copy in the
 | `model/hf-RetaSy-quranic_audio_dataset-README.md` | RetaSy: **no licence** in the card (the paper, arXiv 2405.02675, is the authors' only other publication of it). |
 | `model/hf-MuazAhmad7-Surah_Ikhlas-Labeled_Dataset-README.md` | Al-Ikhlas learner set: **CC BY 4.0** (attribution required). |
 | `model/hf-obadx-qdat-README.md` | QDAT: **MIT**. |
+| `model/hf-greentechapps-user_recited_verses_full-README.md` | v3.7's real phone recordings (`greentechapps/user_recited_verses_full`, fetched 2026-10-21): **CC BY 4.0**; "cleaned and tested from an old Tarteel audio dataset released publicly … originally collected by the Tarteel project". |

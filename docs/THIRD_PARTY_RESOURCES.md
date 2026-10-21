@@ -205,6 +205,22 @@ thresholds, with Iqra_Extra and QuranMB credited on the About screen as
 RetaSy is: credited, not cleared. The remedy if either objects: v3.5's recipe
 without their clips.
 
+### v3.7 (`tahfeez-d6h-v3.7-stream1.28-int4ffn8-b128-acc4`), 2026-10-21
+
+v3.7 is v3.6 fine-tuned for 2,000 steps on its own sources plus one more: real
+users' phone recordings, as student audio only (the teacher's frames are the
+target; no transcripts). Model card: `tool/acoustic_verification/model_work/MODEL_V3_7.md`.
+
+| Source | Role in v3.7 | What its source says | Status |
+|---|---|---|---|
+| User Recited Verses Full (https://huggingface.co/datasets/greentechapps/user_recited_verses_full) | Student audio: 7,012 of its 8,950 recordings (18.3 h), never augmented; mined for clips v3.6 hears wrong (`phone_mine.py`, `phone_select.py`) | **CC BY 4.0** (its card, saved in `docs/licensing-evidence/model/`); the audio is "cleaned and tested from an old Tarteel audio dataset released publicly … originally collected by the Tarteel project" | Permitted with attribution (greentechapps, and the Tarteel project as the original collector). The original Tarteel release states no licence of its own (as Tarteel v1, already credited): credited, not cleared |
+| Quran-Lab quranic-asr-benchmark, Tarteel users' part (`tlog_holdout`) | Still evaluation only: 20 of its 200 clips were also in the dataset above, found by matching audio and **removed from training** | Quran-Lab NPL 1.2: evaluation only | Evaluation only; never trained on |
+
+**Status, 2026-10-21: on trial on the owner's phone; not yet in a release.**
+Shipping it means: a `model-v3.7` release (the files and manifest), README and
+`ios.yml` pointing to it, and greentechapps / the Tarteel project credited on
+the About screen.
+
 ## Provenance notes
 
 - Both files were fetched directly from Google's own `google/fonts` GitHub repository (the

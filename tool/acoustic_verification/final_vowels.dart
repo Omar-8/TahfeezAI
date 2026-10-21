@@ -313,7 +313,7 @@ void main(List<String> args) {
       '${fin ? 'WORD-FINAL' : 'INSIDE A WORD'}: ${ms.length} swaps, '
       'as judged now: ${{for (final m in ms) m.$4: ms.where((x) => x.$4 == m.$4).length}}',
     );
-    for (final th in [2.0, 2.5, 3.0, 3.5, 4.0]) {
+    for (final th in [1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0]) {
       stdout.writeln(
         '  at $th: caught ${pct(ms.where((m) => m.$3 >= th).length, ms.length)}'
         ', your correct ones flagged '
@@ -326,7 +326,9 @@ void main(List<String> args) {
       final x = ms.where((m) => m.$2 == pair).toList();
       stdout.writeln(
         '    $pair: caught at 4 ${pct(x.where((m) => m.$3 >= 4).length, x.length)}'
-        ', at 3 ${pct(x.where((m) => m.$3 >= 3).length, x.length)}',
+        ', at 3 ${pct(x.where((m) => m.$3 >= 3).length, x.length)}'
+        ', at 2 ${pct(x.where((m) => m.$3 >= 2).length, x.length)}'
+        ', at 1 ${pct(x.where((m) => m.$3 >= 1).length, x.length)}',
       );
     }
   }

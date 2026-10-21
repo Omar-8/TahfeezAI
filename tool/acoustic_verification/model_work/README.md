@@ -1,5 +1,7 @@
 # Acoustic model shrinking — experiments
 
+**The newest model, v3.7 (on trial; v3.6 still ships), is documented in [MODEL_V3_7.md](MODEL_V3_7.md)**: what it is, its data and recipe, results against v3.6, and what did not work. The rest of this page is the early experiment log.
+
 Research workspace for shrinking the Quran acoustic model (`obadx/muaalem-model-v3_2`). Nothing
 here is wired into the app. Large outputs go to `artifacts/` (gitignored).
 

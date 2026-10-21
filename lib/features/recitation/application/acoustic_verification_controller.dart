@@ -393,16 +393,28 @@ class AcousticVerificationController
   /// Juz 30 reciters' 35.4 -> 33.6%, Tarteel users' 16.1 -> 15.6%; QuranMB's
   /// real mistakes caught 68.2 -> 68.1%, Al-Ikhlas's unchanged. (+3: the
   /// user's 5.1%, QuranMB 67.7%.)
+  ///
+  /// v3.7 (2026-10-21; fine-tuned on real phone recordings) hears vowels a
+  /// little more leniently than v3.6, so its vowel margins are 1 lower: a
+  /// reduced vowel at +0 (was +1), a unit's last vowel at +1 (was +2), a
+  /// word's last vowel (a case ending) at -2 (was -1). Letters unchanged.
+  /// Measured with v3.7 against v3.6 at its own margins (`tune_sound_margins`,
+  /// `real_mistakes`, `final_vowels`): QuranMB's real mistakes caught 66.2 ->
+  /// 66.7% (v3.6 68.1%), Al-Ikhlas's 12.4 -> 12.7% (v3.6 12.7%), case endings
+  /// said -u as -a caught 14/21 -> 17/21 (v3.6 13/21); correct words flagged
+  /// unchanged (the user's 4.6%, amateurs' 4.2%, professionals' 1.8%; v3.6
+  /// 5.2 / 4.2 / 2.0%). Stronger (-0.5 / +0.5 / -2.5) caught QuranMB 67.2%
+  /// but flagged amateurs 5.1%.
   static const learnerSounds = {
     SoundGroup.shadda: SoundMargins(uncertain: 2),
-    SoundGroup.reducedVowel: SoundMargins(error: 1, uncertain: 2),
-    SoundGroup.finalVowel: SoundMargins(error: 2, uncertain: 2),
+    SoundGroup.reducedVowel: SoundMargins(error: 0, uncertain: 2),
+    SoundGroup.finalVowel: SoundMargins(error: 1, uncertain: 2),
     SoundGroup.qalqala: SoundMargins(error: 2, uncertain: 4),
     SoundGroup.nasal: SoundMargins(uncertain: 2),
     SoundGroup.hiddenNasal: SoundMargins(error: -1),
     SoundGroup.throat: SoundMargins(uncertain: 2),
     SoundGroup.similarLetter: SoundMargins(error: 2),
-    SoundGroup.wordFinalVowel: SoundMargins(error: -1),
+    SoundGroup.wordFinalVowel: SoundMargins(error: -2),
     SoundGroup.stopInFlow: SoundMargins(error: 1),
   };
 

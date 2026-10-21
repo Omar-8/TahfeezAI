@@ -171,6 +171,10 @@ MAX_CLIP_S = float(os.environ.get('MAX_CLIP_S', 0))   # training clips longer ar
 # teacher scaled by TRUST_KL and its CTC by TRUST_CTC — the teachers flag 9-13% of such
 # amateurs' correct words (v3.5 2-3%), and a student close to them inherits it.
 TRUST, TRUST_KL, TRUST_CTC = [], 1.0, 1.0
+# --real-phone: shards of real phone recordings (G19, 2026-10-21). Their clips are never
+# augmented (no simulated phone effects, tempo or pitch): teacher and student hear the
+# same real waveform, the teacher's KL the target.
+REAL_PHONE = []
 # --guide: a second teacher (an earlier student, e.g. v3.5, gentle with amateurs where the
 # teachers are not) for the shards GUIDE_PRE ([(prefix, weight)], the longest prefix
 # matching), its KL weighed against the teachers' by that weight.
@@ -185,8 +189,9 @@ GATE, GATE_DIS, GATE_TRUST, GATE_LEARN = False, 1.0, 1.0, []
 
 
 class Tagged(list):
-    """A transcript from a --trust (its [trusted]) or --guide ([guided]) shard."""
-    trusted = learner = False
+    """A transcript from a --trust (its [trusted]) or --guide ([guided]) shard, or a clip
+    of a --real-phone shard ([real]: heard as recorded, by teacher and student alike)."""
+    trusted = learner = real = False
     guided = 0.0
 
 
@@ -209,10 +214,11 @@ def batches(data_dir, max_audio_s, seed):
             guided = next((w for pre, w in GUIDE_PRE if base.startswith(pre)), 0.0) \
                 if GUIDE is not None else 0.0
             learner = any(base.startswith(pre) for pre in GATE_LEARN)
-            if trusted or guided or learner:
+            real = any(base.startswith(pre) for pre in REAL_PHONE)
+            if trusted or guided or learner or real:
                 tagged = []
                 for x, t in items:
-                    t = Tagged(t); t.trusted, t.guided, t.learner = trusted, guided, learner
+                    t = Tagged(t); t.trusted, t.guided, t.learner, t.real = trusted, guided, learner, real
                     tagged.append((x, t))
                 items = tagged
             items.sort(key=lambda c: len(c[0]))
@@ -565,6 +571,12 @@ VOWEL_SYMBOLS = ['َ', 'ُ', 'ِ']
 VOCAB = ['', 'ء', 'ب', 'ت', 'ث', 'ج', 'ح', 'خ', 'د', 'ذ', 'ر', 'ز', 'س', 'ش', 'ص', 'ض', 'ط', 'ظ',
          'ع', 'غ', 'ف', 'ق', 'ك', 'ل', 'م', 'ن', 'ه', 'و', 'ي', 'ا', 'ۦ', 'ۥ', 'َ', 'ُ', 'ِ', '۪', 'ـ',
          'ٲ', 'ڇ', 'ں', '۾', 'ۜ', 'ؙ']   # the 43 phoneme classes (the app's own order)
+# Real phones (--channels, phone_channels.py): microphone + room responses and background
+# noise measured on crowd recordings. With [CHANNEL_SHARE], a degraded clip gets one in
+# place of the simulated low-pass / tilt and noise: on Tarteel users' phones v3.6 hears
+# 1.7x the teacher's wrong letters, on the simulation only 1.25x.
+CHANNELS, CHANNEL_SHARE = None, 0.0
+CHANNEL_SNR = (5.0, 25.0)   # (--channel-snr) the real noise's level below the speech, dB
 EXTRA = False # more phone conditions: coloured noise, background voices, hum, dropouts,
               # larger rooms (--phone-extra)
 
@@ -577,7 +589,7 @@ def tempo(items, coded, rng=random):
         return items, coded
     out, cod = [], []
     for i, (x, t) in enumerate(items):
-        if rng.random() >= TEMPO:
+        if getattr(t, 'real', False) or rng.random() >= TEMPO:
             out.append((x, t)); cod.append(coded[i] if coded else None); continue
         f = rng.uniform(0.88, 1.12)                 # speed: f > 1 is faster (shorter)
         w = torch.as_tensor(np.asarray(x, dtype=np.float32))[None, None]
@@ -601,7 +613,7 @@ def augment(items, prob, rng=random, coded=None, pool_share=0.7, others=None):
         torch.backends.cuda.cufft_plan_cache.max_size = 32
     out = []
     for i, (x, t) in enumerate(items):
-        if rng.random() >= prob:
+        if getattr(t, 'real', False) or rng.random() >= prob:
             out.append((x, t)); continue
         c = coded[i] if coded else None
         use_pool = c is not None and rng.random() < pool_share
@@ -624,7 +636,14 @@ def augment(items, prob, rng=random, coded=None, pool_share=0.7, others=None):
                 w = F.pad(w, (0, n - w.shape[0]))
         # FFT lengths are powers of two: cuFFT failed (CUFFT_INTERNAL_ERROR) on some
         # odd clip lengths.
-        lowpass, tilt = rng.random() < 0.6, rng.random() < 0.4
+        real = CHANNELS is not None and rng.random() < CHANNEL_SHARE
+        lowpass, tilt = (False, False) if real else (rng.random() < 0.6, rng.random() < 0.4)
+        if real:                                    # a measured phone's response
+            m = 1 << (n - 1).bit_length()
+            r = CHANNELS.resp[rng.randrange(len(CHANNELS.resp))] * rng.uniform(0.5, 1.0)
+            f = np.fft.rfftfreq(m, 1 / 16000)
+            gain = 10 ** (np.interp(f, np.arange(r.shape[0]) * 16000 / 512, r) / 20)
+            w = torch.fft.irfft(torch.fft.rfft(w, m) * torch.as_tensor(gain, dtype=torch.float32, device=DEV), m)[:n]
         if lowpass or tilt:
             m = 1 << (n - 1).bit_length()
             spec = torch.fft.rfft(w, m)
@@ -650,7 +669,16 @@ def augment(items, prob, rng=random, coded=None, pool_share=0.7, others=None):
             ir = ir / ir.norm()
             m = 1 << (n + k - 2).bit_length()
             w = torch.fft.irfft(torch.fft.rfft(w, m) * torch.fft.rfft(ir, m), m)[:n]
-        if rng.random() < 0.5:                      # background noise at 10-30 dB SNR
+        if real and len(CHANNELS.off) > 1 and rng.random() < 0.8:
+            # A real phone's background (room, hiss, codec), 5-25 dB below the speech.
+            k = rng.randrange(len(CHANNELS.off) - 1)
+            seg = CHANNELS.noise[CHANNELS.off[k]:CHANNELS.off[k + 1]].astype(np.float32) / 32767
+            seg = torch.as_tensor(np.tile(seg, n // len(seg) + 1)[:n], device=DEV)
+            fr = n // 320
+            e = w[:fr * 320].reshape(fr, 320).pow(2).mean(1) if fr >= 2 else w.pow(2).mean()[None]
+            p = e[e >= e.median()].mean().clamp_min(1e-10)
+            w = w + seg * torch.sqrt(p / seg.pow(2).mean().clamp_min(1e-12) / 10 ** (rng.uniform(*CHANNEL_SNR) / 10))
+        elif rng.random() < 0.5:                    # background noise at 10-30 dB SNR
             snr = rng.uniform(10, 30)
             p = w.pow(2).mean().clamp_min(1e-8)
             noise = torch.randn_like(w)
@@ -708,7 +736,8 @@ def crop_views(items, prob, rng=random, hop=640):
         if rng.random() >= prob or n <= w + 2:
             out.append((x, t)); starts.append(0); cropped.append(False); continue
         s0 = rng.randrange(0, n - w + 1)
-        out.append((x[s0 * hop:(s0 + w) * hop], [])); starts.append(s0); cropped.append(True)
+        e = Tagged(); e.real = getattr(t, 'real', False)     # no transcript; still real
+        out.append((x[s0 * hop:(s0 + w) * hop], e)); starts.append(s0); cropped.append(True)
     return out, starts, cropped
 
 
@@ -730,7 +759,7 @@ def losses(teacher, student, fe, items, T, ctc_w, aug=0.0, coded=None, layers=No
         else:
             xs = x if STUDENT_CAUSAL is None else featurize(fe, items, STUDENT_CAUSAL)[0]
         smask, starts, cropped = mask, None, None
-    hid = layers is not None and crop == 0
+    hid = layers is not None
     with torch.no_grad():
         to = teacher.model(input_features=x.to(teacher.model.dtype), attention_mask=mask,
                            output_hidden_states=hid, return_dict=True)
@@ -741,12 +770,28 @@ def losses(teacher, student, fe, items, T, ctc_w, aug=0.0, coded=None, layers=No
         sl = so.logits['phonemes']
     sl = sl.float()
     loss_hid = torch.zeros((), device=sl.device)
-    if hid:
+    if hid and starts is None:
         hm = mask.float()
         for i, k in enumerate(layers):
             cos = F.cosine_similarity(so.hidden_states[i + 1].float(),
                                       to.hidden_states[k + 1].float(), dim=-1)
             loss_hid = loss_hid + ((1 - cos) * hm).sum() / hm.sum()
+        loss_hid = loss_hid / len(layers)
+    elif hid:
+        # Cropped views: student feature frame j (20 ms, before the adapter) is the
+        # whole clip's frame 2 * starts[i] + j (crops start on 40 ms boundaries), as the
+        # output frames are matched below. (G15, uncropped for --hidden, caught 2 points
+        # fewer spliced mistakes than G14.)
+        ns = so.hidden_states[1].shape[1]
+        idx2 = torch.arange(ns, device=sl.device)[None, :] + 2 * torch.tensor(starts, device=sl.device)[:, None]
+        ok2 = idx2 < mask.sum(1)[:, None]
+        hm = (smask[:, :ns].bool() & ok2).float()
+        g = idx2.clamp(max=mask.shape[1] - 1)
+        for i, k in enumerate(layers):
+            th = to.hidden_states[k + 1].float()
+            th = torch.gather(th, 1, g[:, :, None].expand(-1, -1, th.shape[2]))
+            cos = F.cosine_similarity(so.hidden_states[i + 1].float(), th, dim=-1)
+            loss_hid = loss_hid + ((1 - cos) * hm).sum() / hm.sum().clamp_min(1)
         loss_hid = loss_hid / len(layers)
     if starts is not None:
         # Each student frame j matches teacher frame starts[i] + j of the whole clip.
@@ -883,7 +928,17 @@ def train(a):
         chunk_s, left_s = streaming.parse(a.stream)
         print(f'streaming student: chunk {chunk_s} s, left {left_s} s,',
               streaming.enable(s, chunk_s, left_s), streaming.enable(ema, chunk_s, left_s), 'attention layers')
-    opt = torch.optim.AdamW(s.parameters(), lr=a.lr, betas=(0.9, 0.98), weight_decay=0.01)
+    if a.train_top:
+        # Only the top encoder layers, the adapter and the output head learn (G20: keep a
+        # fine-tune from drifting); the feature projection and lower layers stay frozen.
+        n_layers = len(s.wav2vec2_bert.encoder.layers)
+        keep = tuple(f'encoder.layers.{i}.' for i in range(n_layers - a.train_top, n_layers)) + ('adapter.', 'lm_head')
+        for name, prm in s.named_parameters():
+            prm.requires_grad_(any(k in name for k in keep))
+        n = sum(prm.numel() for prm in s.parameters() if prm.requires_grad)
+        print(f'training the top {a.train_top} layers + adapter + head: {n / 1e6:.1f}M parameters', flush=True)
+    opt = torch.optim.AdamW([prm for prm in s.parameters() if prm.requires_grad], lr=a.lr,
+                            betas=(0.9, 0.98), weight_decay=0.01)
     warm = max(1, a.steps // 25)
     sched = torch.optim.lr_scheduler.LambdaLR(
         opt, lambda i: min(1.0, (i + 1) / warm) * 0.5 * (1 + math.cos(math.pi * min(i, a.steps) / a.steps)))
@@ -909,7 +964,7 @@ def train(a):
         print(f'resumed at step {step}')
     json.dump(dict(vars(a)), open(os.path.join(a.out, 'run.json'), 'w'), indent=1)
     val = clips(os.path.join(a.data, 'val.npz'))
-    global PITCH, REPEAT, TEMPO, EXTRA, HARD_W, FOCUS_W, VOWEL_W, TRUST, TRUST_KL, TRUST_CTC
+    global REAL_PHONE, CHANNELS, CHANNEL_SHARE, CHANNEL_SNR, PITCH, REPEAT, TEMPO, EXTRA, HARD_W, FOCUS_W, VOWEL_W, TRUST, TRUST_KL, TRUST_CTC
     global GUIDE, GUIDE_PRE
     if a.guide:
         path, pre, gw = a.guide.split(':')
@@ -934,6 +989,13 @@ def train(a):
         TRUST, TRUST_KL, TRUST_CTC = pre.split('+'), float(kl_s), float(ctc_s)
     PITCH = a.pitch
     TEMPO, EXTRA = a.tempo, a.phone_extra
+    REAL_PHONE = [q for q in a.real_phone.split('+') if q]
+    if a.channels:
+        from phone_channels import Bank
+        CHANNELS, CHANNEL_SHARE = Bank(a.channels), a.channel_share
+        CHANNEL_SNR = tuple(float(v) for v in a.channel_snr.split(','))
+        print(f'channels: {len(CHANNELS.resp)} phones, {CHANNELS.noise.shape[0] / 16000 / 60:.0f} min noise, '
+              f'share {CHANNEL_SHARE}')
     HARD_W, FOCUS_W, VOWEL_W = a.hard, a.focus, a.vowel
     if a.repeat:
         REPEAT = [(pre, int(times)) for pre, times in
@@ -990,7 +1052,7 @@ def train(a):
         recent.append(lv)
         run_of_skips = 0
         loss.backward()
-        torch.nn.utils.clip_grad_norm_(s.parameters(), 1.0)
+        torch.nn.utils.clip_grad_norm_([prm for prm in s.parameters() if prm.requires_grad], 1.0)
         opt.step(); opt.zero_grad(set_to_none=True); sched.step()
         with torch.no_grad():
             for pe, ps in zip(ema.parameters(), s.parameters()):
@@ -1016,6 +1078,12 @@ def train(a):
             torch.save(dict(student=s.state_dict(), ema=ema.state_dict(), opt=opt.state_dict(),
                             sched=sched.state_dict(), step=step, best=best), ck + '.tmp')
             os.replace(ck + '.tmp', ck)
+        if a.pause_at and step == a.pause_at:
+            # Evaluate here, resume later on the same schedule (--resume).
+            torch.save(ema.state_dict(), os.path.join(a.out, f'ema_{step}.pt'))
+            student_config(_base(t.model), a.size).save_pretrained(a.out)
+            print('paused', step, flush=True)
+            return
     torch.save(ema.state_dict(), os.path.join(a.out, 'student.pt'))
     student_config(_base(t.model), a.size).save_pretrained(a.out)
     print('done', a.out)
@@ -1058,6 +1126,18 @@ def main():
                    help='extra KL weight (up to this) on frames the student gets most wrong')
     p.add_argument('--tempo', type=float, default=0.0,
                    help='share of clips resampled to 0.88-1.12x speed (teacher and student)')
+    p.add_argument('--real-phone', default='',
+                   help='shard prefixes (a+b) of real phone recordings: never augmented')
+    p.add_argument('--train-top', type=int, default=0,
+                   help='train only the top N encoder layers + adapter + head (0: everything)')
+    p.add_argument('--pause-at', type=int, default=0,
+                   help='save ema_<step>.pt and stop at this step (resume with --resume)')
+    p.add_argument('--channels', default='',
+                   help='phone_channels.py bank: real phone responses and background noise')
+    p.add_argument('--channel-share', type=float, default=0.6,
+                   help='with --channels: share of degraded clips heard through a real phone')
+    p.add_argument('--channel-snr', default='5,25',
+                   help='with --channels: real background noise this many dB below the speech (lo,hi)')
     p.add_argument('--phone-extra', action='store_true',
                    help='more phone conditions: coloured noise, nearby voices, hum, dropouts, '
                         'larger rooms')

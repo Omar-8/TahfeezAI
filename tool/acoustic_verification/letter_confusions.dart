@@ -26,16 +26,18 @@ const _margins = {
   SoundGroup.stopInFlow: SoundMargins(error: 1),
 };
 
-/// v35, v36, or v36+sN (N more for [SoundGroup.similarLetter]).
+/// v35, v36, or v36+sN (N more for [SoundGroup.similarLetter]); +eX: v36's margins at X
+/// instead of 3 (a model's own threshold).
 AcousticThresholds _settings(String preset) {
   final v36 = preset.startsWith('v36');
   final similar = RegExp(r'\+s([\d.]+)').firstMatch(preset);
+  final e = double.parse(RegExp(r'\+e([\d.]+)').firstMatch(preset)?[1] ?? '3');
   return AcousticThresholds(
-    error: v36 ? 3 : 4,
-    letterError: v36 ? 3 : 4,
-    shaddaError: v36 ? 3 : 4,
-    sukunError: v36 ? 3 : 2,
-    missingVowelError: v36 ? 3 : 2,
+    error: v36 ? e : 4,
+    letterError: v36 ? e : 4,
+    shaddaError: v36 ? e : 4,
+    sukunError: v36 ? e : 2,
+    missingVowelError: v36 ? e : 2,
     correct: -1,
     pauseFrames: 4,
     sounds: {
@@ -49,7 +51,10 @@ AcousticThresholds _settings(String preset) {
   );
 }
 
-void main(List<String> args) {
+void main(List<String> arguments) {
+  final args = [...arguments];
+  // --all: every confusion, not the 25 commonest.
+  final all = args.remove('--all');
   final tag = args[0], packs = args.sublist(2);
   final reference = QuranPhoneticReference.fromJson(
     jsonDecode(
@@ -141,7 +146,7 @@ void main(List<String> args) {
       'another letter: ${c.take(15).map((e) => '${e.key} ${e.value}x').join(', ')}',
     );
   }
-  for (final e in sorted.take(25)) {
+  for (final e in sorted.take(all ? sorted.length : 25)) {
     final llr = e.value..sort();
     final of = seen[e.key.split(' ').first] ?? 0;
     print(
