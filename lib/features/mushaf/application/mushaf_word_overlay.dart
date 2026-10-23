@@ -25,6 +25,11 @@ enum MushafWordMark {
   /// mistake in it (a vowel, sukun, shadda or letter).
   tashkeel,
 
+  /// Recited as the right word, its letters and vowels right, but a tajweed
+  /// rule not kept (a hidden or merged nūn said plainly, a qalqala echo or
+  /// madd missing, a ghunnah not held).
+  tajweed,
+
   /// A likely pronunciation mistake: the word's quick check heard one, its
   /// ayah's check (which confirms it as [tashkeel] or clears it) is still
   /// to come. A softer colour, no alert.

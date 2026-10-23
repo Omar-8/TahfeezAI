@@ -74,6 +74,7 @@ class HifzSettings {
     this.tajweedRules = allTajweedRules,
     this.sajdahReminder = true,
     this.strictness = RecitationStrictness.balanced,
+    this.tajweedAlert = MistakeAlert.vibrate,
   });
 
   static const allTajweedRules = {
@@ -94,6 +95,10 @@ class HifzSettings {
 
   /// How strictly pronunciation is judged (balanced: as calibrated).
   final RecitationStrictness strictness;
+
+  /// Vibrate or beep on a tajweed mistake (a word whose only mistakes are
+  /// tajweed), apart from [alert] for letters, vowels and words.
+  final MistakeAlert tajweedAlert;
 
   /// Judge tajweed in the pronunciation check (idghām, ikhfāʾ, iqlāb …);
   /// off, only the letters and vowels.
@@ -124,6 +129,7 @@ class HifzSettings {
     Set<TajweedRule>? tajweedRules,
     bool? sajdahReminder,
     RecitationStrictness? strictness,
+    MistakeAlert? tajweedAlert,
   }) => HifzSettings(
     strict: strict ?? this.strict,
     highlightCurrent: highlightCurrent ?? this.highlightCurrent,
@@ -134,6 +140,7 @@ class HifzSettings {
     tajweedRules: tajweedRules ?? this.tajweedRules,
     sajdahReminder: sajdahReminder ?? this.sajdahReminder,
     strictness: strictness ?? this.strictness,
+    tajweedAlert: tajweedAlert ?? this.tajweedAlert,
   );
 
   Map<String, Object> toJson() => {
@@ -146,20 +153,22 @@ class HifzSettings {
     'tajweedRules': [for (final r in tajweedRules) r.name],
     'sajdahReminder': sajdahReminder,
     'strictness': strictness.name,
+    'tajweedAlert': tajweedAlert.name,
   };
 
   static HifzSettings fromJson(Object? json) {
     if (json is! Map) return const HifzSettings();
     bool read(String key, bool fallback) =>
         json[key] is bool ? json[key] as bool : fallback;
+    // (Saved before the alert choice: a vibrate switch.)
+    final alert =
+        MistakeAlert.values.asNameMap()[json['alert']] ??
+        (read('vibrate', true) ? MistakeAlert.vibrate : MistakeAlert.off);
     return HifzSettings(
       strict: read('strict', true),
       highlightCurrent: read('highlightCurrent', true),
       showMistakes: read('showMistakes', true),
-      // (Saved before the alert choice: a vibrate switch.)
-      alert:
-          MistakeAlert.values.asNameMap()[json['alert']] ??
-          (read('vibrate', true) ? MistakeAlert.vibrate : MistakeAlert.off),
+      alert: alert,
       colorWords: read('colorWords', true),
       tajweed: read('tajweed', true),
       // (Saved before the per-rule choice: every rule.)
@@ -173,6 +182,9 @@ class HifzSettings {
       strictness:
           RecitationStrictness.values.asNameMap()[json['strictness']] ??
           RecitationStrictness.balanced,
+      // (Saved before the tajweed alert: as the mistake alert.)
+      tajweedAlert:
+          MistakeAlert.values.asNameMap()[json['tajweedAlert']] ?? alert,
     );
   }
 }
@@ -487,7 +499,7 @@ class HifzController extends Notifier<HifzState> {
         if (r.pass < _pass ||
             (r.pass == _pass &&
                 judge.revealed.contains(judge.corpus.positionOf(w)))) {
-          _alert([w], pass: r.pass);
+          _alert([w], pass: r.pass, tajweed: r.isTajweedOnly);
         }
       }
     });
@@ -688,7 +700,7 @@ class HifzController extends Notifier<HifzState> {
       a == null || !a.isMistake || a.pass != pass
       ? MushafWordMark.correct
       : a.isSure
-      ? MushafWordMark.tashkeel
+      ? (a.isTajweedOnly ? MushafWordMark.tajweed : MushafWordMark.tashkeel)
       : MushafWordMark.checking;
 
   /// [marks] as the settings show them: with mistakes not shown, no word
@@ -709,6 +721,7 @@ class HifzController extends Notifier<HifzState> {
     MushafWordMark.skipped,
     MushafWordMark.wrong,
     MushafWordMark.tashkeel,
+    MushafWordMark.tajweed,
     MushafWordMark.checking,
     MushafWordMark.uncertain,
   };
@@ -1069,10 +1082,11 @@ class HifzController extends Notifier<HifzState> {
 
   /// Signals a mistake on [words] — vibration or a beep, as set — once
   /// per word.
-  void _alert(Iterable<WordRef> words, {int? pass}) {
+  void _alert(Iterable<WordRef> words, {int? pass, bool tajweed = false}) {
     final p = pass ?? _pass;
     if (!state.running || !words.map((w) => (p, w)).any(_alerted.add)) return;
-    final alert = ref.read(hifzSettingsProvider).alert;
+    final settings = ref.read(hifzSettingsProvider);
+    final alert = tajweed ? settings.tajweedAlert : settings.alert;
     if (alert.vibrates) ref.read(hifzHapticsProvider)();
     if (alert.beeps) ref.read(hifzBeepProvider)();
   }

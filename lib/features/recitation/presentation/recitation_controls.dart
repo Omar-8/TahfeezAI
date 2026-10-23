@@ -1398,7 +1398,10 @@ class HifzStatusStrip extends StatelessWidget {
             _word(acoustic!.lastMistake!.word),
             describe(acoustic!.lastMistake!, AppLocalizations.of(context)),
           ),
-          const Color(0xFFEF6C00),
+          // As the word's own mark: tajweed purple, a pronunciation orange.
+          acoustic!.lastMistake!.isTajweed
+              ? const Color(0xFF8E24AA)
+              : const Color(0xFFEF6C00),
         ),
       HifzState(running: true, reviewing: final r?) => (
         AppLocalizations.of(context).recGoingBack(_word(r)),
@@ -1649,6 +1652,46 @@ class _HifzSettingsSheet extends ConsumerWidget {
                     onSelectionChanged: (s) => controller.update(
                       settings.copyWith(
                         alert: MistakeAlert.of(
+                          vibrate: s.contains(MistakeAlert.vibrate),
+                          sound: s.contains(MistakeAlert.sound),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            // Tajweed mistakes (purple) alert apart, as chosen here.
+            if (alerts && settings.tajweed)
+              ListTile(
+                key: const ValueKey('hifz-tajweed-alert'),
+                title: Text(AppLocalizations.of(context).recTajweedAlert),
+                subtitle: Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: SegmentedButton<MistakeAlert>(
+                    multiSelectionEnabled: true,
+                    emptySelectionAllowed: true,
+                    segments: [
+                      ButtonSegment(
+                        value: MistakeAlert.vibrate,
+                        icon: const Icon(Icons.vibration),
+                        label: Text(
+                          AppLocalizations.of(context).recAlertVibrate,
+                        ),
+                      ),
+                      ButtonSegment(
+                        value: MistakeAlert.sound,
+                        icon: const Icon(Icons.volume_up_outlined),
+                        label: Text(AppLocalizations.of(context).recAlertSound),
+                      ),
+                    ],
+                    selected: {
+                      if (settings.tajweedAlert.vibrates) MistakeAlert.vibrate,
+                      if (settings.tajweedAlert.beeps) MistakeAlert.sound,
+                    },
+                    showSelectedIcon: false,
+                    onSelectionChanged: (s) => controller.update(
+                      settings.copyWith(
+                        tajweedAlert: MistakeAlert.of(
                           vibrate: s.contains(MistakeAlert.vibrate),
                           sound: s.contains(MistakeAlert.sound),
                         ),

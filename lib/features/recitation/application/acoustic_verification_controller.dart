@@ -98,6 +98,19 @@ class AcousticWordResult {
 
   bool get isMistake => type.isError;
 
+  /// A mistake against tajweed only: every mistake heard in the word is a
+  /// tajweed rule not kept ([RecitationError.isTajweed]) — no letter or
+  /// vowel said wrong. Shown and alerted apart (Hifz settings).
+  bool get isTajweedOnly {
+    final mistakes = [
+      for (final e in errors)
+        if (e.type.isError) e,
+    ];
+    return isMistake &&
+        mistakes.isNotEmpty &&
+        mistakes.every((e) => e.isTajweed);
+  }
+
   /// A mistake shown and alerted at once, though only [provisional]: the
   /// kinds a quick check is rarely wrong about. Replaying 30 phone
   /// sessions (model v3.5s, 2026-10-10), quick verdicts of a wrong vowel

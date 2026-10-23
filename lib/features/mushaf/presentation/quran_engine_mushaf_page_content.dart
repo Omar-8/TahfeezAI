@@ -70,6 +70,7 @@ class _QuranEngineMushafPageContentState
     MushafWordMark.skipped: (color: Color(0xFFE0A800), ink: true),
     MushafWordMark.wrong: (color: Color(0xFFD32F2F), ink: true),
     MushafWordMark.tashkeel: (color: Color(0xFFEF6C00), ink: true),
+    MushafWordMark.tajweed: (color: Color(0xFF8E24AA), ink: true),
     MushafWordMark.checking: (color: Color(0xFFFFAB91), ink: true),
     MushafWordMark.uncertain: (color: Color(0xFFFBC02D), ink: true),
   };

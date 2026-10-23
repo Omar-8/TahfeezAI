@@ -296,6 +296,122 @@ void main() {
     );
   });
 
+  test('a tajweed-only mistake: its own mark and its own alert', () async {
+    const kursiVerse = (chapterNo: 2, verseNo: 255);
+    await setUpHifz(from: kursiVerse, to: kursiVerse);
+    container
+        .read(hifzSettingsProvider.notifier)
+        .update(
+          container
+              .read(hifzSettingsProvider)
+              .copyWith(
+                alert: MistakeAlert.vibrate,
+                tajweedAlert: MistakeAlert.sound,
+              ),
+        );
+    await recite(kursi.split(' ').take(5).join(' '));
+    final start = corpus.verseStartPosition(kursiVerse)!;
+    final first = corpus.words[start + 1].ref,
+        second = corpus.words[start + 2].ref;
+    final acoustic = container.read(
+      acousticVerificationControllerProvider.notifier,
+    ) as _Acoustic;
+    RecitationError error(
+      WordRef w,
+      RecitationErrorType type, {
+      TajweedRule? rule,
+    }) => RecitationError(
+      word: w,
+      letter: 0,
+      type: type,
+      expected: 'ں',
+      likelihoodRatio: 5,
+      rule: rule,
+    );
+    // A hidden nūn said plainly (ikhfāʾ): tajweed only.
+    acoustic.put({
+      first: AcousticWordResult(RecitationErrorType.wrongLetter, [
+        error(first, RecitationErrorType.wrongLetter, rule: TajweedRule.ikhfa),
+      ]),
+    });
+    await pumpEventQueue();
+    expect(
+      container.read(mushafWordOverlayProvider)!.marks[first],
+      MushafWordMark.tajweed,
+    );
+    expect((beeps, vibrations), (1, 0), reason: 'the tajweed alert: sound');
+    // A vowel said wrong: a pronunciation mistake, the mistake alert.
+    acoustic.put({
+      first: AcousticWordResult(RecitationErrorType.wrongLetter, [
+        error(first, RecitationErrorType.wrongLetter, rule: TajweedRule.ikhfa),
+      ]),
+      second: AcousticWordResult(RecitationErrorType.wrongVowel, [
+        error(second, RecitationErrorType.wrongVowel),
+      ]),
+    });
+    await pumpEventQueue();
+    expect(
+      container.read(mushafWordOverlayProvider)!.marks[second],
+      MushafWordMark.tashkeel,
+    );
+    expect((beeps, vibrations), (1, 1));
+  });
+
+  test(
+    'tajweed mistakes: by rule or kind; a word is tajweed-only if all are',
+    () {
+      const w = (ayahId: 1001, wordIndex: 0);
+      RecitationError e(RecitationErrorType type, {TajweedRule? rule}) =>
+          RecitationError(
+            word: w,
+            letter: 0,
+            type: type,
+            expected: 'x',
+            likelihoodRatio: 5,
+            rule: rule,
+          );
+      expect(
+        e(RecitationErrorType.wrongLetter, rule: TajweedRule.idgham).isTajweed,
+        isTrue,
+      );
+      expect(e(RecitationErrorType.maddShort).isTajweed, isTrue);
+      expect(e(RecitationErrorType.qalqalaMissing).isTajweed, isTrue);
+      expect(e(RecitationErrorType.ghunnahMissing).isTajweed, isTrue);
+      expect(e(RecitationErrorType.wrongLetter).isTajweed, isFalse);
+      expect(
+        AcousticWordResult(RecitationErrorType.maddShort, [
+          e(RecitationErrorType.maddShort),
+        ]).isTajweedOnly,
+        isTrue,
+      );
+      expect(
+        AcousticWordResult(RecitationErrorType.wrongVowel, [
+          e(RecitationErrorType.maddShort),
+          e(RecitationErrorType.wrongVowel),
+        ]).isTajweedOnly,
+        isFalse,
+      );
+      // (an uncertain sound alongside doesn't count either way)
+      expect(
+        AcousticWordResult(RecitationErrorType.maddShort, [
+          e(RecitationErrorType.maddShort),
+          e(RecitationErrorType.uncertain),
+        ]).isTajweedOnly,
+        isTrue,
+      );
+    },
+  );
+
+  test('the tajweed alert: as the mistake alert until chosen', () {
+    expect(
+      HifzSettings.fromJson({'alert': 'sound'}).tajweedAlert,
+      MistakeAlert.sound,
+    );
+    const off = HifzSettings(tajweedAlert: MistakeAlert.off);
+    expect(HifzSettings.fromJson(off.toJson()).tajweedAlert, MistakeAlert.off);
+    expect(HifzSettings.fromJson(off.toJson()).alert, MistakeAlert.vibrate);
+  });
+
   test('a sure quick verdict (a clear wrong vowel) alerts at once, and not '
       'again when confirmed', () async {
     const kursiVerse = (chapterNo: 2, verseNo: 255);

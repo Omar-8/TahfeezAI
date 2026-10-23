@@ -198,7 +198,18 @@ void main() {
       final v = verifier.verify(clearFrames(said), expected)[k];
       expect(v.type, RecitationErrorType.wrongLetter, reason: hidden);
       expect(v.observed, 'ن');
+      // A tajweed mistake (its own highlight and alert in the app).
+      expect(v.rule, hidden == 'ں' ? TajweedRule.ikhfa : TajweedRule.iqlab);
+      final e = verifier.errors([v], const Duration(milliseconds: 40)).single;
+      expect(e.isTajweed, isTrue, reason: hidden);
     }
+    // A letter said wrong is not.
+    final said = [for (final t in expected) t.token];
+    final fa = expected.indexWhere((t) => t.symbol == 'ف');
+    said[fa] = phoneticClassOf('ث');
+    final v = verifier.verify(clearFrames(said), expected)[fa];
+    expect(v.type, RecitationErrorType.wrongLetter);
+    expect(v.rule, isNull);
   });
 
   test('with tajweed off, only the letters and vowels are judged', () {

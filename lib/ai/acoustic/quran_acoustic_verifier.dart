@@ -350,11 +350,17 @@ class PhonemeVerdict {
     this.competitor,
     this.likelihoodRatio = 0,
     this.observed,
+    this.rule,
   });
 
   final PhoneticToken token;
   final RecitationErrorType type;
   final FrameSpan? span;
+
+  /// The tajweed rule the sound was judged against (its mistake was the rule
+  /// not kept: a hidden nūn said plainly, a qalqala echo or madd missing);
+  /// `null`: a letter or vowel.
+  final TajweedRule? rule;
 
   /// Mean posterior of the expected token over its frames.
   final double confidence;
@@ -382,9 +388,21 @@ class RecitationError {
     required this.likelihoodRatio,
     this.start,
     this.end,
+    this.rule,
   });
 
   final WordRef word;
+
+  /// The tajweed rule it is a mistake against, if any ([PhonemeVerdict.rule]).
+  final TajweedRule? rule;
+
+  /// A tajweed mistake (a rule not kept, or a ghunnah not held), not a
+  /// letter or vowel said wrong.
+  bool get isTajweed =>
+      rule != null ||
+      type == RecitationErrorType.qalqalaMissing ||
+      type == RecitationErrorType.maddShort ||
+      type == RecitationErrorType.ghunnahMissing;
 
   /// Base-letter index within the word.
   final int letter;
@@ -809,6 +827,7 @@ class QuranAcousticVerifier {
               span: span,
               likelihoodRatio: beats,
               observed: '${beats.round()}',
+              rule: TajweedRule.madd,
             ),
           );
           continue;
@@ -971,6 +990,7 @@ class QuranAcousticVerifier {
           competitor: competitor,
           likelihoodRatio: llr,
           observed: decided.observed,
+          rule: type == RecitationErrorType.correct ? null : decided.rule,
         ),
       );
     }
@@ -1108,6 +1128,7 @@ class QuranAcousticVerifier {
       span: spans[k],
       likelihoodRatio: llr,
       observed: llr >= thresholds.qalqalaError ? 'NO_QALQALA' : null,
+      rule: TajweedRule.qalqala,
     );
   }
 
@@ -1261,6 +1282,7 @@ class QuranAcousticVerifier {
           likelihoodRatio: v.likelihoodRatio,
           start: v.span == null ? null : frameDuration * v.span!.start,
           end: v.span == null ? null : frameDuration * (v.span!.end + 1),
+          rule: v.rule,
         ),
   ];
 
