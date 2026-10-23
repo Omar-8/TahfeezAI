@@ -25,7 +25,12 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 def load_student(run_dir):
     from quran_muaalem import Muaalem
     m = Muaalem(model_name_or_path='obadx/muaalem-model-v3_2', device='cpu', dtype=torch.float32)
-    net = m.model.__class__(m.model.config.__class__.from_pretrained(run_dir))
+    cfg = m.model.config.__class__.from_pretrained(run_dir)
+    net = m.model.__class__(cfg)
+    if getattr(cfg, 'phone_adapter', 0):      # G24's phone adapter (distill_student.py)
+        sys.path.insert(0, HERE)
+        from distill_student import add_phone_adapter
+        add_phone_adapter(net, cfg.phone_adapter)
     net.load_state_dict(torch.load(os.path.join(run_dir, 'student.pt'), map_location='cpu'))
     return net.eval(), getattr(m.processor, 'feature_extractor', m.processor)
 
@@ -268,6 +273,15 @@ def export(run_dir, out_dir, chunk_s, left_s):
                           opset_version=17, dynamo=False)
     m = onnx.load(out, load_external_data=True)
     print('Gemm -> MatMul:', gemm_to_matmul(m))
+    # The exporter links equal constants (two all-zero biases of a fresh phone adapter) by
+    # Identity, which the app's runtime lacks: each one's consumers read its input instead.
+    outs = {o.name for o in m.graph.output}
+    for n in [n for n in m.graph.node if n.op_type == 'Identity' and n.output[0] not in outs]:
+        for other in m.graph.node:
+            for i, name in enumerate(other.input):
+                if name == n.output[0]:
+                    other.input[i] = n.input[0]
+        m.graph.node.remove(n)
     # Only operators the app's reduced ONNX Runtime has (tool/onnxruntime).
     cfg = os.path.join(HERE, '..', '..', 'onnxruntime', 'required_ops.config')
     have = set()

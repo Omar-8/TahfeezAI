@@ -175,6 +175,15 @@ TRUST, TRUST_KL, TRUST_CTC = [], 1.0, 1.0
 # augmented (no simulated phone effects, tempo or pitch): teacher and student hear the
 # same real waveform, the teacher's KL the target.
 REAL_PHONE = []
+# --margin-shards / --margin-weight (G24): on those shards' batches, a pairwise margin on the
+# frames where the teacher is sure (p >= 0.8) of a letter: the student's log-probability of it
+# must beat its best other sound by MARGIN_M; the remaining phone confusions count double.
+MARGIN_PRE, MARGIN_W, MARGIN_M = [], 0.0, 1.0
+MARGIN_FOCUS = [('ح', 'ه'), ('ض', 'د'), ('ق', 'ك'), ('ء', 'ي'), ('ن', 'ي'), ('ك', 'ق')]
+REAL_AUGMENT = False   # --real-phone-augment: real phone clips augmented anyway (an ablation)
+# --ctc-scale PREFIX=W,...: those shards' CTC weighed W (G25: TLOG's transcripts are inferred
+# from its file names and a user may have said a word wrong — a weak CTC; the KL leads).
+CTC_SCALE = []
 # --guide: a second teacher (an earlier student, e.g. v3.5, gentle with amateurs where the
 # teachers are not) for the shards GUIDE_PRE ([(prefix, weight)], the longest prefix
 # matching), its KL weighed against the teachers' by that weight.
@@ -190,8 +199,10 @@ GATE, GATE_DIS, GATE_TRUST, GATE_LEARN = False, 1.0, 1.0, []
 
 class Tagged(list):
     """A transcript from a --trust (its [trusted]) or --guide ([guided]) shard, or a clip
-    of a --real-phone shard ([real]: heard as recorded, by teacher and student alike)."""
-    trusted = learner = real = False
+    of a --real-phone shard ([real]: heard as recorded, by teacher and student alike), or
+    of a --margin-shards shard ([margin]); [ctc]: its CTC's weight (--ctc-scale)."""
+    trusted = learner = real = margin = False
+    ctc = 1.0
     guided = 0.0
 
 
@@ -215,10 +226,14 @@ def batches(data_dir, max_audio_s, seed):
                 if GUIDE is not None else 0.0
             learner = any(base.startswith(pre) for pre in GATE_LEARN)
             real = any(base.startswith(pre) for pre in REAL_PHONE)
-            if trusted or guided or learner or real:
+            margin = any(base.startswith(pre) for pre in MARGIN_PRE)
+            ctc_w = next((w for pre, w in CTC_SCALE if base.startswith(pre)), 1.0)
+            if trusted or guided or learner or real or margin or ctc_w != 1.0:
                 tagged = []
                 for x, t in items:
-                    t = Tagged(t); t.trusted, t.guided, t.learner, t.real = trusted, guided, learner, real
+                    t = Tagged(t)
+                    t.trusted, t.guided, t.learner, t.real, t.margin = trusted, guided, learner, real, margin
+                    t.ctc = ctc_w
                     tagged.append((x, t))
                 items = tagged
             items.sort(key=lambda c: len(c[0]))
@@ -390,8 +405,45 @@ class TeacherMix(torch.nn.Module):
         return out
 
 
+PHONE_ADAPTER = 0   # --phone-adapter: the bottleneck width of G24's phone adapter (0: none)
+
+
+class PhoneAdapter(nn.Module):
+    """G24: a small residual bottleneck after the input projection, frame by frame (no state:
+    streaming is unchanged): down -> LayerNorm -> GELU -> up, added back. Its up projection
+    starts at zero, so a model with it starts as the model without. GELU as x * sigmoid(1.702 x):
+    the app's ONNX Runtime has neither Erf (exact GELU) nor Tanh (its tanh form)."""
+
+    def __init__(self, width, dim):
+        super().__init__()
+        self.down, self.norm, self.up = nn.Linear(width, dim), nn.LayerNorm(dim), nn.Linear(dim, width)
+        nn.init.zeros_(self.up.weight); nn.init.zeros_(self.up.bias)
+
+    def forward(self, x):
+        h = self.norm(self.down(x))
+        return x + self.up(h * torch.sigmoid(1.702 * h))
+
+
+def add_phone_adapter(model, dim):
+    """[model]'s feature projection with a PhoneAdapter between its projection and dropout
+    (its own weights and outputs otherwise as before)."""
+    fp = model.wav2vec2_bert.feature_projection
+    fp.phone_adapter = PhoneAdapter(fp.projection.out_features, dim)
+
+    def forward(hidden_states, fp=fp):
+        norm = fp.layer_norm(hidden_states)
+        h = fp.phone_adapter(fp.projection(norm))
+        # (feat_proj_dropout is 0 in every student; skipped, it exports as Identity)
+        return (fp.dropout(h) if fp.training and fp.dropout.p > 0 else h), norm
+    fp.forward = forward
+    model.config.phone_adapter = dim
+    return model
+
+
 def student_config(teacher_model, size):
     cfg = teacher_model.config.__class__.from_dict(teacher_model.config.to_dict())
+    if PHONE_ADAPTER:
+        cfg.phone_adapter = PHONE_ADAPTER
     if size in DEPTH:
         cfg.num_hidden_layers = len(DEPTH[size])
         cfg.level_to_vocab_size = {'phonemes': 43}
@@ -425,6 +477,8 @@ def make_student(teacher_model, size):
         if size in FFN:       # (a slimmer student's real start is its --init, pruned)
             out = prune_ffn(out, FFN[size])
         s.load_state_dict(out)
+    if PHONE_ADAPTER:
+        add_phone_adapter(s, PHONE_ADAPTER)
     print(f'student {size}: {sum(p.numel() for p in s.parameters()) / 1e6:.1f}M parameters')
     return s
 
@@ -589,7 +643,7 @@ def tempo(items, coded, rng=random):
         return items, coded
     out, cod = [], []
     for i, (x, t) in enumerate(items):
-        if getattr(t, 'real', False) or rng.random() >= TEMPO:
+        if (getattr(t, 'real', False) and not REAL_AUGMENT) or rng.random() >= TEMPO:
             out.append((x, t)); cod.append(coded[i] if coded else None); continue
         f = rng.uniform(0.88, 1.12)                 # speed: f > 1 is faster (shorter)
         w = torch.as_tensor(np.asarray(x, dtype=np.float32))[None, None]
@@ -613,7 +667,7 @@ def augment(items, prob, rng=random, coded=None, pool_share=0.7, others=None):
         torch.backends.cuda.cufft_plan_cache.max_size = 32
     out = []
     for i, (x, t) in enumerate(items):
-        if getattr(t, 'real', False) or rng.random() >= prob:
+        if (getattr(t, 'real', False) and not REAL_AUGMENT) or rng.random() >= prob:
             out.append((x, t)); continue
         c = coded[i] if coded else None
         use_pool = c is not None and rng.random() < pool_share
@@ -741,6 +795,35 @@ def crop_views(items, prob, rng=random, hop=640):
     return out, starts, cropped
 
 
+_MARGIN_TABLES = {}
+
+
+def margin_loss(tl, sl, fm):
+    """Hinge on teacher-sure letter frames: MARGIN_M - (student log p(teacher's letter) - its
+    best other non-blank sound), focus pairs x2; mean over those frames (0 if none)."""
+    dev = sl.device
+    if dev not in _MARGIN_TABLES:
+        letter = torch.zeros(len(VOCAB), dtype=torch.bool, device=dev)
+        for c in 'ءبتثجحخدذرزسشصضطظعغفقكلمنهوي':
+            letter[VOCAB.index(c)] = True
+        focus = torch.zeros(len(VOCAB), len(VOCAB), device=dev)
+        for a_, b_ in MARGIN_FOCUS:
+            focus[VOCAB.index(a_), VOCAB.index(b_)] = 1.0
+        _MARGIN_TABLES[dev] = (letter, focus)
+    letter, focus = _MARGIN_TABLES[dev]
+    conf, top = F.softmax(tl.float(), -1).max(-1)
+    sel = fm.bool() & (conf >= 0.8) & letter[top]
+    if not sel.any():
+        return sl.new_zeros(())
+    ls = F.log_softmax(sl.float(), -1)
+    tgt = ls.gather(-1, top[..., None])[..., 0]
+    other = ls.scatter(-1, top[..., None], float('-inf'))
+    other[..., 0] = float('-inf')                       # never the blank
+    best, alt = other.max(-1)
+    hinge = F.relu(MARGIN_M - (tgt - best)) * (1 + focus[top, alt])
+    return (hinge * sel).sum() / sel.sum()
+
+
 def losses(teacher, student, fe, items, T, ctc_w, aug=0.0, coded=None, layers=None,
            rng=random, pool_share=0.7, crop=0.0):
     """KL to the teacher, CTC to the transcript and — with [layers] (a depth student's
@@ -863,6 +946,8 @@ def losses(teacher, student, fe, items, T, ctc_w, aug=0.0, coded=None, layers=No
     if any(trusted):
         w = w * torch.tensor([TRUST_KL if tr else 1.0 for tr in trusted], device=kl.device)[:, None]
     loss_kl = (kl * w * fm).sum() / fm.sum() * T * T
+    if MARGIN_W > 0 and getattr(items[0][1], 'margin', False):
+        loss_kl = loss_kl + MARGIN_W * margin_loss(tl, sl, fm)
     # CTC only for clips with a transcript (diverse_data.py clips have none: there the
     # teacher's distribution is the whole target).
     keep = [j for j, (_, t) in enumerate(items)
@@ -873,7 +958,8 @@ def losses(teacher, student, fe, items, T, ctc_w, aug=0.0, coded=None, layers=No
         per = F.ctc_loss(F.log_softmax(sl[keep], -1).transpose(0, 1), targets,
                          fm[keep].sum(1).long(), lengths, blank=0, zero_infinity=True,
                          reduction='none') / lengths.clamp_min(1)
-        cw = torch.tensor([TRUST_CTC if trusted[j] else 1.0 for j in keep], device=per.device)
+        cw = torch.tensor([(TRUST_CTC if trusted[j] else 1.0) * getattr(items[j][1], 'ctc', 1.0)
+                           for j in keep], device=per.device)
         loss_ctc = (per * cw).mean()   # as reduction='mean', the trusted clips weighed
     else:
         loss_ctc = torch.zeros((), device=sl.device)
@@ -914,6 +1000,8 @@ def bench(a):
 
 
 def train(a):
+    global PHONE_ADAPTER
+    PHONE_ADAPTER = a.phone_adapter      # before the student is built (make_student adds it)
     t = load_teacher()
     fe = getattr(t.processor, 'feature_extractor', t.processor)
     s = make_student(_base(t.model), a.size).to(DEV).train()
@@ -932,13 +1020,23 @@ def train(a):
         # Only the top encoder layers, the adapter and the output head learn (G20: keep a
         # fine-tune from drifting); the feature projection and lower layers stay frozen.
         n_layers = len(s.wav2vec2_bert.encoder.layers)
-        keep = tuple(f'encoder.layers.{i}.' for i in range(n_layers - a.train_top, n_layers)) + ('adapter.', 'lm_head')
+        keep = tuple(f'encoder.layers.{i}.' for i in range(n_layers - a.train_top, n_layers)) + ('adapter.', 'lm_head', 'phone_adapter')
         for name, prm in s.named_parameters():
             prm.requires_grad_(any(k in name for k in keep))
         n = sum(prm.numel() for prm in s.parameters() if prm.requires_grad)
         print(f'training the top {a.train_top} layers + adapter + head: {n / 1e6:.1f}M parameters', flush=True)
-    opt = torch.optim.AdamW([prm for prm in s.parameters() if prm.requires_grad], lr=a.lr,
-                            betas=(0.9, 0.98), weight_decay=0.01)
+    groups = [prm for n, prm in s.named_parameters() if prm.requires_grad and 'phone_adapter' not in n]
+    adapter = [prm for n, prm in s.named_parameters() if 'phone_adapter' in n]
+    if PHONE_ADAPTER and a.lr == 0:
+        for prm in groups:          # adapter only: everything else frozen
+            prm.requires_grad_(False)
+        groups = []
+    param_groups = ([{'params': groups, 'lr': a.lr}] if groups else []) + \
+        ([{'params': adapter, 'lr': a.adapter_lr}] if adapter else [])
+    if PHONE_ADAPTER:
+        print(f'phone adapter: {sum(p.numel() for p in adapter) / 1e6:.3f}M parameters at lr {a.adapter_lr}; '
+              f'other trainable {sum(p.numel() for p in groups) / 1e6:.1f}M at lr {a.lr}', flush=True)
+    opt = torch.optim.AdamW(param_groups, lr=a.lr, betas=(0.9, 0.98), weight_decay=0.01)
     warm = max(1, a.steps // 25)
     sched = torch.optim.lr_scheduler.LambdaLR(
         opt, lambda i: min(1.0, (i + 1) / warm) * 0.5 * (1 + math.cos(math.pi * min(i, a.steps) / a.steps)))
@@ -954,7 +1052,13 @@ def train(a):
                 scores = ffn_activity(_base(t.model), a.size, a.init, a.data, fe)
                 print(f'pruning by activity on real audio ({len(scores)} feed-forwards)')
             w = prune_ffn(w, FFN[a.size], scores)
-        s.load_state_dict(w); ema.load_state_dict(w)
+        if PHONE_ADAPTER and not any('phone_adapter' in k for k in w):
+            # v3.7's weights into the adapted model: only the (zero-started) adapter is new.
+            miss, extra = s.load_state_dict(w, strict=False)
+            assert not extra and all('phone_adapter' in k for k in miss), (miss, extra)
+            ema.load_state_dict(s.state_dict())
+        else:
+            s.load_state_dict(w); ema.load_state_dict(w)
         print(f'initialised from {a.init}')
     if a.resume and os.path.exists(ck):
         state = torch.load(ck, map_location=DEV, weights_only=False)
@@ -964,11 +1068,13 @@ def train(a):
         print(f'resumed at step {step}')
     json.dump(dict(vars(a)), open(os.path.join(a.out, 'run.json'), 'w'), indent=1)
     val = clips(os.path.join(a.data, 'val.npz'))
-    global REAL_PHONE, CHANNELS, CHANNEL_SHARE, CHANNEL_SNR, PITCH, REPEAT, TEMPO, EXTRA, HARD_W, FOCUS_W, VOWEL_W, TRUST, TRUST_KL, TRUST_CTC
+    global CTC_SCALE, MARGIN_PRE, MARGIN_W, REAL_PHONE, REAL_AUGMENT, CHANNELS, CHANNEL_SHARE, CHANNEL_SNR, PITCH, REPEAT, TEMPO, EXTRA, HARD_W, FOCUS_W, VOWEL_W, TRUST, TRUST_KL, TRUST_CTC
     global GUIDE, GUIDE_PRE
     if a.guide:
         path, pre, gw = a.guide.split(':')
+        keep_adapter, PHONE_ADAPTER = PHONE_ADAPTER, 0      # the guide (v3.5) has no adapter
         GUIDE = make_student(_base(t.model), 'd6').to(DEV).eval()
+        PHONE_ADAPTER = keep_adapter
         GUIDE.load_state_dict(torch.load(path, map_location=DEV))
         for p in GUIDE.parameters():
             p.requires_grad_(False)
@@ -990,6 +1096,9 @@ def train(a):
     PITCH = a.pitch
     TEMPO, EXTRA = a.tempo, a.phone_extra
     REAL_PHONE = [q for q in a.real_phone.split('+') if q]
+    MARGIN_PRE, MARGIN_W = [q for q in a.margin_shards.split('+') if q], a.margin_weight
+    CTC_SCALE = [(q.split('=')[0], float(q.split('=')[1])) for q in a.ctc_scale.split(',') if q]
+    REAL_AUGMENT = a.real_phone_augment
     if a.channels:
         from phone_channels import Bank
         CHANNELS, CHANNEL_SHARE = Bank(a.channels), a.channel_share
@@ -1018,7 +1127,11 @@ def train(a):
             import streaming
             lo, hi = (float(x) for x in a.stream_chunks.split(','))
             streaming.CHUNK_OVERRIDE['s'] = rng.uniform(lo, hi)
-        kl, ctc, hid = losses(t, s, fe, items, a.temperature, a.ctc_weight, a.augment, coded,
+        # Real phone batches (one shard each): the teacher's targets softened
+        # (--real-temperature), so the student learns which letters it nearly confused.
+        T = a.real_temperature if a.real_temperature and getattr(items[0][1], 'real', False) \
+            else a.temperature
+        kl, ctc, hid = losses(t, s, fe, items, T, a.ctc_weight, a.augment, coded,
                               DEPTH.get(a.size) if a.hidden > 0 else None, rng, a.pool_share,
                               a.crop)
         if a.stream and a.stream_chunks:
@@ -1078,6 +1191,8 @@ def train(a):
             torch.save(dict(student=s.state_dict(), ema=ema.state_dict(), opt=opt.state_dict(),
                             sched=sched.state_dict(), step=step, best=best), ck + '.tmp')
             os.replace(ck + '.tmp', ck)
+            if a.keep_ema:     # every checkpoint's EMA weights kept, to judge each one after
+                torch.save(ema.state_dict(), os.path.join(a.out, f'ema_{step}.pt'))
         if a.pause_at and step == a.pause_at:
             # Evaluate here, resume later on the same schedule (--resume).
             torch.save(ema.state_dict(), os.path.join(a.out, f'ema_{step}.pt'))
@@ -1098,6 +1213,8 @@ def main():
     p.add_argument('--max-audio', type=float, default=320, help='seconds of audio per batch')
     p.add_argument('--lr', type=float, default=5e-4)
     p.add_argument('--temperature', type=float, default=1.0)
+    p.add_argument('--real-temperature', type=float, default=0.0,
+                   help='the KL temperature on --real-phone batches (0: --temperature)')
     p.add_argument('--ctc-weight', type=float, default=0.1)
     p.add_argument('--ema', type=float, default=0.999)
     p.add_argument('--codec', type=float, default=0.0,
@@ -1130,6 +1247,15 @@ def main():
                    help='shard prefixes (a+b) of real phone recordings: never augmented')
     p.add_argument('--train-top', type=int, default=0,
                    help='train only the top N encoder layers + adapter + head (0: everything)')
+    p.add_argument('--keep-ema', action='store_true', help='keep ema_<step>.pt at every --save-every')
+    p.add_argument('--phone-adapter', type=int, default=0,
+                   help='G24: a residual bottleneck of this width after the input projection')
+    p.add_argument('--adapter-lr', type=float, default=1e-4, help="the phone adapter's learning rate")
+    p.add_argument('--margin-shards', default='', help='shard prefixes (a+b) with the margin loss')
+    p.add_argument('--ctc-scale', default='', help='PREFIX=W,...: those shards\' CTC weighed W')
+    p.add_argument('--margin-weight', type=float, default=0.0)
+    p.add_argument('--real-phone-augment', action='store_true',
+                   help='augment --real-phone clips like any other (keeping their temperature): an ablation')
     p.add_argument('--pause-at', type=int, default=0,
                    help='save ema_<step>.pt and stop at this step (resume with --resume)')
     p.add_argument('--channels', default='',

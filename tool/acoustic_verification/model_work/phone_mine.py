@@ -81,6 +81,9 @@ def main():
     p.add_argument('--max-cost', type=float, default=0.6)
     p.add_argument('--shard-clips', type=int, default=1000)
     p.add_argument('--cache', default='/workspace/.hf_parquet')
+    p.add_argument('--holdout', type=int, default=0,
+                   help='every Nth clip that passes the filters goes to a test pack '
+                        '(<out>/phonedev_audio.npz + _cases.json), never to the candidates')
     a = p.parse_args()
     os.makedirs(a.out, exist_ok=True)
 
@@ -101,7 +104,8 @@ def main():
 
     files = sorted(f for f in HfApi().list_repo_files(REPO, repo_type='dataset') if f.endswith('.parquet'))
     index, shard, n_shard = [], [], 0
-    stats = dict(rows=0, overlap=0, blocked=0, decode=0, unknown=0, poor_fit=0, kept=0)
+    stats = dict(rows=0, overlap=0, blocked=0, decode=0, unknown=0, poor_fit=0, kept=0, held_out=0)
+    dev_audio, dev_cases, passed = {}, [], 0
     overlaps = []
 
     def flush():
@@ -149,6 +153,17 @@ def main():
                 sp, cost = spans(lp_t, toks)
                 if sp is None or cost is None or cost > a.max_cost:
                     stats['poor_fit'] += 1; continue
+                passed += 1
+                if a.holdout and passed % a.holdout == 0:
+                    # A held-out phone test clip: the whole ayah, as the tlog pack's.
+                    n_words = ord(fit.ref[str(aid)]['w'][-1]) - 47
+                    dev_audio[f'c{len(dev_cases)}'] = x.astype(np.float32)
+                    dev_cases.append(dict(set='clean', kind='clean', category='phone_dev',
+                                          name=f'gt_{aid}_{stats["rows"]}', ayahId=aid, lastAyah=aid,
+                                          ayahs=[aid], firstWord=0, lastWord=n_words - 1,
+                                          targetWords=[], openStart=True, openEnd=True, screen=True))
+                    stats['held_out'] += 1
+                    continue
                 with torch.no_grad():
                     xs, sm = ds.featurize(fe, [(x, [])], ds.STUDENT_CAUSAL)
                     lp_s = F.log_softmax(student(input_features=xs, attention_mask=sm).logits['phonemes'][0].float(), -1)
@@ -187,6 +202,9 @@ def main():
     flush()
     json.dump(dict(stats=stats, overlaps=overlaps, clips=index),
               open(os.path.join(a.out, 'index.json'), 'w'), ensure_ascii=False)
+    if dev_cases:
+        np.savez(os.path.join(a.out, 'phonedev_audio.npz'), **dev_audio)
+        json.dump(dev_cases, open(os.path.join(a.out, 'phonedev_cases.json'), 'w'), ensure_ascii=False)
     print('done', stats, flush=True)
 
 

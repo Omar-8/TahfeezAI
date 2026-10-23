@@ -53,3 +53,4 @@ from the machine that collected these; its statement is the copy in the
 | `model/hf-MuazAhmad7-Surah_Ikhlas-Labeled_Dataset-README.md` | Al-Ikhlas learner set: **CC BY 4.0** (attribution required). |
 | `model/hf-obadx-qdat-README.md` | QDAT: **MIT**. |
 | `model/hf-greentechapps-user_recited_verses_full-README.md` | v3.7's real phone recordings (`greentechapps/user_recited_verses_full`, fetched 2026-10-21): **CC BY 4.0**; "cleaned and tested from an old Tarteel audio dataset released publicly … originally collected by the Tarteel project". |
+| `model/hf-google-fleurs-README.md` | G22 candidate audio (`google/fleurs`, config `ar_eg`, fetched 2026-10-21): **CC BY 4.0** ("All datasets are licensed under the Creative Commons license (CC-BY)"). |
