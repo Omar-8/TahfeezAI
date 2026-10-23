@@ -117,6 +117,17 @@ Several of these pairs (ق→ك, ض→د, ح→ه) are classic real learner mist
 says them only slightly wrong is now less likely to be flagged. (+4 would give Tarteel-200
 180 and QuranMB 66.2%.)
 
+**Pronunciation strictness** (Hifz settings, 2026-10-23; owner's request): one choice shifts every
+threshold together, tajweed included — lenient +1 (qalqala +1, madd short below 55%, ghunnah
+hold x1.25), balanced as above, precise -0.5 (madd 72%, ghunnah x0.85); the sound-group
+margins stay on top (`AcousticVerificationController.withStrictness`):
+
+| v3.7 | Owner / Tarteel-200 / Juz 30 false letters | QuranMB caught | Al-Ikhlas caught | Amateurs flagged | Spliced caught |
+|---|---|---:|---:|---:|---:|
+| Lenient | 19 / 141 / 1,157 | 61.7% | 10.1% | 2.5% | 85.1% |
+| Balanced | 29 / 187 / 1,576 | 66.4% | 12.4% | 4.2% | 89.5% |
+| Precise | 35 / 217 / 1,837 | 68.4% | 13.8% | 6.3% | 89.5% |
+
 Lowering the overall threshold instead (2.75) gave back the whole phone gain
 (owner 37, Tarteel 226). Stronger vowel margins (−0.5 / +0.5 / −2.5) caught
 QuranMB 67.2% but flagged amateurs 5.1%.

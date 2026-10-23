@@ -448,6 +448,29 @@ void main() {
     expect(container.read(hifzSettingsProvider).strict, isFalse);
   });
 
+  testWidgets('pronunciation strictness is chosen in the Hifz settings', (
+    tester,
+  ) async {
+    await tester.pumpWidget(app());
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Hifz settings'));
+    await tester.pumpAndSettle();
+    final container = ProviderScope.containerOf(
+      tester.element(find.text('Pronunciation strictness')),
+    );
+    expect(
+      container.read(hifzSettingsProvider).strictness,
+      RecitationStrictness.balanced,
+    );
+    await tester.ensureVisible(find.text('Lenient'));
+    await tester.tap(find.text('Lenient'));
+    await tester.pumpAndSettle();
+    expect(
+      container.read(hifzSettingsProvider).strictness,
+      RecitationStrictness.lenient,
+    );
+  });
+
   testWidgets('Hifz status strip shows progress and a pending mistake', (
     tester,
   ) async {

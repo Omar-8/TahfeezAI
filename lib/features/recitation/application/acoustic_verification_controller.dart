@@ -17,7 +17,7 @@ import '../../../ai/matching/local_quran_position_tracker.dart'
 import '../../../core/core_providers.dart';
 import '../../../quran/domain/models/quran_refs.dart';
 import 'local_acoustic_inference_controller.dart';
-import 'hifz_controller.dart' show hifzSettingsProvider;
+import 'hifz_controller.dart' show RecitationStrictness, hifzSettingsProvider;
 import 'recitation_ai_config.dart';
 import 'recitation_position.dart';
 import 'quran_match_controller.dart' show quranWordCorpusProvider;
@@ -480,16 +480,54 @@ class AcousticVerificationController
     // the user's correct words flagged 6.1% -> 6.3%, amateurs' correct clips
     // 8.7% -> 10.1%, calibration unchanged.
     return QuranAcousticVerifier(
-      thresholds: verifier.thresholds.copyWith(
-        tajweed: tajweed,
-        tajweedRules: settings.tajweedRules,
-        error: _streaming ? streamingError : null,
-        letterError: _streaming ? streamingError : null,
-        shaddaError: _streaming ? streamingError : null,
-        sukunError: _streaming ? streamingMinorError : null,
-        missingVowelError: _streaming ? streamingMinorError : null,
-        qalqalaError: _streaming ? streamingQalqalaError : null,
+      thresholds: withStrictness(
+        verifier.thresholds.copyWith(
+          tajweed: tajweed,
+          tajweedRules: settings.tajweedRules,
+          error: _streaming ? streamingError : null,
+          letterError: _streaming ? streamingError : null,
+          shaddaError: _streaming ? streamingError : null,
+          sukunError: _streaming ? streamingMinorError : null,
+          missingVowelError: _streaming ? streamingMinorError : null,
+          qalqalaError: _streaming ? streamingQalqalaError : null,
+        ),
+        settings.strictness,
       ),
+    );
+  }
+
+  /// [thresholds] at the user's [strictness] (Hifz settings): every
+  /// mistake's threshold shifted together — lenient +1, strict -0.5 — and
+  /// with them the tajweed checks: a missing qalqala echo by the same, a
+  /// madd short below 55% / 72% of its length (balanced 65%), a ghunnah's
+  /// hold x1.25 / x0.85. The sound groups' margins stay on top.
+  /// Measured with v3.7 (owner's phone sets / Tarteel users' / unseen Juz 30
+  /// reciters' false letter flags; QuranMB's and Al-Ikhlas's real mistakes
+  /// caught; amateurs' correct words flagged), 2026-10-21:
+  ///   lenient  19 / 141 / 1,157   61.7%  10.1%   2.5%
+  ///   balanced 29 / 187 / 1,576   66.4%  12.4%   4.2%
+  ///   strict   35 / 217 / 1,837   68.4%  13.8%   6.3%
+  static AcousticThresholds withStrictness(
+    AcousticThresholds thresholds,
+    RecitationStrictness strictness,
+  ) {
+    final (shift, madd, ghunnah) = switch (strictness) {
+      RecitationStrictness.lenient => (1.0, -0.10, 1.25),
+      RecitationStrictness.balanced => (0.0, 0.0, 1.0),
+      RecitationStrictness.strict => (-0.5, 0.07, 0.85),
+    };
+    if (shift == 0) return thresholds;
+    double? moved(double? t) => t == null ? null : t + shift;
+    final hold = thresholds.ghunnahHold;
+    return thresholds.copyWith(
+      error: thresholds.error + shift,
+      letterError: thresholds.letterError + shift,
+      shaddaError: moved(thresholds.shaddaError),
+      sukunError: moved(thresholds.sukunError),
+      missingVowelError: moved(thresholds.missingVowelError),
+      qalqalaError: thresholds.qalqalaError + shift,
+      maddShare: thresholds.maddShare + madd,
+      ghunnahHold: hold == null ? null : hold * ghunnah,
     );
   }
 

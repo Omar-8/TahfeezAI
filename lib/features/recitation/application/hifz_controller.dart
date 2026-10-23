@@ -57,6 +57,11 @@ enum MistakeAlert {
       : (sound ? MistakeAlert.sound : off);
 }
 
+/// How strictly pronunciation is judged: every threshold of the check — letters,
+/// vowels, shadda, sukun and, with tajweed, qalqala, madd and ghunnah — shifted
+/// together ([AcousticVerificationController.withStrictness]).
+enum RecitationStrictness { lenient, balanced, strict }
+
 /// Configurable Hifz feedback.
 class HifzSettings {
   const HifzSettings({
@@ -68,6 +73,7 @@ class HifzSettings {
     this.tajweed = true,
     this.tajweedRules = allTajweedRules,
     this.sajdahReminder = true,
+    this.strictness = RecitationStrictness.balanced,
   });
 
   static const allTajweedRules = {
@@ -85,6 +91,9 @@ class HifzSettings {
   /// Reciting an ayah of prostration: a reminder of Sujood al-Tilawah
   /// (once per app session).
   final bool sajdahReminder;
+
+  /// How strictly pronunciation is judged (balanced: as calibrated).
+  final RecitationStrictness strictness;
 
   /// Judge tajweed in the pronunciation check (idghām, ikhfāʾ, iqlāb …);
   /// off, only the letters and vowels.
@@ -114,6 +123,7 @@ class HifzSettings {
     bool? tajweed,
     Set<TajweedRule>? tajweedRules,
     bool? sajdahReminder,
+    RecitationStrictness? strictness,
   }) => HifzSettings(
     strict: strict ?? this.strict,
     highlightCurrent: highlightCurrent ?? this.highlightCurrent,
@@ -123,6 +133,7 @@ class HifzSettings {
     tajweed: tajweed ?? this.tajweed,
     tajweedRules: tajweedRules ?? this.tajweedRules,
     sajdahReminder: sajdahReminder ?? this.sajdahReminder,
+    strictness: strictness ?? this.strictness,
   );
 
   Map<String, Object> toJson() => {
@@ -134,6 +145,7 @@ class HifzSettings {
     'tajweed': tajweed,
     'tajweedRules': [for (final r in tajweedRules) r.name],
     'sajdahReminder': sajdahReminder,
+    'strictness': strictness.name,
   };
 
   static HifzSettings fromJson(Object? json) {
@@ -158,6 +170,9 @@ class HifzSettings {
             }
           : allTajweedRules,
       sajdahReminder: read('sajdahReminder', true),
+      strictness:
+          RecitationStrictness.values.asNameMap()[json['strictness']] ??
+          RecitationStrictness.balanced,
     );
   }
 }

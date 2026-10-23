@@ -360,6 +360,66 @@ void main() {
     );
   });
 
+  test('pronunciation strictness: balanced until chosen, then as saved', () {
+    expect(HifzSettings.fromJson({}).strictness, RecitationStrictness.balanced);
+    const lenient = HifzSettings(strictness: RecitationStrictness.lenient);
+    expect(
+      HifzSettings.fromJson(lenient.toJson()).strictness,
+      RecitationStrictness.lenient,
+    );
+    expect(
+      HifzSettings.fromJson({'strictness': 'unknown'}).strictness,
+      RecitationStrictness.balanced,
+    );
+  });
+
+  test('strictness shifts every threshold together, tajweed too', () {
+    const base = AcousticThresholds(
+      error: 3,
+      letterError: 3,
+      shaddaError: 3,
+      sukunError: 3,
+      missingVowelError: 3,
+      qalqalaError: 2,
+      maddShare: 0.65,
+      ghunnahHold: 1.2,
+      sounds: {SoundGroup.similarLetter: SoundMargins(error: 4)},
+    );
+    final balanced = AcousticVerificationController.withStrictness(
+      base,
+      RecitationStrictness.balanced,
+    );
+    expect(identical(balanced, base), isTrue);
+    final lenient = AcousticVerificationController.withStrictness(
+      base,
+      RecitationStrictness.lenient,
+    );
+    expect(
+      [
+        lenient.error,
+        lenient.letterError,
+        lenient.shaddaError,
+        lenient.sukunError,
+        lenient.missingVowelError,
+        lenient.qalqalaError,
+      ],
+      [4, 4, 4, 4, 4, 3],
+    );
+    expect(lenient.maddShare, closeTo(0.55, 1e-9));
+    expect(lenient.ghunnahHold, closeTo(1.5, 1e-9));
+    // The sound groups' margins stay on top, unchanged.
+    expect(lenient.sounds, base.sounds);
+    final strict = AcousticVerificationController.withStrictness(
+      base,
+      RecitationStrictness.strict,
+    );
+    expect(strict.error, 2.5);
+    expect(strict.sukunError, 2.5);
+    expect(strict.qalqalaError, 1.5);
+    expect(strict.maddShare, closeTo(0.72, 1e-9));
+    expect(strict.ghunnahHold, closeTo(1.02, 1e-9));
+  });
+
   test('a saved vibrate switch becomes the vibrate alert', () {
     expect(HifzSettings.fromJson({'vibrate': false}).alert, MistakeAlert.off);
     expect(

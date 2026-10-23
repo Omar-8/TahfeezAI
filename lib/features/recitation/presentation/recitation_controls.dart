@@ -1520,6 +1520,45 @@ class _HifzSettingsSheet extends ConsumerWidget {
               settings.colorWords,
               (v) => settings.copyWith(colorWords: v),
             ),
+            ListTile(
+              key: const ValueKey('hifz-strictness'),
+              title: Text(AppLocalizations.of(context).recStrictness),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(AppLocalizations.of(context).recStrictnessSub),
+                  const SizedBox(height: 8),
+                  // One shift for every threshold, tajweed's too.
+                  SegmentedButton<RecitationStrictness>(
+                    segments: [
+                      ButtonSegment(
+                        value: RecitationStrictness.lenient,
+                        label: Text(
+                          AppLocalizations.of(context).recStrictnessLenient,
+                        ),
+                      ),
+                      ButtonSegment(
+                        value: RecitationStrictness.balanced,
+                        label: Text(
+                          AppLocalizations.of(context).recStrictnessBalanced,
+                        ),
+                      ),
+                      ButtonSegment(
+                        value: RecitationStrictness.strict,
+                        label: Text(
+                          AppLocalizations.of(context).recStrictnessStrict,
+                        ),
+                      ),
+                    ],
+                    selected: {settings.strictness},
+                    showSelectedIcon: false,
+                    onSelectionChanged: (s) => controller.update(
+                      settings.copyWith(strictness: s.first),
+                    ),
+                  ),
+                ],
+              ),
+            ),
             toggle(
               AppLocalizations.of(context).recTajweed,
               AppLocalizations.of(context).recTajweedSub,
