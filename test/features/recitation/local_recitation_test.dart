@@ -536,6 +536,50 @@ void main() {
       },
     );
 
+    test('behind by 2.5 s, chunks of silence are taken as blank without '
+        'running the model; speech never is', () async {
+      // A tone (speech-loud), or quiet: [seconds] of either arriving at once,
+      // faster than the model runs — a phone too slow for it.
+      void burst(double seconds, {required bool loud}) {
+        final n = (16000 * seconds).round();
+        final pcm = ByteData(n * 2);
+        for (var i = 0; i < n; i++) {
+          pcm.setInt16(
+            i * 2,
+            loud ? ((i ~/ 20).isEven ? 8000 : -8000) : 0,
+            Endian.little,
+          );
+        }
+        mic.mic!.add(pcm.buffer.asUint8List());
+      }
+
+      burst(1, loud: true);
+      burst(6, loud: false);
+      await pumpEventQueue(times: 50);
+      // 7 s arrived: the speech chunk run, then silent chunks skipped while
+      // 2.5 s or more were waiting, the rest run.
+      final skipped = inference().state.silenceSkipped;
+      expect(skipped, greaterThan(0));
+      expect(model.resets, greaterThanOrEqualTo(1));
+      expect(model.runs.length + skipped / 1.28, closeTo(5, 0.01));
+      // The first chunk run after a skip starts the model afresh (the
+      // session's start was the first reset).
+      expect(model.resets, 2);
+      burst(6, loud: true);
+      await pumpEventQueue(times: 50);
+      expect(
+        inference().state.silenceSkipped,
+        skipped,
+        reason: 'speech is never skipped',
+      );
+      // The frames stay contiguous, the skipped ones marked as a pause.
+      var next = 0;
+      for (final c in chunks) {
+        expect(c.start, next);
+        next = c.end;
+      }
+    });
+
     test('a paused session computes its partial chunk provisionally, then the '
         'real chunk replaces it', () async {
       await speak(5);

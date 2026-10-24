@@ -82,6 +82,7 @@ class LocalAcousticInferenceState {
     this.lastRun,
     this.lag = Duration.zero,
     this.droppedSeconds = 0,
+    this.silenceSkipped = 0,
     this.followLatency,
     this.locateLatency,
     this.device,
@@ -109,6 +110,10 @@ class LocalAcousticInferenceState {
   /// Audio skipped because the model fell too far behind.
   final double droppedSeconds;
 
+  /// Silence not run through the model (taken as blank) to catch up: a
+  /// phone too slow for the model spends its pauses on the speech before.
+  final double silenceSkipped;
+
   /// From a word's last sound being received to the tracker placing it;
   /// from the first speech to the reciter being located.
   final Duration? followLatency, locateLatency;
@@ -133,6 +138,7 @@ class LocalAcousticInferenceState {
     Duration? lastRun,
     Duration? lag,
     double? droppedSeconds,
+    double? silenceSkipped,
     Duration? followLatency,
     Duration? locateLatency,
     AcousticDeviceStats? device,
@@ -150,6 +156,7 @@ class LocalAcousticInferenceState {
     lastRun: lastRun ?? this.lastRun,
     lag: lag ?? this.lag,
     droppedSeconds: droppedSeconds ?? this.droppedSeconds,
+    silenceSkipped: silenceSkipped ?? this.silenceSkipped,
     followLatency: followLatency ?? this.followLatency,
     locateLatency: locateLatency ?? this.locateLatency,
     device: device ?? this.device,
@@ -496,6 +503,34 @@ class LocalAcousticInferenceController
         }
         break;
       }
+      // Behind (a phone slower than the model needs): a chunk that is only
+      // the room's quiet is taken as blank frames without running it, and
+      // the model starts afresh at the next speech, so each pause in the
+      // recitation is time to catch up. A phone that keeps up (the POCO F3:
+      // 0.53 s of model time per 1.28 s chunk, at most 0.8 s behind) never
+      // gets here.
+      if (full &&
+          written - _streamNext >= _catchUpAfter &&
+          _pauses.isQuiet(pcm.samples(_streamNext, _streamNext + need))) {
+        final first = _streamNext ~/ spf;
+        final frames = config.chunkSamples ~/ spf;
+        final added = store.put(
+          TimedAcousticFrames(
+            first,
+            _silence(frames, model.info.frameDuration),
+          ),
+        );
+        _streamNext += config.chunkSamples;
+        _streamFresh = true;
+        _out.add(TimedAcousticFrames(added.start, added.frames, last: true));
+        state = state.copyWith(
+          silenceSkipped: state.silenceSkipped + frames * 0.04,
+          lag: Duration(
+            milliseconds: (pcm.written - store.end * spf) * 1000 ~/ 16000,
+          ),
+        );
+        continue;
+      }
       if (_streamFresh) {
         // Only now, with a chunk to run: a model loaded before the session
         // is not reset twice.
@@ -546,6 +581,10 @@ class LocalAcousticInferenceController
       if (!full) break;
     }
   }
+
+  /// How far behind the stream must be (2.5 s of audio) before silent
+  /// chunks are skipped.
+  static const _catchUpAfter = 40000;
 
   /// Marks a pause for the consumers, even if no frames were left.
   void _markPause() {

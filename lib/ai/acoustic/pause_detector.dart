@@ -41,8 +41,25 @@ class PauseDetector {
     return fired;
   }
 
+  /// The level (RMS) above which a 20 ms frame is speech: 3× the room's
+  /// noise floor, at least 0.006.
+  double get speechLevel => math.max(0.006, 3 * _noise);
+
+  /// Whether every 20 ms frame of [samples] is below [speechLevel].
+  bool isQuiet(Float32List samples) {
+    final level = speechLevel;
+    for (var i = 0; i + _frame <= samples.length; i += _frame) {
+      var sum = 0.0;
+      for (var k = i; k < i + _frame; k++) {
+        sum += samples[k] * samples[k];
+      }
+      if (math.sqrt(sum / _frame) > level) return false;
+    }
+    return true;
+  }
+
   bool _onFrame(double rms) {
-    final speech = rms > math.max(0.006, 3 * _noise);
+    final speech = rms > speechLevel;
     if (speech) {
       _speechFrames++;
       _quietFrames = 0;
