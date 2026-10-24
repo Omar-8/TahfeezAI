@@ -1291,10 +1291,18 @@ enum MushafHideControlsPart {
 
 /// Hifz progress and live feedback, above the recording controls.
 class HifzStatusStrip extends StatelessWidget {
-  const HifzStatusStrip({super.key, required this.state, this.acoustic});
+  const HifzStatusStrip({
+    super.key,
+    required this.state,
+    this.acoustic,
+    this.settings = const HifzSettings(),
+  });
 
   final HifzState state;
   final AcousticVerificationState? acoustic;
+
+  /// The mistake colours chosen (Hifz settings).
+  final HifzSettings settings;
 
   /// A pronunciation mistake in plain words, in the UI language.
   static String describe(RecitationError e, AppLocalizations l10n) {
@@ -1398,10 +1406,12 @@ class HifzStatusStrip extends StatelessWidget {
             _word(acoustic!.lastMistake!.word),
             describe(acoustic!.lastMistake!, AppLocalizations.of(context)),
           ),
-          // As the word's own mark: tajweed purple, a pronunciation orange.
-          acoustic!.lastMistake!.isTajweed
-              ? const Color(0xFF8E24AA)
-              : const Color(0xFFEF6C00),
+          // As the word's own mark, in the colours chosen.
+          Color(
+            acoustic!.lastMistake!.isTajweed
+                ? settings.tajweedColor
+                : settings.pronunciationColor,
+          ),
         ),
       HifzState(running: true, reviewing: final r?) => (
         AppLocalizations.of(context).recGoingBack(_word(r)),
@@ -1523,6 +1533,15 @@ class _HifzSettingsSheet extends ConsumerWidget {
               settings.colorWords,
               (v) => settings.copyWith(colorWords: v),
             ),
+            if (settings.colorWords)
+              _ColourChoice(
+                key: const ValueKey('hifz-pronunciation-colour'),
+                title: AppLocalizations.of(context).recPronunciationColour,
+                colours: HifzSettings.pronunciationColors,
+                selected: settings.pronunciationColor,
+                onSelected: (c) =>
+                    controller.update(settings.copyWith(pronunciationColor: c)),
+              ),
             ListTile(
               key: const ValueKey('hifz-strictness'),
               title: Text(AppLocalizations.of(context).recStrictness),
@@ -1607,6 +1626,15 @@ class _HifzSettingsSheet extends ConsumerWidget {
                   ),
                 ),
               ),
+              if (settings.colorWords)
+                _ColourChoice(
+                  key: const ValueKey('hifz-tajweed-colour'),
+                  title: AppLocalizations.of(context).recTajweedColour,
+                  colours: HifzSettings.tajweedColors,
+                  selected: settings.tajweedColor,
+                  onSelected: (c) =>
+                      controller.update(settings.copyWith(tajweedColor: c)),
+                ),
             ],
             toggle(
               AppLocalizations.of(context).recShowMistakes,
@@ -1713,6 +1741,67 @@ class _HifzSettingsSheet extends ConsumerWidget {
 /// Says plainly when recitation can't be followed on this device: the
 /// on-device model is missing or unusable, or offline mode refused part of
 /// the configuration.
+/// A mistake colour, picked from a row of swatches (the chosen one ringed
+/// and ticked).
+class _ColourChoice extends StatelessWidget {
+  const _ColourChoice({
+    super.key,
+    required this.title,
+    required this.colours,
+    required this.selected,
+    required this.onSelected,
+  });
+
+  final String title;
+  final List<int> colours;
+  final int selected;
+  final ValueChanged<int> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return ListTile(
+      title: Text(title),
+      subtitle: Padding(
+        padding: const EdgeInsets.only(top: 8),
+        child: Wrap(
+          spacing: 12,
+          runSpacing: 8,
+          children: [
+            for (final (i, c) in colours.indexed)
+              Semantics(
+                selected: c == selected,
+                button: true,
+                child: InkWell(
+                  key: ValueKey('${(key as ValueKey<String>?)?.value}-$i'),
+                  customBorder: const CircleBorder(),
+                  onTap: () => onSelected(c),
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: Color(c),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: c == selected
+                            ? scheme.onSurface
+                            : scheme.outlineVariant,
+                        width: c == selected ? 3 : 1,
+                      ),
+                    ),
+                    child: c == selected
+                        ? const Icon(Icons.check, color: Colors.white, size: 22)
+                        : null,
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _RecitationAiNotice extends StatelessWidget {
   const _RecitationAiNotice({required this.config, this.inference});
 

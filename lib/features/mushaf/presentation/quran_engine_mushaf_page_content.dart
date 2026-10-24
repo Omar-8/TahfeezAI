@@ -70,7 +70,7 @@ class _QuranEngineMushafPageContentState
     MushafWordMark.skipped: (color: Color(0xFFE0A800), ink: true),
     MushafWordMark.wrong: (color: Color(0xFFD32F2F), ink: true),
     MushafWordMark.tashkeel: (color: Color(0xFFEF6C00), ink: true),
-    MushafWordMark.tajweed: (color: Color(0xFF8E24AA), ink: true),
+    MushafWordMark.tajweed: (color: Color(0xFF039BE5), ink: true),
     MushafWordMark.checking: (color: Color(0xFFFFAB91), ink: true),
     MushafWordMark.uncertain: (color: Color(0xFFFBC02D), ink: true),
   };
@@ -82,6 +82,7 @@ class _QuranEngineMushafPageContentState
     int? focus,
     Map<int, Color>? passages,
     Set<int> hidden,
+    Map<MushafWordMark, int> inks,
   })?
   _appliedHighlights;
 
@@ -107,6 +108,15 @@ class _QuranEngineMushafPageContentState
     if (page == null) return;
     final refs = page.wordRefs;
     final marks = _appliedOverlay?.$2 ?? const <int, MushafWordMark>{};
+    // Colours the reader chose for some marks (Hifz settings).
+    final inks =
+        ref.read(mushafWordOverlayProvider)?.inks ??
+        const <MushafWordMark, int>{};
+    Color colorOf(MushafWordMark mark) {
+      final ink = inks[mark];
+      return ink != null ? Color(ink) : _markStyles[mark]!.color;
+    }
+
     final focusId = _pressedAyah ?? ref.read(mushafFocusAyahProvider)?.ayahId;
     final focus = focusId != null && refs.any((w) => w.ayahId == focusId)
         ? focusId
@@ -129,6 +139,7 @@ class _QuranEngineMushafPageContentState
         applied.focus == focus &&
         identical(applied.passages, passages) &&
         mapEquals(applied.marks, marks) &&
+        mapEquals(applied.inks, inks) &&
         setEquals(applied.hidden, hidden)) {
       return;
     }
@@ -152,7 +163,7 @@ class _QuranEngineMushafPageContentState
       final mark = marks[i];
       final ayah = refs[i].ayahId;
       if (mark != null && !_isInk(mark)) {
-        highlights.add((word: i, color: _markStyles[mark]!.color, ink: false));
+        highlights.add((word: i, color: colorOf(mark), ink: false));
       } else if (passages != null && ayah != focus && !hidden.contains(i)) {
         final tint = passages[ayah];
         if (tint != null) {
@@ -175,7 +186,7 @@ class _QuranEngineMushafPageContentState
         }
       }
       if (mark != null && _isInk(mark)) {
-        highlights.add((word: i, color: _markStyles[mark]!.color, ink: true));
+        highlights.add((word: i, color: colorOf(mark), ink: true));
       }
     }
     for (final MapEntry(key: ayah, value: words) in tintedWords.entries) {
@@ -190,6 +201,7 @@ class _QuranEngineMushafPageContentState
       focus: focus,
       passages: passages,
       hidden: hidden,
+      inks: inks,
     );
   }
 

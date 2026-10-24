@@ -184,6 +184,7 @@ REAL_AUGMENT = False   # --real-phone-augment: real phone clips augmented anyway
 # --ctc-scale PREFIX=W,...: those shards' CTC weighed W (G25: TLOG's transcripts are inferred
 # from its file names and a user may have said a word wrong — a weak CTC; the KL leads).
 CTC_SCALE = []
+HIDDEN_REAL = False    # --hidden-real-only: the teacher's layers held on real phone clips only
 # --guide: a second teacher (an earlier student, e.g. v3.5, gentle with amateurs where the
 # teachers are not) for the shards GUIDE_PRE ([(prefix, weight)], the longest prefix
 # matching), its KL weighed against the teachers' by that weight.
@@ -843,6 +844,10 @@ def losses(teacher, student, fe, items, T, ctc_w, aug=0.0, coded=None, layers=No
             xs = x if STUDENT_CAUSAL is None else featurize(fe, items, STUDENT_CAUSAL)[0]
         smask, starts, cropped = mask, None, None
     hid = layers is not None
+    # --hidden-real-only: layers held on the real phone clips (--real-phone) alone, not on
+    # learners' clips, whose teacher layers over-flag (G26: amateurs' correct words 3.8 -> 5.9%).
+    hw = (torch.tensor([float(getattr(t, 'real', False)) for _, t in items], device=DEV)[:, None]
+          if hid and HIDDEN_REAL else None)
     with torch.no_grad():
         to = teacher.model(input_features=x.to(teacher.model.dtype), attention_mask=mask,
                            output_hidden_states=hid, return_dict=True)
@@ -854,11 +859,11 @@ def losses(teacher, student, fe, items, T, ctc_w, aug=0.0, coded=None, layers=No
     sl = sl.float()
     loss_hid = torch.zeros((), device=sl.device)
     if hid and starts is None:
-        hm = mask.float()
+        hm = mask.float() if hw is None else mask.float() * hw
         for i, k in enumerate(layers):
             cos = F.cosine_similarity(so.hidden_states[i + 1].float(),
                                       to.hidden_states[k + 1].float(), dim=-1)
-            loss_hid = loss_hid + ((1 - cos) * hm).sum() / hm.sum()
+            loss_hid = loss_hid + ((1 - cos) * hm).sum() / hm.sum().clamp_min(1)
         loss_hid = loss_hid / len(layers)
     elif hid:
         # Cropped views: student feature frame j (20 ms, before the adapter) is the
@@ -869,6 +874,8 @@ def losses(teacher, student, fe, items, T, ctc_w, aug=0.0, coded=None, layers=No
         idx2 = torch.arange(ns, device=sl.device)[None, :] + 2 * torch.tensor(starts, device=sl.device)[:, None]
         ok2 = idx2 < mask.sum(1)[:, None]
         hm = (smask[:, :ns].bool() & ok2).float()
+        if hw is not None:
+            hm = hm * hw
         g = idx2.clamp(max=mask.shape[1] - 1)
         for i, k in enumerate(layers):
             th = to.hidden_states[k + 1].float()
@@ -1068,7 +1075,7 @@ def train(a):
         print(f'resumed at step {step}')
     json.dump(dict(vars(a)), open(os.path.join(a.out, 'run.json'), 'w'), indent=1)
     val = clips(os.path.join(a.data, 'val.npz'))
-    global CTC_SCALE, MARGIN_PRE, MARGIN_W, REAL_PHONE, REAL_AUGMENT, CHANNELS, CHANNEL_SHARE, CHANNEL_SNR, PITCH, REPEAT, TEMPO, EXTRA, HARD_W, FOCUS_W, VOWEL_W, TRUST, TRUST_KL, TRUST_CTC
+    global HIDDEN_REAL, CTC_SCALE, MARGIN_PRE, MARGIN_W, REAL_PHONE, REAL_AUGMENT, CHANNELS, CHANNEL_SHARE, CHANNEL_SNR, PITCH, REPEAT, TEMPO, EXTRA, HARD_W, FOCUS_W, VOWEL_W, TRUST, TRUST_KL, TRUST_CTC
     global GUIDE, GUIDE_PRE
     if a.guide:
         path, pre, gw = a.guide.split(':')
@@ -1099,6 +1106,7 @@ def train(a):
     MARGIN_PRE, MARGIN_W = [q for q in a.margin_shards.split('+') if q], a.margin_weight
     CTC_SCALE = [(q.split('=')[0], float(q.split('=')[1])) for q in a.ctc_scale.split(',') if q]
     REAL_AUGMENT = a.real_phone_augment
+    HIDDEN_REAL = a.hidden_real_only
     if a.channels:
         from phone_channels import Bank
         CHANNELS, CHANNEL_SHARE = Bank(a.channels), a.channel_share
@@ -1243,6 +1251,8 @@ def main():
                    help='extra KL weight (up to this) on frames the student gets most wrong')
     p.add_argument('--tempo', type=float, default=0.0,
                    help='share of clips resampled to 0.88-1.12x speed (teacher and student)')
+    p.add_argument('--hidden-real-only', action='store_true',
+                   help="--hidden on the --real-phone shards' clips only")
     p.add_argument('--real-phone', default='',
                    help='shard prefixes (a+b) of real phone recordings: never augmented')
     p.add_argument('--train-top', type=int, default=0,

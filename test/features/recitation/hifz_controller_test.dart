@@ -489,6 +489,37 @@ void main() {
     );
   });
 
+  test(
+    'mistake colours: orange and light blue until chosen, then as saved',
+    () {
+      const defaults = HifzSettings();
+      expect(defaults.pronunciationColor, 0xFFEF6C00);
+      expect(defaults.tajweedColor, 0xFF039BE5);
+      // Orange keeps the page's own peach for a mistake still being checked.
+      expect(defaults.inks.containsKey(MushafWordMark.checking), isFalse);
+      final chosen = defaults.copyWith(
+        pronunciationColor: HifzSettings.pronunciationColors[4],
+        tajweedColor: HifzSettings.tajweedColors[3],
+      );
+      final restored = HifzSettings.fromJson(chosen.toJson());
+      expect(restored.pronunciationColor, HifzSettings.pronunciationColors[4]);
+      expect(restored.tajweedColor, HifzSettings.tajweedColors[3]);
+      expect(restored.inks, {
+        MushafWordMark.tashkeel: 0xFF00897B,
+        MushafWordMark.tajweed: 0xFF8E24AA,
+        // Teal lightened 55% toward white.
+        MushafWordMark.checking: 0xFF8CCAC4,
+      });
+      // A colour no longer offered (or none saved): the default.
+      final other = HifzSettings.fromJson({
+        'pronunciationColor': 0xFF123456,
+        'tajweedColor': 'blue',
+      });
+      expect(other.pronunciationColor, HifzSettings.defaultPronunciationColor);
+      expect(other.tajweedColor, HifzSettings.defaultTajweedColor);
+    },
+  );
+
   test('strictness shifts every threshold together, tajweed too', () {
     const base = AcousticThresholds(
       error: 3,

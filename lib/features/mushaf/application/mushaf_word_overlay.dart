@@ -55,7 +55,12 @@ class MushafWordOverlay {
     this.showBefore = false,
     this.heard = const {},
     this.corrected = const {},
+    this.inks = const {},
   });
+
+  /// Marks drawn in a colour the reader chose (ARGB) instead of the page's
+  /// own: a pronunciation and a tajweed mistake (Hifz settings).
+  final Map<MushafWordMark, int> inks;
 
   /// For a word marked wrong: what was heard in its place (phonetic).
   final Map<WordRef, String> heard;
@@ -99,7 +104,8 @@ class MushafWordOverlay {
       mapEquals(other.heard, heard) &&
       setEquals(other.corrected, corrected) &&
       setEquals(other.revealed, revealed) &&
-      mapEquals(other.marks, marks);
+      mapEquals(other.marks, marks) &&
+      mapEquals(other.inks, inks);
 
   @override
   int get hashCode => Object.hash(first, last, revealed.length, marks.length);

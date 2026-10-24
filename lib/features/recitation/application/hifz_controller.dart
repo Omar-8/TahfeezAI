@@ -75,7 +75,56 @@ class HifzSettings {
     this.sajdahReminder = true,
     this.strictness = RecitationStrictness.balanced,
     this.tajweedAlert = MistakeAlert.vibrate,
+    this.pronunciationColor = defaultPronunciationColor,
+    this.tajweedColor = defaultTajweedColor,
   });
+
+  /// The colours offered for a word with a pronunciation mistake (a letter
+  /// or vowel) and for one whose only mistakes are tajweed, as ARGB — none
+  /// of them green, yellow or red, which mean correct, skipped and wrong.
+  static const pronunciationColors = [
+    defaultPronunciationColor,
+    0xFFD81B60, // pink
+    0xFF8E24AA, // purple
+    0xFF6D4C41, // brown
+    0xFF00897B, // teal
+  ];
+  static const tajweedColors = [
+    defaultTajweedColor,
+    0xFF3949AB, // indigo
+    0xFF00897B, // teal
+    0xFF8E24AA, // purple
+    0xFFD81B60, // pink
+  ];
+  static const defaultPronunciationColor = 0xFFEF6C00; // orange
+  static const defaultTajweedColor = 0xFF039BE5; // light blue
+
+  /// The ink of a word with a pronunciation mistake: one of
+  /// [pronunciationColors].
+  final int pronunciationColor;
+
+  /// The ink of a word whose only mistakes are tajweed: one of
+  /// [tajweedColors].
+  final int tajweedColor;
+
+  /// The page's inks for these colours: the chosen two and, with a
+  /// pronunciation colour other than orange, a likely mistake still being
+  /// checked in a lighter shade of it (orange's own is the page's peach).
+  Map<MushafWordMark, int> get inks => {
+    MushafWordMark.tashkeel: pronunciationColor,
+    MushafWordMark.tajweed: tajweedColor,
+    if (pronunciationColor != defaultPronunciationColor)
+      MushafWordMark.checking: _lighter(pronunciationColor),
+  };
+
+  static int _lighter(int argb) {
+    int channel(int shift) {
+      final c = (argb >> shift) & 0xFF;
+      return (c + (255 - c) * 0.55).round() << shift;
+    }
+
+    return 0xFF000000 | channel(16) | channel(8) | channel(0);
+  }
 
   static const allTajweedRules = {
     TajweedRule.ikhfa,
@@ -130,6 +179,8 @@ class HifzSettings {
     bool? sajdahReminder,
     RecitationStrictness? strictness,
     MistakeAlert? tajweedAlert,
+    int? pronunciationColor,
+    int? tajweedColor,
   }) => HifzSettings(
     strict: strict ?? this.strict,
     highlightCurrent: highlightCurrent ?? this.highlightCurrent,
@@ -141,6 +192,8 @@ class HifzSettings {
     sajdahReminder: sajdahReminder ?? this.sajdahReminder,
     strictness: strictness ?? this.strictness,
     tajweedAlert: tajweedAlert ?? this.tajweedAlert,
+    pronunciationColor: pronunciationColor ?? this.pronunciationColor,
+    tajweedColor: tajweedColor ?? this.tajweedColor,
   );
 
   Map<String, Object> toJson() => {
@@ -154,6 +207,8 @@ class HifzSettings {
     'sajdahReminder': sajdahReminder,
     'strictness': strictness.name,
     'tajweedAlert': tajweedAlert.name,
+    'pronunciationColor': pronunciationColor,
+    'tajweedColor': tajweedColor,
   };
 
   static HifzSettings fromJson(Object? json) {
@@ -185,6 +240,14 @@ class HifzSettings {
       // (Saved before the tajweed alert: as the mistake alert.)
       tajweedAlert:
           MistakeAlert.values.asNameMap()[json['tajweedAlert']] ?? alert,
+      // Only a colour still offered.
+      pronunciationColor:
+          pronunciationColors.contains(json['pronunciationColor'])
+          ? json['pronunciationColor'] as int
+          : defaultPronunciationColor,
+      tajweedColor: tajweedColors.contains(json['tajweedColor'])
+          ? json['tajweedColor'] as int
+          : defaultTajweedColor,
     );
   }
 }
@@ -686,6 +749,7 @@ class HifzController extends Notifier<HifzState> {
             showBefore: _showBefore,
             heard: Map.of(_heardAt),
             corrected: Set.of(_correctedAt),
+            inks: settings.inks,
           ),
         );
   }
@@ -756,6 +820,7 @@ class HifzController extends Notifier<HifzState> {
             followHideMode: true,
             heard: Map.of(_heardAt),
             corrected: Set.of(_correctedAt),
+            inks: ref.read(hifzSettingsProvider).inks,
           ),
         );
   }

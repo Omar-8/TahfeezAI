@@ -738,7 +738,7 @@ class _AyahBlock extends ConsumerWidget {
     MushafWordMark.skipped: (color: Color(0xFFE0A800), ink: true),
     MushafWordMark.wrong: (color: Color(0xFFD32F2F), ink: true),
     MushafWordMark.tashkeel: (color: Color(0xFFEF6C00), ink: true),
-    MushafWordMark.tajweed: (color: Color(0xFF8E24AA), ink: true),
+    MushafWordMark.tajweed: (color: Color(0xFF039BE5), ink: true),
     MushafWordMark.checking: (color: Color(0xFFFFAB91), ink: true),
     MushafWordMark.uncertain: (color: Color(0xFFFBC02D), ink: true),
   };
@@ -752,6 +752,18 @@ class _AyahBlock extends ConsumerWidget {
         : const <int, String>{};
     final focused =
         ref.watch(mushafFocusAyahProvider.select((f) => f?.ayahId)) == ayahId;
+    // Colours the reader chose for some marks (Hifz settings).
+    final inks =
+        ref.watch(mushafWordOverlayProvider.select((o) => o?.inks)) ??
+        const <MushafWordMark, int>{};
+    ({Color color, bool ink})? styleOf(MushafWordMark? mark) {
+      final style = _markStyles[mark];
+      final ink = inks[mark];
+      return style == null || ink == null
+          ? style
+          : (color: Color(ink), ink: style.ink);
+    }
+
     final theme = Theme.of(context);
     final anyHidden = hidden.contains(true);
     ref.watch(bookmarksProvider);
@@ -863,7 +875,7 @@ class _AyahBlock extends ConsumerWidget {
                       text: textOf(k),
                       meaning: meanings[words[k].wordIndex],
                       hidden: hidden[k],
-                      style: _markStyles[marks[k]],
+                      style: styleOf(marks[k]),
                       colors: colors,
                       fontFamily: view.quranFont.family,
                       onTap: hidden[k]

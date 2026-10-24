@@ -471,6 +471,35 @@ void main() {
     );
   });
 
+  testWidgets('mistake colours are chosen in the Hifz settings', (
+    tester,
+  ) async {
+    await tester.pumpWidget(app());
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Hifz settings'));
+    await tester.pumpAndSettle();
+    final container = ProviderScope.containerOf(
+      tester.element(find.text('Pronunciation mistake colour')),
+    );
+    expect(
+      container.read(hifzSettingsProvider).tajweedColor,
+      HifzSettings.defaultTajweedColor,
+    );
+    await tester.ensureVisible(
+      find.byKey(const ValueKey('hifz-pronunciation-colour-2')),
+    );
+    await tester.tap(find.byKey(const ValueKey('hifz-pronunciation-colour-2')));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(
+      find.byKey(const ValueKey('hifz-tajweed-colour-1')),
+    );
+    await tester.tap(find.byKey(const ValueKey('hifz-tajweed-colour-1')));
+    await tester.pumpAndSettle();
+    final settings = container.read(hifzSettingsProvider);
+    expect(settings.pronunciationColor, HifzSettings.pronunciationColors[2]);
+    expect(settings.tajweedColor, HifzSettings.tajweedColors[1]);
+  });
+
   testWidgets('Hifz status strip shows progress and a pending mistake', (
     tester,
   ) async {

@@ -4,6 +4,8 @@
 # on the simulated phone bank; G25 copied the teacher's answers on TLOG but at matched mistake
 # detection was no better than v3.7 at threshold 3.4. G26 asks whether the teacher's inner
 # picture of real phone audio carries what its answers do not.
+#   G26b: HIDDEN_REAL=1 NAME=G26b — layers held on the TLOG clips only (--hidden-real-only):
+#   G26's amateurs' correct words flagged 3.8 -> 5.9%, likely the teacher's layers on RetaSy.
 #   tmux new -d -s round35 'bash gpu/round35.sh 2>&1 | tee -a round.out'
 set -u
 cd "$(dirname "$0")/.."
@@ -32,7 +34,7 @@ log "$name start from v3.7 ($(ls data_mix/shard_*.npz | wc -l) shards; random TL
 for ma in 44 36 30 24 20 16; do       # 24 teacher layers kept: smaller batches
   PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
   $PY distill_student.py train d6h data_mix runs/$name --max-audio $ma --seed 351 \
-    --init init/v37/student.pt --steps $STEPS --lr 1e-5 --keep-ema --hidden 0.5 \
+    --init init/v37/student.pt --steps $STEPS --lr 1e-5 --keep-ema --hidden 0.5 $([ "${HIDDEN_REAL:-0}" = 1 ] && echo --hidden-real-only) \
     --augment 0.6 --phone-extra --pitch 0.25 --tempo 0.3 --hard 0.75 --focus 0.5 --crop 0.5 \
     --repeat shard_95=16,shard_97=2,shard_98=2,shard_99=2,shard_70=$R70,shard_71=$R71 \
     --real-phone shard_70+shard_71 --ctc-scale shard_70=0.3,shard_71=0.3 \

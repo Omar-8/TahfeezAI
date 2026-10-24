@@ -328,7 +328,7 @@
   "recHighlight": "Highlight the next word",
   "recHighlightSub": "Mark where to continue reciting",
   "recColour": "Colour recited words",
-  "recColourSub": "Correct green, skipped yellow, wrong red, a pronunciation mistake orange, a tajweed mistake purple",
+  "recColourSub": "Correct green, skipped yellow, wrong red; pronunciation and tajweed mistakes in the colours chosen below",
   "recShowMistakes": "Show mistakes",
   "recShowMistakesSub": "Mark wrong, skipped and mispronounced words (off: only correct words are coloured)",
   "recRangeDefault": "Range: from the visible page to the end of the surah",
@@ -493,7 +493,17 @@
   "recStrictnessBalanced": "Balanced",
   "recStrictnessStrict": "Precise",
   "recTajweedAlert": "Tajweed mistake alert",
-  "@recStrictness": {"description": "Hifz setting: one shift for every pronunciation-check threshold (letters, vowels and, with tajweed, its rules)."},
+  "recPronunciationColour": "Pronunciation mistake colour",
+  "recTajweedColour": "Tajweed mistake colour",
+  "@recPronunciationColour": {
+    "description": "Hifz settings: the colour of a word with a letter or vowel mistake (a row of colour swatches)."
+  },
+  "@recTajweedColour": {
+    "description": "Hifz settings: the colour of a word whose only mistakes are tajweed (a row of colour swatches)."
+  },
+  "@recStrictness": {
+    "description": "Hifz setting: one shift for every pronunciation-check threshold (letters, vowels and, with tajweed, its rules)."
+  },
   "ruleIkhfa": "Ikhfa (hidden noon)",
   "ruleIqlab": "Iqlab (noon before ب)",
   "ruleIkhfaShafawi": "Ikhfa shafawi (meem before ب)",
