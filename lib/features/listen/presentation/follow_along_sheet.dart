@@ -22,6 +22,8 @@ import '../application/listen_options.dart';
 import '../application/quran_audio_player.dart';
 import '../application/reciter_controller.dart';
 import '../domain/quran_audio_sources.dart';
+import '../../recitation/presentation/recitation_controls.dart'
+    show showRecitationIntro;
 import 'listen_sheet.dart';
 
 /// Follow along's menu, laid out like the Listen menu: the reciter, the
@@ -96,6 +98,13 @@ class _FollowAlongSheetState extends ConsumerState<_FollowAlongSheet> {
   Future<void> _start() async {
     final l10n = AppLocalizations.of(context);
     final messenger = ScaffoldMessenger.of(context);
+    // How the check works, over this sheet (the first time, and in the
+    // guide): closed, back to the choices here.
+    if (!await showRecitationIntro(context, RecitationIntroMode.follow) ||
+        !mounted) {
+      return;
+    }
+    if (!context.mounted) return;
     Navigator.of(context).pop();
     final started = await ref
         .read(followAlongControllerProvider.notifier)

@@ -22,6 +22,7 @@ import '../application/mushaf_recitation_target.dart';
 import '../application/quran_match_controller.dart'
     show quranWordCorpusProvider;
 import '../application/recitation_session_controller.dart';
+import 'recitation_controls.dart' show showRecitationIntro;
 
 /// Loop recitation's settings: how to repeat (the whole range, or each
 /// ayah), the range, and how many times — then starts reciting.
@@ -118,9 +119,15 @@ class _RecitationLoopSheetState extends ConsumerState<_RecitationLoopSheet> {
     });
   }
 
-  void _start() {
+  Future<void> _start() async {
     final location = ref.read(mushafRecitationTargetProvider)?.location;
     if (location == null) return;
+    // How the check works, over this sheet (the first time, and in the
+    // guide): closed, back to the choices here.
+    if (!await showRecitationIntro(context, RecitationIntroMode.loop) ||
+        !mounted) {
+      return;
+    }
     ref.read(hifzControllerProvider.notifier).setLoop((
       from: _from!,
       to: _to!,

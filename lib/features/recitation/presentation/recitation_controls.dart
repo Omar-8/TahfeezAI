@@ -584,9 +584,12 @@ class _ModeButtons extends ConsumerWidget {
         onPressed: location == null || starting
             ? null
             : () async {
-                // The first time: how the check works, before it listens.
-                if (!ref.read(hifzSettingsProvider).introSeen &&
-                    !await showRecitationIntro(context)) {
+                // How the check works, before it listens (the first time,
+                // and in the guide).
+                if (!await showRecitationIntro(
+                  context,
+                  RecitationIntroMode.recite,
+                )) {
                   return;
                 }
                 await controller.start(startLocation: location);
@@ -1471,40 +1474,44 @@ class HifzStatusStrip extends StatelessWidget {
 }
 
 /// Hifz feedback settings and the memorization range.
-/// How the recitation check works, shown before the first recitation:
-/// what the colours mean, that the check is still learning, and that the
-/// voice stays on the phone. Marked seen however it is closed. True: start
-/// reciting; false: not now (or the Hifz settings opened instead).
-Future<bool> showRecitationIntro(BuildContext context) async {
+/// How the recitation check works, before [mode]'s first recitation — and
+/// each time in the guide, whose last step it is for that mode: what to
+/// do, what the colours mean, that the check is still learning, and that
+/// the voice stays on the phone. Hifz settings open over it. True: start;
+/// false: closed (in the guide, back to the step asking for the button).
+Future<bool> showRecitationIntro(
+  BuildContext context,
+  RecitationIntroMode mode,
+) async {
   final container = ProviderScope.containerOf(context, listen: false);
-  // In the guide's Recite tour: this says what its last step ("Recite now")
-  // would — that card left out, not shown over this one.
-  final guide = container.read(guideProvider);
-  final inTour = guide?.tour == GuideTour.recite;
-  if (inTour) container.read(guideQuietProvider.notifier).set(true);
-  final choice = await showModalBottomSheet<bool>(
+  final guided = container.read(guideProvider) != null;
+  if (!guided &&
+      container.read(hifzSettingsProvider).introsSeen.contains(mode)) {
+    return true;
+  }
+  final start = await showModalBottomSheet<bool>(
     context: context,
     showDragHandle: true,
     isScrollControlled: true,
     useSafeArea: true,
     useRootNavigator: true,
     constraints: sheetBelowAppBar(context),
-    builder: (context) => const _RecitationIntroSheet(),
+    builder: (context) => _RecitationIntroSheet(mode),
   );
-  final hifz = container.read(hifzSettingsProvider.notifier);
-  hifz.update(container.read(hifzSettingsProvider).copyWith(introSeen: true));
-  if (choice != true && inTour) {
-    // Not reciting after all: the tour back at "tap Recite".
-    container.read(guideProvider.notifier).back();
+  final settings = container.read(hifzSettingsProvider);
+  container
+      .read(hifzSettingsProvider.notifier)
+      .update(settings.copyWith(introsSeen: {...settings.introsSeen, mode}));
+  if (start != true && guided) {
+    container.read(guideProvider.notifier).notStarted();
   }
-  if (choice == false && context.mounted) {
-    await showHifzSettingsSheet(context);
-  }
-  return choice == true;
+  return start == true;
 }
 
 class _RecitationIntroSheet extends ConsumerWidget {
-  const _RecitationIntroSheet();
+  const _RecitationIntroSheet(this.mode);
+
+  final RecitationIntroMode mode;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -1522,8 +1529,8 @@ class _RecitationIntroSheet extends ConsumerWidget {
         ],
       ),
     );
-    // The colours, one per row: a dot under the heading's icon, its
-    // meaning beside it.
+    // The colours, one per row: each dot under the icons, its meaning in
+    // line with the text.
     Widget colour(int argb, String meaning) => Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -1547,10 +1554,23 @@ class _RecitationIntroSheet extends ConsumerWidget {
         children: [
           Text(l10n.recIntroTitle, style: theme.textTheme.titleLarge),
           const SizedBox(height: 12),
-          point(const Icon(Icons.mic_rounded), l10n.recIntroListen),
-          point(const Icon(Icons.stop_circle_outlined), l10n.recIntroStop),
+          // What to do, in this mode.
+          ...switch (mode) {
+            RecitationIntroMode.recite => [
+              point(const Icon(Icons.mic_rounded), l10n.recIntroListen),
+              point(const Icon(Icons.stop_circle_outlined), l10n.recIntroStop),
+            ],
+            RecitationIntroMode.loop => [
+              point(const Icon(Icons.repeat_rounded), l10n.guideLoopRecite),
+            ],
+            RecitationIntroMode.follow => [
+              point(
+                const Icon(Icons.record_voice_over_outlined),
+                l10n.guideFollowPractice,
+              ),
+            ],
+          },
           point(const Icon(Icons.palette_outlined), l10n.recIntroColours),
-          // Each dot under the icons, its meaning in line with the text.
           Padding(
             key: const ValueKey('recitation-intro-colours'),
             padding: const EdgeInsets.only(bottom: 8),
@@ -1576,9 +1596,10 @@ class _RecitationIntroSheet extends ConsumerWidget {
             child: Text(l10n.recIntroStart),
           ),
           const SizedBox(height: 8),
+          // Over this sheet, back to it when closed.
           OutlinedButton(
             key: const ValueKey('recitation-intro-settings'),
-            onPressed: () => Navigator.of(context).pop(false),
+            onPressed: () => showHifzSettingsSheet(context),
             child: Text(l10n.recIntroSettings),
           ),
         ],

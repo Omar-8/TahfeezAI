@@ -791,7 +791,32 @@ void main() {
     final container = ProviderScope.containerOf(
       tester.element(find.byTooltip('Listening…')),
     );
-    expect(container.read(hifzSettingsProvider).introSeen, isTrue);
+    expect(container.read(hifzSettingsProvider).introsSeen, {
+      RecitationIntroMode.recite,
+    });
+  });
+
+  testWidgets('Hifz settings open over the explanation, which stays', (
+    tester,
+  ) async {
+    await tester.runAsync(
+      () => SharedPreferencesAsync().remove(HifzSettingsController.storageKey),
+    );
+    await tester.pumpWidget(app(introSeen: false));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Start recitation'));
+    await tester.pumpAndSettle();
+    final settings = find.byKey(const ValueKey('recitation-intro-settings'));
+    await tester.ensureVisible(settings);
+    await tester.pumpAndSettle();
+    await tester.tap(settings);
+    await tester.pumpAndSettle();
+    expect(find.text('Pronunciation strictness'), findsOneWidget);
+    // Closed: back to the explanation, still there.
+    Navigator.of(tester.element(find.text('Pronunciation strictness'))).pop();
+    await tester.pumpAndSettle();
+    expect(find.text('Pronunciation strictness'), findsNothing);
+    expect(find.byKey(const ValueKey('recitation-intro')), findsOneWidget);
   });
 
   testWidgets('permission denied shows a message and no session', (
@@ -851,5 +876,6 @@ class _WebPlatform implements PlatformCapabilities {
 
 class _IntroSeen extends HifzSettingsController {
   @override
-  HifzSettings build() => const HifzSettings(introSeen: true);
+  HifzSettings build() =>
+      HifzSettings(introsSeen: RecitationIntroMode.values.toSet());
 }

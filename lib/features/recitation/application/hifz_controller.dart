@@ -62,6 +62,9 @@ enum MistakeAlert {
 /// together ([AcousticVerificationController.withStrictness]).
 enum RecitationStrictness { lenient, balanced, strict }
 
+/// The recitation modes with an explanation before their first run.
+enum RecitationIntroMode { recite, loop, follow }
+
 /// Configurable Hifz feedback.
 class HifzSettings {
   const HifzSettings({
@@ -77,11 +80,12 @@ class HifzSettings {
     this.tajweedAlert = MistakeAlert.vibrate,
     this.pronunciationColor = defaultPronunciationColor,
     this.tajweedColor = defaultTajweedColor,
-    this.introSeen = false,
+    this.introsSeen = const {},
   });
 
-  /// The first recitation's explanation (how the check works) was shown.
-  final bool introSeen;
+  /// The modes whose explanation (how the check works) was shown before
+  /// their first recitation.
+  final Set<RecitationIntroMode> introsSeen;
 
   /// The colours offered for a word with a pronunciation mistake (a letter
   /// or vowel) and for one whose only mistakes are tajweed, as ARGB — none
@@ -196,7 +200,7 @@ class HifzSettings {
     MistakeAlert? tajweedAlert,
     int? pronunciationColor,
     int? tajweedColor,
-    bool? introSeen,
+    Set<RecitationIntroMode>? introsSeen,
   }) => HifzSettings(
     strict: strict ?? this.strict,
     highlightCurrent: highlightCurrent ?? this.highlightCurrent,
@@ -210,7 +214,7 @@ class HifzSettings {
     tajweedAlert: tajweedAlert ?? this.tajweedAlert,
     pronunciationColor: pronunciationColor ?? this.pronunciationColor,
     tajweedColor: tajweedColor ?? this.tajweedColor,
-    introSeen: introSeen ?? this.introSeen,
+    introsSeen: introsSeen ?? this.introsSeen,
   );
 
   Map<String, Object> toJson() => {
@@ -229,7 +233,7 @@ class HifzSettings {
     'tajweedAlert': tajweedAlert.name,
     'pronunciationColor': pronunciationColor,
     'tajweedColor': tajweedColor,
-    'introSeen': introSeen,
+    'introsSeen': [for (final m in introsSeen) m.name],
   };
 
   static HifzSettings fromJson(Object? json) {
@@ -276,7 +280,13 @@ class HifzSettings {
       tajweedColor: tajweedColors.contains(json['tajweedColor'])
           ? json['tajweedColor'] as int
           : defaultTajweedColor,
-      introSeen: read('introSeen', false),
+      introsSeen: {
+        if (json['introsSeen'] is List)
+          for (final n in json['introsSeen'] as List)
+            ?RecitationIntroMode.values.asNameMap()[n],
+        // (Saved when only Recite had one.)
+        if (read('introSeen', false)) RecitationIntroMode.recite,
+      },
     );
   }
 }
