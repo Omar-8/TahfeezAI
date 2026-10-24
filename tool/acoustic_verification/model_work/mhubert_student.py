@@ -73,6 +73,29 @@ def train(a):
     # waveform; their inferred transcripts only a weak CTC (--ctc-scale).
     ds.REAL_PHONE[:] = [q for q in a.real_phone.split('+') if q]
     ds.CTC_SCALE[:] = [(q.split('=')[0], float(q.split('=')[1])) for q in a.ctc_scale.split(',') if q]
+    # v3.7's recipe (M3): more phone conditions, pitch and tempo; short vowels, hard sounds and
+    # the frames furthest from the teacher weigh more (distill_student.py --vowel / --hard /
+    # --focus); v3.5 a second teacher on amateurs' clips (--guide path:prefix:weight).
+    ds.PITCH, ds.TEMPO, ds.EXTRA = a.pitch, a.tempo, a.phone_extra
+    guide, guide_pre = None, []
+    if a.guide:
+        import streaming
+        path, pre, gw = a.guide.split(':')
+        guide = ds.make_student(ds._base(teacher.model), 'd6').to(ds.DEV).eval()
+        guide.load_state_dict(torch.load(path, map_location=ds.DEV))
+        for p_ in guide.parameters():
+            p_.requires_grad_(False)
+        ds.STUDENT_CAUSAL = streaming.prior(os.path.join(HERE, 'fbank_prior.json'), ds.DEV)
+        print('guide streaming:', streaming.enable(guide, *streaming.parse('0.96,5.12')), 'attention layers')
+        guide_pre = [(q, float(gw)) for q in pre.split('+')]
+        # batches() tags those shards' clips with their weight ([guided]).
+        ds.GUIDE, ds.GUIDE_PRE[:] = guide, guide_pre
+    vowel = torch.zeros(43, device=ds.DEV)
+    for c in ds.VOWEL_SYMBOLS:
+        vowel[ds.VOCAB.index(c)] = 1.0
+    hard = torch.zeros(43, device=ds.DEV)
+    for c in ds.HARD_SYMBOLS:
+        hard[ds.VOCAB.index(c)] = 1.0
     os.makedirs(a.out, exist_ok=True)
     ckpt = os.path.join(a.out, 'checkpoint.pt')
     step = 0
@@ -99,8 +122,29 @@ def train(a):
         n = min(tl.shape[1], sl.shape[1])
         fm = mask[:, ::2][:, :n].float()
         kl = F.kl_div(sl[:, :n], tl[:, :n], log_target=True, reduction='none').sum(-1)
+        g = torch.tensor([getattr(t, 'guided', 0.0) for _, t in items], device=kl.device)[:, None]
+        if (g > 0).any():
+            # The second teacher hears what the student hears, streaming as in the app.
+            xs, sm = ds.featurize(fe, heard, ds.STUDENT_CAUSAL)
+            with torch.no_grad(), torch.autocast(ds.DEV, dtype=torch.bfloat16, enabled=ds.DEV == 'cuda'):
+                gl = F.log_softmax(guide(input_features=xs, attention_mask=sm, return_dict=True)
+                                   .logits['phonemes'].float(), -1)
+            m = min(n, gl.shape[1])
+            kl_g = torch.zeros_like(kl)
+            kl_g[:, :m] = F.kl_div(sl[:, :m], gl[:, :m], log_target=True, reduction='none').sum(-1)
+            kl = (1 - g) * kl + g * kl_g
+        w = torch.ones_like(kl)
+        tp = tl[:, :n].exp()
+        if a.vowel > 0:
+            w = w + a.vowel * (tp * vowel).sum(-1).clamp(0, 1)
+        if a.hard > 0:
+            w = w + a.hard * hard[tp.argmax(-1)]
+        if a.focus > 0:
+            mean = (kl * fm).sum() / fm.sum().clamp_min(1)
+            w = w + a.focus * (kl.detach() / mean.detach().clamp_min(1e-6)).clamp(0, 3) / 3
+        w = w / ((w * fm).sum() / fm.sum().clamp_min(1))   # same overall scale
         trusted = [getattr(t, 'trusted', False) and len(t) > 0 for _, t in items]
-        w = torch.tensor([a.trust_kl if tr else 1.0 for tr in trusted], device=kl.device)[:, None]
+        w = w * torch.tensor([a.trust_kl if tr else 1.0 for tr in trusted], device=kl.device)[:, None]
         loss_kl = (kl * w * fm).sum() / fm.sum()
         keep = [j for j, (_, t) in enumerate(items) if len(t) > 0]
         loss_ctc = torch.zeros((), device=kl.device)
@@ -201,6 +245,13 @@ def main():
     t.add_argument('--real-phone', default='', help='shard prefixes (a+b) of real phone recordings')
     t.add_argument('--ctc-scale', default='', help='PREFIX=W,...: CTC weight per shard prefix')
     t.add_argument('--save-every', type=int, default=0, help='also keep student_<step>.pt')
+    t.add_argument('--vowel', type=float, default=0.0)
+    t.add_argument('--hard', type=float, default=0.0)
+    t.add_argument('--focus', type=float, default=0.0)
+    t.add_argument('--pitch', type=float, default=0.0)
+    t.add_argument('--tempo', type=float, default=0.0)
+    t.add_argument('--phone-extra', action='store_true')
+    t.add_argument('--guide', default='', help='path:prefix(+prefix):weight — a second teacher')
     b = sub.add_parser('bench')
     b.add_argument('run'); b.add_argument('tag'); b.add_argument('packs', nargs='+')
     b.add_argument('--weights', default='student.pt')

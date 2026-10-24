@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
-# Round 36 (2026-10-24): M2 — mHuBERT-147 (94M, its own pretrained ear intact;
+# Round 36 (2026-10-24): M2 / M3 — RECIPE=v37 NAME=M3: M2 with v3.7's recipe (--vowel 1 --hard
+# 0.75 --focus 0.5, more phone conditions, pitch, tempo, v3.5 a second teacher on RetaSy): M2 missed
+# learner-style mistakes (Al-Ikhlas 11.3 -> 6.6%, spliced 87.9 -> 83.9%) though its false letters
+# on phones fell 20-44%; benched at the end only (BENCH="12000").
+# M2 — mHuBERT-147 (94M, its own pretrained ear intact;
 # mhubert_student.py) distilled from ft5 with real phone audio. M1 (round 21, 2026-10-20)
 # had no real phone data and matched the cut-down students on the owner's phone (37 letter
 # flags, v3.6 40, ft5 22); since then real phone recordings were the one thing that helped
@@ -31,6 +35,8 @@ for attempt in 1 2 3 4 5; do
     --lr 5e-5 --augment 0.6 --seed 361 --save-every 4000 \
     --repeat shard_95=16,shard_97=2,shard_98=2,shard_99=2,shard_70=2,shard_71=1 \
     --trust shard_95 --real-phone shard_70+shard_71 --ctc-scale shard_70=0.3,shard_71=0.3 \
+    $([ "${RECIPE:-}" = v37 ] && echo --vowel 1 --hard 0.75 --focus 0.5 --pitch 0.25 --tempo 0.3 --phone-extra \
+        --guide init/v35s/student.pt:shard_95:0.7) \
     >> train_$name.out 2>&1
   [ -f runs/$name/student.pt ] && break
   log "$name attempt $attempt stopped: $(grep -E 'Error|error' train_$name.out | tail -n 1 | cut -c1-120)"
@@ -39,7 +45,7 @@ done
 log "$name trained: $(grep VAL runs/$name/train.log | tail -n 3 | tr '\n' ' ')"
 PACKS="tlog phone phone2 phone3 phone4 phone6 phone7 juz30h retasy quranmbh tlogdev ikhlash calib calibdeg errors sessions quranmb"
 mkdir -p artifacts/results
-for st in $(seq 4000 4000 $STEPS); do
+for st in ${BENCH:-$(seq 4000 4000 $STEPS)}; do
   w=student_$st.pt; [ -f runs/$name/$w ] || w=student.pt
   $PY mhubert_student.py bench runs/$name ${name,,}_$st $(for p in $PACKS; do [ -f artifacts/${p}_cases.json ] && echo $p; done) \
     --weights $w >> bench_$name.out 2>&1 || log "$name bench $st FAILED"
