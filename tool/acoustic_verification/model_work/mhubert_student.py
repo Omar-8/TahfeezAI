@@ -59,6 +59,10 @@ def train(a):
     teacher = ds.load_teacher()
     fe = getattr(teacher.processor, 'feature_extractor', teacher.processor)
     s = MHubertStudent().to(ds.DEV).train()
+    if a.init:
+        # M4: from M3, the second teacher added.
+        s.load_state_dict(torch.load(a.init, map_location=ds.DEV))
+        print('initialised from', a.init, flush=True)
     s.encoder.feature_extractor._freeze_parameters()
     head = [p for n, p in s.named_parameters() if n.startswith('head')]
     body = [p for n, p in s.named_parameters() if not n.startswith('head') and p.requires_grad]
@@ -251,6 +255,7 @@ def main():
     t.add_argument('--pitch', type=float, default=0.0)
     t.add_argument('--tempo', type=float, default=0.0)
     t.add_argument('--phone-extra', action='store_true')
+    t.add_argument('--init', default='', help='start from these weights (a student.pt)')
     t.add_argument('--guide', default='', help='path:prefix(+prefix):weight — a second teacher')
     b = sub.add_parser('bench')
     b.add_argument('run'); b.add_argument('tag'); b.add_argument('packs', nargs='+')

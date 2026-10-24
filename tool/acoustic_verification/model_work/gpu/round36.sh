@@ -20,6 +20,11 @@ PY=.venv/bin/python
 log() { echo "$(date -u +%H:%M) $*" | tee -a round4.log; }
 export TEACHER_WEIGHTS=teachers/teacher_ft5.pt MAX_CLIP_S=20
 unset TEACHER_SELECT
+# M4: v3.6's two teachers (ft4, the --no-nasal amateur fine-tune, with ft5; TEACHER_SELECT) — the
+# one part of v3.6's recipe M3 lacked — from M3: TEACHERS=ft4+ft5 INIT=runs/M3/student.pt.
+if [ "${TEACHERS:-}" = ft4+ft5 ]; then
+  export TEACHER_WEIGHTS=teachers/teacher_ft4.pt,teachers/teacher_ft5.pt TEACHER_SELECT=1
+fi
 [ -f data_tlog/select.json ] || { log "M2: no TLOG pools (round34.sh first)"; exit 1; }
 STEPS=${STEPS:-12000}
 rm -rf data_mix && mkdir data_mix
@@ -32,7 +37,7 @@ log "$name start (mHuBERT-147, $(ls data_mix/shard_*.npz | wc -l) shards)"
 for attempt in 1 2 3 4 5; do
   PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
   $PY mhubert_student.py train data_mix runs/$name --steps $STEPS --max-audio ${MAX_AUDIO:-100} \
-    --lr 5e-5 --augment 0.6 --seed 361 --save-every 4000 \
+    --lr ${LR:-5e-5} --augment 0.6 --seed 361 --save-every 4000 $([ -n "${INIT:-}" ] && echo --init $INIT) \
     --repeat shard_95=16,shard_97=2,shard_98=2,shard_99=2,shard_70=2,shard_71=1 \
     --trust shard_95 --real-phone shard_70+shard_71 --ctc-scale shard_70=0.3,shard_71=0.3 \
     $([ "${RECIPE:-}" = v37 ] && echo --vowel 1 --hard 0.75 --focus 0.5 --pitch 0.25 --tempo 0.3 --phone-extra \
