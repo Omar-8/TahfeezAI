@@ -112,6 +112,26 @@ void main() {
     expect(reciteTaps, 1, reason: 'nothing blocks the page');
   });
 
+  testWidgets('a quiet practice card is left out until the run is over', (
+    tester,
+  ) async {
+    await pump(tester);
+    final guide = container.read(guideProvider.notifier);
+    // On "tap Recite"; the first recitation's explanation, opened by the
+    // same tap, quiets the next step's card before the guide moves on.
+    guide.start(GuideTour.recite, guideSteps(GuideTour.recite).length - 2);
+    container.read(guideQuietProvider.notifier).set(true);
+    guide.next();
+    await tester.pumpAndSettle();
+    expect(guide.step!.practice, isTrue);
+    expect(find.byKey(const ValueKey('guide-card')), findsNothing);
+    // The run over: the next card shows again.
+    guide.next();
+    await tester.pumpAndSettle();
+    expect(container.read(guideQuietProvider), isFalse);
+    expect(find.byKey(const ValueKey('guide-card')), findsOneWidget);
+  });
+
   test('finishing a mode tour goes back to choosing a mode', () {
     final c = ProviderContainer();
     addTearDown(c.dispose);

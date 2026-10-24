@@ -1477,6 +1477,11 @@ class HifzStatusStrip extends StatelessWidget {
 /// reciting; false: not now (or the Hifz settings opened instead).
 Future<bool> showRecitationIntro(BuildContext context) async {
   final container = ProviderScope.containerOf(context, listen: false);
+  // In the guide's Recite tour: this says what its last step ("Recite now")
+  // would — that card left out, not shown over this one.
+  final guide = container.read(guideProvider);
+  final inTour = guide?.tour == GuideTour.recite;
+  if (inTour) container.read(guideQuietProvider.notifier).set(true);
   final choice = await showModalBottomSheet<bool>(
     context: context,
     showDragHandle: true,
@@ -1488,6 +1493,10 @@ Future<bool> showRecitationIntro(BuildContext context) async {
   );
   final hifz = container.read(hifzSettingsProvider.notifier);
   hifz.update(container.read(hifzSettingsProvider).copyWith(introSeen: true));
+  if (choice != true && inTour) {
+    // Not reciting after all: the tour back at "tap Recite".
+    container.read(guideProvider.notifier).back();
+  }
   if (choice == false && context.mounted) {
     await showHifzSettingsSheet(context);
   }
@@ -1513,9 +1522,22 @@ class _RecitationIntroSheet extends ConsumerWidget {
         ],
       ),
     );
-    Widget dot(int argb) => Padding(
-      padding: const EdgeInsets.only(right: 4),
-      child: CircleAvatar(radius: 6, backgroundColor: Color(argb)),
+    // The colours, one per row: a dot under the heading's icon, its
+    // meaning beside it.
+    Widget colour(int argb, String meaning) => Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 28,
+            child: Center(
+              child: CircleAvatar(radius: 7, backgroundColor: Color(argb)),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(child: Text(meaning, style: theme.textTheme.bodyLarge)),
+        ],
+      ),
     );
     return SingleChildScrollView(
       key: const ValueKey('recitation-intro'),
@@ -1526,18 +1548,24 @@ class _RecitationIntroSheet extends ConsumerWidget {
           Text(l10n.recIntroTitle, style: theme.textTheme.titleLarge),
           const SizedBox(height: 12),
           point(const Icon(Icons.mic_rounded), l10n.recIntroListen),
-          point(
-            Wrap(
-              runSpacing: 4,
+          point(const Icon(Icons.stop_circle_outlined), l10n.recIntroStop),
+          point(const Icon(Icons.palette_outlined), l10n.recIntroColours),
+          // Each dot under the icons, its meaning in line with the text.
+          Padding(
+            key: const ValueKey('recitation-intro-colours'),
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Column(
               children: [
-                dot(0xFF43A047),
-                dot(0xFFE0A800),
-                dot(0xFFD32F2F),
-                dot(settings.pronunciationColor),
-                dot(settings.tajweedColor),
+                colour(0xFF43A047, l10n.recLegendCorrect),
+                colour(0xFFE0A800, l10n.recLegendSkipped),
+                colour(0xFFD32F2F, l10n.recLegendWrong),
+                colour(
+                  settings.pronunciationColor,
+                  l10n.recLegendPronunciation,
+                ),
+                colour(settings.tajweedColor, l10n.recLegendTajweed),
               ],
             ),
-            l10n.recIntroColours,
           ),
           point(const Icon(Icons.school_outlined), l10n.recIntroLearning),
           point(const Icon(Icons.lock_outline), l10n.recIntroPrivate),

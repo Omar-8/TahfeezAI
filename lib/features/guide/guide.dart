@@ -129,6 +129,7 @@ class GuideController extends Notifier<GuideState?> {
 
   /// Starts [tour] (the overview with the ayahs shown, so the modes are).
   void start([GuideTour tour = GuideTour.overview, int index = 0]) {
+    _speak();
     if (tour == GuideTour.overview &&
         ref.read(mushafHideModeProvider).enabled) {
       ref.read(mushafHideModeProvider.notifier).toggle();
@@ -140,6 +141,9 @@ class GuideController extends Notifier<GuideState?> {
   static final _choose = guideSteps(GuideTour.overview).length - 1;
 
   void next() {
+    // (Into a practice step a quiet card stays quiet: the first
+    // recitation's explanation, opened by the same tap, says it.)
+    if (step?.practice ?? false) _speak();
     final s = state;
     if (s == null) return;
     if (s.index + 1 < length) {
@@ -172,12 +176,23 @@ class GuideController extends Notifier<GuideState?> {
   }
 
   void back() {
+    _speak();
     final s = state;
     if (s == null || s.index == 0) return;
     state = (tour: s.tour, index: s.index - 1);
   }
 
-  void close() => state = null;
+  void close() {
+    _speak();
+    state = null;
+  }
+
+  /// Any step on: its card shown again (see [guideQuietProvider]).
+  void _speak() {
+    if (ref.read(guideQuietProvider)) {
+      ref.read(guideQuietProvider.notifier).set(false);
+    }
+  }
 
   /// A [GuideTarget] was tapped: on a "tap it" step, on (or, on the
   /// overview's last step, into the mode's tour).
@@ -196,6 +211,18 @@ class GuideController extends Notifier<GuideState?> {
 final guideProvider = NotifierProvider<GuideController, GuideState?>(
   GuideController.new,
 );
+
+/// A practice step's card left out: another explanation said it already
+/// (the first recitation's, which holds the Recite tour's last step). The
+/// step still waits for the run to end; any step on shows cards again.
+class GuideQuiet extends Notifier<bool> {
+  @override
+  bool build() => false;
+
+  void set(bool quiet) => state = quiet;
+}
+
+final guideQuietProvider = NotifierProvider<GuideQuiet, bool>(GuideQuiet.new);
 
 /// The controls the guide can light, by id.
 final _targets = <String, GlobalKey>{};
@@ -375,6 +402,9 @@ class _GuideOverlayState extends ConsumerState<_GuideOverlay> {
     if (step == null) return const SizedBox.shrink();
     _listenFor(step.wait);
     final l10n = AppLocalizations.of(context);
+    if (step.practice && ref.watch(guideQuietProvider)) {
+      return const SizedBox.shrink();
+    }
     if (step.practice) {
       // The page in full view and usable; the hint at the bottom, above
       // the recitation bar, until the run is over.

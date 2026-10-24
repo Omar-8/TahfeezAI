@@ -781,6 +781,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('recitation-intro')), findsOneWidget);
     expect(find.byTooltip('Listening…'), findsNothing, reason: 'not yet');
+    await tester.ensureVisible(
+      find.byKey(const ValueKey('recitation-intro-start')),
+    );
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('recitation-intro-start')));
     await tester.pumpAndSettle();
     expect(find.byTooltip('Listening…'), findsOneWidget);
