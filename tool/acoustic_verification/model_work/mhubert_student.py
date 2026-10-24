@@ -69,6 +69,10 @@ def train(a):
         opt, lambda k: min(1, (k + 1) / warm) * 0.5 * (1 + math.cos(math.pi * min(1, k / a.steps))))
     ds.REPEAT[:] = [(p, int(t)) for p, t in (r.split('=') for r in a.repeat.split(','))] if a.repeat else []
     ds.TRUST[:] = a.trust.split(',') if a.trust else []
+    # Real phone recordings (M2: TLOG): never augmented, teacher and student the same
+    # waveform; their inferred transcripts only a weak CTC (--ctc-scale).
+    ds.REAL_PHONE[:] = [q for q in a.real_phone.split('+') if q]
+    ds.CTC_SCALE[:] = [(q.split('=')[0], float(q.split('=')[1])) for q in a.ctc_scale.split(',') if q]
     os.makedirs(a.out, exist_ok=True)
     ckpt = os.path.join(a.out, 'checkpoint.pt')
     step = 0
@@ -105,7 +109,8 @@ def train(a):
             lengths = torch.tensor([len(items[j][1]) for j in keep], device=ds.DEV)
             per = F.ctc_loss(sl[keep, :n].transpose(0, 1), targets, fm[keep].sum(1).long(), lengths,
                              blank=0, zero_infinity=True, reduction='none') / lengths.clamp_min(1)
-            cw = torch.tensor([a.trust_ctc if trusted[j] else 1.0 for j in keep], device=per.device)
+            cw = torch.tensor([(a.trust_ctc if trusted[j] else 1.0) * getattr(items[j][1], 'ctc', 1.0)
+                               for j in keep], device=per.device)
             loss_ctc = (per * cw).mean()
         loss = loss_kl + a.ctc * loss_ctc
         opt.zero_grad(set_to_none=True)
@@ -132,6 +137,8 @@ def train(a):
             torch.save({'model': s.state_dict(), 'opt': opt.state_dict(), 'sched': sched.state_dict(),
                         'step': step}, ckpt + '.tmp')
             os.replace(ckpt + '.tmp', ckpt)
+            if a.save_every and step % a.save_every == 0:
+                torch.save(s.state_dict(), os.path.join(a.out, f'student_{step}.pt'))
     torch.save(s.state_dict(), os.path.join(a.out, 'student.pt'))
     s.encoder.config.save_pretrained(a.out)
     json.dump(vars(a), open(os.path.join(a.out, 'run.json'), 'w'))
@@ -140,15 +147,17 @@ def train(a):
 def bench(a):
     """Offline frames over test packs, in bench_run.py's results format: whole clips
     (pieces of 20 s with 2 s overlap beyond that), so the Dart tools can judge them."""
+    dev = 'cuda' if torch.cuda.is_available() else 'cpu'
     s = MHubertStudent(config=a.run).eval()
-    s.load_state_dict(torch.load(os.path.join(a.run, 'student.pt'), map_location='cpu'))
+    s.load_state_dict(torch.load(os.path.join(a.run, a.weights), map_location='cpu'))
+    s.to(dev)
     torch.set_num_threads(os.cpu_count())
     piece, overlap, hop = 20 * 16000, 2 * 16000, 640
 
     def frames(w):
         def run(x):
             with torch.no_grad():
-                return s(normalise([x]))[0].numpy()
+                return s(normalise([x]).to(dev))[0].float().cpu().numpy()
         if len(w) <= piece:
             return run(w)
         parts, start = [], 0
@@ -189,8 +198,12 @@ def main():
     t.add_argument('--trust-kl', type=float, default=0.2)
     t.add_argument('--trust-ctc', type=float, default=10)
     t.add_argument('--seed', type=int, default=0)
+    t.add_argument('--real-phone', default='', help='shard prefixes (a+b) of real phone recordings')
+    t.add_argument('--ctc-scale', default='', help='PREFIX=W,...: CTC weight per shard prefix')
+    t.add_argument('--save-every', type=int, default=0, help='also keep student_<step>.pt')
     b = sub.add_parser('bench')
     b.add_argument('run'); b.add_argument('tag'); b.add_argument('packs', nargs='+')
+    b.add_argument('--weights', default='student.pt')
     a = p.parse_args()
     train(a) if a.cmd == 'train' else bench(a)
 

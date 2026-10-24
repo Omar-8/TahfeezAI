@@ -124,6 +124,11 @@ Future<void> main(List<String> arguments) async {
       words += {for (final t in expected) t.word}.difference(targets).length;
       for (final v in verdicts) {
         if (v.type == RecitationErrorType.wrongLetter) {
+          // The token's place (the verdict's may be a waqf form's copy: then
+          // judged alone, as its group but a sākin qalqala's).
+          final k = expected.indexWhere(
+            (t) => t.unit == v.token.unit && t.symbol == v.token.symbol,
+          );
           dump?.writeln(
             jsonEncode({
               'pack': pack,
@@ -131,6 +136,18 @@ Future<void> main(List<String> arguments) async {
               'exp': v.token.symbol,
               'heard': v.observed,
               'llr': v.likelihoodRatio,
+              // The threshold it passed: the letter's and its sound group's.
+              'at':
+                  th.letterError +
+                  (th
+                          .sounds[SoundGroup.of(
+                            k < 0 ? [v.token] : expected,
+                            k < 0 ? 0 : k,
+                            RecitationErrorType.wrongLetter,
+                            phoneticClassOf(v.observed!),
+                          )]
+                          ?.error ??
+                      0),
             }),
           );
         }
