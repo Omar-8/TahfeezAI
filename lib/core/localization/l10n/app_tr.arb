@@ -516,5 +516,12 @@
   "packIndonesiaMinistry": "Din İşleri Bakanlığı (Endonezya)",
   "packJunagarhi": "Muhammed Cunagarhi",
   "tafsirMuyassar": "Tefsîr-i Müyesser",
-  "tafsirMukhtasar": "Muhtasar Kur'an-ı Kerim Tefsiri"
+  "tafsirMukhtasar": "Muhtasar Kur'an-ı Kerim Tefsiri",
+  "recIntroTitle": "Okuma kontrolü nasıl çalışır",
+  "recIntroListen": "Ezberden okuyun: uygulama telefonunuzda dinler ve her kelimeyi siz söyledikçe gösterir.",
+  "recIntroColours": "Kelimeler okudukça renklenir: doğru yeşil, atlanan sarı, yanlış kırmızı — telaffuz ve tecvid hataları kendi renklerinde.",
+  "recIntroLearning": "Kontrol henüz öğreniyor: bir hatayı kaçırabilir veya doğru bir kelimeyi işaretleyebilir. Çok işaretlerse Hıfz ayarlarında Esnek'i seçin.",
+  "recIntroPrivate": "Sesiniz telefonunuzda kalır: hiçbir şey kaydedilmez veya gönderilmez.",
+  "recIntroStart": "Okumaya başla",
+  "recIntroSettings": "Hıfz ayarları"
 }

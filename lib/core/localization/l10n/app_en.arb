@@ -1010,5 +1010,15 @@
         "type": "int"
       }
     }
+  },
+  "recIntroTitle": "How recitation checking works",
+  "recIntroListen": "Recite from memory: the app listens on your phone and shows each word as you say it.",
+  "recIntroColours": "Words are coloured as you go: right in green, skipped in yellow, wrong in red — and pronunciation and tajweed mistakes in their own colours.",
+  "recIntroLearning": "The checker is still learning: it may miss a mistake or mark a correct word. If it marks too much, choose Lenient in Hifz settings.",
+  "recIntroPrivate": "Your voice stays on your phone: nothing is recorded or sent.",
+  "recIntroStart": "Start reciting",
+  "recIntroSettings": "Hifz settings",
+  "@recIntroTitle": {
+    "description": "Title of the sheet shown before the first recitation: how the recitation check works."
   }
 }

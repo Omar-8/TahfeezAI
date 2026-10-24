@@ -583,7 +583,14 @@ class _ModeButtons extends ConsumerWidget {
         short: l10n.modeRecite,
         onPressed: location == null || starting
             ? null
-            : () => controller.start(startLocation: location),
+            : () async {
+                // The first time: how the check works, before it listens.
+                if (!ref.read(hifzSettingsProvider).introSeen &&
+                    !await showRecitationIntro(context)) {
+                  return;
+                }
+                await controller.start(startLocation: location);
+              },
       ),
       if (recognition)
         (
@@ -1464,6 +1471,94 @@ class HifzStatusStrip extends StatelessWidget {
 }
 
 /// Hifz feedback settings and the memorization range.
+/// How the recitation check works, shown before the first recitation:
+/// what the colours mean, that the check is still learning, and that the
+/// voice stays on the phone. Marked seen however it is closed. True: start
+/// reciting; false: not now (or the Hifz settings opened instead).
+Future<bool> showRecitationIntro(BuildContext context) async {
+  final container = ProviderScope.containerOf(context, listen: false);
+  final choice = await showModalBottomSheet<bool>(
+    context: context,
+    showDragHandle: true,
+    isScrollControlled: true,
+    useSafeArea: true,
+    useRootNavigator: true,
+    constraints: sheetBelowAppBar(context),
+    builder: (context) => const _RecitationIntroSheet(),
+  );
+  final hifz = container.read(hifzSettingsProvider.notifier);
+  hifz.update(container.read(hifzSettingsProvider).copyWith(introSeen: true));
+  if (choice == false && context.mounted) {
+    await showHifzSettingsSheet(context);
+  }
+  return choice == true;
+}
+
+class _RecitationIntroSheet extends ConsumerWidget {
+  const _RecitationIntroSheet();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final settings = ref.watch(hifzSettingsProvider);
+    Widget point(Widget leading, String text) => Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(width: 28, child: leading),
+          const SizedBox(width: 12),
+          Expanded(child: Text(text, style: theme.textTheme.bodyLarge)),
+        ],
+      ),
+    );
+    Widget dot(int argb) => Padding(
+      padding: const EdgeInsets.only(right: 4),
+      child: CircleAvatar(radius: 6, backgroundColor: Color(argb)),
+    );
+    return SingleChildScrollView(
+      key: const ValueKey('recitation-intro'),
+      padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(l10n.recIntroTitle, style: theme.textTheme.titleLarge),
+          const SizedBox(height: 12),
+          point(const Icon(Icons.mic_rounded), l10n.recIntroListen),
+          point(
+            Wrap(
+              runSpacing: 4,
+              children: [
+                dot(0xFF43A047),
+                dot(0xFFE0A800),
+                dot(0xFFD32F2F),
+                dot(settings.pronunciationColor),
+                dot(settings.tajweedColor),
+              ],
+            ),
+            l10n.recIntroColours,
+          ),
+          point(const Icon(Icons.school_outlined), l10n.recIntroLearning),
+          point(const Icon(Icons.lock_outline), l10n.recIntroPrivate),
+          const SizedBox(height: 16),
+          FilledButton(
+            key: const ValueKey('recitation-intro-start'),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(l10n.recIntroStart),
+          ),
+          const SizedBox(height: 8),
+          OutlinedButton(
+            key: const ValueKey('recitation-intro-settings'),
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(l10n.recIntroSettings),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 Future<void> showHifzSettingsSheet(BuildContext context) {
   return showModalBottomSheet<void>(
     context: context,

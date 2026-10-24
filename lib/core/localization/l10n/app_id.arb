@@ -516,5 +516,12 @@
   "packIndonesiaMinistry": "Kementerian Agama RI",
   "packJunagarhi": "Muhammad Junagarhi",
   "tafsirMuyassar": "At-Tafsir Al-Muyassar",
-  "tafsirMukhtasar": "Al-Mukhtashar dalam Tafsir Al-Qur'an"
+  "tafsirMukhtasar": "Al-Mukhtashar dalam Tafsir Al-Qur'an",
+  "recIntroTitle": "Cara kerja pemeriksaan bacaan",
+  "recIntroListen": "Bacalah dari hafalan: aplikasi mendengarkan di ponsel Anda dan menampilkan setiap kata saat Anda mengucapkannya.",
+  "recIntroColours": "Kata-kata diwarnai saat Anda membaca: benar hijau, terlewat kuning, salah merah — kesalahan pelafalan dan tajwid dengan warnanya sendiri.",
+  "recIntroLearning": "Pemeriksa masih belajar: ia bisa melewatkan kesalahan atau menandai kata yang benar. Jika terlalu banyak menandai, pilih Longgar di pengaturan Hifz.",
+  "recIntroPrivate": "Suara Anda tetap di ponsel Anda: tidak ada yang direkam atau dikirim.",
+  "recIntroStart": "Mulai membaca",
+  "recIntroSettings": "Pengaturan Hifz"
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tahfeez_ai/core/localization/generated/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tahfeez_ai/ai/speech/live_quran_recognizer.dart';
 import 'package:tahfeez_ai/core/core_providers.dart';
 import 'package:tahfeez_ai/core/platform/platform_capabilities.dart';
@@ -40,9 +41,13 @@ void main() {
     bool devPanel = true,
     int pageCount = 604,
     bool web = false,
+    bool introSeen = true,
   }) {
     return ProviderScope(
       overrides: [
+        // The first recitation's explanation, already seen (its own test
+        // shows it).
+        if (introSeen) hifzSettingsProvider.overrideWith(_IntroSeen.new),
         memorizationRecordDelayProvider.overrideWithValue(Duration.zero),
         memorizationRecorderProvider.overrideWithValue((_) async {}),
         recitationSupportedProvider.overrideWithValue(supported),
@@ -763,6 +768,28 @@ void main() {
     expect(find.text('How many times to recite the range'), findsOneWidget);
   });
 
+  testWidgets('the first recitation explains the check first, once', (
+    tester,
+  ) async {
+    // Nothing saved by the tests before (their settings had it seen).
+    await tester.runAsync(
+      () => SharedPreferencesAsync().remove(HifzSettingsController.storageKey),
+    );
+    await tester.pumpWidget(app(introSeen: false));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Start recitation'));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('recitation-intro')), findsOneWidget);
+    expect(find.byTooltip('Listening…'), findsNothing, reason: 'not yet');
+    await tester.tap(find.byKey(const ValueKey('recitation-intro-start')));
+    await tester.pumpAndSettle();
+    expect(find.byTooltip('Listening…'), findsOneWidget);
+    final container = ProviderScope.containerOf(
+      tester.element(find.byTooltip('Listening…')),
+    );
+    expect(container.read(hifzSettingsProvider).introSeen, isTrue);
+  });
+
   testWidgets('permission denied shows a message and no session', (
     tester,
   ) async {
@@ -816,4 +843,9 @@ class _WebPlatform implements PlatformCapabilities {
   bool get supportsScheduledNotifications => false;
   @override
   bool get supportsNativeFileStorage => false;
+}
+
+class _IntroSeen extends HifzSettingsController {
+  @override
+  HifzSettings build() => const HifzSettings(introSeen: true);
 }

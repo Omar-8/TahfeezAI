@@ -516,5 +516,12 @@
   "packIndonesiaMinistry": "Ministerio de Asuntos Religiosos (Indonesia)",
   "packJunagarhi": "Muhammad Junagarhi",
   "tafsirMuyassar": "At-Tafsir Al-Muyassar",
-  "tafsirMukhtasar": "Al-Mukhtasar: exégesis resumida del Corán"
+  "tafsirMukhtasar": "Al-Mukhtasar: exégesis resumida del Corán",
+  "recIntroTitle": "Cómo funciona la comprobación de la recitación",
+  "recIntroListen": "Recita de memoria: la aplicación escucha en tu teléfono y muestra cada palabra al decirla.",
+  "recIntroColours": "Las palabras se colorean al recitar: correctas en verde, omitidas en amarillo, incorrectas en rojo — y los errores de pronunciación y de tayuid en sus propios colores.",
+  "recIntroLearning": "El comprobador aún está aprendiendo: puede pasar por alto un error o marcar una palabra correcta. Si marca demasiado, elige Flexible en los ajustes de Hifz.",
+  "recIntroPrivate": "Tu voz se queda en tu teléfono: no se graba ni se envía nada.",
+  "recIntroStart": "Empezar a recitar",
+  "recIntroSettings": "Ajustes de Hifz"
 }

@@ -77,7 +77,11 @@ class HifzSettings {
     this.tajweedAlert = MistakeAlert.vibrate,
     this.pronunciationColor = defaultPronunciationColor,
     this.tajweedColor = defaultTajweedColor,
+    this.introSeen = false,
   });
+
+  /// The first recitation's explanation (how the check works) was shown.
+  final bool introSeen;
 
   /// The colours offered for a word with a pronunciation mistake (a letter
   /// or vowel) and for one whose only mistakes are tajweed, as ARGB — none
@@ -181,6 +185,7 @@ class HifzSettings {
     MistakeAlert? tajweedAlert,
     int? pronunciationColor,
     int? tajweedColor,
+    bool? introSeen,
   }) => HifzSettings(
     strict: strict ?? this.strict,
     highlightCurrent: highlightCurrent ?? this.highlightCurrent,
@@ -194,6 +199,7 @@ class HifzSettings {
     tajweedAlert: tajweedAlert ?? this.tajweedAlert,
     pronunciationColor: pronunciationColor ?? this.pronunciationColor,
     tajweedColor: tajweedColor ?? this.tajweedColor,
+    introSeen: introSeen ?? this.introSeen,
   );
 
   Map<String, Object> toJson() => {
@@ -209,6 +215,7 @@ class HifzSettings {
     'tajweedAlert': tajweedAlert.name,
     'pronunciationColor': pronunciationColor,
     'tajweedColor': tajweedColor,
+    'introSeen': introSeen,
   };
 
   static HifzSettings fromJson(Object? json) {
@@ -248,6 +255,7 @@ class HifzSettings {
       tajweedColor: tajweedColors.contains(json['tajweedColor'])
           ? json['tajweedColor'] as int
           : defaultTajweedColor,
+      introSeen: read('introSeen', false),
     );
   }
 }
