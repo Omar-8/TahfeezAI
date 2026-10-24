@@ -95,10 +95,10 @@ missed needed **only the vowel margins** to change (`learnerSounds` in
 |---|---:|---:|
 | reducedVowel (error margin) | +1 | **0** |
 | finalVowel (a unit's last vowel) | +2 | **+1** |
-| wordFinalVowel (a case ending) | −1 | **−2.4** (−2 until the 3.4 threshold) |
+| wordFinalVowel (a case ending) | −1 | **−2.6** (−2 at the threshold 3, −2.4 at 3.4) |
 | similarLetter (letters that sound alike), ayah and quick check | +2 | **+4** |
 | phoneWeak (new: ح→ه ض→د ق→ك ء→ي ن→ي ك→ق خ→ف ظ→ض ل→ذ, one direction each), ayah and quick check | — | **+2** |
-| Letters, vowels, shadda (threshold) | 3 | **3.4** (2026-10-24) |
+| Letters, vowels, shadda (threshold) | 3 | **3.6** (2026-10-24; 3.4 earlier that day) |
 | Sukun, missing vowel (threshold 3), hiddenNasal −1 | unchanged | unchanged |
 
 **Similar letters at +4** (added 2026-10-21): false letter flags on phones drop further
@@ -125,9 +125,12 @@ margins stay on top (`AcousticVerificationController.withStrictness`):
 
 | v3.7 | Owner / Tarteel-200 / Juz 30 false letters | QuranMB caught | Al-Ikhlas caught | Amateurs flagged | Spliced caught |
 |---|---|---:|---:|---:|---:|
-| Lenient | 19 / 130 / 1,020 | 59.8% | 9.9% | 2.5% | 83.5% |
-| Balanced | 25 / 165 / 1,404 | 65.5% | 12.0% | 3.8% | 88.7% |
-| Precise | 30 / 194 / 1,631 | 67.2% | 13.1% | 5.1% | 89.5% |
+| Lenient (4.6) | 19 / 123 / 952 | 58.7% | 9.9% | 2.5% | 82.7% |
+| Balanced (3.6) | 22 / 156 / 1,322 | 65.2% | 11.3% | 3.4% | 87.9% |
+| Precise (3.1) | 28 / 182 / 1,531 | 66.9% | 12.9% | 5.1% | 89.1% |
+
+At the threshold 3.4: lenient 19 / 130 / 1,020, 59.8%; balanced 25 / 165 / 1,404, 65.5%,
+Al-Ikhlas 12.0%, amateurs 3.8%, spliced 88.7%; precise 30 / 194 / 1,631, 67.2%.
 
 At the threshold 3 (2026-10-23 to 2026-10-24): lenient 19 / 141 / 1,157, 61.7%; balanced
 29 / 187 / 1,576, 66.4%, Al-Ikhlas 12.4%, amateurs 4.2%; precise 35 / 217 / 1,837, 68.4%.
@@ -140,6 +143,15 @@ speakers 451 → 390; correct words flagged, owner's sessions 4.5 → 4.0%, amat
 sobolev's reviewed 42.1% unchanged, spliced 89.5 → 88.7%, degraded 89.1 → 87.9%. G25 (v3.7
 trained further on 120 files of TLOG) reached 26 / 170 / 1,416 at QuranMB 64.7%: this
 threshold alone does as well or better on every test.
+
+**Threshold 3.6** (owner's decision, 2026-10-24, the same day): case endings kept at 1
+(wordFinalVowel −2.6). False letter flags owner 25 → 22 (the teacher's 22 at the same settings),
+Tarteel-200 165 → 156, Juz 30 unseen 1,404 → 1,322; correct words flagged, owner's sessions
+4.0 → 3.7%, amateurs 3.8 → 3.4%. Cost: QuranMB 65.5 → 65.2%, Al-Ikhlas 12.0 → 11.3%,
+sobolev's reviewed 42.1 → 39.5% (about one word), spliced 88.7 → 87.9%, degraded 87.9 → 87.1%.
+The teacher at 3.6: 22 / 117 / 1,351, QuranMB 67.7%, Al-Ikhlas 15.0%. Per-pair letter margins
+tuned on some tests (laptop study, `letter_confusions.dart --dump`) did no better on held-out
+tests than this one shift.
 
 Lowering the overall threshold instead (2.75) gave back the whole phone gain
 (owner 37, Tarteel 226). Stronger vowel margins (−0.5 / +0.5 / −2.5) caught

@@ -443,9 +443,9 @@ class AcousticVerificationController
     SoundGroup.throat: SoundMargins(uncertain: 2),
     SoundGroup.similarLetter: SoundMargins(error: 4),
     SoundGroup.phoneWeak: SoundMargins(error: 2, uncertain: 2),
-    // Case endings judged at 1 still with the error threshold at 3.4: u -> a
-    // caught 17 of 21 (at 1.4, 14-17).
-    SoundGroup.wordFinalVowel: SoundMargins(error: -2.4),
+    // Case endings judged at 1 still with the error threshold at 3.6: u -> a
+    // caught 17 of 21 (at 1.6, 14-17).
+    SoundGroup.wordFinalVowel: SoundMargins(error: -2.6),
     SoundGroup.stopInFlow: SoundMargins(error: 1),
   };
 
@@ -516,13 +516,13 @@ class AcousticVerificationController
   /// with them the tajweed checks: a missing qalqala echo by the same, a
   /// madd short below 55% / 72% of its length (balanced 65%), a ghunnah's
   /// hold x1.25 / x0.85. The sound groups' margins stay on top.
-  /// Measured with v3.7 at the streaming error 3.4 (owner's phone sets /
+  /// Measured with v3.7 at the streaming error 3.6 (owner's phone sets /
   /// Tarteel users' / unseen Juz 30 reciters' false letter flags; QuranMB's
   /// and Al-Ikhlas's real mistakes caught; amateurs' correct words flagged;
   /// spliced mistakes caught), 2026-10-24:
-  ///   lenient  19 / 130 / 1,020   59.8%   9.9%   2.5%   83.5%
-  ///   balanced 25 / 165 / 1,404   65.5%  12.0%   3.8%   88.7%
-  ///   strict   30 / 194 / 1,631   67.2%  13.1%   5.1%   89.5%
+  ///   lenient  19 / 123 /   952   58.7%   9.9%   2.5%   82.7%
+  ///   balanced 22 / 156 / 1,322   65.2%  11.3%   3.4%   87.9%
+  ///   strict   28 / 182 / 1,531   66.9%  12.9%   5.1%   89.1%
   static AcousticThresholds withStrictness(
     AcousticThresholds thresholds,
     RecitationStrictness strictness,
@@ -570,7 +570,15 @@ class AcousticVerificationController
   /// Al-Ikhlas 12.4 -> 12.0%, sobolev's reviewed 42.1 -> 42.1%, spliced 89.5 ->
   /// 88.7%, degraded 89.1 -> 87.9%. (G25, v3.7 trained on TLOG, did no better
   /// than this threshold: owner 26, Tarteel 170, QuranMB 64.7%.)
-  static const streamingError = 3.4;
+  ///
+  /// At 3.6 (owner, 2026-10-24; was 3.4): false letter flags the owner's sets
+  /// 25 -> 22 (the teacher's 22), Tarteel users' 165 -> 156, unseen Juz 30
+  /// 1,404 -> 1,322; correct words flagged, the user's sessions 4.0 -> 3.7%,
+  /// amateurs' 3.8 -> 3.4%; real mistakes caught QuranMB 65.5 -> 65.2%,
+  /// Al-Ikhlas 12.0 -> 11.3%, sobolev's reviewed 42.1 -> 39.5%, spliced 88.7 ->
+  /// 87.9%, degraded 87.9 -> 87.1%. (Per-pair letter margins tuned on some
+  /// tests did no better on held-out ones than this.)
+  static const streamingError = 3.6;
 
   /// A missing qalqala echo, at 2: v3.5s on the held-out Surah Al-Ikhlas
   /// learners catches 19.2% of labelled misses, flags 2.5% of correct ones; the
