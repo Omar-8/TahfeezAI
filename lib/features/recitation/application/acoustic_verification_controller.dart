@@ -17,8 +17,7 @@ import '../../../ai/matching/local_quran_position_tracker.dart'
 import '../../../core/core_providers.dart';
 import '../../../quran/domain/models/quran_refs.dart';
 import 'local_acoustic_inference_controller.dart';
-import 'hifz_controller.dart'
-    show QalqalaCheck, RecitationStrictness, hifzSettingsProvider;
+import 'hifz_controller.dart' show RecitationStrictness, hifzSettingsProvider;
 import 'recitation_ai_config.dart';
 import 'recitation_position.dart';
 import 'quran_match_controller.dart' show quranWordCorpusProvider;
@@ -505,7 +504,7 @@ class AcousticVerificationController
           shaddaError: _streaming ? streamingError : null,
           sukunError: _streaming ? streamingMinorError : null,
           missingVowelError: _streaming ? streamingMinorError : null,
-          qalqalaError: _streaming ? qalqalaErrorFor(settings.qalqala) : null,
+          qalqalaError: _streaming ? streamingQalqalaError : null,
           ghunnahHold: _streaming ? streamingGhunnahHold : null,
         ),
         settings.strictness,
@@ -595,25 +594,16 @@ class AcousticVerificationController
   /// QuranMB 61.2%.)
   static const streamingLetterError = 4.1;
 
-  /// A missing qalqala echo, at 2: v3.5s on the held-out Surah Al-Ikhlas
-  /// learners catches 19.2% of labelled misses, flags 2.5% of correct ones; the
-  /// user's phone sessions and professional recitation no more than at 3.
-  static const streamingQalqalaError = 2.0;
-
-  /// The echo check's threshold for the Hifz setting [check] (before the
-  /// overall strictness shifts it); more sensitive by the owner's decision
-  /// (2026-10-25: «ٱلْفَلَقِ» and the rest of Al-Falaq said without the
-  /// echo were not marked). v3.7 (`qalqala_threshold.dart`): Al-Ikhlas
-  /// learners' missing echoes caught / their correct ones flagged / the
-  /// owner's correct ones flagged / Tarteel users' / unseen Juz 30 reciters':
-  ///   lenient    2.0    7.6%   1.5%  0 of 122    8%  31%
-  ///   balanced   0.0   30.4%   4.4%  0 of 122   11%  52%
-  ///   sensitive -1.0   57.7%   8.1%  2 of 122   15%  67%
-  static double qalqalaErrorFor(QalqalaCheck check) => switch (check) {
-    QalqalaCheck.lenient => streamingQalqalaError,
-    QalqalaCheck.balanced => 0.0,
-    QalqalaCheck.sensitive => -1.0,
-  };
+  /// A missing qalqala echo, at -1.5 (was 2: owner, 2026-10-25 — Al-Falaq
+  /// said without the echo was not marked; one threshold for everyone,
+  /// shifted by the strictness like the rest). v3.7 (`qalqala_threshold
+  /// .dart`): Al-Ikhlas learners' missing echoes caught 7.6 -> 70.4%, their
+  /// correct ones flagged 1.5 -> 11.1%, the owner's correct 0 -> 3 of 122,
+  /// Tarteel users' 7.8 -> 18.4%, unseen Juz 30 reciters' 30.6 -> 71.7%.
+  /// The owner's own Al-Falaq takes: «حَسَدْ», «وَقَبْ», «ٱلْعُقَدْ» caught
+  /// (+2.75, -0.12, -1.16), «ٱلْفَلَقْ» and «خَلَقْ» not (-3.74, -4.98: his
+  /// strong echo, missed, still scores like others' correct one).
+  static const streamingQalqalaError = -1.5;
 
   /// A ghunnah not held (a tajweed rule, on by default: the owner's
   /// decision after testing it, 2026-10-25), at 1.5. v3.7 at the app's settings (`ghunnah_check.dart`): the

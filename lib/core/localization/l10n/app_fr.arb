@@ -231,8 +231,6 @@
   "ruleQalqala": "Qalqala",
   "ruleMadd": "Longueur du madd",
   "ruleGhunnah": "Ghunna tenue",
-  "recQalqalaCheck": "Vérification de la qalqala",
-  "recQalqalaSensitive": "Sensible",
   "recQalqala": "qalqala : « {letter} » avec soukoun doit résonner (un léger rebond)",
   "recGhunnah": "ghunna : tenez le son nasal de « {letter} » avec chadda (2 temps)",
   "recMaddShort": "madd : prolongez « {letter} » davantage (4 à 6 temps ici)",

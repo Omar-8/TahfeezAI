@@ -231,8 +231,6 @@
   "ruleQalqala": "القلقلة",
   "ruleMadd": "طول المدّ",
   "ruleGhunnah": "إظهار الغنّة",
-  "recQalqalaCheck": "فحص القلقلة",
-  "recQalqalaSensitive": "حسّاس",
   "recQalqala": "قلقلة: «{letter}» الساكنة تُقلقَل (نبرة خفيفة)",
   "recGhunnah": "غنّة: «{letter}» المشدّدة تُغَنّ بمقدار حركتين",
   "recMaddShort": "مدّ: أطِل «{letter}» (٤–٦ حركات هنا)",

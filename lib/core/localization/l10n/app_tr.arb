@@ -231,8 +231,6 @@
   "ruleQalqala": "Kalkale",
   "ruleMadd": "Med uzunluğu",
   "ruleGhunnah": "Gunne süresi",
-  "recQalqalaCheck": "Kalkale denetimi",
-  "recQalqalaSensitive": "Hassas",
   "recQalqala": "kalkale: sakin «{letter}» yankılanmalı (hafif bir sekme)",
   "recGhunnah": "gunne: şeddeli «{letter}» harfinde genizden sesi 2 hareke tutun",
   "recMaddShort": "med: «{letter}» harfini daha uzun tutun (burada 4–6 elif)",

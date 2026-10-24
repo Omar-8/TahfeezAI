@@ -231,8 +231,6 @@
   "ruleQalqala": "Qalqalah",
   "ruleMadd": "Panjang mad",
   "ruleGhunnah": "Dengung ditahan",
-  "recQalqalaCheck": "Pemeriksaan qalqalah",
-  "recQalqalaSensitive": "Peka",
   "recQalqala": "qalqalah: «{letter}» bersukun perlu dipantulkan (sedikit memantul)",
   "recGhunnah": "ghunnah: tahan dengung «{letter}» bertasydid (2 harakat)",
   "recMaddShort": "mad: tahan «{letter}» lebih panjang (4–6 harakat di sini)",

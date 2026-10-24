@@ -46,7 +46,10 @@ void main(List<String> args) {
   );
   final tag = args[0];
   final missing = <String, List<double>>{}, kept = <String, List<double>>{};
-  for (final pack in args.skip(1)) {
+  // --by-letter: the correct qalqalas' scores per letter too.
+  final byLetter = args.contains('--by-letter');
+  final letters = <String, Map<String, List<double>>>{};
+  for (final pack in args.skip(1).where((a) => !a.startsWith('--'))) {
     final meta = (jsonDecode(
       File('$_results/${pack}_$tag.json').readAsStringSync(),
     ) as List).cast<Map<String, Object?>>();
@@ -71,13 +74,34 @@ void main(List<String> args) {
         openEnd: m['openEnd'] == true,
       );
       final targets = (m['targetWords']! as List).cast<int>();
+      String? letter;
       for (final v in vs) {
-        if (v.token.symbol != 'ڇ') continue;
+        if (v.token.symbol != 'ڇ') {
+          letter = v.token.symbol;
+          continue;
+        }
+        if (byLetter && !mistake) {
+          (letters[letter ?? '?'] ??= {})
+              .putIfAbsent(pack, () => [])
+              .add(v.likelihoodRatio);
+        }
         if (mistake && !targets.contains(v.token.word.wordIndex)) continue;
         (mistake ? missing : kept)
             .putIfAbsent(pack, () => [])
             .add(v.likelihoodRatio);
       }
+    }
+  }
+  if (byLetter) {
+    // Correct qalqalas' scores by letter (deciles; lower: the echo surer).
+    for (final MapEntry(key: l, value: packs) in letters.entries) {
+      final xs = [for (final v in packs.values) ...v]..sort();
+      String at(double q) =>
+          xs[(q * (xs.length - 1)).round()].toStringAsFixed(1);
+      stdout.writeln(
+        '$l: ${xs.length} correct — 5% ${at(.05)} | 10% ${at(.1)} | 25% '
+        '${at(.25)} | median ${at(.5)} | 75% ${at(.75)} | 90% ${at(.9)}',
+      );
     }
   }
   String share(List<double> xs, double t) =>
@@ -88,6 +112,8 @@ void main(List<String> args) {
   for (final t in [
     -3.0,
     -2.0,
+    -1.5,
+    -1.25,
     -1.0,
     -0.5,
     0.0,

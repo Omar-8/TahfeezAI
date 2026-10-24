@@ -508,32 +508,6 @@ void main() {
     );
   });
 
-  test('the qalqala check: balanced until chosen, its own threshold', () {
-    expect(HifzSettings.fromJson({}).qalqala, QalqalaCheck.balanced);
-    const sensitive = HifzSettings(qalqala: QalqalaCheck.sensitive);
-    expect(
-      HifzSettings.fromJson(sensitive.toJson()).qalqala,
-      QalqalaCheck.sensitive,
-    );
-    // Lenient as the check was until 2026-10-25; balanced and sensitive
-    // more ready to mark a missing echo.
-    expect(
-      AcousticVerificationController.qalqalaErrorFor(QalqalaCheck.lenient),
-      AcousticVerificationController.streamingQalqalaError,
-    );
-    final balanced = AcousticVerificationController.qalqalaErrorFor(
-      QalqalaCheck.balanced,
-    );
-    expect(
-      balanced,
-      lessThan(AcousticVerificationController.streamingQalqalaError),
-    );
-    expect(
-      AcousticVerificationController.qalqalaErrorFor(QalqalaCheck.sensitive),
-      lessThan(balanced),
-    );
-  });
-
   test('pronunciation strictness: balanced until chosen, then as saved', () {
     expect(HifzSettings.fromJson({}).strictness, RecitationStrictness.balanced);
     const lenient = HifzSettings(strictness: RecitationStrictness.lenient);

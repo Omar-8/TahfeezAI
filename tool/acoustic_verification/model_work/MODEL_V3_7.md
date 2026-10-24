@@ -156,6 +156,17 @@ sobolev's reviewed 42.1% unchanged, spliced 89.5 → 88.7%, degraded 89.1 → 87
 trained further on 120 files of TLOG) reached 26 / 170 / 1,416 at QuranMB 64.7%: this
 threshold alone does as well or better on every test.
 
+**Qalqala echo at −1.5** (owner's decision, 2026-10-25; was 2, one threshold shifted by the
+strictness): Al-Ikhlas learners' missing echoes caught 7.6 → 70.4%, their correct ones flagged
+1.5 → 11.1%; the owner's correct qalqala 0 → 3 of 122 flagged; Tarteel users' 7.8 → 18.4%;
+unseen Juz 30 reciters' 30.6 → 71.7% (they say qalqala lightly). His Al-Falaq takes without the
+echo: «حَسَدْ», «وَقَبْ», «ٱلْعُقَدْ» caught, «ٱلْفَلَقْ» and «خَلَقْ» not — his echo is strong, so
+his missing one still scores like other people's correct one (`qalqala_threshold.dart --by-letter`).
+
+**Ghunnah held** (a tajweed rule, on by default since 2026-10-25, hold 1.5): the owner's
+deliberate cuts caught 11 of 20, but about half of correctly held everyday ghunnahs flagged
+(`ghunnah_check.dart`); kept on by his decision after testing it.
+
 **Threshold 3.6** (owner's decision, 2026-10-24, the same day): case endings kept at 1
 (wordFinalVowel −2.6). False letter flags owner 25 → 22 (the teacher's 22 at the same settings),
 Tarteel-200 165 → 156, Juz 30 unseen 1,404 → 1,322; correct words flagged, owner's sessions

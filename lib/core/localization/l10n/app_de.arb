@@ -231,8 +231,6 @@
   "ruleQalqala": "Qalqala",
   "ruleMadd": "Länge des Madd",
   "ruleGhunnah": "Ghunna gehalten",
-  "recQalqalaCheck": "Qalqala-Prüfung",
-  "recQalqalaSensitive": "Empfindlich",
   "recQalqala": "Qalqala: «{letter}» mit Sukun braucht ein Nachklingen (ein leichtes Abprallen)",
   "recGhunnah": "Ghunna: den Nasallaut von «{letter}» mit Schadda halten (2 Zählzeiten)",
   "recMaddShort": "Madd: «{letter}» länger halten (hier 4–6 Zählzeiten)",

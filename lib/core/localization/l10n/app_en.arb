@@ -512,8 +512,6 @@
   "ruleQalqala": "Qalqala",
   "ruleMadd": "Madd length",
   "ruleGhunnah": "Ghunnah held",
-  "recQalqalaCheck": "Qalqala check",
-  "recQalqalaSensitive": "Sensitive",
   "recQalqala": "qalqala: «{letter}» with sukun needs its echo (a slight bounce)",
   "@recQalqala": {
     "placeholders": {

@@ -231,8 +231,6 @@
   "ruleQalqala": "قلقلہ",
   "ruleMadd": "مد کی لمبائی",
   "ruleGhunnah": "غنہ کی ادائیگی",
-  "recQalqalaCheck": "قلقلہ کی جانچ",
-  "recQalqalaSensitive": "حساس",
   "recQalqala": "قلقلہ: ساکن «{letter}» میں ہلکی سی گونج ہونی چاہیے",
   "recGhunnah": "غنہ: مشدد «{letter}» میں دو حرکات تک ناک کی آواز رکھیں",
   "recMaddShort": "مد: «{letter}» کو زیادہ کھینچیں (یہاں 4–6 حرکات)",
