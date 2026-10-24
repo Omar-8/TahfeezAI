@@ -17,7 +17,8 @@ import '../../../ai/matching/local_quran_position_tracker.dart'
 import '../../../core/core_providers.dart';
 import '../../../quran/domain/models/quran_refs.dart';
 import 'local_acoustic_inference_controller.dart';
-import 'hifz_controller.dart' show RecitationStrictness, hifzSettingsProvider;
+import 'hifz_controller.dart'
+    show QalqalaCheck, RecitationStrictness, hifzSettingsProvider;
 import 'recitation_ai_config.dart';
 import 'recitation_position.dart';
 import 'quran_match_controller.dart' show quranWordCorpusProvider;
@@ -504,7 +505,7 @@ class AcousticVerificationController
           shaddaError: _streaming ? streamingError : null,
           sukunError: _streaming ? streamingMinorError : null,
           missingVowelError: _streaming ? streamingMinorError : null,
-          qalqalaError: _streaming ? streamingQalqalaError : null,
+          qalqalaError: _streaming ? qalqalaErrorFor(settings.qalqala) : null,
           ghunnahHold: _streaming ? streamingGhunnahHold : null,
         ),
         settings.strictness,
@@ -598,6 +599,19 @@ class AcousticVerificationController
   /// learners catches 19.2% of labelled misses, flags 2.5% of correct ones; the
   /// user's phone sessions and professional recitation no more than at 3.
   static const streamingQalqalaError = 2.0;
+
+  /// The echo check's threshold for the Hifz setting [check] (before the
+  /// overall strictness shifts it). v3.7 (`qalqala_threshold.dart`, 2026-10-25):
+  /// Al-Ikhlas learners' missing echoes caught / correct ones flagged —
+  /// the owner's 0% at every one, Tarteel users', unseen Juz 30 reciters':
+  ///   lenient   3.0   5.6%   7%  20%
+  ///   balanced  2.0   7.6%   8%  31%
+  ///   sensitive 0.5  20.5%   9%  47%
+  static double qalqalaErrorFor(QalqalaCheck check) => switch (check) {
+    QalqalaCheck.lenient => 3.0,
+    QalqalaCheck.balanced => streamingQalqalaError,
+    QalqalaCheck.sensitive => 0.5,
+  };
 
   /// A ghunnah not held (the experimental rule, off unless chosen in the
   /// tajweed rules), at 1.5 — owner's request to test it himself,

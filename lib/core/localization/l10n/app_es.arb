@@ -231,6 +231,8 @@
   "ruleQalqala": "Qalqala",
   "ruleMadd": "Duración del madd",
   "ruleGhunnah": "Ghunna sostenida (experimental)",
+  "recQalqalaCheck": "Comprobación de la qalqala",
+  "recQalqalaSensitive": "Sensible",
   "tajweedRulesNote": "La ghunna sostenida es experimental: puede marcar ghunnas correctas.",
   "recQalqala": "qalqala: «{letter}» con sukun necesita su eco (un ligero rebote)",
   "recGhunnah": "ghunna: mantén el sonido nasal de «{letter}» con shadda (2 tiempos)",

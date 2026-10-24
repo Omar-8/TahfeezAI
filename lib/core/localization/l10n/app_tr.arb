@@ -231,6 +231,8 @@
   "ruleQalqala": "Kalkale",
   "ruleMadd": "Med uzunluğu",
   "ruleGhunnah": "Gunne süresi (deneysel)",
+  "recQalqalaCheck": "Kalkale denetimi",
+  "recQalqalaSensitive": "Hassas",
   "tajweedRulesNote": "Gunne denetimi deneyseldir: doğru tutulan gunneleri de işaretleyebilir.",
   "recQalqala": "kalkale: sakin «{letter}» yankılanmalı (hafif bir sekme)",
   "recGhunnah": "gunne: şeddeli «{letter}» harfinde genizden sesi 2 hareke tutun",

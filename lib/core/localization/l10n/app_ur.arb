@@ -231,6 +231,8 @@
   "ruleQalqala": "قلقلہ",
   "ruleMadd": "مد کی لمبائی",
   "ruleGhunnah": "غنہ کی ادائیگی (تجرباتی)",
+  "recQalqalaCheck": "قلقلہ کی جانچ",
+  "recQalqalaSensitive": "حساس",
   "tajweedRulesNote": "غنہ کی جانچ تجرباتی ہے: درست غنہ پر بھی نشان لگ سکتا ہے۔",
   "recQalqala": "قلقلہ: ساکن «{letter}» میں ہلکی سی گونج ہونی چاہیے",
   "recGhunnah": "غنہ: مشدد «{letter}» میں دو حرکات تک ناک کی آواز رکھیں",

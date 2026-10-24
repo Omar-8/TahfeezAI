@@ -512,6 +512,8 @@
   "ruleQalqala": "Qalqala",
   "ruleMadd": "Madd length",
   "ruleGhunnah": "Ghunnah held (experimental)",
+  "recQalqalaCheck": "Qalqala check",
+  "recQalqalaSensitive": "Sensitive",
   "tajweedRulesNote": "Ghunnah held is experimental: it may mark correctly held ghunnahs.",
   "recQalqala": "qalqala: «{letter}» with sukun needs its echo (a slight bounce)",
   "@recQalqala": {

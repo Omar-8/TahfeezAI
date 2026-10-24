@@ -467,8 +467,13 @@ void main() {
       container.read(hifzSettingsProvider).strictness,
       RecitationStrictness.balanced,
     );
-    await tester.ensureVisible(find.text('Lenient'));
-    await tester.tap(find.text('Lenient'));
+    // (The strictness's, not the qalqala check's.)
+    final lenient = find.descendant(
+      of: find.byKey(const ValueKey('hifz-strictness')),
+      matching: find.text('Lenient'),
+    );
+    await tester.ensureVisible(lenient);
+    await tester.tap(lenient);
     await tester.pumpAndSettle();
     expect(
       container.read(hifzSettingsProvider).strictness,

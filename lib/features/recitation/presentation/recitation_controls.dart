@@ -1814,6 +1814,47 @@ class _HifzSettingsSheet extends ConsumerWidget {
                     ),
                   ),
                 ),
+              // The qalqala check's own setting, under its rule.
+              if (settings.tajweedRules.contains(TajweedRule.qalqala))
+                Padding(
+                  key: const ValueKey('hifz-qalqala-check'),
+                  padding: const EdgeInsetsDirectional.fromSTEB(32, 4, 16, 8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(AppLocalizations.of(context).recQalqalaCheck),
+                      const SizedBox(height: 8),
+                      SegmentedButton<QalqalaCheck>(
+                        segments: [
+                          ButtonSegment(
+                            value: QalqalaCheck.lenient,
+                            label: Text(
+                              AppLocalizations.of(context).recStrictnessLenient,
+                            ),
+                          ),
+                          ButtonSegment(
+                            value: QalqalaCheck.balanced,
+                            label: Text(
+                              AppLocalizations.of(context)
+                                  .recStrictnessBalanced,
+                            ),
+                          ),
+                          ButtonSegment(
+                            value: QalqalaCheck.sensitive,
+                            label: Text(
+                              AppLocalizations.of(context).recQalqalaSensitive,
+                            ),
+                          ),
+                        ],
+                        selected: {settings.qalqala},
+                        showSelectedIcon: false,
+                        onSelectionChanged: (s) => controller.update(
+                          settings.copyWith(qalqala: s.first),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               Padding(
                 padding: const EdgeInsetsDirectional.fromSTEB(32, 0, 16, 8),
                 child: Text(

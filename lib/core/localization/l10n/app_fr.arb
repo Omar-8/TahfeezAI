@@ -231,6 +231,8 @@
   "ruleQalqala": "Qalqala",
   "ruleMadd": "Longueur du madd",
   "ruleGhunnah": "Ghunna tenue (expérimental)",
+  "recQalqalaCheck": "Vérification de la qalqala",
+  "recQalqalaSensitive": "Sensible",
   "tajweedRulesNote": "La ghunna tenue est expérimentale : elle peut marquer des ghunnas justes.",
   "recQalqala": "qalqala : « {letter} » avec soukoun doit résonner (un léger rebond)",
   "recGhunnah": "ghunna : tenez le son nasal de « {letter} » avec chadda (2 temps)",

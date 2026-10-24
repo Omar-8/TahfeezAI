@@ -231,6 +231,8 @@
   "ruleQalqala": "قلقله",
   "ruleMadd": "طول مد",
   "ruleGhunnah": "نگه‌داشتن غنّه (آزمایشی)",
+  "recQalqalaCheck": "بررسی قلقله",
+  "recQalqalaSensitive": "حساس",
   "tajweedRulesNote": "بررسی غنّه آزمایشی است: ممکن است غنّهٔ درست را هم علامت بزند.",
   "recQalqala": "قلقله: «{letter}» ساکن به بازتاب (جهشی خفیف) نیاز دارد",
   "recGhunnah": "غنّه: صدای خیشومی «{letter}» مشدّد را دو حرکت نگه دارید",

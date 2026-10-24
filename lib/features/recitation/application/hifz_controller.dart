@@ -62,6 +62,10 @@ enum MistakeAlert {
 /// together ([AcousticVerificationController.withStrictness]).
 enum RecitationStrictness { lenient, balanced, strict }
 
+/// How readily a missing qalqala echo is marked, apart from the overall
+/// strictness (the echo check's own threshold).
+enum QalqalaCheck { lenient, balanced, sensitive }
+
 /// The recitation modes with an explanation before their first run.
 enum RecitationIntroMode { recite, loop, follow }
 
@@ -81,7 +85,11 @@ class HifzSettings {
     this.pronunciationColor = defaultPronunciationColor,
     this.tajweedColor = defaultTajweedColor,
     this.introsSeen = const {},
+    this.qalqala = QalqalaCheck.balanced,
   });
+
+  /// The qalqala echo check's own setting (Hifz settings, under tajweed).
+  final QalqalaCheck qalqala;
 
   /// The modes whose explanation (how the check works) was shown before
   /// their first recitation.
@@ -213,6 +221,7 @@ class HifzSettings {
     int? pronunciationColor,
     int? tajweedColor,
     Set<RecitationIntroMode>? introsSeen,
+    QalqalaCheck? qalqala,
   }) => HifzSettings(
     strict: strict ?? this.strict,
     highlightCurrent: highlightCurrent ?? this.highlightCurrent,
@@ -227,6 +236,7 @@ class HifzSettings {
     pronunciationColor: pronunciationColor ?? this.pronunciationColor,
     tajweedColor: tajweedColor ?? this.tajweedColor,
     introsSeen: introsSeen ?? this.introsSeen,
+    qalqala: qalqala ?? this.qalqala,
   );
 
   Map<String, Object> toJson() => {
@@ -246,6 +256,7 @@ class HifzSettings {
     'pronunciationColor': pronunciationColor,
     'tajweedColor': tajweedColor,
     'introsSeen': [for (final m in introsSeen) m.name],
+    'qalqala': qalqala.name,
   };
 
   static HifzSettings fromJson(Object? json) {
@@ -299,6 +310,9 @@ class HifzSettings {
         // (Saved when only Recite had one.)
         if (read('introSeen', false)) RecitationIntroMode.recite,
       },
+      qalqala:
+          QalqalaCheck.values.asNameMap()[json['qalqala']] ??
+          QalqalaCheck.balanced,
     );
   }
 }

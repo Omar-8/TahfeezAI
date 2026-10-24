@@ -523,6 +523,27 @@ void main() {
     },
   );
 
+  test('the qalqala check: balanced until chosen, its own threshold', () {
+    expect(HifzSettings.fromJson({}).qalqala, QalqalaCheck.balanced);
+    const sensitive = HifzSettings(qalqala: QalqalaCheck.sensitive);
+    expect(
+      HifzSettings.fromJson(sensitive.toJson()).qalqala,
+      QalqalaCheck.sensitive,
+    );
+    expect(
+      AcousticVerificationController.qalqalaErrorFor(QalqalaCheck.balanced),
+      AcousticVerificationController.streamingQalqalaError,
+    );
+    expect(
+      AcousticVerificationController.qalqalaErrorFor(QalqalaCheck.sensitive),
+      lessThan(AcousticVerificationController.streamingQalqalaError),
+    );
+    expect(
+      AcousticVerificationController.qalqalaErrorFor(QalqalaCheck.lenient),
+      greaterThan(AcousticVerificationController.streamingQalqalaError),
+    );
+  });
+
   test('pronunciation strictness: balanced until chosen, then as saved', () {
     expect(HifzSettings.fromJson({}).strictness, RecitationStrictness.balanced);
     const lenient = HifzSettings(strictness: RecitationStrictness.lenient);
