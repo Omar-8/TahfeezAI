@@ -181,6 +181,32 @@ void main() {
     );
   });
 
+  test('a doubled mīm across words said single is idghām into mīm; within '
+      'a word a plain shadda', () {
+    // The doubled letter said once: its shadda missing.
+    TajweedRule? ruleOfSingle(int ayah, int word) {
+      final expected = reference.ayah(ayah);
+      final k = expected.indexWhere(
+        (t) => t.geminate && t.word.wordIndex == word,
+      );
+      expect(k, greaterThan(0), reason: '$ayah:$word has a doubled letter');
+      final said = [
+        for (var i = 0; i < expected.length; i++)
+          if (i != k) expected[i].token,
+      ];
+      final v = verifier.verify(clearFrames(said), expected)[k];
+      expect(v.type, RecitationErrorType.shaddaError, reason: '$ayah:$word');
+      return v.rule;
+    }
+
+    // 2:10 «قُلُوبِهِم مَّرَضٌ»: a sākin mīm into «م».
+    expect(ruleOfSingle(2010, 2), TajweedRule.idghamMim);
+    // 86:6 «خُلِقَ مِن مَّآءٍ دَافِقٍ»: a nūn into «م» — the same check.
+    expect(ruleOfSingle(86006, 2), TajweedRule.idghamMim);
+    // 2:28 «ثُمَّ»: a shadda within the word, not tajweed.
+    expect(ruleOfSingle(2028, 6), isNull);
+  });
+
   test('a hidden nūn said plainly is a mistake: ikhfāʾ and iqlāb', () {
     // 2:10 «فِى قُلُوبِهِم مَّرَضٌ فَزَادَهُمُ … عَذَابٌ أَلِيمٌۢ بِمَا»: the
     // tanween of مَرَضٌ hidden before ف (ں), that of أَلِيمٌ turned to a

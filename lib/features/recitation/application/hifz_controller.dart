@@ -130,10 +130,21 @@ class HifzSettings {
     return 0xFF000000 | channel(16) | channel(8) | channel(0);
   }
 
+  /// The rules offered before the choice was saved with them.
+  static const _rulesBeforeIdghamMim = [
+    'ikhfa',
+    'iqlab',
+    'ikhfaShafawi',
+    'idgham',
+    'qalqala',
+    'madd',
+  ];
+
   static const allTajweedRules = {
     TajweedRule.ikhfa,
     TajweedRule.iqlab,
     TajweedRule.ikhfaShafawi,
+    TajweedRule.idghamMim,
     TajweedRule.idgham,
     TajweedRule.qalqala,
     TajweedRule.madd,
@@ -210,6 +221,9 @@ class HifzSettings {
     'colorWords': colorWords,
     'tajweed': tajweed,
     'tajweedRules': [for (final r in tajweedRules) r.name],
+    // The rules offered when chosen: one added since is on (it was never
+    // turned off).
+    'tajweedRulesKnown': [for (final r in TajweedRule.values) r.name],
     'sajdahReminder': sajdahReminder,
     'strictness': strictness.name,
     'tajweedAlert': tajweedAlert.name,
@@ -233,11 +247,18 @@ class HifzSettings {
       alert: alert,
       colorWords: read('colorWords', true),
       tajweed: read('tajweed', true),
-      // (Saved before the per-rule choice: every rule.)
+      // (Saved before the per-rule choice: every rule. A rule added since
+      // the choice — idghām into mīm, 2026-10-24 — on.)
       tajweedRules: json['tajweedRules'] is List
           ? {
               for (final n in json['tajweedRules'] as List)
                 ?TajweedRule.values.asNameMap()[n],
+              for (final r in allTajweedRules)
+                if (!(json['tajweedRulesKnown'] is List
+                        ? json['tajweedRulesKnown'] as List
+                        : _rulesBeforeIdghamMim)
+                    .contains(r.name))
+                  r,
             }
           : allTajweedRules,
       sajdahReminder: read('sajdahReminder', true),

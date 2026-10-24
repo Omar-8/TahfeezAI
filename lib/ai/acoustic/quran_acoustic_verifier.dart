@@ -193,6 +193,12 @@ enum TajweedRule {
   /// clearly.
   idgham,
 
+  /// Idghām into a mīm starting the next word: a sākin mīm (idghām shafawī,
+  /// «قُلُوبِهِم مَّرَضٌ») or a nūn / tanween («مِن مَّآءٍ») — one long mīm
+  /// with its ghunnah, not a single one. (The reference keeps no trace of
+  /// which letter merged: the same check for both.)
+  idghamMim,
+
   /// Qalqala: the echo of a sākin «ق ط ب ج د».
   qalqala,
 
@@ -1443,7 +1449,7 @@ class QuranAcousticVerifier {
           RecitationErrorType.shaddaError,
           'NO_SHADDA',
           const [],
-          rule: merged != null ? TajweedRule.idgham : null,
+          rule: merged != null ? TajweedRule.idgham : _mergedAcross(ts, k),
         ),
       ];
     }
@@ -1493,6 +1499,16 @@ int? _plainOfHidden(PhoneticToken t) {
     return phoneticClassOf(t.sourceChar == 'م' ? 'م' : 'ن');
   }
   return null;
+}
+
+/// For a doubled «م» whose first half ends the word before ([ts]`[k]` the
+/// second): idghām into mīm. `null` for a shadda within a word («ثُمَّ»).
+TajweedRule? _mergedAcross(List<PhoneticToken> ts, int k) {
+  if (k < 2 || ts[k].symbol != 'م') return null;
+  final first = ts[k - 1];
+  return first.symbol == 'م' && ts[k - 2].word != first.word
+      ? TajweedRule.idghamMim
+      : null;
 }
 
 /// For a letter that another merged into (idghām), the letter merged — a

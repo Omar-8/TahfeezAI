@@ -1692,6 +1692,10 @@ class _HifzSettingsSheet extends ConsumerWidget {
                   AppLocalizations.of(context).ruleIkhfaShafawi,
                 ),
                 (TajweedRule.idgham, AppLocalizations.of(context).ruleIdgham),
+                (
+                  TajweedRule.idghamMim,
+                  AppLocalizations.of(context).ruleIdghamMim,
+                ),
                 (TajweedRule.qalqala, AppLocalizations.of(context).ruleQalqala),
                 (TajweedRule.madd, AppLocalizations.of(context).ruleMadd),
               ])

@@ -508,9 +508,10 @@
   "ruleIqlab": "Iqlab (noon before ب)",
   "ruleIkhfaShafawi": "Ikhfa shafawi (meem before ب)",
   "ruleIdgham": "Idgham (noon merged)",
+  "ruleIdghamMim": "Idgham into meem (meem or noon)",
   "ruleQalqala": "Qalqala",
   "ruleMadd": "Madd length",
-  "tajweedRulesNote": "Not checked yet: how long a ghunnah is held, and idgham of meem.",
+  "tajweedRulesNote": "Not checked yet: how long a ghunnah is held.",
   "recQalqala": "qalqala: «{letter}» with sukun needs its echo (a slight bounce)",
   "@recQalqala": {
     "placeholders": {

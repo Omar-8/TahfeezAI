@@ -472,8 +472,28 @@ void main() {
       HifzSettings.fromJson({
         'tajweedRules': ['qalqala', 'unknown'],
       }).tajweedRules,
-      {TajweedRule.qalqala},
+      // (Saved before idghām into mīm was offered: that one on.)
+      {TajweedRule.qalqala, TajweedRule.idghamMim},
     );
+  });
+
+  test('a tajweed rule added since the rules were chosen is on; a rule '
+      'turned off stays off', () {
+    // Saved before idghām into mīm existed, with qalqala turned off.
+    final old = HifzSettings.fromJson({
+      'tajweedRules': ['ikhfa', 'iqlab', 'ikhfaShafawi', 'idgham', 'madd'],
+    });
+    expect(old.tajweedRules, contains(TajweedRule.idghamMim));
+    expect(old.tajweedRules, isNot(contains(TajweedRule.qalqala)));
+    // Turned off since: stays off.
+    final off = HifzSettings.fromJson(
+      old
+          .copyWith(
+            tajweedRules: {...old.tajweedRules}..remove(TajweedRule.idghamMim),
+          )
+          .toJson(),
+    );
+    expect(off.tajweedRules, isNot(contains(TajweedRule.idghamMim)));
   });
 
   test('pronunciation strictness: balanced until chosen, then as saved', () {
