@@ -187,10 +187,10 @@ dart run tool/quran_data/build_production_data.dart # the app's bundled data
 
 ### 3. The speech model
 
-Download `quran_acoustic.onnx` and `quran_acoustic.json` from the [`model-v3.6` release](https://github.com/Omar-8/TahfeezAI/releases/tag/model-v3.6) into `assets/models/`:
+Download `quran_acoustic.onnx` and `quran_acoustic.json` from the [`model-v3.7` release](https://github.com/Omar-8/TahfeezAI/releases/tag/model-v3.7) into `assets/models/`:
 
 ```sh
-gh release download model-v3.6 --repo Omar-8/TahfeezAI --dir assets/models
+gh release download model-v3.7 --repo Omar-8/TahfeezAI --dir assets/models
 ```
 
 ### 4. Run

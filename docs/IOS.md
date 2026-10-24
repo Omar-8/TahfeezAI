@@ -32,7 +32,7 @@ differs only in the compiled Dart code).
 5. `flutter run --profile --dart-define=TAHFEEZ_KEEP_RECORDINGS=true` on
    an iPhone.
 6. The acoustic model is bundled (`assets/models/`, from the release
-   `model-v3.6`: `gh release download model-v3.6 --dir assets/models`). A
+   `model-v3.7`: `gh release download model-v3.7 --dir assets/models`). A
    different one can still be sideloaded into `Documents/models/` with
    `xcrun devicectl device copy to --domain-type appDataContainer ...`;
    it then comes first.

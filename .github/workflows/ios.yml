@@ -88,12 +88,12 @@ jobs:
           key: quran-data-${{ hashFiles('tool/quran_data/**/*.dart', 'tool/quran_engine/fetch_page_data.sh') }}
 
       # The acoustic model, bundled into the app but not in git: the
-      # release "model-v3.6" of this repository (checked against its manifest).
+      # release "model-v3.7" of this repository (checked against its manifest).
       - name: Acoustic model
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release download model-v3.6 --dir assets/models --clobber
+          gh release download model-v3.7 --dir assets/models --clobber
           python3 -c "import hashlib,json; m=json.load(open('assets/models/quran_acoustic.json')); h=hashlib.sha256(open('assets/models/quran_acoustic.onnx','rb').read()).hexdigest(); assert h==m['sha256'], h; print('model ok', m['id'])"
 
       - name: Mushaf pages (Quran Engine v0.3.0 data, SHA-256 checked) and layout

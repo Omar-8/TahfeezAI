@@ -274,6 +274,15 @@ const credits = <Credit>[
   ),
   Credit(
     group: CreditGroup.data,
+    name: 'User Recited Verses Full (greentechapps)',
+    owner: 'greentechapps; originally collected by the Tarteel project',
+    licence: 'CC BY 4.0',
+    url: 'https://huggingface.co/datasets/greentechapps/user_recited_verses_full',
+    useEn: 'Training the recitation model on real phone recordings',
+    useAr: 'تدريب نموذج التلاوة على تسجيلات هواتف حقيقية',
+  ),
+  Credit(
+    group: CreditGroup.data,
     name: 'QDAT (obadx/qdat)',
     owner: 'QDAT authors; cleaned by obadx',
     licence: 'MIT (obadx/qdat)',
