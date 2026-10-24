@@ -1546,63 +1546,111 @@ class _RecitationIntroSheet extends ConsumerWidget {
         ],
       ),
     );
-    return SingleChildScrollView(
-      key: const ValueKey('recitation-intro'),
-      padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(l10n.recIntroTitle, style: theme.textTheme.titleLarge),
-          const SizedBox(height: 12),
-          // What to do, in this mode.
-          ...switch (mode) {
-            RecitationIntroMode.recite => [
-              point(const Icon(Icons.mic_rounded), l10n.recIntroListen),
-              point(const Icon(Icons.stop_circle_outlined), l10n.recIntroStop),
-            ],
-            RecitationIntroMode.loop => [
-              point(const Icon(Icons.repeat_rounded), l10n.guideLoopRecite),
-            ],
-            RecitationIntroMode.follow => [
-              point(
-                const Icon(Icons.record_voice_over_outlined),
-                l10n.guideFollowPractice,
-              ),
-            ],
-          },
-          point(const Icon(Icons.palette_outlined), l10n.recIntroColours),
-          Padding(
-            key: const ValueKey('recitation-intro-colours'),
-            padding: const EdgeInsets.only(bottom: 8),
-            child: Column(
+    final scheme = theme.colorScheme;
+    // As the Loop and Follow along sheets: a titled column that scrolls,
+    // inside the safe area (clear of the system navigation bar), the
+    // buttons side by side at its end.
+    return SafeArea(
+      child: SingleChildScrollView(
+        key: const ValueKey('recitation-intro'),
+        padding: const EdgeInsets.fromLTRB(
+          TahfeezSpacing.md,
+          0,
+          TahfeezSpacing.md,
+          TahfeezSpacing.md,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
               children: [
-                colour(0xFF43A047, l10n.recLegendCorrect),
-                colour(0xFFE0A800, l10n.recLegendSkipped),
-                colour(0xFFD32F2F, l10n.recLegendWrong),
-                colour(
-                  settings.pronunciationColor,
-                  l10n.recLegendPronunciation,
+                Icon(
+                  switch (mode) {
+                    RecitationIntroMode.recite => Icons.mic_rounded,
+                    RecitationIntroMode.loop => Icons.repeat_rounded,
+                    RecitationIntroMode.follow =>
+                      Icons.record_voice_over_outlined,
+                  },
+                  size: 20,
+                  color: scheme.primary,
                 ),
-                colour(settings.tajweedColor, l10n.recLegendTajweed),
+                const SizedBox(width: TahfeezSpacing.sm),
+                Expanded(
+                  child: Text(
+                    l10n.recIntroTitle,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
               ],
             ),
-          ),
-          point(const Icon(Icons.school_outlined), l10n.recIntroLearning),
-          point(const Icon(Icons.lock_outline), l10n.recIntroPrivate),
-          const SizedBox(height: 16),
-          FilledButton(
-            key: const ValueKey('recitation-intro-start'),
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(l10n.recIntroStart),
-          ),
-          const SizedBox(height: 8),
-          // Over this sheet, back to it when closed.
-          OutlinedButton(
-            key: const ValueKey('recitation-intro-settings'),
-            onPressed: () => showHifzSettingsSheet(context),
-            child: Text(l10n.recIntroSettings),
-          ),
-        ],
+            const SizedBox(height: TahfeezSpacing.sm),
+            // What to do, in this mode.
+            ...switch (mode) {
+              RecitationIntroMode.recite => [
+                point(const Icon(Icons.mic_rounded), l10n.recIntroListen),
+                point(
+                  const Icon(Icons.stop_circle_outlined),
+                  l10n.recIntroStop,
+                ),
+              ],
+              RecitationIntroMode.loop => [
+                point(const Icon(Icons.repeat_rounded), l10n.guideLoopRecite),
+              ],
+              RecitationIntroMode.follow => [
+                point(
+                  const Icon(Icons.record_voice_over_outlined),
+                  l10n.guideFollowPractice,
+                ),
+              ],
+            },
+            point(const Icon(Icons.palette_outlined), l10n.recIntroColours),
+            Padding(
+              key: const ValueKey('recitation-intro-colours'),
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Column(
+                children: [
+                  colour(0xFF43A047, l10n.recLegendCorrect),
+                  colour(0xFFE0A800, l10n.recLegendSkipped),
+                  colour(0xFFD32F2F, l10n.recLegendWrong),
+                  colour(
+                    settings.pronunciationColor,
+                    l10n.recLegendPronunciation,
+                  ),
+                  colour(settings.tajweedColor, l10n.recLegendTajweed),
+                ],
+              ),
+            ),
+            point(const Icon(Icons.school_outlined), l10n.recIntroLearning),
+            point(const Icon(Icons.lock_outline), l10n.recIntroPrivate),
+            const SizedBox(height: TahfeezSpacing.md),
+            Row(
+              children: [
+                // Over this sheet, back to it when closed.
+                TextButton(
+                  key: const ValueKey('recitation-intro-settings'),
+                  onPressed: () => showHifzSettingsSheet(context),
+                  child: Text(l10n.recIntroSettings),
+                ),
+                const SizedBox(width: TahfeezSpacing.sm),
+                Expanded(
+                  child: FilledButton.icon(
+                    key: const ValueKey('recitation-intro-start'),
+                    style: FilledButton.styleFrom(
+                      minimumSize: const Size.fromHeight(52),
+                    ),
+                    icon: const Icon(Icons.mic_rounded),
+                    label: Text(l10n.recIntroStart),
+                    onPressed: () => Navigator.of(context).pop(true),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
