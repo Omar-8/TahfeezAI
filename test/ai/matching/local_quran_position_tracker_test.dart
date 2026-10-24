@@ -1,7 +1,9 @@
 import 'dart:math' as math;
+import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tahfeez_ai/ai/acoustic/acoustic_frame_stream.dart';
+import 'package:tahfeez_ai/ai/acoustic/quran_acoustic_model.dart';
 import 'package:tahfeez_ai/ai/acoustic/quran_phonetic_reference.dart';
 import 'package:tahfeez_ai/ai/hifz/hifz_judge.dart';
 import 'package:tahfeez_ai/ai/matching/local_quran_position_tracker.dart';
@@ -252,6 +254,57 @@ void main() {
         (ayahId: 103003, wordIndex: 0),
         (ayahId: 103003, wordIndex: 1),
         (ayahId: 103003, wordIndex: 2),
+      ]);
+    });
+
+    test('an ayah\'s last words, the short ones before its last heard as '
+        'silence, are placed at the pause', () {
+      // Owner's phone, 2:8: «…وَبِٱلْيَوْمِ ٱلْءَاخِرِ وَمَا هُم بِمُؤْمِنِينَ» with
+      // «وَمَا هُم» said aloud but heard mostly as blanks, then a pause. They
+      // were shown only once the next ayah was said (5.8 s late).
+      final ref = loadTestReference();
+      final classes = quranPhoneticVocabulary.length;
+      final rows = <List<double>>[];
+      void frame(int top, [int? second]) => rows.add([
+        for (var k = 0; k < classes; k++)
+          k == top ? -0.1 : (k == second ? -2.5 : -20),
+      ]);
+      frame(ctcBlank);
+      // The ayah as said (its joined units), «وَمَا هُم» (words 9 and 10)
+      // blanks with their sounds only second.
+      final span = ref.span([
+        for (var w = 0; w < 11; w++) (ayahId: 2008, wordIndex: w),
+      ]);
+      for (final t in span.tokens) {
+        if (t.optional || t.unitFinalVowel) continue;
+        final weak = t.word.wordIndex == 8 || t.word.wordIndex == 9;
+        frame(weak ? ctcBlank : t.token, weak ? t.token : null);
+        frame(weak ? ctcBlank : t.token, weak ? t.token : null);
+        frame(ctcBlank);
+      }
+      for (var i = 0; i < 30; i++) {
+        frame(ctcBlank);
+      }
+      final frames = AcousticFrames(
+        frames: rows.length,
+        classes: classes,
+        logProbs: Float32List.fromList([for (final r in rows) ...r]),
+        frameDuration: const Duration(milliseconds: 40),
+      );
+      final tracker = LocalQuranPositionTracker(corpus, loadTestPhonemes)
+        ..start(anchor: pos(2, 8, 1), trustAnchor: true);
+      final out = <QuranMatchEvent>[];
+      for (var at = 0; at < frames.frames; at += 4) {
+        final to = math.min(frames.frames, at + 4);
+        out.addAll(
+          tracker.onFrames(TimedAcousticFrames(at, frames.slice(at, to - 1))),
+        );
+      }
+      // The pause: what was held back is final now.
+      out.addAll(tracker.flush());
+      final heard = out.whereType<WordHeard>().map((h) => h.ref).toList();
+      expect(heard, [
+        for (var w = 0; w < 11; w++) (ayahId: 2008, wordIndex: w),
       ]);
     });
 

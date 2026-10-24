@@ -257,7 +257,15 @@ class LocalQuranPositionTracker implements RecitationPositionMatcher {
       _log('dropping ${_frames.end - _mark - config.maxPendingFrames} frames');
       _mark = _frames.end - config.maxPendingFrames;
     }
-    _frames.dropBefore(_mark - 2);
+    // Kept from the last placed word on (within the pending limit): frames
+    // the model heard as silence may hold the next words («وَمَا هُم» said
+    // aloud, heard as blanks), for the alignment at a pause.
+    _frames.dropBefore(
+      math.max(
+        _frames.end - config.maxPendingFrames,
+        math.min(_mark - 2, lastPlacedFrame ?? _mark),
+      ),
+    );
     return events;
   }
 
@@ -294,6 +302,24 @@ class LocalQuranPositionTracker implements RecitationPositionMatcher {
     }
     _mark = last;
     _tail = const {};
+  }
+
+  /// Whether every sound [word] must have is placed in [fit], fitting as
+  /// well as the expected word at a pause must.
+  bool _heardClearly(_Fit fit, WordRef word) {
+    var frames = 0;
+    var cost = 0.0;
+    for (var k = 0; k < fit.tokens.length; k++) {
+      final t = fit.tokens[k];
+      if (t.word != word || t.optional || t.unitFinalVowel) continue;
+      final s = fit.spans[k];
+      if (s == null) return false;
+      for (var f = s.start; f <= s.end; f++) {
+        cost += fit.excess[f];
+        frames++;
+      }
+    }
+    return frames > 0 && cost / frames <= config.pauseFollowCost;
   }
 
   /// A fit is usable if it explains the audio up to its end, or up to a
@@ -349,6 +375,32 @@ class LocalQuranPositionTracker implements RecitationPositionMatcher {
           f.cost <= config.pauseFollowCost) {
         _log('at a pause: ${_fmt(next)} (cost ${f.cost.toStringAsFixed(2)})');
         return _emit(f, start, flush);
+      }
+      // …or the rest of the ayah (two or three words), its last word heard
+      // clearly: the short words before it said quickly or softly. The model
+      // barely heard «وَمَا هُم» before a clear «بِمُؤْمِنِينَ»; nothing fitted
+      // until the next ayah's audio pushed this out, and the ayah's last
+      // words were shown only then (owner's 2:8, 5.8 s late, 2026-10-24).
+      final ayah = corpus.words[next].ref.ayahId;
+      var end = next;
+      while (end + 1 < corpus.length &&
+          corpus.words[end + 1].ref.ayahId == ayah) {
+        end++;
+      }
+      if (end > next && end - next <= 2) {
+        final r = _align(resources, w, next, end, flexible: false, toEnd: true);
+        if (r != null &&
+            r.prefixSpeech <= 2 &&
+            r.trailingSpeech <= 4 &&
+            r.lastWord == end &&
+            r.cost <= config.followCost &&
+            _heardClearly(r, corpus.words[end].ref)) {
+          _log(
+            'at a pause: ${_fmt(next)}..${_fmt(end)}, the ayah\'s end '
+            '(cost ${r.cost.toStringAsFixed(2)})',
+          );
+          return _emit(r, start, flush);
+        }
       }
     }
     if (held != null) return held;
@@ -713,6 +765,7 @@ class LocalQuranPositionTracker implements RecitationPositionMatcher {
     int last, {
     required bool flexible,
     bool complete = false,
+    bool toEnd = false,
   }) {
     if (first > last || window.frames == 0) return null;
     final span = resources.reference.span([
@@ -731,12 +784,12 @@ class LocalQuranPositionTracker implements RecitationPositionMatcher {
       [for (final t in tokens) t.token],
       optional: [for (final t in tokens) t.optional || t.unitFinalVowel],
       startAt: flexible ? startAt : null,
-      // [complete]: only at the end of a word, not partway through one.
+      // [complete]: only at the end of a word, not partway through one;
+      // [toEnd]: only at the end of [last].
       endAt: {
         for (var k = 0; k < tokens.length; k++)
-          if (!complete ||
-              k == tokens.length - 1 ||
-              tokens[k + 1].word != tokens[k].word)
+          if (k == tokens.length - 1 ||
+              (!toEnd && (!complete || tokens[k + 1].word != tokens[k].word)))
             k,
       },
     );
