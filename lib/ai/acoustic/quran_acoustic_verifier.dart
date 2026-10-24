@@ -206,8 +206,8 @@ enum TajweedRule {
   madd,
 
   /// A doubled «ن» / «م» held with its ghunnah ([AcousticThresholds
-  /// .ghunnahHold]). Experimental, off unless chosen: on the owner's
-  /// everyday recitation it marks many correctly held ghunnahs.
+  /// .ghunnahHold]). On by the owner's decision (2026-10-25), after testing
+  /// it himself; measured, it also marks many correctly held ghunnahs.
   ghunnah,
 }
 

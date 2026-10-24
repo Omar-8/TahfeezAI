@@ -472,8 +472,8 @@ void main() {
       HifzSettings.fromJson({
         'tajweedRules': ['qalqala', 'unknown'],
       }).tajweedRules,
-      // (Saved before idghām into mīm was offered: that one on.)
-      {TajweedRule.qalqala, TajweedRule.idghamMim},
+      // (Saved before idghām into mīm and the ghunnah were offered: on.)
+      {TajweedRule.qalqala, TajweedRule.idghamMim, TajweedRule.ghunnah},
     );
   });
 
@@ -496,32 +496,17 @@ void main() {
     expect(off.tajweedRules, isNot(contains(TajweedRule.idghamMim)));
   });
 
-  test(
-    'the experimental ghunnah rule is off until chosen, kept when chosen',
-    () {
-      expect(
-        const HifzSettings().tajweedRules,
-        isNot(contains(TajweedRule.ghunnah)),
-      );
-      expect(
-        HifzSettings.fromJson({
-          'tajweedRules': ['madd'],
-        }).tajweedRules,
-        isNot(contains(TajweedRule.ghunnah)),
-        reason: 'not turned on as a rule added since',
-      );
-      final on = const HifzSettings().copyWith(
-        tajweedRules: {
-          ...HifzSettings.defaultTajweedRules,
-          TajweedRule.ghunnah,
-        },
-      );
-      expect(
-        HifzSettings.fromJson(on.toJson()).tajweedRules,
-        contains(TajweedRule.ghunnah),
-      );
-    },
-  );
+  test('the ghunnah rule is on until turned off, and stays off', () {
+    expect(const HifzSettings().tajweedRules, contains(TajweedRule.ghunnah));
+    final off = const HifzSettings().copyWith(
+      tajweedRules: {...HifzSettings.defaultTajweedRules}
+        ..remove(TajweedRule.ghunnah),
+    );
+    expect(
+      HifzSettings.fromJson(off.toJson()).tajweedRules,
+      isNot(contains(TajweedRule.ghunnah)),
+    );
+  });
 
   test('the qalqala check: balanced until chosen, its own threshold', () {
     expect(HifzSettings.fromJson({}).qalqala, QalqalaCheck.balanced);
@@ -530,17 +515,22 @@ void main() {
       HifzSettings.fromJson(sensitive.toJson()).qalqala,
       QalqalaCheck.sensitive,
     );
+    // Lenient as the check was until 2026-10-25; balanced and sensitive
+    // more ready to mark a missing echo.
     expect(
-      AcousticVerificationController.qalqalaErrorFor(QalqalaCheck.balanced),
+      AcousticVerificationController.qalqalaErrorFor(QalqalaCheck.lenient),
       AcousticVerificationController.streamingQalqalaError,
     );
+    final balanced = AcousticVerificationController.qalqalaErrorFor(
+      QalqalaCheck.balanced,
+    );
     expect(
-      AcousticVerificationController.qalqalaErrorFor(QalqalaCheck.sensitive),
+      balanced,
       lessThan(AcousticVerificationController.streamingQalqalaError),
     );
     expect(
-      AcousticVerificationController.qalqalaErrorFor(QalqalaCheck.lenient),
-      greaterThan(AcousticVerificationController.streamingQalqalaError),
+      AcousticVerificationController.qalqalaErrorFor(QalqalaCheck.sensitive),
+      lessThan(balanced),
     );
   });
 

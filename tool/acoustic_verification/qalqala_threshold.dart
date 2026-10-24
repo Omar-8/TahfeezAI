@@ -85,7 +85,20 @@ void main(List<String> args) {
   stdout.writeln(
     'threshold  ${[for (final p in missing.keys) 'caught $p (${missing[p]!.length})', for (final p in kept.keys) 'flagged $p (${kept[p]!.length})'].join('  ')}',
   );
-  for (final t in [0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 4.0]) {
+  for (final t in [
+    -3.0,
+    -2.0,
+    -1.0,
+    -0.5,
+    0.0,
+    0.5,
+    1.0,
+    1.5,
+    2.0,
+    2.5,
+    3.0,
+    4.0,
+  ]) {
     stdout.writeln(
       '${t.toStringAsFixed(1).padLeft(9)}  ${[for (final xs in missing.values) share(xs, t).padLeft(8), for (final xs in kept.values) share(xs, t).padLeft(8)].join('  ')}',
     );

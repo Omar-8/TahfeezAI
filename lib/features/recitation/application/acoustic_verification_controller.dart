@@ -601,21 +601,22 @@ class AcousticVerificationController
   static const streamingQalqalaError = 2.0;
 
   /// The echo check's threshold for the Hifz setting [check] (before the
-  /// overall strictness shifts it). v3.7 (`qalqala_threshold.dart`, 2026-10-25):
-  /// Al-Ikhlas learners' missing echoes caught / correct ones flagged —
-  /// the owner's 0% at every one, Tarteel users', unseen Juz 30 reciters':
-  ///   lenient   3.0   5.6%   7%  20%
-  ///   balanced  2.0   7.6%   8%  31%
-  ///   sensitive 0.5  20.5%   9%  47%
+  /// overall strictness shifts it); more sensitive by the owner's decision
+  /// (2026-10-25: «ٱلْفَلَقِ» and the rest of Al-Falaq said without the
+  /// echo were not marked). v3.7 (`qalqala_threshold.dart`): Al-Ikhlas
+  /// learners' missing echoes caught / their correct ones flagged / the
+  /// owner's correct ones flagged / Tarteel users' / unseen Juz 30 reciters':
+  ///   lenient    2.0    7.6%   1.5%  0 of 122    8%  31%
+  ///   balanced   0.0   30.4%   4.4%  0 of 122   11%  52%
+  ///   sensitive -1.0   57.7%   8.1%  2 of 122   15%  67%
   static double qalqalaErrorFor(QalqalaCheck check) => switch (check) {
-    QalqalaCheck.lenient => 3.0,
-    QalqalaCheck.balanced => streamingQalqalaError,
-    QalqalaCheck.sensitive => 0.5,
+    QalqalaCheck.lenient => streamingQalqalaError,
+    QalqalaCheck.balanced => 0.0,
+    QalqalaCheck.sensitive => -1.0,
   };
 
-  /// A ghunnah not held (the experimental rule, off unless chosen in the
-  /// tajweed rules), at 1.5 — owner's request to test it himself,
-  /// 2026-10-25. v3.7 at the app's settings (`ghunnah_check.dart`): the
+  /// A ghunnah not held (a tajweed rule, on by default: the owner's
+  /// decision after testing it, 2026-10-25), at 1.5. v3.7 at the app's settings (`ghunnah_check.dart`): the
   /// owner's deliberate cuts caught 11 of 20, his deliberately held takes
   /// 0 of 20 flagged; but on everyday recitation correctly held ghunnahs
   /// flagged — his 51%, Tarteel users' 25%, unseen Juz 30 reciters' 42% —

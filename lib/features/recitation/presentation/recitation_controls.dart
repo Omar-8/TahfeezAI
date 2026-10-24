@@ -1855,15 +1855,6 @@ class _HifzSettingsSheet extends ConsumerWidget {
                     ],
                   ),
                 ),
-              Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(32, 0, 16, 8),
-                child: Text(
-                  AppLocalizations.of(context).tajweedRulesNote,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ),
               if (settings.colorWords)
                 _ColourChoice(
                   key: const ValueKey('hifz-tajweed-colour'),

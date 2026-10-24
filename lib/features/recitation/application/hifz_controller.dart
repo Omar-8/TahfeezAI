@@ -163,16 +163,8 @@ class HifzSettings {
     TajweedRule.ghunnah,
   };
 
-  /// Every rule but the experimental ghunnah length (off until chosen).
-  static const defaultTajweedRules = {
-    TajweedRule.ikhfa,
-    TajweedRule.iqlab,
-    TajweedRule.ikhfaShafawi,
-    TajweedRule.idghamMim,
-    TajweedRule.idgham,
-    TajweedRule.qalqala,
-    TajweedRule.madd,
-  };
+  /// Every rule, on until chosen.
+  static const defaultTajweedRules = allTajweedRules;
 
   /// With [tajweed]: the rules judged (each can be turned off).
   final Set<TajweedRule> tajweedRules;
