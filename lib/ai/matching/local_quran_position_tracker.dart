@@ -45,6 +45,7 @@ class LocalPositionTrackerConfig {
     this.extraFrames = 8,
     this.pauseFrames = 5,
     this.endMargin = 3,
+    this.strayCost = 0.5,
   });
 
   /// The most the next word may cost when the audio paused
@@ -95,6 +96,14 @@ class LocalPositionTrackerConfig {
 
   /// Frames after a word's last sound before it counts as finished.
   final int endMargin;
+
+  /// The expected words fitting at least this well may follow a little
+  /// unexplained sound (shorter than [extraFrames]: a breath, the held end
+  /// of a stop); a looser fit only up to 2 frames of it. Held to 2, a stop
+  /// at a waqf sign heard as «ۦهه» after «لِي» was taken for «لِي» said
+  /// again — too short to believe — and «فَلَا تَلُومُونِي…» was shown only
+  /// once that audio was given up on, 10 s later (owner's 14:22, 2026-10-24).
+  final double strayCost;
 }
 
 /// Follows the reciter through the Quran from the on-device acoustic
@@ -322,6 +331,12 @@ class LocalQuranPositionTracker implements RecitationPositionMatcher {
     return frames > 0 && cost / frames <= config.pauseFollowCost;
   }
 
+  /// Whether the sound before [fit] may be passed over: 2 frames, or less
+  /// than an extra word's before a close fit.
+  bool _leadIn(_Fit fit) =>
+      fit.prefixSpeech <= 2 ||
+      (fit.prefixSpeech < config.extraFrames && fit.cost <= config.strayCost);
+
   /// A fit is usable if it explains the audio up to its end, or up to a
   /// pause after which the rest is left for the next step.
   bool _usable(_Fit fit, double cost) =>
@@ -342,7 +357,7 @@ class LocalQuranPositionTracker implements RecitationPositionMatcher {
     final straight = _align(resources, window, next, last, flexible: false);
     List<QuranMatchEvent>? held;
     if (straight != null &&
-        straight.prefixSpeech <= 2 &&
+        _leadIn(straight) &&
         _usable(straight, config.followCost)) {
       final placed = _emit(straight, from, flush);
       // Nothing finished at a pause: try the next word in full below.

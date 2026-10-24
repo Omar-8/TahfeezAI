@@ -308,6 +308,64 @@ void main() {
       ]);
     });
 
+    test('a stop at a waqf sign, its end heard as sound, does not hold the '
+        'next words', () {
+      // Owner's phone, 14:22: «…فَٱسْتَجَبْتُمْ لِى ۖ» stopped at the waqf
+      // sign, its end heard as «ۦهه», then «فَلَا تَلُومُونِى…». The stop was
+      // taken for «لِى» said again and the next words were shown 10 s late.
+      final ref = loadTestReference();
+      final classes = quranPhoneticVocabulary.length;
+      final rows = <List<double>>[];
+      void frame(int top) =>
+          rows.add([for (var k = 0; k < classes; k++) k == top ? 0 : -20]);
+      void say(int from, int to) {
+        final span = ref.span([
+          for (var w = from; w <= to; w++) (ayahId: 14022, wordIndex: w),
+        ]);
+        for (final t in span.tokens) {
+          if (t.optional || t.unitFinalVowel) continue;
+          frame(t.token);
+          frame(t.token);
+          frame(ctcBlank);
+        }
+      }
+
+      frame(ctcBlank);
+      say(18, 22); // … «فَٱسْتَجَبْتُمْ لِى»
+      for (final c in ['ۦ', 'ه', 'ه']) {
+        frame(phoneticClassOf(c));
+      }
+      for (var i = 0; i < 30; i++) {
+        frame(ctcBlank);
+      }
+      say(23, 27); // «فَلَا تَلُومُونِى وَلُومُوٓا۟ أَنفُسَكُم»
+      for (var i = 0; i < 6; i++) {
+        frame(ctcBlank);
+      }
+      final frames = AcousticFrames(
+        frames: rows.length,
+        classes: classes,
+        logProbs: Float32List.fromList([for (final r in rows) ...r]),
+        frameDuration: const Duration(milliseconds: 40),
+      );
+      final tracker = LocalQuranPositionTracker(corpus, loadTestPhonemes)
+        ..start(anchor: pos(14, 22, 19), trustAnchor: true);
+      final out = <QuranMatchEvent>[];
+      for (var at = 0; at < frames.frames; at += 4) {
+        final to = math.min(frames.frames, at + 4);
+        out.addAll(
+          tracker.onFrames(TimedAcousticFrames(at, frames.slice(at, to - 1))),
+        );
+      }
+      // Before any pause: the words after the stop are followed as said.
+      final heard = out.whereType<WordHeard>().map((h) => h.ref).toList();
+      expect(heard, contains((ayahId: 14022, wordIndex: 24)));
+      expect(
+        heard.where((r) => r == (ayahId: 14022, wordIndex: 22)),
+        hasLength(1),
+      );
+    });
+
     test('going back to re-read the previous surah\'s last ayah is followed', () {
       // 106:4 (7 words), then into Al-Ma'un — «أَرَءَيْتَ ٱلَّذِى» — then back
       // to 106:4 from its start, 9 words back, and on into 107:1 again.
