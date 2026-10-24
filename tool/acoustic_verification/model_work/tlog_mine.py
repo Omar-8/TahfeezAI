@@ -97,7 +97,9 @@ def main():
     files = sorted(f for f in HfApi().list_repo_files(REPO, repo_type='dataset')
                    if f.startswith('data/clean-') and f.endswith('.parquet'))
     if a.files:
-        files = sorted(random.Random(a.seed).sample(files, a.files))
+        # One fixed random order of all the files: --files N takes its first N, so a pilot's
+        # files are the start of a bigger run's (resumed, not redone).
+        files = sorted(random.Random(a.seed).sample(files, len(files))[:a.files])
     ix = os.path.join(a.out, 'index.json')
     state = json.load(open(ix)) if os.path.exists(ix) else dict(
         files=[], clips=[], overlaps=[], n_shard=0,

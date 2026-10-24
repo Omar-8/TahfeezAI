@@ -12,6 +12,8 @@
 #   4. From v3.7, ft5 at T=1, lr 1e-5, up to 3,000 steps; the EMA kept at 1,000 / 2,000 / 3,000
 #      (--keep-ema) and judged in order by the stop rules on the laptop.
 #   FILES=120 tmux new -d -s round34 'bash gpu/round34.sh 2>&1 | tee -a round34.out'
+#   Pilot: FILES=20 STEPS=1000 NAME=G25p — its files are the first 20 of the 120 (tlog_mine.py's
+#   fixed order), so scaling up resumes the mining; the pools are selected again from all.
 set -u
 cd "$(dirname "$0")/.."
 PY=.venv/bin/python
@@ -29,12 +31,14 @@ if [ ! -f data_orig/val.npz ]; then
   grep -q '^prepared' prep_orig.out || { log "data_orig FAILED: $(tail -n 1 prep_orig.out)"; exit 1; }
 fi
 FILES=${FILES:-120}
-if ! grep -q '^done' tlog_mine.out 2>/dev/null; then
+STEPS=${STEPS:-3000}
+if [ "$(python3 -c "import json;print(len(json.load(open('data_tlog_cand/index.json'))['files']))" 2>/dev/null || echo 0)" -lt "$FILES" ]; then
   log "TLOG mining: $FILES files"
   $PY tlog_mine.py data_tlog_cand --student init/v37/student.pt --test-packs tlog juz30h \
     --files $FILES --embed >> tlog_mine.out 2>&1
-  grep -q '^done' tlog_mine.out || { log "TLOG mining FAILED: $(tail -n 1 tlog_mine.out)"; exit 1; }
-  log "mined: $(grep '^done' tlog_mine.out)"
+  tail -n 1 tlog_mine.out | grep -q '^done' || { log "TLOG mining FAILED: $(tail -n 1 tlog_mine.out)"; exit 1; }
+  log "mined: $(grep '^done' tlog_mine.out | tail -n 1)"
+  rm -rf data_tlog                     # the pools again, from every file mined so far
 fi
 if [ ! -f data_tlog/select.json ]; then
   $PY tlog_select.py data_tlog_cand data_tlog 2>&1 | tee -a round4.log
@@ -58,7 +62,7 @@ log "$name start from v3.7 ($(ls data_mix/shard_*.npz | wc -l) shards; random TL
 for ma in 70 56 44 36 30 30; do
   PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
   $PY distill_student.py train d6h data_mix runs/$name --max-audio $ma --seed 341 \
-    --init init/v37/student.pt --steps 3000 --lr 1e-5 --keep-ema \
+    --init init/v37/student.pt --steps $STEPS --lr 1e-5 --keep-ema \
     --augment 0.6 --phone-extra --pitch 0.25 --tempo 0.3 --hard 0.75 --focus 0.5 --crop 0.5 \
     --repeat shard_95=16,shard_97=2,shard_98=2,shard_99=2,shard_70=$R70,shard_71=$R71 \
     --real-phone shard_70+shard_71 --ctc-scale shard_70=0.3,shard_71=0.3 \
@@ -69,7 +73,7 @@ for ma in 70 56 44 36 30 30; do
   log "$name stopped at max-audio $ma: $(grep -E 'Error|error' train_$name.out | tail -n 1 | cut -c1-100)"
 done
 [ -f runs/$name/student.pt ] || { log "$name FAILED"; exit 1; }
-for st in 1000 2000 3000; do
+for st in $(seq 1000 1000 $STEPS); do
   mkdir -p out/${name}_$st; cp runs/$name/ema_$st.pt out/${name}_$st/student.pt
   cp runs/$name/config.json out/${name}_$st/; cp init/v35s/fbank_prior.json out/${name}_$st/
 done
