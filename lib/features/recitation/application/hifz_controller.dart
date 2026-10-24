@@ -74,7 +74,7 @@ class HifzSettings {
     this.alert = MistakeAlert.vibrate,
     this.colorWords = true,
     this.tajweed = true,
-    this.tajweedRules = allTajweedRules,
+    this.tajweedRules = defaultTajweedRules,
     this.sajdahReminder = true,
     this.strictness = RecitationStrictness.balanced,
     this.tajweedAlert = MistakeAlert.vibrate,
@@ -145,6 +145,18 @@ class HifzSettings {
   ];
 
   static const allTajweedRules = {
+    TajweedRule.ikhfa,
+    TajweedRule.iqlab,
+    TajweedRule.ikhfaShafawi,
+    TajweedRule.idghamMim,
+    TajweedRule.idgham,
+    TajweedRule.qalqala,
+    TajweedRule.madd,
+    TajweedRule.ghunnah,
+  };
+
+  /// Every rule but the experimental ghunnah length (off until chosen).
+  static const defaultTajweedRules = {
     TajweedRule.ikhfa,
     TajweedRule.iqlab,
     TajweedRule.ikhfaShafawi,
@@ -257,14 +269,14 @@ class HifzSettings {
           ? {
               for (final n in json['tajweedRules'] as List)
                 ?TajweedRule.values.asNameMap()[n],
-              for (final r in allTajweedRules)
+              for (final r in defaultTajweedRules)
                 if (!(json['tajweedRulesKnown'] is List
                         ? json['tajweedRulesKnown'] as List
                         : _rulesBeforeIdghamMim)
                     .contains(r.name))
                   r,
             }
-          : allTajweedRules,
+          : defaultTajweedRules,
       sajdahReminder: read('sajdahReminder', true),
       strictness:
           RecitationStrictness.values.asNameMap()[json['strictness']] ??

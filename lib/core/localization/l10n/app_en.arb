@@ -511,7 +511,8 @@
   "ruleIdghamMim": "Idgham into meem (meem or noon)",
   "ruleQalqala": "Qalqala",
   "ruleMadd": "Madd length",
-  "tajweedRulesNote": "Not checked yet: how long a ghunnah is held.",
+  "ruleGhunnah": "Ghunnah held (experimental)",
+  "tajweedRulesNote": "Ghunnah held is experimental: it may mark correctly held ghunnahs.",
   "recQalqala": "qalqala: «{letter}» with sukun needs its echo (a slight bounce)",
   "@recQalqala": {
     "placeholders": {

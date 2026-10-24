@@ -1795,6 +1795,7 @@ class _HifzSettingsSheet extends ConsumerWidget {
                 ),
                 (TajweedRule.qalqala, AppLocalizations.of(context).ruleQalqala),
                 (TajweedRule.madd, AppLocalizations.of(context).ruleMadd),
+                (TajweedRule.ghunnah, AppLocalizations.of(context).ruleGhunnah),
               ])
                 CheckboxListTile(
                   key: ValueKey('tajweed-rule-${rule.name}'),

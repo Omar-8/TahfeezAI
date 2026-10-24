@@ -505,6 +505,7 @@ class AcousticVerificationController
           sukunError: _streaming ? streamingMinorError : null,
           missingVowelError: _streaming ? streamingMinorError : null,
           qalqalaError: _streaming ? streamingQalqalaError : null,
+          ghunnahHold: _streaming ? streamingGhunnahHold : null,
         ),
         settings.strictness,
       ),
@@ -597,6 +598,15 @@ class AcousticVerificationController
   /// learners catches 19.2% of labelled misses, flags 2.5% of correct ones; the
   /// user's phone sessions and professional recitation no more than at 3.
   static const streamingQalqalaError = 2.0;
+
+  /// A ghunnah not held (the experimental rule, off unless chosen in the
+  /// tajweed rules), at 1.5 — owner's request to test it himself,
+  /// 2026-10-25. v3.7 at the app's settings (`ghunnah_check.dart`): the
+  /// owner's deliberate cuts caught 11 of 20, his deliberately held takes
+  /// 0 of 20 flagged; but on everyday recitation correctly held ghunnahs
+  /// flagged — his 51%, Tarteel users' 25%, unseen Juz 30 reciters' 42% —
+  /// and by ear 24 of 38 correct against 3 of 8 cut.
+  static const streamingGhunnahHold = 1.5;
 
   @override
   AcousticVerificationState build() {

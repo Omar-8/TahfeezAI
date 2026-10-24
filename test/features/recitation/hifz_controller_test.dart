@@ -462,7 +462,7 @@ void main() {
   test('tajweed rules: every one until chosen, then as saved', () {
     expect(
       HifzSettings.fromJson({}).tajweedRules,
-      HifzSettings.allTajweedRules,
+      HifzSettings.defaultTajweedRules,
     );
     final some = HifzSettings(tajweedRules: {TajweedRule.madd});
     expect(HifzSettings.fromJson(some.toJson()).tajweedRules, {
@@ -495,6 +495,33 @@ void main() {
     );
     expect(off.tajweedRules, isNot(contains(TajweedRule.idghamMim)));
   });
+
+  test(
+    'the experimental ghunnah rule is off until chosen, kept when chosen',
+    () {
+      expect(
+        const HifzSettings().tajweedRules,
+        isNot(contains(TajweedRule.ghunnah)),
+      );
+      expect(
+        HifzSettings.fromJson({
+          'tajweedRules': ['madd'],
+        }).tajweedRules,
+        isNot(contains(TajweedRule.ghunnah)),
+        reason: 'not turned on as a rule added since',
+      );
+      final on = const HifzSettings().copyWith(
+        tajweedRules: {
+          ...HifzSettings.defaultTajweedRules,
+          TajweedRule.ghunnah,
+        },
+      );
+      expect(
+        HifzSettings.fromJson(on.toJson()).tajweedRules,
+        contains(TajweedRule.ghunnah),
+      );
+    },
+  );
 
   test('pronunciation strictness: balanced until chosen, then as saved', () {
     expect(HifzSettings.fromJson({}).strictness, RecitationStrictness.balanced);

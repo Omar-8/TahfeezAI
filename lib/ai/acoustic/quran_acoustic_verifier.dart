@@ -204,6 +204,11 @@ enum TajweedRule {
 
   /// A madd of four or six counts held long enough.
   madd,
+
+  /// A doubled «ن» / «م» held with its ghunnah ([AcousticThresholds
+  /// .ghunnahHold]). Experimental, off unless chosen: on the owner's
+  /// everyday recitation it marks many correctly held ghunnahs.
+  ghunnah,
 }
 
 /// Configurable decision thresholds, in nats of log-likelihood.
@@ -841,7 +846,7 @@ class QuranAcousticVerifier {
       }
       // A ghunnah not held: the doubled noon / meem heard as its plain
       // letter for long.
-      if (thresholds.tajweed &&
+      if (thresholds.judges(TajweedRule.ghunnah) &&
           (thresholds.ghunnahHold != null || thresholds.ghunnahSplit) &&
           pace != null &&
           span != null &&
