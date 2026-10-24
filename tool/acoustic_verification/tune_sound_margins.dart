@@ -4,7 +4,8 @@
 //   dart run tool/acoustic_verification/tune_sound_margins.dart <tag>
 //       [--mine phone,phone2,...] [--sweep] [--margins group=error/uncertain,...]
 //       [--pause N] [--correct C] [--clips]
-//       [--error E (vowel, letter, shadda)] [--minor M (sukun, missing)]
+//       [--error E (vowel, letter, shadda)] [--letter L (a wrong letter's own)]
+//       [--minor M (sukun, missing)]
 //       [--madd S] (a long madd's share held)
 //
 // <tag>: the model outputs' tag (results/<set>_<tag>.json/.f32; the
@@ -67,7 +68,7 @@ void main(List<String> args) {
   final calibdeg = _load('calibdeg_$tag');
   final base = AcousticThresholds(
     error: double.parse(opt('error') ?? '4'),
-    letterError: double.parse(opt('error') ?? '4'),
+    letterError: double.parse(opt('letter') ?? opt('error') ?? '4'),
     shaddaError: double.parse(opt('error') ?? '4'),
     sukunError: double.parse(opt('minor') ?? '3'),
     missingVowelError: double.parse(opt('minor') ?? '3'),

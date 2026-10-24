@@ -500,7 +500,7 @@ class AcousticVerificationController
           tajweed: tajweed,
           tajweedRules: settings.tajweedRules,
           error: _streaming ? streamingError : null,
-          letterError: _streaming ? streamingError : null,
+          letterError: _streaming ? streamingLetterError : null,
           shaddaError: _streaming ? streamingError : null,
           sukunError: _streaming ? streamingMinorError : null,
           missingVowelError: _streaming ? streamingMinorError : null,
@@ -516,13 +516,13 @@ class AcousticVerificationController
   /// with them the tajweed checks: a missing qalqala echo by the same, a
   /// madd short below 55% / 72% of its length (balanced 65%), a ghunnah's
   /// hold x1.25 / x0.85. The sound groups' margins stay on top.
-  /// Measured with v3.7 at the streaming error 3.6 (owner's phone sets /
-  /// Tarteel users' / unseen Juz 30 reciters' false letter flags; QuranMB's
-  /// and Al-Ikhlas's real mistakes caught; amateurs' correct words flagged;
-  /// spliced mistakes caught), 2026-10-24:
-  ///   lenient  19 / 123 /   952   58.7%   9.9%   2.5%   82.7%
-  ///   balanced 22 / 156 / 1,322   65.2%  11.3%   3.4%   87.9%
-  ///   strict   28 / 182 / 1,531   66.9%  12.9%   5.1%   89.1%
+  /// Measured with v3.7 at the streaming error 3.6, letters 4.1 (owner's
+  /// phone sets / Tarteel users' / unseen Juz 30 reciters' false letter
+  /// flags; QuranMB's and Al-Ikhlas's real mistakes caught; amateurs'
+  /// correct words flagged; spliced mistakes caught), 2026-10-24:
+  ///   lenient  15 /  99 /   779   55.3%   9.9%   2.5%   82.7%
+  ///   balanced 19 / 140 / 1,125   63.2%  10.8%   2.5%   87.9%
+  ///   strict   22 / 156 / 1,322   66.2%  12.2%   4.6%   89.1%
   static AcousticThresholds withStrictness(
     AcousticThresholds thresholds,
     RecitationStrictness strictness,
@@ -579,6 +579,19 @@ class AcousticVerificationController
   /// 87.9%, degraded 87.9 -> 87.1%. (Per-pair letter margins tuned on some
   /// tests did no better on held-out ones than this.)
   static const streamingError = 3.6;
+
+  /// A wrong letter, at 4.1 (owner, 2026-10-24: a letter heard just over
+  /// the threshold is not a mistake — left uncertain, unmarked). Letter
+  /// flags just over it are as often false as real on phones (29% of false
+  /// flags lie within 1 of it, 17% of real ones), and no recheck tells
+  /// them apart. Against 3.6: false letter flags the owner's sets 22 -> 19,
+  /// Tarteel users' 156 -> 140, unseen Juz 30 1,322 -> 1,125; correct words
+  /// flagged, the user's sessions 3.7 -> 3.4%, amateurs' 3.4 -> 2.5%,
+  /// professionals' 1.5 -> 1.3%; real mistakes caught QuranMB 65.2 ->
+  /// 63.2%, Al-Ikhlas 11.3 -> 10.8%, sobolev's reviewed, spliced and
+  /// degraded unchanged (39.5, 87.9, 87.1%). (At 4.6: 19 / 123 / 952,
+  /// QuranMB 61.2%.)
+  static const streamingLetterError = 4.1;
 
   /// A missing qalqala echo, at 2: v3.5s on the held-out Surah Al-Ikhlas
   /// learners catches 19.2% of labelled misses, flags 2.5% of correct ones; the

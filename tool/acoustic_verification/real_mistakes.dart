@@ -38,10 +38,14 @@ void main(List<String> args) {
   final error = args.contains('--error')
       ? double.parse(args[args.indexOf('--error') + 1])
       : 4.0;
+  // --letter L: a wrong letter's own threshold (default: as --error).
+  final letter = args.contains('--letter')
+      ? double.parse(args[args.indexOf('--letter') + 1])
+      : error;
   final verifier = QuranAcousticVerifier(
     thresholds: AcousticThresholds(
       error: error,
-      letterError: error,
+      letterError: letter,
       shaddaError: error,
       sukunError: minor,
       missingVowelError: minor,

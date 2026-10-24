@@ -136,6 +136,22 @@ Future<void> main(List<String> arguments) async {
               'exp': v.token.symbol,
               'heard': v.observed,
               'llr': v.likelihoodRatio,
+              // Where: its frames in the clip's n, its token's place among the
+              // expected K, the first / last sound of its word, the clip's ends open.
+              'start': v.span?.start,
+              'end': v.span?.end,
+              'n': n,
+              'k': k,
+              'K': expected.length,
+              'wordFirst':
+                  k >= 0 && (k == 0 || expected[k - 1].word != v.token.word),
+              'wordLast':
+                  k >= 0 &&
+                  (k == expected.length - 1 ||
+                      expected[k + 1].word != v.token.word),
+              'openStart': m['openStart'],
+              'openEnd': m['openEnd'],
+              'case': m['name'],
               // The threshold it passed: the letter's and its sound group's.
               'at':
                   th.letterError +

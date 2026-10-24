@@ -99,6 +99,7 @@ missed needed **only the vowel margins** to change (`learnerSounds` in
 | similarLetter (letters that sound alike), ayah and quick check | +2 | **+4** |
 | phoneWeak (new: ح→ه ض→د ق→ك ء→ي ن→ي ك→ق خ→ف ظ→ض ل→ذ, one direction each), ayah and quick check | — | **+2** |
 | Letters, vowels, shadda (threshold) | 3 | **3.6** (2026-10-24; 3.4 earlier that day) |
+| A wrong letter's own threshold | as above | **4.1** (2026-10-24: borderline letters not mistakes) |
 | Sukun, missing vowel (threshold 3), hiddenNasal −1 | unchanged | unchanged |
 
 **Similar letters at +4** (added 2026-10-21): false letter flags on phones drop further
@@ -125,9 +126,20 @@ margins stay on top (`AcousticVerificationController.withStrictness`):
 
 | v3.7 | Owner / Tarteel-200 / Juz 30 false letters | QuranMB caught | Al-Ikhlas caught | Amateurs flagged | Spliced caught |
 |---|---|---:|---:|---:|---:|
-| Lenient (4.6) | 19 / 123 / 952 | 58.7% | 9.9% | 2.5% | 82.7% |
-| Balanced (3.6) | 22 / 156 / 1,322 | 65.2% | 11.3% | 3.4% | 87.9% |
-| Precise (3.1) | 28 / 182 / 1,531 | 66.9% | 12.9% | 5.1% | 89.1% |
+| Lenient (4.6, letters 5.1) | 15 / 99 / 779 | 55.3% | 9.9% | 2.5% | 82.7% |
+| Balanced (3.6, letters 4.1) | 19 / 140 / 1,125 | 63.2% | 10.8% | 2.5% | 87.9% |
+| Precise (3.1, letters 3.6) | 22 / 156 / 1,322 | 66.2% | 12.2% | 4.6% | 89.1% |
+
+With letters at 3.6 like the rest: lenient 19 / 123 / 952, 58.7%; balanced 22 / 156 / 1,322,
+65.2%, Al-Ikhlas 11.3%, amateurs 3.4%; precise 28 / 182 / 1,531, 66.9%.
+
+**Borderline letters not mistakes** (owner's decision, 2026-10-24): a wrong letter needs 4.1
+(vowels, shadda 3.6). 29% of v3.7's false letter flags on phones lie within 1 of the threshold
+against 17% of real ones, and no recheck separates them (the shifted re-listen removes both
+alike). Against letters at 3.6: false letters owner 22 → 19, Tarteel-200 156 → 140, Juz 30
+1,322 → 1,125; amateurs' correct words flagged 3.4 → 2.5%, owner's sessions 3.7 → 3.4%,
+professionals 1.5 → 1.3%. Cost: QuranMB 65.2 → 63.2%, Al-Ikhlas 11.3 → 10.8%; sobolev's,
+spliced and degraded unchanged. (Letters at 4.6: 19 / 123 / 952, QuranMB 61.2%.)
 
 At the threshold 3.4: lenient 19 / 130 / 1,020, 59.8%; balanced 25 / 165 / 1,404, 65.5%,
 Al-Ikhlas 12.0%, amateurs 3.8%, spliced 88.7%; precise 30 / 194 / 1,631, 67.2%.
