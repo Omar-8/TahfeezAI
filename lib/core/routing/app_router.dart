@@ -129,8 +129,8 @@ GoRouter appRouter(Ref ref) {
   return router;
 }
 
-/// The shell's tabs, each kept alive: the one shown fades in over the one
-/// before (220 ms), which is then hidden. Only the shown one's tickers run
+/// The shell's tabs, each kept alive: the one shown fades in (160 ms), the
+/// one before hidden at once. Only the shown one's tickers run
 /// — a Mushaf in another tab knows it is out of sight.
 class FadingBranches extends StatefulWidget {
   const FadingBranches({
@@ -148,29 +148,22 @@ class FadingBranches extends StatefulWidget {
 
 class _FadingBranchesState extends State<FadingBranches>
     with SingleTickerProviderStateMixin {
-  late final _fade =
-      AnimationController(
-        vsync: this,
-        duration: const Duration(milliseconds: 220),
-        value: 1,
-      )..addStatusListener((status) {
-        if (status == AnimationStatus.completed && mounted) {
-          setState(() => _previous = null);
-        }
-      });
-  int? _previous;
+  late final _fade = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 160),
+    value: 1,
+  );
+  late final _opacity = CurvedAnimation(parent: _fade, curve: Curves.easeOut);
 
   @override
   void didUpdateWidget(FadingBranches old) {
     super.didUpdateWidget(old);
-    if (old.index != widget.index) {
-      _previous = old.index;
-      _fade.forward(from: 0);
-    }
+    if (old.index != widget.index) _fade.forward(from: 0);
   }
 
   @override
   void dispose() {
+    _opacity.dispose();
     _fade.dispose();
     super.dispose();
   }
@@ -190,14 +183,17 @@ class _FadingBranchesState extends State<FadingBranches>
         for (final i in order)
           KeyedSubtree(
             key: ValueKey(i),
+            // The tab left hidden at once: two screens drawn through each
+            // other (their see-through skies) read as a glitch — the new one
+            // simply fades in on the page.
             child: Offstage(
-              offstage: i != index && i != _previous,
+              offstage: i != index,
               child: TickerMode(
                 enabled: i == index,
                 // Always wrapped (the same tree shown or not, so nothing
                 // is rebuilt), only the shown one's opacity moving.
                 child: FadeTransition(
-                  opacity: i == index ? _fade : kAlwaysCompleteAnimation,
+                  opacity: i == index ? _opacity : kAlwaysCompleteAnimation,
                   child: widget.children[i],
                 ),
               ),

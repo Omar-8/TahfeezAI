@@ -1,4 +1,4 @@
-import 'dart:async' show unawaited;
+import 'dart:async' show Timer, unawaited;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show RenderAbstractViewport;
@@ -242,6 +242,10 @@ class AyahModePageState extends ConsumerState<AyahModePage> {
   /// The reader is dragging the list (not a scroll of ours).
   var _userScrolling = false;
 
+  /// A recitation's move on to its next ayah, waiting a moment.
+  Timer? _recitationScroll;
+  static const _recitationScrollDelay = Duration(seconds: 1);
+
   @override
   void initState() {
     super.initState();
@@ -267,6 +271,7 @@ class AyahModePageState extends ConsumerState<AyahModePage> {
 
   @override
   void dispose() {
+    _recitationScroll?.cancel();
     _ownScroll.dispose();
     super.dispose();
   }
@@ -437,7 +442,16 @@ class AyahModePageState extends ConsumerState<AyahModePage> {
         (previous, next) {
           if (next == null) return;
           if (previous == null || previous.ayahId != next.ayahId) {
-            _scrollTo(next.ayahId);
+            // On to the next ayah a second later: the one just recited
+            // stays in view meanwhile, its colours (any mistake) seen.
+            _recitationScroll?.cancel();
+            _recitationScroll = Timer(_recitationScrollDelay, () {
+              if (!mounted) return;
+              final now = ref.read(hifzControllerProvider);
+              _scrollTo(
+                now.running ? now.expected?.ayahId ?? next.ayahId : next.ayahId,
+              );
+            });
           } else {
             _keepWordVisible(next);
           }

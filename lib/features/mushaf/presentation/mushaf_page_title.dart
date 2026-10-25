@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../quran/presentation/surah_name_calligraphy.dart';
 import '../../../core/localization/generated/app_localizations.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -87,7 +86,6 @@ class MushafPageTitle extends ConsumerWidget {
         (surahNo != null
             ? AppLocalizations.of(context).homeContinueReadingSurah(surahNo)
             : AppLocalizations.of(context).readerMushaf);
-    final arabic = languageCode == 'ar';
 
     final subtitleParts = <String>[
       AppLocalizations.of(context).homeContinueReadingPage(pageNumber),
@@ -104,36 +102,14 @@ class MushafPageTitle extends ConsumerWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // The name, and beside it the Mushaf's calligraphy of it — in
-        // Arabic the calligraphy alone (the plain name its label).
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          spacing: 6,
-          children: [
-            if (!(arabic && surahNo != null))
-              Flexible(
-                child: Text(
-                  name,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ).copyWith(color: baseColor),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            // Shrinking too where the bar is short of room.
-            if (surahNo != null)
-              Flexible(
-                child: SurahNameCalligraphy(
-                  surahNo: surahNo,
-                  height: arabic ? 24 : 20,
-                  maxWidth: 80,
-                  color: baseColor,
-                  semanticLabel: arabic ? name : null,
-                ),
-              ),
-          ],
+        Text(
+          name,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ).copyWith(color: baseColor),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
         Text(
           subtitleParts.join(' · '),
