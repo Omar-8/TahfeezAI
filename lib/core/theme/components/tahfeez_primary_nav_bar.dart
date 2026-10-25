@@ -44,13 +44,14 @@ class TahfeezPrimaryNavigationBar extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
+          // Close to the page's own colour: light, as if see-through.
           colors: [
             Color.lerp(
-              scheme.surfaceContainer,
+              scheme.surface,
               dark ? Colors.white : scheme.surfaceContainerLowest,
-              dark ? 0.06 : 0.7,
+              dark ? 0.04 : 0.5,
             )!,
-            scheme.surfaceContainer,
+            Color.lerp(scheme.surface, scheme.surfaceContainer, 0.5)!,
           ],
         ),
         border: Border(

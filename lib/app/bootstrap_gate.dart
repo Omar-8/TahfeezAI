@@ -79,43 +79,49 @@ class _BootstrapSplash extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // The whole screen (the switcher around it would let it shrink to the
+    // emblem: a dark square on black).
     return Directionality(
       textDirection: TextDirection.ltr,
-      child: ColoredBox(
-        color: _background,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            // Home's sky for the time of day behind the emblem, at once
-            // (the splash shows for about a second): its light colours
-            // toned down into the launch screen's green, so they read on
-            // it, and the star lattice clearly.
-            Positioned.fill(child: _sky(DayPart.at(DateTime.now()))),
-            Image.asset(
-              'assets/branding/splash_icon.png',
-              width: 288,
-              height: 288,
-            ),
-            // Below the emblem (its visible part is ~192 dp across).
-            Transform.translate(
-              offset: const Offset(0, 120),
-              child: const _FadeIn(
-                child: AppNameText(
-                  'TahfeezAI',
-                  // On the splash's dark green: the mint.
-                  aiColor: TahfeezExplorationPalette.darkPrimary,
-                  style: TextStyle(
-                    fontFamily: 'Noto Sans',
-                    fontSize: 30,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 0.5,
-                    color: Color(0xFFE8F2EC),
-                    decoration: TextDecoration.none,
+      child: SizedBox.expand(
+        child: ColoredBox(
+          color: _background,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              // Home's sky for the time of day behind the emblem, at once
+              // (the splash shows for about a second): its light colours
+              // toned down into the launch screen's green, so they read on
+              // it, and the star lattice clearly.
+              Positioned.fill(child: _sky(DayPart.at(DateTime.now()))),
+              // The emblem alone (cut out of the launcher icon's dark square,
+              // which would show as a box on the sky).
+              Image.asset(
+                'assets/branding/splash_emblem.png',
+                width: 288,
+                height: 288,
+              ),
+              // Below the emblem (its visible part is ~192 dp across).
+              Transform.translate(
+                offset: const Offset(0, 120),
+                child: const _FadeIn(
+                  child: AppNameText(
+                    'TahfeezAI',
+                    // On the splash's dark green: the mint.
+                    aiColor: TahfeezExplorationPalette.darkPrimary,
+                    style: TextStyle(
+                      fontFamily: 'Noto Sans',
+                      fontSize: 30,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.5,
+                      color: Color(0xFFE8F2EC),
+                      decoration: TextDecoration.none,
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
