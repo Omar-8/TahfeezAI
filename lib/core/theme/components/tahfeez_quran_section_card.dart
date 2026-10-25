@@ -70,108 +70,159 @@ class TahfeezQuranSectionCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(TahfeezSpacing.md),
         child: Padding(
           padding: const EdgeInsets.all(TahfeezSpacing.md),
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Container(
-                width: 40,
-                height: 40,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: accent.withValues(alpha: 0.12),
-                  shape: BoxShape.circle,
-                ),
-                child: Text(
-                  '$number',
-                  style: Theme.of(context).textTheme.titleSmall
-                      ?.copyWith(color: accent),
-                ),
-              ),
-              const SizedBox(width: TahfeezSpacing.smPlus),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Row(
+              Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: accent.withValues(alpha: 0.12),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Text(
+                      '$number',
+                      style: Theme.of(context).textTheme.titleSmall
+                          ?.copyWith(color: accent),
+                    ),
+                  ),
+                  const SizedBox(width: TahfeezSpacing.smPlus),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Flexible(
-                          child: Text(
-                            title,
+                        Row(
+                          children: [
+                            Flexible(
+                              child: Text(
+                                title,
+                                maxLines: singleLine ? 1 : null,
+                                overflow: singleLine
+                                    ? TextOverflow.ellipsis
+                                    : null,
+                                style: Theme.of(context).textTheme.bodyLarge,
+                              ),
+                            ),
+                            if (bookmarked)
+                              Padding(
+                                padding: const EdgeInsetsDirectional.only(
+                                  start: TahfeezSpacing.xs,
+                                ),
+                                child: Icon(
+                                  Icons.bookmark_rounded,
+                                  key: const ValueKey(
+                                    'section-card-bookmarked',
+                                  ),
+                                  size: 16,
+                                  color: accent,
+                                ),
+                              ),
+                          ],
+                        ),
+                        if (subtitle != null)
+                          Text(
+                            subtitle!,
                             maxLines: singleLine ? 1 : null,
                             overflow: singleLine ? TextOverflow.ellipsis : null,
-                            style: Theme.of(context).textTheme.bodyLarge,
-                          ),
-                        ),
-                        if (bookmarked)
-                          Padding(
-                            padding: const EdgeInsetsDirectional.only(
-                              start: TahfeezSpacing.xs,
-                            ),
-                            child: Icon(
-                              Icons.bookmark_rounded,
-                              key: const ValueKey('section-card-bookmarked'),
-                              size: 16,
-                              color: accent,
-                            ),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: scheme.onSurfaceVariant),
                           ),
                       ],
                     ),
-                    if (subtitle != null)
-                      Text(
-                        subtitle!,
-                        maxLines: singleLine ? 1 : null,
-                        overflow: singleLine ? TextOverflow.ellipsis : null,
-                        style: Theme.of(context).textTheme.bodySmall
-                            ?.copyWith(color: scheme.onSurfaceVariant),
-                      ),
-                  ],
-                ),
-              ),
-              if (art case final art?)
-                Padding(
-                  padding: const EdgeInsetsDirectional.only(
-                    start: TahfeezSpacing.sm,
-                    end: TahfeezSpacing.xs,
                   ),
-                  child: art,
-                ),
-              if (progress case final p?)
-                SizedBox(
-                  key: const ValueKey('section-card-progress'),
-                  width: 48,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    spacing: TahfeezSpacing.xs,
-                    children: [
-                      Text(
-                        '${(p.clamp(0.0, 1.0) * 100).round()}%',
-                        style: Theme.of(context).textTheme.labelLarge
-                            ?.copyWith(color: progressColor ?? accent),
+                  if (art case final art?)
+                    Padding(
+                      padding: const EdgeInsetsDirectional.only(
+                        start: TahfeezSpacing.sm,
+                        end: TahfeezSpacing.xs,
                       ),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(TahfeezRadii.pill),
-                        child: LinearProgressIndicator(
-                          value: p.clamp(0.0, 1.0),
-                          minHeight: 4,
-                          color: progressColor ?? accent,
-                          backgroundColor: scheme.surfaceContainerHighest,
+                      child: art,
+                    ),
+                  if (art != null)
+                    const SizedBox.shrink()
+                  else if (progress case final p?)
+                    SizedBox(
+                      key: const ValueKey('section-card-progress'),
+                      width: 48,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        spacing: TahfeezSpacing.xs,
+                        children: [
+                          Text(
+                            '${(p.clamp(0.0, 1.0) * 100).round()}%',
+                            style: Theme.of(context).textTheme.labelLarge
+                                ?.copyWith(color: progressColor ?? accent),
+                          ),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(
+                              TahfeezRadii.pill,
+                            ),
+                            child: LinearProgressIndicator(
+                              value: p.clamp(0.0, 1.0),
+                              minHeight: 4,
+                              color: progressColor ?? accent,
+                              backgroundColor: scheme.surfaceContainerHighest,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  else if (progressLabel case final label?)
+                    Text(
+                      label,
+                      key: const ValueKey('section-card-progress-label'),
+                      style: Theme.of(context).textTheme.labelMedium
+                          ?.copyWith(color: scheme.onSurfaceVariant),
+                    )
+                  else
+                    Icon(
+                      Icons.chevron_right,
+                      size: TahfeezIconSize.md,
+                      color: scheme.onSurfaceVariant,
+                    ),
+                ],
+              ),
+              // Beside the art there is no room: the progress as a line along
+              // the card's foot.
+              if (art != null && (progress != null || progressLabel != null))
+                Padding(
+                  padding: const EdgeInsets.only(top: TahfeezSpacing.smPlus),
+                  child: Row(
+                    key: const ValueKey('section-card-progress'),
+                    spacing: TahfeezSpacing.sm,
+                    children: [
+                      Expanded(
+                        child: progress == null
+                            ? const SizedBox.shrink()
+                            : ClipRRect(
+                                borderRadius: BorderRadius.circular(
+                                  TahfeezRadii.pill,
+                                ),
+                                child: LinearProgressIndicator(
+                                  value: progress!.clamp(0.0, 1.0),
+                                  minHeight: 3,
+                                  color: progressColor ?? accent,
+                                  backgroundColor:
+                                      scheme.surfaceContainerHighest,
+                                ),
+                              ),
+                      ),
+                      Text(
+                        progress != null
+                            ? '${(progress!.clamp(0.0, 1.0) * 100).round()}%'
+                            : progressLabel!,
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: progress != null
+                              ? progressColor ?? accent
+                              : scheme.onSurfaceVariant,
                         ),
                       ),
                     ],
                   ),
-                )
-              else if (progressLabel case final label?)
-                Text(
-                  label,
-                  key: const ValueKey('section-card-progress-label'),
-                  style: Theme.of(context).textTheme.labelMedium
-                      ?.copyWith(color: scheme.onSurfaceVariant),
-                )
-              else
-                Icon(
-                  Icons.chevron_right,
-                  size: TahfeezIconSize.md,
-                  color: scheme.onSurfaceVariant,
                 ),
             ],
           ),

@@ -1675,7 +1675,6 @@ class _HifzSettingsSheetState extends ConsumerState<_HifzSettingsSheet>
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    // As tall as the tab shown (the sheet fits its settings).
     return SafeArea(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -1689,16 +1688,21 @@ class _HifzSettingsSheetState extends ConsumerState<_HifzSettingsSheet>
               Tab(text: l10n.hifzTabAppearance),
             ],
           ),
+          // Both tabs laid out, one shown: the sheet keeps the taller one's
+          // height whichever is open.
           Flexible(
             child: SingleChildScrollView(
-              key: ValueKey('hifz-settings-tab-${_tabs.index}'),
               padding: const EdgeInsets.only(top: 8),
-              child: _tabs.index == 0
-                  ? _recitationSettings(context)
-                  : const Padding(
-                      padding: EdgeInsets.fromLTRB(16, 8, 16, 16),
-                      child: MushafAppearanceOptions(),
-                    ),
+              child: IndexedStack(
+                index: _tabs.index,
+                children: [
+                  _recitationSettings(context),
+                  const Padding(
+                    padding: EdgeInsets.fromLTRB(16, 8, 16, 16),
+                    child: MushafAppearanceOptions(),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
