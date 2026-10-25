@@ -177,8 +177,9 @@ enum QvpWordEffectKind {
   /// The word's ink fades in from the paper (drawn over it, fading out).
   inkIn,
 
-  /// The word's ink fades into the paper (drawn over it, fading in), held
-  /// at the paper for its last fifth — for the app to hide the word then.
+  /// The word's ink fades into the paper (drawn over it, fading in) over
+  /// 400 ms — as [inkIn], mirrored — then held at the paper a moment, for
+  /// the app to hide the word then.
   inkOut,
 }
 
@@ -213,8 +214,8 @@ class QvpWordEffect {
   double get durationMs => switch (kind) {
     QvpWordEffectKind.bloom => 650,
     QvpWordEffectKind.shake => 420,
-    QvpWordEffectKind.inkIn => 380,
-    QvpWordEffectKind.inkOut => 400,
+    QvpWordEffectKind.inkIn => 400,
+    QvpWordEffectKind.inkOut => 460,
   };
 }
 
@@ -1025,7 +1026,7 @@ class _QvpPainter extends CustomPainter {
       for (final (e, t) in _running(fx, QvpWordEffectKind.inkOut, now)) {
         final r = _wordBounds(l, paths, e.word);
         if (r == null) continue;
-        final p = (t / 0.8).clamp(0.0, 1.0);
+        final p = (t * 460 / 400).clamp(0.0, 1.0);
         canvas.drawRect(
           r.inflate(1.5),
           ui.Paint()..color = paperColor.withValues(alpha: p * p * (3 - 2 * p)),
@@ -1034,7 +1035,8 @@ class _QvpPainter extends CustomPainter {
       for (final (e, t) in _running(fx, QvpWordEffectKind.inkIn, now)) {
         final r = _wordBounds(l, paths, e.word);
         if (r == null) continue;
-        final ease = 1 - (1 - t) * (1 - t) * (1 - t);
+        // The same curve as inkOut, mirrored: the two fades match.
+        final ease = t * t * (3 - 2 * t);
         canvas.drawRect(
           r.inflate(1.5),
           ui.Paint()..color = paperColor.withValues(alpha: 1 - ease),

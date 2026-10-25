@@ -191,9 +191,10 @@ painter, with no engine call:
 - `shake` — the word's styled ink (an ink highlight) swayed sideways,
   settling (420 ms);
 - `inkIn` — the paper drawn over the word's bounds, fading out, so a
-  just-revealed word's ink fades in (380 ms).
-- `inkOut` — the reverse: the paper over the word fading in, held at the
-  paper for its last fifth, for the app to hide the word then (400 ms).
+  just-revealed word's ink fades in (400 ms, a smoothstep).
+- `inkOut` — the reverse, the same curve: the paper over the word fading
+  in over 400 ms, then held at the paper for the app to hide the word
+  (460 ms in all).
 
 The view's ticker keeps running only while an effect runs (or the
 engine animates), so a still page costs nothing. Used by

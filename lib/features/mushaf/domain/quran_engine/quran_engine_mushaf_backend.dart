@@ -182,7 +182,7 @@ enum MushafWordEffect {
   inkOut;
 
   /// How long [inkOut] takes to reach the paper.
-  static const inkOutTime = Duration(milliseconds: 320);
+  static const inkOutTime = Duration(milliseconds: 400);
 }
 
 /// A [QuranEngineMushafPage] that can animate its words ([MushafWordEffect]):
