@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tahfeez_ai/core/routing/app_router.dart';
 import 'package:tahfeez_ai/features/home/presentation/home_sky.dart';
 import 'package:tahfeez_ai/features/mushaf/presentation/mushaf_zen_mode.dart';
 
@@ -22,6 +23,19 @@ void main() {
     await RealApp.settle(tester);
     expect(container.read(mushafZenModeProvider), isFalse);
     expect(find.byType(AppBar), findsOneWidget);
+    await RealApp.quit(tester);
+  });
+
+  testWidgets('focus mode ends as the Mushaf goes out of sight (another tab)', (
+    tester,
+  ) async {
+    final container = await RealApp.launch(tester, route: '/quran/surah/1');
+    await tester.tap(find.byKey(const ValueKey('mushaf-zen')));
+    await RealApp.settle(tester);
+    expect(container.read(mushafZenModeProvider), isTrue);
+    container.read(appRouterProvider).go('/home');
+    await RealApp.settle(tester);
+    expect(container.read(mushafZenModeProvider), isFalse);
     await RealApp.quit(tester);
   });
 

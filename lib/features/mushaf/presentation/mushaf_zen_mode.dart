@@ -79,6 +79,18 @@ class _ZenModeLayerState extends ConsumerState<ZenModeLayer> {
     });
   }
 
+  /// A Mushaf left open in another tab (or under another screen) stays
+  /// built: focus mode — the phone's bars hidden — ends as it goes out of
+  /// sight.
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!TickerMode.valuesOf(context).enabled) {
+      final zen = _zen;
+      Future.microtask(() => zen.set(false));
+    }
+  }
+
   @override
   void dispose() {
     _fade?.cancel();

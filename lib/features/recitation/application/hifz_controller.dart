@@ -911,6 +911,8 @@ class HifzController extends Notifier<HifzState> {
   /// word not yet uncovered on the visible page; with the page visible,
   /// wherever the reciter turns out to start.
   void _begin() {
+    // (A turn still waiting from the recitation before: not this one's.)
+    _turnLater?.cancel();
     _showHeld();
     _lastBatch = null;
     _setPass(0);

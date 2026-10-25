@@ -1,4 +1,7 @@
 import 'package:flutter/foundation.dart';
+
+import '../../../core/ui/bar_space.dart';
+
 import 'package:flutter/material.dart';
 
 import '../../../core/app_store/app_store_service.dart';
@@ -36,7 +39,7 @@ class AboutScreen extends ConsumerWidget {
     return Scaffold(
       appBar: TahfeezAppBar(title: Text(l10n.aboutTitle), centerTitle: false),
       body: ListView(
-        padding: const EdgeInsets.all(TahfeezSpacing.md),
+        padding: withBarSpace(context, const EdgeInsets.all(TahfeezSpacing.md)),
         children: [
           AppNameText(l10n.appName, style: theme.textTheme.headlineSmall),
           Text(
