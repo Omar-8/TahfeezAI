@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'app.dart';
 import '../core/theme/app_colors.dart';
 import '../core/ui/app_name_text.dart';
+import '../features/home/presentation/home_sky.dart';
 
 /// Shown for the (typically brief, but real on a cold/first launch — see
 /// `bootstrap.dart`'s own doc comment) window while [BundledDatasetSeeder]
@@ -70,6 +71,20 @@ class _BootstrapSplash extends StatelessWidget {
         child: Stack(
           alignment: Alignment.center,
           children: [
+            // Home's sky for the time of day (its dark colours, on the
+            // native launch screen's green), fading in behind the emblem.
+            Positioned.fill(
+              child: _FadeIn(
+                rise: false,
+                duration: const Duration(milliseconds: 700),
+                child: DaySky(
+                  part: DayPart.at(DateTime.now()),
+                  brightness: Brightness.dark,
+                  paper: _background,
+                  ink: const Color(0xFFE8F2EC),
+                ),
+              ),
+            ),
             Image.asset(
               'assets/branding/splash_icon.png',
               width: 288,
@@ -102,18 +117,28 @@ class _BootstrapSplash extends StatelessWidget {
 }
 
 class _FadeIn extends StatelessWidget {
-  const _FadeIn({required this.child});
+  const _FadeIn({
+    required this.child,
+    this.rise = true,
+    this.duration = const Duration(milliseconds: 400),
+  });
 
   final Widget child;
+
+  /// Rising a little as it appears.
+  final bool rise;
+  final Duration duration;
 
   @override
   Widget build(BuildContext context) => TweenAnimationBuilder<double>(
     tween: Tween(begin: 0, end: 1),
-    duration: const Duration(milliseconds: 400),
+    duration: duration,
     curve: Curves.easeOut,
     builder: (context, t, child) => Opacity(
       opacity: t,
-      child: Transform.translate(offset: Offset(0, 8 * (1 - t)), child: child),
+      child: rise
+          ? Transform.translate(offset: Offset(0, 8 * (1 - t)), child: child)
+          : child,
     ),
     child: child,
   );

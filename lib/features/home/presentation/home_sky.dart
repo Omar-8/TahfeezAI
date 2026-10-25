@@ -134,19 +134,50 @@ class _HomeSkyState extends ConsumerState<HomeSky> {
   Widget build(BuildContext context) {
     if (!ref.watch(homeSkyProvider)) return const SizedBox.shrink();
     final scheme = Theme.of(context).colorScheme;
-    final part = DayPart.at(ref.watch(homeSkyClockProvider)());
+    return DaySky(
+      part: DayPart.at(ref.watch(homeSkyClockProvider)()),
+      brightness: scheme.brightness,
+      paper: scheme.surface,
+      ink: scheme.onSurface,
+      height: widget.height,
+    );
+  }
+}
+
+/// The sky itself, [height] tall (else as tall as it is given): [part]'s
+/// colours for [brightness] — leaning a little towards a light [paper] —
+/// the sun's or moon's glow, and the star lattice in [ink], fading out
+/// towards the bottom. Needs no providers: the splash draws it too.
+class DaySky extends StatelessWidget {
+  const DaySky({
+    super.key,
+    required this.part,
+    required this.brightness,
+    required this.paper,
+    required this.ink,
+    this.height,
+  });
+
+  final DayPart part;
+  final Brightness brightness;
+  final Color paper, ink;
+  final double? height;
+
+  @override
+  Widget build(BuildContext context) {
     // Light papers (standard, warm, sepia): the sky leans a little towards
     // the paper, so each keeps its character.
-    var (a, b) = part.colors(scheme.brightness);
-    if (scheme.brightness == Brightness.light) {
-      a = Color.lerp(a, scheme.surface, 0.12)!;
-      b = Color.lerp(b, scheme.surface, 0.12)!;
+    var (a, b) = part.colors(brightness);
+    if (brightness == Brightness.light) {
+      a = Color.lerp(a, paper, 0.12)!;
+      b = Color.lerp(b, paper, 0.12)!;
     }
-    final rtl = Directionality.of(context) == TextDirection.rtl;
+    final direction = Directionality.of(context);
+    final rtl = direction == TextDirection.rtl;
     return IgnorePointer(
       child: SizedBox(
         key: ValueKey('home-sky-${part.name}'),
-        height: widget.height,
+        height: height,
         child: ShaderMask(
           // Fading into the page towards the bottom.
           blendMode: BlendMode.dstIn,
@@ -162,12 +193,8 @@ class _HomeSkyState extends ConsumerState<HomeSky> {
               DecoratedBox(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    begin: AlignmentDirectional.topStart.resolve(
-                      Directionality.of(context),
-                    ),
-                    end: AlignmentDirectional.bottomEnd.resolve(
-                      Directionality.of(context),
-                    ),
+                    begin: AlignmentDirectional.topStart.resolve(direction),
+                    end: AlignmentDirectional.bottomEnd.resolve(direction),
                     colors: [a, b],
                   ),
                 ),
@@ -182,16 +209,16 @@ class _HomeSkyState extends ConsumerState<HomeSky> {
                     shape: BoxShape.circle,
                     gradient: RadialGradient(
                       colors: [
-                        part.glow(scheme.brightness),
-                        part.glow(scheme.brightness).withValues(alpha: 0),
+                        part.glow(brightness),
+                        part.glow(brightness).withValues(alpha: 0),
                       ],
                     ),
                   ),
                 ),
               ),
               TahfeezGeometricPattern(
-                color: scheme.onSurface.withValues(
-                  alpha: scheme.brightness == Brightness.light ? 0.15 : 0.12,
+                color: ink.withValues(
+                  alpha: brightness == Brightness.light ? 0.15 : 0.12,
                 ),
                 spacing: 52,
               ),
