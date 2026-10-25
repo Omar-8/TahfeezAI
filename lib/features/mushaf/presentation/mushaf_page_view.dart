@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../../../core/theme/components/tahfeez_geometric_pattern.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../application/mushaf_appearance_controller.dart';
@@ -66,14 +69,31 @@ class MushafPageView extends ConsumerWidget {
       );
     }
 
+    final page = QuranEngineMushafPageContent(
+      pageNumber: pageNumber,
+      colors: colors,
+      onWordTap: onWordTap,
+      onWordLongPress: onWordLongPress,
+    );
+    // On wide screens, the star lattice faintly in the margins around the
+    // printed page (its paper is drawn over it, so never under the text).
+    final wide = MediaQuery.sizeOf(context).width >= 600;
     return Container(
       color: colors.background,
-      child: QuranEngineMushafPageContent(
-        pageNumber: pageNumber,
-        colors: colors,
-        onWordTap: onWordTap,
-        onWordLongPress: onWordLongPress,
-      ),
+      child: wide
+          ? Stack(
+              fit: StackFit.expand,
+              children: [
+                IgnorePointer(
+                  child: TahfeezGeometricPattern(
+                    color: colors.text.withValues(alpha: 0.06),
+                    spacing: 48,
+                  ),
+                ),
+                page,
+              ],
+            )
+          : page,
     );
   }
 }
