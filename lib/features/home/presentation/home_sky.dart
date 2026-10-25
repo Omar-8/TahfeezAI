@@ -156,6 +156,8 @@ class DaySky extends StatelessWidget {
     required this.paper,
     required this.ink,
     this.height,
+    this.lattice,
+    this.colors,
   });
 
   final DayPart part;
@@ -163,12 +165,18 @@ class DaySky extends StatelessWidget {
   final Color paper, ink;
   final double? height;
 
+  /// The star lattice's opacity (else the screens' own).
+  final double? lattice;
+
+  /// The sky's two colours, in place of [part]'s for [brightness].
+  final (Color, Color)? colors;
+
   @override
   Widget build(BuildContext context) {
     // Light papers (standard, warm, sepia): the sky leans a little towards
     // the paper, so each keeps its character.
-    var (a, b) = part.colors(brightness);
-    if (brightness == Brightness.light) {
+    var (a, b) = colors ?? part.colors(brightness);
+    if (colors == null && brightness == Brightness.light) {
       a = Color.lerp(a, paper, 0.12)!;
       b = Color.lerp(b, paper, 0.12)!;
     }
@@ -218,7 +226,8 @@ class DaySky extends StatelessWidget {
               ),
               TahfeezGeometricPattern(
                 color: ink.withValues(
-                  alpha: brightness == Brightness.light ? 0.15 : 0.12,
+                  alpha:
+                      lattice ?? (brightness == Brightness.light ? 0.15 : 0.12),
                 ),
                 spacing: 52,
               ),

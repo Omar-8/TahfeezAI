@@ -79,7 +79,7 @@ class TahfeezQuranSectionCard extends StatelessWidget {
                 label: '$number',
                 color: accentColor ?? scheme.tertiary,
                 size: 36,
-                textStyle: Theme.of(context).textTheme.titleSmall,
+                textStyle: Theme.of(context).textTheme.labelMedium,
               ),
               const SizedBox(width: TahfeezSpacing.smPlus),
               Expanded(

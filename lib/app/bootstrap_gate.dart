@@ -62,6 +62,21 @@ class _BootstrapSplash extends StatelessWidget {
 
   static const _background = Color(0xFF03100C);
 
+  static Widget _sky(DayPart part) {
+    final (a, b) = part.colors(Brightness.light);
+    return DaySky(
+      part: part,
+      brightness: Brightness.dark,
+      paper: _background,
+      ink: const Color(0xFFE8F2EC),
+      colors: (
+        Color.lerp(a, _background, 0.55)!,
+        Color.lerp(b, _background, 0.6)!,
+      ),
+      lattice: 0.16,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Directionality(
@@ -71,20 +86,11 @@ class _BootstrapSplash extends StatelessWidget {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            // Home's sky for the time of day (its dark colours, on the
-            // native launch screen's green), fading in behind the emblem.
-            Positioned.fill(
-              child: _FadeIn(
-                rise: false,
-                duration: const Duration(milliseconds: 700),
-                child: DaySky(
-                  part: DayPart.at(DateTime.now()),
-                  brightness: Brightness.dark,
-                  paper: _background,
-                  ink: const Color(0xFFE8F2EC),
-                ),
-              ),
-            ),
+            // Home's sky for the time of day behind the emblem, at once
+            // (the splash shows for about a second): its light colours
+            // toned down into the launch screen's green, so they read on
+            // it, and the star lattice clearly.
+            Positioned.fill(child: _sky(DayPart.at(DateTime.now()))),
             Image.asset(
               'assets/branding/splash_icon.png',
               width: 288,
@@ -117,28 +123,18 @@ class _BootstrapSplash extends StatelessWidget {
 }
 
 class _FadeIn extends StatelessWidget {
-  const _FadeIn({
-    required this.child,
-    this.rise = true,
-    this.duration = const Duration(milliseconds: 400),
-  });
+  const _FadeIn({required this.child});
 
   final Widget child;
-
-  /// Rising a little as it appears.
-  final bool rise;
-  final Duration duration;
 
   @override
   Widget build(BuildContext context) => TweenAnimationBuilder<double>(
     tween: Tween(begin: 0, end: 1),
-    duration: duration,
+    duration: const Duration(milliseconds: 400),
     curve: Curves.easeOut,
     builder: (context, t, child) => Opacity(
       opacity: t,
-      child: rise
-          ? Transform.translate(offset: Offset(0, 8 * (1 - t)), child: child)
-          : child,
+      child: Transform.translate(offset: Offset(0, 8 * (1 - t)), child: child),
     ),
     child: child,
   );
