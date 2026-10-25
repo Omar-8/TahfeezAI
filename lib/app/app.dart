@@ -15,6 +15,7 @@ import '../core/theme/app_surface_tone.dart';
 import '../core/theme/app_theme.dart';
 import '../core/theme/theme_controller.dart';
 import '../features/memorize/application/memorization_reminder.dart';
+import '../quran/application/meaning_language_follower.dart';
 
 /// TahfeezAI's root widget.
 ///
@@ -37,6 +38,8 @@ class TahfeezApp extends ConsumerWidget {
     // Started with the app: restores the daily reminder, reschedules it and
     // handles a tap on it.
     ref.listen(memorizationReminderProvider, (_, _) {});
+    // Translations, tafsir and word meanings follow the app's language.
+    ref.listen(meaningLanguageFollowerProvider, (_, _) {});
 
     // DynamicColorBuilder provides the OS's Material You palette on
     // platforms that have one (Android 12+); `lightDynamic`/`darkDynamic`

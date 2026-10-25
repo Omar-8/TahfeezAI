@@ -21,8 +21,22 @@ const _wordAudioEnabledPrefKey = 'wbw.word_audio_enabled';
 class WbwSelectedPackController extends _$WbwSelectedPackController {
   @override
   String? build() {
-    _restore();
+    _restored = _restore();
     return null;
+  }
+
+  late Future<void> _restored;
+
+  /// The app's language changed from [from]: a pack chosen in [from] goes
+  /// back to the language's own (`activeWbwPack`); one chosen in another
+  /// language stays.
+  Future<void> follow(String from) async {
+    await _restored;
+    if (!ref.mounted) return;
+    final current = state;
+    if (current != null && current.split('-').first == from) {
+      await select(null);
+    }
   }
 
   Future<void> _restore() async {

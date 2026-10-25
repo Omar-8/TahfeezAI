@@ -17,9 +17,26 @@ const _tafsirTextScalePrefKey = 'tafsir.text_scale';
 class TafsirSelectionController extends _$TafsirSelectionController {
   @override
   String? build() {
-    _restore();
+    _restored = _restore();
     // Until a choice is made: the default for the user's language.
     return defaultTafsirId(meaningLanguage(ref));
+  }
+
+  late Future<void> _restored;
+
+  /// The app's language changed from [from] to [to]: a tafsir in [from]
+  /// (or [from]'s default) becomes [to]'s; one in another language stays,
+  /// and so does none.
+  Future<void> follow(String from, String to) async {
+    await _restored;
+    if (!ref.mounted) return;
+    final current = state;
+    if (current == null) return;
+    if (current.split('-').first != from && current != defaultTafsirId(from)) {
+      return;
+    }
+    final next = defaultTafsirId(to);
+    if (next != current) await select(next);
   }
 
   Future<void> _restore() async {

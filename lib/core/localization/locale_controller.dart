@@ -6,7 +6,8 @@ import 'supported_locales.dart';
 
 part 'locale_controller.g.dart';
 
-const _localePrefKey = 'core.locale';
+/// Where the app-UI language override is stored.
+const localePrefKey = 'core.locale';
 
 /// Persisted app-UI locale override.
 ///
@@ -26,7 +27,7 @@ class LocaleController extends _$LocaleController {
   Future<void> _restore() async {
     final stored = await ref
         .read(browserStorageProvider)
-        .getString(_localePrefKey);
+        .getString(localePrefKey);
     if (stored == null) return;
     for (final locale in kTahfeezSupportedLocales) {
       if (locale.languageCode == stored) {
@@ -40,9 +41,9 @@ class LocaleController extends _$LocaleController {
     state = locale;
     final storage = ref.read(browserStorageProvider);
     if (locale == null) {
-      await storage.remove(_localePrefKey);
+      await storage.remove(localePrefKey);
     } else {
-      await storage.setString(_localePrefKey, locale.languageCode);
+      await storage.setString(localePrefKey, locale.languageCode);
     }
   }
 }

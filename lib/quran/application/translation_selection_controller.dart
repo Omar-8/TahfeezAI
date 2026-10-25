@@ -23,10 +23,31 @@ const _activeTranslationSlugsPrefKey = 'translation.active_slugs';
 class TranslationSelectionController extends _$TranslationSelectionController {
   @override
   List<String> build() {
-    _restore();
+    _restored = _restore();
     // Until a choice is made: the default for the user's language.
     return defaultTranslationSlugs(meaningLanguage(ref));
   }
+
+  late Future<void> _restored;
+
+  /// The app's language changed from [from] to [to]: translations all in
+  /// [from] (or [from]'s defaults) become [to]'s; a translation chosen in
+  /// another language stays, with the rest.
+  Future<void> follow(String from, String to) async {
+    await _restored;
+    if (!ref.mounted) return;
+    final current = state;
+    final inFrom =
+        current.every((s) => s.split('-').first == from) ||
+        _same(current, defaultTranslationSlugs(from));
+    if (!inFrom) return;
+    final next = defaultTranslationSlugs(to);
+    if (!_same(current, next)) await _persist(next);
+  }
+
+  static bool _same(List<String> a, List<String> b) =>
+      a.length == b.length &&
+      [for (var i = 0; i < a.length; i++) a[i] == b[i]].every((x) => x);
 
   Future<void> _restore() async {
     final stored = await ref
