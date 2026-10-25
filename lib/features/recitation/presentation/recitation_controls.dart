@@ -1474,19 +1474,21 @@ class HifzStatusStrip extends StatelessWidget {
 }
 
 /// Hifz feedback settings and the memorization range.
-/// How the recitation check works, before [mode]'s first recitation — and
-/// each time in the guide, whose last step it is for that mode: what to
-/// do, what the colours mean, that the check is still learning, and that
-/// the voice stays on the phone. Hifz settings open over it. True: start;
-/// false: closed (in the guide, back to the step asking for the button).
+/// How the recitation check works, for [mode]: each time in the guide,
+/// whose last step it is for that mode; outside it, once only — before the
+/// first recitation of any of the three modes (the guide's showings aside).
+/// What to do, what the colours mean, that the check is still learning,
+/// and that the voice stays on the phone. Hifz settings open over it.
+/// True: start; false: closed (in the guide, back to the step asking for
+/// the button).
 Future<bool> showRecitationIntro(
   BuildContext context,
   RecitationIntroMode mode,
 ) async {
   final container = ProviderScope.containerOf(context, listen: false);
   final guided = container.read(guideProvider) != null;
-  if (!guided &&
-      container.read(hifzSettingsProvider).introsSeen.contains(mode)) {
+  // Seen outside the guide, for any mode: not again (but in the guide).
+  if (!guided && container.read(hifzSettingsProvider).introsSeen.isNotEmpty) {
     return true;
   }
   final start = await showModalBottomSheet<bool>(
@@ -1498,10 +1500,14 @@ Future<bool> showRecitationIntro(
     constraints: sheetBelowAppBar(context),
     builder: (context) => _RecitationIntroSheet(mode),
   );
-  final settings = container.read(hifzSettingsProvider);
-  container
-      .read(hifzSettingsProvider.notifier)
-      .update(settings.copyWith(introsSeen: {...settings.introsSeen, mode}));
+  // (The guide's showings don't count: a reader who skipped the guide
+  // still gets it once.)
+  if (!guided) {
+    final settings = container.read(hifzSettingsProvider);
+    container
+        .read(hifzSettingsProvider.notifier)
+        .update(settings.copyWith(introsSeen: {...settings.introsSeen, mode}));
+  }
   if (start != true && guided) {
     container.read(guideProvider.notifier).notStarted();
   }

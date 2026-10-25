@@ -83,8 +83,9 @@ class HifzSettings {
     this.introsSeen = const {},
   });
 
-  /// The modes whose explanation (how the check works) was shown before
-  /// their first recitation.
+  /// The mode the explanation (how the check works) was shown for outside
+  /// the guide — once for all three modes: any one, and it is not shown
+  /// again (but in the guide, each time).
   final Set<RecitationIntroMode> introsSeen;
 
   /// The colours offered for a word with a pronunciation mistake (a letter
