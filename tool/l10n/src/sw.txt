@@ -546,3 +546,4 @@ recStrictnessSub = Ukaguzi unapaswa kuwa na uhakika kiasi gani kabla ya kuweka a
 recStrictnessLenientSub = alama chache za uongo; baadhi ya makosa madogo yanaweza kupita.
 recStrictnessBalancedSub = kiwango cha kati kinachopendekezwa.
 recStrictnessStrictSub = hukamata makosa zaidi; mara chache kinaweza kuweka alama kwenye neno sahihi.
+mushafPageTheme = Mandhari ya ukurasa

@@ -976,12 +976,26 @@ class HifzController extends Notifier<HifzState> {
       }
       return;
     }
-    // The page is visible: locate the reciter first.
+    // The page is visible: locate the reciter first — on it, or the page
+    // before. (Twice the session began as if the next page were on screen,
+    // Al-Fatiha's page showing — its basmala then passed over as the
+    // formula before another surah and the test begun mid-surah, owner's
+    // 17:14, 2026-10-25. The page before in reach, the reciter is found
+    // from their first word.)
     final lastRange = ranges[pages!.$2] ?? firstRange;
+    final before = ranges[pages.$1 - 1];
+    final focusStart =
+        (before == null ? null : corpus.positionOf(before.first)) ?? pageStart;
+    if (!kReleaseMode) {
+      debugPrint(
+        'Hifz: begins on pages $pages (${firstRange.first}), '
+        'looking from ${corpus.words[focusStart].ref}',
+      );
+    }
     _matcher = _newMatcher()
       ..start(anchor: pageStart)
       ..setFocus(
-        pageStart,
+        focusStart,
         corpus.positionOf(lastRange.last) ?? pageStart,
         only: true,
       );

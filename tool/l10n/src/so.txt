@@ -546,3 +546,4 @@ recStrictnessSub = Inta ay hubintu tahay inay hubto kahor intaanay xaraf, shakal
 recStrictnessLenientSub = calaamado been ah oo yar; khaladaad fudud qaarkood way gudbi karaan.
 recStrictnessBalancedSub = heerka dhexe ee lagu taliyay.
 recStrictnessStrictSub = khaladaad badan ayuu qabtaa; mararka qaarkood wuxuu calaamadeyn karaa eray sax ah.
+mushafPageTheme = Muuqaalka bogga

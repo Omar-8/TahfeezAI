@@ -547,5 +547,6 @@
   "hifzTabAppearance": "চেহারা",
   "recStrictnessLenientSub": "কম ভুল চিহ্ন; কিছু হালকা ভুল বাদ পড়তে পারে।",
   "recStrictnessBalancedSub": "প্রস্তাবিত মাঝামাঝি।",
-  "recStrictnessStrictSub": "বেশি ভুল ধরে; মাঝে মাঝে সঠিক শব্দও চিহ্নিত করতে পারে।"
+  "recStrictnessStrictSub": "বেশি ভুল ধরে; মাঝে মাঝে সঠিক শব্দও চিহ্নিত করতে পারে।",
+  "mushafPageTheme": "পৃষ্ঠার থিম"
 }

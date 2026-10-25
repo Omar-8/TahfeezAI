@@ -546,3 +546,4 @@ recStrictnessSub = Sejauh mana semakan mesti yakin sebelum menandakan huruf, bar
 recStrictnessLenientSub = kurang tanda palsu; sesetengah kesalahan ringan mungkin terlepas.
 recStrictnessBalancedSub = tahap tengah yang disyorkan.
 recStrictnessStrictSub = menangkap lebih banyak kesalahan; sekali-sekala mungkin menandakan perkataan yang betul.
+mushafPageTheme = Tema halaman

@@ -547,5 +547,6 @@
   "hifzTabAppearance": "Darstellung",
   "recStrictnessLenientSub": "weniger falsche Markierungen; leichte Fehler können durchgehen.",
   "recStrictnessBalancedSub": "die empfohlene Mitte.",
-  "recStrictnessStrictSub": "findet mehr Fehler; markiert gelegentlich auch ein richtiges Wort."
+  "recStrictnessStrictSub": "findet mehr Fehler; markiert gelegentlich auch ein richtiges Wort.",
+  "mushafPageTheme": "Seitendesign"
 }

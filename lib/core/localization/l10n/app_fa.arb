@@ -547,5 +547,6 @@
   "hifzTabAppearance": "ظاهر",
   "recStrictnessLenientSub": "نشانه‌های نادرست کمتر؛ برخی خطاهای جزئی ممکن است رد شوند.",
   "recStrictnessBalancedSub": "حالت میانهٔ پیشنهادی.",
-  "recStrictnessStrictSub": "خطاهای بیشتری می‌گیرد؛ گاهی ممکن است واژهٔ درستی را هم نشان بزند."
+  "recStrictnessStrictSub": "خطاهای بیشتری می‌گیرد؛ گاهی ممکن است واژهٔ درستی را هم نشان بزند.",
+  "mushafPageTheme": "پوستهٔ صفحه"
 }

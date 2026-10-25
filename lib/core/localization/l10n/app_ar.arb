@@ -547,5 +547,6 @@
   "hifzTabAppearance": "المظهر",
   "recStrictnessLenientSub": "علامات خاطئة أقل، وقد تمرّ بعض الأخطاء الخفيفة.",
   "recStrictnessBalancedSub": "الوسط الموصى به.",
-  "recStrictnessStrictSub": "يلتقط أخطاءً أكثر، وقد يعلّم أحيانًا كلمة صحيحة."
+  "recStrictnessStrictSub": "يلتقط أخطاءً أكثر، وقد يعلّم أحيانًا كلمة صحيحة.",
+  "mushafPageTheme": "سمة الصفحة"
 }

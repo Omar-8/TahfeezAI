@@ -547,5 +547,6 @@
   "hifzTabAppearance": "Apariencia",
   "recStrictnessLenientSub": "menos marcas falsas; algunos errores leves pueden pasar.",
   "recStrictnessBalancedSub": "el punto medio recomendado.",
-  "recStrictnessStrictSub": "detecta más errores; de vez en cuando puede marcar una palabra correcta."
+  "recStrictnessStrictSub": "detecta más errores; de vez en cuando puede marcar una palabra correcta.",
+  "mushafPageTheme": "Tema de la página"
 }

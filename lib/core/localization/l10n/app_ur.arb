@@ -547,5 +547,6 @@
   "hifzTabAppearance": "ظاہری شکل",
   "recStrictnessLenientSub": "غلط نشانات کم، کچھ ہلکی غلطیاں رہ سکتی ہیں۔",
   "recStrictnessBalancedSub": "تجویز کردہ درمیانی سطح۔",
-  "recStrictnessStrictSub": "زیادہ غلطیاں پکڑتی ہے، کبھی کبھار درست لفظ پر بھی نشان لگا سکتی ہے۔"
+  "recStrictnessStrictSub": "زیادہ غلطیاں پکڑتی ہے، کبھی کبھار درست لفظ پر بھی نشان لگا سکتی ہے۔",
+  "mushafPageTheme": "صفحے کی تھیم"
 }

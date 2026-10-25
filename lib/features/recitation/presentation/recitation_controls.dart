@@ -1690,19 +1690,21 @@ class _HifzSettingsSheetState extends ConsumerState<_HifzSettingsSheet>
           ),
           // Both tabs laid out, one shown: the sheet keeps the taller one's
           // height whichever is open.
+          // Each tab its own scroll (one scrolled down leaves the other at
+          // its top).
           Flexible(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.only(top: 8),
-              child: IndexedStack(
-                index: _tabs.index,
-                children: [
-                  _recitationSettings(context),
-                  const Padding(
-                    padding: EdgeInsets.fromLTRB(16, 8, 16, 16),
-                    child: MushafAppearanceOptions(),
-                  ),
-                ],
-              ),
+            child: IndexedStack(
+              index: _tabs.index,
+              children: [
+                SingleChildScrollView(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: _recitationSettings(context),
+                ),
+                const SingleChildScrollView(
+                  padding: EdgeInsets.fromLTRB(16, 16, 16, 16),
+                  child: MushafAppearanceOptions(),
+                ),
+              ],
             ),
           ),
         ],

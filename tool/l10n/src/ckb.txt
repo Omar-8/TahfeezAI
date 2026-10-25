@@ -546,3 +546,4 @@ recStrictnessSub = پشکنینەکە دەبێت چەند دڵنیا بێت پێ
 recStrictnessLenientSub = نیشانەی هەڵەی کەمتر؛ هەندێک هەڵەی سووک لەوانەیە تێپەڕن.
 recStrictnessBalancedSub = ناوەڕاستی پێشنیارکراو.
 recStrictnessStrictSub = هەڵەی زیاتر دەگرێت؛ جاروبار لەوانەیە وشەیەکی ڕاست نیشانە بکات.
+mushafPageTheme = ڕووکاری لاپەڕە

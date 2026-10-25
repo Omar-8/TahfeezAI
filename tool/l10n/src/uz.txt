@@ -546,3 +546,4 @@ recStrictnessSub = Harf, harakat yoki tajvid qoidasini xato deb belgilashdan old
 recStrictnessLenientSub = yolgʻon belgilar kamroq; ayrim yengil xatolar oʻtib ketishi mumkin.
 recStrictnessBalancedSub = tavsiya etilgan oʻrta daraja.
 recStrictnessStrictSub = koʻproq xato topadi; ba’zan toʻgʻri soʻzni ham belgilashi mumkin.
+mushafPageTheme = Sahifa mavzusi

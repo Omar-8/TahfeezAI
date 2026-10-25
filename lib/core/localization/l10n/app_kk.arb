@@ -547,5 +547,6 @@
   "hifzTabAppearance": "Көрініс",
   "recStrictnessLenientSub": "жалған белгілер азырақ; кейбір жеңіл қателер өтіп кетуі мүмкін.",
   "recStrictnessBalancedSub": "ұсынылатын орташа деңгей.",
-  "recStrictnessStrictSub": "көбірек қате табады; кейде дұрыс сөзді де белгілеуі мүмкін."
+  "recStrictnessStrictSub": "көбірек қате табады; кейде дұрыс сөзді де белгілеуі мүмкін.",
+  "mushafPageTheme": "Бет тақырыбы"
 }

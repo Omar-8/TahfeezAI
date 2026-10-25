@@ -547,5 +547,6 @@
   "hifzTabAppearance": "Paparan",
   "recStrictnessLenientSub": "kurang tanda palsu; sesetengah kesalahan ringan mungkin terlepas.",
   "recStrictnessBalancedSub": "tahap tengah yang disyorkan.",
-  "recStrictnessStrictSub": "menangkap lebih banyak kesalahan; sekali-sekala mungkin menandakan perkataan yang betul."
+  "recStrictnessStrictSub": "menangkap lebih banyak kesalahan; sekali-sekala mungkin menandakan perkataan yang betul.",
+  "mushafPageTheme": "Tema halaman"
 }

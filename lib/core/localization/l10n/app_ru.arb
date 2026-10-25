@@ -547,5 +547,6 @@
   "hifzTabAppearance": "Оформление",
   "recStrictnessLenientSub": "меньше ложных отметок; лёгкие ошибки могут пропускаться.",
   "recStrictnessBalancedSub": "рекомендуемая середина.",
-  "recStrictnessStrictSub": "находит больше ошибок; иногда может отметить правильное слово."
+  "recStrictnessStrictSub": "находит больше ошибок; иногда может отметить правильное слово.",
+  "mushafPageTheme": "Тема страницы"
 }

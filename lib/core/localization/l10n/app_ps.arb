@@ -547,5 +547,6 @@
   "hifzTabAppearance": "بڼه",
   "recStrictnessLenientSub": "لږ غلطې نښې؛ ځینې سپکې تېروتنې کېدای شي تېرې شي.",
   "recStrictnessBalancedSub": "وړاندیز شوی منځنی حالت.",
-  "recStrictnessStrictSub": "ډېرې تېروتنې نیسي؛ کله ناکله کېدای شي سمه کلمه هم په نښه کړي."
+  "recStrictnessStrictSub": "ډېرې تېروتنې نیسي؛ کله ناکله کېدای شي سمه کلمه هم په نښه کړي.",
+  "mushafPageTheme": "د مخ بڼه"
 }

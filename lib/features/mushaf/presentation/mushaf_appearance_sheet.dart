@@ -47,12 +47,26 @@ class MushafAppearanceOptions extends ConsumerWidget {
           const AyahViewOptions(),
         if (ref.watch(readerModeProvider) == ReaderMode.ayah)
           const Divider(height: 24),
+        // The page's theme: each with a swatch of its paper and ink.
+        Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: Text(
+            l10n.mushafPageTheme,
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+        ),
         Wrap(
+          key: const ValueKey('mushaf-page-theme'),
           spacing: 8,
           runSpacing: 8,
           children: [
             for (final appearance in MushafAppearance.values)
               ChoiceChip(
+                avatar: ThemeSwatch(
+                  paper: appearance.colors.background,
+                  ink: appearance.colors.text,
+                ),
+                showCheckmark: false,
                 label: Text(mushafAppearanceName(appearance, l10n)),
                 selected: appearance == selected,
                 onSelected: (_) => ref
