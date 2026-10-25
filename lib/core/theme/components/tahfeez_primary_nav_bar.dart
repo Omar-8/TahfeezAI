@@ -121,6 +121,10 @@ class _PrimaryNavBarItem extends StatelessWidget {
         onTap: () {},
         // (Screen readers tap through _LiftTap's own semantics.)
         excludeFromSemantics: true,
+        // No ripple across the whole item: the selected tab's pill shows it.
+        splashFactory: NoSplash.splashFactory,
+        highlightColor: Colors.transparent,
+        hoverColor: Colors.transparent,
         // The bar keeps its height at any text size: labels grow up to 1.3×,
         // stay on one line, and the item scales down if that still doesn't
         // fit (very large text, long Arabic labels).

@@ -215,9 +215,12 @@ class DaySky extends StatelessWidget {
                   height: 220,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
+                    // Softly: a hint of light, not a reflection.
                     gradient: RadialGradient(
                       colors: [
-                        part.glow(brightness),
+                        part
+                            .glow(brightness)
+                            .withValues(alpha: part.glow(brightness).a * 0.65),
                         part.glow(brightness).withValues(alpha: 0),
                       ],
                     ),
