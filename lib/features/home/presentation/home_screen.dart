@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../../../core/ui/bar_space.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'home_sky.dart';
@@ -49,7 +52,10 @@ class HomeScreen extends StatelessWidget {
             child: SafeArea(
               bottom: false,
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(TahfeezSpacing.md),
+                padding: withBarSpace(
+                  context,
+                  const EdgeInsets.all(TahfeezSpacing.md),
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [

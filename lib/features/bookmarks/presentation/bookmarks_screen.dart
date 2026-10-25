@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../../../core/ui/bar_space.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/localization/generated/app_localizations.dart';
@@ -35,7 +38,10 @@ class BookmarksScreen extends ConsumerWidget {
               message: l10n.bookmarksEmpty,
             )
           : ListView.separated(
-              padding: const EdgeInsets.all(TahfeezSpacing.md),
+              padding: withBarSpace(
+                context,
+                const EdgeInsets.all(TahfeezSpacing.md),
+              ),
               itemCount: bookmarks.length,
               separatorBuilder: (_, _) =>
                   const SizedBox(height: TahfeezSpacing.sm),

@@ -118,6 +118,9 @@ class AppShell extends ConsumerWidget {
       return AnnotatedRegion<SystemUiOverlayStyle>(
         value: _systemNavigationBarStyle(scheme),
         child: Scaffold(
+          // Screens drawn on beneath the glass navigation bar, which blurs
+          // them — not the Mushaf under its recitation bar.
+          extendBody: !recitationBar,
           body: content,
           bottomNavigationBar: RecitationBottomBar(
             navigation: TahfeezPrimaryNavigationBar(

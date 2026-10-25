@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/ui/bar_space.dart';
 import '../../../../quran/presentation/surah_name_calligraphy.dart';
 import '../../../../core/localization/generated/app_localizations.dart';
 
@@ -327,8 +328,9 @@ class _SurahIndexTabState extends ConsumerState<SurahIndexTab> {
                 );
               }
               return ListView.builder(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: TahfeezSpacing.sm,
+                padding: withBarSpace(
+                  context,
+                  const EdgeInsets.symmetric(horizontal: TahfeezSpacing.sm),
                 ),
                 itemCount: filtered.length,
                 itemBuilder: (context, index) {

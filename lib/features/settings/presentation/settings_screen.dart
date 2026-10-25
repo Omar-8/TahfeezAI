@@ -1,4 +1,7 @@
 import 'package:file_picker/file_picker.dart';
+
+import '../../../core/ui/bar_space.dart';
+
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show SystemNavigator;
@@ -393,11 +396,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   dense: true,
                   minVerticalPadding: 2,
                   child: ListView(
-                    padding: const EdgeInsets.fromLTRB(
-                      TahfeezSpacing.md,
-                      TahfeezSpacing.sm,
-                      TahfeezSpacing.md,
-                      TahfeezSpacing.md,
+                    padding: withBarSpace(
+                      context,
+                      const EdgeInsets.fromLTRB(
+                        TahfeezSpacing.md,
+                        TahfeezSpacing.sm,
+                        TahfeezSpacing.md,
+                        TahfeezSpacing.md,
+                      ),
                     ),
                     children: [
                       // Glass, as the groups below it.

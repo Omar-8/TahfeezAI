@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/ui/bar_space.dart';
 import '../../../../core/localization/generated/app_localizations.dart';
 
 import 'package:flutter/services.dart';
@@ -59,7 +60,7 @@ class _PageIndexTabState extends ConsumerState<PageIndexTab> {
     final mushaf = ref.watch(defaultMushafProvider);
 
     return Padding(
-      padding: const EdgeInsets.all(TahfeezSpacing.md),
+      padding: withBarSpace(context, const EdgeInsets.all(TahfeezSpacing.md)),
       child: mushaf.when(
         data: (mushaf) {
           if (mushaf == null) {

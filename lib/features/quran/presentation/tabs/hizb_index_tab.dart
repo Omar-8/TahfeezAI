@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/ui/bar_space.dart';
 import '../../../../core/localization/generated/app_localizations.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -30,7 +31,10 @@ class HizbIndexTab extends ConsumerWidget {
           );
         }
         return ListView.builder(
-          padding: const EdgeInsets.all(TahfeezSpacing.md),
+          padding: withBarSpace(
+            context,
+            const EdgeInsets.all(TahfeezSpacing.md),
+          ),
           itemCount: units.length,
           itemBuilder: (context, index) {
             final unit = units[index];

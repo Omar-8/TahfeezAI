@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../../../core/ui/bar_space.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -89,7 +92,10 @@ class MemorizeScreen extends ConsumerWidget {
             loading: () => const TahfeezLoadingView(),
             error: (e, _) => TahfeezEmptyView(message: '$e'),
             data: (today) => ListView(
-              padding: const EdgeInsets.all(TahfeezSpacing.md),
+              padding: withBarSpace(
+                context,
+                const EdgeInsets.all(TahfeezSpacing.md),
+              ),
               children: [
                 const _TodayScore(),
                 const SizedBox(height: TahfeezSpacing.lg),

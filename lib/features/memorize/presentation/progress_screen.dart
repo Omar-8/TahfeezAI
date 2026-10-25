@@ -1,4 +1,5 @@
 import '../../home/presentation/home_sky.dart';
+import '../../../core/ui/bar_space.dart';
 import '../../../core/localization/fallback_localizations.dart';
 
 import 'package:flutter/material.dart';
@@ -71,7 +72,10 @@ class MemorizationProgressScreen extends ConsumerWidget {
           loading: () => const TahfeezLoadingView(),
           error: (e, _) => TahfeezEmptyView(message: '$e'),
           data: (map) => ListView(
-            padding: const EdgeInsets.all(TahfeezSpacing.md),
+            padding: withBarSpace(
+              context,
+              const EdgeInsets.all(TahfeezSpacing.md),
+            ),
             children: [
               _Summary(map: map),
               const SizedBox(height: TahfeezSpacing.lg),

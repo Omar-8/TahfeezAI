@@ -1,3 +1,5 @@
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/gestures.dart' show kTouchSlop;
 import 'package:flutter/material.dart';
 
@@ -36,57 +38,58 @@ class TahfeezPrimaryNavigationBar extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final dark = scheme.brightness == Brightness.dark;
 
-    // Glass, as the cards: frosted lighter towards its top, a bright
-    // hairline along it, a soft lift — its foot the colour the phone's own
-    // navigation strip is given below it.
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          // Close to the page's own colour: light, as if see-through.
-          colors: [
-            Color.lerp(
-              scheme.surface,
-              dark ? Colors.white : scheme.surfaceContainerLowest,
-              dark ? 0.04 : 0.5,
-            )!,
-            Color.lerp(scheme.surface, scheme.surfaceContainer, 0.5)!,
-          ],
-        ),
-        border: Border(
-          top: BorderSide(
-            color: dark
-                ? Colors.white.withValues(alpha: 0.10)
-                : Colors.white.withValues(alpha: 0.9),
-          ),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: scheme.shadow.withValues(alpha: dark ? 0.25 : 0.06),
-            blurRadius: 16,
-            offset: const Offset(0, -4),
-          ),
-        ],
-      ),
-      child: Material(
-        type: MaterialType.transparency,
-        child: SafeArea(
-          top: false,
-          child: SizedBox(
-            height: 72,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                for (var i = 0; i < items.length; i++)
-                  Expanded(
-                    child: _PrimaryNavBarItem(
-                      item: items[i],
-                      selected: i == selectedIndex,
-                      onTap: () => onDestinationSelected(i),
-                    ),
-                  ),
+    // Glass: the screen behind it (drawn on beneath the bar by the app
+    // shell) blurred, a see-through frost lighter towards its top, a bright
+    // hairline along it.
+    return ClipRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color.lerp(
+                  scheme.surface,
+                  dark ? Colors.white : scheme.surfaceContainerLowest,
+                  dark ? 0.04 : 0.5,
+                )!.withValues(alpha: dark ? 0.62 : 0.66),
+                Color.lerp(
+                  scheme.surface,
+                  scheme.surfaceContainer,
+                  0.5,
+                )!.withValues(alpha: dark ? 0.78 : 0.8),
               ],
+            ),
+            border: Border(
+              top: BorderSide(
+                color: dark
+                    ? Colors.white.withValues(alpha: 0.10)
+                    : Colors.white.withValues(alpha: 0.9),
+              ),
+            ),
+          ),
+          child: Material(
+            type: MaterialType.transparency,
+            child: SafeArea(
+              top: false,
+              child: SizedBox(
+                height: 72,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    for (var i = 0; i < items.length; i++)
+                      Expanded(
+                        child: _PrimaryNavBarItem(
+                          item: items[i],
+                          selected: i == selectedIndex,
+                          onTap: () => onDestinationSelected(i),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
             ),
           ),
         ),
