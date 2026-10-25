@@ -552,6 +552,12 @@ class HifzController extends Notifier<HifzState> {
   bool _listening = false;
   int? _turnedFor;
 
+  /// A page recited to its end glows word after word before it turns
+  /// (`QuranEngineMushafPageContent`): the turn to the next one waits this
+  /// long.
+  static const _pageDoneHold = Duration(milliseconds: 1300);
+  Timer? _turnLater;
+
   /// With the page visible the reciter may start anywhere: the test begins
   /// once the matcher has located them.
   bool _locating = false;
@@ -567,6 +573,7 @@ class HifzController extends Notifier<HifzState> {
     }
     ref.onDispose(() {
       _pacer?.cancel();
+      _turnLater?.cancel();
       unawaited(_recognition?.cancel());
       unawaited(_frames?.cancel());
       Future.microtask(() => overlay.set(null));
@@ -1668,10 +1675,15 @@ class HifzController extends Notifier<HifzState> {
     final turns = ref.read(mushafPageTurnRequestsProvider.notifier);
     if (_turnedFor == at) return;
     if (compareWordRefs(here, last.last) > 0) {
+      // On once the page's last words have had their glow.
       _turnedFor = at;
-      turns.next();
+      _turnLater?.cancel();
+      _turnLater = Timer(_pageDoneHold, () {
+        if (ref.mounted) turns.next();
+      });
     } else if (compareWordRefs(here, first.first) < 0) {
       _turnedFor = at;
+      _turnLater?.cancel();
       turns.previous();
     }
   }

@@ -162,25 +162,36 @@ class _QuranEngineMushafPageContentState
           break;
       }
     }
-    // The page's last word recited: every word marked (in ink), which it
-    // was not before.
+    // The page recited to its end (or the recitation's range to its end on
+    // it): the last of its words in the range newly marked (in ink), and
+    // nearly all of them marked — a word no recitation marks (a printed
+    // basmalah, say) does not hold it back.
+    final overlay = ref.read(mushafWordOverlayProvider);
+    final refs = page.wordRefs;
+    final inRange = [
+      for (var i = 0; i < refs.length; i++)
+        if (overlay != null &&
+            compareWordRefs(refs[i], overlay.first) >= 0 &&
+            compareWordRefs(refs[i], overlay.last) <= 0)
+          i,
+    ];
+    bool inked(MushafWordMark? mark) => mark != null && _isInk(mark);
     bool complete((Set<int>, Map<int, MushafWordMark>) applied) {
-      if (n == 0) return false;
-      for (var i = 0; i < n; i++) {
-        final mark = applied.$2[i];
-        if (mark == null || !_isInk(mark)) return false;
-      }
-      return true;
+      if (inRange.isEmpty || !inked(applied.$2[inRange.last])) return false;
+      final marked = inRange.where((i) => inked(applied.$2[i])).length;
+      return marked >= inRange.length * 0.9;
     }
 
     if (changed.isNotEmpty && complete(after) && !complete(before)) {
-      final step = math.min(30.0, 1200 / n);
+      // Over 0.7 s, so most of it shows before the page turns (the
+      // recitation waits 1.3 s to turn it).
+      final step = math.min(25.0, 700 / n);
       for (var i = 0; i < n; i++) {
         effects.playWordEffect(
           i,
           MushafWordEffect.bloom,
           color: colorOf(MushafWordMark.correct),
-          delay: Duration(microseconds: (300000 + i * step * 1000).round()),
+          delay: Duration(microseconds: (150000 + i * step * 1000).round()),
         );
       }
       if (ref.read(hifzSettingsProvider).alert.vibrates) {

@@ -37,7 +37,9 @@ class ZenModeButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) => IconButton(
     key: const ValueKey('mushaf-zen'),
-    icon: const Icon(Icons.fullscreen_rounded),
+    // Its corner marks span 14 of the glyph's 24 units (its neighbours'
+    // about 19): drawn larger to look the same size.
+    icon: const Icon(Icons.fullscreen_rounded, size: 30),
     tooltip: AppLocalizations.of(context).zenMode,
     onPressed: () => ref.read(mushafZenModeProvider.notifier).set(true),
   );

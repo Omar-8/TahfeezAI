@@ -688,8 +688,11 @@ void main() {
       isNull,
       reason: 'the next word is still on the visible page',
     );
-    // The page's last word: the next one is on the following page.
+    // The page's last word: the next one is on the following page — turned
+    // to once the finished page has glowed.
     await recite(words.join(' '));
+    expect(container.read(mushafPageTurnRequestsProvider), isNull);
+    await Future<void>.delayed(const Duration(milliseconds: 1400));
     expect(container.read(mushafPageTurnRequestsProvider)?.direction, 1);
     expect(hifz().expected!.ayahId, 2257);
   });
