@@ -187,6 +187,7 @@ class QvpWordEffect {
     this.color,
     this.startMs, {
     this.halo = true,
+    this.letters = true,
   });
 
   final int word;
@@ -197,6 +198,10 @@ class QvpWordEffect {
   /// the glow around its letters (`false`: the letters' glow only — words
   /// glowing together then read as one).
   final bool halo;
+
+  /// A [QvpWordEffectKind.bloom]'s blurred glow around the word's letters
+  /// (`false`: the band only — cheap enough for many words at once).
+  final bool letters;
 
   /// On [QvpWordEffects.nowMs]'s clock.
   final double startMs;
@@ -224,8 +229,18 @@ class QvpWordEffects extends ChangeNotifier {
     Color color = const Color(0xFF43A047),
     double delayMs = 0,
     bool halo = true,
+    bool letters = true,
   }) {
-    _effects.add(QvpWordEffect(word, kind, color, nowMs + delayMs, halo: halo));
+    _effects.add(
+      QvpWordEffect(
+        word,
+        kind,
+        color,
+        nowMs + delayMs,
+        halo: halo,
+        letters: letters,
+      ),
+    );
     notifyListeners();
   }
 
@@ -597,6 +612,9 @@ class _InkCache {
   /// Each word's engine paths (Tahfeez patch 0005), built when first needed.
   List<List<int>>? wordPaths;
 
+  /// Each path's bounds in page units (Tahfeez patch 0005), as measured.
+  List<Rect?>? pathBounds;
+
   List<List<int>> buildWordPaths(QvpPage p) {
     final cached = wordPaths;
     if (cached != null) return cached;
@@ -613,6 +631,7 @@ class _InkCache {
     page = p;
     paths = null;
     wordPaths = null;
+    pathBounds = null;
     key = '';
     _dropImage();
   }
@@ -736,9 +755,10 @@ class _QvpPainter extends CustomPainter {
     final wordPaths = cache.buildWordPaths(page);
     if (word < 0 || word >= wordPaths.length) return null;
     Rect? out;
+    final bounds = cache.pathBounds ??= List<Rect?>.filled(paths.length, null);
     for (final i in wordPaths[word]) {
       final (s, tx, ty) = _lineTf(l, page.pathLine(i));
-      final b = paths[i].getBounds();
+      final b = bounds[i] ??= paths[i].getBounds();
       final r = Rect.fromLTRB(
         tx + b.left * s,
         ty + b.top * s,
@@ -934,6 +954,7 @@ class _QvpPainter extends CustomPainter {
           );
         }
         // …and a glow around its letters, spreading.
+        if (!e.letters) continue;
         final glow = ui.Paint()
           ..isAntiAlias = true
           ..color = e.color.withValues(alpha: e.color.a * 0.9 * fade);

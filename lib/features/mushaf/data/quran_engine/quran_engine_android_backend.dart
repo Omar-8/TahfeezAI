@@ -160,6 +160,7 @@ class QuranEngineAndroidPage
     Color? color,
     Duration delay = Duration.zero,
     bool halo = true,
+    bool letters = true,
   }) => _effects.play(
     wordIndex,
     switch (effect) {
@@ -170,6 +171,7 @@ class QuranEngineAndroidPage
     color: color ?? const Color(0xFF43A047),
     delayMs: delay.inMicroseconds / 1000,
     halo: halo,
+    letters: letters,
   );
 
   @override

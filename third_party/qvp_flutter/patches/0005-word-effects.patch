@@ -8,7 +8,7 @@
  import 'dart:ui' as ui;
  
  import 'package:flutter/foundation.dart';
-@@ -164,6 +165,77 @@
+@@ -164,6 +165,92 @@
        Offset((local.dx - offsetX) / scale, (local.dy - offsetY) / scale);
  }
  
@@ -34,6 +34,7 @@
 +    this.color,
 +    this.startMs, {
 +    this.halo = true,
++    this.letters = true,
 +  });
 +
 +  final int word;
@@ -44,6 +45,10 @@
 +  /// the glow around its letters (`false`: the letters' glow only — words
 +  /// glowing together then read as one).
 +  final bool halo;
++
++  /// A [QvpWordEffectKind.bloom]'s blurred glow around the word's letters
++  /// (`false`: the band only — cheap enough for many words at once).
++  final bool letters;
 +
 +  /// On [QvpWordEffects.nowMs]'s clock.
 +  final double startMs;
@@ -71,8 +76,18 @@
 +    Color color = const Color(0xFF43A047),
 +    double delayMs = 0,
 +    bool halo = true,
++    bool letters = true,
 +  }) {
-+    _effects.add(QvpWordEffect(word, kind, color, nowMs + delayMs, halo: halo));
++    _effects.add(
++      QvpWordEffect(
++        word,
++        kind,
++        color,
++        nowMs + delayMs,
++        halo: halo,
++        letters: letters,
++      ),
++    );
 +    notifyListeners();
 +  }
 +
@@ -86,7 +101,7 @@
  /// Renders a [QvpPage] with the engine's layout, animated highlights, masks,
  /// styled paths, tap / long-press selection and pinch / pan.
  class QvpPageView extends StatefulWidget {
-@@ -186,9 +258,13 @@
+@@ -186,9 +273,13 @@
      this.paperShadow = true,
      this.minScale = kMinZoom,
      this.maxScale = kMaxZoom,
@@ -100,7 +115,7 @@
    final QvpViewLayout layout;
  
    /// Paper colour behind the ink (null = transparent).
-@@ -253,6 +329,7 @@
+@@ -253,6 +344,7 @@
      _ticker = createTicker(_onTick);
      _attachPage();
      _applyInk();
@@ -108,7 +123,7 @@
    }
  
    void _attachPage() {
-@@ -282,12 +359,17 @@
+@@ -282,12 +374,17 @@
        _attachPage();
      }
      if (oldWidget.defaultInk != widget.defaultInk) _applyInk();
@@ -126,7 +141,7 @@
      _ticker.dispose();
      _cache.dispose();
      _frame.dispose();
-@@ -321,8 +403,10 @@
+@@ -321,8 +418,10 @@
        return;
      }
      final more = page.tick(nowMs);
@@ -138,7 +153,7 @@
    }
  
    // ── layout & fit (engine layout, then pan/zoom on top) ──
-@@ -487,6 +571,7 @@
+@@ -487,6 +586,7 @@
                    dpr: dpr,
                    paper: widget.paper,
                    paperShadow: widget.paperShadow,
@@ -146,12 +161,15 @@
                  ),
                ),
              ),
-@@ -509,10 +594,25 @@
+@@ -509,10 +609,29 @@
    int basePaths = 0, overlayPaths = 0, bands = 0;
    double baseMs = 0, overlayMs = 0;
  
 +  /// Each word's engine paths (Tahfeez patch 0005), built when first needed.
 +  List<List<int>>? wordPaths;
++
++  /// Each path's bounds in page units (Tahfeez patch 0005), as measured.
++  List<Rect?>? pathBounds;
 +
 +  List<List<int>> buildWordPaths(QvpPage p) {
 +    final cached = wordPaths;
@@ -169,10 +187,11 @@
      page = p;
      paths = null;
 +    wordPaths = null;
++    pathBounds = null;
      key = '';
      _dropImage();
    }
-@@ -582,6 +682,7 @@
+@@ -582,6 +701,7 @@
      required this.dpr,
      required this.paper,
      required this.paperShadow,
@@ -180,7 +199,7 @@
    }) : super(repaint: Listenable.merge([page, view, frame]));
  
    final QvpPage page;
-@@ -590,6 +691,64 @@
+@@ -590,6 +710,65 @@
    final double dpr;
    final Color? paper;
    final bool paperShadow;
@@ -229,9 +248,10 @@
 +    final wordPaths = cache.buildWordPaths(page);
 +    if (word < 0 || word >= wordPaths.length) return null;
 +    Rect? out;
++    final bounds = cache.pathBounds ??= List<Rect?>.filled(paths.length, null);
 +    for (final i in wordPaths[word]) {
 +      final (s, tx, ty) = _lineTf(l, page.pathLine(i));
-+      final b = paths[i].getBounds();
++      final b = bounds[i] ??= paths[i].getBounds();
 +      final r = Rect.fromLTRB(
 +        tx + b.left * s,
 +        ty + b.top * s,
@@ -245,7 +265,7 @@
  
    /// Transform of one line: (scale, tx, ty) in logical px.
    (double, double, double) _lineTf(QvpLayout? l, int line) {
-@@ -752,6 +911,39 @@
+@@ -752,6 +931,40 @@
      final bands = page.highlightBoxesView();
      _drawBoxes(canvas, bands, layout: l);
  
@@ -272,6 +292,7 @@
 +          );
 +        }
 +        // …and a glow around its letters, spreading.
++        if (!e.letters) continue;
 +        final glow = ui.Paint()
 +          ..isAntiAlias = true
 +          ..color = e.color.withValues(alpha: e.color.a * 0.9 * fade);
@@ -285,7 +306,7 @@
      // 2. base ink
      final img = cache.image;
      if (img != null) {
-@@ -772,6 +964,7 @@
+@@ -772,6 +985,7 @@
      if (styled.isNotEmpty) {
        final paint = ui.Paint()..isAntiAlias = true;
        var cur = -1, open = false;
@@ -293,7 +314,7 @@
        for (final s in styled) {
          if ((s.color & 0xff) == 0) continue;
          final ln = page.pathLine(s.path);
-@@ -783,13 +976,37 @@
+@@ -783,13 +997,37 @@
            canvas.scale(sc);
            open = true;
            cur = ln;
@@ -332,7 +353,7 @@
      // 4. mask boxes (block / blur) on top
      _drawBoxes(canvas, page.maskBoxesView());
      cache.overlayMs = sw.elapsedMicroseconds / 1000;
-@@ -804,7 +1021,8 @@
+@@ -804,7 +1042,8 @@
        old.dpr != dpr ||
        old.paper != paper ||
        old.paperShadow != paperShadow ||

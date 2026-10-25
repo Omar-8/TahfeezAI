@@ -148,3 +148,48 @@ class _LatticePainter extends CustomPainter {
       old.spacing != spacing ||
       old.strokeWidth != strokeWidth;
 }
+
+/// A number inside the eight-pointed star's outline — an ayah's end (the
+/// daily ayah), a surah's or a juz's number (the Quran tab).
+class TahfeezStarNumber extends StatelessWidget {
+  const TahfeezStarNumber({
+    super.key,
+    required this.label,
+    required this.color,
+    this.size = 40,
+    this.textStyle,
+  });
+
+  /// The number as shown (Arabic-Indic digits, or the locale's).
+  final String label;
+  final Color color;
+  final double size;
+  final TextStyle? textStyle;
+
+  @override
+  Widget build(BuildContext context) => SizedBox.square(
+    dimension: size,
+    child: Stack(
+      alignment: Alignment.center,
+      children: [
+        TahfeezStar(color: color, size: size, filled: false),
+        Padding(
+          padding: EdgeInsets.all(size * 0.2),
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              label,
+              maxLines: 1,
+              style: (textStyle ?? const TextStyle()).copyWith(
+                fontSize: textStyle?.fontSize ?? size * 0.32,
+                height: 1,
+                color: color,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}

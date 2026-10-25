@@ -39,14 +39,66 @@ class TahfeezCard extends StatelessWidget {
     );
   }
 
-  /// Frosted glass ([TahfeezGlass]): what is behind it blurred, a sheen
-  /// across it and a hairline edge catching the light.
-  Widget _glass(BuildContext context, ShapeBorder? shape, Widget content) {
+  Widget _glass(BuildContext context, ShapeBorder? shape, Widget content) =>
+      TahfeezGlassSurface(shape: shape, onTap: onTap, child: content);
+}
+
+/// Frosted glass ([TahfeezGlass]): a sheen across it, a hairline edge
+/// catching the light, a soft shadow in light themes — and, with [blur],
+/// what is behind it blurred (left out for long scrolling lists: smooth,
+/// and the sky behind them fades out within a few cards).
+class TahfeezGlassSurface extends StatelessWidget {
+  const TahfeezGlassSurface({
+    super.key,
+    required this.child,
+    this.shape,
+    this.onTap,
+    this.onLongPress,
+    this.blur = true,
+  });
+
+  final Widget child;
+  final ShapeBorder? shape;
+  final VoidCallback? onTap, onLongPress;
+  final bool blur;
+
+  @override
+  Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final dark = scheme.brightness == Brightness.dark;
-    final radius = shape is RoundedRectangleBorder
-        ? shape.borderRadius.resolve(Directionality.of(context))
+    final cardShape = shape ?? Theme.of(context).cardTheme.shape;
+    final radius = cardShape is RoundedRectangleBorder
+        ? cardShape.borderRadius.resolve(Directionality.of(context))
         : BorderRadius.circular(TahfeezRadii.lg);
+    final surface = DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: radius,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            scheme.surfaceContainerLowest.withValues(alpha: dark ? 0.22 : 0.48),
+            scheme.surfaceContainerLow.withValues(alpha: dark ? 0.12 : 0.26),
+          ],
+        ),
+        border: Border.all(
+          color: dark
+              ? Colors.white.withValues(alpha: 0.08)
+              : Colors.white.withValues(alpha: 0.7),
+        ),
+      ),
+      child: Material(
+        type: MaterialType.transparency,
+        child: onTap == null && onLongPress == null
+            ? child
+            : InkWell(
+                onTap: onTap,
+                onLongPress: onLongPress,
+                borderRadius: radius,
+                child: child,
+              ),
+      ),
+    );
     // In light themes a soft shadow lifts the glass off the page.
     return DecoratedBox(
       decoration: BoxDecoration(
@@ -63,37 +115,12 @@ class TahfeezCard extends StatelessWidget {
       ),
       child: ClipRRect(
         borderRadius: radius,
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              borderRadius: radius,
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  scheme.surfaceContainerLowest.withValues(
-                    alpha: dark ? 0.22 : 0.48,
-                  ),
-                  scheme.surfaceContainerLow.withValues(
-                    alpha: dark ? 0.12 : 0.26,
-                  ),
-                ],
-              ),
-              border: Border.all(
-                color: dark
-                    ? Colors.white.withValues(alpha: 0.08)
-                    : Colors.white.withValues(alpha: 0.7),
-              ),
-            ),
-            child: Material(
-              type: MaterialType.transparency,
-              child: onTap == null
-                  ? content
-                  : InkWell(onTap: onTap, borderRadius: radius, child: content),
-            ),
-          ),
-        ),
+        child: blur
+            ? BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+                child: surface,
+              )
+            : surface,
       ),
     );
   }

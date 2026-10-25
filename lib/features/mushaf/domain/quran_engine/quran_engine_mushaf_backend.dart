@@ -183,12 +183,14 @@ enum MushafWordEffect {
 abstract interface class MushafWordEffectsPage {
   /// Plays [effect] on the page word at engine index [wordIndex] (in
   /// [color], for a [MushafWordEffect.bloom] — with a band behind the word
-  /// unless not [halo]), after [delay].
+  /// unless not [halo], a glow around its letters unless not [letters]),
+  /// after [delay].
   void playWordEffect(
     int wordIndex,
     MushafWordEffect effect, {
     Color? color,
     Duration delay = Duration.zero,
     bool halo = true,
+    bool letters = true,
   });
 }

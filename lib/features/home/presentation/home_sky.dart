@@ -191,13 +191,49 @@ class _HomeSkyState extends ConsumerState<HomeSky> {
               ),
               TahfeezGeometricPattern(
                 color: scheme.onSurface.withValues(
-                  alpha: scheme.brightness == Brightness.light ? 0.07 : 0.05,
+                  alpha: scheme.brightness == Brightness.light ? 0.10 : 0.08,
                 ),
                 spacing: 52,
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// A screen over the time-of-day sky, as Home is: the sky behind its top —
+/// its app bar's too, made see-through — and its cards frosted glass
+/// ([TahfeezGlass]). The Quran tab, Memorize, Progress, Settings.
+class SkyBackdrop extends StatelessWidget {
+  const SkyBackdrop({super.key, required this.child});
+
+  /// The screen's [Scaffold].
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return ColoredBox(
+      color: theme.colorScheme.surface,
+      child: Stack(
+        children: [
+          const Positioned(top: 0, left: 0, right: 0, child: HomeSky()),
+          TahfeezGlass(
+            child: Theme(
+              data: theme.copyWith(
+                scaffoldBackgroundColor: Colors.transparent,
+                appBarTheme: theme.appBarTheme.copyWith(
+                  backgroundColor: Colors.transparent,
+                  surfaceTintColor: Colors.transparent,
+                  scrolledUnderElevation: 0,
+                ),
+              ),
+              child: child,
+            ),
+          ),
+        ],
       ),
     );
   }

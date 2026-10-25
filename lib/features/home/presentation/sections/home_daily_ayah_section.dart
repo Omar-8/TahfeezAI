@@ -116,10 +116,14 @@ class _DailyAyahCard extends ConsumerWidget {
                           const TextSpan(text: ' '),
                           WidgetSpan(
                             alignment: PlaceholderAlignment.middle,
-                            child: _AyahMarker(
-                              number: ayah.verseNo,
+                            // Its number in a drawn star, not a font glyph.
+                            child: TahfeezStarNumber(
+                              label: _arabicDigits(ayah.verseNo),
                               color: scheme.tertiary,
                               size: arabicSize * 0.95,
+                              textStyle: const TextStyle(
+                                fontFamily: 'Noto Naskh Arabic',
+                              ),
                             ),
                           ),
                         ],
@@ -220,40 +224,4 @@ class _Ornament extends StatelessWidget {
       ),
     );
   }
-}
-
-/// The ayah's end: its number in an eight-pointed star (drawn, not a font
-/// glyph).
-class _AyahMarker extends StatelessWidget {
-  const _AyahMarker({
-    required this.number,
-    required this.color,
-    required this.size,
-  });
-
-  final int number;
-  final Color color;
-  final double size;
-
-  @override
-  Widget build(BuildContext context) => SizedBox.square(
-    dimension: size,
-    child: Stack(
-      alignment: Alignment.center,
-      children: [
-        TahfeezStar(color: color, size: size, filled: false),
-        Text(
-          _arabicDigits(number),
-          textDirection: TextDirection.rtl,
-          style: TextStyle(
-            fontFamily: 'Noto Naskh Arabic',
-            fontSize: size * 0.36,
-            height: 1,
-            color: color,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
-    ),
-  );
 }

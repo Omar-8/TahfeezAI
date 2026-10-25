@@ -986,12 +986,6 @@ class HifzController extends Notifier<HifzState> {
     final before = ranges[pages.$1 - 1];
     final focusStart =
         (before == null ? null : corpus.positionOf(before.first)) ?? pageStart;
-    if (!kReleaseMode) {
-      debugPrint(
-        'Hifz: begins on pages $pages (${firstRange.first}), '
-        'looking from ${corpus.words[focusStart].ref}',
-      );
-    }
     _matcher = _newMatcher()
       ..start(anchor: pageStart)
       ..setFocus(

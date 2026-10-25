@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../home/presentation/home_sky.dart';
 import '../../../core/localization/generated/app_localizations.dart';
 import '../../../core/routing/app_routes.dart';
 
@@ -56,62 +57,64 @@ class _QuranIndexScreenState extends ConsumerState<QuranIndexScreen>
     final recent = ref.watch(recentQuranLocationControllerProvider);
 
     return BackToExit(
-      child: Scaffold(
-        appBar: TahfeezAppBar(
-          title: Text(AppLocalizations.of(context).quranTitle),
-          centerTitle: false,
-          actions: [
-            // Beside the page-jump ("Go to Ayah") button, not a full-width
-            // chip row below the app bar taking real estate away from the
-            // tab content -- only shown once there's somewhere to jump back
-            // to.
-            if (recent != null)
+      child: SkyBackdrop(
+        child: Scaffold(
+          appBar: TahfeezAppBar(
+            title: Text(AppLocalizations.of(context).quranTitle),
+            centerTitle: false,
+            actions: [
+              // Beside the page-jump ("Go to Ayah") button, not a full-width
+              // chip row below the app bar taking real estate away from the
+              // tab content -- only shown once there's somewhere to jump back
+              // to.
+              if (recent != null)
+                IconButton(
+                  icon: const Icon(Icons.history),
+                  tooltip: AppLocalizations.of(context).quranJumpBack,
+                  onPressed: () => goToQuranLocation(context, recent),
+                ),
               IconButton(
-                icon: const Icon(Icons.history),
-                tooltip: AppLocalizations.of(context).quranJumpBack,
-                onPressed: () => goToQuranLocation(context, recent),
+                icon: const Icon(Icons.pin_outlined),
+                tooltip: AppLocalizations.of(context).quranGoToAyah,
+                onPressed: _goToAyah,
               ),
-            IconButton(
-              icon: const Icon(Icons.pin_outlined),
-              tooltip: AppLocalizations.of(context).quranGoToAyah,
-              onPressed: _goToAyah,
-            ),
-            IconButton(
-              key: const ValueKey('quran-bookmarks'),
-              icon: const Icon(Icons.bookmarks_outlined),
-              tooltip: AppLocalizations.of(context).bookmarksTitle,
-              onPressed: () => context.go(AppRoutes.bookmarks),
-            ),
-            IconButton(
-              icon: const Icon(Icons.search),
-              tooltip: AppLocalizations.of(context).navSearch,
-              onPressed: () => context.go(AppRoutes.search),
-            ),
-          ],
-        ),
-        body: Column(
-          children: [
-            TabBar(
-              controller: _tabController,
-              tabs: [
-                Tab(text: AppLocalizations.of(context).quranTabSurah),
-                Tab(text: AppLocalizations.of(context).quranTabJuz),
-                Tab(text: AppLocalizations.of(context).quranTabHizb),
-                Tab(text: AppLocalizations.of(context).quranTabPage),
-              ],
-            ),
-            Expanded(
-              child: TabBarView(
+              IconButton(
+                key: const ValueKey('quran-bookmarks'),
+                icon: const Icon(Icons.bookmarks_outlined),
+                tooltip: AppLocalizations.of(context).bookmarksTitle,
+                onPressed: () => context.go(AppRoutes.bookmarks),
+              ),
+              IconButton(
+                icon: const Icon(Icons.search),
+                tooltip: AppLocalizations.of(context).navSearch,
+                onPressed: () => context.go(AppRoutes.search),
+              ),
+            ],
+          ),
+          body: Column(
+            children: [
+              TabBar(
                 controller: _tabController,
-                children: [
-                  SurahIndexTab(onSelect: _select),
-                  JuzIndexTab(onSelect: _select),
-                  HizbIndexTab(onSelect: _select),
-                  PageIndexTab(onSelect: _select),
+                tabs: [
+                  Tab(text: AppLocalizations.of(context).quranTabSurah),
+                  Tab(text: AppLocalizations.of(context).quranTabJuz),
+                  Tab(text: AppLocalizations.of(context).quranTabHizb),
+                  Tab(text: AppLocalizations.of(context).quranTabPage),
                 ],
               ),
-            ),
-          ],
+              Expanded(
+                child: TabBarView(
+                  controller: _tabController,
+                  children: [
+                    SurahIndexTab(onSelect: _select),
+                    JuzIndexTab(onSelect: _select),
+                    HizbIndexTab(onSelect: _select),
+                    PageIndexTab(onSelect: _select),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

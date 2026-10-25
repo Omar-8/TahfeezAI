@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../home/presentation/home_sky.dart';
 import '../../../core/localization/generated/app_localizations.dart';
 import '../../../core/routing/app_routes.dart';
 import '../../../core/routing/quran_location_routing.dart';
@@ -53,91 +54,95 @@ class MemorizeScreen extends ConsumerWidget {
         );
 
     return BackToExit(
-      child: Scaffold(
-        appBar: TahfeezAppBar(
-          title: Text(l10n.memTitle),
-          centerTitle: false,
-          actions: [
-            // Named, not only an icon: what it opens is plain to see. At most
-            // under half the bar — a long name at large text shortened, the
-            // title kept.
-            Padding(
-              padding: const EdgeInsetsDirectional.only(end: TahfeezSpacing.sm),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxWidth: MediaQuery.sizeOf(context).width * 0.45,
+      child: SkyBackdrop(
+        child: Scaffold(
+          appBar: TahfeezAppBar(
+            title: Text(l10n.memTitle),
+            centerTitle: false,
+            actions: [
+              // Named, not only an icon: what it opens is plain to see. At most
+              // under half the bar — a long name at large text shortened, the
+              // title kept.
+              Padding(
+                padding: const EdgeInsetsDirectional.only(
+                  end: TahfeezSpacing.sm,
                 ),
-                child: TextButton.icon(
-                  key: const ValueKey('mem-open-progress'),
-                  onPressed: () => context.push(AppRoutes.memorizeProgress),
-                  icon: const Icon(Icons.insights_outlined),
-                  label: Text(
-                    l10n.memProgressTitle,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: MediaQuery.sizeOf(context).width * 0.45,
+                  ),
+                  child: TextButton.icon(
+                    key: const ValueKey('mem-open-progress'),
+                    onPressed: () => context.push(AppRoutes.memorizeProgress),
+                    icon: const Icon(Icons.insights_outlined),
+                    label: Text(
+                      l10n.memProgressTitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
-        ),
-        body: plan.when(
-          loading: () => const TahfeezLoadingView(),
-          error: (e, _) => TahfeezEmptyView(message: '$e'),
-          data: (today) => ListView(
-            padding: const EdgeInsets.all(TahfeezSpacing.md),
-            children: [
-              const _TodayScore(),
-              const SizedBox(height: TahfeezSpacing.lg),
-              section(
-                l10n.memNewLesson,
-                l10n.memLessonHint,
-                Icons.auto_stories_outlined,
-                _NewLessonCard(names: names),
-              ),
-              const SizedBox(height: TahfeezSpacing.lg),
-              if (today.isEmpty)
-                TahfeezCard(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    spacing: TahfeezSpacing.sm,
-                    children: [
-                      Text(
-                        l10n.memEmptyTitle,
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      Text(l10n.memEmptyBody),
-                      Align(
-                        alignment: AlignmentDirectional.centerStart,
-                        child: FilledButton.tonalIcon(
-                          key: const ValueKey('mem-empty-mark-known'),
-                          onPressed: () => showMarkKnownSheet(context),
-                          icon: const Icon(Icons.playlist_add_check),
-                          label: Text(l10n.memMarkKnown),
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-              else ...[
-                if (today.recent.isNotEmpty) ...[
-                  section(
-                    l10n.memRecent,
-                    l10n.memRecentSub,
-                    Icons.replay_outlined,
-                    _TaskList(tasks: today.recent, names: names),
-                  ),
-                  const SizedBox(height: TahfeezSpacing.lg),
-                ],
-                if (today.old.isNotEmpty)
-                  section(
-                    l10n.memOld,
-                    l10n.memOldSub,
-                    Icons.history_edu_outlined,
-                    _TaskList(tasks: today.old, names: names),
-                  ),
-              ],
             ],
+          ),
+          body: plan.when(
+            loading: () => const TahfeezLoadingView(),
+            error: (e, _) => TahfeezEmptyView(message: '$e'),
+            data: (today) => ListView(
+              padding: const EdgeInsets.all(TahfeezSpacing.md),
+              children: [
+                const _TodayScore(),
+                const SizedBox(height: TahfeezSpacing.lg),
+                section(
+                  l10n.memNewLesson,
+                  l10n.memLessonHint,
+                  Icons.auto_stories_outlined,
+                  _NewLessonCard(names: names),
+                ),
+                const SizedBox(height: TahfeezSpacing.lg),
+                if (today.isEmpty)
+                  TahfeezCard(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      spacing: TahfeezSpacing.sm,
+                      children: [
+                        Text(
+                          l10n.memEmptyTitle,
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        Text(l10n.memEmptyBody),
+                        Align(
+                          alignment: AlignmentDirectional.centerStart,
+                          child: FilledButton.tonalIcon(
+                            key: const ValueKey('mem-empty-mark-known'),
+                            onPressed: () => showMarkKnownSheet(context),
+                            icon: const Icon(Icons.playlist_add_check),
+                            label: Text(l10n.memMarkKnown),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                else ...[
+                  if (today.recent.isNotEmpty) ...[
+                    section(
+                      l10n.memRecent,
+                      l10n.memRecentSub,
+                      Icons.replay_outlined,
+                      _TaskList(tasks: today.recent, names: names),
+                    ),
+                    const SizedBox(height: TahfeezSpacing.lg),
+                  ],
+                  if (today.old.isNotEmpty)
+                    section(
+                      l10n.memOld,
+                      l10n.memOldSub,
+                      Icons.history_edu_outlined,
+                      _TaskList(tasks: today.old, names: names),
+                    ),
+                ],
+              ],
+            ),
           ),
         ),
       ),

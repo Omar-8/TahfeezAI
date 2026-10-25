@@ -1,3 +1,4 @@
+import '../../home/presentation/home_sky.dart';
 import '../../../core/localization/fallback_localizations.dart';
 
 import 'package:flutter/material.dart';
@@ -44,63 +45,65 @@ class MemorizationProgressScreen extends ConsumerWidget {
             width(l10n.memProgressTitle, theme.textTheme.titleLarge) +
             140 <=
         MediaQuery.sizeOf(context).width;
-    return Scaffold(
-      appBar: TahfeezAppBar(
-        title: Text(l10n.memProgressTitle),
-        centerTitle: false,
-        actions: [
-          if (labelFits)
-            TextButton.icon(
-              key: const ValueKey('mem-mark-known'),
-              onPressed: () => showMarkKnownSheet(context),
-              icon: const Icon(Icons.playlist_add_check),
-              label: Text(l10n.memMarkKnown),
-            )
-          else
-            IconButton(
-              key: const ValueKey('mem-mark-known'),
-              tooltip: l10n.memMarkKnown,
-              onPressed: () => showMarkKnownSheet(context),
-              icon: const Icon(Icons.playlist_add_check),
-            ),
-        ],
-      ),
-      body: map.when(
-        loading: () => const TahfeezLoadingView(),
-        error: (e, _) => TahfeezEmptyView(message: '$e'),
-        data: (map) => ListView(
-          padding: const EdgeInsets.all(TahfeezSpacing.md),
-          children: [
-            _Summary(map: map),
-            const SizedBox(height: TahfeezSpacing.lg),
-            TahfeezSectionHeader(
-              title: l10n.memStreakTitle,
-              icon: Icons.calendar_month_rounded,
-            ),
-            const SizedBox(height: TahfeezSpacing.sm),
-            const StreakCard(),
-            const SizedBox(height: TahfeezSpacing.lg),
-            TahfeezSectionHeader(
-              title: l10n.activityTitle,
-              icon: Icons.insights_rounded,
-            ),
-            const SizedBox(height: TahfeezSpacing.sm),
-            const _Activity(),
-            const SizedBox(height: TahfeezSpacing.lg),
-            TahfeezSectionHeader(
-              title: l10n.memMapTitle,
-              icon: Icons.grid_view_outlined,
-            ),
-            const SizedBox(height: TahfeezSpacing.sm),
-            _StrengthMap(map: map),
-            const SizedBox(height: TahfeezSpacing.lg),
-            TahfeezSectionHeader(
-              title: l10n.memWeakTitle,
-              icon: Icons.trending_down,
-            ),
-            const SizedBox(height: TahfeezSpacing.sm),
-            _WeakPages(map: map),
+    return SkyBackdrop(
+      child: Scaffold(
+        appBar: TahfeezAppBar(
+          title: Text(l10n.memProgressTitle),
+          centerTitle: false,
+          actions: [
+            if (labelFits)
+              TextButton.icon(
+                key: const ValueKey('mem-mark-known'),
+                onPressed: () => showMarkKnownSheet(context),
+                icon: const Icon(Icons.playlist_add_check),
+                label: Text(l10n.memMarkKnown),
+              )
+            else
+              IconButton(
+                key: const ValueKey('mem-mark-known'),
+                tooltip: l10n.memMarkKnown,
+                onPressed: () => showMarkKnownSheet(context),
+                icon: const Icon(Icons.playlist_add_check),
+              ),
           ],
+        ),
+        body: map.when(
+          loading: () => const TahfeezLoadingView(),
+          error: (e, _) => TahfeezEmptyView(message: '$e'),
+          data: (map) => ListView(
+            padding: const EdgeInsets.all(TahfeezSpacing.md),
+            children: [
+              _Summary(map: map),
+              const SizedBox(height: TahfeezSpacing.lg),
+              TahfeezSectionHeader(
+                title: l10n.memStreakTitle,
+                icon: Icons.calendar_month_rounded,
+              ),
+              const SizedBox(height: TahfeezSpacing.sm),
+              const StreakCard(),
+              const SizedBox(height: TahfeezSpacing.lg),
+              TahfeezSectionHeader(
+                title: l10n.activityTitle,
+                icon: Icons.insights_rounded,
+              ),
+              const SizedBox(height: TahfeezSpacing.sm),
+              const _Activity(),
+              const SizedBox(height: TahfeezSpacing.lg),
+              TahfeezSectionHeader(
+                title: l10n.memMapTitle,
+                icon: Icons.grid_view_outlined,
+              ),
+              const SizedBox(height: TahfeezSpacing.sm),
+              _StrengthMap(map: map),
+              const SizedBox(height: TahfeezSpacing.lg),
+              TahfeezSectionHeader(
+                title: l10n.memWeakTitle,
+                icon: Icons.trending_down,
+              ),
+              const SizedBox(height: TahfeezSpacing.sm),
+              _WeakPages(map: map),
+            ],
+          ),
         ),
       ),
     );

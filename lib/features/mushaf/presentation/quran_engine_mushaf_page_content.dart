@@ -112,8 +112,8 @@ class _QuranEngineMushafPageContentState
   static const _maxReveals = 60;
 
   /// A word revealed: its ink fading in, with a soft glow in its own
-  /// colour ([color], else the page's ink) around its letters — the words
-  /// revealed together (an ayah) all at once, so they glow and fade as one.
+  /// colour ([color], else the page's ink) behind it — the words revealed
+  /// together (an ayah) all at once, so they glow and fade as one.
   void _reveal(
     MushafWordEffectsPage effects,
     int word,
@@ -125,8 +125,10 @@ class _QuranEngineMushafPageContentState
     effects.playWordEffect(
       word,
       MushafWordEffect.bloom,
-      color: (color ?? widget.colors.text).withValues(alpha: 0.55),
-      halo: false,
+      color: (color ?? widget.colors.text).withValues(alpha: 0.35),
+      // A soft band behind each word, the letters not blurred: an ayah's
+      // words revealed quickly one after another stay smooth.
+      letters: false,
     );
   }
 
