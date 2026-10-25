@@ -1,3 +1,5 @@
+import '../../../core/localization/fallback_localizations.dart';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -108,7 +110,7 @@ class _Activity extends ConsumerWidget {
     final theme = Theme.of(context);
     final stats = ref.watch(activityStatsProvider);
     final number = NumberFormat.decimalPattern(
-      Localizations.localeOf(context).toLanguageTag(),
+      intlLocaleOf(Localizations.localeOf(context)),
     );
     final minutes = stats.mushafSeconds ~/ 60;
     final time = minutes >= 60

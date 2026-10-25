@@ -100,7 +100,13 @@ class _DailyAyahCard extends ConsumerWidget {
               // English translation in the Arabic app, an Urdu one in the
               // English app).
               textDirection:
-                  const {'ar', 'ur', 'fa'}.contains(ayah.translationLanguage)
+                  const {
+                    'ar',
+                    'ur',
+                    'fa',
+                    'ckb',
+                    'ps',
+                  }.contains(ayah.translationLanguage)
                   ? TextDirection.rtl
                   : TextDirection.ltr,
               textAlign: TextAlign.center,

@@ -202,6 +202,8 @@ class _TranslationResultRow extends StatelessWidget {
                     'ar',
                     'ur',
                     'fa',
+                    'ckb',
+                    'ps',
                   }.contains(hit.translationSlug.split('-').first)
                   ? TextDirection.rtl
                   : TextDirection.ltr,

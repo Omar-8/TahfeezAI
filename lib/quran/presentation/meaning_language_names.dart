@@ -12,5 +12,13 @@ String nativeLanguageName(String code) => switch (code) {
   'ru' => 'Русский',
   'fa' => 'فارسی',
   'bn' => 'বাংলা',
+  'ms' => 'Bahasa Melayu',
+  'ha' => 'Hausa',
+  'ckb' => 'کوردی',
+  'ps' => 'پښتو',
+  'sw' => 'Kiswahili',
+  'kk' => 'Қазақша',
+  'uz' => 'Oʻzbekcha',
+  'so' => 'Soomaali',
   _ => code,
 };

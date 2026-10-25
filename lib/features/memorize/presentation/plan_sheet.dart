@@ -1,3 +1,5 @@
+import '../../../core/localization/fallback_localizations.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -60,7 +62,7 @@ class _PlanSheetState extends ConsumerState<_PlanSheet> {
   }
 
   static String _dayName(BuildContext context, int weekday) =>
-      DateFormat.E(Localizations.localeOf(context).toLanguageTag())
+      DateFormat.E(intlLocaleOf(Localizations.localeOf(context)))
       // 2024-01-01 was a Monday.
       .format(DateTime(2024, 1, weekday));
 

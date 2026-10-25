@@ -1,3 +1,4 @@
+import '../core/localization/fallback_localizations.dart';
 import '../features/guide/guide.dart';
 
 import 'package:dynamic_color/dynamic_color.dart';
@@ -74,6 +75,9 @@ class TahfeezApp extends ConsumerWidget {
           supportedLocales: kTahfeezSupportedLocales,
           localizationsDelegates: const [
             AppLocalizations.delegate,
+            // First: for the UI languages Flutter lacks (Hausa, Kurdish,
+            // Somali), before the global delegates would refuse them.
+            ...kFallbackLocalizationsDelegates,
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
