@@ -8,22 +8,75 @@ import '../tahfeez_icon_sizes.dart';
 /// show yet. Kept trivial on purpose — this is the single place a future
 /// milestone would add a skeleton/shimmer treatment if Tahfeez adopts one,
 /// without touching every screen that shows a loading state today.
-class TahfeezLoadingView extends StatelessWidget {
+class TahfeezLoadingView extends StatefulWidget {
   const TahfeezLoadingView({super.key, this.message});
 
   final String? message;
 
   @override
+  State<TahfeezLoadingView> createState() => _TahfeezLoadingViewState();
+}
+
+/// Loading as content arriving, not a spinner: a few soft rounded bars,
+/// gently pulsing.
+class _TahfeezLoadingViewState extends State<TahfeezLoadingView>
+    with SingleTickerProviderStateMixin {
+  late final _pulse = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 900),
+  )..repeat(reverse: true);
+
+  @override
+  void dispose() {
+    _pulse.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    Widget bar(double widthFactor, double height) => FractionallySizedBox(
+      widthFactor: widthFactor,
+      alignment: AlignmentDirectional.centerStart,
+      child: Container(
+        height: height,
+        decoration: BoxDecoration(
+          color: scheme.onSurface.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(TahfeezRadii.md),
+        ),
+      ),
+    );
     return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        spacing: TahfeezSpacing.md,
-        children: [
-          const CircularProgressIndicator(),
-          if (message != null)
-            Text(message!, style: Theme.of(context).textTheme.bodyMedium),
-        ],
+      child: Semantics(
+        label: widget.message,
+        liveRegion: widget.message != null,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 360),
+          child: Padding(
+            padding: const EdgeInsets.all(TahfeezSpacing.lg),
+            child: FadeTransition(
+              opacity: Tween(begin: 0.45, end: 1.0).animate(
+                CurvedAnimation(parent: _pulse, curve: Curves.easeInOut),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                spacing: TahfeezSpacing.smPlus,
+                children: [
+                  bar(1, 56),
+                  bar(0.85, 16),
+                  bar(0.6, 16),
+                  if (widget.message != null)
+                    Text(
+                      widget.message!,
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

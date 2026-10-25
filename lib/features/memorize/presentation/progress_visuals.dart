@@ -24,37 +24,44 @@ class JuzRing extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final percent = (map.share * 100).round();
+    final juz = [
+      for (final j in map.juz)
+        (
+          recited: j.ayahs == 0
+              ? 0.0
+              : j.pages.fold(0, (n, p) => n + p.memorized - p.unverified) /
+                    j.ayahs,
+          marked: j.ayahs == 0
+              ? 0.0
+              : j.pages.fold(0, (n, p) => n + p.unverified) / j.ayahs,
+        ),
+    ];
+    // Filling as it appears, the share counting up with it.
     return Semantics(
       label: AppLocalizations.of(context).memProgressShare(percent),
-      child: SizedBox.square(
-        dimension: size,
-        child: CustomPaint(
-          painter: _JuzRingPainter(
-            juz: [
-              for (final j in map.juz)
-                (
-                  recited: j.ayahs == 0
-                      ? 0.0
-                      : j.pages.fold(
-                              0,
-                              (n, p) => n + p.memorized - p.unverified,
-                            ) /
-                            j.ayahs,
-                  marked: j.ayahs == 0
-                      ? 0.0
-                      : j.pages.fold(0, (n, p) => n + p.unverified) / j.ayahs,
-                ),
-            ],
-            track: scheme.surfaceContainerHighest,
-            fill: scheme.primary,
-          ),
-          child: Center(
-            child: ExcludeSemantics(
-              child: Text(
-                '$percent%',
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: scheme.primary,
+      child: TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0, end: 1),
+        duration: const Duration(milliseconds: 1100),
+        curve: Curves.easeOutCubic,
+        builder: (context, t, _) => SizedBox.square(
+          dimension: size,
+          child: CustomPaint(
+            painter: _JuzRingPainter(
+              juz: [
+                for (final j in juz)
+                  (recited: j.recited * t, marked: j.marked * t),
+              ],
+              track: scheme.surfaceContainerHighest,
+              fill: scheme.primary,
+            ),
+            child: Center(
+              child: ExcludeSemantics(
+                child: Text(
+                  '${(percent * t).round()}%',
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: scheme.primary,
+                  ),
                 ),
               ),
             ),
@@ -151,9 +158,19 @@ class StreakCard extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      l10n.memStreakDays(current),
-                      style: theme.textTheme.titleMedium,
+                    // Counting up to it as the card appears.
+                    TweenAnimationBuilder<double>(
+                      tween: Tween(begin: 0, end: current.toDouble()),
+                      duration: Duration(
+                        milliseconds: 300 + 40 * current.clamp(0, 15),
+                      ),
+                      curve: Curves.easeOut,
+                      builder: (context, v, _) => Text(
+                        l10n.memStreakDays(
+                          current == 0 ? 0 : v.round().clamp(1, current),
+                        ),
+                        style: theme.textTheme.titleMedium,
+                      ),
                     ),
                     if (calendar.longest > 0)
                       Text(
