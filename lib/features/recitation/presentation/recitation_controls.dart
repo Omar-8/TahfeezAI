@@ -144,8 +144,8 @@ class _RecitationMushafAnchorState
 /// The app shell's bottom bar while a Mushaf is open: replaces the
 /// Home/Quran/Settings [navigation] with the live-recitation bar, one row —
 /// a start button before a session, stop and pause/resume while one runs
-/// (its [RecordingDot] is in the app bar), with the hide-mode controls
-/// beside them. Shows [navigation] otherwise.
+/// (the stop button's ring showing the microphone hears), with the
+/// hide-mode controls beside them. Shows [navigation] otherwise.
 ///
 /// Also reports permission-denied/error/saved outcomes as snackbars.
 /// A row of the bar's buttons as one rounded group, thin dividers between
@@ -1065,106 +1065,6 @@ class _MicLevelPainter extends CustomPainter {
   @override
   bool shouldRepaint(_MicLevelPainter old) =>
       old.level != level || old.color != color;
-}
-
-/// That the microphone is recording, for a Mushaf screen's app bar: a red
-/// dot while a session runs — pulsing a few times as recording starts or
-/// resumes, then steady (not pulsing on: redrawing all the time would cost
-/// the phone work the recognition needs), dimmed while paused, starting or
-/// saving. Says so — its tooltip and semantics — in words. Nothing outside
-/// a session.
-class RecordingDot extends ConsumerStatefulWidget {
-  const RecordingDot({super.key});
-
-  @override
-  ConsumerState<RecordingDot> createState() => _RecordingDotState();
-}
-
-class _RecordingDotState extends ConsumerState<RecordingDot>
-    with SingleTickerProviderStateMixin {
-  static const _pulses = 3;
-
-  late final _pulse = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 450),
-    value: 1,
-  );
-
-  /// Fades out and back [_pulses] times, ending lit.
-  Future<void> _start() async {
-    for (var i = 0; i < _pulses && mounted; i++) {
-      try {
-        await _pulse.reverse(from: 1).orCancel;
-        await _pulse.forward().orCancel;
-      } on TickerCanceled {
-        return;
-      }
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    if (ref.read(recitationSessionControllerProvider).phase ==
-        RecitationPhase.listening) {
-      _start();
-    }
-  }
-
-  @override
-  void dispose() {
-    _pulse.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    ref.listen(recitationSessionControllerProvider, (previous, next) {
-      final listening = next.phase == RecitationPhase.listening;
-      if (listening && previous?.phase != RecitationPhase.listening) {
-        _start();
-      } else if (!listening) {
-        _pulse
-          ..stop()
-          ..value = 1;
-      }
-    });
-    final session = ref.watch(recitationSessionControllerProvider);
-    if (!session.isActive) return const SizedBox.shrink();
-    final scheme = Theme.of(context).colorScheme;
-    final l10n = AppLocalizations.of(context);
-    final label = switch (session.phase) {
-      RecitationPhase.starting => l10n.recStarting,
-      RecitationPhase.paused => l10n.recPaused,
-      RecitationPhase.stopping => l10n.recSaving,
-      _ => l10n.recListening,
-    };
-    final listening = session.phase == RecitationPhase.listening;
-    return Tooltip(
-      message: label,
-      child: Semantics(
-        key: const ValueKey('recording-dot'),
-        label: label,
-        liveRegion: true,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: FadeTransition(
-            opacity: Tween(begin: 0.3, end: 1.0).animate(_pulse),
-            child: Container(
-              width: 12,
-              height: 12,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: listening
-                    ? scheme.error
-                    : scheme.onSurface.withValues(alpha: 0.38),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 /// The Hifz feedback settings, for a Mushaf screen's app bar (only where

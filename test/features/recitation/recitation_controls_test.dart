@@ -104,7 +104,7 @@ void main() {
           builder: (context, open, _) => Scaffold(
             appBar: AppBar(
               title: const Text('Top bar'),
-              actions: const [RecordingDot(), HifzSettingsButton()],
+              actions: const [HifzSettingsButton()],
             ),
             body: open
                 ? const RecitationMushafAnchor(
@@ -361,14 +361,8 @@ void main() {
       before,
       reason: 'the eye stays put as recording starts',
     );
-    // Recording is shown by a dot in the app bar, not in the bar.
-    expect(
-      find.descendant(
-        of: find.byType(AppBar),
-        matching: find.byTooltip('Listening…'),
-      ),
-      findsOneWidget,
-    );
+    // Recording is shown by the stop button's ring, not in the app bar.
+    expect(find.byKey(const ValueKey('mic-level-ring')), findsOneWidget);
     await toggleKeepsEye();
 
     // Recording, hidden: the eye in the stop button's row.
@@ -563,7 +557,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('Start recitation'));
     await tester.pumpAndSettle();
-    expect(find.byTooltip('Listening…'), findsOneWidget);
+    expect(find.byKey(const ValueKey('mic-level-ring')), findsOneWidget);
     await tester.tap(find.byTooltip('Hide ayahs'));
     await tester.pumpAndSettle();
     expect(find.byTooltip('Show ayahs'), findsOneWidget);
@@ -576,14 +570,15 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('Start recitation'));
     await tester.pumpAndSettle();
-    expect(find.byTooltip('Listening…'), findsOneWidget);
+    expect(find.byKey(const ValueKey('mic-level-ring')), findsOneWidget);
 
     mushafOpen.value = false;
     // The Mushaf clears its target, then the session stops (closing the
     // mic completes in the root zone).
     for (
       var i = 0;
-      i < 20 && find.byTooltip('Listening…').evaluate().isNotEmpty;
+      i < 20 &&
+          find.byKey(const ValueKey('mic-level-ring')).evaluate().isNotEmpty;
       i++
     ) {
       await tester.pump();
@@ -593,7 +588,7 @@ void main() {
     }
     await tester.pumpAndSettle();
 
-    expect(find.byTooltip('Listening…'), findsNothing);
+    expect(find.byKey(const ValueKey('mic-level-ring')), findsNothing);
     expect(find.text('Home Quran Search'), findsOneWidget);
   });
 
@@ -657,18 +652,18 @@ void main() {
     await tester.pumpAndSettle();
 
     // One row: a recording indicator, no status text or timer.
-    expect(find.byTooltip('Listening…'), findsOneWidget);
+    expect(find.byKey(const ValueKey('mic-level-ring')), findsOneWidget);
     expect(find.text('Listening…'), findsNothing);
     expect(find.text('0:00'), findsNothing);
     expect(find.byTooltip('Start recitation'), findsNothing);
 
     await tester.tap(find.byTooltip('Pause'));
     await tester.pumpAndSettle();
-    expect(find.byTooltip('Paused'), findsOneWidget);
+    expect(find.byTooltip('Resume'), findsOneWidget);
 
     await tester.tap(find.byTooltip('Resume'));
     await tester.pumpAndSettle();
-    expect(find.byTooltip('Listening…'), findsOneWidget);
+    expect(find.byKey(const ValueKey('mic-level-ring')), findsOneWidget);
 
     await tester.tap(find.byTooltip('Stop'));
     // Closing the mic completes some futures in the root zone; let those
@@ -676,7 +671,7 @@ void main() {
     await tester.runAsync(() => Future<void>.delayed(Duration.zero));
     await tester.pumpAndSettle();
 
-    expect(find.byTooltip('Listening…'), findsNothing);
+    expect(find.byKey(const ValueKey('mic-level-ring')), findsNothing);
     expect(find.byTooltip('Start recitation'), findsOneWidget);
     expect(find.textContaining('Recitation saved'), findsNothing);
     expect(
@@ -758,7 +753,7 @@ void main() {
       from: (chapterNo: 1, verseNo: 2),
       to: (chapterNo: 1, verseNo: 7),
     ));
-    expect(find.byTooltip('Listening…'), findsOneWidget);
+    expect(find.byKey(const ValueKey('mic-level-ring')), findsOneWidget);
     // In the recitation bar, which holds stop and pause during a session.
     expect(find.byKey(const ValueKey('hifz-loop')), findsNothing);
 
@@ -785,16 +780,20 @@ void main() {
     await tester.tap(find.byTooltip('Start recitation'));
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('recitation-intro')), findsOneWidget);
-    expect(find.byTooltip('Listening…'), findsNothing, reason: 'not yet');
+    expect(
+      find.byKey(const ValueKey('mic-level-ring')),
+      findsNothing,
+      reason: 'not yet',
+    );
     await tester.ensureVisible(
       find.byKey(const ValueKey('recitation-intro-start')),
     );
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('recitation-intro-start')));
     await tester.pumpAndSettle();
-    expect(find.byTooltip('Listening…'), findsOneWidget);
+    expect(find.byKey(const ValueKey('mic-level-ring')), findsOneWidget);
     final container = ProviderScope.containerOf(
-      tester.element(find.byTooltip('Listening…')),
+      tester.element(find.byKey(const ValueKey('mic-level-ring'))),
     );
     expect(container.read(hifzSettingsProvider).introsSeen, {
       RecitationIntroMode.recite,
@@ -835,7 +834,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.textContaining('Microphone access is needed'), findsOneWidget);
-    expect(find.byTooltip('Listening…'), findsNothing);
+    expect(find.byKey(const ValueKey('mic-level-ring')), findsNothing);
   });
 
   testWidgets('navigation is untouched where recitation is unsupported', (

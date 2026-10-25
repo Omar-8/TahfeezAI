@@ -37,7 +37,7 @@ class ZenModeButton extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) => IconButton(
     key: const ValueKey('mushaf-zen'),
-    icon: const Icon(Icons.self_improvement_rounded),
+    icon: const Icon(Icons.fullscreen_rounded),
     tooltip: AppLocalizations.of(context).zenMode,
     onPressed: () => ref.read(mushafZenModeProvider.notifier).set(true),
   );
@@ -130,7 +130,7 @@ class _ZenModeLayerState extends ConsumerState<ZenModeLayer> {
                             spacing: TahfeezSpacing.xs,
                             children: [
                               Icon(
-                                Icons.close_fullscreen_rounded,
+                                Icons.fullscreen_exit_rounded,
                                 size: 16,
                                 color: colors.secondaryText,
                               ),
