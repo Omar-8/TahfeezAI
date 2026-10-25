@@ -167,7 +167,8 @@ class QvpViewController extends ChangeNotifier {
 
 /// Tahfeez patch 0005 (`PATCHES.md`): a short animation on one word.
 enum QvpWordEffectKind {
-  /// A soft glow of [QvpWordEffect.color] behind the word, fading out.
+  /// A soft glow of [QvpWordEffect.color] (its alpha scaling the glow's)
+  /// behind the word, fading out.
   bloom,
 
   /// The word's styled ink sways sideways a few times, settling.
@@ -190,7 +191,7 @@ class QvpWordEffect {
   final double startMs;
 
   double get durationMs => switch (kind) {
-    QvpWordEffectKind.bloom => 900,
+    QvpWordEffectKind.bloom => 650,
     QvpWordEffectKind.shake => 420,
     QvpWordEffectKind.inkIn => 380,
   };
@@ -905,11 +906,26 @@ class _QvpPainter extends CustomPainter {
     final shakes = <int, double>{};
     if (fx.isNotEmpty) {
       for (final (e, t) in _running(fx, QvpWordEffectKind.bloom, now)) {
-        final fade = (1 - t) * (1 - t);
+        // Rising fast, then fading: a soft halo behind the whole word…
+        final rise = t < 0.15 ? t / 0.15 : 1.0;
+        final fade = rise * (1 - t);
+        final r = _wordBounds(l, paths, e.word);
+        if (r != null) {
+          canvas.drawRRect(
+            RRect.fromRectAndRadius(
+              r.inflate(3 + 5 * t),
+              Radius.circular(r.height / 2),
+            ),
+            ui.Paint()
+              ..color = e.color.withValues(alpha: e.color.a * 0.32 * fade)
+              ..maskFilter = const ui.MaskFilter.blur(BlurStyle.normal, 6),
+          );
+        }
+        // …and a glow around its letters, spreading.
         final glow = ui.Paint()
           ..isAntiAlias = true
-          ..color = e.color.withValues(alpha: 0.75 * fade);
-        _drawWord(canvas, l, paths, e.word, glow, blurPx: 3 + 9 * t);
+          ..color = e.color.withValues(alpha: e.color.a * 0.9 * fade);
+        _drawWord(canvas, l, paths, e.word, glow, blurPx: 4 + 10 * t);
       }
       for (final (e, t) in _running(fx, QvpWordEffectKind.shake, now)) {
         shakes[e.word] = math.sin(t * math.pi * 6) * (1 - t) * 3.5;

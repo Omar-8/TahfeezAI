@@ -16,7 +16,6 @@ import '../../mushaf/application/mushaf_focus_ayah.dart';
 import '../../mushaf/application/mushaf_page_providers.dart';
 import '../../mushaf/application/reader_mode.dart';
 import '../../mushaf/domain/mushaf_appearance.dart';
-import '../../mushaf/presentation/mushaf_appearance_sheet.dart';
 import '../../mushaf/presentation/mushaf_page_title.dart';
 import '../../mushaf/presentation/mushaf_page_view.dart';
 import '../../mushaf/presentation/mushaf_pager.dart';
@@ -200,11 +199,6 @@ class _MushafModeScaffold extends ConsumerWidget {
                 const ZenModeButton(),
                 // The guide to the modes (left of the reader's own settings).
                 const GuideButton(),
-                IconButton(
-                  icon: const Icon(Icons.tune),
-                  tooltip: AppLocalizations.of(context).readerOptions,
-                  onPressed: () => showMushafAppearanceSheet(context),
-                ),
               ],
             ),
       // Reports the page on screen to the app shell's recitation bar.

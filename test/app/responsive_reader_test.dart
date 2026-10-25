@@ -26,6 +26,8 @@ import 'package:tahfeez_ai/quran/application/tafsir_selection_controller.dart';
 import 'package:tahfeez_ai/features/mushaf/domain/mushaf_appearance.dart';
 import 'package:tahfeez_ai/features/settings/presentation/theme_choices.dart';
 
+import 'package:tahfeez_ai/features/mushaf/presentation/mushaf_appearance_sheet.dart';
+
 import '../test_helpers/real_app.dart';
 
 /// The reader — the printed page's frame and Ayah mode in both layouts —
@@ -113,7 +115,8 @@ void main() {
       if (sheet != null) {
         sheet(tester.element(find.byType(Scaffold).last));
       } else {
-        await tester.tap(find.byIcon(Icons.tune).first);
+        // (Its options are in the Hifz settings too.)
+        showMushafAppearanceSheet(tester.element(find.byType(Scaffold).last));
       }
       await settle(tester);
       fits(tester, 'sheet opens');

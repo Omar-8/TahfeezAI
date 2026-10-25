@@ -16,7 +16,6 @@ import '../application/reader_mode.dart';
 import '../domain/mushaf_appearance.dart';
 import 'mushaf_pager.dart';
 import 'mushaf_page_title.dart';
-import 'mushaf_appearance_sheet.dart';
 import 'reader_mode_toggle.dart';
 import '../application/reading_surah.dart';
 
@@ -86,9 +85,6 @@ class _MushafReaderScreenState extends ConsumerState<MushafReaderScreen> {
                 pageNumber: _currentPageNumber,
               ),
               actions: [
-                // Same icon/tooltip/sheet as `reader_screen.dart`'s
-                // `_MushafModeScaffold`: both open the Mushaf themes
-                // (`showMushafAppearanceSheet`).
                 // Hifz mode's feedback settings, beside the reader's own (loop
                 // recitation is in the recitation bar).
                 const HifzSettingsButton(),
@@ -98,11 +94,6 @@ class _MushafReaderScreenState extends ConsumerState<MushafReaderScreen> {
                 const ZenModeButton(),
                 // The guide to the modes (left of the reader's own settings).
                 const GuideButton(),
-                IconButton(
-                  icon: const Icon(Icons.tune),
-                  tooltip: AppLocalizations.of(context).readerOptions,
-                  onPressed: () => showMushafAppearanceSheet(context),
-                ),
               ],
             ),
       // Reports the page on screen to the app shell's recitation bar.

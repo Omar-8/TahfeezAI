@@ -187,7 +187,7 @@ Each effect animates one page word for under a second, drawn by the same
 painter, with no engine call:
 
 - `bloom` — the word's paths in a colour with a widening blur, behind the
-  ink, fading out (900 ms);
+  ink, and a soft halo behind the word, fading out (650 ms);
 - `shake` — the word's styled ink (an ink highlight) swayed sideways,
   settling (420 ms);
 - `inkIn` — the paper drawn over the word's bounds, fading out, so a
