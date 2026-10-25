@@ -149,6 +149,7 @@ flutter:
     - assets/quran/translations/en_rowwad.json
     - assets/quran/translations/de_rowwad.json
     - assets/quran/tafsir/ar_muyassar.json
+    - assets/quran/surah_names/surah_names.json
     # Word meanings (translation milestone T3; licence unverified, owner
     # decision — docs/THIRD_PARTY_RESOURCES.md).
     - assets/quran/wbw/en_qurancom.json

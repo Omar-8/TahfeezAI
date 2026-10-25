@@ -25,12 +25,16 @@ class TahfeezQuranSectionCard extends StatelessWidget {
     this.progressColor,
     this.progressLabel,
     this.singleLine = false,
+    this.art,
   });
 
   /// The title and the line under it one line each, shortened to fit — a
   /// card of fixed size (a strip of cards), whatever the language or text
   /// size.
   final bool singleLine;
+
+  /// Shown at the end, before the progress (a surah's name in calligraphy).
+  final Widget? art;
 
   final int number;
   final String title;
@@ -123,6 +127,14 @@ class TahfeezQuranSectionCard extends StatelessWidget {
                   ],
                 ),
               ),
+              if (art case final art?)
+                Padding(
+                  padding: const EdgeInsetsDirectional.only(
+                    start: TahfeezSpacing.sm,
+                    end: TahfeezSpacing.xs,
+                  ),
+                  child: art,
+                ),
               if (progress case final p?)
                 SizedBox(
                   key: const ValueKey('section-card-progress'),

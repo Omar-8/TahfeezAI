@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../quran/presentation/surah_name_calligraphy.dart';
 import '../../../../core/localization/generated/app_localizations.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -309,6 +310,7 @@ class _SurahIndexTabState extends ConsumerState<SurahIndexTab> {
           child: surahs.when(
             data: (all) {
               final filtered = _apply(all);
+              final art = ref.watch(surahNameArtProvider).value;
               if (all.isEmpty) {
                 return TahfeezEmptyView(
                   icon: Icons.menu_book_outlined,
@@ -329,14 +331,18 @@ class _SurahIndexTabState extends ConsumerState<SurahIndexTab> {
                 itemCount: filtered.length,
                 itemBuilder: (context, index) {
                   final indexed = filtered[index];
+                  final hasArt =
+                      art?.containsKey(indexed.surah.surahNo) ?? false;
                   final subtitleParts = [
                     AppLocalizations.of(context)
                         .homeFeaturedAyahCount(indexed.surah.ayahCount),
                     indexed.surah.revelationType == RevelationType.meccan
                         ? AppLocalizations.of(context).quranMeccan
                         : AppLocalizations.of(context).quranMedinan,
-                    // The Arabic name, unless it is already the title.
-                    if (indexed.arabicName != null &&
+                    // (The Arabic name is drawn at the end, as the Mushaf
+                    // writes it — or, with no calligraphy, here.)
+                    if (!hasArt &&
+                        indexed.arabicName != null &&
                         indexed.arabicName != indexed.localizedName)
                       indexed.arabicName!,
                   ];
@@ -349,6 +355,13 @@ class _SurahIndexTabState extends ConsumerState<SurahIndexTab> {
                           AppLocalizations.of(context)
                               .homeContinueReadingSurah(indexed.surah.surahNo),
                       subtitle: subtitleParts.join(' · '),
+                      art: hasArt
+                          ? SurahNameCalligraphy(
+                              surahNo: indexed.surah.surahNo,
+                              color: scheme.onSurface,
+                              semanticLabel: indexed.arabicName,
+                            )
+                          : null,
                       // How much of it is memorized (from memory, hide mode
                       // on); recited with the page visible only: practised.
                       progress: switch (progress[indexed.surah.surahNo]) {
