@@ -20,7 +20,7 @@ String surahNameLanguage(String language) =>
 /// Whether [language] is written in Arabic script, so Arabic names (of
 /// surahs, reciters) read naturally in it.
 bool usesArabicScript(String language) =>
-    const {'ar', 'ur', 'fa'}.contains(language);
+    const {'ar', 'ur', 'fa', 'ckb', 'ps'}.contains(language);
 
 /// The bundled translation shown by default for each language; none for
 /// Arabic; English for any other.
@@ -35,12 +35,22 @@ List<String> defaultTranslationSlugs(String language) => switch (language) {
   'ru' => const ['ru-rowwad'],
   'fa' => const ['fa-rowwad'],
   'bn' => const ['bn-rowwad'],
+  'ms' => const ['ms-basumayyah'],
+  'ha' => const ['ha-gumi'],
+  'ckb' => const ['ckb-bamoki'],
+  'ps' => const ['ps-rowwad'],
+  'sw' => const ['sw-rowwad'],
+  'kk' => const ['kk-altai'],
+  'uz' => const ['uz-rowwad'],
+  'so' => const ['so-yaqoub'],
   _ => const ['en-rowwad'],
 };
 
 /// The bundled tafsir shown by default for each language: Al-Muyassar for
 /// Arabic, Al-Mukhtasar where it exists in the language; Urdu,
-/// Ahsan-ul-Bayan; German, which has neither, the English Al-Mukhtasar.
+/// Ahsan-ul-Bayan; German and the languages with none, the English
+/// Al-Mukhtasar. (Arabic also has al-Sirāj's word meanings, chosen in the
+/// tafsir list.)
 String? defaultTafsirId(String language) => switch (language) {
   'ar' => 'ar-muyassar',
   'en' => 'en-mukhtasar',
@@ -53,5 +63,9 @@ String? defaultTafsirId(String language) => switch (language) {
   'bn' => 'bn-mukhtasar',
   'de' => 'en-mukhtasar',
   'ur' => 'ur-ahsanulbayan',
+  'ckb' => 'ckb-mukhtasar',
+  'ps' => 'ps-mukhtasar',
+  'uz' => 'uz-mukhtasar',
+  // Malay, Hausa, Swahili, Kazakh and Somali: no Al-Mukhtasar (2026-10-25).
   _ => 'en-mukhtasar',
 };

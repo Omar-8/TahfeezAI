@@ -131,6 +131,15 @@ class BundledDatasetSeeder {
       'ru_rowwad',
       'fa_rowwad',
       'bn_rowwad',
+      // Added 2026-10-25.
+      'ms_basumayyah',
+      'ha_gumi',
+      'ckb_bamoki',
+      'ps_rowwad',
+      'sw_rowwad',
+      'kk_altai',
+      'uz_rowwad',
+      'so_yaqoub',
     ]) {
       await _seedTranslation(
         hashes,
@@ -148,6 +157,11 @@ class BundledDatasetSeeder {
       'fa_mukhtasar',
       'bn_mukhtasar',
       'ur_ahsanulbayan',
+      // Added 2026-10-25 (al-Sirāj: the Arabic meanings of difficult words).
+      'ckb_mukhtasar',
+      'ps_mukhtasar',
+      'uz_mukhtasar',
+      'ar_seraj',
     ]) {
       await _seedTafsir(
         hashes,

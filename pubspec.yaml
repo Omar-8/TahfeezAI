@@ -176,6 +176,19 @@ flutter:
     - assets/quran/tafsir/fa_mukhtasar.json
     - assets/quran/tafsir/bn_mukhtasar.json
     - assets/quran/tafsir/ur_ahsanulbayan.json
+    # Added 2026-10-25: eight languages and the Arabic word meanings.
+    - assets/quran/translations/ms_basumayyah.json
+    - assets/quran/translations/ha_gumi.json
+    - assets/quran/translations/ckb_bamoki.json
+    - assets/quran/translations/ps_rowwad.json
+    - assets/quran/translations/sw_rowwad.json
+    - assets/quran/translations/kk_altai.json
+    - assets/quran/translations/uz_rowwad.json
+    - assets/quran/translations/so_yaqoub.json
+    - assets/quran/tafsir/ckb_mukhtasar.json
+    - assets/quran/tafsir/ps_mukhtasar.json
+    - assets/quran/tafsir/uz_mukhtasar.json
+    - assets/quran/tafsir/ar_seraj.json
     # Expected Hafs pronunciation of every ayah for acoustic verification —
     # tool/acoustic_verification/build_reference.py.
     - assets/quran/recitation/phonetic_reference_hafs.json

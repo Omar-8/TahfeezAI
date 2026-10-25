@@ -22,6 +22,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:crypto/crypto.dart';
+import 'package:sqlite3/sqlite3.dart';
 import 'package:tahfeez_ai/quran/data/import/dataset_json_codec.dart';
 import 'package:tahfeez_ai/quran/domain/dataset_integrity.dart';
 import 'package:tahfeez_ai/quran/domain/quran_dataset_payload.dart';
@@ -112,6 +113,80 @@ const _launchTranslations = [
     version: 'unversioned upstream (tracked by sourceHash)',
     versionCode: 1,
   ),
+  // Added 2026-10-25 (owner): Malay, Hausa, Kurdish (Sorani), Pashto, Swahili,
+  // Kazakh, Uzbek and Somali. Tracked by sourceHash.
+  (
+    key: 'malay_basumayyah',
+    slug: 'ms-basumayyah',
+    displayName: 'Malay Translation - Abdullah Basumayyah',
+    language: 'ms',
+    author: 'Abdullah Muhammad Basumayyah',
+    version: 'unversioned upstream (tracked by sourceHash)',
+    versionCode: 1,
+  ),
+  (
+    key: 'hausa_gummi',
+    slug: 'ha-gumi',
+    displayName: 'Hausa Translation - Abu Bakr Mahmoud Gumi',
+    language: 'ha',
+    author: 'Abu Bakr Mahmoud Gumi',
+    version: 'unversioned upstream (tracked by sourceHash)',
+    versionCode: 1,
+  ),
+  (
+    key: 'kurdish_bamoki',
+    slug: 'ckb-bamoki',
+    displayName: 'Kurdish Translation - Muhammad Salih Bamoki',
+    language: 'ckb',
+    author: 'Muhammad Salih Bamoki',
+    version: 'unversioned upstream (tracked by sourceHash)',
+    versionCode: 1,
+  ),
+  (
+    key: 'pashto_rwwad',
+    slug: 'ps-rowwad',
+    displayName: 'Pashto Translation - Rowwad Translation Center',
+    language: 'ps',
+    author: 'Rowwad Translation Center',
+    version: 'unversioned upstream (tracked by sourceHash)',
+    versionCode: 1,
+  ),
+  (
+    key: 'swahili_rwwad',
+    slug: 'sw-rowwad',
+    displayName: 'Swahili Translation - Rowwad Translation Center',
+    language: 'sw',
+    author: 'Rowwad Translation Center',
+    version: 'unversioned upstream (tracked by sourceHash)',
+    versionCode: 1,
+  ),
+  (
+    key: 'kazakh_altai',
+    slug: 'kk-altai',
+    displayName: 'Kazakh Translation - Khalifa Altai',
+    language: 'kk',
+    author: 'Khalifa Altai',
+    version: 'unversioned upstream (tracked by sourceHash)',
+    versionCode: 1,
+  ),
+  (
+    key: 'uzbek_rwwad',
+    slug: 'uz-rowwad',
+    displayName: 'Uzbek Translation - Rowwad Translation Center',
+    language: 'uz',
+    author: 'Rowwad Translation Center',
+    version: 'unversioned upstream (tracked by sourceHash)',
+    versionCode: 1,
+  ),
+  (
+    key: 'somali_yacob',
+    slug: 'so-yaqoub',
+    displayName: 'Somali Translation - Abdullah Hasan Yaqoub',
+    language: 'so',
+    author: 'Abdullah Hasan Yaqoub',
+    version: 'unversioned upstream (tracked by sourceHash)',
+    versionCode: 1,
+  ),
 ];
 
 const _mukhtasarAuthor = 'Tafsir Center for Quranic Studies';
@@ -166,6 +241,26 @@ const _launchTafsirs = [
     id: 'bn-mukhtasar',
     displayName: 'আল-মুখতাসার ফী তাফসীরিল কুরআনিল কারীম (বাংলা)',
     language: 'bn',
+  ),
+  // Added 2026-10-25 with their languages (QuranEnc has none in Malay,
+  // Hausa, Swahili, Kazakh or Somali).
+  (
+    key: 'kurdish_mokhtasar',
+    id: 'ckb-mukhtasar',
+    displayName: 'کورتەی تەفسیری قورئانی پیرۆز (کوردی)',
+    language: 'ckb',
+  ),
+  (
+    key: 'pashto_mokhtasar',
+    id: 'ps-mukhtasar',
+    displayName: 'د قرآن کریم په تفسیر کې المختصر (پښتو)',
+    language: 'ps',
+  ),
+  (
+    key: 'uzbek_mokhtasar',
+    id: 'uz-mukhtasar',
+    displayName: 'Al-Muxtasar: Qurʼoni karim tafsiri (Oʻzbekcha)',
+    language: 'uz',
   ),
 ];
 
@@ -392,6 +487,44 @@ Future<void> main() async {
     extraTafsirs.add((r, 'urdu_junagarhi'));
     stdout.writeln(
       'Ahsan-ul-Bayan (Urdu): ${r.verses.length} ayahs with commentary.',
+    );
+  }
+  // Arabic word meanings (owner decision 2026-10-25): al-Sirāj fī Bayān
+  // Gharīb al-Qurʾān, the difficult words of each ayah explained (QuranEnc's
+  // "Meanings of Words"). Ayahs with no difficult word have no row.
+  {
+    const key = 'arabic_seraj';
+    final file = File('$_cache/$key/$key.sqlite');
+    final db = sqlite3.open(file.path);
+    final empty = {
+      for (final row in db.select(
+        "SELECT sura, aya FROM translations WHERE trim(coalesce(translation, '')) = ''",
+      ))
+        '${row['sura']}:${row['aya']}',
+    };
+    db.close();
+    final r = parseQuranEncTafsir(
+      sqliteFile: file,
+      tafsirId: 'ar-seraj',
+      displayName: 'السراج في بيان غريب القرآن (معاني الكلمات)',
+      languageCode: 'ar',
+      author: 'Muhammad ibn Abdulaziz Al-Khudayri',
+      version: 1,
+      leaveOut: empty,
+    );
+    requireEveryAyah(key, [
+      for (final v in r.verses) (v.chapterNo, v.verseNo, v.text),
+    ], merged: empty);
+    packagedAssetHashes['tafsir/ar_seraj.json'] = _writeJson(
+      '$_outDir/tafsir/ar_seraj.json',
+      {
+        'work': tafsirWorkToJson(r.work),
+        'verses': r.verses.map(tafsirVerseToJson).toList(),
+      },
+    );
+    extraTafsirs.add((r, key));
+    stdout.writeln(
+      'Al-Siraj (Arabic word meanings): ${r.verses.length} ayahs.',
     );
   }
   // Word meanings (docs/TRANSLATION_TAFSIR_MILESTONE.md, T3): Quran.com's

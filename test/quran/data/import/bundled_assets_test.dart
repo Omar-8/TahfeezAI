@@ -45,6 +45,9 @@ void main() {
       if (name == 'tafsir/ur_ahsanulbayan.json') {
         // A translation's notes: only the ayahs they comment on.
         expect(verses.length, inInclusiveRange(4000, 6236), reason: name);
+      } else if (name == 'tafsir/ar_seraj.json') {
+        // Word meanings: only the ayahs with a difficult word (3,648).
+        expect(verses.length, inInclusiveRange(3500, 6236), reason: name);
       } else {
         expect(verses, hasLength(6236 - absent.length), reason: name);
       }
