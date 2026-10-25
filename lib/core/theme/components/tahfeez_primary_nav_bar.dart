@@ -34,25 +34,59 @@ class TahfeezPrimaryNavigationBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final dark = scheme.brightness == Brightness.dark;
 
-    return Material(
-      color: scheme.surfaceContainer,
-      child: SafeArea(
-        top: false,
-        child: SizedBox(
-          height: 72,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              for (var i = 0; i < items.length; i++)
-                Expanded(
-                  child: _PrimaryNavBarItem(
-                    item: items[i],
-                    selected: i == selectedIndex,
-                    onTap: () => onDestinationSelected(i),
+    // Glass, as the cards: frosted lighter towards its top, a bright
+    // hairline along it, a soft lift — its foot the colour the phone's own
+    // navigation strip is given below it.
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Color.lerp(
+              scheme.surfaceContainer,
+              dark ? Colors.white : scheme.surfaceContainerLowest,
+              dark ? 0.06 : 0.7,
+            )!,
+            scheme.surfaceContainer,
+          ],
+        ),
+        border: Border(
+          top: BorderSide(
+            color: dark
+                ? Colors.white.withValues(alpha: 0.10)
+                : Colors.white.withValues(alpha: 0.9),
+          ),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: scheme.shadow.withValues(alpha: dark ? 0.25 : 0.06),
+            blurRadius: 16,
+            offset: const Offset(0, -4),
+          ),
+        ],
+      ),
+      child: Material(
+        type: MaterialType.transparency,
+        child: SafeArea(
+          top: false,
+          child: SizedBox(
+            height: 72,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                for (var i = 0; i < items.length; i++)
+                  Expanded(
+                    child: _PrimaryNavBarItem(
+                      item: items[i],
+                      selected: i == selectedIndex,
+                      onTap: () => onDestinationSelected(i),
+                    ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -95,7 +129,26 @@ class _PrimaryNavBarItem extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             spacing: TahfeezSpacing.xs,
             children: [
-              Icon(icon, size: TahfeezIconSize.lg, color: color),
+              // The selected one on a small glass pill.
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: TahfeezSpacing.md,
+                  vertical: 2,
+                ),
+                decoration: BoxDecoration(
+                  color: selected
+                      ? scheme.primary.withValues(alpha: 0.12)
+                      : Colors.transparent,
+                  borderRadius: BorderRadius.circular(TahfeezRadii.pill),
+                  border: Border.all(
+                    color: selected
+                        ? scheme.primary.withValues(alpha: 0.18)
+                        : Colors.transparent,
+                  ),
+                ),
+                child: Icon(icon, size: TahfeezIconSize.lg, color: color),
+              ),
               Text(
                 item.label,
                 maxLines: 1,
