@@ -181,11 +181,22 @@ enum QvpWordEffectKind {
 /// Tahfeez patch 0005: one running [QvpWordEffectKind] on page word [word].
 @immutable
 class QvpWordEffect {
-  const QvpWordEffect(this.word, this.kind, this.color, this.startMs);
+  const QvpWordEffect(
+    this.word,
+    this.kind,
+    this.color,
+    this.startMs, {
+    this.halo = true,
+  });
 
   final int word;
   final QvpWordEffectKind kind;
   final Color color;
+
+  /// A [QvpWordEffectKind.bloom]'s soft band behind the whole word, with
+  /// the glow around its letters (`false`: the letters' glow only — words
+  /// glowing together then read as one).
+  final bool halo;
 
   /// On [QvpWordEffects.nowMs]'s clock.
   final double startMs;
@@ -212,8 +223,9 @@ class QvpWordEffects extends ChangeNotifier {
     QvpWordEffectKind kind, {
     Color color = const Color(0xFF43A047),
     double delayMs = 0,
+    bool halo = true,
   }) {
-    _effects.add(QvpWordEffect(word, kind, color, nowMs + delayMs));
+    _effects.add(QvpWordEffect(word, kind, color, nowMs + delayMs, halo: halo));
     notifyListeners();
   }
 
@@ -909,7 +921,7 @@ class _QvpPainter extends CustomPainter {
         // Rising fast, then fading: a soft halo behind the whole word…
         final rise = t < 0.15 ? t / 0.15 : 1.0;
         final fade = rise * (1 - t);
-        final r = _wordBounds(l, paths, e.word);
+        final r = e.halo ? _wordBounds(l, paths, e.word) : null;
         if (r != null) {
           canvas.drawRRect(
             RRect.fromRectAndRadius(

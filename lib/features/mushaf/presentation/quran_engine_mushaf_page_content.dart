@@ -112,23 +112,21 @@ class _QuranEngineMushafPageContentState
   static const _maxReveals = 60;
 
   /// A word revealed: its ink fading in, with a soft glow in its own
-  /// colour ([color], else the page's ink) — one after another, in reading
-  /// order ([order]).
+  /// colour ([color], else the page's ink) around its letters — the words
+  /// revealed together (an ayah) all at once, so they glow and fade as one.
   void _reveal(
     MushafWordEffectsPage effects,
     int word,
     Color? color, {
-    int order = 0,
     bool glow = true,
   }) {
-    final delay = Duration(milliseconds: 25 * order);
-    effects.playWordEffect(word, MushafWordEffect.inkIn, delay: delay);
+    effects.playWordEffect(word, MushafWordEffect.inkIn);
     if (!glow) return;
     effects.playWordEffect(
       word,
       MushafWordEffect.bloom,
       color: (color ?? widget.colors.text).withValues(alpha: 0.55),
-      delay: delay,
+      halo: false,
     );
   }
 
@@ -165,14 +163,12 @@ class _QuranEngineMushafPageContentState
           if (mark == MushafWordMark.correct || mark == MushafWordMark.mistake)
             i,
       };
-      final ordered = revealed.toList()..sort();
-      for (final (k, i) in ordered.indexed) {
+      for (final i in revealed) {
         final mark = after.$2[i];
         _reveal(
           effects,
           i,
           mark != null && _isInk(mark) ? colorOf(mark) : null,
-          order: k,
           glow: !blooming.contains(i),
         );
       }
@@ -223,15 +219,15 @@ class _QuranEngineMushafPageContentState
     }
 
     if (changed.isNotEmpty && complete(after) && !complete(before)) {
-      // Over 0.4 s, so it shows before the page turns (the recitation
-      // waits 0.9 s to turn it).
-      final step = math.min(15.0, 400 / n);
+      // Over 0.2 s, so it shows before the page turns (the recitation
+      // waits 0.5 s to turn it).
+      final step = math.min(8.0, 200 / n);
       for (var i = 0; i < n; i++) {
         effects.playWordEffect(
           i,
           MushafWordEffect.bloom,
           color: colorOf(MushafWordMark.correct),
-          delay: Duration(microseconds: (80000 + i * step * 1000).round()),
+          delay: Duration(microseconds: (30000 + i * step * 1000).round()),
         );
       }
       if (ref.read(hifzSettingsProvider).alert.vibrates) {
@@ -411,12 +407,7 @@ class _QuranEngineMushafPageContentState
         wanted.revealed > before.revealed &&
         wanted.revealed - before.revealed <= _maxReveals) {
       for (var i = before.revealed; i < wanted.revealed; i++) {
-        _reveal(
-          page as MushafWordEffectsPage,
-          i,
-          null,
-          order: i - before.revealed,
-        );
+        _reveal(page as MushafWordEffectsPage, i, null);
       }
     }
   }

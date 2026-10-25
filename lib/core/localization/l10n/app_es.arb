@@ -216,7 +216,7 @@
   "recTajweed": "Tajwid",
   "recTajweedSub": "Comprobar también las reglas del tajwid: idgham, ikhfa, iqlab, qalqala y la duración del madd. Desactivado: solo letras y vocales.",
   "recStrictness": "Exigencia de pronunciación",
-  "recStrictnessSub": "Cuánta seguridad necesita la comprobación antes de marcar una letra, vocal o regla de tayuid como error. Flexible: menos marcas falsas, algunos errores leves pasan. Precisa: detecta más y marca más recitación correcta.",
+  "recStrictnessSub": "Qué tan segura debe estar la comprobación antes de marcar una letra, una vocal o una regla de tajwid como error.",
   "recStrictnessLenient": "Flexible",
   "recStrictnessBalanced": "Equilibrada",
   "recStrictnessStrict": "Precisa",
@@ -543,5 +543,9 @@
   "settingsTimeOfDaySub": "El alba, el día, el atardecer y la noche detrás de Inicio",
   "zenMode": "Modo concentración",
   "zenModeExit": "Salir del modo concentración",
-  "wordMeaningSiraj": "Significado de la palabra · al-Sirāj"
+  "wordMeaningSiraj": "Significado de la palabra · al-Sirāj",
+  "hifzTabAppearance": "Apariencia",
+  "recStrictnessLenientSub": "menos marcas falsas; algunos errores leves pueden pasar.",
+  "recStrictnessBalancedSub": "el punto medio recomendado.",
+  "recStrictnessStrictSub": "detecta más errores; de vez en cuando puede marcar una palabra correcta."
 }

@@ -216,7 +216,7 @@
   "recTajweed": "التجويد",
   "recTajweedSub": "افحص أحكام التجويد أيضًا: الإدغام والإخفاء والإقلاب والقلقلة ومقدار المدّ. عند الإيقاف: الحروف والحركات فقط.",
   "recStrictness": "درجة تدقيق النطق",
-  "recStrictnessSub": "مدى تأكد الفحص قبل أن يعدّ الحرف أو الحركة أو حكم التجويد خطأً. المتساهل: أخطاء موهومة أقل، وقد تمرّ بعض الأخطاء الخفيفة. الدقيق: يلتقط أكثر، ويعلّم قراءة صحيحة أكثر.",
+  "recStrictnessSub": "مدى تأكد الفحص قبل أن يعدّ الحرف أو الحركة أو حكم التجويد خطأً.",
   "recStrictnessLenient": "متساهل",
   "recStrictnessBalanced": "متوازن",
   "recStrictnessStrict": "دقيق",
@@ -543,5 +543,9 @@
   "settingsTimeOfDaySub": "الفجر والنهار والغروب والليل خلف الرئيسية",
   "zenMode": "وضع التركيز",
   "zenModeExit": "الخروج من وضع التركيز",
-  "wordMeaningSiraj": "معنى الكلمة · السراج"
+  "wordMeaningSiraj": "معنى الكلمة · السراج",
+  "hifzTabAppearance": "المظهر",
+  "recStrictnessLenientSub": "علامات خاطئة أقل، وقد تمرّ بعض الأخطاء الخفيفة.",
+  "recStrictnessBalancedSub": "الوسط الموصى به.",
+  "recStrictnessStrictSub": "يلتقط أخطاءً أكثر، وقد يعلّم أحيانًا كلمة صحيحة."
 }

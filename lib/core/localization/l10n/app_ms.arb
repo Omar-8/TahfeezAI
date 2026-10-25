@@ -216,7 +216,7 @@
   "recTajweed": "Tajwid",
   "recTajweedSub": "Semak hukum tajwid juga: idgham, ikhfa', iqlab, qalqalah dan panjang mad. Mati: hanya huruf dan baris.",
   "recStrictness": "Ketegasan sebutan",
-  "recStrictnessSub": "Sejauh mana semakan perlu pasti sebelum menandakan huruf, baris atau hukum tajwid sebagai kesilapan. Longgar: kurang tanda salah, sesetengah kesilapan kecil terlepas. Tepat: lebih banyak dikesan, lebih banyak bacaan betul ditandakan.",
+  "recStrictnessSub": "Sejauh mana semakan mesti yakin sebelum menandakan huruf, baris atau hukum tajwid sebagai kesalahan.",
   "recStrictnessLenient": "Longgar",
   "recStrictnessBalanced": "Seimbang",
   "recStrictnessStrict": "Tepat",
@@ -543,5 +543,9 @@
   "settingsTimeOfDaySub": "Subuh, siang, senja dan malam di belakang Utama",
   "zenMode": "Mod fokus",
   "zenModeExit": "Keluar mod fokus",
-  "wordMeaningSiraj": "Makna perkataan · as-Siraj"
+  "wordMeaningSiraj": "Makna perkataan · as-Siraj",
+  "hifzTabAppearance": "Paparan",
+  "recStrictnessLenientSub": "kurang tanda palsu; sesetengah kesalahan ringan mungkin terlepas.",
+  "recStrictnessBalancedSub": "tahap tengah yang disyorkan.",
+  "recStrictnessStrictSub": "menangkap lebih banyak kesalahan; sekali-sekala mungkin menandakan perkataan yang betul."
 }

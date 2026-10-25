@@ -8,7 +8,7 @@
  import 'dart:ui' as ui;
  
  import 'package:flutter/foundation.dart';
-@@ -164,6 +165,65 @@
+@@ -164,6 +165,77 @@
        Offset((local.dx - offsetX) / scale, (local.dy - offsetY) / scale);
  }
  
@@ -28,11 +28,22 @@
 +/// Tahfeez patch 0005: one running [QvpWordEffectKind] on page word [word].
 +@immutable
 +class QvpWordEffect {
-+  const QvpWordEffect(this.word, this.kind, this.color, this.startMs);
++  const QvpWordEffect(
++    this.word,
++    this.kind,
++    this.color,
++    this.startMs, {
++    this.halo = true,
++  });
 +
 +  final int word;
 +  final QvpWordEffectKind kind;
 +  final Color color;
++
++  /// A [QvpWordEffectKind.bloom]'s soft band behind the whole word, with
++  /// the glow around its letters (`false`: the letters' glow only — words
++  /// glowing together then read as one).
++  final bool halo;
 +
 +  /// On [QvpWordEffects.nowMs]'s clock.
 +  final double startMs;
@@ -59,8 +70,9 @@
 +    QvpWordEffectKind kind, {
 +    Color color = const Color(0xFF43A047),
 +    double delayMs = 0,
++    bool halo = true,
 +  }) {
-+    _effects.add(QvpWordEffect(word, kind, color, nowMs + delayMs));
++    _effects.add(QvpWordEffect(word, kind, color, nowMs + delayMs, halo: halo));
 +    notifyListeners();
 +  }
 +
@@ -74,7 +86,7 @@
  /// Renders a [QvpPage] with the engine's layout, animated highlights, masks,
  /// styled paths, tap / long-press selection and pinch / pan.
  class QvpPageView extends StatefulWidget {
-@@ -186,9 +246,13 @@
+@@ -186,9 +258,13 @@
      this.paperShadow = true,
      this.minScale = kMinZoom,
      this.maxScale = kMaxZoom,
@@ -88,7 +100,7 @@
    final QvpViewLayout layout;
  
    /// Paper colour behind the ink (null = transparent).
-@@ -253,6 +317,7 @@
+@@ -253,6 +329,7 @@
      _ticker = createTicker(_onTick);
      _attachPage();
      _applyInk();
@@ -96,7 +108,7 @@
    }
  
    void _attachPage() {
-@@ -282,12 +347,17 @@
+@@ -282,12 +359,17 @@
        _attachPage();
      }
      if (oldWidget.defaultInk != widget.defaultInk) _applyInk();
@@ -114,7 +126,7 @@
      _ticker.dispose();
      _cache.dispose();
      _frame.dispose();
-@@ -321,8 +391,10 @@
+@@ -321,8 +403,10 @@
        return;
      }
      final more = page.tick(nowMs);
@@ -126,7 +138,7 @@
    }
  
    // ── layout & fit (engine layout, then pan/zoom on top) ──
-@@ -487,6 +559,7 @@
+@@ -487,6 +571,7 @@
                    dpr: dpr,
                    paper: widget.paper,
                    paperShadow: widget.paperShadow,
@@ -134,7 +146,7 @@
                  ),
                ),
              ),
-@@ -509,10 +582,25 @@
+@@ -509,10 +594,25 @@
    int basePaths = 0, overlayPaths = 0, bands = 0;
    double baseMs = 0, overlayMs = 0;
  
@@ -160,7 +172,7 @@
      key = '';
      _dropImage();
    }
-@@ -582,6 +670,7 @@
+@@ -582,6 +682,7 @@
      required this.dpr,
      required this.paper,
      required this.paperShadow,
@@ -168,7 +180,7 @@
    }) : super(repaint: Listenable.merge([page, view, frame]));
  
    final QvpPage page;
-@@ -590,6 +679,64 @@
+@@ -590,6 +691,64 @@
    final double dpr;
    final Color? paper;
    final bool paperShadow;
@@ -233,7 +245,7 @@
  
    /// Transform of one line: (scale, tx, ty) in logical px.
    (double, double, double) _lineTf(QvpLayout? l, int line) {
-@@ -752,6 +899,39 @@
+@@ -752,6 +911,39 @@
      final bands = page.highlightBoxesView();
      _drawBoxes(canvas, bands, layout: l);
  
@@ -247,7 +259,7 @@
 +        // Rising fast, then fading: a soft halo behind the whole word…
 +        final rise = t < 0.15 ? t / 0.15 : 1.0;
 +        final fade = rise * (1 - t);
-+        final r = _wordBounds(l, paths, e.word);
++        final r = e.halo ? _wordBounds(l, paths, e.word) : null;
 +        if (r != null) {
 +          canvas.drawRRect(
 +            RRect.fromRectAndRadius(
@@ -273,7 +285,7 @@
      // 2. base ink
      final img = cache.image;
      if (img != null) {
-@@ -772,6 +952,7 @@
+@@ -772,6 +964,7 @@
      if (styled.isNotEmpty) {
        final paint = ui.Paint()..isAntiAlias = true;
        var cur = -1, open = false;
@@ -281,7 +293,7 @@
        for (final s in styled) {
          if ((s.color & 0xff) == 0) continue;
          final ln = page.pathLine(s.path);
-@@ -783,13 +964,37 @@
+@@ -783,13 +976,37 @@
            canvas.scale(sc);
            open = true;
            cur = ln;
@@ -320,7 +332,7 @@
      // 4. mask boxes (block / blur) on top
      _drawBoxes(canvas, page.maskBoxesView());
      cache.overlayMs = sw.elapsedMicroseconds / 1000;
-@@ -804,7 +1009,8 @@
+@@ -804,7 +1021,8 @@
        old.dpr != dpr ||
        old.paper != paper ||
        old.paperShadow != paperShadow ||

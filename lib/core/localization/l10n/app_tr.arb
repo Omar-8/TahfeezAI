@@ -216,7 +216,7 @@
   "recTajweed": "Tecvid",
   "recTajweedSub": "Tecvid kurallarını da kontrol et: idgam, ihfa, iklab, kalkale ve med uzunluğu. Kapalıyken: yalnızca harfler ve harekeler.",
   "recStrictness": "Telaffuz hassasiyeti",
-  "recStrictnessSub": "Kontrolün bir harfi, harekeyi veya tecvid kuralını hata saymadan önce ne kadar emin olması gerektiği. Esnek: daha az yanlış işaret, bazı hafif hatalar geçer. Hassas: daha çok yakalar, doğru okumayı da daha çok işaretler.",
+  "recStrictnessSub": "Kontrolün bir harfi, harekeyi veya tecvid kuralını hata saymadan önce ne kadar emin olması gerektiği.",
   "recStrictnessLenient": "Esnek",
   "recStrictnessBalanced": "Dengeli",
   "recStrictnessStrict": "Hassas",
@@ -543,5 +543,9 @@
   "settingsTimeOfDaySub": "Ana sayfanın arkasında şafak, gündüz, gün batımı ve gece",
   "zenMode": "Odak modu",
   "zenModeExit": "Odak modundan çık",
-  "wordMeaningSiraj": "Kelime anlamı · es-Sirâc"
+  "wordMeaningSiraj": "Kelime anlamı · es-Sirâc",
+  "hifzTabAppearance": "Görünüm",
+  "recStrictnessLenientSub": "daha az yanlış işaret; bazı hafif hatalar geçebilir.",
+  "recStrictnessBalancedSub": "önerilen orta ayar.",
+  "recStrictnessStrictSub": "daha çok hata yakalar; ara sıra doğru bir kelimeyi işaretleyebilir."
 }

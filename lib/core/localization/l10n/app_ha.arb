@@ -216,7 +216,7 @@
   "recTajweed": "Tajwidi",
   "recTajweedSub": "Duba dokokin tajwidi ma: idgām, ikhfā'i, iqlābi, qalqala da tsawon madda. A kashe: haruffa da wasula kawai.",
   "recStrictness": "Tsaurin lafazi",
-  "recStrictnessSub": "Yaya tabbaci binciken ya kamata ya kasance kafin ya alamta harafi, wasali ko dokar tajwidi a matsayin kuskure. Mai sauƙi: ƙarancin alamomin ƙarya, wasu ƙananan kurakurai suna wucewa. Daidaitacce: yana kama ƙari, yana alamta karatu daidai ƙari.",
+  "recStrictnessSub": "Yaya tabbaci binciken ya kamata ya kasance kafin ya alamta harafi, wasali ko dokar tajwidi a matsayin kuskure.",
   "recStrictnessLenient": "Mai sauƙi",
   "recStrictnessBalanced": "Matsakaici",
   "recStrictnessStrict": "Daidaitacce",
@@ -543,5 +543,9 @@
   "settingsTimeOfDaySub": "Alfijir, rana, faɗuwar rana da dare a bayan Gida",
   "zenMode": "Yanayin mai da hankali",
   "zenModeExit": "Fita daga yanayin mai da hankali",
-  "wordMeaningSiraj": "Ma'anar kalma · as-Siraj"
+  "wordMeaningSiraj": "Ma'anar kalma · as-Siraj",
+  "hifzTabAppearance": "Kamanni",
+  "recStrictnessLenientSub": "ƙarancin alamomin ƙarya; wasu ƙananan kurakurai na iya wucewa.",
+  "recStrictnessBalancedSub": "matsakaicin da aka ba da shawara.",
+  "recStrictnessStrictSub": "yana kama kurakurai da yawa; lokaci-lokaci yana iya alamta kalma daidai."
 }

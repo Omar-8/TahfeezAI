@@ -216,7 +216,7 @@
   "recTajweed": "Tajwiid",
   "recTajweedSub": "Hubi xukunnada tajwiidka sidoo kale: idgaam, ikhfaa', iqlaab, qalqala iyo dhererka madda. Dansan: xarfaha iyo shakalka oo kaliya.",
   "recStrictness": "Adkaanta dhawaaqa",
-  "recStrictnessSub": "Inta ay hubinta tahay inay hubto kahor intaanay xaraf, shakal ama xukun tajwiid u calaamadin khalad. Fudud: calaamado been ah oo yar, khaladaad fudud qaarkood way gudbaan. Sax: wax badan ayuu qabtaa, tilaawad sax ah wax badan ayuu calaamadeeyaa.",
+  "recStrictnessSub": "Inta ay hubintu tahay inay hubto kahor intaanay xaraf, shakal ama xukun tajwiid u calaamadin khalad.",
   "recStrictnessLenient": "Fudud",
   "recStrictnessBalanced": "Dheellitiran",
   "recStrictnessStrict": "Sax",
@@ -543,5 +543,9 @@
   "settingsTimeOfDaySub": "Waaberi, maalin, qorrax dhac iyo habeen gadaasha Hoyga",
   "zenMode": "Habka diirad saarka",
   "zenModeExit": "Ka bax habka diirad saarka",
-  "wordMeaningSiraj": "Macnaha erayga · as-Siraaj"
+  "wordMeaningSiraj": "Macnaha erayga · as-Siraaj",
+  "hifzTabAppearance": "Muuqaal",
+  "recStrictnessLenientSub": "calaamado been ah oo yar; khaladaad fudud qaarkood way gudbi karaan.",
+  "recStrictnessBalancedSub": "heerka dhexe ee lagu taliyay.",
+  "recStrictnessStrictSub": "khaladaad badan ayuu qabtaa; mararka qaarkood wuxuu calaamadeyn karaa eray sax ah."
 }

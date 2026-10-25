@@ -216,7 +216,7 @@
   "recTajweed": "Tajvid",
   "recTajweedSub": "Tajvid qoidalarini ham tekshirish: idgʻom, ixfo, iqlob, qalqala va madd uzunligi. Oʻchiq: faqat harflar va harakatlar.",
   "recStrictness": "Talaffuz qatʼiyligi",
-  "recStrictnessSub": "Harf, harakat yoki tajvid qoidasini xato deb belgilashdan oldin tekshiruv qanchalik ishonchli boʻlishi kerak. Yumshoq: yolgʻon belgilar kamroq, ayrim yengil xatolar oʻtib ketadi. Aniq: koʻproq ushlaydi, toʻgʻri tilovatni ham koʻproq belgilaydi.",
+  "recStrictnessSub": "Harf, harakat yoki tajvid qoidasini xato deb belgilashdan oldin tekshiruv qanchalik ishonchli boʻlishi kerak.",
   "recStrictnessLenient": "Yumshoq",
   "recStrictnessBalanced": "Muvozanatli",
   "recStrictnessStrict": "Aniq",
@@ -543,5 +543,9 @@
   "settingsTimeOfDaySub": "Bosh sahifa ortida tong, kunduz, quyosh botishi va tun",
   "zenMode": "Diqqat rejimi",
   "zenModeExit": "Diqqat rejimidan chiqish",
-  "wordMeaningSiraj": "Soʻz maʼnosi · as-Siroj"
+  "wordMeaningSiraj": "Soʻz maʼnosi · as-Siroj",
+  "hifzTabAppearance": "Koʻrinish",
+  "recStrictnessLenientSub": "yolgʻon belgilar kamroq; ayrim yengil xatolar oʻtib ketishi mumkin.",
+  "recStrictnessBalancedSub": "tavsiya etilgan oʻrta daraja.",
+  "recStrictnessStrictSub": "koʻproq xato topadi; ba’zan toʻgʻri soʻzni ham belgilashi mumkin."
 }

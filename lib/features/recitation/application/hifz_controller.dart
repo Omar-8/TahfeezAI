@@ -555,7 +555,7 @@ class HifzController extends Notifier<HifzState> {
   /// A page recited to its end glows word after word before it turns
   /// (`QuranEngineMushafPageContent`): the turn to the next one waits this
   /// long.
-  static const _pageDoneHold = Duration(milliseconds: 900);
+  static const _pageDoneHold = Duration(milliseconds: 500);
   Timer? _turnLater;
 
   /// With the page visible the reciter may start anywhere: the test begins

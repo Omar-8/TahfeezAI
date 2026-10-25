@@ -216,7 +216,7 @@
   "recTajweed": "Tajwidi",
   "recTajweedSub": "Kagua pia hukumu za tajwidi: idghām, ikhfāʾ, iqlāb, qalqala na urefu wa madd. Imezimwa: herufi na harakati tu.",
   "recStrictness": "Ukali wa matamshi",
-  "recStrictnessSub": "Ukaguzi unapaswa kuwa na uhakika kiasi gani kabla ya kuweka alama ya kosa kwenye herufi, harakati au hukumu ya tajwidi. Laini: alama chache za uongo, baadhi ya makosa madogo hupita. Sahihi: hukamata zaidi, huweka alama kwenye kisomo sahihi zaidi.",
+  "recStrictnessSub": "Ukaguzi unapaswa kuwa na uhakika kiasi gani kabla ya kuweka alama ya kosa kwenye herufi, harakati au hukumu ya tajwidi.",
   "recStrictnessLenient": "Laini",
   "recStrictnessBalanced": "Wastani",
   "recStrictnessStrict": "Sahihi",
@@ -543,5 +543,9 @@
   "settingsTimeOfDaySub": "Alfajiri, mchana, machweo na usiku nyuma ya Nyumbani",
   "zenMode": "Hali ya kuzingatia",
   "zenModeExit": "Toka kwenye hali ya kuzingatia",
-  "wordMeaningSiraj": "Maana ya neno · as-Siraj"
+  "wordMeaningSiraj": "Maana ya neno · as-Siraj",
+  "hifzTabAppearance": "Mwonekano",
+  "recStrictnessLenientSub": "alama chache za uongo; baadhi ya makosa madogo yanaweza kupita.",
+  "recStrictnessBalancedSub": "kiwango cha kati kinachopendekezwa.",
+  "recStrictnessStrictSub": "hukamata makosa zaidi; mara chache kinaweza kuweka alama kwenye neno sahihi."
 }

@@ -182,11 +182,13 @@ enum MushafWordEffect {
 /// Android's. Pages without one simply show the marks.
 abstract interface class MushafWordEffectsPage {
   /// Plays [effect] on the page word at engine index [wordIndex] (in
-  /// [color], for a [MushafWordEffect.bloom]), after [delay].
+  /// [color], for a [MushafWordEffect.bloom] — with a band behind the word
+  /// unless not [halo]), after [delay].
   void playWordEffect(
     int wordIndex,
     MushafWordEffect effect, {
     Color? color,
     Duration delay = Duration.zero,
+    bool halo = true,
   });
 }

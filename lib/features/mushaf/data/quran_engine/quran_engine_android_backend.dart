@@ -159,6 +159,7 @@ class QuranEngineAndroidPage
     MushafWordEffect effect, {
     Color? color,
     Duration delay = Duration.zero,
+    bool halo = true,
   }) => _effects.play(
     wordIndex,
     switch (effect) {
@@ -168,6 +169,7 @@ class QuranEngineAndroidPage
     },
     color: color ?? const Color(0xFF43A047),
     delayMs: delay.inMicroseconds / 1000,
+    halo: halo,
   );
 
   @override

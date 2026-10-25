@@ -692,7 +692,7 @@ void main() {
     // to once the finished page has glowed.
     await recite(words.join(' '));
     expect(container.read(mushafPageTurnRequestsProvider), isNull);
-    await Future<void>.delayed(const Duration(milliseconds: 1000));
+    await Future<void>.delayed(const Duration(milliseconds: 600));
     expect(container.read(mushafPageTurnRequestsProvider)?.direction, 1);
     expect(hifz().expected!.ayahId, 2257);
   });

@@ -216,7 +216,7 @@
   "recTajweed": "تجوید",
   "recTajweedSub": "د تجوید قواعد هم وڅېړئ: ادغام، اخفاء، اقلاب، قلقله او د مد اوږدوالی. بند: یوازې توري او حرکتونه.",
   "recStrictness": "د تلفظ سختوالی",
-  "recStrictnessSub": "څېړنه باید څومره ډاډه وي مخکې له دې چې یو توری، حرکت یا د تجوید قاعده تېروتنه په نښه کړي. نرم: لږ غلطې نښې، ځینې سپکې تېروتنې تېرېږي. دقیق: ډېر نیسي، سم تلاوت هم ډېر په نښه کوي.",
+  "recStrictnessSub": "څېړنه باید څومره ډاډه وي مخکې له دې چې یو توری، حرکت یا د تجوید قاعده تېروتنه په نښه کړي.",
   "recStrictnessLenient": "نرم",
   "recStrictnessBalanced": "متوازن",
   "recStrictnessStrict": "دقیق",
@@ -543,5 +543,9 @@
   "settingsTimeOfDaySub": "د کور شاته سهار، ورځ، ماښام او شپه",
   "zenMode": "د تمرکز حالت",
   "zenModeExit": "له تمرکز حالت نه ووځئ",
-  "wordMeaningSiraj": "د کلمې معنا · السراج"
+  "wordMeaningSiraj": "د کلمې معنا · السراج",
+  "hifzTabAppearance": "بڼه",
+  "recStrictnessLenientSub": "لږ غلطې نښې؛ ځینې سپکې تېروتنې کېدای شي تېرې شي.",
+  "recStrictnessBalancedSub": "وړاندیز شوی منځنی حالت.",
+  "recStrictnessStrictSub": "ډېرې تېروتنې نیسي؛ کله ناکله کېدای شي سمه کلمه هم په نښه کړي."
 }
