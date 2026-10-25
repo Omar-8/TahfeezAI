@@ -39,6 +39,19 @@ void main() {
     await RealApp.quit(tester);
   });
 
+  test('the sky blends between the parts of the day', () {
+    DateTime at(int h, int m) => DateTime(2026, 10, 25, h, m);
+    final dawn = DayPart.dawn.colors(Brightness.light);
+    final night = DayPart.night.colors(Brightness.light);
+    int sky(int h, int m) =>
+        SkyBlend.at(at(h, m), Brightness.light).a.toARGB32();
+    expect(sky(5, 30), dawn.$1.toARGB32());
+    expect(sky(2, 0), night.$1.toARGB32());
+    expect(sky(4, 30), Color.lerp(night.$1, dawn.$1, 0.5)!.toARGB32());
+    // Past midnight, still the night's.
+    expect(sky(23, 0), night.$1.toARGB32());
+  });
+
   test("Home's sky by the clock", () {
     DayPart at(int h, [int m = 0]) => DayPart.at(DateTime(2026, 10, 25, h, m));
     expect(at(2), DayPart.night);

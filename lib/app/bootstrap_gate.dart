@@ -63,7 +63,8 @@ class _BootstrapSplash extends StatelessWidget {
   static const _background = Color(0xFF03100C);
 
   static Widget _sky(DayPart part) {
-    final (a, b) = part.colors(Brightness.light);
+    final sky = SkyBlend.at(DateTime.now(), Brightness.light);
+    final (a, b) = (sky.a, sky.b);
     return DaySky(
       part: part,
       brightness: Brightness.dark,
@@ -73,6 +74,7 @@ class _BootstrapSplash extends StatelessWidget {
         Color.lerp(a, _background, 0.55)!,
         Color.lerp(b, _background, 0.6)!,
       ),
+      glowColor: SkyBlend.at(DateTime.now(), Brightness.dark).glow,
       lattice: 0.16,
     );
   }

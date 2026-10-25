@@ -70,6 +70,52 @@ enum DayPart {
   };
 }
 
+/// The sky's colours at any moment: the parts of the day as keyframes
+/// (night until 3:30, dawn at 5:30, morning at 8, afternoon at 12:30, the
+/// golden hour at 4:30 pm, sunset at 6:45, night again from 8:30), blended
+/// in between — the sky shifts through the day rather than in steps.
+abstract final class SkyBlend {
+  static const _keys = [
+    (3 * 60 + 30, DayPart.night),
+    (5 * 60 + 30, DayPart.dawn),
+    (8 * 60, DayPart.morning),
+    (12 * 60 + 30, DayPart.afternoon),
+    (16 * 60 + 30, DayPart.golden),
+    (18 * 60 + 45, DayPart.sunset),
+    (20 * 60 + 30, DayPart.night),
+  ];
+
+  /// The sky's two colours and the glow's at [t], for [brightness].
+  static ({Color a, Color b, Color glow}) at(
+    DateTime t,
+    Brightness brightness,
+  ) {
+    final m = t.hour * 60 + t.minute + t.second / 60;
+    // The keyframes around [m] (the night wraps past midnight).
+    var (fromM, from) = (_keys.last.$1 - 24 * 60, _keys.last.$2);
+    var (toM, to) = _keys.first;
+    for (var i = 0; i < _keys.length; i++) {
+      if (m < _keys[i].$1) {
+        (toM, to) = _keys[i];
+        if (i > 0) (fromM, from) = _keys[i - 1];
+        break;
+      }
+      if (i == _keys.length - 1) {
+        (fromM, from) = _keys[i];
+        (toM, to) = (_keys.first.$1 + 24 * 60, _keys.first.$2);
+      }
+    }
+    final k = ((m - fromM) / (toM - fromM)).clamp(0.0, 1.0);
+    final (a0, b0) = from.colors(brightness);
+    final (a1, b1) = to.colors(brightness);
+    return (
+      a: Color.lerp(a0, a1, k)!,
+      b: Color.lerp(b0, b1, k)!,
+      glow: Color.lerp(from.glow(brightness), to.glow(brightness), k)!,
+    );
+  }
+}
+
 /// Home's sky by the time of day — on unless turned off in Settings.
 class HomeSkyController extends Notifier<bool> {
   static const storageKey = 'home.time_of_day_sky';
@@ -134,9 +180,13 @@ class _HomeSkyState extends ConsumerState<HomeSky> {
   Widget build(BuildContext context) {
     if (!ref.watch(homeSkyProvider)) return const SizedBox.shrink();
     final scheme = Theme.of(context).colorScheme;
+    final now = ref.watch(homeSkyClockProvider)();
+    final sky = SkyBlend.at(now, scheme.brightness);
     return DaySky(
-      part: DayPart.at(ref.watch(homeSkyClockProvider)()),
+      part: DayPart.at(now),
       brightness: scheme.brightness,
+      colors: (sky.a, sky.b),
+      glowColor: sky.glow,
       paper: scheme.surface,
       ink: scheme.onSurface,
       height: widget.height,
@@ -158,6 +208,7 @@ class DaySky extends StatelessWidget {
     this.height,
     this.lattice,
     this.colors,
+    this.glowColor,
   });
 
   final DayPart part;
@@ -171,12 +222,16 @@ class DaySky extends StatelessWidget {
   /// The sky's two colours, in place of [part]'s for [brightness].
   final (Color, Color)? colors;
 
+  /// The glow's colour, in place of [part]'s.
+  final Color? glowColor;
+
   @override
   Widget build(BuildContext context) {
     // Light papers (standard, warm, sepia): the sky leans a little towards
     // the paper, so each keeps its character.
     var (a, b) = colors ?? part.colors(brightness);
-    if (colors == null && brightness == Brightness.light) {
+    final glow = glowColor ?? part.glow(brightness);
+    if (brightness == Brightness.light && paper != Colors.transparent) {
       a = Color.lerp(a, paper, 0.12)!;
       b = Color.lerp(b, paper, 0.12)!;
     }
@@ -218,10 +273,8 @@ class DaySky extends StatelessWidget {
                     // Softly: a hint of light, not a reflection.
                     gradient: RadialGradient(
                       colors: [
-                        part
-                            .glow(brightness)
-                            .withValues(alpha: part.glow(brightness).a * 0.65),
-                        part.glow(brightness).withValues(alpha: 0),
+                        glow.withValues(alpha: glow.a * 0.65),
+                        glow.withValues(alpha: 0),
                       ],
                     ),
                   ),

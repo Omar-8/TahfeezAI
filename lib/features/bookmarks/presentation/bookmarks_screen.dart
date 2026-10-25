@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../quran/presentation/surah_name_calligraphy.dart';
 import '../../../core/ui/bar_space.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -71,11 +72,23 @@ class BookmarksScreen extends ConsumerWidget {
                     subtitle: b.isSurah
                         ? Text(l10n.homeContinueReadingSurah(b.surahNo))
                         : _AyahOpening(ayahId: b.ayahId!),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.delete_outline_rounded),
-                      tooltip: l10n.bookmarkRemove,
-                      onPressed: () =>
-                          ref.read(bookmarksProvider.notifier).remove(b),
+                    // Its surah's name as the Mushaf writes it, then remove.
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SurahNameCalligraphy(
+                          surahNo: b.surahNo,
+                          height: 22,
+                          maxWidth: 76,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete_outline_rounded),
+                          tooltip: l10n.bookmarkRemove,
+                          onPressed: () =>
+                              ref.read(bookmarksProvider.notifier).remove(b),
+                        ),
+                      ],
                     ),
                     onTap: () => goToQuranLocation(
                       context,

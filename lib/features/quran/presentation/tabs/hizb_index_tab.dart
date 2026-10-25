@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../quran/presentation/surah_name_calligraphy.dart';
 import '../../../../core/ui/bar_space.dart';
 import '../../../../core/localization/generated/app_localizations.dart';
 
@@ -46,6 +47,13 @@ class HizbIndexTab extends ConsumerWidget {
                     .homeContinueReadingHizb(unit.unitNo),
                 subtitle: AppLocalizations.of(context)
                     .quranStartsAt(unit.start.surahNo, unit.start.startAyahNo),
+                // The surah it starts in, as the Mushaf writes its name.
+                art: SurahNameCalligraphy(
+                  surahNo: unit.start.surahNo,
+                  height: 24,
+                  maxWidth: 90,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
                 onTap: () => onSelect(QuranLocation.hizb(unit.unitNo)),
               ),
             );
