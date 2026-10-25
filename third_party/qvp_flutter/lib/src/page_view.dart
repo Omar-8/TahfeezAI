@@ -176,6 +176,10 @@ enum QvpWordEffectKind {
 
   /// The word's ink fades in from the paper (drawn over it, fading out).
   inkIn,
+
+  /// The word's ink fades into the paper (drawn over it, fading in), held
+  /// at the paper for its last fifth — for the app to hide the word then.
+  inkOut,
 }
 
 /// Tahfeez patch 0005: one running [QvpWordEffectKind] on page word [word].
@@ -210,6 +214,7 @@ class QvpWordEffect {
     QvpWordEffectKind.bloom => 650,
     QvpWordEffectKind.shake => 420,
     QvpWordEffectKind.inkIn => 380,
+    QvpWordEffectKind.inkOut => 400,
   };
 }
 
@@ -1015,8 +1020,17 @@ class _QvpPainter extends CustomPainter {
     }
 
     // Tahfeez patch 0005: ink fading in — the paper over the word, fading
-    // out.
+    // out — or fading out, the paper over it fading in.
     if (fx.isNotEmpty && paperColor != null) {
+      for (final (e, t) in _running(fx, QvpWordEffectKind.inkOut, now)) {
+        final r = _wordBounds(l, paths, e.word);
+        if (r == null) continue;
+        final p = (t / 0.8).clamp(0.0, 1.0);
+        canvas.drawRect(
+          r.inflate(1.5),
+          ui.Paint()..color = paperColor.withValues(alpha: p * p * (3 - 2 * p)),
+        );
+      }
       for (final (e, t) in _running(fx, QvpWordEffectKind.inkIn, now)) {
         final r = _wordBounds(l, paths, e.word);
         if (r == null) continue;

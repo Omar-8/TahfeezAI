@@ -167,6 +167,7 @@ class QuranEngineAndroidPage
       MushafWordEffect.bloom => QvpWordEffectKind.bloom,
       MushafWordEffect.shake => QvpWordEffectKind.shake,
       MushafWordEffect.inkIn => QvpWordEffectKind.inkIn,
+      MushafWordEffect.inkOut => QvpWordEffectKind.inkOut,
     },
     color: color ?? const Color(0xFF43A047),
     delayMs: delay.inMicroseconds / 1000,

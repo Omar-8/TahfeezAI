@@ -1,4 +1,4 @@
-import 'dart:async' show unawaited;
+import 'dart:async' show Timer, unawaited;
 import 'dart:math' as math;
 
 import '../../../core/localization/generated/app_localizations.dart';
@@ -55,6 +55,9 @@ class _QuranEngineMushafPageContentState
   QuranEngineMushafPage? _page;
   Object? _loadError;
   bool _loading = false;
+
+  /// The eye's hiding, applied once the words have faded into the paper.
+  Timer? _maskLater;
 
   /// The hide-mode state last applied to [_page], so changes to other
   /// pages' reveal progress don't re-apply this one.
@@ -395,12 +398,38 @@ class _QuranEngineMushafPageContentState
       _appliedMask = wanted;
       return;
     }
+    final before = _appliedMask;
+    _appliedMask = wanted;
+    _maskLater?.cancel();
+    // The eye: the whole page hidden or shown — fading.
+    if (page is MushafWordEffectsPage &&
+        before != null &&
+        before.hidden != wanted.hidden) {
+      final effects = page as MushafWordEffectsPage;
+      if (wanted.hidden) {
+        // Into the paper first, then hidden.
+        for (var i = wanted.revealed; i < page.wordCount; i++) {
+          effects.playWordEffect(i, MushafWordEffect.inkOut);
+        }
+        _maskLater = Timer(MushafWordEffect.inkOutTime, () {
+          if (!mounted || _page != page || _appliedMask != wanted) return;
+          page.setMemorizationMask(
+            hidden: wanted.hidden,
+            revealedWords: wanted.revealed,
+          );
+        });
+        return;
+      }
+      page.setMemorizationMask(hidden: false);
+      for (var i = before.revealed; i < page.wordCount; i++) {
+        effects.playWordEffect(i, MushafWordEffect.inkIn);
+      }
+      return;
+    }
     page.setMemorizationMask(
       hidden: wanted.hidden,
       revealedWords: wanted.revealed,
     );
-    final before = _appliedMask;
-    _appliedMask = wanted;
     // Words uncovered with hide mode's buttons: animated in, in order.
     if (page is MushafWordEffectsPage &&
         before != null &&
@@ -485,6 +514,7 @@ class _QuranEngineMushafPageContentState
 
   @override
   void dispose() {
+    _maskLater?.cancel();
     final backend = _backend;
     final page = _page;
     if (backend != null && page != null) backend.disposePage(page);

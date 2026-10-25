@@ -176,6 +176,13 @@ enum MushafWordEffect {
 
   /// The word's ink fades in (a hidden word revealed).
   inkIn,
+
+  /// The word's ink fades into the paper (before it is hidden), over
+  /// [MushafWordEffect.inkOutTime].
+  inkOut;
+
+  /// How long [inkOut] takes to reach the paper.
+  static const inkOutTime = Duration(milliseconds: 320);
 }
 
 /// A [QuranEngineMushafPage] that can animate its words ([MushafWordEffect]):

@@ -8,7 +8,7 @@
  import 'dart:ui' as ui;
  
  import 'package:flutter/foundation.dart';
-@@ -164,6 +165,92 @@
+@@ -164,6 +165,97 @@
        Offset((local.dx - offsetX) / scale, (local.dy - offsetY) / scale);
  }
  
@@ -23,6 +23,10 @@
 +
 +  /// The word's ink fades in from the paper (drawn over it, fading out).
 +  inkIn,
++
++  /// The word's ink fades into the paper (drawn over it, fading in), held
++  /// at the paper for its last fifth — for the app to hide the word then.
++  inkOut,
 +}
 +
 +/// Tahfeez patch 0005: one running [QvpWordEffectKind] on page word [word].
@@ -57,6 +61,7 @@
 +    QvpWordEffectKind.bloom => 650,
 +    QvpWordEffectKind.shake => 420,
 +    QvpWordEffectKind.inkIn => 380,
++    QvpWordEffectKind.inkOut => 400,
 +  };
 +}
 +
@@ -101,7 +106,7 @@
  /// Renders a [QvpPage] with the engine's layout, animated highlights, masks,
  /// styled paths, tap / long-press selection and pinch / pan.
  class QvpPageView extends StatefulWidget {
-@@ -186,9 +273,13 @@
+@@ -186,9 +278,13 @@
      this.paperShadow = true,
      this.minScale = kMinZoom,
      this.maxScale = kMaxZoom,
@@ -115,7 +120,7 @@
    final QvpViewLayout layout;
  
    /// Paper colour behind the ink (null = transparent).
-@@ -253,6 +344,7 @@
+@@ -253,6 +349,7 @@
      _ticker = createTicker(_onTick);
      _attachPage();
      _applyInk();
@@ -123,7 +128,7 @@
    }
  
    void _attachPage() {
-@@ -282,12 +374,17 @@
+@@ -282,12 +379,17 @@
        _attachPage();
      }
      if (oldWidget.defaultInk != widget.defaultInk) _applyInk();
@@ -141,7 +146,7 @@
      _ticker.dispose();
      _cache.dispose();
      _frame.dispose();
-@@ -321,8 +418,10 @@
+@@ -321,8 +423,10 @@
        return;
      }
      final more = page.tick(nowMs);
@@ -153,7 +158,7 @@
    }
  
    // ── layout & fit (engine layout, then pan/zoom on top) ──
-@@ -487,6 +586,7 @@
+@@ -487,6 +591,7 @@
                    dpr: dpr,
                    paper: widget.paper,
                    paperShadow: widget.paperShadow,
@@ -161,7 +166,7 @@
                  ),
                ),
              ),
-@@ -509,10 +609,29 @@
+@@ -509,10 +614,29 @@
    int basePaths = 0, overlayPaths = 0, bands = 0;
    double baseMs = 0, overlayMs = 0;
  
@@ -191,7 +196,7 @@
      key = '';
      _dropImage();
    }
-@@ -582,6 +701,7 @@
+@@ -582,6 +706,7 @@
      required this.dpr,
      required this.paper,
      required this.paperShadow,
@@ -199,7 +204,7 @@
    }) : super(repaint: Listenable.merge([page, view, frame]));
  
    final QvpPage page;
-@@ -590,6 +710,65 @@
+@@ -590,6 +715,65 @@
    final double dpr;
    final Color? paper;
    final bool paperShadow;
@@ -265,7 +270,7 @@
  
    /// Transform of one line: (scale, tx, ty) in logical px.
    (double, double, double) _lineTf(QvpLayout? l, int line) {
-@@ -752,6 +931,40 @@
+@@ -752,6 +936,40 @@
      final bands = page.highlightBoxesView();
      _drawBoxes(canvas, bands, layout: l);
  
@@ -306,7 +311,7 @@
      // 2. base ink
      final img = cache.image;
      if (img != null) {
-@@ -772,6 +985,7 @@
+@@ -772,6 +990,7 @@
      if (styled.isNotEmpty) {
        final paint = ui.Paint()..isAntiAlias = true;
        var cur = -1, open = false;
@@ -314,7 +319,7 @@
        for (final s in styled) {
          if ((s.color & 0xff) == 0) continue;
          final ln = page.pathLine(s.path);
-@@ -783,13 +997,37 @@
+@@ -783,13 +1002,46 @@
            canvas.scale(sc);
            open = true;
            cur = ln;
@@ -337,8 +342,17 @@
      }
  
 +    // Tahfeez patch 0005: ink fading in — the paper over the word, fading
-+    // out.
++    // out — or fading out, the paper over it fading in.
 +    if (fx.isNotEmpty && paperColor != null) {
++      for (final (e, t) in _running(fx, QvpWordEffectKind.inkOut, now)) {
++        final r = _wordBounds(l, paths, e.word);
++        if (r == null) continue;
++        final p = (t / 0.8).clamp(0.0, 1.0);
++        canvas.drawRect(
++          r.inflate(1.5),
++          ui.Paint()..color = paperColor.withValues(alpha: p * p * (3 - 2 * p)),
++        );
++      }
 +      for (final (e, t) in _running(fx, QvpWordEffectKind.inkIn, now)) {
 +        final r = _wordBounds(l, paths, e.word);
 +        if (r == null) continue;
@@ -353,7 +367,7 @@
      // 4. mask boxes (block / blur) on top
      _drawBoxes(canvas, page.maskBoxesView());
      cache.overlayMs = sw.elapsedMicroseconds / 1000;
-@@ -804,7 +1042,8 @@
+@@ -804,7 +1056,8 @@
        old.dpr != dpr ||
        old.paper != paper ||
        old.paperShadow != paperShadow ||
