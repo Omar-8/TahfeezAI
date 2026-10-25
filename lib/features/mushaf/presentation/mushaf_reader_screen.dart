@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 
 import '../../../core/localization/generated/app_localizations.dart';
 
+import 'mushaf_zen_mode.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../quran/domain/models/quran_location.dart';
@@ -69,56 +71,65 @@ class _MushafReaderScreenState extends ConsumerState<MushafReaderScreen> {
     final colors = ref.watch(mushafAppearanceControllerProvider).colors;
     final mushafAsync = ref.watch(mushafByIdProvider(widget.mushafId));
 
+    // Focus mode: the page alone (and the recitation bar).
+    final zen = ref.watch(mushafZenModeProvider);
     return Scaffold(
       backgroundColor: colors.background,
-      appBar: AppBar(
-        backgroundColor: colors.background,
-        foregroundColor: colors.text,
-        titleSpacing: 0,
-        title: MushafPageTitle(
-          mushafId: widget.mushafId,
-          pageNumber: _currentPageNumber,
-        ),
-        actions: [
-          // Same icon/tooltip/sheet as `reader_screen.dart`'s
-          // `_MushafModeScaffold`: both open the Mushaf themes
-          // (`showMushafAppearanceSheet`).
-          // Recording: a red dot while a recitation session runs.
-          const RecordingDot(),
-          // Hifz mode's feedback settings, beside the reader's own (loop
-          // recitation is in the recitation bar).
-          const HifzSettingsButton(),
-          // The printed page ⇄ Ayah mode.
-          const ReaderModeToggle(),
-          // The guide to the modes (left of the reader's own settings).
-          const GuideButton(),
-          IconButton(
-            icon: const Icon(Icons.tune),
-            tooltip: AppLocalizations.of(context).readerOptions,
-            onPressed: () => showMushafAppearanceSheet(context),
-          ),
-        ],
-      ),
+      appBar: zen
+          ? null
+          : AppBar(
+              backgroundColor: colors.background,
+              foregroundColor: colors.text,
+              titleSpacing: 0,
+              title: MushafPageTitle(
+                mushafId: widget.mushafId,
+                pageNumber: _currentPageNumber,
+              ),
+              actions: [
+                // Same icon/tooltip/sheet as `reader_screen.dart`'s
+                // `_MushafModeScaffold`: both open the Mushaf themes
+                // (`showMushafAppearanceSheet`).
+                // Recording: a red dot while a recitation session runs.
+                const RecordingDot(),
+                // Hifz mode's feedback settings, beside the reader's own (loop
+                // recitation is in the recitation bar).
+                const HifzSettingsButton(),
+                // The printed page ⇄ Ayah mode.
+                const ReaderModeToggle(),
+                // Focus mode: the page alone.
+                const ZenModeButton(),
+                // The guide to the modes (left of the reader's own settings).
+                const GuideButton(),
+                IconButton(
+                  icon: const Icon(Icons.tune),
+                  tooltip: AppLocalizations.of(context).readerOptions,
+                  onPressed: () => showMushafAppearanceSheet(context),
+                ),
+              ],
+            ),
       // Reports the page on screen to the app shell's recitation bar.
-      body: RecitationMushafAnchor(
-        location: QuranLocation.page(widget.mushafId, _currentPageNumber),
-        child: mushafAsync.when(
-          data: (mushaf) {
-            if (mushaf == null) {
-              return _unavailable(colors.secondaryText);
-            }
-            return MushafPager(
-              mushafId: mushaf.id,
-              pageCount: mushaf.pageCount,
-              initialPageNumber: widget.initialPageNumber,
-              onPageChanged: (pageNumber) =>
-                  setState(() => _currentPageNumber = pageNumber),
-            );
-          },
-          loading: () => Center(
-            child: CircularProgressIndicator(color: colors.secondaryText),
+      body: ZenModeLayer(
+        colors: colors,
+        child: RecitationMushafAnchor(
+          location: QuranLocation.page(widget.mushafId, _currentPageNumber),
+          child: mushafAsync.when(
+            data: (mushaf) {
+              if (mushaf == null) {
+                return _unavailable(colors.secondaryText);
+              }
+              return MushafPager(
+                mushafId: mushaf.id,
+                pageCount: mushaf.pageCount,
+                initialPageNumber: widget.initialPageNumber,
+                onPageChanged: (pageNumber) =>
+                    setState(() => _currentPageNumber = pageNumber),
+              );
+            },
+            loading: () => Center(
+              child: CircularProgressIndicator(color: colors.secondaryText),
+            ),
+            error: (_, _) => _unavailable(colors.secondaryText),
           ),
-          error: (_, _) => _unavailable(colors.secondaryText),
         ),
       ),
     );

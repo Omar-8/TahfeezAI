@@ -530,5 +530,17 @@
   "recIntroLearning": "Die Prüfung lernt noch: Sie kann einen Fehler übersehen oder ein richtiges Wort markieren. Markiert sie zu viel, wähle in den Hifz-Einstellungen „Nachsichtig“.",
   "recIntroPrivate": "Deine Stimme bleibt auf deinem Telefon: Nichts wird aufgenommen oder gesendet.",
   "recIntroStart": "Rezitation starten",
-  "recIntroSettings": "Hifz-Einstellungen"
+  "recIntroSettings": "Hifz-Einstellungen",
+  "memStreakTitle": "Serie",
+  "memStreakDays": "{count, plural, =0{Rezitiere heute, um eine Serie zu beginnen} =1{1 Tag in Folge} other{{count} Tage in Folge}}",
+  "memStreakBest": "{count, plural, =1{Bestwert: 1 Tag} other{Bestwert: {count} Tage}}",
+  "memCalendarLess": "Weniger",
+  "memCalendarMore": "Mehr",
+  "milestoneTitle": "Masha'Allah",
+  "milestoneJuz": "Juz {juz} auswendig gelernt",
+  "milestoneSurah": "Sure {surah} auswendig gelernt",
+  "settingsTimeOfDay": "Farben von „Start“ nach Tageszeit",
+  "settingsTimeOfDaySub": "Morgendämmerung, Tag, Sonnenuntergang und Nacht hinter „Start“",
+  "zenMode": "Fokusmodus",
+  "zenModeExit": "Fokusmodus verlassen"
 }

@@ -529,3 +529,15 @@ recIntroLearning = Тексеруші әлі үйренуде: қатені өт
 recIntroPrivate = Дауысыңыз телефоныңызда қалады: ештеңе жазылмайды және жіберілмейді.
 recIntroStart = Оқуды бастау
 recIntroSettings = Жаттау баптаулары
+memStreakTitle = Серия
+memStreakDays = {count, plural, =0{Серияны бастау үшін бүгін оқыңыз} =1{Қатарынан 1 күн} other{Қатарынан {count} күн}}
+memStreakBest = {count, plural, =1{Ең үздігі: 1 күн} other{Ең үздігі: {count} күн}}
+memCalendarLess = Аз
+memCalendarMore = Көп
+milestoneTitle = Машаллаһ
+milestoneJuz = {juz}-пара жатталды
+milestoneSurah = {surah} сүресі жатталды
+settingsTimeOfDay = Басты беттің түстері тәулік уақытына қарай
+settingsTimeOfDaySub = Басты беттің артында таң, күндіз, күн батуы және түн
+zenMode = Зейін режимі
+zenModeExit = Зейін режимінен шығу

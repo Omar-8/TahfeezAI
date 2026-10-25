@@ -529,3 +529,15 @@ recIntroLearning = څېړونکی لا زده کوي: کېدای شي یوه ت�
 recIntroPrivate = ستاسو غږ ستاسو په ټیلیفون کې پاتې کېږي: هیڅ نه ثبتېږي او نه لېږل کېږي.
 recIntroStart = تلاوت پیل کړئ
 recIntroSettings = د حفظ تنظیمات
+memStreakTitle = لړۍ
+memStreakDays = {count, plural, =0{نن تلاوت وکړئ چې لړۍ پیل شي} =1{پرله پسې 1 ورځ} other{پرله پسې {count} ورځې}}
+memStreakBest = {count, plural, =1{غوره: 1 ورځ} other{غوره: {count} ورځې}}
+memCalendarLess = لږ
+memCalendarMore = ډېر
+milestoneTitle = ماشاءالله
+milestoneJuz = {juz} سیپاره حفظ شوه
+milestoneSurah = {surah} سورت حفظ شو
+settingsTimeOfDay = د کور رنګونه د ورځې د وخت سره سم
+settingsTimeOfDaySub = د کور شاته سهار، ورځ، ماښام او شپه
+zenMode = د تمرکز حالت
+zenModeExit = له تمرکز حالت نه ووځئ

@@ -530,5 +530,17 @@
   "recIntroLearning": "Kontrol henüz öğreniyor: bir hatayı kaçırabilir veya doğru bir kelimeyi işaretleyebilir. Çok işaretlerse Hıfz ayarlarında Esnek'i seçin.",
   "recIntroPrivate": "Sesiniz telefonunuzda kalır: hiçbir şey kaydedilmez veya gönderilmez.",
   "recIntroStart": "Okumaya başla",
-  "recIntroSettings": "Hıfz ayarları"
+  "recIntroSettings": "Hıfz ayarları",
+  "memStreakTitle": "Seri",
+  "memStreakDays": "{count, plural, =0{Bir seri başlatmak için bugün okuyun} =1{Üst üste 1 gün} other{Üst üste {count} gün}}",
+  "memStreakBest": "{count, plural, =1{En iyi: 1 gün} other{En iyi: {count} gün}}",
+  "memCalendarLess": "Az",
+  "memCalendarMore": "Çok",
+  "milestoneTitle": "Maşallah",
+  "milestoneJuz": "{juz}. cüz ezberlendi",
+  "milestoneSurah": "{surah} suresi ezberlendi",
+  "settingsTimeOfDay": "Günün saatine göre ana sayfa renkleri",
+  "settingsTimeOfDaySub": "Ana sayfanın arkasında şafak, gündüz, gün batımı ve gece",
+  "zenMode": "Odak modu",
+  "zenModeExit": "Odak modundan çık"
 }

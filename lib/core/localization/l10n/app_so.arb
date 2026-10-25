@@ -530,5 +530,17 @@
   "recIntroLearning": "Hubiyuhu weli wuu baranayaa: wuu seegi karaa khalad ama wuu calaamadeyn karaa eray sax ah. Haddii uu calaamadeeyo wax aad u badan, dooro Fudud gudaha Dejinta xifdinta.",
   "recIntroPrivate": "Codkaagu wuxuu ku jiraa taleefankaaga: waxba lama duubo lamana diro.",
   "recIntroStart": "Bilow tilaawada",
-  "recIntroSettings": "Dejinta xifdinta"
+  "recIntroSettings": "Dejinta xifdinta",
+  "memStreakTitle": "Isku xigxig",
+  "memStreakDays": "{count, plural, =0{Maanta akhri si aad u bilowdo isku xigxig} =1{1 maalin oo isku xigta} other{{count} maalmood oo isku xigta}}",
+  "memStreakBest": "{count, plural, =1{Ugu fiican: 1 maalin} other{Ugu fiican: {count} maalmood}}",
+  "memCalendarLess": "Ka yar",
+  "memCalendarMore": "Ka badan",
+  "milestoneTitle": "Mashaa Allah",
+  "milestoneJuz": "Juz {juz} waa la xifdiyay",
+  "milestoneSurah": "Suuradda {surah} waa la xifdiyay",
+  "settingsTimeOfDay": "Midabada Hoyga waqtiga maalinta",
+  "settingsTimeOfDaySub": "Waaberi, maalin, qorrax dhac iyo habeen gadaasha Hoyga",
+  "zenMode": "Habka diirad saarka",
+  "zenModeExit": "Ka bax habka diirad saarka"
 }

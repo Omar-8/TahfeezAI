@@ -5,6 +5,7 @@ import 'package:flutter/services.dart' show SystemNavigator;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../home/presentation/home_sky.dart';
 import '../../../core/core_providers.dart';
 import '../../../core/localization/generated/app_localizations.dart';
 import '../../../core/routing/app_routes.dart';
@@ -175,34 +176,52 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             group(
               l10n.settingsAppTheme,
               Icons.palette_outlined,
-              Wrap(
-                key: const ValueKey('settings-app-theme'),
-                spacing: TahfeezSpacing.sm,
-                runSpacing: TahfeezSpacing.sm,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  for (final choice in AppThemeChoice.values)
-                    ChoiceChip(
-                      avatar: choice == AppThemeChoice.system
-                          ? const Icon(Icons.brightness_auto_outlined)
-                          : ThemeSwatch(
-                              paper: _paper(choice),
-                              ink: _ink(choice),
-                            ),
-                      label: Text(choice.label(l10n)),
-                      selected: choice == appTheme,
-                      showCheckmark: false,
-                      onSelected: (_) {
-                        ref
-                            .read(themeModeControllerProvider.notifier)
-                            .setThemeMode(choice.mode);
-                        ref
-                            .read(appSurfaceToneProvider.notifier)
-                            .setTone(choice.tone);
-                      },
-                    ),
+                  Wrap(
+                    key: const ValueKey('settings-app-theme'),
+                    spacing: TahfeezSpacing.sm,
+                    runSpacing: TahfeezSpacing.sm,
+                    children: [
+                      for (final choice in AppThemeChoice.values)
+                        ChoiceChip(
+                          avatar: choice == AppThemeChoice.system
+                              ? const Icon(Icons.brightness_auto_outlined)
+                              : ThemeSwatch(
+                                  paper: _paper(choice),
+                                  ink: _ink(choice),
+                                ),
+                          label: Text(choice.label(l10n)),
+                          selected: choice == appTheme,
+                          showCheckmark: false,
+                          onSelected: (_) {
+                            ref
+                                .read(themeModeControllerProvider.notifier)
+                                .setThemeMode(choice.mode);
+                            ref
+                                .read(appSurfaceToneProvider.notifier)
+                                .setTone(choice.tone);
+                          },
+                        ),
+                    ],
+                  ),
+                  SwitchListTile(
+                    key: const ValueKey('settings-time-of-day'),
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(l10n.settingsTimeOfDay),
+                    subtitle: Text(l10n.settingsTimeOfDaySub),
+                    value: ref.watch(homeSkyProvider),
+                    onChanged: (on) =>
+                        ref.read(homeSkyProvider.notifier).setEnabled(on),
+                  ),
                 ],
               ),
-              words: [for (final c in AppThemeChoice.values) c.label(l10n)],
+              words: [
+                for (final c in AppThemeChoice.values) c.label(l10n),
+                l10n.settingsTimeOfDay,
+                l10n.settingsTimeOfDaySub,
+              ],
             );
             group(
               l10n.settingsArabicFont,

@@ -529,3 +529,15 @@ recIntroLearning = Penyemak masih belajar: ia mungkin terlepas kesilapan atau me
 recIntroPrivate = Suara anda kekal pada telefon anda: tiada yang dirakam atau dihantar.
 recIntroStart = Mula membaca
 recIntroSettings = Tetapan hafazan
+memStreakTitle = Rentetan
+memStreakDays = {count, plural, =0{Bacalah hari ini untuk memulakan rentetan} =1{1 hari berturut-turut} other{{count} hari berturut-turut}}
+memStreakBest = {count, plural, =1{Terbaik: 1 hari} other{Terbaik: {count} hari}}
+memCalendarLess = Kurang
+memCalendarMore = Lebih
+milestoneTitle = MasyaAllah
+milestoneJuz = Juzuk {juz} telah dihafaz
+milestoneSurah = Surah {surah} telah dihafaz
+settingsTimeOfDay = Warna Utama mengikut waktu
+settingsTimeOfDaySub = Subuh, siang, senja dan malam di belakang Utama
+zenMode = Mod fokus
+zenModeExit = Keluar mod fokus

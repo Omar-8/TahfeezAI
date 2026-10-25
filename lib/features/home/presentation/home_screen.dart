@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'home_sky.dart';
 import 'home_store_prompts.dart';
 
 import '../../../core/ui/back_to_exit.dart';
@@ -8,6 +9,7 @@ import '../../../core/ui/first_run.dart';
 
 import '../../../core/localization/generated/app_localizations.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/components/components.dart';
 import 'sections/home_daily_ayah_section.dart';
 import 'sections/home_featured_reading_section.dart';
 import 'sections/home_memorization_section.dart';
@@ -37,36 +39,45 @@ class HomeScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
 
     // Back on Home: once to be told, twice (within 2 s) to leave the app.
+    // The sky of the time of day behind the top (under the status bar too),
+    // the cards frosted glass over it.
     return BackToExit(
-      child: SafeArea(
-        bottom: false,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(TahfeezSpacing.md),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _HomeBrandHeader(l10n: l10n),
-              // The first time Home shows: a word of welcome (a dialog; no
-              // room of its own).
-              const _WelcomeOnce(),
-              const SizedBox(height: TahfeezSpacing.md),
-              // Only when there are updates, with its own space below.
-              const HomeResourceUpdatesBanner(),
-              // (Spaced apart here, not above: hidden parts left a gap each,
-              // three between the header and the daily ayah.)
-              const Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                spacing: TahfeezSpacing.lg,
-                children: [
-                  HomeDailyAyahSection(),
-                  HomeReadHistorySection(),
-                  HomeMemorizationSection(),
-                  HomeFeaturedReadingSection(),
-                ],
+      child: Stack(
+        children: [
+          const Positioned(top: 0, left: 0, right: 0, child: HomeSky()),
+          TahfeezGlass(
+            child: SafeArea(
+              bottom: false,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(TahfeezSpacing.md),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _HomeBrandHeader(l10n: l10n),
+                    // The first time Home shows: a word of welcome (a dialog; no
+                    // room of its own).
+                    const _WelcomeOnce(),
+                    const SizedBox(height: TahfeezSpacing.md),
+                    // Only when there are updates, with its own space below.
+                    const HomeResourceUpdatesBanner(),
+                    // (Spaced apart here, not above: hidden parts left a gap each,
+                    // three between the header and the daily ayah.)
+                    const Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      spacing: TahfeezSpacing.lg,
+                      children: [
+                        HomeDailyAyahSection(),
+                        HomeReadHistorySection(),
+                        HomeMemorizationSection(),
+                        HomeFeaturedReadingSection(),
+                      ],
+                    ),
+                  ],
+                ),
               ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

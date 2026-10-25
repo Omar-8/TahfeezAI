@@ -530,5 +530,17 @@
   "recIntroLearning": "Tekshiruvchi hali oʻrganmoqda: xatoni oʻtkazib yuborishi yoki toʻgʻri soʻzni belgilashi mumkin. Agar juda koʻp belgilasa, Yodlash sozlamalarida Yumshoqni tanlang.",
   "recIntroPrivate": "Ovozingiz telefoningizda qoladi: hech narsa yozib olinmaydi va yuborilmaydi.",
   "recIntroStart": "Tilovatni boshlash",
-  "recIntroSettings": "Yodlash sozlamalari"
+  "recIntroSettings": "Yodlash sozlamalari",
+  "memStreakTitle": "Ketma-ketlik",
+  "memStreakDays": "{count, plural, =0{Ketma-ketlikni boshlash uchun bugun oʻqing} =1{Ketma-ket 1 kun} other{Ketma-ket {count} kun}}",
+  "memStreakBest": "{count, plural, =1{Eng yaxshisi: 1 kun} other{Eng yaxshisi: {count} kun}}",
+  "memCalendarLess": "Kam",
+  "memCalendarMore": "Koʻp",
+  "milestoneTitle": "Mashaalloh",
+  "milestoneJuz": "{juz}-pora yodlandi",
+  "milestoneSurah": "{surah} surasi yodlandi",
+  "settingsTimeOfDay": "Bosh sahifa ranglari kun vaqtiga qarab",
+  "settingsTimeOfDaySub": "Bosh sahifa ortida tong, kunduz, quyosh botishi va tun",
+  "zenMode": "Diqqat rejimi",
+  "zenModeExit": "Diqqat rejimidan chiqish"
 }

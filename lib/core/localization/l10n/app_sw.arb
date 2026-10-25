@@ -530,5 +530,17 @@
   "recIntroLearning": "Kikagua bado kinajifunza: kinaweza kukosa kosa au kuweka alama kwenye neno sahihi. Kikiweka alama nyingi mno, chagua Laini katika Mipangilio ya kuhifadhi.",
   "recIntroPrivate": "Sauti yako inabaki kwenye simu yako: hakuna kinachorekodiwa wala kutumwa.",
   "recIntroStart": "Anza kusoma",
-  "recIntroSettings": "Mipangilio ya kuhifadhi"
+  "recIntroSettings": "Mipangilio ya kuhifadhi",
+  "memStreakTitle": "Mfululizo",
+  "memStreakDays": "{count, plural, =0{Soma leo ili kuanza mfululizo} =1{Siku 1 mfululizo} other{Siku {count} mfululizo}}",
+  "memStreakBest": "{count, plural, =1{Bora zaidi: siku 1} other{Bora zaidi: siku {count}}}",
+  "memCalendarLess": "Kidogo",
+  "memCalendarMore": "Zaidi",
+  "milestoneTitle": "Masha'Allah",
+  "milestoneJuz": "Juzuu {juz} imehifadhiwa",
+  "milestoneSurah": "Sura {surah} imehifadhiwa",
+  "settingsTimeOfDay": "Rangi za Nyumbani kulingana na wakati",
+  "settingsTimeOfDaySub": "Alfajiri, mchana, machweo na usiku nyuma ya Nyumbani",
+  "zenMode": "Hali ya kuzingatia",
+  "zenModeExit": "Toka kwenye hali ya kuzingatia"
 }

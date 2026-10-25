@@ -530,5 +530,17 @@
   "recIntroLearning": "بررسی‌کننده هنوز در حال یادگیری است: ممکن است خطایی را نبیند یا کلمهٔ درستی را علامت بزند. اگر زیاد علامت زد، در تنظیمات حفظ «آسان‌گیر» را انتخاب کنید.",
   "recIntroPrivate": "صدای شما روی گوشی‌تان می‌ماند: چیزی ضبط یا ارسال نمی‌شود.",
   "recIntroStart": "شروع تلاوت",
-  "recIntroSettings": "تنظیمات حفظ"
+  "recIntroSettings": "تنظیمات حفظ",
+  "memStreakTitle": "پیوستگی",
+  "memStreakDays": "{count, plural, =0{امروز تلاوت کنید تا پیوستگی آغاز شود} other{{count} روز پیاپی}}",
+  "memStreakBest": "{count, plural, other{بهترین: {count} روز}}",
+  "memCalendarLess": "کمتر",
+  "memCalendarMore": "بیشتر",
+  "milestoneTitle": "ماشاءالله",
+  "milestoneJuz": "جزء {juz} حفظ شد",
+  "milestoneSurah": "سورهٔ {surah} حفظ شد",
+  "settingsTimeOfDay": "رنگ‌های خانه بر اساس زمان روز",
+  "settingsTimeOfDaySub": "سپیده‌دم، روز، غروب و شب پشت صفحهٔ خانه",
+  "zenMode": "حالت تمرکز",
+  "zenModeExit": "خروج از حالت تمرکز"
 }

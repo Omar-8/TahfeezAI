@@ -530,5 +530,17 @@
   "recIntroLearning": "جانچنے والا ابھی سیکھ رہا ہے: کوئی غلطی رہ سکتی ہے یا درست لفظ پر نشان لگ سکتا ہے۔ اگر نشان زیادہ ہوں تو حفظ کی ترتیبات میں «نرم» چنیں۔",
   "recIntroPrivate": "آپ کی آواز آپ کے فون پر رہتی ہے: نہ کچھ ریکارڈ ہوتا ہے نہ بھیجا جاتا ہے۔",
   "recIntroStart": "پڑھنا شروع کریں",
-  "recIntroSettings": "حفظ کی ترتیبات"
+  "recIntroSettings": "حفظ کی ترتیبات",
+  "memStreakTitle": "تسلسل",
+  "memStreakDays": "{count, plural, =0{تسلسل شروع کرنے کے لیے آج تلاوت کریں} =1{لگاتار 1 دن} other{لگاتار {count} دن}}",
+  "memStreakBest": "{count, plural, =1{بہترین: 1 دن} other{بہترین: {count} دن}}",
+  "memCalendarLess": "کم",
+  "memCalendarMore": "زیادہ",
+  "milestoneTitle": "ماشاءاللہ",
+  "milestoneJuz": "پارہ {juz} حفظ ہو گیا",
+  "milestoneSurah": "سورہ {surah} حفظ ہو گئی",
+  "settingsTimeOfDay": "وقت کے مطابق ہوم کے رنگ",
+  "settingsTimeOfDaySub": "ہوم کے پیچھے فجر، دن، غروب اور رات",
+  "zenMode": "فوکس موڈ",
+  "zenModeExit": "فوکس موڈ سے نکلیں"
 }

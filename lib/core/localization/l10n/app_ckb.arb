@@ -530,5 +530,17 @@
   "recIntroLearning": "پشکنەرەکە هێشتا فێر دەبێت: لەوانەیە هەڵەیەک لەدەست بدات یان وشەیەکی ڕاست نیشانە بکات. ئەگەر زۆر نیشانە دەکات، لە ڕێکخستنەکانی لەبەرکردندا نەرم هەڵبژێرە.",
   "recIntroPrivate": "دەنگت لەسەر مۆبایلەکەت دەمێنێتەوە: هیچ شتێک تۆمار ناکرێت و نانێردرێت.",
   "recIntroStart": "دەستپێکردنی خوێندنەوە",
-  "recIntroSettings": "ڕێکخستنەکانی لەبەرکردن"
+  "recIntroSettings": "ڕێکخستنەکانی لەبەرکردن",
+  "memStreakTitle": "زنجیرە",
+  "memStreakDays": "{count, plural, =0{ئەمڕۆ بخوێنەوە بۆ دەستپێکردنی زنجیرەیەک} =1{1 ڕۆژ لە دوای یەک} other{{count} ڕۆژ لە دوای یەک}}",
+  "memStreakBest": "{count, plural, =1{باشترین: 1 ڕۆژ} other{باشترین: {count} ڕۆژ}}",
+  "memCalendarLess": "کەمتر",
+  "memCalendarMore": "زیاتر",
+  "milestoneTitle": "ماشاءاللە",
+  "milestoneJuz": "جوزئی {juz} لەبەرکرا",
+  "milestoneSurah": "سوورەتی {surah} لەبەرکرا",
+  "settingsTimeOfDay": "ڕەنگەکانی سەرەکی بەپێی کاتی ڕۆژ",
+  "settingsTimeOfDaySub": "بەرەبەیان، ڕۆژ، ئاوابوون و شەو لە پشت سەرەکی",
+  "zenMode": "دۆخی سەرنج",
+  "zenModeExit": "دەرچوون لە دۆخی سەرنج"
 }

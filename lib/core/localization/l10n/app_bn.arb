@@ -530,5 +530,17 @@
   "recIntroLearning": "যাচাইকারী এখনো শিখছে: কোনো ভুল বাদ পড়তে পারে বা সঠিক শব্দে চিহ্ন পড়তে পারে। বেশি চিহ্ন দিলে হিফজ সেটিংসে «নমনীয়» বেছে নিন।",
   "recIntroPrivate": "আপনার কণ্ঠ আপনার ফোনেই থাকে: কিছু রেকর্ড বা পাঠানো হয় না।",
   "recIntroStart": "তিলাওয়াত শুরু করুন",
-  "recIntroSettings": "হিফজ সেটিংস"
+  "recIntroSettings": "হিফজ সেটিংস",
+  "memStreakTitle": "ধারাবাহিকতা",
+  "memStreakDays": "{count, plural, =0{ধারাবাহিকতা শুরু করতে আজ তিলাওয়াত করুন} other{টানা {count} দিন}}",
+  "memStreakBest": "{count, plural, other{সেরা: {count} দিন}}",
+  "memCalendarLess": "কম",
+  "memCalendarMore": "বেশি",
+  "milestoneTitle": "মাশাআল্লাহ",
+  "milestoneJuz": "পারা {juz} মুখস্থ হয়েছে",
+  "milestoneSurah": "সূরা {surah} মুখস্থ হয়েছে",
+  "settingsTimeOfDay": "দিনের সময় অনুযায়ী হোমের রং",
+  "settingsTimeOfDaySub": "হোমের পেছনে ভোর, দিন, সূর্যাস্ত ও রাত",
+  "zenMode": "ফোকাস মোড",
+  "zenModeExit": "ফোকাস মোড থেকে বের হন"
 }

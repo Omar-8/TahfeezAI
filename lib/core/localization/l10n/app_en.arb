@@ -1063,5 +1063,9 @@
         "type": "String"
       }
     }
-  }
+  },
+  "settingsTimeOfDay": "Home colours by time of day",
+  "settingsTimeOfDaySub": "Dawn, day, sunset and night behind Home",
+  "zenMode": "Focus mode",
+  "zenModeExit": "Leave focus mode"
 }

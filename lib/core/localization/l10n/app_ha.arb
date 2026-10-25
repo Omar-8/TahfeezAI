@@ -530,5 +530,17 @@
   "recIntroLearning": "Mai binciken har yanzu yana koyo: yana iya rasa kuskure ko ya alamta kalma daidai. Idan yana alamtawa da yawa, zaɓi Mai sauƙi a Saitunan haddace.",
   "recIntroPrivate": "Muryarka tana nan a kan wayarka: ba a naɗi ko aika komai ba.",
   "recIntroStart": "Fara karatu",
-  "recIntroSettings": "Saitunan haddace"
+  "recIntroSettings": "Saitunan haddace",
+  "memStreakTitle": "Jerin kwanaki",
+  "memStreakDays": "{count, plural, =0{Karanta yau don fara jerin kwanaki} =1{Kwana 1 a jere} other{Kwanaki {count} a jere}}",
+  "memStreakBest": "{count, plural, =1{Mafi kyau: kwana 1} other{Mafi kyau: kwanaki {count}}}",
+  "memCalendarLess": "Kaɗan",
+  "memCalendarMore": "Da yawa",
+  "milestoneTitle": "Masha Allah",
+  "milestoneJuz": "An haddace Izu {juz}",
+  "milestoneSurah": "An haddace Suratul {surah}",
+  "settingsTimeOfDay": "Launukan Gida bisa lokacin rana",
+  "settingsTimeOfDaySub": "Alfijir, rana, faɗuwar rana da dare a bayan Gida",
+  "zenMode": "Yanayin mai da hankali",
+  "zenModeExit": "Fita daga yanayin mai da hankali"
 }

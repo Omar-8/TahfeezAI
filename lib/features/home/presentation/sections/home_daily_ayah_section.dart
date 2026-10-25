@@ -54,7 +54,14 @@ class HomeDailyAyahSection extends ConsumerWidget {
   }
 }
 
-const _dailyAyahFont = 'Scheherazade New';
+/// Amiri Quran: a Quran font (`docs/THIRD_PARTY_RESOURCES.md`) in the
+/// classical calligraphic naskh — the daily ayah shown as a calligraphy
+/// piece.
+const _dailyAyahFont = 'Amiri Quran';
+
+/// Arabic-Indic digits for the ayah's number in its marker.
+String _arabicDigits(int n) =>
+    '$n'.split('').map((d) => '٠١٢٣٤٥٦٧٨٩'[int.parse(d)]).join();
 
 class _DailyAyahCard extends ConsumerWidget {
   const _DailyAyahCard({required this.ayah});
@@ -73,74 +80,180 @@ class _DailyAyahCard extends ConsumerWidget {
       context,
       QuranLocation.ayah(ayah.surahNo, ayah.verseNo),
     );
+    // Larger on wider screens.
+    final arabicSize = MediaQuery.sizeOf(context).width >= 600 ? 38.0 : 32.0;
 
     return TahfeezCard(
       onTap: open,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        spacing: TahfeezSpacing.smPlus,
+      padding: EdgeInsets.zero,
+      child: Stack(
         children: [
-          if (ayah.words.isNotEmpty)
-            Directionality(
-              textDirection: TextDirection.rtl,
-              child: Text(
-                ayah.words.join(' '),
-                textAlign: TextAlign.center,
-                style: quranTextStyle(
-                  color: scheme.onSurface,
-                  fontFamily: _dailyAyahFont,
-                  fontSize: 28,
-                ),
-              ),
+          Positioned.fill(
+            child: TahfeezGeometricPattern(
+              color: scheme.tertiary.withValues(alpha: 0.07),
+              spacing: 40,
             ),
-          if (ayah.translation != null)
-            Text(
-              ayah.translation!,
-              // Its own language's direction, whatever the app's (an
-              // English translation in the Arabic app, an Urdu one in the
-              // English app).
-              textDirection:
-                  const {
-                    'ar',
-                    'ur',
-                    'fa',
-                    'ckb',
-                    'ps',
-                  }.contains(ayah.translationLanguage)
-                  ? TextDirection.rtl
-                  : TextDirection.ltr,
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: scheme.onSurfaceVariant,
-              ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              TahfeezSpacing.md,
+              TahfeezSpacing.md,
+              TahfeezSpacing.md,
+              TahfeezSpacing.sm,
             ),
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  reference,
-                  style: theme.textTheme.labelLarge?.copyWith(
-                    color: scheme.primary,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              spacing: TahfeezSpacing.smPlus,
+              children: [
+                _Ornament(color: scheme.tertiary),
+                if (ayah.words.isNotEmpty)
+                  Directionality(
+                    textDirection: TextDirection.rtl,
+                    child: Text.rich(
+                      TextSpan(
+                        children: [
+                          TextSpan(text: ayah.words.join(' ')),
+                          const TextSpan(text: ' '),
+                          WidgetSpan(
+                            alignment: PlaceholderAlignment.middle,
+                            child: _AyahMarker(
+                              number: ayah.verseNo,
+                              color: scheme.tertiary,
+                              size: arabicSize * 0.95,
+                            ),
+                          ),
+                        ],
+                      ),
+                      textAlign: TextAlign.center,
+                      style: quranTextStyle(
+                        color: scheme.onSurface,
+                        fontFamily: _dailyAyahFont,
+                        fontSize: arabicSize,
+                      ).copyWith(height: 2.0),
+                    ),
                   ),
-                ),
-              ),
-              // Sharing the row: a long name at large text shortened, not
-              // pushed off.
-              Flexible(
-                child: TextButton.icon(
-                  onPressed: open,
-                  icon: const Icon(Icons.menu_book_outlined, size: 18),
-                  label: Text(
-                    l10n.homeDailyAyahOpen,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                if (ayah.translation != null)
+                  Text(
+                    ayah.translation!,
+                    // Its own language's direction, whatever the app's (an
+                    // English translation in the Arabic app, an Urdu one in
+                    // the English app).
+                    textDirection:
+                        const {
+                          'ar',
+                          'ur',
+                          'fa',
+                          'ckb',
+                          'ps',
+                        }.contains(ayah.translationLanguage)
+                        ? TextDirection.rtl
+                        : TextDirection.ltr,
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                      height: 1.5,
+                    ),
                   ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        reference,
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          color: scheme.primary,
+                        ),
+                      ),
+                    ),
+                    // Sharing the row: a long name at large text shortened,
+                    // not pushed off.
+                    Flexible(
+                      child: TextButton.icon(
+                        onPressed: open,
+                        icon: const Icon(Icons.menu_book_outlined, size: 18),
+                        label: Text(
+                          l10n.homeDailyAyahOpen,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
     );
   }
+}
+
+/// Above the ayah: the eight-pointed star between two fading lines.
+class _Ornament extends StatelessWidget {
+  const _Ornament({required this.color});
+
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget line(bool towardsStar) => Expanded(
+      child: Container(
+        height: 1,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              color.withValues(alpha: towardsStar ? 0 : 0.5),
+              color.withValues(alpha: towardsStar ? 0.5 : 0),
+            ],
+          ),
+        ),
+      ),
+    );
+    return ExcludeSemantics(
+      child: Row(
+        spacing: TahfeezSpacing.sm,
+        children: [
+          line(true),
+          TahfeezStar(color: color, size: 16),
+          line(false),
+        ],
+      ),
+    );
+  }
+}
+
+/// The ayah's end: its number in an eight-pointed star (drawn, not a font
+/// glyph).
+class _AyahMarker extends StatelessWidget {
+  const _AyahMarker({
+    required this.number,
+    required this.color,
+    required this.size,
+  });
+
+  final int number;
+  final Color color;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) => SizedBox.square(
+    dimension: size,
+    child: Stack(
+      alignment: Alignment.center,
+      children: [
+        TahfeezStar(color: color, size: size, filled: false),
+        Text(
+          _arabicDigits(number),
+          textDirection: TextDirection.rtl,
+          style: TextStyle(
+            fontFamily: 'Noto Naskh Arabic',
+            fontSize: size * 0.36,
+            height: 1,
+            color: color,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    ),
+  );
 }

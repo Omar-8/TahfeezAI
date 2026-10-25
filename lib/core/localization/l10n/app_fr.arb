@@ -530,5 +530,17 @@
   "recIntroLearning": "Le vérificateur apprend encore : il peut manquer une erreur ou marquer un mot juste. S'il marque trop, choisissez Souple dans les réglages Hifz.",
   "recIntroPrivate": "Votre voix reste sur votre téléphone : rien n'est enregistré ni envoyé.",
   "recIntroStart": "Commencer à réciter",
-  "recIntroSettings": "Réglages Hifz"
+  "recIntroSettings": "Réglages Hifz",
+  "memStreakTitle": "Série",
+  "memStreakDays": "{count, plural, =0{Récitez aujourd'hui pour commencer une série} =1{1 jour d'affilée} other{{count} jours d'affilée}}",
+  "memStreakBest": "{count, plural, =1{Record : 1 jour} other{Record : {count} jours}}",
+  "memCalendarLess": "Moins",
+  "memCalendarMore": "Plus",
+  "milestoneTitle": "Masha'Allah",
+  "milestoneJuz": "Juz {juz} mémorisé",
+  "milestoneSurah": "Sourate {surah} mémorisée",
+  "settingsTimeOfDay": "Couleurs de l'accueil selon l'heure",
+  "settingsTimeOfDaySub": "L'aube, le jour, le coucher du soleil et la nuit derrière l'accueil",
+  "zenMode": "Mode concentration",
+  "zenModeExit": "Quitter le mode concentration"
 }

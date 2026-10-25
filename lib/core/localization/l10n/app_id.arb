@@ -530,5 +530,17 @@
   "recIntroLearning": "Pemeriksa masih belajar: ia bisa melewatkan kesalahan atau menandai kata yang benar. Jika terlalu banyak menandai, pilih Longgar di pengaturan Hifz.",
   "recIntroPrivate": "Suara Anda tetap di ponsel Anda: tidak ada yang direkam atau dikirim.",
   "recIntroStart": "Mulai membaca",
-  "recIntroSettings": "Pengaturan Hifz"
+  "recIntroSettings": "Pengaturan Hifz",
+  "memStreakTitle": "Runtutan",
+  "memStreakDays": "{count, plural, =0{Bacalah hari ini untuk memulai runtutan} =1{1 hari berturut-turut} other{{count} hari berturut-turut}}",
+  "memStreakBest": "{count, plural, =1{Terbaik: 1 hari} other{Terbaik: {count} hari}}",
+  "memCalendarLess": "Sedikit",
+  "memCalendarMore": "Banyak",
+  "milestoneTitle": "MasyaAllah",
+  "milestoneJuz": "Juz {juz} telah dihafal",
+  "milestoneSurah": "Surah {surah} telah dihafal",
+  "settingsTimeOfDay": "Warna Beranda sesuai waktu",
+  "settingsTimeOfDaySub": "Fajar, siang, senja, dan malam di balik Beranda",
+  "zenMode": "Mode fokus",
+  "zenModeExit": "Keluar dari mode fokus"
 }

@@ -530,5 +530,17 @@
   "recIntroLearning": "الفاحص ما زال يتعلّم: قد يفوته خطأ أو يعلّم كلمة صحيحة. إن أكثر من التعليم فاختر «متساهل» في إعدادات الحفظ.",
   "recIntroPrivate": "صوتك يبقى على هاتفك: لا يُسجَّل شيء ولا يُرسَل.",
   "recIntroStart": "ابدأ التسميع",
-  "recIntroSettings": "إعدادات الحفظ"
+  "recIntroSettings": "إعدادات الحفظ",
+  "memStreakTitle": "سلسلة الأيام",
+  "memStreakDays": "{count, plural, =0{اقرأ اليوم لتبدأ سلسلة} =1{يوم واحد متتالٍ} =2{يومان متتاليان} few{{count} أيام متتالية} other{{count} يومًا متتاليًا}}",
+  "memStreakBest": "{count, plural, =1{الأفضل: يوم واحد} =2{الأفضل: يومان} few{الأفضل: {count} أيام} other{الأفضل: {count} يومًا}}",
+  "memCalendarLess": "أقل",
+  "memCalendarMore": "أكثر",
+  "milestoneTitle": "ما شاء الله",
+  "milestoneJuz": "حُفظ الجزء {juz}",
+  "milestoneSurah": "حُفظت سورة {surah}",
+  "settingsTimeOfDay": "ألوان الرئيسية حسب وقت اليوم",
+  "settingsTimeOfDaySub": "الفجر والنهار والغروب والليل خلف الرئيسية",
+  "zenMode": "وضع التركيز",
+  "zenModeExit": "الخروج من وضع التركيز"
 }
