@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tahfeez_ai/core/localization/fallback_localizations.dart';
 import 'package:tahfeez_ai/app/app.dart';
 import 'package:tahfeez_ai/core/localization/locale_controller.dart';
 import 'package:tahfeez_ai/core/localization/generated/app_localizations.dart';
@@ -55,6 +56,7 @@ void main() {
   // Urdu and Persian right to left.
   const locales = [
     'en', 'ar', 'de', 'fr', 'tr', 'ur', 'id', 'es', 'ru', 'fa', 'bn', //
+    'ms', 'ha', 'ckb', 'ps', 'sw', 'kk', 'uz', 'so', //
   ];
   const routes = [
     '/home',
@@ -170,7 +172,11 @@ void main() {
             ],
             child: MaterialApp(
               locale: Locale(locale),
-              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              localizationsDelegates: const [
+                ...AppLocalizations.localizationsDelegates,
+                // As the app: Flutter's own strings for the languages it lacks.
+                ...kFallbackLocalizationsDelegates,
+              ],
               supportedLocales: AppLocalizations.supportedLocales,
               home: Builder(
                 builder: (context) => Scaffold(

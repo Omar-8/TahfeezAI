@@ -263,17 +263,23 @@ class _PlanSheetState extends ConsumerState<_PlanSheet> {
           Row(
             spacing: TahfeezSpacing.sm,
             children: [
-              if (widget.plan != null)
-                TextButton(
-                  key: const ValueKey('plan-stop'),
-                  onPressed: () => _save(stop: true),
-                  child: Text(l10n.memPlanStop),
-                )
-              else
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: Text(l10n.commonCancel),
+              // Shrinks rather than overflows (a long word: Kurdish's
+              // «هەڵوەشاندنەوە» at large text).
+              Flexible(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: widget.plan != null
+                      ? TextButton(
+                          key: const ValueKey('plan-stop'),
+                          onPressed: () => _save(stop: true),
+                          child: Text(l10n.memPlanStop),
+                        )
+                      : TextButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          child: Text(l10n.commonCancel),
+                        ),
                 ),
+              ),
               Expanded(
                 child: FilledButton(
                   key: const ValueKey('plan-save'),

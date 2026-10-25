@@ -151,6 +151,7 @@ void main() {
   };
   const locales = [
     'en', 'ar', 'de', 'fr', 'tr', 'ur', 'id', 'es', 'ru', 'fa', 'bn', //
+    'ms', 'ha', 'ckb', 'ps', 'sw', 'kk', 'uz', 'so', //
   ];
   // Long (2:282, the longest ayah), medium (Ya-Sin's start, after a
   // surah's end) and short ayahs (page 604: three surahs, their headers).
