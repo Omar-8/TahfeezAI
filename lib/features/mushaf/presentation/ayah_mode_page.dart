@@ -876,6 +876,7 @@ class _AyahBlock extends ConsumerWidget {
                       meaning: meanings[words[k].wordIndex],
                       hidden: hidden[k],
                       style: styleOf(marks[k]),
+                      mark: marks[k],
                       colors: colors,
                       fontFamily: view.quranFont.family,
                       onTap: hidden[k]

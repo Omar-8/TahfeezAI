@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -5,6 +7,7 @@ import '../../../core/localization/generated/app_localizations.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/ui/script_direction.dart';
 import '../../../core/theme/quran_text_style.dart';
+import '../application/mushaf_word_overlay.dart';
 import '../../../quran/application/ayah_reading_extras.dart';
 import '../../../quran/application/quran_script_code.dart';
 import '../../../quran/application/tafsir_selection_controller.dart';
@@ -32,7 +35,7 @@ final ayahCanonicalWordsProvider = FutureProvider.autoDispose
           );
     });
 
-class AyahWordView extends StatelessWidget {
+class AyahWordView extends StatefulWidget {
   const AyahWordView({
     super.key,
     required this.text,
@@ -41,6 +44,7 @@ class AyahWordView extends StatelessWidget {
     required this.style,
     required this.colors,
     required this.fontFamily,
+    this.mark,
     this.onTap,
     this.onLongPress,
   });
@@ -51,50 +55,141 @@ class AyahWordView extends StatelessWidget {
   final bool hidden;
   final ({Color color, bool ink})? style;
   final MushafAppearanceColors colors;
+
+  /// The recitation's mark on it, for its animation as it changes.
+  final MushafWordMark? mark;
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
 
   @override
+  State<AyahWordView> createState() => _AyahWordViewState();
+}
+
+enum _WordEffect { reveal, hide, glow, sway }
+
+/// As the printed page's words do: recited right, a soft glow; a mistake,
+/// a sway; revealed, its ink fading in; hidden, fading out.
+class _AyahWordViewState extends State<AyahWordView>
+    with SingleTickerProviderStateMixin {
+  AnimationController? _controller;
+  _WordEffect? _effect;
+
+  static const _mistakes = {
+    MushafWordMark.wrong,
+    MushafWordMark.skipped,
+    MushafWordMark.tashkeel,
+    MushafWordMark.tajweed,
+  };
+
+  void _play(_WordEffect effect, int ms) {
+    final c = _controller ??= AnimationController(vsync: this)
+      ..addStatusListener((status) {
+        if (status == AnimationStatus.completed && mounted) {
+          setState(() => _effect = null);
+        }
+      });
+    _effect = effect;
+    c
+      ..duration = Duration(milliseconds: ms)
+      ..forward(from: 0);
+  }
+
+  @override
+  void didUpdateWidget(AyahWordView old) {
+    super.didUpdateWidget(old);
+    if (old.hidden && !widget.hidden) {
+      _play(_WordEffect.reveal, 400);
+    } else if (!old.hidden && widget.hidden) {
+      _play(_WordEffect.hide, 400);
+    } else if (old.mark != widget.mark) {
+      if (widget.mark == MushafWordMark.correct) {
+        _play(_WordEffect.glow, 650);
+      } else if (_mistakes.contains(widget.mark)) {
+        _play(_WordEffect.sway, 420);
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller?.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final mark = style;
+    final controller = _controller;
+    if (controller == null || _effect == null) return _word(context, 0);
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (context, _) => _word(context, controller.value),
+    );
+  }
+
+  Widget _word(BuildContext context, double t) {
+    final mark = widget.style;
+    final colors = widget.colors;
     final ink = mark != null && mark.ink ? mark.color : colors.text;
     final band = mark != null && !mark.ink ? mark.color : null;
+    final smooth = t * t * (3 - 2 * t);
+    // Hidden: its place kept (the line does not reflow), the word not
+    // shown — fading out as it is hidden, in as it is revealed.
+    final inkAlpha = switch (_effect) {
+      _WordEffect.reveal => smooth,
+      _WordEffect.hide => 1 - smooth,
+      _ => widget.hidden ? 0.0 : 1.0,
+    };
     final word = Text(
-      text,
+      widget.text,
       textDirection: TextDirection.rtl,
       style: quranTextStyle(
-        // Hidden: its place kept (the line does not reflow), the word not
-        // shown.
-        color: hidden ? Colors.transparent : ink,
-        fontFamily: fontFamily,
+        color: inkAlpha == 0
+            ? Colors.transparent
+            : ink.withValues(alpha: ink.a * inkAlpha),
+        fontFamily: widget.fontFamily,
         fontSize: 28,
       ),
     );
+    final glow = _effect == _WordEffect.glow
+        ? [
+            BoxShadow(
+              color: ink.withValues(alpha: 0.45 * (1 - t)),
+              blurRadius: 6 + 10 * t,
+            ),
+          ]
+        : null;
+    final dx = _effect == _WordEffect.sway
+        ? math.sin(t * math.pi * 6) * (1 - t) * 4
+        : 0.0;
     return GestureDetector(
-      onTap: onTap,
-      onLongPress: onLongPress,
+      onTap: widget.onTap,
+      onLongPress: widget.onLongPress,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 3),
-            decoration: BoxDecoration(
-              color:
-                  band ??
-                  (hidden
-                      ? colors.secondaryText.withValues(alpha: 0.14)
-                      : null),
-              borderRadius: BorderRadius.circular(6),
+          Transform.translate(
+            offset: Offset(dx, 0),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 3),
+              decoration: BoxDecoration(
+                color:
+                    band ??
+                    (widget.hidden && _effect != _WordEffect.hide
+                        ? colors.secondaryText.withValues(alpha: 0.14)
+                        : null),
+                borderRadius: BorderRadius.circular(6),
+                boxShadow: glow,
+              ),
+              child: word,
             ),
-            child: word,
           ),
-          if (meaning != null && !hidden)
+          if (widget.meaning != null && !widget.hidden)
             ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 110),
               child: Text(
-                meaning!,
+                widget.meaning!,
                 textAlign: TextAlign.center,
-                textDirection: meaningDirection(meaning!),
+                textDirection: meaningDirection(widget.meaning!),
                 style: Theme.of(context).textTheme.labelSmall
                     ?.copyWith(color: colors.secondaryText),
               ),

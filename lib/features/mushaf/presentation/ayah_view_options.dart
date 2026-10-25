@@ -121,8 +121,11 @@ class AyahViewOptions extends ConsumerWidget {
         // transliteration, translations and tafsir.
         Row(
           children: [
-            Text(l10n.tafsirTextSizeTooltip),
+            // Wrapping onto two lines rather than pushing the slider off
+            // (Swahili's «Ukubwa wa maandishi» at large text).
+            Flexible(child: Text(l10n.tafsirTextSizeTooltip, maxLines: 2)),
             Expanded(
+              flex: 2,
               child: Slider(
                 key: const ValueKey('ayah-view-text-size'),
                 value: ref
