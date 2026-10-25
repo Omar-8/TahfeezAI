@@ -79,6 +79,18 @@ void main() {
     expect(m.keys.toSet(), {112001, 112003});
   });
 
+  test('ayahs recited each day, by local date', () async {
+    await repo.recordTest([
+      attempt(112001, AyahGrade.good, t0),
+      attempt(112002, AyahGrade.good, t0.add(const Duration(hours: 14))),
+      attempt(112003, AyahGrade.fail, t0.add(const Duration(days: 2))),
+    ]);
+    expect(await repo.watchDailyRecited().first, {
+      DateTime(2026, 10, 1): 2,
+      DateTime(2026, 10, 3): 1,
+    });
+  });
+
   test('each ayah\'s latest result', () async {
     await repo.recordTest([
       attempt(112001, AyahGrade.fail, t0),

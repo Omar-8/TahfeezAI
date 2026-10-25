@@ -16,6 +16,7 @@ import '../../../memorization/domain/progress_map.dart';
 import '../../../quran/domain/models/quran_location.dart';
 import '../../quran/application/quran_index_providers.dart';
 import 'mark_known_sheet.dart';
+import 'progress_visuals.dart';
 import 'memorize_screen.dart';
 
 /// Memorization progress (`docs/MEMORIZATION_MILESTONE.md`, M4): how much of
@@ -71,6 +72,13 @@ class MemorizationProgressScreen extends ConsumerWidget {
           padding: const EdgeInsets.all(TahfeezSpacing.md),
           children: [
             _Summary(map: map),
+            const SizedBox(height: TahfeezSpacing.lg),
+            TahfeezSectionHeader(
+              title: l10n.memStreakTitle,
+              icon: Icons.calendar_month_rounded,
+            ),
+            const SizedBox(height: TahfeezSpacing.sm),
+            const StreakCard(),
             const SizedBox(height: TahfeezSpacing.lg),
             TahfeezSectionHeader(
               title: l10n.activityTitle,
@@ -192,41 +200,66 @@ class _Summary extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
+    // The ring of the 30 juz beside the numbers.
     return TahfeezCard(
       key: const ValueKey('mem-progress-summary'),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        spacing: TahfeezSpacing.smPlus,
-        children: [
-          Text(
-            l10n.memProgressShare((map.share * 100).round()),
-            style: theme.textTheme.titleMedium,
+      child: LayoutBuilder(
+        builder: (context, box) {
+          // Above the numbers where they would be squeezed beside it.
+          final roomBeside =
+              box.maxWidth - 120 - TahfeezSpacing.md >=
+              MediaQuery.textScalerOf(context).scale(170);
+          final numbers = _numbers(context, l10n, theme);
+          return roomBeside
+              ? Row(
+                  spacing: TahfeezSpacing.md,
+                  children: [
+                    JuzRing(map: map),
+                    Expanded(child: numbers),
+                  ],
+                )
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  spacing: TahfeezSpacing.md,
+                  children: [
+                    Center(child: JuzRing(map: map)),
+                    numbers,
+                  ],
+                );
+        },
+      ),
+    );
+  }
+
+  Widget _numbers(
+    BuildContext context,
+    AppLocalizations l10n,
+    ThemeData theme,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: TahfeezSpacing.smPlus,
+      children: [
+        Text(
+          l10n.memProgressShare((map.share * 100).round()),
+          style: theme.textTheme.titleMedium,
+        ),
+        Text(
+          l10n.memPlanProgress(map.memorized, map.ayahs),
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
           ),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(TahfeezRadii.pill),
-            child: LinearProgressIndicator(
-              value: map.share,
-              minHeight: 8,
-              backgroundColor: theme.colorScheme.surfaceContainerHighest,
-            ),
-          ),
+        ),
+        if (map.strength != null)
+          ScoreBar(label: l10n.memStrengthLabel, value: map.strength!),
+        if (map.unverified > 0)
           Text(
-            l10n.memPlanProgress(map.memorized, map.ayahs),
+            l10n.memProgressUnverified(map.unverified),
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
-          if (map.strength != null)
-            ScoreBar(label: l10n.memStrengthLabel, value: map.strength!),
-          if (map.unverified > 0)
-            Text(
-              l10n.memProgressUnverified(map.unverified),
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-        ],
-      ),
+      ],
     );
   }
 }

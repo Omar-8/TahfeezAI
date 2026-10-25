@@ -26,6 +26,8 @@ class EmptyMemorizationRepository implements MemorizationRepository {
   Stream<List<AyahAttempt>> watchAttemptsSince(DateTime since) =>
       Stream.value(const []);
   @override
+  Stream<Map<DateTime, int>> watchDailyRecited() => Stream.value(const {});
+  @override
   Stream<Map<int, AyahAttempt>> watchLatestAttempts() => Stream.value(const {});
   @override
   Stream<MemorizationPlan?> watchActivePlan() => Stream.value(null);

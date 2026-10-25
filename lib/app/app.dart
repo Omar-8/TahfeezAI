@@ -1,5 +1,6 @@
 import '../core/localization/fallback_localizations.dart';
 import '../features/guide/guide.dart';
+import '../features/memorize/presentation/milestone_banner.dart';
 
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
@@ -84,8 +85,10 @@ class TahfeezApp extends ConsumerWidget {
           ],
           routerConfig: router,
           // The Mushaf's guide, above every screen and menu.
-          builder: (context, child) =>
-              GuideLayer(child: child ?? const SizedBox.shrink()),
+          // and a milestone just reached, gently, over that.
+          builder: (context, child) => MilestoneLayer(
+            child: GuideLayer(child: child ?? const SizedBox.shrink()),
+          ),
         );
       },
     );

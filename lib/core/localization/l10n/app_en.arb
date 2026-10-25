@@ -1027,5 +1027,41 @@
   "recIntroSettings": "Hifz settings",
   "@recIntroTitle": {
     "description": "Title of the sheet shown before the first recitation: how the recitation check works."
+  },
+  "memStreakTitle": "Streak",
+  "memStreakDays": "{count, plural, =0{Recite today to start a streak} =1{1 day in a row} other{{count} days in a row}}",
+  "@memStreakDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "memStreakBest": "{count, plural, =1{Best: 1 day} other{Best: {count} days}}",
+  "@memStreakBest": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "memCalendarLess": "Less",
+  "memCalendarMore": "More",
+  "milestoneTitle": "Masha'Allah",
+  "milestoneJuz": "Juz {juz} memorized",
+  "@milestoneJuz": {
+    "placeholders": {
+      "juz": {
+        "type": "int"
+      }
+    }
+  },
+  "milestoneSurah": "Surah {surah} memorized",
+  "@milestoneSurah": {
+    "placeholders": {
+      "surah": {
+        "type": "String"
+      }
+    }
   }
 }

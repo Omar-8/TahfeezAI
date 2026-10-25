@@ -38,6 +38,10 @@ abstract class MemorizationRepository {
   /// recorded.
   Stream<List<AyahAttempt>> watchAttemptsSince(DateTime since);
 
+  /// Ayahs recited (test results) on each local day ever, by date,
+  /// updated as tests are recorded.
+  Stream<Map<DateTime, int>> watchDailyRecited();
+
   /// Each ayah's latest test result, by ayah id, updated as tests are
   /// recorded.
   Stream<Map<int, AyahAttempt>> watchLatestAttempts();

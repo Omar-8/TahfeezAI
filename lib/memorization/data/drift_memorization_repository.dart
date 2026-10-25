@@ -122,6 +122,21 @@ class DriftMemorizationRepository implements MemorizationRepository {
           .map((rows) => [for (final r in rows) _attempt(r)]);
 
   @override
+  Stream<Map<DateTime, int>> watchDailyRecited() => _db
+      .customSelect(
+        "SELECT date(at, 'unixepoch', 'localtime') AS day, COUNT(*) AS n "
+        'FROM attempts GROUP BY day',
+        readsFrom: {_db.attempts},
+      )
+      .watch()
+      .map(
+        (rows) => {
+          for (final r in rows)
+            DateTime.parse(r.read<String>('day')): r.read<int>('n'),
+        },
+      );
+
+  @override
   Stream<Map<int, AyahAttempt>> watchLatestAttempts() => _db
       .customSelect(
         'SELECT a.* FROM attempts a JOIN (SELECT ayah_id, MAX(id) AS last '
