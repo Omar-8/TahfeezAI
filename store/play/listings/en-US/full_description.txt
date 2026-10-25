@@ -4,9 +4,10 @@ Read the Madinah Mushaf, understand every word, and recite from memory while an 
 
 RECITE FROM MEMORY — WITH FEEDBACK
 • Hide the page and recite: each word is revealed as you say it
-• Words coloured as you go: right, wrong, skipped or mispronounced
+• Words coloured as you go: right, wrong, skipped or mispronounced — a word said right glows softly, a mistake sways, and a finished page glows with a gentle tap
+• A ring around the stop button breathes with your voice, so you know you are heard
 • Hears how you recite, not only what: letters, vowels, shadda and case endings, sound by sound against the Ḥafṣ pronunciation
-• Tajweed checked too: madd length, qalqala, ghunnah (ikhfāʾ, iqlāb, idghām), heavy and light letters, throat letters — each rule can be turned on or off
+• Tajweed checked too: madd length, qalqala, ghunnah (ikhfāʾ, iqlāb, idghām, and a doubled nūn or mīm held), heavy and light letters, throat letters — each rule can be turned on or off
 • Choose how strict the check is: lenient, balanced or precise
 • A vibration or sound on a mistake, with tajweed mistakes alerted apart
 • Choose the colours of pronunciation and tajweed mistakes
@@ -14,8 +15,9 @@ RECITE FROM MEMORY — WITH FEEDBACK
 
 READ AND UNDERSTAND
 • The Madinah Mushaf page by page, exactly as printed — or ayah by ayah, swiped or in one continuous scroll
-• Word-by-word meanings and transliteration
-• Translations in 10 languages and tafsir beside every ayah
+• Word-by-word meanings and transliteration — in Arabic too, from al-Sirāj
+• Translations in 18 languages and tafsir beside every ayah, following your language
+• Surah names in the Mushaf's own calligraphy; focus mode for the page alone
 • Search the whole Quran, in Arabic or in translation
 • Bookmarks and thematic passages coloured on the page
 
@@ -28,10 +30,12 @@ MEMORIZE WITH A PLAN
 • A daily lesson and spaced revision
 • Hide mode, Loop and Follow along
 • Every part's strength tracked, so you know what to revise
+• Your streak, a calendar of the days you recited, a ring of the 30 juz and gentle milestones
 
 MAKE IT YOURS
+• A sky in the colours of the time of day, glass cards and an Islamic geometric pattern
 • Light, dark, warm, sepia and black themes; 4 Quran fonts; text up to 200%
-• In 11 languages: Arabic, English, German, French, Spanish, Russian, Turkish, Indonesian, Urdu, Persian and Bengali
+• In 19 languages: Arabic, English, German, French, Spanish, Russian, Turkish, Indonesian, Malay, Urdu, Persian, Bengali, Hausa, Kurdish, Pashto, Swahili, Kazakh, Uzbek and Somali
 • Phones and tablets
 
 YOUR VOICE STAYS ON YOUR PHONE

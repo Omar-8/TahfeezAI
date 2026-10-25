@@ -1,6 +1,6 @@
 # Google Play listing — Tahfeez AI
 
-Everything to enter in Play Console for the first release (prepared 2026-10-24).
+Everything to enter in Play Console for the first release (prepared 2026-10-24, features updated 2026-10-25).
 Text in `listings/<language>/` (title ≤ 30, short description ≤ 80, full
 description ≤ 4,000 characters — all within). Graphics in `graphics/`, made
 by `python3 tool/make_play_listing.py` from the landing page's media

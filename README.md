@@ -62,15 +62,17 @@ It is a gift, not a product:
 
 - **The Madinah Mushaf**, page by page, exactly as printed (King Fahd Complex layout), drawn natively and crisp on any screen size.
 - **Ayah mode** — the same pages ayah by ayah, swiped page by page or in **one continuous scroll**.
-- **Surah, juz, hizb and page** index; **Go to ayah**; **bookmarks**; **continue reading** from where you stopped; a **daily ayah**.
+- **Surah, juz, hizb and page** index — each surah's name in the **Mushaf's own calligraphy**, its number in an eight-pointed star; **Go to ayah**; **bookmarks**; **continue reading** from where you stopped; a **daily ayah** set in calligraphy.
+- **Focus mode** — the page alone, full screen, nothing else in view.
 - **Search** the Arabic text (with or without diacritics) and the translations — offline.
 - **Passage tints** that colour each rukūʿ, so a page's structure is visible at a glance.
 
 ### Understand
 
-- **Word by word**: the meaning under every word — in English, Urdu, Indonesian, Turkish, Persian or Bengali — with **transliteration**. Tap a word for its details and audio.
-- **Translations** in 10 languages: English, German, French, Spanish, Russian, Turkish, Indonesian, Urdu, Persian and Bengali.
-- **Tafsir**: At-Tafsir Al-Muyassar (Arabic) and Al-Mukhtasar (English, French, Spanish, Russian, Turkish, Indonesian, Persian, Bengali).
+- **Word by word**: the meaning under every word — in English, Urdu, Indonesian, Turkish, Persian, Bengali or French — with **transliteration**; in Arabic, the meanings of each ayah's difficult words from **al-Sirāj**. Tap a word for its details and audio.
+- **Translations** in 18 languages: English, German, French, Spanish, Russian, Turkish, Indonesian, Malay, Urdu, Persian, Bengali, Hausa, Kurdish (Sorani), Pashto, Swahili, Kazakh, Uzbek and Somali.
+- **Tafsir**: At-Tafsir Al-Muyassar and al-Sirāj (Arabic), Al-Mukhtasar (English, French, Spanish, Russian, Turkish, Indonesian, Persian, Bengali, Kurdish, Pashto, Uzbek) and Ahsan-ul-Bayan (Urdu).
+- Translations, tafsir and word meanings **follow the app's language** — unless you choose another.
 
 ### Listen
 
@@ -89,13 +91,14 @@ With **Tajweed** on, the checking covers:
 |---|---|
 | **Madd** | elongations held their full length (e.g. 4–6 counts where required) |
 | **Qalqala** | the echo of ق ط ب ج د with sukūn or at a stop |
-| **Ghunnah** — **ikhfāʾ**, **iqlāb**, **idghām** | the hidden nūn and mīm, nasalised as they should be |
+| **Ghunnah** — **ikhfāʾ**, **iqlāb**, **idghām** (of nūn and of mīm) | the hidden or merged nūn and mīm, nasalised as they should be |
+| **Ghunnah held** | a doubled نّ or مّ held for its two counts |
 | **Heavy and light letters** | ط/ت, ص/س, ض/د, ظ/ذ, ق/ك kept apart |
 | **Throat letters** | ء ع ح ه خ غ said as themselves |
 | **Shadda** | doubled letters held, single ones not doubled |
 | **Vowels and case endings** | ḥarakāt, including the last vowel of a word |
 
-Each word is coloured as you go — right, wrong, skipped or mispronounced — with a short explanation of the mistake and, if you like, a vibration the moment it happens. Tap a word to see what was heard: *“On «ء»: ḍamma expected, fatḥa heard.”*
+Each word is coloured as you go — right, wrong, skipped or mispronounced — with a short explanation of the mistake and, if you like, a vibration the moment it happens. Tap a word to see what was heard: *“On «ء»: ḍamma expected, fatḥa heard.”* A word said right **glows softly**, a mistake **sways**, words you reveal **fade in**, and a page recited to its end **glows word after word** with a gentle double tap. A ring around the stop button **breathes with your voice**, so you know the microphone hears you. One **strictness** setting — lenient, balanced or precise — covers every check, tajweed included.
 
 <p align="center">
   <img src="site/images/screens/05b-recite-marks-dark.webp" width="30%" alt="Every word checked">
@@ -110,16 +113,17 @@ Each word is coloured as you go — right, wrong, skipped or mispronounced — w
 - **Hide mode** — the page covered; words appear as you recite them correctly (or reveal them word by word, ayah by ayah).
 - **Four ways to practise**: **Recite** from memory · **Loop** a range a number of times (strict mode pauses on a mistake) · **Listen** · **Follow along** — the reciter recites an ayah, then it's your turn.
 - **A memorization plan** — today's new lesson and **spaced revision** of what you already know, each part's **strength** tracked from your recitations.
-- **Progress map** of every page you have memorized; mark what you already know to start where you are.
+- **Progress** — the Quran as a **ring of its 30 juz**, a **strength map** of every page, and your **streak** with a **calendar** of the days you recited (a square a day, darker the more you recited); mark what you already know to start where you are.
+- **Gentle milestones** — a juz or a surah memorized, a share of the Quran, days in a row — each celebrated once, never in the middle of a recitation.
 - **Daily reminder**, sajdah reminders, an activity count of the ayahs heard and recited.
 
 ### Make it yours
 
-- **App themes** — light, dark, warm, sepia and black, or follow your phone.
+- **App themes** — light, dark, warm, sepia and black, or follow your phone — with a **sky in the colours of the time of day** (dawn, day, golden hour, sunset, night) and an **Islamic geometric pattern** of our own behind Home, the Quran tab and Memorize, and **glass cards** over it.
 - **Reader themes** for the page — light, warm, sepia, dark, black.
 - **4 Quran fonts** for Ayah mode (Scheherazade New, Amiri Quran, Noto Naskh Arabic, Lateef) and **3 Arabic fonts** for the app (Noto Kufi, Almarai, Tajawal).
 - **Text size** from 80 % to 200 %, and the app follows your phone's own text size.
-- **11 languages** — العربية · English · Deutsch · Français · Español · Русский · Türkçe · Bahasa Indonesia · اردو · فارسی · বাংলা — with full right-to-left layout; the translation and tafsir follow your language.
+- **19 languages** — العربية · English · Deutsch · Français · Español · Русский · Türkçe · Bahasa Indonesia · Bahasa Melayu · اردو · فارسی · বাংলা · Hausa · کوردی · پښتو · Kiswahili · Қазақша · Oʻzbekcha · Soomaali — with full right-to-left layout; the translation and tafsir follow your language.
 - Tested for phones from 280 px foldable cover screens to tablets, in portrait and landscape.
 
 ## Screenshots
@@ -174,7 +178,7 @@ git clone https://github.com/Omar-8/TahfeezAI.git
 cd TahfeezAI
 flutter pub get
 dart run build_runner build --delete-conflicting-outputs   # Drift, Freezed, Riverpod
-flutter gen-l10n                                           # the 11 languages
+flutter gen-l10n                                           # the 19 languages
 ```
 
 ### 2. Quran data (not in git: rebuilt from its sources, checksums verified)
@@ -215,7 +219,7 @@ More detail: [docs/IOS.md](docs/IOS.md). The `iOS` GitHub workflow builds all of
 ```sh
 flutter analyze
 flutter test                                  # ~1,000 tests
-tool/test_responsive_all.sh                   # every screen × 18 sizes × 11 languages × text sizes (~3 h)
+tool/test_responsive_all.sh                   # every screen × 18 sizes × the languages × text sizes (~3 h)
 tool/test_crawl.sh                            # every control on every screen, tapped
 flutter drive --driver=test_driver/integration_test.dart \
   --target=integration_test/device_qa_test.dart -d <device>   # the walk-through on a real device
