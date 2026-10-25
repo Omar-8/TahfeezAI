@@ -1472,7 +1472,7 @@ Future<bool> showRecitationIntro(
     useSafeArea: true,
     useRootNavigator: true,
     constraints: sheetBelowAppBar(context),
-    builder: (context) => _RecitationIntroSheet(mode),
+    builder: (context) => GlassSheet(child: _RecitationIntroSheet(mode)),
   );
   // (The guide's showings don't count: a reader who skipped the guide
   // still gets it once.)
@@ -1646,7 +1646,7 @@ Future<void> showHifzSettingsSheet(BuildContext context) {
     useSafeArea: true,
     useRootNavigator: true,
     constraints: sheetBelowAppBar(context),
-    builder: (context) => const _HifzSettingsSheet(),
+    builder: (context) => GlassSheet(child: const _HifzSettingsSheet()),
   );
 }
 

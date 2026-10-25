@@ -36,7 +36,7 @@ Future<void> showRecitationLoopSheet(BuildContext context) {
     useSafeArea: true,
     useRootNavigator: true,
     constraints: sheetBelowAppBar(context),
-    builder: (context) => const _RecitationLoopSheet(),
+    builder: (context) => GlassSheet(child: const _RecitationLoopSheet()),
   );
 }
 

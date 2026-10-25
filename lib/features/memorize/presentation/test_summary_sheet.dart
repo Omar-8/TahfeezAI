@@ -79,7 +79,37 @@ class _TestSummarySheet extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: TahfeezSpacing.smPlus,
         children: [
-          Text(l10n.memSummaryTitle, style: theme.textTheme.titleLarge),
+          // The results' moment: the eight-pointed star turning into
+          // place beside the title — filled, in gold, when every ayah went
+          // well.
+          Row(
+            spacing: TahfeezSpacing.smPlus,
+            children: [
+              TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0, end: 1),
+                duration: const Duration(milliseconds: 800),
+                curve: Curves.easeOutBack,
+                builder: (context, t, child) => Transform.rotate(
+                  angle: (1 - t) * -0.8,
+                  child: Transform.scale(
+                    scale: 0.4 + 0.6 * t,
+                    child: Opacity(opacity: t.clamp(0.0, 1.0), child: child),
+                  ),
+                ),
+                child: TahfeezStar(
+                  color: scheme.tertiary,
+                  size: 30,
+                  filled: weak.isEmpty,
+                ),
+              ),
+              Expanded(
+                child: Text(
+                  l10n.memSummaryTitle,
+                  style: theme.textTheme.titleLarge,
+                ),
+              ),
+            ],
+          ),
           Text(
             l10n.memSummaryCounts(
               latest.length,

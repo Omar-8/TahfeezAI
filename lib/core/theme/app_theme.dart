@@ -48,9 +48,17 @@ ThemeData buildTahfeezTheme(
         borderRadius: BorderRadius.circular(TahfeezRadii.pill),
       ),
     ),
+    // Glass: the paper a little see-through (each sheet blurs what is
+    // behind it — GlassSheet), a bright hairline along its top.
     bottomSheetTheme: BottomSheetThemeData(
-      backgroundColor: scheme.surface,
-      shape: sheetShape,
+      backgroundColor: scheme.surface.withValues(alpha: 0.86),
+      shape: sheetShape.copyWith(
+        side: BorderSide(
+          color: scheme.brightness == Brightness.dark
+              ? Colors.white.withValues(alpha: 0.10)
+              : Colors.white.withValues(alpha: 0.8),
+        ),
+      ),
       elevation: TahfeezElevation.high,
       modalElevation: TahfeezElevation.high,
     ),

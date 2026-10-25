@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
 
@@ -84,39 +85,43 @@ Future<T?> showTahfeezModalBottomSheet<T>({
     useRootNavigator: true,
     constraints: constraints ?? sheetBelowAppBar(context),
     // Lifted above the keyboard while a field in it is being typed into.
-    builder: (context) => AnimatedPadding(
-      duration: const Duration(milliseconds: 150),
-      curve: Curves.easeOut,
-      padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.only(top: TahfeezSpacing.sm),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 36,
-                height: 4,
-                margin: const EdgeInsets.only(bottom: TahfeezSpacing.md),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.outlineVariant,
-                  borderRadius: BorderRadius.circular(TahfeezSpacing.xs),
-                ),
-              ),
-              if (title != null)
-                Padding(
-                  padding: const EdgeInsets.only(
-                    bottom: TahfeezSpacing.md,
-                    left: TahfeezSpacing.md,
-                    right: TahfeezSpacing.md,
-                  ),
-                  child: Text(
-                    title,
-                    style: Theme.of(context).textTheme.titleMedium,
+    builder: (context) => GlassSheet(
+      child: AnimatedPadding(
+        duration: const Duration(milliseconds: 150),
+        curve: Curves.easeOut,
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.viewInsetsOf(context).bottom,
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.only(top: TahfeezSpacing.sm),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 36,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: TahfeezSpacing.md),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.outlineVariant,
+                    borderRadius: BorderRadius.circular(TahfeezSpacing.xs),
                   ),
                 ),
-              Flexible(child: builder(context)),
-            ],
+                if (title != null)
+                  Padding(
+                    padding: const EdgeInsets.only(
+                      bottom: TahfeezSpacing.md,
+                      left: TahfeezSpacing.md,
+                      right: TahfeezSpacing.md,
+                    ),
+                    child: Text(
+                      title,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                  ),
+                Flexible(child: builder(context)),
+              ],
+            ),
           ),
         ),
       ),
@@ -124,4 +129,24 @@ Future<T?> showTahfeezModalBottomSheet<T>({
   );
   result.whenComplete(TahfeezModalSheetActivity._closed);
   return result;
+}
+
+/// A sheet's content as frosted glass: the screen behind it blurred under
+/// the sheet's see-through paper (`bottomSheetTheme`), clipped to its
+/// rounded top.
+class GlassSheet extends StatelessWidget {
+  const GlassSheet({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => ClipRRect(
+    borderRadius: const BorderRadius.vertical(
+      top: Radius.circular(TahfeezRadii.lg),
+    ),
+    child: BackdropFilter(
+      filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+      child: child,
+    ),
+  );
 }

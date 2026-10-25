@@ -226,13 +226,19 @@ class ScoreBar extends StatelessWidget {
             ),
           ],
         ),
+        // Filling as it appears.
         ClipRRect(
           borderRadius: BorderRadius.circular(TahfeezRadii.pill),
-          child: LinearProgressIndicator(
-            value: value,
-            minHeight: dense ? 4 : 6,
-            color: color,
-            backgroundColor: scheme.surfaceContainerHighest,
+          child: TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0, end: value),
+            duration: const Duration(milliseconds: 700),
+            curve: Curves.easeOutCubic,
+            builder: (context, v, _) => LinearProgressIndicator(
+              value: v,
+              minHeight: dense ? 4 : 6,
+              color: color,
+              backgroundColor: scheme.surfaceContainerHighest,
+            ),
           ),
         ),
       ],
