@@ -55,10 +55,14 @@ class TahfeezGlassSurface extends StatelessWidget {
     this.onTap,
     this.onLongPress,
     this.blur = true,
+    this.borderRadius,
   });
 
   final Widget child;
   final ShapeBorder? shape;
+
+  /// In place of [shape]'s (a pill, for a search bar).
+  final BorderRadius? borderRadius;
   final VoidCallback? onTap, onLongPress;
   final bool blur;
 
@@ -67,9 +71,11 @@ class TahfeezGlassSurface extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final dark = scheme.brightness == Brightness.dark;
     final cardShape = shape ?? Theme.of(context).cardTheme.shape;
-    final radius = cardShape is RoundedRectangleBorder
-        ? cardShape.borderRadius.resolve(Directionality.of(context))
-        : BorderRadius.circular(TahfeezRadii.lg);
+    final radius =
+        borderRadius ??
+        (cardShape is RoundedRectangleBorder
+            ? cardShape.borderRadius.resolve(Directionality.of(context))
+            : BorderRadius.circular(TahfeezRadii.lg));
     final surface = DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: radius,

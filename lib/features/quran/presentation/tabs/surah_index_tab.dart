@@ -147,6 +147,23 @@ class _SurahIndexTabState extends ConsumerState<SurahIndexTab> {
       );
   }
 
+  /// Reverses the list (the last surah first).
+  Widget _reverseButton(ColorScheme scheme) => IconButton(
+    onPressed: () => setState(() => _reversed = !_reversed),
+    tooltip: _reversed
+        ? AppLocalizations.of(context).quranShowingLastFirst
+        : AppLocalizations.of(context).quranShowLastFirst,
+    padding: EdgeInsets.zero,
+    constraints: const BoxConstraints.tightFor(
+      width: _searchBarHeight,
+      height: _searchBarHeight,
+    ),
+    icon: Icon(
+      Icons.swap_vert,
+      color: _reversed ? scheme.onPrimaryContainer : scheme.onSurfaceVariant,
+    ),
+  );
+
   @override
   Widget build(BuildContext context) {
     final surahs = ref.watch(indexedSurahsProvider);
@@ -182,11 +199,9 @@ class _SurahIndexTabState extends ConsumerState<SurahIndexTab> {
               Expanded(
                 child: SizedBox(
                   height: _searchBarHeight,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: scheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(TahfeezRadii.pill),
-                    ),
+                  // Glass, as the cards below it.
+                  child: TahfeezGlassSurface(
+                    borderRadius: BorderRadius.circular(TahfeezRadii.pill),
                     child: TextField(
                       controller: _searchController,
                       style: Theme.of(context).textTheme.bodyMedium,
@@ -245,11 +260,8 @@ class _SurahIndexTabState extends ConsumerState<SurahIndexTab> {
               SizedBox(
                 height: _searchBarHeight,
                 width: _searchBarHeight,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: scheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(TahfeezRadii.pill),
-                  ),
+                child: TahfeezGlassSurface(
+                  borderRadius: BorderRadius.circular(TahfeezRadii.pill),
                   child: IconButton(
                     onPressed: _showFilterSheet,
                     tooltip: AppLocalizations.of(context).quranFilterChapters,
@@ -277,31 +289,21 @@ class _SurahIndexTabState extends ConsumerState<SurahIndexTab> {
               SizedBox(
                 height: _searchBarHeight,
                 width: _searchBarHeight,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: _reversed
-                        ? scheme.primaryContainer
-                        : scheme.surfaceContainerHighest,
-                    borderRadius: BorderRadius.circular(TahfeezRadii.pill),
-                  ),
-                  child: IconButton(
-                    onPressed: () => setState(() => _reversed = !_reversed),
-                    tooltip: _reversed
-                        ? AppLocalizations.of(context).quranShowingLastFirst
-                        : AppLocalizations.of(context).quranShowLastFirst,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints.tightFor(
-                      width: _searchBarHeight,
-                      height: _searchBarHeight,
-                    ),
-                    icon: Icon(
-                      Icons.swap_vert,
-                      color: _reversed
-                          ? scheme.onPrimaryContainer
-                          : scheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
+                // Glass, tinted while on.
+                child: _reversed
+                    ? DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: scheme.primaryContainer,
+                          borderRadius: BorderRadius.circular(
+                            TahfeezRadii.pill,
+                          ),
+                        ),
+                        child: _reverseButton(scheme),
+                      )
+                    : TahfeezGlassSurface(
+                        borderRadius: BorderRadius.circular(TahfeezRadii.pill),
+                        child: _reverseButton(scheme),
+                      ),
               ),
             ],
           ),

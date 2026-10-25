@@ -191,7 +191,7 @@ class _HomeSkyState extends ConsumerState<HomeSky> {
               ),
               TahfeezGeometricPattern(
                 color: scheme.onSurface.withValues(
-                  alpha: scheme.brightness == Brightness.light ? 0.10 : 0.08,
+                  alpha: scheme.brightness == Brightness.light ? 0.15 : 0.12,
                 ),
                 spacing: 52,
               ),

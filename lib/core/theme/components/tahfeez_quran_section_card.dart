@@ -74,10 +74,11 @@ class TahfeezQuranSectionCard extends StatelessWidget {
             children: [
               // The number in the eight-pointed star (as the daily ayah's
               // marker).
+              // In gold, as the daily ayah's.
               TahfeezStarNumber(
                 label: '$number',
-                color: accent,
-                size: 42,
+                color: accentColor ?? scheme.tertiary,
+                size: 36,
                 textStyle: Theme.of(context).textTheme.titleSmall,
               ),
               const SizedBox(width: TahfeezSpacing.smPlus),

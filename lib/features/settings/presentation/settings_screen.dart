@@ -400,17 +400,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       TahfeezSpacing.md,
                     ),
                     children: [
-                      TextField(
-                        key: const ValueKey('settings-search'),
-                        onChanged: (text) => setState(() => _query = text),
-                        textInputAction: TextInputAction.search,
-                        decoration: InputDecoration(
-                          prefixIcon: const Icon(Icons.search_rounded),
-                          hintText: l10n.settingsSearchHint,
-                          isDense: true,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(
-                              TahfeezRadii.pill,
+                      // Glass, as the groups below it.
+                      TahfeezGlassSurface(
+                        borderRadius: BorderRadius.circular(TahfeezRadii.pill),
+                        child: TextField(
+                          key: const ValueKey('settings-search'),
+                          onChanged: (text) => setState(() => _query = text),
+                          textInputAction: TextInputAction.search,
+                          decoration: InputDecoration(
+                            prefixIcon: const Icon(Icons.search_rounded),
+                            hintText: l10n.settingsSearchHint,
+                            isDense: true,
+                            border: InputBorder.none,
+                            contentPadding: const EdgeInsets.symmetric(
+                              vertical: TahfeezSpacing.smPlus,
                             ),
                           ),
                         ),
