@@ -39,8 +39,15 @@ class TahfeezCard extends StatelessWidget {
     );
   }
 
+  /// Without the blur: the cards are in scrolling lists, where a backdrop
+  /// blur flickered darker while scrolling (light themes, 2026-10-25).
   Widget _glass(BuildContext context, ShapeBorder? shape, Widget content) =>
-      TahfeezGlassSurface(shape: shape, onTap: onTap, child: content);
+      TahfeezGlassSurface(
+        shape: shape,
+        onTap: onTap,
+        blur: false,
+        child: content,
+      );
 }
 
 /// Frosted glass ([TahfeezGlass]): a sheen across it, a hairline edge
@@ -83,8 +90,14 @@ class TahfeezGlassSurface extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            scheme.surfaceContainerLowest.withValues(alpha: dark ? 0.22 : 0.48),
-            scheme.surfaceContainerLow.withValues(alpha: dark ? 0.12 : 0.26),
+            // Without a blur (most of them), a little more paper in light
+            // themes keeps the frosted look.
+            scheme.surfaceContainerLowest.withValues(
+              alpha: dark ? 0.22 : (blur ? 0.48 : 0.58),
+            ),
+            scheme.surfaceContainerLow.withValues(
+              alpha: dark ? 0.12 : (blur ? 0.26 : 0.36),
+            ),
           ],
         ),
         border: Border.all(

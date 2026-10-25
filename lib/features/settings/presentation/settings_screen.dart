@@ -403,6 +403,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       // Glass, as the groups below it.
                       TahfeezGlassSurface(
                         borderRadius: BorderRadius.circular(TahfeezRadii.pill),
+                        blur: false,
                         child: TextField(
                           key: const ValueKey('settings-search'),
                           onChanged: (text) => setState(() => _query = text),
