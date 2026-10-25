@@ -2,6 +2,7 @@ import 'dart:async' show unawaited;
 
 import '../../../core/localization/generated/app_localizations.dart';
 
+import 'package:flutter/foundation.dart' show ValueListenable;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -33,6 +34,7 @@ import '../../../ai/acoustic/quran_acoustic_verifier.dart';
 import '../application/acoustic_verification_controller.dart';
 import '../application/hifz_controller.dart';
 import '../application/local_acoustic_inference_controller.dart';
+import '../application/mic_level.dart';
 import '../application/recitation_ai_config.dart';
 import '../application/quran_match_controller.dart';
 import '../application/recitation_session_controller.dart';
@@ -864,12 +866,16 @@ class _SessionControls extends ConsumerWidget {
           children: [
             GuideTarget(
               id: 'session-stop',
-              child: IconButton(
-                style: BarButtonGroup.buttonStyle,
-                color: scheme.error,
-                icon: const Icon(Icons.stop_rounded),
-                tooltip: l10n.recStop,
-                onPressed: canControl ? controller.stop : null,
+              // A ring that swells with the voice the microphone hears.
+              child: MicLevelRing(
+                active: state.phase == RecitationPhase.listening,
+                child: IconButton(
+                  style: BarButtonGroup.buttonStyle,
+                  color: scheme.error,
+                  icon: const Icon(Icons.stop_rounded),
+                  tooltip: l10n.recStop,
+                  onPressed: canControl ? controller.stop : null,
+                ),
               ),
             ),
             if (state.phase == RecitationPhase.paused)
@@ -992,6 +998,73 @@ class _ListenControls extends ConsumerWidget {
       },
     );
   }
+}
+
+/// [child] (the stop button) inside a soft ring that swells and fades
+/// with how loudly the microphone hears the reciter ([micLevelProvider]) —
+/// that it is listening, live. Only the ring repaints, at the audio's pace.
+class MicLevelRing extends ConsumerWidget {
+  const MicLevelRing({super.key, required this.active, required this.child});
+
+  final bool active;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (!active) return child;
+    final level = ref.watch(micLevelProvider);
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        Positioned.fill(
+          child: IgnorePointer(
+            child: RepaintBoundary(
+              child: CustomPaint(
+                key: const ValueKey('mic-level-ring'),
+                painter: _MicLevelPainter(
+                  level,
+                  Theme.of(context).colorScheme.error,
+                ),
+              ),
+            ),
+          ),
+        ),
+        child,
+      ],
+    );
+  }
+}
+
+class _MicLevelPainter extends CustomPainter {
+  _MicLevelPainter(this.level, this.color) : super(repaint: level);
+
+  final ValueListenable<double> level;
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final v = level.value;
+    if (v <= 0.02) return;
+    final center = size.center(Offset.zero);
+    final base = size.shortestSide / 2 - 6;
+    canvas.drawCircle(
+      center,
+      base + 4 * v,
+      Paint()..color = color.withValues(alpha: 0.10 + 0.14 * v),
+    );
+    canvas.drawCircle(
+      center,
+      base + 4 * v,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.5
+        ..color = color.withValues(alpha: 0.25 + 0.45 * v),
+    );
+  }
+
+  @override
+  bool shouldRepaint(_MicLevelPainter old) =>
+      old.level != level || old.color != color;
 }
 
 /// That the microphone is recording, for a Mushaf screen's app bar: a red

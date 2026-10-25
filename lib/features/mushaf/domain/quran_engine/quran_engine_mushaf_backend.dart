@@ -164,3 +164,29 @@ class PageBand {
   /// line's top and bottom.
   static const fill = 0.5;
 }
+
+/// A short animation on one word of a page: a recitation's feedback.
+enum MushafWordEffect {
+  /// A soft glow behind the word, spreading as it fades (a word recited
+  /// right; a page complete).
+  bloom,
+
+  /// The word's coloured ink sways sideways a few times (a mistake).
+  shake,
+
+  /// The word's ink fades in (a hidden word revealed).
+  inkIn,
+}
+
+/// A [QuranEngineMushafPage] that can animate its words ([MushafWordEffect]):
+/// Android's. Pages without one simply show the marks.
+abstract interface class MushafWordEffectsPage {
+  /// Plays [effect] on the page word at engine index [wordIndex] (in
+  /// [color], for a [MushafWordEffect.bloom]), after [delay].
+  void playWordEffect(
+    int wordIndex,
+    MushafWordEffect effect, {
+    Color? color,
+    Duration delay = Duration.zero,
+  });
+}

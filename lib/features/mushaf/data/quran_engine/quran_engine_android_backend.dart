@@ -78,7 +78,8 @@ class QuranEngineAndroidBackend implements QuranEngineMushafBackend {
 String quranEnginePageAssetPath(int pageNumber) =>
     'assets/quran/quran_engine/pages/${pageNumber.toString().padLeft(3, '0')}.qvp';
 
-class QuranEngineAndroidPage implements QuranEngineMushafPage {
+class QuranEngineAndroidPage
+    implements QuranEngineMushafPage, MushafWordEffectsPage {
   QuranEngineAndroidPage({required this.pageNumber, required this.page});
 
   /// Left at `QvpViewLayout`'s own natural default (`1`, the printed
@@ -149,6 +150,26 @@ class QuranEngineAndroidPage implements QuranEngineMushafPage {
   /// applied to it.
   final QvpViewController _viewController = QvpViewController();
 
+  /// Word animations over the page (qvp_flutter patch 0005).
+  final QvpWordEffects _effects = QvpWordEffects();
+
+  @override
+  void playWordEffect(
+    int wordIndex,
+    MushafWordEffect effect, {
+    Color? color,
+    Duration delay = Duration.zero,
+  }) => _effects.play(
+    wordIndex,
+    switch (effect) {
+      MushafWordEffect.bloom => QvpWordEffectKind.bloom,
+      MushafWordEffect.shake => QvpWordEffectKind.shake,
+      MushafWordEffect.inkIn => QvpWordEffectKind.inkIn,
+    },
+    color: color ?? const Color(0xFF43A047),
+    delayMs: delay.inMicroseconds / 1000,
+  );
+
   @override
   final int pageNumber;
 
@@ -192,6 +213,7 @@ class QuranEngineAndroidPage implements QuranEngineMushafPage {
     return QvpPageView(
       page: page,
       controller: _viewController,
+      effects: _effects,
       paper: paper,
       defaultInk: ink,
       layout: QvpViewLayout(
@@ -408,6 +430,7 @@ class QuranEngineAndroidPage implements QuranEngineMushafPage {
   @override
   void dispose() {
     _viewController.dispose();
+    _effects.dispose();
     page.dispose();
   }
 

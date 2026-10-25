@@ -344,6 +344,16 @@ final hifzHapticsProvider = Provider<void Function()>((ref) {
       : () {};
 });
 
+/// A gentle double tap for a page recited to its end (Android: the
+/// device's vibrator, softly).
+final hifzPageDoneHapticsProvider = Provider<void Function()>((ref) {
+  final capabilities = ref.watch(platformCapabilitiesProvider);
+  const channel = MethodChannel('tahfeez/alert');
+  return capabilities.isAndroid
+      ? () => unawaited(channel.invokeMethod<void>('pageDone'))
+      : () {};
+});
+
 /// A short, soft beep for a mistake (Android and iOS).
 final hifzBeepProvider = Provider<void Function()>((ref) {
   final capabilities = ref.watch(platformCapabilitiesProvider);

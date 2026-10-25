@@ -1,0 +1,316 @@
+--- a/lib/src/page_view.dart
++++ b/lib/src/page_view.dart
+@@ -6,6 +6,7 @@
+ // widget only converts geometry into ui.Path objects once, caches the
+ // unstyled ink as an image at the current transform, and forwards gestures
+ // to the engine's hit test / selection.
++import 'dart:math' as math;
+ import 'dart:ui' as ui;
+ 
+ import 'package:flutter/foundation.dart';
+@@ -164,6 +165,64 @@
+       Offset((local.dx - offsetX) / scale, (local.dy - offsetY) / scale);
+ }
+ 
++/// Tahfeez patch 0005 (`PATCHES.md`): a short animation on one word.
++enum QvpWordEffectKind {
++  /// A soft glow of [QvpWordEffect.color] behind the word, fading out.
++  bloom,
++
++  /// The word's styled ink sways sideways a few times, settling.
++  shake,
++
++  /// The word's ink fades in from the paper (drawn over it, fading out).
++  inkIn,
++}
++
++/// Tahfeez patch 0005: one running [QvpWordEffectKind] on page word [word].
++@immutable
++class QvpWordEffect {
++  const QvpWordEffect(this.word, this.kind, this.color, this.startMs);
++
++  final int word;
++  final QvpWordEffectKind kind;
++  final Color color;
++
++  /// On [QvpWordEffects.nowMs]'s clock.
++  final double startMs;
++
++  double get durationMs => switch (kind) {
++    QvpWordEffectKind.bloom => 900,
++    QvpWordEffectKind.shake => 420,
++    QvpWordEffectKind.inkIn => 380,
++  };
++}
++
++/// Tahfeez patch 0005: the word animations of a [QvpPageView]
++/// ([QvpPageView.effects]) — played by the app, drawn over the page until
++/// each ends.
++class QvpWordEffects extends ChangeNotifier {
++  static final Stopwatch _clock = Stopwatch()..start();
++  static double get nowMs => _clock.elapsedMicroseconds / 1000;
++
++  final _effects = <QvpWordEffect>[];
++
++  /// Plays [kind] on [word], [delayMs] from now.
++  void play(
++    int word,
++    QvpWordEffectKind kind, {
++    Color color = const Color(0xFF43A047),
++    double delayMs = 0,
++  }) {
++    _effects.add(QvpWordEffect(word, kind, color, nowMs + delayMs));
++    notifyListeners();
++  }
++
++  /// The effects not yet over at [now] (the finished ones dropped).
++  List<QvpWordEffect> runningAt(double now) {
++    _effects.removeWhere((e) => now > e.startMs + e.durationMs);
++    return _effects;
++  }
++}
++
+ /// Renders a [QvpPage] with the engine's layout, animated highlights, masks,
+ /// styled paths, tap / long-press selection and pinch / pan.
+ class QvpPageView extends StatefulWidget {
+@@ -186,9 +245,13 @@
+     this.paperShadow = true,
+     this.minScale = kMinZoom,
+     this.maxScale = kMaxZoom,
++    this.effects,
+   });
+ 
+   final QvpPage page;
++
++  /// Word animations drawn over the page (Tahfeez patch 0005).
++  final QvpWordEffects? effects;
+   final QvpViewLayout layout;
+ 
+   /// Paper colour behind the ink (null = transparent).
+@@ -253,6 +316,7 @@
+     _ticker = createTicker(_onTick);
+     _attachPage();
+     _applyInk();
++    widget.effects?.addListener(_ensureTicking);
+   }
+ 
+   void _attachPage() {
+@@ -282,12 +346,17 @@
+       _attachPage();
+     }
+     if (oldWidget.defaultInk != widget.defaultInk) _applyInk();
++    if (oldWidget.effects != widget.effects) {
++      oldWidget.effects?.removeListener(_ensureTicking);
++      widget.effects?.addListener(_ensureTicking);
++    }
+     if (oldWidget.layout != widget.layout) _ctl._fitRequested = true;
+   }
+ 
+   @override
+   void dispose() {
+     widget.page.removeListener(_onPageChanged);
++    widget.effects?.removeListener(_ensureTicking);
+     _ticker.dispose();
+     _cache.dispose();
+     _frame.dispose();
+@@ -321,8 +390,10 @@
+       return;
+     }
+     final more = page.tick(nowMs);
++    // Tahfeez patch 0005: ticking on while a word animation runs.
++    final effects = widget.effects?.runningAt(QvpWordEffects.nowMs);
+     _frame.value++;
+-    if (!more) _ticker.stop();
++    if (!more && (effects == null || effects.isEmpty)) _ticker.stop();
+   }
+ 
+   // ── layout & fit (engine layout, then pan/zoom on top) ──
+@@ -487,6 +558,7 @@
+                   dpr: dpr,
+                   paper: widget.paper,
+                   paperShadow: widget.paperShadow,
++                  effects: widget.effects,
+                 ),
+               ),
+             ),
+@@ -509,10 +581,25 @@
+   int basePaths = 0, overlayPaths = 0, bands = 0;
+   double baseMs = 0, overlayMs = 0;
+ 
++  /// Each word's engine paths (Tahfeez patch 0005), built when first needed.
++  List<List<int>>? wordPaths;
++
++  List<List<int>> buildWordPaths(QvpPage p) {
++    final cached = wordPaths;
++    if (cached != null) return cached;
++    final out = List.generate(p.nWords, (_) => <int>[], growable: false);
++    for (var i = 0; i < p.nPaths; i++) {
++      final w = p.pathWord(i);
++      if (w >= 0 && w < out.length) out[w].add(i);
++    }
++    return wordPaths = out;
++  }
++
+   void attach(QvpPage p) {
+     if (page == p) return;
+     page = p;
+     paths = null;
++    wordPaths = null;
+     key = '';
+     _dropImage();
+   }
+@@ -582,6 +669,7 @@
+     required this.dpr,
+     required this.paper,
+     required this.paperShadow,
++    this.effects,
+   }) : super(repaint: Listenable.merge([page, view, frame]));
+ 
+   final QvpPage page;
+@@ -590,6 +678,64 @@
+   final double dpr;
+   final Color? paper;
+   final bool paperShadow;
++  final QvpWordEffects? effects;
++
++  /// Tahfeez patch 0005: the running effects of one kind at [now], with
++  /// each one's progress (0 → 1); those still waiting to start left out.
++  Iterable<(QvpWordEffect, double)> _running(
++    List<QvpWordEffect> all,
++    QvpWordEffectKind kind,
++    double now,
++  ) sync* {
++    for (final e in all) {
++      if (e.kind != kind || now < e.startMs) continue;
++      yield (e, ((now - e.startMs) / e.durationMs).clamp(0.0, 1.0));
++    }
++  }
++
++  /// Tahfeez patch 0005: [word]'s paths drawn with [paint], each at its
++  /// line's transform.
++  void _drawWord(
++    ui.Canvas canvas,
++    QvpLayout? l,
++    List<ui.Path> paths,
++    int word,
++    ui.Paint paint, {
++    double blurPx = 0,
++  }) {
++    final wordPaths = cache.buildWordPaths(page);
++    if (word < 0 || word >= wordPaths.length) return;
++    for (final i in wordPaths[word]) {
++      final (s, tx, ty) = _lineTf(l, page.pathLine(i));
++      if (blurPx > 0) {
++        paint.maskFilter = ui.MaskFilter.blur(BlurStyle.normal, blurPx / s);
++      }
++      canvas.save();
++      canvas.translate(tx, ty);
++      canvas.scale(s);
++      canvas.drawPath(paths[i], paint);
++      canvas.restore();
++    }
++  }
++
++  /// Tahfeez patch 0005: [word]'s bounds on the canvas.
++  Rect? _wordBounds(QvpLayout? l, List<ui.Path> paths, int word) {
++    final wordPaths = cache.buildWordPaths(page);
++    if (word < 0 || word >= wordPaths.length) return null;
++    Rect? out;
++    for (final i in wordPaths[word]) {
++      final (s, tx, ty) = _lineTf(l, page.pathLine(i));
++      final b = paths[i].getBounds();
++      final r = Rect.fromLTRB(
++        tx + b.left * s,
++        ty + b.top * s,
++        tx + b.right * s,
++        ty + b.bottom * s,
++      );
++      out = out == null ? r : out.expandToInclude(r);
++    }
++    return out;
++  }
+ 
+   /// Transform of one line: (scale, tx, ty) in logical px.
+   (double, double, double) _lineTf(QvpLayout? l, int line) {
+@@ -752,6 +898,24 @@
+     final bands = page.highlightBoxesView();
+     _drawBoxes(canvas, bands, layout: l);
+ 
++    // Tahfeez patch 0005: word glows, behind the ink — spreading as they
++    // fade.
++    final now = QvpWordEffects.nowMs;
++    final fx = effects?.runningAt(now) ?? const <QvpWordEffect>[];
++    final shakes = <int, double>{};
++    if (fx.isNotEmpty) {
++      for (final (e, t) in _running(fx, QvpWordEffectKind.bloom, now)) {
++        final fade = (1 - t) * (1 - t);
++        final glow = ui.Paint()
++          ..isAntiAlias = true
++          ..color = e.color.withValues(alpha: 0.75 * fade);
++        _drawWord(canvas, l, paths, e.word, glow, blurPx: 3 + 9 * t);
++      }
++      for (final (e, t) in _running(fx, QvpWordEffectKind.shake, now)) {
++        shakes[e.word] = math.sin(t * math.pi * 6) * (1 - t) * 3.5;
++      }
++    }
++
+     // 2. base ink
+     final img = cache.image;
+     if (img != null) {
+@@ -772,6 +936,7 @@
+     if (styled.isNotEmpty) {
+       final paint = ui.Paint()..isAntiAlias = true;
+       var cur = -1, open = false;
++      var lineScale = 1.0;
+       for (final s in styled) {
+         if ((s.color & 0xff) == 0) continue;
+         final ln = page.pathLine(s.path);
+@@ -783,13 +948,37 @@
+           canvas.scale(sc);
+           open = true;
+           cur = ln;
++          lineScale = sc;
+         }
+         paint.color = QvpColor.toColor(s.color);
+-        canvas.drawPath(paths[s.path], paint);
++        // Tahfeez patch 0005: a shaking word's ink, swayed sideways.
++        final dx = shakes.isEmpty ? null : shakes[page.pathWord(s.path)];
++        if (dx != null) {
++          canvas.save();
++          canvas.translate(dx / lineScale, 0);
++          canvas.drawPath(paths[s.path], paint);
++          canvas.restore();
++        } else {
++          canvas.drawPath(paths[s.path], paint);
++        }
+       }
+       if (open) canvas.restore();
+     }
+ 
++    // Tahfeez patch 0005: ink fading in — the paper over the word, fading
++    // out.
++    if (fx.isNotEmpty && paperColor != null) {
++      for (final (e, t) in _running(fx, QvpWordEffectKind.inkIn, now)) {
++        final r = _wordBounds(l, paths, e.word);
++        if (r == null) continue;
++        final ease = 1 - (1 - t) * (1 - t) * (1 - t);
++        canvas.drawRect(
++          r.inflate(1.5),
++          ui.Paint()..color = paperColor.withValues(alpha: 1 - ease),
++        );
++      }
++    }
++
+     // 4. mask boxes (block / blur) on top
+     _drawBoxes(canvas, page.maskBoxesView());
+     cache.overlayMs = sw.elapsedMicroseconds / 1000;
+@@ -804,7 +993,8 @@
+       old.dpr != dpr ||
+       old.paper != paper ||
+       old.paperShadow != paperShadow ||
+-      old.cache != cache;
++      old.cache != cache ||
++      old.effects != effects;
+ }
+ 
+ /// Render statistics of a [QvpPageView] (base / overlay timings of the last frame).

@@ -59,6 +59,25 @@ class MainActivity : AudioServiceActivity() {
                         }
                         result.success(null)
                     }
+                    // A page recited to its end: two soft taps.
+                    "pageDone" -> {
+                        vibrator()?.let { v ->
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                val amplitude = if (v.hasAmplitudeControl()) 70 else VibrationEffect.DEFAULT_AMPLITUDE
+                                v.vibrate(
+                                    VibrationEffect.createWaveform(
+                                        longArrayOf(0, 18, 110, 26),
+                                        intArrayOf(0, amplitude, 0, amplitude),
+                                        -1,
+                                    ),
+                                )
+                            } else {
+                                @Suppress("DEPRECATION")
+                                v.vibrate(longArrayOf(0, 18, 110, 26), -1)
+                            }
+                        }
+                        result.success(null)
+                    }
                     "beep" -> {
                         val gen = tones ?: ToneGenerator(AudioManager.STREAM_NOTIFICATION, 35)
                             .also { tones = it }

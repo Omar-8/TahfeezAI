@@ -178,3 +178,23 @@ New files only (nothing upstream changed): re-vendoring keeps them if
 `ios/`, `scripts/build-engine-ios.sh` and the `ios:` platform entry are
 carried over. Not yet built or run: no Mac was available when it was
 written (2026-10-11).
+
+## Patch 0005 — word effects
+
+`patches/0005-word-effects.patch` adds `QvpWordEffects` (a
+`ChangeNotifier` the app plays effects on) and `QvpPageView.effects`.
+Each effect animates one page word for under a second, drawn by the same
+painter, with no engine call:
+
+- `bloom` — the word's paths in a colour with a widening blur, behind the
+  ink, fading out (900 ms);
+- `shake` — the word's styled ink (an ink highlight) swayed sideways,
+  settling (420 ms);
+- `inkIn` — the paper drawn over the word's bounds, fading out, so a
+  just-revealed word's ink fades in (380 ms).
+
+The view's ticker keeps running only while an effect runs (or the
+engine animates), so a still page costs nothing. Used by
+`quran_engine_android_backend.dart` for a recitation's word feedback
+(2026-10-25). Re-apply with `patch -p1 < patches/0005-word-effects.patch`
+after re-vendoring.

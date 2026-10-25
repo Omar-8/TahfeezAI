@@ -1,4 +1,5 @@
 import 'dart:async' show unawaited;
+import 'dart:math' as math;
 
 import '../../../core/localization/generated/app_localizations.dart';
 
@@ -11,6 +12,7 @@ import '../application/mushaf_hide_mode.dart';
 import '../application/mushaf_page_verses.dart';
 import '../application/mushaf_passages.dart';
 import '../application/mushaf_word_overlay.dart';
+import '../../recitation/application/hifz_controller.dart';
 import '../application/mushaf_quran_engine_providers.dart';
 import '../domain/mushaf_appearance.dart';
 import '../domain/quran_engine/quran_engine_mushaf_backend.dart';
@@ -92,10 +94,99 @@ class _QuranEngineMushafPageContentState
 
   static bool _isInk(MushafWordMark mark) => _markStyles[mark]!.ink;
 
-  /// Applies the masks, then the highlights over them.
+  /// Applies the masks, then the highlights over them — and animates what
+  /// changed on the page's words.
   void _applyMasks() {
+    final before = _appliedOverlay;
     _applyMasksOnly();
     _applyHighlights();
+    _playWordEffects(before, _appliedOverlay);
+  }
+
+  /// More words changed at once than a recitation changes (a page turned,
+  /// a loop starting again, every ayah shown): no animations.
+  static const _maxEffects = 12;
+
+  /// A recitation's changes on this page, animated (where the page can):
+  /// a word recited right glows, a mistake sways, a word revealed fades in
+  /// — and a page recited to its last word glows word after word, with a
+  /// gentle double tap. Nothing as a page first shows its marks.
+  void _playWordEffects(
+    (Set<int>, Map<int, MushafWordMark>)? before,
+    (Set<int>, Map<int, MushafWordMark>)? after,
+  ) {
+    final page = _page;
+    if (page == null || before == null || after == null) return;
+    if (page is! MushafWordEffectsPage) return;
+    final effects = page as MushafWordEffectsPage;
+    final n = page.wordCount;
+    final inks =
+        ref.read(mushafWordOverlayProvider)?.inks ??
+        const <MushafWordMark, int>{};
+    Color colorOf(MushafWordMark mark) {
+      final ink = inks[mark];
+      return ink != null ? Color(ink) : _markStyles[mark]!.color;
+    }
+
+    final revealed = before.$1.difference(after.$1);
+    final changed = [
+      for (final MapEntry(key: i, value: mark) in after.$2.entries)
+        if (before.$2[i] != mark) (i, mark),
+    ];
+    if (revealed.length + changed.length > _maxEffects) return;
+    for (final i in revealed) {
+      effects.playWordEffect(i, MushafWordEffect.inkIn);
+    }
+    for (final (i, mark) in changed) {
+      switch (mark) {
+        case MushafWordMark.correct:
+          effects.playWordEffect(
+            i,
+            MushafWordEffect.bloom,
+            color: colorOf(mark),
+          );
+        case MushafWordMark.wrong ||
+            MushafWordMark.skipped ||
+            MushafWordMark.tashkeel ||
+            MushafWordMark.tajweed:
+          effects.playWordEffect(i, MushafWordEffect.shake);
+        case MushafWordMark.mistake:
+          effects.playWordEffect(
+            i,
+            MushafWordEffect.bloom,
+            color: colorOf(mark),
+          );
+        case MushafWordMark.current ||
+            MushafWordMark.checking ||
+            MushafWordMark.uncertain:
+          break;
+      }
+    }
+    // The page's last word recited: every word marked (in ink), which it
+    // was not before.
+    bool complete((Set<int>, Map<int, MushafWordMark>) applied) {
+      if (n == 0) return false;
+      for (var i = 0; i < n; i++) {
+        final mark = applied.$2[i];
+        if (mark == null || !_isInk(mark)) return false;
+      }
+      return true;
+    }
+
+    if (changed.isNotEmpty && complete(after) && !complete(before)) {
+      final step = math.min(30.0, 1200 / n);
+      for (var i = 0; i < n; i++) {
+        effects.playWordEffect(
+          i,
+          MushafWordEffect.bloom,
+          color: colorOf(MushafWordMark.correct),
+          delay: Duration(microseconds: (300000 + i * step * 1000).round()),
+        );
+      }
+      if (ref.read(hifzSettingsProvider).alert.vibrates) {
+        ref.read(hifzPageDoneHapticsProvider)();
+      }
+    }
   }
 
   /// Draws every highlight on the page at once, each word's by priority:
