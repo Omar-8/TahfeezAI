@@ -44,16 +44,26 @@ class HomeScreen extends StatelessWidget {
           padding: const EdgeInsets.all(TahfeezSpacing.md),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            spacing: TahfeezSpacing.lg,
             children: [
               _HomeBrandHeader(l10n: l10n),
-              // The first time Home shows: a word of welcome.
+              // The first time Home shows: a word of welcome (a dialog; no
+              // room of its own).
               const _WelcomeOnce(),
+              const SizedBox(height: TahfeezSpacing.md),
+              // Only when there are updates, with its own space below.
               const HomeResourceUpdatesBanner(),
-              const HomeDailyAyahSection(),
-              const HomeReadHistorySection(),
-              const HomeMemorizationSection(),
-              const HomeFeaturedReadingSection(),
+              // (Spaced apart here, not above: hidden parts left a gap each,
+              // three between the header and the daily ayah.)
+              const Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                spacing: TahfeezSpacing.lg,
+                children: [
+                  HomeDailyAyahSection(),
+                  HomeReadHistorySection(),
+                  HomeMemorizationSection(),
+                  HomeFeaturedReadingSection(),
+                ],
+              ),
             ],
           ),
         ),
