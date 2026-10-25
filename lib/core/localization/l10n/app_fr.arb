@@ -542,5 +542,6 @@
   "settingsTimeOfDay": "Couleurs de l'accueil selon l'heure",
   "settingsTimeOfDaySub": "L'aube, le jour, le coucher du soleil et la nuit derrière l'accueil",
   "zenMode": "Mode concentration",
-  "zenModeExit": "Quitter le mode concentration"
+  "zenModeExit": "Quitter le mode concentration",
+  "wordMeaningSiraj": "Sens du mot · al-Sirāj"
 }

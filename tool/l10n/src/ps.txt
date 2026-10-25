@@ -541,3 +541,4 @@ settingsTimeOfDay = د کور رنګونه د ورځې د وخت سره سم
 settingsTimeOfDaySub = د کور شاته سهار، ورځ، ماښام او شپه
 zenMode = د تمرکز حالت
 zenModeExit = له تمرکز حالت نه ووځئ
+wordMeaningSiraj = د کلمې معنا · السراج

@@ -39,6 +39,7 @@ import '../application/recitation_ai_config.dart';
 import '../application/quran_match_controller.dart';
 import '../application/recitation_session_controller.dart';
 import 'recitation_loop_sheet.dart';
+import '../../mushaf/presentation/mushaf_appearance_sheet.dart';
 import '../../../memorization/application/memorization_today.dart';
 import '../../memorize/presentation/test_summary_sheet.dart';
 
@@ -1895,6 +1896,22 @@ class _HifzSettingsSheet extends ConsumerWidget {
                   ),
                 ),
               ),
+            // The Mushaf's appearance too, below the recitation's settings.
+            const Divider(height: 24),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: Text(
+                AppLocalizations.of(context).mushafAppearance,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            const Padding(
+              padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
+              child: MushafAppearanceOptions(),
+            ),
           ],
         ),
       ),

@@ -541,3 +541,4 @@ settingsTimeOfDay = Басты беттің түстері тәулік уақы
 settingsTimeOfDaySub = Басты беттің артында таң, күндіз, күн батуы және түн
 zenMode = Зейін режимі
 zenModeExit = Зейін режимінен шығу
+wordMeaningSiraj = Сөз мағынасы · ас-Сирадж

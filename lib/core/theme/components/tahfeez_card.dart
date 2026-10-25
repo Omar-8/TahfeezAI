@@ -47,36 +47,51 @@ class TahfeezCard extends StatelessWidget {
     final radius = shape is RoundedRectangleBorder
         ? shape.borderRadius.resolve(Directionality.of(context))
         : BorderRadius.circular(TahfeezRadii.lg);
-    return ClipRRect(
-      borderRadius: radius,
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            borderRadius: radius,
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                scheme.surfaceContainerLowest.withValues(
-                  alpha: dark ? 0.22 : 0.62,
-                ),
-                scheme.surfaceContainerLow.withValues(
-                  alpha: dark ? 0.12 : 0.38,
+    // In light themes a soft shadow lifts the glass off the page.
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: radius,
+        boxShadow: dark
+            ? null
+            : [
+                BoxShadow(
+                  color: scheme.shadow.withValues(alpha: 0.06),
+                  blurRadius: 18,
+                  offset: const Offset(0, 6),
                 ),
               ],
+      ),
+      child: ClipRRect(
+        borderRadius: radius,
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              borderRadius: radius,
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  scheme.surfaceContainerLowest.withValues(
+                    alpha: dark ? 0.22 : 0.48,
+                  ),
+                  scheme.surfaceContainerLow.withValues(
+                    alpha: dark ? 0.12 : 0.26,
+                  ),
+                ],
+              ),
+              border: Border.all(
+                color: dark
+                    ? Colors.white.withValues(alpha: 0.08)
+                    : Colors.white.withValues(alpha: 0.7),
+              ),
             ),
-            border: Border.all(
-              color: dark
-                  ? Colors.white.withValues(alpha: 0.08)
-                  : Colors.white.withValues(alpha: 0.7),
+            child: Material(
+              type: MaterialType.transparency,
+              child: onTap == null
+                  ? content
+                  : InkWell(onTap: onTap, borderRadius: radius, child: content),
             ),
-          ),
-          child: Material(
-            type: MaterialType.transparency,
-            child: onTap == null
-                ? content
-                : InkWell(onTap: onTap, borderRadius: radius, child: content),
           ),
         ),
       ),

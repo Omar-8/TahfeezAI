@@ -35,27 +35,27 @@ enum DayPart {
       dawn =>
         dark
             ? (const Color(0xFF3A2A33), const Color(0xFF272538))
-            : (const Color(0xFFF6D9D0), const Color(0xFFE4DEF3)),
+            : (const Color(0xFFF1BFAE), const Color(0xFFD3C7EE)),
       morning =>
         dark
             ? (const Color(0xFF163029), const Color(0xFF14262D))
-            : (const Color(0xFFD6EFE5), const Color(0xFFE3F0F6)),
+            : (const Color(0xFFB4E1CE), const Color(0xFFC3DDF0)),
       afternoon =>
         dark
             ? (const Color(0xFF1A2D24), const Color(0xFF2A291E))
-            : (const Color(0xFFDCEEE2), const Color(0xFFF3EDD9)),
+            : (const Color(0xFFBFE1CB), const Color(0xFFEBDCB0)),
       golden =>
         dark
             ? (const Color(0xFF3A2C17), const Color(0xFF33231D))
-            : (const Color(0xFFF6E1BC), const Color(0xFFF4D8C6)),
+            : (const Color(0xFFF0C886), const Color(0xFFEDB89A)),
       sunset =>
         dark
             ? (const Color(0xFF3B2421), const Color(0xFF2A2238))
-            : (const Color(0xFFF2CBB9), const Color(0xFFDACEEA)),
+            : (const Color(0xFFEAA48C), const Color(0xFFC6B2E3)),
       night =>
         dark
             ? (const Color(0xFF141B33), const Color(0xFF1B1832))
-            : (const Color(0xFFCFD8EE), const Color(0xFFDDD8EE)),
+            : (const Color(0xFFA9B9E4), const Color(0xFFC4B9E6)),
     };
   }
 
@@ -135,7 +135,13 @@ class _HomeSkyState extends ConsumerState<HomeSky> {
     if (!ref.watch(homeSkyProvider)) return const SizedBox.shrink();
     final scheme = Theme.of(context).colorScheme;
     final part = DayPart.at(ref.watch(homeSkyClockProvider)());
-    final (a, b) = part.colors(scheme.brightness);
+    // Light papers (standard, warm, sepia): the sky leans a little towards
+    // the paper, so each keeps its character.
+    var (a, b) = part.colors(scheme.brightness);
+    if (scheme.brightness == Brightness.light) {
+      a = Color.lerp(a, scheme.surface, 0.12)!;
+      b = Color.lerp(b, scheme.surface, 0.12)!;
+    }
     final rtl = Directionality.of(context) == TextDirection.rtl;
     return IgnorePointer(
       child: SizedBox(
@@ -184,7 +190,9 @@ class _HomeSkyState extends ConsumerState<HomeSky> {
                 ),
               ),
               TahfeezGeometricPattern(
-                color: scheme.onSurface.withValues(alpha: 0.05),
+                color: scheme.onSurface.withValues(
+                  alpha: scheme.brightness == Brightness.light ? 0.07 : 0.05,
+                ),
                 spacing: 52,
               ),
             ],

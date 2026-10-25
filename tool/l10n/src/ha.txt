@@ -541,3 +541,4 @@ settingsTimeOfDay = Launukan Gida bisa lokacin rana
 settingsTimeOfDaySub = Alfijir, rana, faɗuwar rana da dare a bayan Gida
 zenMode = Yanayin mai da hankali
 zenModeExit = Fita daga yanayin mai da hankali
+wordMeaningSiraj = Ma'anar kalma · as-Siraj

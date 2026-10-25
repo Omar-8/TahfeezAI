@@ -541,3 +541,4 @@ settingsTimeOfDay = Bosh sahifa ranglari kun vaqtiga qarab
 settingsTimeOfDaySub = Bosh sahifa ortida tong, kunduz, quyosh botishi va tun
 zenMode = Diqqat rejimi
 zenModeExit = Diqqat rejimidan chiqish
+wordMeaningSiraj = Soʻz maʼnosi · as-Siroj

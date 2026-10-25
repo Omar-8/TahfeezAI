@@ -541,3 +541,4 @@ settingsTimeOfDay = ڕەنگەکانی سەرەکی بەپێی کاتی ڕۆژ
 settingsTimeOfDaySub = بەرەبەیان، ڕۆژ، ئاوابوون و شەو لە پشت سەرەکی
 zenMode = دۆخی سەرنج
 zenModeExit = دەرچوون لە دۆخی سەرنج
+wordMeaningSiraj = واتای وشە · السراج

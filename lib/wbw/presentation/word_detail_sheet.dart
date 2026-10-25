@@ -16,6 +16,7 @@ import '../../features/recitation/presentation/recitation_word_feedback.dart';
 import '../../quran/application/canonical_ayah_word_text.dart';
 import '../../quran/domain/models/quran_refs.dart';
 import '../application/active_wbw_pack.dart';
+import '../application/arabic_word_gloss.dart';
 import '../application/wbw_preferences_controller.dart';
 import '../application/wbw_word_lookup.dart';
 import 'wbw_packs_sheet.dart';
@@ -64,6 +65,16 @@ class _WordDetailSheetBody extends ConsumerWidget {
         wordIndex: wordRef.wordIndex,
       ),
     );
+    final gloss = Localizations.localeOf(context).languageCode == 'ar'
+        ? ref
+              .watch(
+                arabicWordGlossProvider((
+                  ayahId: wordRef.ayahId,
+                  wordIndex: wordRef.wordIndex,
+                )),
+              )
+              .value
+        : null;
     final quranTextColor = ref
         .watch(mushafAppearanceControllerProvider)
         .colors
@@ -100,13 +111,34 @@ class _WordDetailSheetBody extends ConsumerWidget {
             wordRef: wordRef,
             wordText: arabicTextAsync.value,
           ),
-          activePack.when(
-            data: (pack) => pack == null
-                ? _noActivePackHint(context)
-                : _WbwWordContent(packId: pack.id, wordRef: wordRef),
-            loading: () => const TahfeezLoadingView(),
-            error: (_, _) => _noActivePackHint(context),
-          ),
+          // In Arabic: the word's meaning from al-Sirāj, where it explains
+          // the word; else (or in another language) the word-by-word pack.
+          if (gloss != null)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              spacing: TahfeezSpacing.xs,
+              children: [
+                Text(
+                  AppLocalizations.of(context).wordMeaningSiraj,
+                  style: Theme.of(context).textTheme.labelMedium
+                      ?.copyWith(color: scheme.primary),
+                ),
+                Text(
+                  gloss,
+                  textDirection: TextDirection.rtl,
+                  style: Theme.of(context).textTheme.bodyLarge
+                      ?.copyWith(height: 1.7),
+                ),
+              ],
+            )
+          else
+            activePack.when(
+              data: (pack) => pack == null
+                  ? _noActivePackHint(context)
+                  : _WbwWordContent(packId: pack.id, wordRef: wordRef),
+              loading: () => const TahfeezLoadingView(),
+              error: (_, _) => _noActivePackHint(context),
+            ),
           Row(
             children: [
               IconButton(

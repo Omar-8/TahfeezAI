@@ -541,3 +541,4 @@ settingsTimeOfDay = Midabada Hoyga waqtiga maalinta
 settingsTimeOfDaySub = Waaberi, maalin, qorrax dhac iyo habeen gadaasha Hoyga
 zenMode = Habka diirad saarka
 zenModeExit = Ka bax habka diirad saarka
+wordMeaningSiraj = Macnaha erayga · as-Siraaj
