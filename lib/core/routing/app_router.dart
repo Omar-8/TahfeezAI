@@ -25,7 +25,14 @@ GoRouter appRouter(Ref ref) {
   final router = GoRouter(
     initialLocation: AppRoutes.home,
     routes: [
-      StatefulShellRoute.indexedStack(
+      StatefulShellRoute(
+        // The tabs cross-fade (as indexedStack's, each kept alive, the
+        // hidden ones' tickers off).
+        navigatorContainerBuilder: (context, navigationShell, children) =>
+            FadingBranches(
+              index: navigationShell.currentIndex,
+              children: children,
+            ),
         builder: (context, state, navigationShell) => AppShell(
           navigationShell: navigationShell,
           // The shell needs the *active* branch's location (see
@@ -120,4 +127,83 @@ GoRouter appRouter(Ref ref) {
     router.dispose();
   });
   return router;
+}
+
+/// The shell's tabs, each kept alive: the one shown fades in over the one
+/// before (220 ms), which is then hidden. Only the shown one's tickers run
+/// — a Mushaf in another tab knows it is out of sight.
+class FadingBranches extends StatefulWidget {
+  const FadingBranches({
+    super.key,
+    required this.index,
+    required this.children,
+  });
+
+  final int index;
+  final List<Widget> children;
+
+  @override
+  State<FadingBranches> createState() => _FadingBranchesState();
+}
+
+class _FadingBranchesState extends State<FadingBranches>
+    with SingleTickerProviderStateMixin {
+  late final _fade =
+      AnimationController(
+        vsync: this,
+        duration: const Duration(milliseconds: 220),
+        value: 1,
+      )..addStatusListener((status) {
+        if (status == AnimationStatus.completed && mounted) {
+          setState(() => _previous = null);
+        }
+      });
+  int? _previous;
+
+  @override
+  void didUpdateWidget(FadingBranches old) {
+    super.didUpdateWidget(old);
+    if (old.index != widget.index) {
+      _previous = old.index;
+      _fade.forward(from: 0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _fade.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final index = widget.index;
+    // The one shown last (on top); each keyed, so moving it keeps it.
+    final order = [
+      for (var i = 0; i < widget.children.length; i++)
+        if (i != index) i,
+      index,
+    ];
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        for (final i in order)
+          KeyedSubtree(
+            key: ValueKey(i),
+            child: Offstage(
+              offstage: i != index && i != _previous,
+              child: TickerMode(
+                enabled: i == index,
+                // Always wrapped (the same tree shown or not, so nothing
+                // is rebuilt), only the shown one's opacity moving.
+                child: FadeTransition(
+                  opacity: i == index ? _fade : kAlwaysCompleteAnimation,
+                  child: widget.children[i],
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
 }

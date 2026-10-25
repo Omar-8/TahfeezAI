@@ -122,13 +122,16 @@ class MushafPageTitle extends ConsumerWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
+            // Shrinking too where the bar is short of room.
             if (surahNo != null)
-              SurahNameCalligraphy(
-                surahNo: surahNo,
-                height: arabic ? 24 : 20,
-                maxWidth: 80,
-                color: baseColor,
-                semanticLabel: arabic ? name : null,
+              Flexible(
+                child: SurahNameCalligraphy(
+                  surahNo: surahNo,
+                  height: arabic ? 24 : 20,
+                  maxWidth: 80,
+                  color: baseColor,
+                  semanticLabel: arabic ? name : null,
+                ),
               ),
           ],
         ),
