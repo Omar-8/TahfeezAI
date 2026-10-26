@@ -16,7 +16,7 @@ by `python3 tool/make_play_listing.py` from the landing page's media
 | Signed with | the upload key (`android/key.properties`; CN=Omar Attia, OU=TahfeezAI); SHA-256 `D4:2A:7E:18:46:FC:47:4F:5F:2C:92:F3:C6:1F:6F:ED:66:0F:3D:82:0B:48:EF:DC:38:43:A2:83:6E:A8:A8:4C` |
 | SDK | min 24 (Android 7.0), target 36 |
 | Acoustic model | v3.7 (release `model-v3.7`, SHA-256 `7cbe486f…`), bundled |
-| Download size (bundletool 1.18.3, `get-size total --dimensions=ABI`) | arm64-v8a 167.5 MB, armeabi-v7a 161.0 MB, x86_64 161.5 MB — under Play's 200 MB |
+| Download size (bundletool 1.18.3, `get-size total --dimensions=ABI`) | arm64-v8a 173.8 MB, armeabi-v7a 167.3 MB, x86_64 167.7 MB — under Play's 200 MB (measured 2026-10-26, with the 8 new languages, their translations and tafsir, al-Sirāj and the surah-name calligraphy) |
 
 ## Main store listing
 
