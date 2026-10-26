@@ -32,10 +32,11 @@ class Student:
 
     NAMES = ['sums', 'count', 'kv', 'conv', 'akv', 'aconv', 'valid']
 
-    def __init__(self, onnx, cfg):
+    def __init__(self, onnx, cfg, threads=8):
         import onnxruntime as ort
         so = ort.SessionOptions()
-        so.intra_op_num_threads = os.cpu_count()
+        # More is far slower on a many-core box: 80 threads ran 35x slower than 8.
+        so.intra_op_num_threads = threads
         self.s = ort.InferenceSession(onnx, so)
         self.cfg = json.load(open(cfg))
 
@@ -103,10 +104,11 @@ def main():
     p.add_argument('sources', nargs='+')
     p.add_argument('--sure', type=float, default=0.9)
     p.add_argument('--ruled-out', type=float, default=0.05)
+    p.add_argument('--threads', type=int, default=8, help="the student's CPU threads")
     a = p.parse_args()
     teacher = ds.load_teacher()
     fe = getattr(teacher.processor, 'feature_extractor', teacher.processor)
-    student = Student(a.student, a.stream)
+    student = Student(a.student, a.stream, a.threads)
     rows, done = [], set()
     if os.path.exists(a.out):   # resume
         rows = json.load(open(a.out))['clips']

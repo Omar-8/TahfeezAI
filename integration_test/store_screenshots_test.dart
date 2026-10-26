@@ -13,6 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tahfeez_ai/features/home/presentation/home_sky.dart';
 import 'package:tahfeez_ai/app/app.dart';
 import 'package:tahfeez_ai/app/bootstrap.dart';
 import 'package:tahfeez_ai/core/localization/locale_controller.dart';
@@ -139,10 +140,14 @@ void main() {
     ]);
     await run(2);
 
-    // ── Light ──
+    // ── Light ── under a morning sky
+    debugSkyTime = DateTime(2026, 10, 26, 9);
     await theme(dark: false);
     await go('/home');
     await shot('01-home-light');
+    // The surah list: glass cards, the names in the Mushaf's calligraphy.
+    await go('/quran');
+    await shot('18-quran-tab-light');
 
     container.read(readerModeProvider.notifier).set(ReaderMode.mushaf);
     await go('/quran/surah/36');
@@ -186,7 +191,8 @@ void main() {
     await run(3);
     await shot('07-search-light');
 
-    // ── Dark ──
+    // ── Dark ── under a night sky
+    debugSkyTime = DateTime(2026, 10, 26, 21);
     await theme(dark: true);
     await ayahView(tafsir: true, meanings: true);
     container.read(readerModeProvider.notifier).set(ReaderMode.ayah);

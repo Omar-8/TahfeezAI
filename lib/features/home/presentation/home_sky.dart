@@ -143,8 +143,14 @@ final homeSkyProvider = NotifierProvider<HomeSkyController, bool>(
 
 /// The clock for Home's sky; overridden in tests.
 final homeSkyClockProvider = Provider<DateTime Function()>(
-  (ref) => DateTime.now,
+  (ref) =>
+      () => debugSkyTime ?? DateTime.now(),
 );
+
+/// The sky's hour for the store screenshots (the app built for them takes
+/// no provider overrides); `null`: the phone's clock.
+@visibleForTesting
+DateTime? debugSkyTime;
 
 /// Behind the top of Home: a soft sky in the colours of the time of day —
 /// dawn, morning, afternoon, the golden hour, sunset, night — with the

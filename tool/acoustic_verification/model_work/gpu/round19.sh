@@ -24,15 +24,26 @@ if [ ! -f data_orig/val.npz ]; then
   log "data_orig: $(ls data_orig/shard_*.npz | wc -l) shards"
 fi
 
+# Six miners side by side (the student on 8 CPU threads each, PyTorch capped too — left
+# at 80 threads apiece they starve each other; the teachers, ~2.7 GB of GPU memory each),
+# over the pools' shards dealt out in turn. Each resumes from its own output.
 if [ ! -f mine_pools.done ]; then
   log "mining start"
-  $PY disagree_mine.py mine_pools.json artifacts/r6g2e8_acc4.onnx artifacts/r6g2e8_stream.json \
-    data_retasy/shard_95*.npz data_learn/shard_9*.npz data_real/shard_96*.npz \
-    data_juz30/shard_94*.npz --sure 0.8 --ruled-out 0.5 > mine.out 2>&1 && touch mine_pools.done
-  log "mining: $(tail -n 1 mine.out)"
+  mapfile -t SHARDS < <(ls data_retasy/shard_95*.npz data_learn/shard_9*.npz \
+    data_real/shard_96*.npz data_juz30/shard_94*.npz)
+  for k in 0 1 2 3 4 5; do
+    part=()
+    for i in "${!SHARDS[@]}"; do [ $((i % 6)) -eq $k ] && part+=("${SHARDS[$i]}"); done
+    OMP_NUM_THREADS=8 MKL_NUM_THREADS=8 $PY disagree_mine.py mine_pools$k.json artifacts/r6g2e8_acc4.onnx artifacts/r6g2e8_stream.json \
+      "${part[@]}" --sure 0.8 --ruled-out 0.5 > mine$k.out 2>&1 &
+  done
+  wait
+  [ "$(grep -l '^[0-9]* clips' mine[0-5].out | wc -l)" -eq 6 ] && touch mine_pools.done
+  log "mining: $(tail -qn 1 mine[0-5].out | tr '\n' ' ')"
 fi
-[ -f mine_pools.done ] || { log "mining FAILED: $(tail -n 1 mine.out)"; exit 1; }
-$PY disagree_shard.py data_mined mine_pools.json --max-clips 3000 --first 9100 > shard.out 2>&1
+[ -f mine_pools.done ] || { log "mining FAILED: $(tail -qn 1 mine[0-5].out | tr '\n' ' ')"; exit 1; }
+$PY disagree_shard.py data_mined mine_pools[0-5].json \
+  --max-clips 3000 --first 9100 > shard.out 2>&1
 log "mined shards: $(tail -n 1 shard.out)"
 
 rm -rf data_mix && mkdir data_mix
@@ -54,6 +65,6 @@ $PY distill_student.py train d6h data_mix runs/G10 \
 mkdir -p out/G10
 cp runs/G10/{student.pt,config.json,run.json,train.log} out/G10/
 cp init/v35s/fbank_prior.json out/G10/
-cp data_mined/mined_clips.json mine_pools.json out/G10/
+cp data_mined/mined_clips.json mine_pools[0-5].json out/G10/
 rm -f runs/G10/checkpoint.pt
 log "G10 done: $(grep VAL runs/G10/train.log | tail -n 1)"

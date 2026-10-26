@@ -31,11 +31,11 @@ PHONE = [
     "05b-recite-marks-dark",
     "06b-pronunciation-dark",
     "10b-hide-recite-dark",
+    "01-home-light",
+    "18-quran-tab-light",
     "02-mushaf-light",
-    "03-listening-dark",
     "04-ayah-mode-light",
-    "12-memorize-dark",
-    "15-home-arabic-light",
+    "13-progress-dark",
 ]
 
 

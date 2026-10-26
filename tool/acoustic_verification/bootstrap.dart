@@ -260,6 +260,10 @@ class _Case {
   _Case(this.m, this.frames, this.expected, this.pauses, this.targets);
   final Map<String, Object?> m;
   final AcousticFrames frames;
+
+  /// A second opinion (tag `student+second`): a word stays a mistake only if
+  /// this model, judged the same way, also finds one in it.
+  _Case? second;
   final List<PhoneticToken> expected;
   final Map<int, PauseForms> pauses;
   final Set<WordRef> targets;
@@ -275,11 +279,35 @@ class _Case {
     )) {
       (out[v.token.word] ??= {}).add(v.type);
     }
+    final other = second?.judge(th);
+    if (other != null) {
+      for (final e in out.entries) {
+        if (!(other[e.key]?.any((t) => t.isError) ?? false)) {
+          e.value.removeWhere((t) => t.isError);
+        }
+      }
+    }
     return out;
   }
 }
 
 List<_Case> _load(String name) {
+  // pack_student+second: the student's verdicts, each mistake confirmed by
+  // the second model's on the same case.
+  if (name.contains('+')) {
+    final pack = name.substring(0, name.indexOf('_'));
+    final tags = name.substring(pack.length + 1).split('+');
+    final first = _load('${pack}_${tags[0]}');
+    final other = _load('${pack}_${tags[1]}');
+    if (other.length != first.length) {
+      stderr.writeln('$name: ${first.length} vs ${other.length} cases');
+      return const [];
+    }
+    for (var i = 0; i < first.length; i++) {
+      first[i].second = other[i];
+    }
+    return first;
+  }
   final json = File('$_results/$name.json');
   if (!json.existsSync()) {
     stderr.writeln('missing $name');
