@@ -1,5 +1,7 @@
 import 'dart:math' as math;
 
+import '../../../core/ui/motion.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -41,7 +43,7 @@ class JuzRing extends StatelessWidget {
       label: AppLocalizations.of(context).memProgressShare(percent),
       child: TweenAnimationBuilder<double>(
         tween: Tween(begin: 0, end: 1),
-        duration: const Duration(milliseconds: 1100),
+        duration: motion(context, const Duration(milliseconds: 1100)),
         curve: Curves.easeOutCubic,
         builder: (context, t, _) => SizedBox.square(
           dimension: size,
@@ -161,8 +163,9 @@ class StreakCard extends ConsumerWidget {
                     // Counting up to it as the card appears.
                     TweenAnimationBuilder<double>(
                       tween: Tween(begin: 0, end: current.toDouble()),
-                      duration: Duration(
-                        milliseconds: 300 + 40 * current.clamp(0, 15),
+                      duration: motion(
+                        context,
+                        Duration(milliseconds: 300 + 40 * current.clamp(0, 15)),
                       ),
                       curve: Curves.easeOut,
                       builder: (context, v, _) => Text(
@@ -184,27 +187,31 @@ class StreakCard extends ConsumerWidget {
               ),
             ],
           ),
-          ActivityHeatmap(calendar: calendar),
-          Wrap(
-            alignment: WrapAlignment.end,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            spacing: 3,
-            runSpacing: 3,
-            children: [
-              Text(l10n.memCalendarLess, style: theme.textTheme.labelSmall),
-              const SizedBox(width: 2),
-              for (var level = 0; level <= 4; level++)
-                Container(
-                  width: 10,
-                  height: 10,
-                  decoration: BoxDecoration(
-                    color: ActivityHeatmap.colorOf(level, scheme),
-                    borderRadius: BorderRadius.circular(2.5),
+          // (Its squares say nothing a screen reader can: the streak above
+          // says it in words.)
+          ExcludeSemantics(child: ActivityHeatmap(calendar: calendar)),
+          ExcludeSemantics(
+            child: Wrap(
+              alignment: WrapAlignment.end,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 3,
+              runSpacing: 3,
+              children: [
+                Text(l10n.memCalendarLess, style: theme.textTheme.labelSmall),
+                const SizedBox(width: 2),
+                for (var level = 0; level <= 4; level++)
+                  Container(
+                    width: 10,
+                    height: 10,
+                    decoration: BoxDecoration(
+                      color: ActivityHeatmap.colorOf(level, scheme),
+                      borderRadius: BorderRadius.circular(2.5),
+                    ),
                   ),
-                ),
-              const SizedBox(width: 2),
-              Text(l10n.memCalendarMore, style: theme.textTheme.labelSmall),
-            ],
+                const SizedBox(width: 2),
+                Text(l10n.memCalendarMore, style: theme.textTheme.labelSmall),
+              ],
+            ),
           ),
         ],
       ),

@@ -1,4 +1,7 @@
 import 'dart:async';
+
+import '../../../core/ui/motion.dart';
+
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
@@ -67,7 +70,7 @@ class _MilestoneLayerState extends ConsumerState<MilestoneLayer> {
           right: 0,
           child: SafeArea(
             child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 450),
+              duration: motion(context, const Duration(milliseconds: 450)),
               switchInCurve: Curves.easeOutCubic,
               switchOutCurve: Curves.easeInCubic,
               transitionBuilder: (child, animation) => FadeTransition(

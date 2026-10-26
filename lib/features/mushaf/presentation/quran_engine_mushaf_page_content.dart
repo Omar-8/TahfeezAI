@@ -59,6 +59,10 @@ class _QuranEngineMushafPageContentState
   /// The eye's hiding, applied once the words have faded into the paper.
   Timer? _maskLater;
 
+  /// The phone's "remove animations": no word effects.
+  bool get _calm =>
+      mounted && (MediaQuery.maybeDisableAnimationsOf(context) ?? false);
+
   /// The hide-mode state last applied to [_page], so changes to other
   /// pages' reveal progress don't re-apply this one.
   ({bool hidden, int revealed})? _appliedMask;
@@ -146,7 +150,9 @@ class _QuranEngineMushafPageContentState
     final page = _page;
     if (page == null || before == null || after == null) return;
     if (page is! MushafWordEffectsPage) return;
-    final effects = page as MushafWordEffectsPage;
+    // Animations turned off on the phone: none played (the rest — a page's
+    // gentle tap — still).
+    final effects = _calm ? const _NoEffects() : page as MushafWordEffectsPage;
     final n = page.wordCount;
     final inks =
         ref.read(mushafWordOverlayProvider)?.inks ??
@@ -403,6 +409,7 @@ class _QuranEngineMushafPageContentState
     _maskLater?.cancel();
     // The eye: the whole page hidden or shown — fading.
     if (page is MushafWordEffectsPage &&
+        !_calm &&
         before != null &&
         before.hidden != wanted.hidden) {
       final effects = page as MushafWordEffectsPage;
@@ -432,6 +439,7 @@ class _QuranEngineMushafPageContentState
     );
     // Words uncovered with hide mode's buttons: animated in, in order.
     if (page is MushafWordEffectsPage &&
+        !_calm &&
         before != null &&
         before.hidden &&
         wanted.hidden &&
@@ -621,4 +629,19 @@ class _QuranEngineMushafPageContentState
             },
     );
   }
+}
+
+/// Word effects when animations are turned off: none.
+class _NoEffects implements MushafWordEffectsPage {
+  const _NoEffects();
+
+  @override
+  void playWordEffect(
+    int wordIndex,
+    MushafWordEffect effect, {
+    Color? color,
+    Duration delay = Duration.zero,
+    bool halo = true,
+    bool letters = true,
+  }) {}
 }

@@ -18,7 +18,7 @@ abstract final class TahfeezExplorationPalette {
   static const lightPrimaryAccent = Color(0xFF218A73);
   static const lightPrimaryContainer = Color(0xFFDCEFE8);
   static const lightText = Color(0xFF18201D);
-  static const lightSecondaryText = Color(0xFF68736E);
+  static const lightSecondaryText = Color(0xFF58635E);
   static const lightBorder = Color(0xFFE4E8E5);
   static const mutedGold = Color(0xFFB79A5B);
 

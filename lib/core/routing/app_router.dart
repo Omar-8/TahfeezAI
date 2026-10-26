@@ -158,7 +158,13 @@ class _FadingBranchesState extends State<FadingBranches>
   @override
   void didUpdateWidget(FadingBranches old) {
     super.didUpdateWidget(old);
-    if (old.index != widget.index) _fade.forward(from: 0);
+    if (old.index == widget.index) return;
+    // The phone's "remove animations": straight to the tab.
+    if (MediaQuery.maybeDisableAnimationsOf(context) ?? false) {
+      _fade.value = 1;
+    } else {
+      _fade.forward(from: 0);
+    }
   }
 
   @override

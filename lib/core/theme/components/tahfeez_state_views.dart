@@ -24,7 +24,20 @@ class _TahfeezLoadingViewState extends State<TahfeezLoadingView>
   late final _pulse = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 900),
-  )..repeat(reverse: true);
+  );
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // The phone's "remove animations": still, not pulsing.
+    if (MediaQuery.maybeDisableAnimationsOf(context) ?? false) {
+      _pulse
+        ..stop()
+        ..value = 1;
+    } else if (!_pulse.isAnimating) {
+      _pulse.repeat(reverse: true);
+    }
+  }
 
   @override
   void dispose() {

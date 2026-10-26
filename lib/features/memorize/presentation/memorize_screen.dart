@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/ui/motion.dart';
 import '../../../core/ui/bar_space.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -231,7 +232,7 @@ class ScoreBar extends StatelessWidget {
           borderRadius: BorderRadius.circular(TahfeezRadii.pill),
           child: TweenAnimationBuilder<double>(
             tween: Tween(begin: 0, end: value),
-            duration: const Duration(milliseconds: 700),
+            duration: motion(context, const Duration(milliseconds: 700)),
             curve: Curves.easeOutCubic,
             builder: (context, v, _) => LinearProgressIndicator(
               value: v,

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../../../core/ui/motion.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/localization/generated/app_localizations.dart';
@@ -87,7 +90,7 @@ class _TestSummarySheet extends ConsumerWidget {
             children: [
               TweenAnimationBuilder<double>(
                 tween: Tween(begin: 0, end: 1),
-                duration: const Duration(milliseconds: 800),
+                duration: motion(context, const Duration(milliseconds: 800)),
                 curve: Curves.easeOutBack,
                 builder: (context, t, child) => Transform.rotate(
                   angle: (1 - t) * -0.8,

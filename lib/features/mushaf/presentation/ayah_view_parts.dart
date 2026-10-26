@@ -82,6 +82,8 @@ class _AyahWordViewState extends State<AyahWordView>
   };
 
   void _play(_WordEffect effect, int ms) {
+    // The phone's "remove animations": none.
+    if (MediaQuery.maybeDisableAnimationsOf(context) ?? false) return;
     final c = _controller ??= AnimationController(vsync: this)
       ..addStatusListener((status) {
         if (status == AnimationStatus.completed && mounted) {
