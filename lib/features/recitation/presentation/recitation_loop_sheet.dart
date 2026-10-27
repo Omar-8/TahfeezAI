@@ -409,9 +409,17 @@ class _RecitationLoopSheetState extends ConsumerState<_RecitationLoopSheet> {
             const SizedBox(height: TahfeezSpacing.md),
             Row(
               children: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: Text(l10n.commonCancel),
+                // Sharing the row at large text sizes (Kurdish at 2×).
+                Flexible(
+                  child: TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: Text(
+                      l10n.commonCancel,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
                 ),
                 const SizedBox(width: TahfeezSpacing.sm),
                 Expanded(
@@ -423,7 +431,12 @@ class _RecitationLoopSheetState extends ConsumerState<_RecitationLoopSheet> {
                         minimumSize: const Size.fromHeight(52),
                       ),
                       icon: const Icon(Icons.mic_rounded),
-                      label: Text(l10n.recLoopStart),
+                      label: Text(
+                        l10n.recLoopStart,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                      ),
                       onPressed: canStart ? _start : null,
                     ),
                   ),

@@ -27,7 +27,9 @@ import 'package:tahfeez_ai/features/mushaf/application/mushaf_hide_mode.dart';
 import 'package:tahfeez_ai/features/mushaf/application/mushaf_passages.dart';
 import 'package:tahfeez_ai/features/mushaf/application/reader_mode.dart';
 import 'package:tahfeez_ai/features/mushaf/domain/mushaf_appearance.dart';
+import 'package:tahfeez_ai/features/mushaf/presentation/mushaf_appearance_sheet.dart';
 import 'package:tahfeez_ai/features/recitation/presentation/recitation_controls.dart';
+import 'package:tahfeez_ai/memorization/application/activity_stats.dart';
 import 'package:tahfeez_ai/memorization/domain/models/memorization_models.dart';
 import 'package:tahfeez_ai/memorization/memorization_providers.dart';
 import 'package:tahfeez_ai/quran/domain/quran_ayah_numbers.dart';
@@ -41,6 +43,7 @@ void main() {
     await prefs.setBool('firstRun.welcome', true);
     await prefs.setBool('firstRun.guide', true);
 
+    debugPrint('store-shots: bootstrap');
     await bootstrap();
     Future<void> run(double seconds) async {
       for (var i = 0; i < seconds * 10; i++) {
@@ -49,6 +52,7 @@ void main() {
     }
 
     await run(30); // the first start seeds the Quran database
+    debugPrint('store-shots: seeded');
     if (Platform.isAndroid) await binding.convertFlutterSurfaceToImage();
     final container = ProviderScope.containerOf(
       tester.element(find.byType(TahfeezApp)),
@@ -61,6 +65,7 @@ void main() {
     }
 
     Future<void> shot(String name) async {
+      debugPrint('store-shots: $name');
       FocusManager.instance.primaryFocus?.unfocus();
       await run(1.5);
       await binding.takeScreenshot('shot-$name');
@@ -138,6 +143,15 @@ void main() {
             hidden: true,
           ),
     ]);
+    // The activity counters, kept apart from the attempts: as those days'.
+    container
+        .read(activityStatsProvider.notifier)
+        .add(
+          recitedAyahs: n,
+          recitedWords: n * 6,
+          heardAyahs: 412,
+          mushafSeconds: 6 * 3600 + 25 * 60,
+        );
     await run(2);
 
     // ── Light ── under a morning sky
@@ -200,7 +214,8 @@ void main() {
     await shot('08-ayah-mode-dark');
 
     // Ayah mode's view: fonts, text size, what each ayah shows.
-    await tester.tap(find.byIcon(Icons.tune).first);
+    // (Its sheet, as the Hifz settings' Appearance tab shows it.)
+    showMushafAppearanceSheet(tester.element(find.byType(Scaffold).last));
     await run(2);
     await shot('09-view-settings-dark');
     await closeSheet();
