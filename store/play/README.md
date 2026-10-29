@@ -16,7 +16,7 @@ by `python3 tool/make_play_listing.py` from the landing page's media
 | Signed with | the upload key (`android/key.properties`; CN=Omar Attia, OU=TahfeezAI); SHA-256 `D4:2A:7E:18:46:FC:47:4F:5F:2C:92:F3:C6:1F:6F:ED:66:0F:3D:82:0B:48:EF:DC:38:43:A2:83:6E:A8:A8:4C` |
 | SDK | min 24 (Android 7.0), target 36 |
 | Acoustic model | v3.7 (release `model-v3.7`, SHA-256 `7cbe486f…`), bundled |
-| Download size (bundletool, `get-size total --dimensions=ABI`) | arm64-v8a 169.5 MB, armeabi-v7a 174.2 MB, x86_64 177.9 MB — under Play's 200 MB (measured 2026-10-29: the Quran as ready-made xz databases and per-language packs instead of JSON; ONNX Runtime for 32-bit ARM and x86_64 too; the model stored uncompressed, read in place) |
+| Download size (bundletool, `get-size total --dimensions=ABI`) | arm64-v8a 175.6 MB, armeabi-v7a 174.2 MB, x86_64 177.9 MB — under Play's 200 MB (measured 2026-10-29: the Quran as ready-made xz databases and per-language packs instead of JSON; ONNX Runtime — Microsoft's build — for 32-bit ARM and x86_64 too; the model stored uncompressed, read in place) |
 
 ## Main store listing
 
