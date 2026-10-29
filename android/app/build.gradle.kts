@@ -39,13 +39,23 @@ android {
     // 91 MB copy in app storage. The download is compressed anyway.
     androidResources.noCompress += "onnx"
 
-    // ONNX Runtime: Microsoft's own build (the Maven package's), on every
-    // phone. A reduced build of it (only the acoustic model's operators,
-    // arm64: tool/onnxruntime/build_reduced.sh, 15.9 MB instead of 33.0)
-    // was used until 2026-10-29 — set aside after a Samsung Galaxy S21
-    // crashed starting recitation: Microsoft's build is the one run on
-    // many phones. (To use the reduced one again: add
-    // src/main/jniLibs-ort as a jniLibs source, picked first.)
+    // A reduced ONNX Runtime (only the acoustic model's operators, arm64;
+    // tool/onnxruntime/build_reduced.sh): 15.9 MB instead of 33.0 MB. Used
+    // when built locally — the folder is not in git — and takes precedence
+    // over the Maven package's native libraries, whose Java API it matches
+    // (same version). Without it, the stock library is packaged. (Briefly
+    // set aside on 2026-10-29 for a crash that turned out to be R8's —
+    // proguard-rules.pro.)
+    val reducedOrt = file("src/main/jniLibs-ort")
+    if (reducedOrt.isDirectory) {
+        sourceSets["main"].jniLibs.srcDir(reducedOrt)
+        packaging.jniLibs.pickFirsts.addAll(
+            listOf(
+                "lib/arm64-v8a/libonnxruntime.so",
+                "lib/arm64-v8a/libonnxruntime4j_jni.so",
+            ),
+        )
+    }
 
     // The Play upload key: android/key.properties (never in git — see
     // android/.gitignore) names the keystore and its passwords. Without it a
