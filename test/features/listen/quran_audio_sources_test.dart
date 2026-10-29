@@ -26,6 +26,20 @@ void main() {
     expect(reciterFor('unknown').edition, reciters.first.edition);
   });
 
+  test('Al-Tablawi plays from everyayah.com, by surah and ayah', () {
+    final tablawi = reciterFor('ar.tablawi');
+    expect(tablawi.edition, 'ar.tablawi');
+    expect(
+      ayahAudioUrl(2255, tablawi),
+      'https://everyayah.com/data/Mohammad_al_Tablaway_64kbps/002255.mp3',
+    );
+    expect(
+      ayahAudioUrl(ayahIdAtGlobal(6236), tablawi),
+      'https://everyayah.com/data/Mohammad_al_Tablaway_64kbps/114006.mp3',
+    );
+    expect(reciterDownloadSize(tablawi), '≈ 854 MB');
+  });
+
   test('word audio follows Quran.com\'s positions, which join two words in '
       'four ayahs', () {
     expect(

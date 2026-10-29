@@ -140,6 +140,15 @@ const credits = <Credit>[
   ),
   Credit(
     group: CreditGroup.translations,
+    name: 'Mohamed Al-Tablawi’s recitation (ayahs)',
+    owner: 'EveryAyah (everyayah.com) — the reciter',
+    licence: 'No licence stated; streamed with credit',
+    url: 'https://everyayah.com',
+    useEn: 'Listening to ayahs and surahs (Al-Tablawi)',
+    useAr: 'الاستماع إلى الآيات والسور (الطبلاوي)',
+  ),
+  Credit(
+    group: CreditGroup.translations,
     name: 'Word audio',
     owner: 'Quran Foundation (Quran.com)',
     licence: 'Quran Foundation Developer Terms; streamed',

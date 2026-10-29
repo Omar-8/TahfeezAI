@@ -1,0 +1,84 @@
+<en-US>
+• New reciter: Mohamed Al-Tablawi
+• Press back twice to leave the app again (Android 16)
+• Hide mode: bigger reveal buttons, in the right order in right-to-left languages
+• The daily ayah keeps its number on the last line
+</en-US>
+<ar>
+• قارئ جديد: محمد محمود الطبلاوي
+• عاد الضغط مرتين على زر الرجوع للخروج من التطبيق (أندرويد 16)
+• وضع الإخفاء: أزرار إظهار أكبر، وبالترتيب الصحيح في اللغات التي تُكتب من اليمين إلى اليسار
+• رقم الآية اليومية يبقى في سطرها الأخير
+</ar>
+<bn-BD>
+• নতুন ক্বারী: মোহাম্মদ আত-তাবলাভি
+• অ্যাপ থেকে বের হতে আবার দুইবার ব্যাক চাপুন (অ্যান্ড্রয়েড ১৬)
+• লুকানোর মোড: দেখানোর বোতাম বড়, ডান থেকে বামে লেখা ভাষায় সঠিক ক্রমে
+• দৈনিক আয়াতের নম্বর শেষ লাইনেই থাকে
+</bn-BD>
+<de-DE>
+• Neuer Rezitator: Mohamed Al-Tablawi
+• Zum Verlassen der App wieder zweimal Zurück drücken (Android 16)
+• Ausblenden-Modus: größere Aufdecken-Tasten, in Sprachen mit Schrift von rechts nach links in der richtigen Reihenfolge
+• Die Nummer des Tagesverses bleibt in seiner letzten Zeile
+</de-DE>
+<es-ES>
+• Nuevo recitador: Mohamed Al-Tablawi
+• Vuelve a pulsar atrás dos veces para salir de la aplicación (Android 16)
+• Modo ocultar: botones de mostrar más grandes, en el orden correcto en idiomas de derecha a izquierda
+• El número de la aleya del día se queda en su última línea
+</es-ES>
+<fa>
+• قاری جدید: محمد محمود طبلاوی
+• دوباره برای خروج از برنامه دو بار دکمهٔ بازگشت را بزنید (اندروید ۱۶)
+• حالت پنهان: دکمه‌های نمایش بزرگ‌تر، با ترتیب درست در زبان‌های راست‌به‌چپ
+• شمارهٔ آیهٔ روز در سطر آخر آن می‌ماند
+</fa>
+<fr-FR>
+• Nouveau récitateur : Mohamed Al-Tablawi
+• Appuyez de nouveau deux fois sur Retour pour quitter l'application (Android 16)
+• Mode masqué : boutons d'affichage plus grands, dans le bon ordre dans les langues de droite à gauche
+• Le numéro du verset du jour reste sur sa dernière ligne
+</fr-FR>
+<id>
+• Qari baru: Mohamed Al-Tablawi
+• Tekan kembali dua kali untuk keluar dari aplikasi lagi (Android 16)
+• Mode sembunyi: tombol tampilkan lebih besar, dengan urutan yang benar pada bahasa kanan-ke-kiri
+• Nomor ayat harian tetap di baris terakhirnya
+</id>
+<kk>
+• Жаңа қари: Мұхаммед әт-Таблауи
+• Қолданбадан шығу үшін қайтадан «Артқа» батырмасын екі рет басыңыз (Android 16)
+• Жасыру режимі: ашу батырмалары үлкенірек, оңнан солға жазылатын тілдерде дұрыс ретпен
+• Күнделікті аяттың нөмірі соңғы жолында қалады
+</kk>
+<ms>
+• Qari baharu: Mohamed Al-Tablawi
+• Tekan kembali dua kali untuk keluar daripada aplikasi sekali lagi (Android 16)
+• Mod sembunyi: butang dedah lebih besar, dalam susunan yang betul bagi bahasa kanan-ke-kiri
+• Nombor ayat harian kekal pada baris terakhirnya
+</ms>
+<ru-RU>
+• Новый чтец: Мухаммад ат-Таблави
+• Для выхода из приложения снова нажмите «Назад» дважды (Android 16)
+• Режим скрытия: кнопки показа крупнее и в правильном порядке в языках с письмом справа налево
+• Номер аята дня остаётся в его последней строке
+</ru-RU>
+<sw>
+• Msomaji mpya: Mohamed Al-Tablawi
+• Bonyeza nyuma mara mbili tena ili kutoka kwenye programu (Android 16)
+• Hali ya kuficha: vitufe vya kufunua vikubwa zaidi, kwa mpangilio sahihi katika lugha za kulia kwenda kushoto
+• Nambari ya aya ya siku inabaki kwenye mstari wake wa mwisho
+</sw>
+<tr-TR>
+• Yeni kâri: Muhammed et-Tablavi
+• Uygulamadan çıkmak için yeniden iki kez geri basın (Android 16)
+• Gizleme modu: daha büyük gösterme düğmeleri, sağdan sola yazılan dillerde doğru sırada
+• Günün ayetinin numarası son satırında kalıyor
+</tr-TR>
+<ur>
+• نئے قاری: محمد محمود طبلاوی
+• ایپ سے نکلنے کے لیے دوبارہ دو بار واپس کا بٹن دبائیں (اینڈرائیڈ 16)
+• چھپانے کا موڈ: دکھانے کے بٹن بڑے، اور دائیں سے بائیں لکھی جانے والی زبانوں میں درست ترتیب سے
+• روزانہ آیت کا نمبر اس کی آخری سطر میں رہتا ہے
+</ur>

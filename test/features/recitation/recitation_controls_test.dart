@@ -42,6 +42,7 @@ void main() {
     int pageCount = 604,
     bool web = false,
     bool introSeen = true,
+    Locale? locale,
   }) {
     return ProviderScope(
       overrides: [
@@ -97,6 +98,7 @@ void main() {
         ),
       ],
       child: MaterialApp(
+        locale: locale,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: ValueListenableBuilder<bool>(
@@ -325,6 +327,97 @@ void main() {
     expect(find.byKey(const ValueKey('modes-open')), findsNothing);
     expect(find.byTooltip('Listen'), findsOneWidget);
   });
+
+  // The reveal/hide buttons in hide mode: as tall as the modes' labelled
+  // group (48), filling the bar between the collapsed modes button and the
+  // eye, never clipped or overflowing — narrow phones to large, in English
+  // and right-to-left languages (the bar mirrored, the buttons not).
+  for (final width in [280.0, 320.0, 430.0]) {
+    for (final locale in const [
+      Locale('en'),
+      Locale('ar'),
+      Locale('fa'),
+      Locale('ur'),
+    ]) {
+      testWidgets('hide mode: the reveal buttons fill the bar, '
+          '${width.round()} wide, ${locale.languageCode}', (tester) async {
+        tester.view.physicalSize = Size(width, 780);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.reset);
+        await tester.pumpWidget(app(devPanel: false, locale: locale));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const ValueKey('mushaf-hide-toggle')));
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull, reason: 'no overflow');
+
+        const steps = [
+          'mushaf-reveal-ayah',
+          'mushaf-reveal-word',
+          'mushaf-hide-word',
+          'mushaf-hide-ayah',
+        ];
+        final rects = [
+          for (final k in steps) tester.getRect(find.byKey(ValueKey(k))),
+        ];
+        for (final (i, r) in rects.indexed) {
+          expect(r.height, 48, reason: '${steps[i]} as tall as the modes');
+          // (Squeezed on the narrowest phones, the icon still whole.)
+          expect(
+            r.width,
+            greaterThanOrEqualTo(width < 300 ? 32 : 40),
+            reason: steps[i],
+          );
+          final icon = tester.getRect(
+            find.descendant(
+              of: find.byKey(ValueKey(steps[i])),
+              matching: find.byType(Icon),
+            ),
+          );
+          expect(icon.width, 24, reason: '${steps[i]}: its icon whole');
+          expect(r.contains(icon.center), isTrue);
+          // Drawn left to right: |< and >| (which mirror themselves in a
+          // right-to-left language) never flipped.
+          expect(
+            Directionality.of(
+              tester.element(
+                find.descendant(
+                  of: find.byKey(ValueKey(steps[i])),
+                  matching: find.byType(Icon),
+                ),
+              ),
+            ),
+            TextDirection.ltr,
+            reason: steps[i],
+          );
+        }
+        // Left to right in every language: |< next ayah, << next word,
+        // >> previous word, >| previous ayah (the Mushaf reads right to
+        // left, so next is left).
+        for (var i = 1; i < rects.length; i++) {
+          expect(rects[i - 1].center.dx, lessThan(rects[i].center.dx));
+        }
+
+        // Between the modes button and the eye, taking that room.
+        final modes = tester.getRect(find.byKey(const ValueKey('modes-open')));
+        final eye = tester.getRect(
+          find.byKey(const ValueKey('mushaf-hide-toggle')),
+        );
+        expect(modes.height, 48);
+        final left = rects.map((r) => r.left).reduce((a, b) => a < b ? a : b);
+        final right = rects.map((r) => r.right).reduce((a, b) => a > b ? a : b);
+        final (near, far) = modes.center.dx < eye.center.dx
+            ? (modes.right, eye.left)
+            : (eye.right, modes.left);
+        expect(left, greaterThanOrEqualTo(near));
+        expect(right, lessThanOrEqualTo(far));
+        expect(
+          right - left,
+          greaterThan((far - near) - 40),
+          reason: 'the room between them, less the gaps',
+        );
+      });
+    }
+  }
 
   testWidgets('the eye stays put when toggled, before and during a session', (
     tester,
@@ -744,7 +837,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('How many times to recite the range'), findsOneWidget);
 
-    await tester.tap(find.text('Start reciting'));
+    await tester.tap(find.byKey(const ValueKey('loop-start')));
     await tester.pumpAndSettle();
     final hifz = container.read(hifzControllerProvider);
     expect(hifz.loop?.mode, HifzLoopMode.range);

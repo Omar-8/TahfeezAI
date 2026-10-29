@@ -23,6 +23,7 @@ import '../application/quran_audio_player.dart';
 import '../application/reciter_controller.dart';
 import '../application/reciter_downloads.dart';
 import '../domain/quran_audio_sources.dart';
+import '../../../core/ui/sheet_actions.dart';
 
 /// The Mushaf's Listen menu: what to play (a range, from [from] if given,
 /// else from the page on screen to its surah's end), how often, by which
@@ -392,16 +393,18 @@ class _ListenSheetState extends ConsumerState<_ListenSheet> {
               ),
             ),
           ),
-          GuideTarget(
-            id: 'listen-play',
-            child: FilledButton.icon(
-              key: const ValueKey('listen-play'),
-              style: FilledButton.styleFrom(
-                minimumSize: const Size.fromHeight(48),
+          SheetActions(
+            primary: GuideTarget(
+              id: 'listen-play',
+              child: FilledButton.icon(
+                key: const ValueKey('listen-play'),
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size.fromHeight(48),
+                ),
+                onPressed: _play,
+                icon: const Icon(Icons.play_arrow_rounded),
+                label: Text(l10n.listenPlay),
               ),
-              onPressed: _play,
-              icon: const Icon(Icons.play_arrow_rounded),
-              label: Text(l10n.listenPlay),
             ),
           ),
         ],

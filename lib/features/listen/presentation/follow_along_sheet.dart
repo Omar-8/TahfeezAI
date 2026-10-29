@@ -25,6 +25,7 @@ import '../domain/quran_audio_sources.dart';
 import '../../recitation/presentation/recitation_controls.dart'
     show showRecitationIntro;
 import 'listen_sheet.dart';
+import '../../../core/ui/sheet_actions.dart';
 
 /// Follow along's menu, laid out like the Listen menu: the reciter, the
 /// range (from the page on screen to its surah's end), each ayah or the
@@ -319,16 +320,18 @@ class _FollowAlongSheetState extends ConsumerState<_FollowAlongSheet> {
               ),
             ),
           ),
-          GuideTarget(
-            id: 'follow-start',
-            child: FilledButton.icon(
-              key: const ValueKey('follow-start'),
-              style: FilledButton.styleFrom(
-                minimumSize: const Size.fromHeight(48),
+          SheetActions(
+            primary: GuideTarget(
+              id: 'follow-start',
+              child: FilledButton.icon(
+                key: const ValueKey('follow-start'),
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size.fromHeight(48),
+                ),
+                onPressed: _start,
+                icon: const Icon(Icons.play_arrow_rounded),
+                label: Text(l10n.followStart),
               ),
-              onPressed: _start,
-              icon: const Icon(Icons.play_arrow_rounded),
-              label: Text(l10n.followStart),
             ),
           ),
         ],

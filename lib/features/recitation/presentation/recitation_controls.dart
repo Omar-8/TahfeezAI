@@ -512,8 +512,9 @@ class _LoopReviewHint extends ConsumerWidget {
 /// The idle bar's row: the modes, then the reveal/hide buttons and the eye.
 /// With the ayahs shown (no reveal buttons) the modes' labelled group takes
 /// all the room up to the eye (on a phone); with hide mode on it collapses
-/// to one button and the reveal buttons, scaling down rather than
-/// overflowing a narrow phone, sit before the eye, which keeps its place.
+/// to one button and the reveal buttons take that room, as tall as the
+/// modes were (on a wider screen, centred, they scale down rather than
+/// overflow). The eye keeps its place.
 List<Widget> _idleRow({
   required QuranLocation? location,
   required bool starting,
@@ -528,10 +529,21 @@ List<Widget> _idleRow({
     collapsed: hidden,
     expand: !hidden && !centered,
   );
-  if (!hidden && !centered) {
+  if (!centered) {
     return [
-      Expanded(child: modes),
-      const SizedBox(width: 12),
+      if (hidden) ...[
+        modes,
+        const SizedBox(width: 12),
+        const Expanded(
+          child: MushafHideControls(
+            part: MushafHideControlsPart.steps,
+            expand: true,
+          ),
+        ),
+      ] else ...[
+        Expanded(child: modes),
+        const SizedBox(width: 12),
+      ],
       const MushafHideControls(part: MushafHideControlsPart.pinned),
     ];
   }
@@ -632,6 +644,8 @@ class _ModeButtons extends ConsumerWidget {
     if (collapsed) {
       child = BarButtonGroup(
         key: const ValueKey('modes-collapsed'),
+        // As tall as the reveal buttons beside it (and the modes were).
+        groupHeight: BarButtonGroup.labelledHeight,
         children: [
           MenuAnchor(
             alignmentOffset: const Offset(0, 4),
@@ -651,7 +665,7 @@ class _ModeButtons extends ConsumerWidget {
               key: const ValueKey('modes-open'),
               style: BarButtonGroup.buttonStyle.copyWith(
                 fixedSize: const WidgetStatePropertyAll(
-                  Size(56, BarButtonGroup.height),
+                  Size(56, BarButtonGroup.labelledHeight),
                 ),
               ),
               tooltip: l10n.recModes,
@@ -1100,7 +1114,15 @@ const _centeredGroupGap = 24.0;
 /// buttons that uncover the next ayah or the next single word, in reading
 /// order from the first word on the page.
 class MushafHideControls extends ConsumerWidget {
-  const MushafHideControls({super.key, this.part = MushafHideControlsPart.all});
+  const MushafHideControls({
+    super.key,
+    this.part = MushafHideControlsPart.all,
+    this.expand = false,
+  });
+
+  /// The reveal/hide buttons stretched over the width they are given, as
+  /// tall as the bar's labelled modes (the phone's bar in hide mode).
+  final bool expand;
 
   /// Which of the controls to build: the bar places the eye
   /// ([MushafHideControlsPart.pinned]) where it never moves, and
@@ -1160,7 +1182,14 @@ class MushafHideControls extends ConsumerWidget {
           id: key,
           child: IconButton(
             key: ValueKey(key),
-            style: BarButtonGroup.buttonStyle,
+            style: expand
+                ? BarButtonGroup.buttonStyle.copyWith(
+                    fixedSize: const WidgetStatePropertyAll(
+                      Size(double.infinity, BarButtonGroup.labelledHeight),
+                    ),
+                    iconSize: const WidgetStatePropertyAll(24),
+                  )
+                : BarButtonGroup.buttonStyle,
             icon: Icon(icon),
             tooltip: tip,
             onPressed: onTap,
@@ -1223,34 +1252,46 @@ class MushafHideControls extends ConsumerWidget {
         ? const <Widget>[]
         : [
             if (hide.enabled) ...[
-              FadeScaleIn(
-                child: BarButtonGroup(
-                  children: [
-                    step(
-                      'mushaf-reveal-ayah',
-                      Icons.first_page_rounded,
-                      AppLocalizations.of(context).recRevealAyah,
-                      onRevealAyah,
+              _expandedIf(
+                expand,
+                FadeScaleIn(
+                  // In this order in every language (Arabic's mirrored bar
+                  // too): the Mushaf reads right to left, so next is left.
+                  child: Directionality(
+                    textDirection: TextDirection.ltr,
+                    child: BarButtonGroup(
+                      expand: expand,
+                      groupHeight: expand
+                          ? BarButtonGroup.labelledHeight
+                          : BarButtonGroup.height,
+                      children: [
+                        step(
+                          'mushaf-reveal-ayah',
+                          Icons.first_page_rounded,
+                          AppLocalizations.of(context).recRevealAyah,
+                          onRevealAyah,
+                        ),
+                        step(
+                          'mushaf-reveal-word',
+                          Icons.keyboard_double_arrow_left_rounded,
+                          AppLocalizations.of(context).recRevealWord,
+                          onRevealWord,
+                        ),
+                        step(
+                          'mushaf-hide-word',
+                          Icons.keyboard_double_arrow_right_rounded,
+                          AppLocalizations.of(context).recHideWord,
+                          onHideWord,
+                        ),
+                        step(
+                          'mushaf-hide-ayah',
+                          Icons.last_page_rounded,
+                          AppLocalizations.of(context).recHideAyah,
+                          onHideAyah,
+                        ),
+                      ],
                     ),
-                    step(
-                      'mushaf-reveal-word',
-                      Icons.keyboard_double_arrow_left_rounded,
-                      AppLocalizations.of(context).recRevealWord,
-                      onRevealWord,
-                    ),
-                    step(
-                      'mushaf-hide-word',
-                      Icons.keyboard_double_arrow_right_rounded,
-                      AppLocalizations.of(context).recHideWord,
-                      onHideWord,
-                    ),
-                    step(
-                      'mushaf-hide-ayah',
-                      Icons.last_page_rounded,
-                      AppLocalizations.of(context).recHideAyah,
-                      onHideAyah,
-                    ),
-                  ],
+                  ),
                 ),
               ),
               gap,
@@ -1259,8 +1300,14 @@ class MushafHideControls extends ConsumerWidget {
     final pinned = part == MushafHideControlsPart.steps
         ? const <Widget>[]
         : [eye];
-    return Row(mainAxisSize: MainAxisSize.min, children: [...steps, ...pinned]);
+    return Row(
+      mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
+      children: [...steps, ...pinned],
+    );
   }
+
+  static Widget _expandedIf(bool expand, Widget child) =>
+      expand ? Expanded(child: child) : child;
 }
 
 /// The parts of [MushafHideControls].

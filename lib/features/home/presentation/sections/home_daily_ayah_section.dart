@@ -50,6 +50,60 @@ class HomeDailyAyahSection extends ConsumerWidget {
 /// piece.
 const _dailyAyahFont = 'Amiri Quran';
 
+/// The number's star, as a share of the ayah's font size.
+const _starShare = 0.95;
+
+/// The ayah's font size: [size] — or, where its number's star would be
+/// left alone on a line of its own, a little smaller (down to 85%) so it
+/// ends the last line instead. Unchanged when even that leaves it alone.
+@visibleForTesting
+double fitNumberOnLastLine({
+  required String text,
+  required TextStyle Function(double size) styleAt,
+  required double size,
+  required double width,
+  required TextScaler textScaler,
+}) {
+  if (!width.isFinite || width <= 0) return size;
+  int lines(double s, {required bool withStar}) {
+    final star = s * _starShare;
+    final painter = TextPainter(
+      text: TextSpan(
+        style: styleAt(s),
+        children: [
+          TextSpan(text: text),
+          if (withStar) ...[
+            const TextSpan(text: ' '),
+            const WidgetSpan(child: SizedBox.shrink()),
+          ],
+        ],
+      ),
+      textDirection: TextDirection.rtl,
+      textAlign: TextAlign.center,
+      textScaler: textScaler,
+    );
+    if (withStar) {
+      painter.setPlaceholderDimensions([
+        PlaceholderDimensions(
+          size: Size.square(star),
+          alignment: PlaceholderAlignment.middle,
+        ),
+      ]);
+    }
+    painter.layout(maxWidth: width);
+    final count = painter.computeLineMetrics().length;
+    painter.dispose();
+    return count;
+  }
+
+  bool alone(double s) => lines(s, withStar: true) > lines(s, withStar: false);
+  if (!alone(size)) return size;
+  for (var s = size - 0.5; s >= size * 0.85; s -= 0.5) {
+    if (!alone(s)) return s;
+  }
+  return size;
+}
+
 /// Arabic-Indic digits for the ayah's number in its marker.
 String _arabicDigits(int n) =>
     '$n'.split('').map((d) => '٠١٢٣٤٥٦٧٨٩'[int.parse(d)]).join();
@@ -98,34 +152,50 @@ class _DailyAyahCard extends ConsumerWidget {
               children: [
                 _Ornament(color: scheme.tertiary),
                 if (ayah.words.isNotEmpty)
-                  Directionality(
-                    textDirection: TextDirection.rtl,
-                    child: Text.rich(
-                      TextSpan(
-                        children: [
-                          TextSpan(text: ayah.words.join(' ')),
-                          const TextSpan(text: ' '),
-                          WidgetSpan(
-                            alignment: PlaceholderAlignment.middle,
-                            // Its number in a drawn star, not a font glyph.
-                            child: TahfeezStarNumber(
-                              label: _arabicDigits(ayah.verseNo),
-                              color: scheme.tertiary,
-                              size: arabicSize * 0.95,
-                              textStyle: const TextStyle(
-                                fontFamily: 'Noto Naskh Arabic',
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      textAlign: TextAlign.center,
-                      style: quranTextStyle(
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final text = ayah.words.join(' ');
+                      TextStyle styleAt(double size) => quranTextStyle(
                         color: scheme.onSurface,
                         fontFamily: _dailyAyahFont,
-                        fontSize: arabicSize,
-                      ).copyWith(height: 2.0),
-                    ),
+                        fontSize: size,
+                      ).copyWith(height: 2.0);
+                      final size = fitNumberOnLastLine(
+                        text: text,
+                        styleAt: styleAt,
+                        size: arabicSize,
+                        width: constraints.maxWidth,
+                        textScaler: MediaQuery.textScalerOf(context),
+                      );
+                      return Directionality(
+                        textDirection: TextDirection.rtl,
+                        child: Text.rich(
+                          TextSpan(
+                            children: [
+                              TextSpan(text: text),
+                              const TextSpan(text: ' '),
+                              WidgetSpan(
+                                alignment: PlaceholderAlignment.middle,
+                                // Its number in a drawn star, not a font
+                                // glyph.
+                                child: TahfeezStarNumber(
+                                  key: const ValueKey('daily-ayah-number'),
+                                  label: _arabicDigits(ayah.verseNo),
+                                  color: scheme.tertiary,
+                                  size: size * _starShare,
+                                  textStyle: const TextStyle(
+                                    fontFamily: 'Noto Naskh Arabic',
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          key: const ValueKey('daily-ayah-text'),
+                          textAlign: TextAlign.center,
+                          style: styleAt(size),
+                        ),
+                      );
+                    },
                   ),
                 if (ayah.translation != null)
                   Text(

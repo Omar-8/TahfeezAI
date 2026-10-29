@@ -1,19 +1,32 @@
 /// Where Quran audio is streamed from (`docs/AUDIO_MILESTONE.md`): ayahs
-/// from the Islamic Network CDN, words from the Quran.com CDN. Nothing is
-/// downloaded or kept.
+/// from the Islamic Network CDN (everyayah.com for a reciter it has only
+/// whole surahs of), words from the Quran.com CDN. Kept only when the
+/// reader downloads a reciter.
 library;
 
 import '../../../quran/domain/quran_ayah_numbers.dart';
 
 export '../../../quran/domain/quran_ayah_numbers.dart'
-    show surahAyahCounts, globalAyahNumber;
+    show surahAyahCounts, globalAyahNumber, ayahIdAtGlobal;
 
-/// A reciter offered for listening: an Islamic Network audio edition.
+/// A reciter offered for listening: an Islamic Network audio edition, or
+/// an everyayah.com folder ([everyAyah]).
 class Reciter {
-  const Reciter(this.edition, this.nameEn, this.nameAr, this.kbps);
+  const Reciter(
+    this.edition,
+    this.nameEn,
+    this.nameAr,
+    this.kbps, {
+    this.everyAyah,
+  });
 
-  /// The CDN edition, e.g. `ar.alafasy`.
+  /// The CDN edition, e.g. `ar.alafasy` — the reciter's id in the app
+  /// (its setting, its downloads' folder) whatever serves it.
   final String edition;
+
+  /// The everyayah.com folder serving its ayahs, for a reciter the
+  /// Islamic Network has only whole surahs of.
+  final String? everyAyah;
   final String nameEn, nameAr;
 
   /// The bitrate its ayah files are served at.
@@ -58,6 +71,15 @@ const reciters = [
   Reciter('ar.aymanswoaid', 'Ayman Suwaid', 'أيمن سويد', 64),
   Reciter('ar.parhizgar', 'Shahriar Parhizgar', 'شهريار پرهيزگار', 48),
   Reciter('ar.muhammadjibreel', 'Muhammad Jibreel', 'محمد جبريل', 128),
+  // The Islamic Network has him by whole surahs only (ar.mohamedtablawi);
+  // everyayah.com by ayah — every ayah checked there, 2026-10-29.
+  Reciter(
+    'ar.tablawi',
+    'Mohamed Al-Tablawi',
+    'محمد محمود الطبلاوي',
+    64,
+    everyAyah: 'Mohammad_al_Tablaway_64kbps',
+  ),
 ];
 
 const defaultReciter = 'ar.alafasy';
@@ -84,9 +106,16 @@ List<int> ayahRange(int from, int to) {
   return out;
 }
 
-String ayahAudioUrl(int ayahId, Reciter reciter) =>
-    'https://cdn.islamic.network/quran/audio/${reciter.kbps}/'
-    '${reciter.edition}/${globalAyahNumber(ayahId)}.mp3';
+String ayahAudioUrl(int ayahId, Reciter reciter) {
+  final folder = reciter.everyAyah;
+  if (folder != null) {
+    String three(int n) => n.toString().padLeft(3, '0');
+    return 'https://everyayah.com/data/$folder/'
+        '${three(ayahId ~/ 1000)}${three(ayahId % 1000)}.mp3';
+  }
+  return 'https://cdn.islamic.network/quran/audio/${reciter.kbps}/'
+      '${reciter.edition}/${globalAyahNumber(ayahId)}.mp3';
+}
 
 /// Where Quran.com writes two canonical words as one (e.g. "بَعْدَ مَا"):
 /// ayah id → index of the first of the pair (from the word-meaning
@@ -128,6 +157,8 @@ const reciterDownloadBytes = <String, int>{
   'ar.aymanswoaid': 1194287490,
   'ar.parhizgar': 591531925,
   'ar.muhammadjibreel': 750775826,
+  // Every file's size summed (2026-10-29).
+  'ar.tablawi': 854317956,
 };
 
 /// [reciter]'s download size, as "≈ 640 MB" / "≈ 1.2 GB"; `null` if

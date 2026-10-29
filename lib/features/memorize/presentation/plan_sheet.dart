@@ -12,6 +12,7 @@ import '../../../memorization/domain/models/memorization_plan.dart';
 import '../../../memorization/memorization_providers.dart';
 import '../../../quran/domain/models/quran_refs.dart';
 import '../../quran/application/quran_index_providers.dart';
+import '../../../core/ui/sheet_actions.dart';
 import '../../recitation/presentation/recitation_loop_sheet.dart'
     show CountStepper, VersePicker;
 
@@ -260,39 +261,24 @@ class _PlanSheetState extends ConsumerState<_PlanSheet> {
               ],
             ),
           ),
-          Row(
-            spacing: TahfeezSpacing.sm,
-            children: [
-              // Shrinks rather than overflows (a long word: Kurdish's
-              // «هەڵوەشاندنەوە» at large text).
-              Flexible(
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: widget.plan != null
-                      ? TextButton(
-                          key: const ValueKey('plan-stop'),
-                          onPressed: () => _save(stop: true),
-                          child: Text(l10n.memPlanStop),
-                        )
-                      : TextButton(
-                          onPressed: () => Navigator.of(context).pop(),
-                          child: Text(l10n.commonCancel),
-                        ),
-                ),
+          SheetActions(
+            secondary: widget.plan != null
+                ? TextButton(
+                    key: const ValueKey('plan-stop'),
+                    onPressed: () => _save(stop: true),
+                    child: SheetActions.label(l10n.memPlanStop),
+                  )
+                : null,
+            primary: FilledButton(
+              key: const ValueKey('plan-save'),
+              style: FilledButton.styleFrom(
+                minimumSize: const Size.fromHeight(48),
               ),
-              Expanded(
-                child: FilledButton(
-                  key: const ValueKey('plan-save'),
-                  style: FilledButton.styleFrom(
-                    minimumSize: const Size.fromHeight(48),
-                  ),
-                  onPressed: _save,
-                  child: Text(
-                    widget.plan == null ? l10n.memPlanSave : l10n.memPlanUpdate,
-                  ),
-                ),
+              onPressed: _save,
+              child: Text(
+                widget.plan == null ? l10n.memPlanSave : l10n.memPlanUpdate,
               ),
-            ],
+            ),
           ),
         ],
       ),

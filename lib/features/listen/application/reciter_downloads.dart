@@ -178,8 +178,7 @@ class ReciterDownloads extends Notifier<Map<String, ReciterDownload>> {
         for (var t = 0; t < _tries && !saved && !token.isCancelled; t++) {
           try {
             await network.download(
-              'https://cdn.islamic.network/quran/audio/${reciter.kbps}/'
-              '$edition/$n.mp3',
+              ayahAudioUrl(ayahIdAtGlobal(n), reciter),
               part,
               cancelToken: token,
             );

@@ -17,7 +17,12 @@
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"/>
+    <!-- enableOnBackInvokedCallback="false": the back press goes to the app.
+         Android 16 turns predictive back on for apps targeting it, and then
+         closed the app at once from a tab's first screen — not "back again
+         to exit" (BackToExit, lib/core/ui/back_to_exit.dart). -->
     <application
+        android:enableOnBackInvokedCallback="false"
         android:networkSecurityConfig="@xml/network_security_config"
         android:label="TahfeezAI"
         android:name="${applicationName}"

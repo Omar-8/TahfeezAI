@@ -23,6 +23,7 @@ import '../application/quran_match_controller.dart'
     show quranWordCorpusProvider;
 import '../application/recitation_session_controller.dart';
 import 'recitation_controls.dart' show showRecitationIntro;
+import '../../../core/ui/sheet_actions.dart';
 
 /// Loop recitation's settings: how to repeat (the whole range, or each
 /// ayah), the range, and how many times — then starts reciting.
@@ -407,41 +408,25 @@ class _RecitationLoopSheetState extends ConsumerState<_RecitationLoopSheet> {
               ),
             ),
             const SizedBox(height: TahfeezSpacing.md),
-            Row(
-              children: [
-                // Sharing the row at large text sizes (Kurdish at 2×).
-                Flexible(
-                  child: TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: Text(
-                      l10n.commonCancel,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.center,
-                    ),
+            SheetActions(
+              primary: GuideTarget(
+                id: 'loop-start',
+                child: FilledButton.icon(
+                  key: const ValueKey('loop-start'),
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size.fromHeight(52),
                   ),
-                ),
-                const SizedBox(width: TahfeezSpacing.sm),
-                Expanded(
-                  child: GuideTarget(
-                    id: 'loop-start',
-                    child: FilledButton.icon(
-                      key: const ValueKey('loop-start'),
-                      style: FilledButton.styleFrom(
-                        minimumSize: const Size.fromHeight(52),
-                      ),
-                      icon: const Icon(Icons.mic_rounded),
-                      label: Text(
-                        l10n.recLoopStart,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.center,
-                      ),
-                      onPressed: canStart ? _start : null,
-                    ),
+                  icon: const Icon(Icons.mic_rounded),
+                  // "Start", as Follow along's button says.
+                  label: Text(
+                    l10n.followStart,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
                   ),
+                  onPressed: canStart ? _start : null,
                 ),
-              ],
+              ),
             ),
           ],
         ),
