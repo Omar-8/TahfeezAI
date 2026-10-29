@@ -1,5 +1,4 @@
 import 'dart:async' show Timer, unawaited;
-import 'dart:math' as math;
 
 import '../../../core/localization/generated/app_localizations.dart';
 
@@ -141,8 +140,8 @@ class _QuranEngineMushafPageContentState
 
   /// A recitation's changes on this page, animated (where the page can):
   /// a word recited right glows, a mistake sways, a word revealed fades in
-  /// — and a page recited to its last word glows word after word, with a
-  /// gentle double tap. Nothing as a page first shows its marks.
+  /// — and a page recited to its last word gives a gentle double tap.
+  /// Nothing as a page first shows its marks.
   void _playWordEffects(
     (Set<int>, Map<int, MushafWordMark>)? before,
     (Set<int>, Map<int, MushafWordMark>)? after,
@@ -153,7 +152,6 @@ class _QuranEngineMushafPageContentState
     // Animations turned off on the phone: none played (the rest — a page's
     // gentle tap — still).
     final effects = _calm ? const _NoEffects() : page as MushafWordEffectsPage;
-    final n = page.wordCount;
     final inks =
         ref.read(mushafWordOverlayProvider)?.inks ??
         const <MushafWordMark, int>{};
@@ -230,17 +228,6 @@ class _QuranEngineMushafPageContentState
     }
 
     if (changed.isNotEmpty && complete(after) && !complete(before)) {
-      // Over 0.2 s, so it shows before the page turns (the recitation
-      // waits 0.5 s to turn it).
-      final step = math.min(8.0, 200 / n);
-      for (var i = 0; i < n; i++) {
-        effects.playWordEffect(
-          i,
-          MushafWordEffect.bloom,
-          color: colorOf(MushafWordMark.correct),
-          delay: Duration(microseconds: (30000 + i * step * 1000).round()),
-        );
-      }
       if (ref.read(hifzSettingsProvider).alert.vibrates) {
         ref.read(hifzPageDoneHapticsProvider)();
       }

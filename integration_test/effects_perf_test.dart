@@ -1,7 +1,6 @@
 // Frame timing of the recitation's word animations on a phone: Yā-Sīn's
 // first page recited word by word — each word revealed and marked right
-// (the reveal, the glow), then the page's own glow as it ends — on the
-// printed page, then in Ayah mode.
+// (the reveal, the glow) — on the printed page, then in Ayah mode.
 //
 //   flutter drive --profile --driver=test_driver/perf_driver.dart \
 //     --target=integration_test/effects_perf_test.dart -d <phone>
@@ -63,7 +62,7 @@ void main() {
     final overlay = container.read(mushafWordOverlayProvider.notifier);
 
     // A recitation's pace: a word every 0.35 s, each revealed and marked
-    // right; the last one ends the page (its glow).
+    // right, to the page's last word.
     Future<void> recite() async {
       final revealed = <WordRef>{};
       final marks = <WordRef, MushafWordMark>{};

@@ -689,7 +689,7 @@ void main() {
       reason: 'the next word is still on the visible page',
     );
     // The page's last word: the next one is on the following page — turned
-    // to once the finished page has glowed.
+    // to after a short hold.
     await recite(words.join(' '));
     expect(container.read(mushafPageTurnRequestsProvider), isNull);
     await Future<void>.delayed(const Duration(milliseconds: 600));

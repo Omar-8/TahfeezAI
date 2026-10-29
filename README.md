@@ -98,7 +98,7 @@ With **Tajweed** on, the checking covers:
 | **Shadda** | doubled letters held, single ones not doubled |
 | **Vowels and case endings** | ḥarakāt, including the last vowel of a word |
 
-Each word is coloured as you go — right, wrong, skipped or mispronounced — with a short explanation of the mistake and, if you like, a vibration the moment it happens. Tap a word to see what was heard: *“On «ء»: ḍamma expected, fatḥa heard.”* A word said right **glows softly**, a mistake **sways**, words you reveal **fade in**, and a page recited to its end **glows word after word** with a gentle double tap. A ring around the stop button **breathes with your voice**, so you know the microphone hears you. One **strictness** setting — lenient, balanced or precise — covers every check, tajweed included.
+Each word is coloured as you go — right, wrong, skipped or mispronounced — with a short explanation of the mistake and, if you like, a vibration the moment it happens. Tap a word to see what was heard: *“On «ء»: ḍamma expected, fatḥa heard.”* A word said right **glows softly**, a mistake **sways**, words you reveal **fade in**, and a page recited to its end gives a gentle double tap. A ring around the stop button **breathes with your voice**, so you know the microphone hears you. One **strictness** setting — lenient, balanced or precise — covers every check, tajweed included.
 
 <p align="center">
   <img src="site/images/screens/05b-recite-marks-dark.webp" width="30%" alt="Every word checked">
