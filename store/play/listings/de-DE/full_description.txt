@@ -1,0 +1,49 @@
+Lerne den Koran auswendig – mit einem Zuhörer in deiner Tasche.
+
+Lies den Madinah-Mushaf, verstehe jedes Wort und rezitiere auswendig, während eine KI auf deinem Handy mitliest – sie bemerkt das vertauschte Wort, die übersprungene Aya und das zu kurze Madd. Kostenlos, offline, ohne Werbung, ohne Konto.
+
+AUSWENDIG REZITIEREN – MIT RÜCKMELDUNG
+• Seite verbergen und rezitieren: Jedes Wort erscheint, sobald du es sprichst
+• Wörter werden laufend eingefärbt: richtig, falsch, ausgelassen oder falsch ausgesprochen – ein richtiges Wort leuchtet sanft, ein Fehler wackelt, eine fertige Seite leuchtet mit einem sanften Tippen
+• Ein Ring um die Stopp-Taste atmet mit deiner Stimme, damit du weißt, dass du gehört wirst
+• Hört, wie du rezitierst, nicht nur was: Buchstaben, Vokale, Schadda und Kasusendungen, Laut für Laut nach der Aussprache von Ḥafṣ
+• Auch Tajwīd wird geprüft: Madd-Länge, Qalqala, Ghunna (Ikhfāʾ, Iqlāb, Idghām, gehaltenes doppeltes Nūn oder Mīm), schwere und leichte Buchstaben, Kehllaute – jede Regel einzeln abschaltbar
+• Wähle, wie streng geprüft wird: nachsichtig, ausgewogen oder genau
+• Vibration oder Ton bei einem Fehler, Tajwīd-Fehler getrennt gemeldet
+• Wähle die Farben für Aussprache- und Tajwīd-Fehler
+• Eine Aya wiederholen, einem Rezitator folgen oder eine ganze Seite prüfen
+
+LESEN UND VERSTEHEN
+• Der Madinah-Mushaf Seite für Seite, genau wie gedruckt – oder Aya für Aya, zum Wischen oder fortlaufend
+• Wort-für-Wort-Bedeutungen und Umschrift – auch auf Arabisch, aus al-Sirāj
+• Übersetzungen in 18 Sprachen und Tafsir neben jeder Aya, in deiner Sprache
+• Surennamen in der Kalligrafie des Mushaf; Fokusmodus für die Seite allein
+• Durchsuche den ganzen Koran, auf Arabisch oder in der Übersetzung
+• Lesezeichen und thematische Abschnitte farbig auf der Seite
+
+HÖREN
+• 18 Rezitatoren, darunter Alafasy, Al-Husary, Al-Minshawi, Abdul Basit und As-Sudais
+• Die Aya leuchtet auf, während sie rezitiert wird; wiederhole eine Aya oder einen Bereich
+• Lade einen Rezitator herunter und höre offline; die Wiedergabe läuft bei ausgeschaltetem Bildschirm weiter
+
+MIT PLAN AUSWENDIG LERNEN
+• Eine tägliche Lektion und verteilte Wiederholung
+• Versteckmodus, Schleife und Mitlesen
+• Die Festigkeit jedes Teils wird verfolgt, damit du weißt, was du wiederholen solltest
+• Deine Serie, ein Kalender deiner Rezitationstage, ein Ring der 30 Juz und sanfte Meilensteine
+
+NACH DEINEM GESCHMACK
+• Ein Himmel in den Farben der Tageszeit, Glaskarten und ein islamisches geometrisches Muster
+• Helle, dunkle, warme, Sepia- und schwarze Designs; 4 Koran-Schriften; Text bis 200 %
+• In 19 Sprachen: Arabisch, Englisch, Deutsch, Französisch, Spanisch, Russisch, Türkisch, Indonesisch, Malaiisch, Urdu, Persisch, Bengalisch, Hausa, Kurdisch, Paschtu, Swahili, Kasachisch, Usbekisch und Somali
+• Für Handys und Tablets
+
+DEINE STIMME BLEIBT AUF DEINEM HANDY
+Deine Rezitation wird auf dem Gerät vom eigenen Sprachmodell der App geprüft und danach verworfen. Nichts wird hochgeladen; kein Konto, keine Analyse, kein Tracking. Lesen, Übersetzungen, Tafsir, Suche, Auswendiglernen und die Prüfung der Rezitation funktionieren ohne Internet.
+
+EIN GESCHENK, KEIN PRODUKT
+Keine Werbung, keine Abos, keine Käufe – kostenlos für alle, für immer. Tahfeez AI ist Open Source: github.com/Omar-8/TahfeezAI
+
+Das Rezitationsmodell ist jung und lernt noch: Es kann einen Fehler übersehen oder ein richtiges Wort markieren. Jede Version wird besser – dein Feedback hilft: tahfeez.ai.app@gmail.com
+
+Mit Dank an Tanzil, den König-Fahd-Komplex, Quran Engine, QUL (Tarteel), QuranEnc, quran.com, die Rezitatoren sowie die Autoren des Muaalem-Modells und aller Datensätze, die im Info-Bereich der App aufgeführt sind.

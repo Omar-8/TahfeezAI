@@ -28,7 +28,7 @@ by `python3 tool/make_play_listing.py` from the landing page's media
 | App icon (512 × 512, 32-bit PNG) | `graphics/icon.png` |
 | Feature graphic (1,024 × 500) | `graphics/featureGraphic.png` |
 | Phone screenshots (8, 1,242 × 2,208) | `graphics/phoneScreenshots/` in their numbered order |
-| Arabic translation of the listing | `listings/ar/` (add language: Arabic – ar) |
+| Translations of the listing | `listings/<Play language code>/` — ar, de-DE, fr-FR, es-ES, ru-RU, tr-TR, id, ms, ur, fa, bn-BD, sw, kk; all in one file: `listings/all_languages.csv` (for Play's "Import translations"). Hausa, Kurdish, Pashto, Somali and Uzbek: no Play store-listing language — their users see English |
 
 ## Store settings
 

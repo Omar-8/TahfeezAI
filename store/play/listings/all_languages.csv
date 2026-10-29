@@ -1,0 +1,687 @@
+language,title,short_description,full_description
+en-US,Tahfeez AI: Quran Memorization,Recite the Quran from memory: offline AI follows you and checks every word.,"Memorize the Quran with a listener in your pocket.
+
+Read the Madinah Mushaf, understand every word, and recite from memory while an AI on your phone follows along — catching the slipped word, the skipped ayah and the missed madd. Free, offline, no ads, no account.
+
+RECITE FROM MEMORY — WITH FEEDBACK
+• Hide the page and recite: each word is revealed as you say it
+• Words coloured as you go: right, wrong, skipped or mispronounced — a word said right glows softly, a mistake sways, and a finished page glows with a gentle tap
+• A ring around the stop button breathes with your voice, so you know you are heard
+• Hears how you recite, not only what: letters, vowels, shadda and case endings, sound by sound against the Ḥafṣ pronunciation
+• Tajweed checked too: madd length, qalqala, ghunnah (ikhfāʾ, iqlāb, idghām, and a doubled nūn or mīm held), heavy and light letters, throat letters — each rule can be turned on or off
+• Choose how strict the check is: lenient, balanced or precise
+• A vibration or sound on a mistake, with tajweed mistakes alerted apart
+• Choose the colours of pronunciation and tajweed mistakes
+• Loop an ayah, follow along with a reciter, or test a whole page
+
+READ AND UNDERSTAND
+• The Madinah Mushaf page by page, exactly as printed — or ayah by ayah, swiped or in one continuous scroll
+• Word-by-word meanings and transliteration — in Arabic too, from al-Sirāj
+• Translations in 18 languages and tafsir beside every ayah, following your language
+• Surah names in the Mushaf's own calligraphy; focus mode for the page alone
+• Search the whole Quran, in Arabic or in translation
+• Bookmarks and thematic passages coloured on the page
+
+LISTEN
+• 18 reciters, including Alafasy, Al-Husary, Al-Minshawi, Abdul Basit and As-Sudais
+• The ayah lights up as it is recited; repeat an ayah or a range
+• Download a reciter to listen offline; playback continues with the screen off
+
+MEMORIZE WITH A PLAN
+• A daily lesson and spaced revision
+• Hide mode, Loop and Follow along
+• Every part's strength tracked, so you know what to revise
+• Your streak, a calendar of the days you recited, a ring of the 30 juz and gentle milestones
+
+MAKE IT YOURS
+• A sky in the colours of the time of day, glass cards and an Islamic geometric pattern
+• Light, dark, warm, sepia and black themes; 4 Quran fonts; text up to 200%
+• In 19 languages: Arabic, English, German, French, Spanish, Russian, Turkish, Indonesian, Malay, Urdu, Persian, Bengali, Hausa, Kurdish, Pashto, Swahili, Kazakh, Uzbek and Somali
+• Phones and tablets
+
+YOUR VOICE STAYS ON YOUR PHONE
+Your recitation is checked on the device by the app's own speech model and then discarded. Nothing is uploaded, there is no account, no analytics and no tracking. Reading, translations, tafsir, search, memorization and recitation checking all work without internet.
+
+A GIFT, NOT A PRODUCT
+No ads, no subscriptions, no purchases — free for everyone, forever. Tahfeez AI is open source: github.com/Omar-8/TahfeezAI
+
+The recitation model is young and still learning: it may miss a mistake or flag a correct word. Every version gets better — your feedback helps: tahfeez.ai.app@gmail.com
+
+With thanks to Tanzil, the King Fahd Complex, Quran Engine, QUL (Tarteel), QuranEnc, quran.com, the reciters, and the authors of the Muaalem model and of every dataset listed in the app's About screen."
+ar,تحفيظ AI: حفظ القرآن الكريم,سمّع القرآن من حفظك: ذكاء اصطناعي على هاتفك يتابعك ويراجع كل كلمة بلا إنترنت.,"احفظ القرآن ومعك مُسمِّعٌ في جيبك.
+
+اقرأ مصحف المدينة، وافهم كل كلمة، وسمِّع من حفظك وذكاءٌ اصطناعي على هاتفك يتابعك — يلتقط الكلمة التي زلّت، والآية التي سقطت، والمدّ الذي لم يُوفَّ. مجاني، يعمل بلا إنترنت، بلا إعلانات ولا حساب.
+
+التسميع من الحفظ مع التصحيح
+• أخفِ الصفحة وسمِّع: تظهر كل كلمة حين تنطقها
+• تُلوَّن الكلمات أثناء التلاوة: صحيحة، أو خاطئة، أو متروكة، أو في نطقها خطأ — تتوهّج الكلمة الصحيحة وتهتز الخاطئة، وتتوهّج الصفحة إذا أتممتها مع لمسة اهتزاز لطيفة
+• حلقة حول زر الإيقاف تتنفّس مع صوتك، فتعرف أنك مسموع
+• يسمع كيف تقرأ لا ماذا تقرأ فقط: الحروف والحركات والشدّة وأواخر الكلمات، صوتًا صوتًا على رواية حفص
+• يراجع التجويد أيضًا: مقدار المدّ، والقلقلة، والغنّة (الإخفاء والإقلاب والإدغام وإتمام غنة المشدّد)، والتفخيم والترقيق، وحروف الحلق — ولك تشغيل كل حكم أو إيقافه
+• اختر درجة دقة الفحص: متساهل أو متوازن أو دقيق
+• اهتزاز أو صوت عند الخطأ، ولأخطاء التجويد تنبيه مستقل
+• اختر لون أخطاء النطق ولون أخطاء التجويد
+• كرّر آية، أو تابع قارئًا، أو اختبر نفسك في صفحة كاملة
+
+القراءة والفهم
+• مصحف المدينة صفحةً صفحة كما طُبع — أو آيةً آية، بالتمرير أو في عرض متصل
+• معاني الكلمات كلمةً كلمة مع النطق بالحروف اللاتينية — وبالعربية من «السراج في بيان غريب القرآن»
+• ترجمات بثماني عشرة لغة وتفسير بجانب كل آية، بلغتك
+• أسماء السور بخط المصحف نفسه، ووضع التركيز للصفحة وحدها
+• البحث في القرآن كله، بالعربية أو في الترجمة
+• العلامات المرجعية، وتلوين موضوعات السور على الصفحة
+
+الاستماع
+• ١٨ قارئًا، منهم العفاسي والحصري والمنشاوي وعبد الباسط والسديس
+• تُضاء الآية أثناء تلاوتها، مع تكرار آية أو مقطع
+• نزّل قارئًا لتستمع بلا إنترنت، ويستمر التشغيل والشاشة مطفأة
+
+الحفظ بخطة
+• درس يومي ومراجعة متباعدة
+• وضع الإخفاء والتكرار والمتابعة
+• متابعة قوة حفظك في كل جزء لتعرف ما تراجعه
+• أيامك المتتالية، وتقويم أيام تلاوتك، وحلقة الأجزاء الثلاثين، ومحطات لطيفة
+
+اجعله على ذوقك
+• سماء بألوان وقت اليوم، وبطاقات زجاجية، وزخرفة هندسية إسلامية
+• سمات فاتحة وداكنة ودافئة وبنية وسوداء، و٤ خطوط للمصحف، وتكبير النص حتى ٢٠٠٪
+• بتسع عشرة لغة، منها العربية والإنجليزية والأردية والإندونيسية والملايوية والتركية والفارسية والبنغالية والهوسا والكردية والبشتو والسواحيلية والصومالية
+• للهواتف والأجهزة اللوحية
+
+صوتك يبقى على هاتفك
+تُراجَع تلاوتك على الجهاز بنموذج التطبيق نفسه ثم تُحذف. لا يُرفع شيء، ولا حساب، ولا تحليلات، ولا تتبّع. القراءة والترجمات والتفسير والبحث والحفظ ومراجعة التلاوة كلها تعمل بلا إنترنت.
+
+هدية لا سلعة
+بلا إعلانات ولا اشتراكات ولا مشتريات — مجاني للجميع دائمًا. تحفيظ AI مفتوح المصدر: github.com/Omar-8/TahfeezAI
+
+نموذج التلاوة ما زال يتعلّم: قد يفوته خطأ أو يعلّم كلمة صحيحة. كل إصدار أفضل من سابقه — وملاحظاتك تساعد: tahfeez.ai.app@gmail.com
+
+شكرًا لتنزيل، ومجمع الملك فهد، وQuran Engine، وQUL (ترتيل)، وQuranEnc، وquran.com، والقرّاء، ومؤلفي نموذج مُعلِّم وكل مجموعات البيانات المذكورة في صفحة «حول» في التطبيق."
+de-DE,Tahfeez AI: Koran lernen,Rezitiere den Koran auswendig: eine Offline-KI hört zu und prüft jedes Wort.,"Lerne den Koran auswendig – mit einem Zuhörer in deiner Tasche.
+
+Lies den Madinah-Mushaf, verstehe jedes Wort und rezitiere auswendig, während eine KI auf deinem Handy mitliest – sie bemerkt das vertauschte Wort, die übersprungene Aya und das zu kurze Madd. Kostenlos, offline, ohne Werbung, ohne Konto.
+
+AUSWENDIG REZITIEREN – MIT RÜCKMELDUNG
+• Seite verbergen und rezitieren: Jedes Wort erscheint, sobald du es sprichst
+• Wörter werden laufend eingefärbt: richtig, falsch, ausgelassen oder falsch ausgesprochen – ein richtiges Wort leuchtet sanft, ein Fehler wackelt, eine fertige Seite leuchtet mit einem sanften Tippen
+• Ein Ring um die Stopp-Taste atmet mit deiner Stimme, damit du weißt, dass du gehört wirst
+• Hört, wie du rezitierst, nicht nur was: Buchstaben, Vokale, Schadda und Kasusendungen, Laut für Laut nach der Aussprache von Ḥafṣ
+• Auch Tajwīd wird geprüft: Madd-Länge, Qalqala, Ghunna (Ikhfāʾ, Iqlāb, Idghām, gehaltenes doppeltes Nūn oder Mīm), schwere und leichte Buchstaben, Kehllaute – jede Regel einzeln abschaltbar
+• Wähle, wie streng geprüft wird: nachsichtig, ausgewogen oder genau
+• Vibration oder Ton bei einem Fehler, Tajwīd-Fehler getrennt gemeldet
+• Wähle die Farben für Aussprache- und Tajwīd-Fehler
+• Eine Aya wiederholen, einem Rezitator folgen oder eine ganze Seite prüfen
+
+LESEN UND VERSTEHEN
+• Der Madinah-Mushaf Seite für Seite, genau wie gedruckt – oder Aya für Aya, zum Wischen oder fortlaufend
+• Wort-für-Wort-Bedeutungen und Umschrift – auch auf Arabisch, aus al-Sirāj
+• Übersetzungen in 18 Sprachen und Tafsir neben jeder Aya, in deiner Sprache
+• Surennamen in der Kalligrafie des Mushaf; Fokusmodus für die Seite allein
+• Durchsuche den ganzen Koran, auf Arabisch oder in der Übersetzung
+• Lesezeichen und thematische Abschnitte farbig auf der Seite
+
+HÖREN
+• 18 Rezitatoren, darunter Alafasy, Al-Husary, Al-Minshawi, Abdul Basit und As-Sudais
+• Die Aya leuchtet auf, während sie rezitiert wird; wiederhole eine Aya oder einen Bereich
+• Lade einen Rezitator herunter und höre offline; die Wiedergabe läuft bei ausgeschaltetem Bildschirm weiter
+
+MIT PLAN AUSWENDIG LERNEN
+• Eine tägliche Lektion und verteilte Wiederholung
+• Versteckmodus, Schleife und Mitlesen
+• Die Festigkeit jedes Teils wird verfolgt, damit du weißt, was du wiederholen solltest
+• Deine Serie, ein Kalender deiner Rezitationstage, ein Ring der 30 Juz und sanfte Meilensteine
+
+NACH DEINEM GESCHMACK
+• Ein Himmel in den Farben der Tageszeit, Glaskarten und ein islamisches geometrisches Muster
+• Helle, dunkle, warme, Sepia- und schwarze Designs; 4 Koran-Schriften; Text bis 200 %
+• In 19 Sprachen: Arabisch, Englisch, Deutsch, Französisch, Spanisch, Russisch, Türkisch, Indonesisch, Malaiisch, Urdu, Persisch, Bengalisch, Hausa, Kurdisch, Paschtu, Swahili, Kasachisch, Usbekisch und Somali
+• Für Handys und Tablets
+
+DEINE STIMME BLEIBT AUF DEINEM HANDY
+Deine Rezitation wird auf dem Gerät vom eigenen Sprachmodell der App geprüft und danach verworfen. Nichts wird hochgeladen; kein Konto, keine Analyse, kein Tracking. Lesen, Übersetzungen, Tafsir, Suche, Auswendiglernen und die Prüfung der Rezitation funktionieren ohne Internet.
+
+EIN GESCHENK, KEIN PRODUKT
+Keine Werbung, keine Abos, keine Käufe – kostenlos für alle, für immer. Tahfeez AI ist Open Source: github.com/Omar-8/TahfeezAI
+
+Das Rezitationsmodell ist jung und lernt noch: Es kann einen Fehler übersehen oder ein richtiges Wort markieren. Jede Version wird besser – dein Feedback hilft: tahfeez.ai.app@gmail.com
+
+Mit Dank an Tanzil, den König-Fahd-Komplex, Quran Engine, QUL (Tarteel), QuranEnc, quran.com, die Rezitatoren sowie die Autoren des Muaalem-Modells und aller Datensätze, die im Info-Bereich der App aufgeführt sind."
+fr-FR,Tahfeez AI: Mémoriser le Coran,Récitez le Coran de mémoire : une IA hors ligne vérifie chaque mot.,"Mémorisez le Coran avec un auditeur dans votre poche.
+
+Lisez le Mushaf de Médine, comprenez chaque mot et récitez de mémoire pendant qu'une IA sur votre téléphone vous suit : elle repère le mot qui a glissé, le verset sauté et le madd écourté. Gratuit, hors ligne, sans publicité, sans compte.
+
+RÉCITER DE MÉMOIRE, AVEC UN RETOUR
+• Cachez la page et récitez : chaque mot apparaît quand vous le prononcez
+• Les mots se colorent au fil de la récitation : juste, faux, omis ou mal prononcé ; un mot juste brille doucement, une erreur oscille, et une page achevée s'illumine avec une légère vibration
+• Un anneau autour du bouton d'arrêt respire avec votre voix : vous savez que vous êtes entendu
+• Entend comment vous récitez, pas seulement quoi : lettres, voyelles, shadda et désinences, son par son selon la lecture de Ḥafṣ
+• Le tajwid aussi : longueur du madd, qalqala, ghunna (ikhfāʾ, iqlāb, idghām, nūn ou mīm redoublé tenu), lettres emphatiques et légères, lettres gutturales ; chaque règle peut être activée ou désactivée
+• Choisissez la sévérité : indulgente, équilibrée ou précise
+• Une vibration ou un son à chaque erreur, les erreurs de tajwid signalées à part
+• Choisissez les couleurs des erreurs de prononciation et de tajwid
+• Répétez un verset, suivez un récitateur ou testez une page entière
+
+LIRE ET COMPRENDRE
+• Le Mushaf de Médine page par page, tel qu'imprimé, ou verset par verset, en glissant ou en défilement continu
+• Sens et translittération mot à mot, en arabe aussi grâce à al-Sirāj
+• Traductions en 18 langues et tafsir à côté de chaque verset, dans votre langue
+• Noms des sourates dans la calligraphie du Mushaf ; mode concentration pour la page seule
+• Recherche dans tout le Coran, en arabe ou en traduction
+• Signets et passages thématiques colorés sur la page
+
+ÉCOUTER
+• 18 récitateurs, dont Alafasy, Al-Husary, Al-Minshawi, Abdul Basit et As-Sudais
+• Le verset s'illumine pendant sa récitation ; répétez un verset ou un passage
+• Téléchargez un récitateur pour écouter hors ligne ; la lecture continue écran éteint
+
+MÉMORISER AVEC UN PLAN
+• Une leçon quotidienne et des révisions espacées
+• Mode caché, boucle et suivi de récitation
+• La solidité de chaque partie suivie, pour savoir quoi réviser
+• Votre série de jours, un calendrier de vos récitations, un anneau des 30 juz et de discrets jalons
+
+À VOTRE GOÛT
+• Un ciel aux couleurs de l'heure du jour, des cartes en verre et un motif géométrique islamique
+• Thèmes clair, sombre, chaud, sépia et noir ; 4 polices du Coran ; texte jusqu'à 200 %
+• En 19 langues : arabe, anglais, allemand, français, espagnol, russe, turc, indonésien, malais, ourdou, persan, bengali, haoussa, kurde, pachto, swahili, kazakh, ouzbek et somali
+• Téléphones et tablettes
+
+VOTRE VOIX RESTE SUR VOTRE TÉLÉPHONE
+Votre récitation est vérifiée sur l'appareil par le modèle vocal de l'application, puis effacée. Rien n'est envoyé : ni compte, ni statistiques, ni pistage. Lecture, traductions, tafsir, recherche, mémorisation et vérification de la récitation fonctionnent sans internet.
+
+UN CADEAU, PAS UN PRODUIT
+Sans publicité, sans abonnement, sans achat : gratuit pour tous, pour toujours. Tahfeez AI est open source : github.com/Omar-8/TahfeezAI
+
+Le modèle de récitation est jeune et apprend encore : il peut manquer une erreur ou signaler un mot correct. Chaque version s'améliore, et vos retours aident : tahfeez.ai.app@gmail.com
+
+Merci à Tanzil, au Complexe du Roi Fahd, à Quran Engine, à QUL (Tarteel), à QuranEnc, à quran.com, aux récitateurs, ainsi qu'aux auteurs du modèle Muaalem et de chaque jeu de données cité dans l'écran « À propos » de l'application."
+es-ES,Tahfeez AI: memorizar el Corán,Recita el Corán de memoria: una IA sin conexión revisa cada palabra.,"Memoriza el Corán con un oyente en tu bolsillo.
+
+Lee el Mushaf de Medina, entiende cada palabra y recita de memoria mientras una IA en tu teléfono te sigue: detecta la palabra que se escapó, la aleya omitida y el madd que faltó. Gratis, sin conexión, sin anuncios y sin cuenta.
+
+RECITA DE MEMORIA, CON CORRECCIÓN
+• Oculta la página y recita: cada palabra aparece al pronunciarla
+• Las palabras se colorean mientras recitas: correcta, incorrecta, omitida o mal pronunciada; una palabra correcta brilla suavemente, un error se balancea y una página terminada se ilumina con una vibración suave
+• Un anillo alrededor del botón de parar respira con tu voz, para que sepas que te escucha
+• Oye cómo recitas, no solo qué: letras, vocales, shadda y desinencias, sonido a sonido según la lectura de Ḥafṣ
+• También revisa el tajwid: duración del madd, qalqala, ghunna (ikhfāʾ, iqlāb, idghām y nūn o mīm doble sostenida), letras gruesas y finas, letras guturales; cada regla se puede activar o desactivar
+• Elige cuán estricta es la revisión: flexible, equilibrada o precisa
+• Una vibración o un sonido ante un error, con aviso aparte para el tajwid
+• Elige los colores de los errores de pronunciación y de tajwid
+• Repite una aleya, sigue a un recitador o ponte a prueba con una página entera
+
+LEE Y ENTIENDE
+• El Mushaf de Medina página a página, tal como está impreso, o aleya por aleya, deslizando o en desplazamiento continuo
+• Significado y transliteración palabra por palabra, también en árabe gracias a al-Sirāj
+• Traducciones en 18 idiomas y tafsir junto a cada aleya, en tu idioma
+• Nombres de las suras con la caligrafía del Mushaf; modo concentración para la página sola
+• Busca en todo el Corán, en árabe o en la traducción
+• Marcadores y pasajes temáticos coloreados en la página
+
+ESCUCHA
+• 18 recitadores, entre ellos Alafasy, Al-Husary, Al-Minshawi, Abdul Basit y As-Sudais
+• La aleya se ilumina mientras se recita; repite una aleya o un tramo
+• Descarga un recitador para escuchar sin conexión; la reproducción sigue con la pantalla apagada
+
+MEMORIZA CON UN PLAN
+• Una lección diaria y repaso espaciado
+• Modo oculto, bucle y seguimiento
+• La solidez de cada parte, para saber qué repasar
+• Tu racha, un calendario de los días que recitaste, un anillo de los 30 juz y pequeños logros
+
+A TU GUSTO
+• Un cielo con los colores de la hora del día, tarjetas de cristal y un patrón geométrico islámico
+• Temas claro, oscuro, cálido, sepia y negro; 4 tipos de letra del Corán; texto hasta el 200 %
+• En 19 idiomas: árabe, inglés, alemán, francés, español, ruso, turco, indonesio, malayo, urdu, persa, bengalí, hausa, kurdo, pastún, suajili, kazajo, uzbeko y somalí
+• Teléfonos y tabletas
+
+TU VOZ SE QUEDA EN TU TELÉFONO
+Tu recitación se revisa en el dispositivo con el propio modelo de voz de la app y luego se descarta. No se sube nada; no hay cuenta, ni analíticas, ni rastreo. La lectura, las traducciones, el tafsir, la búsqueda, la memorización y la revisión de la recitación funcionan sin internet.
+
+UN REGALO, NO UN PRODUCTO
+Sin anuncios, sin suscripciones, sin compras: gratis para todos, para siempre. Tahfeez AI es de código abierto: github.com/Omar-8/TahfeezAI
+
+El modelo de recitación es joven y sigue aprendiendo: puede pasar por alto un error o marcar una palabra correcta. Cada versión mejora, y tus comentarios ayudan: tahfeez.ai.app@gmail.com
+
+Gracias a Tanzil, al Complejo del Rey Fahd, a Quran Engine, a QUL (Tarteel), a QuranEnc, a quran.com, a los recitadores y a los autores del modelo Muaalem y de cada conjunto de datos citado en la pantalla «Acerca de» de la app."
+ru-RU,Tahfeez AI: заучивание Корана,Читайте Коран наизусть: офлайн-ИИ слушает вас и проверяет каждое слово.,"Заучивайте Коран со слушателем в кармане.
+
+Читайте Мединский мусхаф, понимайте каждое слово и читайте наизусть, пока ИИ на вашем телефоне следит за чтением: он замечает перепутанное слово, пропущенный аят и недотянутый мадд. Бесплатно, без интернета, без рекламы и без аккаунта.
+
+ЧТЕНИЕ НАИЗУСТЬ С ПРОВЕРКОЙ
+• Скройте страницу и читайте: каждое слово появляется, когда вы его произносите
+• Слова окрашиваются по ходу чтения: верно, ошибка, пропущено или неверно произнесено; верное слово мягко светится, ошибка покачивается, а завершённая страница загорается с лёгкой вибрацией
+• Кольцо вокруг кнопки «стоп» дышит в такт вашему голосу — вы знаете, что вас слышат
+• Слышит, как вы читаете, а не только что: буквы, огласовки, шадду и окончания, звук за звуком по чтению Хафса
+• Проверяет и таджвид: длину мадда, калькалу, гунну (ихфа, икляб, идгам, удвоенные нун и мим), твёрдые и мягкие буквы, гортанные звуки; каждое правило можно включить или выключить
+• Выберите строгость проверки: мягкая, сбалансированная или точная
+• Вибрация или звук при ошибке, отдельный сигнал для ошибок таджвида
+• Выберите цвета ошибок произношения и таджвида
+• Повторяйте аят, следуйте за чтецом или проверьте себя на целой странице
+
+ЧИТАЙТЕ И ПОНИМАЙТЕ
+• Мединский мусхаф страница за страницей, как в печатном издании, или аят за аятом — листанием или сплошной лентой
+• Значения и транслитерация каждого слова — и на арабском, из «ас-Сирадж»
+• Переводы на 18 языков и тафсир рядом с каждым аятом, на вашем языке
+• Названия сур каллиграфией мусхафа; режим фокуса — только страница
+• Поиск по всему Корану, на арабском или в переводе
+• Закладки и тематические отрывки, выделенные цветом на странице
+
+СЛУШАЙТЕ
+• 18 чтецов, среди них Алафаси, аль-Хусари, аль-Миншави, Абдуль-Басит и ас-Судайс
+• Аят подсвечивается во время чтения; повтор аята или отрывка
+• Скачайте чтеца, чтобы слушать без интернета; воспроизведение продолжается при выключенном экране
+
+ЗАУЧИВАЙТЕ ПО ПЛАНУ
+• Ежедневный урок и интервальное повторение
+• Скрытый режим, повтор и чтение вслед
+• Прочность каждой части видна — вы знаете, что повторить
+• Серия дней, календарь ваших чтений, кольцо из 30 джузов и приятные достижения
+
+НА ВАШ ВКУС
+• Небо в цветах времени суток, стеклянные карточки и исламский геометрический орнамент
+• Светлая, тёмная, тёплая, сепия и чёрная темы; 4 шрифта Корана; текст до 200 %
+• 19 языков: арабский, английский, немецкий, французский, испанский, русский, турецкий, индонезийский, малайский, урду, персидский, бенгальский, хауса, курдский, пушту, суахили, казахский, узбекский и сомалийский
+• Телефоны и планшеты
+
+ВАШ ГОЛОС ОСТАЁТСЯ НА ТЕЛЕФОНЕ
+Чтение проверяется на устройстве собственной речевой моделью приложения и затем удаляется. Ничего не отправляется: нет аккаунта, аналитики и слежки. Чтение, переводы, тафсир, поиск, заучивание и проверка чтения работают без интернета.
+
+ПОДАРОК, А НЕ ПРОДУКТ
+Без рекламы, подписок и покупок — бесплатно для всех и навсегда. Tahfeez AI — проект с открытым кодом: github.com/Omar-8/TahfeezAI
+
+Модель проверки ещё молода и учится: она может пропустить ошибку или отметить верное слово. Каждая версия лучше прежней — ваши отзывы помогают: tahfeez.ai.app@gmail.com
+
+Благодарим Tanzil, Комплекс короля Фахда, Quran Engine, QUL (Tarteel), QuranEnc, quran.com, чтецов, а также авторов модели Muaalem и всех наборов данных, перечисленных в разделе «О приложении»."
+tr-TR,Tahfeez AI: Kur'an Ezberi,Kur'an'ı ezberden oku: çevrimdışı yapay zekâ her kelimeyi kontrol eder.,"Kur'an'ı cebindeki bir dinleyiciyle ezberle.
+
+Medine Mushafı'nı oku, her kelimeyi anla ve ezberden oku; telefonundaki yapay zekâ seni takip etsin: kayan kelimeyi, atlanan ayeti ve eksik kalan meddi yakalar. Ücretsiz, çevrimdışı, reklamsız, hesapsız.
+
+EZBERDEN OKU, GERİ BİLDİRİM AL
+• Sayfayı gizle ve oku: her kelime sen söyledikçe açılır
+• Kelimeler okudukça renklenir: doğru, yanlış, atlanmış veya hatalı telaffuz; doğru kelime yumuşakça parlar, hata sallanır, biten sayfa hafif bir titreşimle parlar
+• Durdur düğmesinin etrafındaki halka sesinle nefes alır; duyulduğunu bilirsin
+• Neyi değil, nasıl okuduğunu da duyar: harfler, harekeler, şedde ve kelime sonları, Hafs rivayetine göre ses ses
+• Tecvid de kontrol edilir: med uzunluğu, kalkale, gunne (ihfa, iklab, idgam, şeddeli nun ve mimde gunne), kalın ve ince harfler, boğaz harfleri; her kural açılıp kapatılabilir
+• Kontrolün ne kadar sıkı olacağını seç: hoşgörülü, dengeli veya hassas
+• Hata olunca titreşim veya ses; tecvid hataları için ayrı uyarı
+• Telaffuz ve tecvid hatalarının renklerini seç
+• Bir ayeti tekrarla, bir kâriyi takip et veya bütün bir sayfada kendini sına
+
+OKU VE ANLA
+• Medine Mushafı sayfa sayfa, basıldığı gibi; ya da ayet ayet, kaydırarak veya kesintisiz akışta
+• Kelime kelime anlam ve okunuş; Arapça olarak da, es-Sirâc'tan
+• 18 dilde meal ve her ayetin yanında tefsir, senin dilinde
+• Sure adları Mushaf'ın kendi hattıyla; yalnızca sayfa için odak modu
+• Tüm Kur'an'da Arapça veya mealde arama
+• Yer imleri ve sayfada renklendirilmiş konu bölümleri
+
+DİNLE
+• Alafasy, el-Husarî, el-Minşâvî, Abdulbâsıt ve es-Sudeys dahil 18 kâri
+• Okunan ayet ışıldar; bir ayeti veya aralığı tekrarla
+• Bir kâriyi indirip çevrimdışı dinle; ekran kapalıyken de çalmaya devam eder
+
+PLANLA EZBERLE
+• Günlük ders ve aralıklı tekrar
+• Gizleme modu, döngü ve takip
+• Her bölümün sağlamlığı izlenir; neyi tekrarlayacağını bilirsin
+• Serin, okuduğun günlerin takvimi, 30 cüzlük halka ve hoş kilometre taşları
+
+ZEVKİNE GÖRE
+• Günün saatinin renklerinde bir gökyüzü, cam kartlar ve İslami geometrik desen
+• Açık, koyu, sıcak, sepya ve siyah temalar; 4 Kur'an yazı tipi; %200'e kadar metin
+• 19 dilde: Arapça, İngilizce, Almanca, Fransızca, İspanyolca, Rusça, Türkçe, Endonezce, Malayca, Urduca, Farsça, Bengalce, Hausaca, Kürtçe, Peştuca, Svahili, Kazakça, Özbekçe ve Somalice
+• Telefon ve tabletler
+
+SESİN TELEFONUNDA KALIR
+Okuman, uygulamanın kendi ses modeliyle cihazda kontrol edilir ve sonra silinir. Hiçbir şey yüklenmez; hesap, analiz ve takip yoktur. Okuma, mealler, tefsir, arama, ezber ve okuma kontrolü internetsiz çalışır.
+
+BİR ÜRÜN DEĞİL, BİR HEDİYE
+Reklam, abonelik ve satın alma yok; herkes için sonsuza dek ücretsiz. Tahfeez AI açık kaynaklıdır: github.com/Omar-8/TahfeezAI
+
+Okuma modeli henüz genç ve öğreniyor: bir hatayı kaçırabilir ya da doğru bir kelimeyi işaretleyebilir. Her sürüm daha iyi; geri bildirimin yardımcı olur: tahfeez.ai.app@gmail.com
+
+Tanzil'e, Kral Fahd Kompleksi'ne, Quran Engine'e, QUL'a (Tarteel), QuranEnc'e, quran.com'a, kârilere ve Muaalem modelinin ve uygulamanın Hakkında ekranında listelenen tüm veri setlerinin yazarlarına teşekkürler."
+id,Tahfeez AI: Hafalan Al-Qur'an,Setor hafalan Al-Qur'an: AI offline menyimak Anda dan memeriksa setiap kata.,"Hafalkan Al-Qur'an dengan penyimak di saku Anda.
+
+Baca Mushaf Madinah, pahami setiap kata, dan lantunkan hafalan Anda sementara AI di ponsel Anda menyimak — menangkap kata yang tergelincir, ayat yang terlewat, dan mad yang kurang panjang. Gratis, offline, tanpa iklan, tanpa akun.
+
+SETOR HAFALAN, DENGAN KOREKSI
+• Sembunyikan halaman dan lantunkan: setiap kata muncul saat Anda mengucapkannya
+• Kata diberi warna sambil Anda membaca: benar, salah, terlewat, atau salah ucap — kata yang benar berpendar lembut, kesalahan bergoyang, dan halaman yang selesai bercahaya dengan getaran lembut
+• Lingkaran di sekitar tombol berhenti bernapas mengikuti suara Anda, jadi Anda tahu Anda didengar
+• Mendengar bagaimana Anda membaca, bukan hanya apa: huruf, harakat, syaddah, dan akhir kata, bunyi demi bunyi sesuai riwayat Hafs
+• Tajwid juga diperiksa: panjang mad, qalqalah, ghunnah (ikhfa, iqlab, idgham, nun dan mim bertasydid), huruf tebal dan tipis, huruf tenggorokan — setiap hukum bisa dinyalakan atau dimatikan
+• Pilih seberapa ketat pemeriksaannya: longgar, seimbang, atau teliti
+• Getar atau bunyi saat ada kesalahan, dengan peringatan terpisah untuk tajwid
+• Pilih warna kesalahan pelafalan dan tajwid
+• Ulangi satu ayat, ikuti qari, atau uji diri pada satu halaman penuh
+
+BACA DAN PAHAMI
+• Mushaf Madinah halaman demi halaman, persis seperti cetakannya — atau ayat demi ayat, digeser atau bergulir terus
+• Arti dan transliterasi kata per kata — juga dalam bahasa Arab, dari al-Sirāj
+• Terjemahan dalam 18 bahasa dan tafsir di samping setiap ayat, dalam bahasa Anda
+• Nama surah dengan kaligrafi mushaf; mode fokus untuk halaman saja
+• Cari di seluruh Al-Qur'an, dalam bahasa Arab atau terjemahan
+• Penanda dan bagian tematik diwarnai di halaman
+
+DENGARKAN
+• 18 qari, termasuk Alafasy, Al-Husary, Al-Minshawi, Abdul Basit, dan As-Sudais
+• Ayat menyala saat dibacakan; ulangi satu ayat atau rentang ayat
+• Unduh qari untuk mendengar offline; pemutaran tetap berjalan saat layar mati
+
+MENGHAFAL DENGAN RENCANA
+• Pelajaran harian dan murajaah berjarak
+• Mode sembunyi, ulang, dan ikuti bacaan
+• Kekuatan setiap bagian terpantau, jadi Anda tahu apa yang perlu dimurajaah
+• Rangkaian hari Anda, kalender hari-hari membaca, cincin 30 juz, dan pencapaian kecil
+
+SESUAI SELERA ANDA
+• Langit berwarna sesuai waktu, kartu kaca, dan pola geometris Islami
+• Tema terang, gelap, hangat, sepia, dan hitam; 4 font Al-Qur'an; teks hingga 200%
+• Dalam 19 bahasa: Arab, Inggris, Jerman, Prancis, Spanyol, Rusia, Turki, Indonesia, Melayu, Urdu, Persia, Bengali, Hausa, Kurdi, Pashto, Swahili, Kazakh, Uzbek, dan Somalia
+• Ponsel dan tablet
+
+SUARA ANDA TETAP DI PONSEL ANDA
+Bacaan Anda diperiksa di perangkat oleh model suara milik aplikasi, lalu dihapus. Tidak ada yang diunggah; tanpa akun, tanpa analitik, tanpa pelacakan. Membaca, terjemahan, tafsir, pencarian, hafalan, dan pemeriksaan bacaan semuanya berjalan tanpa internet.
+
+HADIAH, BUKAN PRODUK
+Tanpa iklan, tanpa langganan, tanpa pembelian — gratis untuk semua, selamanya. Tahfeez AI bersifat open source: github.com/Omar-8/TahfeezAI
+
+Model bacaan ini masih muda dan terus belajar: bisa saja melewatkan kesalahan atau menandai kata yang benar. Setiap versi makin baik — masukan Anda membantu: tahfeez.ai.app@gmail.com
+
+Terima kasih kepada Tanzil, Kompleks Raja Fahd, Quran Engine, QUL (Tarteel), QuranEnc, quran.com, para qari, serta penyusun model Muaalem dan setiap dataset yang tercantum di layar Tentang aplikasi."
+ms,Tahfeez AI: Hafazan Al-Quran,Tasmik hafazan Al-Quran: AI luar talian mendengar anda dan menyemak setiap kata.,"Hafaz Al-Quran dengan pendengar di dalam poket anda.
+
+Baca Mushaf Madinah, fahami setiap perkataan, dan baca dari ingatan sementara AI di telefon anda mengikuti — menangkap perkataan yang tergelincir, ayat yang tertinggal dan mad yang tidak cukup panjang. Percuma, luar talian, tanpa iklan, tanpa akaun.
+
+TASMIK DARI INGATAN, DENGAN TEGURAN
+• Sembunyikan halaman dan baca: setiap perkataan muncul apabila anda menyebutnya
+• Perkataan diwarnakan semasa anda membaca: betul, salah, tertinggal atau salah sebutan — perkataan yang betul bercahaya lembut, kesilapan bergoyang, dan halaman yang selesai bersinar dengan getaran lembut
+• Gelang di sekeliling butang berhenti bernafas bersama suara anda, jadi anda tahu anda didengari
+• Mendengar bagaimana anda membaca, bukan hanya apa: huruf, baris, sabdu dan hujung perkataan, bunyi demi bunyi mengikut riwayat Hafs
+• Tajwid juga disemak: panjang mad, qalqalah, dengung (ikhfa', iqlab, idgham, nun dan mim bersabdu), huruf tebal dan nipis, huruf halqi — setiap hukum boleh dihidupkan atau dimatikan
+• Pilih tahap ketegasan semakan: longgar, seimbang atau teliti
+• Getaran atau bunyi apabila tersilap, dengan amaran berasingan untuk tajwid
+• Pilih warna kesilapan sebutan dan tajwid
+• Ulang satu ayat, ikut qari, atau uji diri pada satu halaman penuh
+
+BACA DAN FAHAMI
+• Mushaf Madinah halaman demi halaman, sama seperti cetakannya — atau ayat demi ayat, dileret atau skrol berterusan
+• Makna dan transliterasi kata demi kata — juga dalam bahasa Arab, daripada al-Sirāj
+• Terjemahan dalam 18 bahasa dan tafsir di sebelah setiap ayat, dalam bahasa anda
+• Nama surah dalam khat mushaf; mod fokus untuk halaman sahaja
+• Cari dalam seluruh Al-Quran, dalam bahasa Arab atau terjemahan
+• Penanda buku dan petikan bertema diwarnakan pada halaman
+
+DENGAR
+• 18 qari, termasuk Alafasy, Al-Husary, Al-Minshawi, Abdul Basit dan As-Sudais
+• Ayat menyala semasa dibacakan; ulang satu ayat atau julat ayat
+• Muat turun qari untuk mendengar luar talian; main balik diteruskan walaupun skrin dimatikan
+
+HAFAZ DENGAN PELAN
+• Pelajaran harian dan ulang kaji berjarak
+• Mod sembunyi, ulang dan ikut bacaan
+• Kekuatan setiap bahagian dijejak, jadi anda tahu apa yang perlu diulang kaji
+• Rentetan hari anda, kalendar hari-hari anda membaca, gelang 30 juzuk dan pencapaian kecil
+
+IKUT CITA RASA ANDA
+• Langit dengan warna mengikut waktu, kad kaca dan corak geometri Islam
+• Tema cerah, gelap, hangat, sepia dan hitam; 4 fon Al-Quran; teks sehingga 200%
+• Dalam 19 bahasa: Arab, Inggeris, Jerman, Perancis, Sepanyol, Rusia, Turki, Indonesia, Melayu, Urdu, Parsi, Bengali, Hausa, Kurdi, Pashto, Swahili, Kazakh, Uzbek dan Somali
+• Telefon dan tablet
+
+SUARA ANDA KEKAL DI TELEFON ANDA
+Bacaan anda disemak pada peranti oleh model suara aplikasi sendiri, kemudian dibuang. Tiada apa yang dimuat naik; tiada akaun, tiada analitik, tiada penjejakan. Bacaan, terjemahan, tafsir, carian, hafazan dan semakan bacaan semuanya berfungsi tanpa internet.
+
+HADIAH, BUKAN PRODUK
+Tanpa iklan, tanpa langganan, tanpa pembelian — percuma untuk semua, selamanya. Tahfeez AI ialah sumber terbuka: github.com/Omar-8/TahfeezAI
+
+Model bacaan ini masih baharu dan sedang belajar: ia mungkin terlepas kesilapan atau menandakan perkataan yang betul. Setiap versi semakin baik — maklum balas anda membantu: tahfeez.ai.app@gmail.com
+
+Terima kasih kepada Tanzil, Kompleks Raja Fahd, Quran Engine, QUL (Tarteel), QuranEnc, quran.com, para qari, serta penyusun model Muaalem dan setiap set data yang disenaraikan di skrin Perihal aplikasi."
+ur,تحفیظ AI: قرآن حفظ کریں,قرآن زبانی سنائیں: آف لائن مصنوعی ذہانت آپ کو سنتی اور ہر لفظ جانچتی ہے۔,"قرآن حفظ کریں — آپ کی جیب میں ایک سننے والے کے ساتھ۔
+
+مدینہ مصحف پڑھیں، ہر لفظ سمجھیں اور زبانی سنائیں، جبکہ آپ کے فون پر مصنوعی ذہانت ساتھ ساتھ سنتی ہے — پھسلا ہوا لفظ، چھوٹی ہوئی آیت اور ادھورا مد پکڑ لیتی ہے۔ مفت، آف لائن، بغیر اشتہارات، بغیر اکاؤنٹ۔
+
+زبانی سنائیں — تصحیح کے ساتھ
+• صفحہ چھپائیں اور سنائیں: ہر لفظ آپ کے بولتے ہی ظاہر ہوتا ہے
+• پڑھتے ہوئے الفاظ رنگین ہوتے ہیں: درست، غلط، چھوٹا ہوا یا غلط ادا — درست لفظ نرمی سے چمکتا ہے، غلطی ہلتی ہے، اور مکمل صفحہ ہلکے ارتعاش کے ساتھ جگمگاتا ہے
+• روکنے کے بٹن کے گرد ایک حلقہ آپ کی آواز کے ساتھ سانس لیتا ہے، تاکہ آپ جانیں کہ آپ کو سنا جا رہا ہے
+• یہ سنتا ہے کہ آپ کیسے پڑھتے ہیں، صرف کیا نہیں: حروف، حرکات، شد اور آخری اعراب، آواز بہ آواز روایتِ حفص کے مطابق
+• تجوید بھی جانچی جاتی ہے: مد کی مقدار، قلقلہ، غنہ (اخفاء، اقلاب، ادغام، مشدد نون و میم)، پُر اور باریک حروف، حلقی حروف — ہر قاعدہ آن یا آف کیا جا سکتا ہے
+• جانچ کی سختی چنیں: نرم، متوازن یا باریک بین
+• غلطی پر ارتعاش یا آواز، تجوید کی غلطیوں کے لیے الگ اطلاع
+• تلفظ اور تجوید کی غلطیوں کے رنگ خود چنیں
+• ایک آیت دہرائیں، کسی قاری کے ساتھ پڑھیں یا پورے صفحے پر اپنا امتحان لیں
+
+پڑھیں اور سمجھیں
+• مدینہ مصحف صفحہ بہ صفحہ، بالکل جیسا چھپا ہے — یا آیت بہ آیت، سوائپ کر کے یا مسلسل اسکرول میں
+• لفظ بہ لفظ معانی اور رومن تلفظ — عربی میں بھی، «السراج» سے
+• 18 زبانوں میں ترجمے اور ہر آیت کے ساتھ تفسیر، آپ کی زبان میں
+• سورتوں کے نام مصحف ہی کی خطاطی میں؛ صرف صفحے کے لیے فوکس موڈ
+• پورے قرآن میں تلاش، عربی میں یا ترجمے میں
+• بُک مارکس اور صفحے پر رنگین موضوعاتی حصے
+
+سنیں
+• 18 قراء، جن میں العفاسی، الحصری، المنشاوی، عبدالباسط اور السدیس شامل ہیں
+• تلاوت کے دوران آیت روشن ہوتی ہے؛ ایک آیت یا حصہ دہرائیں
+• آف لائن سننے کے لیے قاری ڈاؤن لوڈ کریں؛ اسکرین بند ہونے پر بھی تلاوت جاری رہتی ہے
+
+منصوبے کے ساتھ حفظ
+• روزانہ سبق اور وقفے وقفے سے دہرائی
+• چھپانے کا موڈ، تکرار اور ساتھ پڑھنا
+• ہر حصے کی پختگی کا ریکارڈ، تاکہ معلوم ہو کیا دہرانا ہے
+• مسلسل دنوں کا سلسلہ، تلاوت کے دنوں کا کیلنڈر، 30 پاروں کا حلقہ اور خوشگوار سنگِ میل
+
+اپنی پسند کے مطابق
+• دن کے وقت کے رنگوں میں آسمان، شیشے جیسے کارڈ اور اسلامی جیومیٹریکل نقش
+• روشن، تاریک، گرم، سیپیا اور سیاہ تھیمز؛ قرآن کے 4 فونٹس؛ متن 200% تک
+• 19 زبانوں میں: عربی، انگریزی، جرمن، فرانسیسی، ہسپانوی، روسی، ترکی، انڈونیشیائی، مالے، اردو، فارسی، بنگالی، ہاؤسا، کرد، پشتو، سواحلی، قازق، ازبک اور صومالی
+• فون اور ٹیبلیٹ
+
+آپ کی آواز آپ کے فون پر ہی رہتی ہے
+آپ کی تلاوت ایپ کے اپنے صوتی ماڈل سے آلے پر ہی جانچی جاتی ہے اور پھر مٹا دی جاتی ہے۔ کچھ بھی اپ لوڈ نہیں ہوتا؛ نہ اکاؤنٹ، نہ تجزیات، نہ ٹریکنگ۔ پڑھنا، ترجمے، تفسیر، تلاش، حفظ اور تلاوت کی جانچ سب انٹرنیٹ کے بغیر کام کرتے ہیں۔
+
+تحفہ، سودا نہیں
+نہ اشتہارات، نہ سبسکرپشن، نہ خریداری — سب کے لیے ہمیشہ مفت۔ تحفیظ AI اوپن سورس ہے: github.com/Omar-8/TahfeezAI
+
+تلاوت کا ماڈل ابھی نیا ہے اور سیکھ رہا ہے: کوئی غلطی چھوٹ سکتی ہے یا درست لفظ پر نشان لگ سکتا ہے۔ ہر ورژن بہتر ہوتا ہے — آپ کی رائے مدد کرتی ہے: tahfeez.ai.app@gmail.com
+
+تنزیل، شاہ فہد کمپلیکس، Quran Engine، QUL (ترتیل)، QuranEnc، quran.com، قراء کرام، اور معلّم ماڈل اور ایپ کی «تعارف» اسکرین میں درج تمام ڈیٹا سیٹس کے مصنفین کا شکریہ۔"
+fa,تحفیظ AI: حفظ قرآن کریم,قرآن را از حفظ بخوانید: هوش مصنوعی آفلاین می‌شنود و هر کلمه را بررسی می‌کند.,"قرآن را حفظ کنید، با شنونده‌ای در جیبتان.
+
+مصحف مدینه را بخوانید، هر کلمه را بفهمید و از حفظ تلاوت کنید، در حالی که هوش مصنوعی روی گوشی‌تان همراهتان است — کلمهٔ لغزیده، آیهٔ جاافتاده و مدِّ ناتمام را تشخیص می‌دهد. رایگان، آفلاین، بدون تبلیغ و بدون حساب کاربری.
+
+تلاوت از حفظ، همراه با بازخورد
+• صفحه را پنهان کنید و بخوانید: هر کلمه با ادای آن ظاهر می‌شود
+• کلمات هنگام تلاوت رنگ می‌گیرند: درست، نادرست، جاافتاده یا با تلفظ نادرست — کلمهٔ درست آرام می‌درخشد، خطا تکان می‌خورد و صفحهٔ کامل‌شده با لرزشی ملایم می‌درخشد
+• حلقه‌ای دور دکمهٔ توقف با صدای شما نفس می‌کشد تا بدانید صدایتان شنیده می‌شود
+• می‌شنود چگونه می‌خوانید، نه فقط چه می‌خوانید: حروف، حرکات، تشدید و اعراب پایانی، صوت به صوت بر اساس روایت حفص
+• تجوید هم بررسی می‌شود: اندازهٔ مد، قلقله، غنه (اخفا، اقلاب، ادغام، نون و میم مشدد)، حروف پُر و نازک، حروف حلقی — هر قاعده را می‌توان روشن یا خاموش کرد
+• سخت‌گیری بررسی را انتخاب کنید: آسان‌گیر، متعادل یا دقیق
+• لرزش یا صدا هنگام خطا، با هشدار جداگانه برای خطاهای تجوید
+• رنگ خطاهای تلفظ و تجوید را انتخاب کنید
+• آیه‌ای را تکرار کنید، همراه قاری بخوانید یا خود را در یک صفحهٔ کامل بیازمایید
+
+بخوانید و بفهمید
+• مصحف مدینه صفحه به صفحه، درست مانند نسخهٔ چاپی — یا آیه به آیه، با کشیدن یا پیمایش پیوسته
+• معنی و آوانویسی کلمه به کلمه — به عربی نیز، از «السراج»
+• ترجمه به ۱۸ زبان و تفسیر کنار هر آیه، به زبان شما
+• نام سوره‌ها با خوشنویسی خود مصحف؛ حالت تمرکز برای خود صفحه
+• جست‌وجو در کل قرآن، به عربی یا در ترجمه
+• نشانک‌ها و بخش‌های موضوعی رنگی روی صفحه
+
+بشنوید
+• ۱۸ قاری، از جمله العفاسی، الحصری، المنشاوی، عبدالباسط و السدیس
+• آیه هنگام تلاوت روشن می‌شود؛ تکرار یک آیه یا یک بازه
+• قاری را دانلود کنید تا آفلاین بشنوید؛ پخش با صفحهٔ خاموش هم ادامه دارد
+
+حفظ با برنامه
+• درس روزانه و مرور فاصله‌دار
+• حالت پنهان، تکرار و همراه‌خوانی
+• استحکام حفظ هر بخش ثبت می‌شود تا بدانید چه چیزی را مرور کنید
+• روزهای پیاپی، تقویم روزهای تلاوت، حلقهٔ ۳۰ جزء و نقطه‌عطف‌های دلنشین
+
+به سلیقهٔ شما
+• آسمانی به رنگ‌های ساعت روز، کارت‌های شیشه‌ای و نقش هندسی اسلامی
+• پوسته‌های روشن، تیره، گرم، سپیا و سیاه؛ ۴ قلم قرآن؛ متن تا ۲۰۰٪
+• به ۱۹ زبان: عربی، انگلیسی، آلمانی، فرانسوی، اسپانیایی، روسی، ترکی، اندونزیایی، مالایی، اردو، فارسی، بنگالی، هوسا، کردی، پشتو، سواحیلی، قزاقی، ازبکی و سومالیایی
+• گوشی و تبلت
+
+صدای شما روی گوشی‌تان می‌ماند
+تلاوت شما روی دستگاه با مدل صوتی خود برنامه بررسی و سپس پاک می‌شود. چیزی بارگذاری نمی‌شود؛ نه حساب، نه آمارگیری، نه ردیابی. خواندن، ترجمه‌ها، تفسیر، جست‌وجو، حفظ و بررسی تلاوت همه بدون اینترنت کار می‌کنند.
+
+هدیه، نه کالا
+بدون تبلیغ، بدون اشتراک، بدون خرید — رایگان برای همه، برای همیشه. تحفیظ AI متن‌باز است: github.com/Omar-8/TahfeezAI
+
+مدل تلاوت هنوز جوان است و در حال یادگیری: ممکن است خطایی را نبیند یا کلمهٔ درستی را علامت بزند. هر نسخه بهتر از قبل است — بازخورد شما کمک می‌کند: tahfeez.ai.app@gmail.com
+
+با سپاس از تنزیل، مجتمع ملک فهد، Quran Engine، QUL (ترتیل)، QuranEnc، quran.com، قاریان، و پدیدآورندگان مدل معلّم و همهٔ مجموعه‌داده‌هایی که در صفحهٔ «درباره» برنامه آمده‌اند."
+bn-BD,Tahfeez AI: কুরআন হিফজ,মুখস্থ থেকে কুরআন তিলাওয়াত করুন: অফলাইন এআই শোনে ও প্রতিটি শব্দ যাচাই করে।,"পকেটে একজন শ্রোতা নিয়ে কুরআন হিফজ করুন।
+
+মদিনা মুসহাফ পড়ুন, প্রতিটি শব্দ বুঝুন এবং মুখস্থ থেকে তিলাওয়াত করুন — আপনার ফোনের এআই সাথে সাথে শুনবে: পিছলে যাওয়া শব্দ, বাদ পড়া আয়াত আর অপূর্ণ মাদ্দ ধরে ফেলবে। বিনামূল্যে, অফলাইনে, বিজ্ঞাপন ছাড়া, অ্যাকাউন্ট ছাড়া।
+
+মুখস্থ তিলাওয়াত — সংশোধনসহ
+• পৃষ্ঠা লুকিয়ে তিলাওয়াত করুন: আপনি বলার সাথে সাথে প্রতিটি শব্দ দেখা যায়
+• পড়ার সময় শব্দগুলো রঙিন হয়: সঠিক, ভুল, বাদ পড়া বা ভুল উচ্চারণ — সঠিক শব্দ মৃদু আলো ছড়ায়, ভুল দুলে ওঠে, আর শেষ হওয়া পৃষ্ঠা হালকা কম্পনের সাথে উজ্জ্বল হয়
+• থামার বোতামের চারপাশের বলয় আপনার কণ্ঠের সাথে শ্বাস নেয়, তাই বুঝবেন আপনাকে শোনা হচ্ছে
+• শুধু কী নয়, কীভাবে পড়ছেন তাও শোনে: হরফ, হরকত, তাশদীদ ও শব্দের শেষ, হাফস রেওয়ায়াত অনুযায়ী ধ্বনি ধরে ধরে
+• তাজবীদও যাচাই হয়: মাদ্দের দৈর্ঘ্য, কলকলা, গুন্নাহ (ইখফা, ইকলাব, ইদগাম, তাশদীদযুক্ত নূন ও মীম), মোটা ও পাতলা হরফ, কণ্ঠনালীর হরফ — প্রতিটি নিয়ম চালু বা বন্ধ করা যায়
+• যাচাই কতটা কড়া হবে বেছে নিন: সহজ, মাঝামাঝি বা সূক্ষ্ম
+• ভুলে কম্পন বা শব্দ, তাজবীদের ভুলের জন্য আলাদা সতর্কতা
+• উচ্চারণ ও তাজবীদের ভুলের রং বেছে নিন
+• একটি আয়াত পুনরাবৃত্তি করুন, কারীর সাথে পড়ুন বা পুরো পৃষ্ঠায় নিজেকে যাচাই করুন
+
+পড়ুন ও বুঝুন
+• মদিনা মুসহাফ পৃষ্ঠা ধরে, ঠিক যেমন ছাপা — অথবা আয়াত ধরে, সোয়াইপ করে বা একটানা স্ক্রলে
+• শব্দে শব্দে অর্থ ও উচ্চারণ — আরবিতেও, আস-সিরাজ থেকে
+• ১৮টি ভাষায় অনুবাদ ও প্রতিটি আয়াতের পাশে তাফসীর, আপনার ভাষায়
+• মুসহাফের নিজস্ব ক্যালিগ্রাফিতে সূরার নাম; শুধু পৃষ্ঠার জন্য ফোকাস মোড
+• পুরো কুরআনে খুঁজুন, আরবিতে বা অনুবাদে
+• বুকমার্ক এবং পৃষ্ঠায় রঙিন বিষয়ভিত্তিক অংশ
+
+শুনুন
+• ১৮ জন কারী, যেমন আলাফাসি, আল-হুসারি, আল-মিনশাবি, আব্দুল বাসিত ও আস-সুদাইস
+• তিলাওয়াতের সময় আয়াত আলোকিত হয়; একটি আয়াত বা অংশ পুনরাবৃত্তি করুন
+• অফলাইনে শুনতে কারী ডাউনলোড করুন; স্ক্রিন বন্ধ থাকলেও বাজতে থাকে
+
+পরিকল্পনা করে হিফজ
+• প্রতিদিনের সবক ও ব্যবধানসহ পুনরাবৃত্তি
+• লুকানো মোড, লুপ ও সাথে পড়া
+• প্রতিটি অংশের মজবুতি দেখা যায়, তাই জানবেন কী পুনরাবৃত্তি করতে হবে
+• টানা দিনের ধারা, তিলাওয়াতের দিনের ক্যালেন্ডার, ৩০ পারার বলয় ও ছোট ছোট মাইলফলক
+
+আপনার পছন্দমতো
+• দিনের সময়ের রঙে আকাশ, কাচের কার্ড ও ইসলামি জ্যামিতিক নকশা
+• হালকা, গাঢ়, উষ্ণ, সেপিয়া ও কালো থিম; কুরআনের ৪টি ফন্ট; লেখা ২০০% পর্যন্ত
+• ১৯টি ভাষায়: আরবি, ইংরেজি, জার্মান, ফরাসি, স্প্যানিশ, রুশ, তুর্কি, ইন্দোনেশীয়, মালয়, উর্দু, ফারসি, বাংলা, হাউসা, কুর্দি, পশতু, সোয়াহিলি, কাজাখ, উজবেক ও সোমালি
+• ফোন ও ট্যাবলেট
+
+আপনার কণ্ঠ আপনার ফোনেই থাকে
+আপনার তিলাওয়াত অ্যাপের নিজস্ব ভয়েস মডেল দিয়ে ডিভাইসেই যাচাই হয়, তারপর মুছে ফেলা হয়। কিছুই আপলোড হয় না; কোনো অ্যাকাউন্ট, অ্যানালিটিক্স বা ট্র্যাকিং নেই। পড়া, অনুবাদ, তাফসীর, খোঁজা, হিফজ ও তিলাওয়াত যাচাই — সবই ইন্টারনেট ছাড়া চলে।
+
+উপহার, পণ্য নয়
+বিজ্ঞাপন নেই, সাবস্ক্রিপশন নেই, কেনাকাটা নেই — সবার জন্য চিরকাল বিনামূল্যে। Tahfeez AI ওপেন সোর্স: github.com/Omar-8/TahfeezAI
+
+তিলাওয়াত মডেলটি নতুন এবং এখনো শিখছে: কোনো ভুল এড়িয়ে যেতে পারে বা সঠিক শব্দ চিহ্নিত করতে পারে। প্রতিটি সংস্করণ আরও ভালো হয় — আপনার মতামত সাহায্য করে: tahfeez.ai.app@gmail.com
+
+কৃতজ্ঞতা Tanzil, বাদশাহ ফাহাদ কমপ্লেক্স, Quran Engine, QUL (Tarteel), QuranEnc, quran.com, কারীগণ, এবং Muaalem মডেল ও অ্যাপের «সম্পর্কে» পাতায় তালিকাভুক্ত প্রতিটি ডেটাসেটের প্রণেতাদের প্রতি।"
+sw,Tahfeez AI: Kuhifadhi Qur'ani,Soma Qur'ani kwa moyo: AI isiyohitaji intaneti inakagua kila neno.,"Hifadhi Qur'ani ukiwa na msikilizaji mfukoni mwako.
+
+Soma Msahafu wa Madina, elewa kila neno, na usome kwa moyo huku AI kwenye simu yako ikikufuatilia — inanasa neno lililoteleza, aya iliyorukwa na madd isiyotimia. Bure, bila intaneti, bila matangazo, bila akaunti.
+
+SOMA KWA MOYO, UPATE MAREKEBISHO
+• Ficha ukurasa na usome: kila neno linaonekana unapolitamka
+• Maneno hupakwa rangi unaposoma: sahihi, kosa, lililorukwa au lililotamkwa vibaya — neno sahihi linang'aa kwa upole, kosa linayumba, na ukurasa uliokamilika unang'aa kwa mtetemo mwepesi
+• Pete kuzunguka kitufe cha kusimamisha inapumua pamoja na sauti yako, ili ujue unasikika
+• Inasikia jinsi unavyosoma, si tu unachosoma: herufi, irabu, shadda na miisho ya maneno, sauti kwa sauti kwa kisomo cha Ḥafṣ
+• Tajwidi pia inakaguliwa: urefu wa madd, qalqala, ghunna (ikhfāʾ, iqlāb, idghām, nūn na mīm zenye shadda), herufi nzito na nyepesi, herufi za koo — kila kanuni inaweza kuwashwa au kuzimwa
+• Chagua ukali wa ukaguzi: mpole, wa wastani au makini
+• Mtetemo au sauti kosa linapotokea, na tahadhari tofauti kwa makosa ya tajwidi
+• Chagua rangi za makosa ya matamshi na ya tajwidi
+• Rudia aya, fuata msomaji, au jipime kwa ukurasa mzima
+
+SOMA NA UELEWE
+• Msahafu wa Madina ukurasa kwa ukurasa, kama ulivyochapishwa — au aya kwa aya, kwa kutelezesha au mfululizo
+• Maana na tafsiri ya matamshi neno kwa neno — pia kwa Kiarabu, kutoka al-Sirāj
+• Tafsiri katika lugha 18 na tafsiri ya maelezo kando ya kila aya, kwa lugha yako
+• Majina ya sura kwa hati ya Msahafu wenyewe; hali ya kuzingatia kwa ukurasa peke yake
+• Tafuta katika Qur'ani nzima, kwa Kiarabu au katika tafsiri
+• Alamisho na vifungu vya mada vilivyopakwa rangi kwenye ukurasa
+
+SIKILIZA
+• Wasomaji 18, wakiwemo Alafasy, Al-Husary, Al-Minshawi, Abdul Basit na As-Sudais
+• Aya huwaka inaposomwa; rudia aya moja au sehemu
+• Pakua msomaji ili usikilize bila intaneti; usomaji unaendelea skrini ikiwa imezimwa
+
+HIFADHI KWA MPANGO
+• Somo la kila siku na marudio yenye vipindi
+• Hali ya kuficha, kurudia na kufuatilia
+• Uimara wa kila sehemu unafuatiliwa, ili ujue cha kurudia
+• Mfululizo wa siku zako, kalenda ya siku ulizosoma, pete ya juzuu 30 na hatua ndogo za mafanikio
+
+KWA LADHA YAKO
+• Anga lenye rangi za wakati wa siku, kadi za kioo na muundo wa kijiometri wa Kiislamu
+• Mandhari angavu, giza, joto, sepia na nyeusi; fonti 4 za Qur'ani; maandishi hadi 200%
+• Kwa lugha 19: Kiarabu, Kiingereza, Kijerumani, Kifaransa, Kihispania, Kirusi, Kituruki, Kiindonesia, Kimalei, Kiurdu, Kiajemi, Kibengali, Kihausa, Kikurdi, Kipashto, Kiswahili, Kikazakh, Kiuzbeki na Kisomali
+• Simu na kompyuta kibao
+
+SAUTI YAKO INABAKI KWENYE SIMU YAKO
+Kisomo chako kinakaguliwa kwenye kifaa na modeli ya sauti ya programu yenyewe, kisha kinafutwa. Hakuna kinachopakiwa; hakuna akaunti, takwimu wala ufuatiliaji. Kusoma, tafsiri, tafsiri ya maelezo, utafutaji, kuhifadhi na ukaguzi wa kisomo vyote hufanya kazi bila intaneti.
+
+ZAWADI, SI BIDHAA
+Hakuna matangazo, usajili wala ununuzi — bure kwa wote, milele. Tahfeez AI ni chanzo huria: github.com/Omar-8/TahfeezAI
+
+Modeli ya kisomo bado ni changa na inajifunza: inaweza kukosa kosa au kuweka alama kwenye neno sahihi. Kila toleo ni bora zaidi — maoni yako yanasaidia: tahfeez.ai.app@gmail.com
+
+Shukrani kwa Tanzil, Kituo cha Mfalme Fahd, Quran Engine, QUL (Tarteel), QuranEnc, quran.com, wasomaji, na waandishi wa modeli ya Muaalem na kila seti ya data iliyoorodheshwa kwenye skrini ya Kuhusu ya programu."
+kk,Tahfeez AI: Құранды жаттау,"Құранды жатқа оқыңыз: офлайн ЖИ тыңдап, әр сөзді тексереді.","Құранды қалтаңыздағы тыңдаушымен жаттаңыз.
+
+Мединалық мұсхафты оқып, әр сөзді түсініп, жатқа оқыңыз — телефоныңыздағы ЖИ қатар тыңдап, жаңылған сөзді, түсіп қалған аятты және толық созылмаған маддты байқайды. Тегін, интернетсіз, жарнамасыз, аккаунтсыз.
+
+ЖАТҚА ОҚУ — ТҮЗЕТУМЕН
+• Бетті жасырып, оқыңыз: әр сөз сіз айтқанда пайда болады
+• Оқыған сайын сөздер боялады: дұрыс, қате, түсіп қалған немесе қате айтылған — дұрыс сөз нәзік жарқырайды, қате тербеледі, ал аяқталған бет жеңіл дірілмен жарқырайды
+• Тоқтату түймесінің айналасындағы шеңбер даусыңызбен бірге тыныс алады — сізді естіп тұрғанын білесіз
+• Не оқығаныңызды ғана емес, қалай оқығаныңызды да естиді: әріптер, харакаттар, шадда және сөз соңдары, Хафс рияуаты бойынша дыбыс-дыбыспен
+• Тәжуид те тексеріледі: мадд ұзындығы, қалқала, ғунна (ихфа, иқлаб, идғам, шаддалы нун мен мим), жуан және жіңішке әріптер, көмей әріптері — әр ережені қосуға не өшіруге болады
+• Тексеру қатаңдығын таңдаңыз: жұмсақ, теңгерімді немесе дәл
+• Қате кезінде діріл не дыбыс, тәжуид қателеріне бөлек белгі
+• Айтылу және тәжуид қателерінің түстерін таңдаңыз
+• Аятты қайталаңыз, қарымен бірге оқыңыз немесе тұтас бетте өзіңізді тексеріңіз
+
+ОҚЫҢЫЗ ЖӘНЕ ТҮСІНІҢІЗ
+• Мединалық мұсхаф бетпе-бет, басылғандай — немесе аятпа-аят, сырғытып не үздіксіз айналдырып
+• Әр сөздің мағынасы мен транслитерациясы — араб тілінде де, «әс-Сирадж» кітабынан
+• 18 тілдегі аудармалар және әр аяттың жанында тәпсір, өз тіліңізде
+• Сүре аттары мұсхафтың өз каллиграфиясымен; тек бетке арналған зейін режимі
+• Бүкіл Құраннан іздеу, арабша немесе аудармада
+• Бетбелгілер және бетте түспен белгіленген тақырыптық үзінділер
+
+ТЫҢДАҢЫЗ
+• 18 қари, соның ішінде Әлафаси, әл-Хусари, әл-Миншауи, Абдулбасит және әс-Судайс
+• Оқылып жатқан аят жарқырайды; аятты не үзіндіні қайталау
+• Интернетсіз тыңдау үшін қариды жүктеп алыңыз; экран сөнсе де ойнату жалғасады
+
+ЖОСПАРМЕН ЖАТТАУ
+• Күнделікті сабақ және аралықпен қайталау
+• Жасыру режимі, қайталау және қатар оқу
+• Әр бөліктің беріктігі бақыланады, не қайталау керегін білесіз
+• Қатарынан оқыған күндер, оқу күндерінің күнтізбесі, 30 пара шеңбері және жағымды белестер
+
+ӨЗ ТАЛҒАМЫҢЫЗША
+• Тәулік уақытының түстеріндегі аспан, шыны карталар және исламдық геометриялық өрнек
+• Ашық, күңгірт, жылы, сепия және қара тақырыптар; Құранның 4 қарпі; мәтін 200%-ға дейін
+• 19 тілде: араб, ағылшын, неміс, француз, испан, орыс, түрік, индонезия, малай, урду, парсы, бенгал, хауса, күрд, пушту, суахили, қазақ, өзбек және сомали
+• Телефондар мен планшеттер
+
+ДАУСЫҢЫЗ ТЕЛЕФОНЫҢЫЗДА ҚАЛАДЫ
+Оқуыңыз құрылғының өзінде қолданбаның өз дыбыс моделімен тексеріліп, кейін жойылады. Ештеңе жүктелмейді: аккаунт та, аналитика да, бақылау да жоқ. Оқу, аудармалар, тәпсір, іздеу, жаттау және оқуды тексеру интернетсіз жұмыс істейді.
+
+ТАУАР ЕМЕС, СЫЙЛЫҚ
+Жарнама, жазылым, сатып алу жоқ — бәріне мәңгі тегін. Tahfeez AI — ашық бастапқы кодты жоба: github.com/Omar-8/TahfeezAI
+
+Оқуды тексеретін модель әлі жас және үйреніп жүр: қатені өткізіп алуы не дұрыс сөзді белгілеуі мүмкін. Әр нұсқа жақсара түседі — пікіріңіз көмектеседі: tahfeez.ai.app@gmail.com
+
+Tanzil, Король Фахд кешені, Quran Engine, QUL (Tarteel), QuranEnc, quran.com, қарилер, сондай-ақ Muaalem моделі мен қолданбаның «Қолданба туралы» бетінде аталған барлық деректер жинақтарының авторларына алғыс."
