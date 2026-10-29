@@ -555,3 +555,5 @@ recNeeds64Bit = Hubinta akhriskaagu waxay u baahan tahay taleefan 64-bit ah. Akh
 meaningPacksPreparing = Tarjumaadaha waa la diyaarinayaa…
 meaningPacksFailed = Tarjumaadaha lama diyaarin karin.
 recModelCrashed = Hubinta akhrisku waxay xidhay barnaamijka taleefankan, sidaa darteed waa la damiyay. Akhrinta, dhegaysiga iyo xifdintu sidii caadiga ahayd ayay u shaqeeyaan.
+settingsAnimations = Dhaqdhaqaaqa
+settingsAnimationsSub = Iftiinka, libdhinta iyo dhaqdhaqaaqa marka aad akhrinayso oo aad dhex socoto

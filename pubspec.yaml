@@ -94,6 +94,9 @@ dev_dependencies:
   # never part of the app.
   integration_test:
     sdk: flutter
+  # Frame-timing summaries of on-device runs (test_driver/perf_driver.dart).
+  flutter_driver:
+    sdk: flutter
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

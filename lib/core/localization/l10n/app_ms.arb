@@ -556,5 +556,7 @@
   "recNeeds64Bit": "Semakan bacaan memerlukan telefon 64-bit. Membaca, mendengar dan menghafaz berfungsi seperti biasa.",
   "meaningPacksPreparing": "Menyediakan terjemahan…",
   "meaningPacksFailed": "Terjemahan tidak dapat disediakan.",
-  "recModelCrashed": "Semakan bacaan menutup aplikasi pada telefon ini, jadi ia dimatikan. Membaca, mendengar dan menghafaz berfungsi seperti biasa."
+  "recModelCrashed": "Semakan bacaan menutup aplikasi pada telefon ini, jadi ia dimatikan. Membaca, mendengar dan menghafaz berfungsi seperti biasa.",
+  "settingsAnimations": "Animasi",
+  "settingsAnimationsSub": "Cahaya, peralihan pudar dan gerakan semasa membaca dan menyemak imbas"
 }

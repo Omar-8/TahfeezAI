@@ -556,5 +556,7 @@
   "recNeeds64Bit": "Pemeriksaan bacaan memerlukan ponsel 64-bit. Membaca, mendengarkan, dan menghafal tetap berjalan seperti biasa.",
   "meaningPacksPreparing": "Menyiapkan terjemahan…",
   "meaningPacksFailed": "Terjemahan tidak dapat disiapkan.",
-  "recModelCrashed": "Pemeriksaan bacaan menutup aplikasi di ponsel ini, jadi dimatikan. Membaca, mendengarkan, dan menghafal tetap berjalan seperti biasa."
+  "recModelCrashed": "Pemeriksaan bacaan menutup aplikasi di ponsel ini, jadi dimatikan. Membaca, mendengarkan, dan menghafal tetap berjalan seperti biasa.",
+  "settingsAnimations": "Animasi",
+  "settingsAnimationsSub": "Pendar, transisi memudar, dan gerakan saat membaca dan menjelajah"
 }

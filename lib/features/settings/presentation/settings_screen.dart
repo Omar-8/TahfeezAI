@@ -43,6 +43,7 @@ import 'theme_choices.dart';
 import '../../../quran/presentation/meaning_resource_names.dart';
 import '../../../core/ui/back_to_exit.dart';
 import '../../../core/ui/app_name_text.dart';
+import '../../../core/ui/animations_setting.dart';
 
 /// The Settings tab: the app's language and theme (the Quran page's own
 /// theme is chosen in the Mushaf, independently, so the two can be mixed).
@@ -219,12 +220,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       onChanged: (on) =>
                           ref.read(homeSkyProvider.notifier).setEnabled(on),
                     ),
+                    SwitchListTile(
+                      key: const ValueKey('settings-animations'),
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(l10n.settingsAnimations),
+                      subtitle: Text(l10n.settingsAnimationsSub),
+                      value: ref.watch(animationsProvider),
+                      onChanged: (on) =>
+                          ref.read(animationsProvider.notifier).setEnabled(on),
+                    ),
                   ],
                 ),
                 words: [
                   for (final c in AppThemeChoice.values) c.label(l10n),
                   l10n.settingsTimeOfDay,
                   l10n.settingsTimeOfDaySub,
+                  l10n.settingsAnimations,
+                  l10n.settingsAnimationsSub,
                 ],
               );
               group(

@@ -556,5 +556,7 @@
   "recNeeds64Bit": "Okuma kontrolü 64 bit bir telefon gerektirir. Okuma, dinleme ve ezber her zamanki gibi çalışır.",
   "meaningPacksPreparing": "Mealler hazırlanıyor…",
   "meaningPacksFailed": "Mealler hazırlanamadı.",
-  "recModelCrashed": "Okuma kontrolü bu telefonda uygulamayı kapattığı için kapatıldı. Okuma, dinleme ve ezber her zamanki gibi çalışır."
+  "recModelCrashed": "Okuma kontrolü bu telefonda uygulamayı kapattığı için kapatıldı. Okuma, dinleme ve ezber her zamanki gibi çalışır.",
+  "settingsAnimations": "Animasyonlar",
+  "settingsAnimationsSub": "Okurken ve gezinirken parlamalar, geçişler ve hareket"
 }

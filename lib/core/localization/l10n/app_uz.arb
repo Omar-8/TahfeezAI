@@ -556,5 +556,7 @@
   "recNeeds64Bit": "Tilovatni tekshirish uchun 64-bitli telefon kerak. Oʻqish, tinglash va yodlash odatdagidek ishlaydi.",
   "meaningPacksPreparing": "Tarjimalar tayyorlanmoqda…",
   "meaningPacksFailed": "Tarjimalarni tayyorlab boʻlmadi.",
-  "recModelCrashed": "Tilovatni tekshirish bu telefonda ilovani yopib qoʻydi, shuning uchun u oʻchirildi. Oʻqish, tinglash va yodlash odatdagidek ishlaydi."
+  "recModelCrashed": "Tilovatni tekshirish bu telefonda ilovani yopib qoʻydi, shuning uchun u oʻchirildi. Oʻqish, tinglash va yodlash odatdagidek ishlaydi.",
+  "settingsAnimations": "Animatsiyalar",
+  "settingsAnimationsSub": "Tilovat va koʻrib chiqish paytidagi yorqinlik, xiralashish va harakat"
 }

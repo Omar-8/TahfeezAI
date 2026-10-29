@@ -556,5 +556,7 @@
   "recNeeds64Bit": "La vérification de la récitation nécessite un téléphone 64 bits. Lecture, écoute et mémorisation fonctionnent normalement.",
   "meaningPacksPreparing": "Préparation des traductions…",
   "meaningPacksFailed": "Les traductions n'ont pas pu être préparées.",
-  "recModelCrashed": "La vérification de la récitation a fermé l'application sur ce téléphone ; elle est donc désactivée. Lecture, écoute et mémorisation fonctionnent normalement."
+  "recModelCrashed": "La vérification de la récitation a fermé l'application sur ce téléphone ; elle est donc désactivée. Lecture, écoute et mémorisation fonctionnent normalement.",
+  "settingsAnimations": "Animations",
+  "settingsAnimationsSub": "Lueurs, fondus et mouvements pendant la récitation et la navigation"
 }

@@ -1,5 +1,6 @@
 import 'dart:async' show Timer, unawaited;
 
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show RenderAbstractViewport;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -84,6 +85,12 @@ class AyahModePageState extends ConsumerState<AyahModePage> {
 
   /// Each page word's key (by its page index), to scroll a word into view.
   final _wordKeys = <int, GlobalKey>{};
+
+  /// Each ayah's block as last built, with what it showed: reused as it is
+  /// (the very same widget, so Flutter skips it) while its words' masks and
+  /// marks stay the same — a recitation changes one word at a time, and
+  /// rebuilding the whole page for it each time made Ayah mode stutter.
+  final _blocks = <int, (List<bool>, List<MushafWordMark?>, Object, Widget)>{};
 
   /// Brings the page's word [index] into view (revealing and hiding).
   ///
@@ -632,18 +639,7 @@ class AyahModePageState extends ConsumerState<AyahModePage> {
         children: [
           if (ayahId % 1000 == 1)
             _SurahHeader(surahNo: ayahId ~/ 1000, colors: colors),
-          _AyahBlock(
-            mushafId: widget.mushafId,
-            pageNumber: widget.pageNumber,
-            ayahId: ayahId,
-            words: [for (final i in indices) words[i]],
-            wordKeys: [
-              for (final i in indices) _wordKeys.putIfAbsent(i, GlobalKey.new),
-            ],
-            hidden: [for (final i in indices) hidden(i)],
-            marks: [for (final i in indices) mark(i)],
-            colors: colors,
-          ),
+          _block(ayahId, indices, words, hidden, mark),
           if (k < ayahs.length - 1)
             Divider(
               height: TahfeezSpacing.xl,
@@ -652,6 +648,39 @@ class AyahModePageState extends ConsumerState<AyahModePage> {
         ],
       ),
     );
+  }
+
+  Widget _block(
+    int ayahId,
+    List<int> indices,
+    List<WordRef> words,
+    bool Function(int) hidden,
+    MushafWordMark? Function(int) mark,
+  ) {
+    final masks = [for (final i in indices) hidden(i)];
+    final marks = [for (final i in indices) mark(i)];
+    final colors = widget.colors;
+    final kept = _blocks[ayahId];
+    if (kept != null &&
+        identical(kept.$3, colors) &&
+        listEquals(kept.$1, masks) &&
+        listEquals(kept.$2, marks)) {
+      return kept.$4;
+    }
+    final block = _AyahBlock(
+      mushafId: widget.mushafId,
+      pageNumber: widget.pageNumber,
+      ayahId: ayahId,
+      words: [for (final i in indices) words[i]],
+      wordKeys: [
+        for (final i in indices) _wordKeys.putIfAbsent(i, GlobalKey.new),
+      ],
+      hidden: masks,
+      marks: marks,
+      colors: colors,
+    );
+    _blocks[ayahId] = (masks, marks, colors, block);
+    return block;
   }
 }
 

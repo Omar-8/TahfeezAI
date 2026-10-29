@@ -1,0 +1,368 @@
+--- a/lib/src/page_view.dart	2026-10-29 18:23:17.310581750 +0100
++++ b/lib/src/page_view.dart	2026-10-29 18:23:17.311581728 +0100
+@@ -621,6 +621,27 @@
+   /// Each path's bounds in page units (Tahfeez patch 0005), as measured.
+   List<Rect?>? pathBounds;
+ 
++  /// Tahfeez patch 0006: each line's paths, and its ink — the line's words
++  /// in their colours — as an image at the current transform, rebuilt only
++  /// when something on that line changes.
++  List<List<int>>? linePaths;
++  final lines = <int, _LineImage>{};
++
++  List<List<int>> buildLinePaths(QvpPage p) {
++    final cached = linePaths;
++    if (cached != null) return cached;
++    var n = 0;
++    for (var i = 0; i < p.nPaths; i++) {
++      n = math.max(n, p.pathLine(i) + 1);
++    }
++    final out = List.generate(n, (_) => <int>[], growable: false);
++    for (var i = 0; i < p.nPaths; i++) {
++      final ln = p.pathLine(i);
++      if (ln >= 0) out[ln].add(i);
++    }
++    return linePaths = out;
++  }
++
+   List<List<int>> buildWordPaths(QvpPage p) {
+     final cached = wordPaths;
+     if (cached != null) return cached;
+@@ -638,6 +659,7 @@
+     paths = null;
+     wordPaths = null;
+     pathBounds = null;
++    linePaths = null;
+     key = '';
+     _dropImage();
+   }
+@@ -647,6 +669,10 @@
+     image = null;
+     picture?.dispose();
+     picture = null;
++    for (final line in lines.values) {
++      line.dispose();
++    }
++    lines.clear();
+   }
+ 
+   void dispose() {
+@@ -698,6 +724,22 @@
+   }
+ }
+ 
++/// Tahfeez patch 0006: one line's ink, rasterised, where it sits on the
++/// canvas.
++class _LineImage {
++  _LineImage(this.key, this.rect, this.image, this.picture);
++
++  final String key;
++  final Rect rect;
++  final ui.Image? image;
++  final ui.Picture? picture;
++
++  void dispose() {
++    image?.dispose();
++    picture?.dispose();
++  }
++}
++
+ class _QvpPainter extends CustomPainter {
+   _QvpPainter({
+     required this.page,
+@@ -787,6 +829,67 @@
+     );
+   }
+ 
++  /// Tahfeez patch 0006: [ids] (one line's paths) drawn into an image of
++  /// just that line's area — each in its colour, or the page's [ink]; the
++  /// hidden (transparent) and the swaying ([shakes]) left out.
++  _LineImage _rasterLine(
++    QvpLayout? l,
++    List<ui.Path> paths,
++    List<Rect?> bounds,
++    List<int> ids,
++    Map<int, int> colorOf,
++    Map<int, double> shakes,
++    int ink,
++    Size size,
++    String key,
++  ) {
++    final (s, tx, ty) = _lineTf(l, page.pathLine(ids.first));
++    Rect? area;
++    for (final i in ids) {
++      final b = bounds[i] ??= paths[i].getBounds();
++      final r = Rect.fromLTRB(
++        tx + b.left * s,
++        ty + b.top * s,
++        tx + b.right * s,
++        ty + b.bottom * s,
++      );
++      area = area == null ? r : area.expandToInclude(r);
++    }
++    final rect = area!.inflate(2).intersect(Offset.zero & size);
++    if (rect.isEmpty) return _LineImage(key, rect, null, null);
++    final rec = ui.PictureRecorder();
++    final c = ui.Canvas(rec);
++    c.scale(dpr);
++    c.translate(-rect.left, -rect.top);
++    c.translate(tx, ty);
++    c.scale(s);
++    final paint = ui.Paint()..isAntiAlias = true;
++    for (final i in ids) {
++      final color = colorOf[i] ?? ink;
++      if ((color & 0xff) == 0) continue;
++      if (shakes.isNotEmpty && shakes.containsKey(page.pathWord(i))) continue;
++      paint.color = QvpColor.toColor(color);
++      c.drawPath(paths[i], paint);
++    }
++    final pic = rec.endRecording();
++    try {
++      final img = pic.toImageSync(
++        (rect.width * dpr).ceil().clamp(1, 1 << 14),
++        (rect.height * dpr).ceil().clamp(1, 1 << 14),
++      );
++      pic.dispose();
++      return _LineImage(key, rect, img, null);
++    } catch (_) {
++      // No GPU image available: replay the picture, placed.
++      final placed = ui.PictureRecorder();
++      ui.Canvas(placed)
++        ..translate(rect.left, rect.top)
++        ..scale(1 / dpr)
++        ..drawPicture(pic);
++      return _LineImage(key, rect, null, placed.endRecording());
++    }
++  }
++
+   void _drawBoxes(ui.Canvas c, List<QvpBox> boxes, {QvpLayout? layout}) {
+     final slots = layout?.slots;
+     // Tahfeez patch 0003: the ayah marks per line, in layout px — a
+@@ -865,7 +968,6 @@
+     final paths = cache.buildPaths(page);
+     final l = page.currentLayout;
+     final styled = page.styledPaths();
+-    final styledSet = <int>{for (final s in styled) s.path};
+     final ink = page.defaultInk;
+ 
+     // paper
+@@ -887,51 +989,6 @@
+       canvas.drawRect(rect, ui.Paint()..color = paperColor);
+     }
+ 
+-    // base ink cache: every non-styled path at the current transform
+-    final ids = styledSet.toList()..sort();
+-    final key =
+-        '${view.scale.toStringAsFixed(5)}|${view.offsetX.toStringAsFixed(2)}|${view.offsetY.toStringAsFixed(2)}|$dpr|$ink|${identityHashCode(l)}|${size.width}x${size.height}|${ids.join(',')}';
+-    if (key != cache.key || (cache.image == null && cache.picture == null)) {
+-      final sw = Stopwatch()..start();
+-      final rec = ui.PictureRecorder();
+-      final c = ui.Canvas(rec);
+-      c.scale(dpr);
+-      final paint = ui.Paint()
+-        ..color = QvpColor.toColor(ink)
+-        ..isAntiAlias = true;
+-      var cur = -1, n = 0, open = false;
+-      for (var i = 0; i < page.nPaths; i++) {
+-        if (styledSet.contains(i)) continue;
+-        final ln = page.pathLine(i);
+-        if (ln != cur) {
+-          if (open) c.restore();
+-          final (s, tx, ty) = _lineTf(l, ln);
+-          c.save();
+-          c.translate(tx, ty);
+-          c.scale(s);
+-          open = true;
+-          cur = ln;
+-        }
+-        c.drawPath(paths[i], paint);
+-        n++;
+-      }
+-      if (open) c.restore();
+-      final pic = rec.endRecording();
+-      cache._dropImage();
+-      try {
+-        cache.image = pic.toImageSync(
+-          (size.width * dpr).ceil().clamp(1, 1 << 14),
+-          (size.height * dpr).ceil().clamp(1, 1 << 14),
+-        );
+-        pic.dispose();
+-      } catch (_) {
+-        cache.picture = pic; // no GPU image available: replay the picture
+-      }
+-      cache.key = key;
+-      cache.basePaths = n;
+-      cache.baseMs = sw.elapsedMicroseconds / 1000;
+-    }
+-
+     final sw = Stopwatch()..start();
+     // 1. highlight bands (behind the ink)
+     final bands = page.highlightBoxesView();
+@@ -959,65 +1016,122 @@
+               ..maskFilter = const ui.MaskFilter.blur(BlurStyle.normal, 6),
+           );
+         }
+-        // …and a glow around its letters, spreading.
+-        if (!e.letters) continue;
+-        final glow = ui.Paint()
+-          ..isAntiAlias = true
+-          ..color = e.color.withValues(alpha: e.color.a * 0.9 * fade);
+-        _drawWord(canvas, l, paths, e.word, glow, blurPx: 4 + 10 * t);
++      }
++      // …and a glow around its letters, spreading (Tahfeez patch 0006): the
++      // words glowing together blurred together — a few blur passes for a
++      // whole page's glow (in three steps of its spread), not one a word.
++      final letters = [
++        for (final (e, t) in _running(fx, QvpWordEffectKind.bloom, now))
++          if (e.letters) (e, t),
++      ];
++      for (var step = 0; step < 3 && letters.isNotEmpty; step++) {
++        final these = [
++          for (final (e, t) in letters)
++            if (math.min((t * 3).floor(), 2) == step) (e, t),
++        ];
++        if (these.isEmpty) continue;
++        final sigma = 4 + 10 * (step + 0.5) / 3;
++        Rect? area;
++        for (final (e, _) in these) {
++          final r = _wordBounds(l, paths, e.word);
++          if (r != null) area = area == null ? r : area.expandToInclude(r);
++        }
++        if (area == null) continue;
++        canvas.saveLayer(
++          area.inflate(sigma * 3),
++          ui.Paint()
++            ..imageFilter = ui.ImageFilter.blur(sigmaX: sigma, sigmaY: sigma),
++        );
++        for (final (e, t) in these) {
++          final rise = t < 0.15 ? t / 0.15 : 1.0;
++          final fade = rise * (1 - t);
++          final glow = ui.Paint()
++            ..isAntiAlias = true
++            ..color = e.color.withValues(alpha: e.color.a * 0.9 * fade);
++          _drawWord(canvas, l, paths, e.word, glow);
++        }
++        canvas.restore();
+       }
+       for (final (e, t) in _running(fx, QvpWordEffectKind.shake, now)) {
+         shakes[e.word] = math.sin(t * math.pi * 6) * (1 - t) * 3.5;
+       }
+     }
+ 
+-    // 2. base ink
+-    final img = cache.image;
+-    if (img != null) {
+-      canvas.drawImageRect(
+-        img,
+-        Rect.fromLTWH(0, 0, img.width.toDouble(), img.height.toDouble()),
+-        Rect.fromLTWH(0, 0, size.width, size.height),
+-        ui.Paint()..filterQuality = FilterQuality.none,
+-      );
+-    } else if (cache.picture != null) {
+-      canvas.save();
+-      canvas.scale(1 / dpr);
+-      canvas.drawPicture(cache.picture!);
+-      canvas.restore();
++    // 2. the ink, line by line (Tahfeez patch 0006): each line's words in
++    // their colours (a hidden word's transparent ink left out), as an
++    // image rebuilt only when something on that line changes — a recited
++    // word recolours one line, not the page; a swaying word drawn live.
++    final colorOf = <int, int>{for (final s in styled) s.path: s.color};
++    final lines = cache.buildLinePaths(page);
++    final tkey =
++        '${view.scale.toStringAsFixed(5)}|${view.offsetX.toStringAsFixed(2)}|${view.offsetY.toStringAsFixed(2)}|$dpr|$ink|${identityHashCode(l)}|${size.width}x${size.height}';
++    final bounds = cache.pathBounds ??= List<Rect?>.filled(paths.length, null);
++    final baseSw = Stopwatch()..start();
++    var rebuilt = 0;
++    for (var ln = 0; ln < lines.length; ln++) {
++      final ids = lines[ln];
++      if (ids.isEmpty) continue;
++      final sig = StringBuffer(tkey);
++      for (final i in ids) {
++        final c = colorOf[i];
++        if (c != null) sig.write(',$i:$c');
++        if (shakes.isNotEmpty && shakes.containsKey(page.pathWord(i))) {
++          sig.write(',$i~');
++        }
++      }
++      final key = sig.toString();
++      var line = cache.lines[ln];
++      if (line == null || line.key != key) {
++        line?.dispose();
++        line = _rasterLine(
++          l,
++          paths,
++          bounds,
++          ids,
++          colorOf,
++          shakes,
++          ink,
++          size,
++          key,
++        );
++        cache.lines[ln] = line;
++        rebuilt++;
++      }
++      final img = line.image;
++      if (img != null) {
++        canvas.drawImageRect(
++          img,
++          Rect.fromLTWH(0, 0, img.width.toDouble(), img.height.toDouble()),
++          line.rect,
++          ui.Paint()..filterQuality = FilterQuality.none,
++        );
++      } else if (line.picture != null) {
++        canvas.drawPicture(line.picture!);
++      }
++    }
++    if (rebuilt > 0) {
++      cache.basePaths = rebuilt;
++      cache.baseMs = baseSw.elapsedMicroseconds / 1000;
+     }
+ 
+-    // 3. styled paths
+-    if (styled.isNotEmpty) {
++    // Tahfeez patch 0005: a shaking word's ink, swayed sideways.
++    if (shakes.isNotEmpty) {
+       final paint = ui.Paint()..isAntiAlias = true;
+-      var cur = -1, open = false;
+-      var lineScale = 1.0;
+-      for (final s in styled) {
+-        if ((s.color & 0xff) == 0) continue;
+-        final ln = page.pathLine(s.path);
+-        if (ln != cur) {
+-          if (open) canvas.restore();
+-          final (sc, tx, ty) = _lineTf(l, ln);
++      final wordPaths = cache.buildWordPaths(page);
++      for (final MapEntry(key: word, value: dx) in shakes.entries) {
++        if (word < 0 || word >= wordPaths.length) continue;
++        for (final i in wordPaths[word]) {
++          final c = colorOf[i] ?? ink;
++          if ((c & 0xff) == 0) continue;
++          paint.color = QvpColor.toColor(c);
++          final (sc, tx, ty) = _lineTf(l, page.pathLine(i));
+           canvas.save();
+-          canvas.translate(tx, ty);
++          canvas.translate(tx + dx, ty);
+           canvas.scale(sc);
+-          open = true;
+-          cur = ln;
+-          lineScale = sc;
+-        }
+-        paint.color = QvpColor.toColor(s.color);
+-        // Tahfeez patch 0005: a shaking word's ink, swayed sideways.
+-        final dx = shakes.isEmpty ? null : shakes[page.pathWord(s.path)];
+-        if (dx != null) {
+-          canvas.save();
+-          canvas.translate(dx / lineScale, 0);
+-          canvas.drawPath(paths[s.path], paint);
++          canvas.drawPath(paths[i], paint);
+           canvas.restore();
+-        } else {
+-          canvas.drawPath(paths[s.path], paint);
+         }
+       }
+-      if (open) canvas.restore();
+     }
+ 
+     // Tahfeez patch 0005: ink fading in — the paper over the word, fading

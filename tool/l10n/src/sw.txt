@@ -555,3 +555,5 @@ recNeeds64Bit = Kukagua kisomo chako kunahitaji simu ya biti 64. Kusoma, kusikil
 meaningPacksPreparing = Tafsiri zinaandaliwa…
 meaningPacksFailed = Tafsiri hazikuweza kuandaliwa.
 recModelCrashed = Ukaguzi wa kisomo ulifunga programu kwenye simu hii, kwa hivyo umezimwa. Kusoma, kusikiliza na kuhifadhi vinafanya kazi kama kawaida.
+settingsAnimations = Uhuishaji
+settingsAnimationsSub = Mng'ao, kufifia na mwendo unaposoma na kuvinjari

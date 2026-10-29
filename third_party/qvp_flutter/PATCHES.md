@@ -201,3 +201,24 @@ engine animates), so a still page costs nothing. Used by
 `quran_engine_android_backend.dart` for a recitation's word feedback
 (2026-10-25). Re-apply with `patch -p1 < patches/0005-word-effects.patch`
 after re-vendoring.
+
+## Patch 0006 — line ink images
+
+`patches/0006-line-ink-images.patch` (on top of 0005) changes how the
+painter caches the page's ink, for a recitation's animations to run
+smoothly on a phone (frame timing: `integration_test/effects_perf_test.dart`):
+
+- The ink is cached **per line**, each line's words in their colours (a
+  hidden word's transparent ink left out), as an image of just that
+  line's area. Before, the unstyled ink was one image of the whole page,
+  rebuilt whenever any word's style changed — every word a recitation
+  reveals or colours — and every styled path was drawn as a vector path
+  every frame. Now a word changing redraws its own line; the rest stay.
+- A swaying word (`shake`) is left out of its line's image and drawn live.
+- A `bloom`'s glow around the letters is blurred in a shared layer (the
+  words glowing together, in three steps of their spread) instead of a
+  mask blur per path — a whole page's end-of-recitation glow is a few blur
+  passes, not hundreds.
+
+Re-apply with `patch -p1 < patches/0006-line-ink-images.patch` after 0005
+(2026-10-29).

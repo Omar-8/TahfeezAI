@@ -555,3 +555,5 @@ recNeeds64Bit = Duba karatunka yana buƙatar waya mai 64-bit. Karatu, saurare da
 meaningPacksPreparing = Ana shirya fassarorin…
 meaningPacksFailed = Ba a iya shirya fassarorin ba.
 recModelCrashed = Duba karatu ya rufe manhajar a wannan wayar, don haka an kashe shi. Karatu, saurare da haddacewa suna aiki kamar yadda aka saba.
+settingsAnimations = Motsin hotuna
+settingsAnimationsSub = Haske, dushewa da motsi yayin karatu da bincike

@@ -556,5 +556,7 @@
   "recNeeds64Bit": "Revisar la recitación requiere un teléfono de 64 bits. Leer, escuchar y memorizar funcionan como siempre.",
   "meaningPacksPreparing": "Preparando las traducciones…",
   "meaningPacksFailed": "No se pudieron preparar las traducciones.",
-  "recModelCrashed": "La revisión de la recitación cerró la app en este teléfono, así que se ha desactivado. Leer, escuchar y memorizar funcionan como siempre."
+  "recModelCrashed": "La revisión de la recitación cerró la app en este teléfono, así que se ha desactivado. Leer, escuchar y memorizar funcionan como siempre.",
+  "settingsAnimations": "Animaciones",
+  "settingsAnimationsSub": "Brillos, fundidos y movimiento al recitar y navegar"
 }

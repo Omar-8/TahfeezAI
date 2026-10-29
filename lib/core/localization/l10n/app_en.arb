@@ -1087,5 +1087,7 @@
   "@meaningPacksPreparing": {
     "description": "Over the app for a moment while the translations, tafsir and word meanings of a newly chosen language are unpacked."
   },
-  "recModelCrashed": "Recitation checking closed the app on this phone, so it's turned off. Reading, listening and memorizing work as usual."
+  "recModelCrashed": "Recitation checking closed the app on this phone, so it's turned off. Reading, listening and memorizing work as usual.",
+  "settingsAnimations": "Animations",
+  "settingsAnimationsSub": "Glows, fades and movement as you recite and browse"
 }
