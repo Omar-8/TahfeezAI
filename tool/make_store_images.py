@@ -130,7 +130,7 @@ def frame(shot: Path, headline, sub, dark, arabic):
     y = 120
     for line in wrap(d, headline, hf, W - 160):
         d.text((W // 2, y), line, font=hf, fill=head_c, anchor="ma", direction=direction)
-        y += 96
+        y += 122 if arabic else 96  # (the Arabic font's lines are taller)
     y += 14
     for line in wrap(d, sub, sf, W - 200):
         d.text((W // 2, y), line, font=sf, fill=sub_c, anchor="ma", direction=direction)
