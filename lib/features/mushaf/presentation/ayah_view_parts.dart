@@ -47,6 +47,7 @@ class AyahWordView extends StatefulWidget {
     this.mark,
     this.onTap,
     this.onLongPress,
+    this.fade = true,
   });
 
   final String fontFamily;
@@ -58,6 +59,9 @@ class AyahWordView extends StatefulWidget {
 
   /// The recitation's mark on it, for its animation as it changes.
   final MushafWordMark? mark;
+
+  /// Whether hiding or revealing it fades (else it changes at once).
+  final bool fade;
   final VoidCallback? onTap;
   final VoidCallback? onLongPress;
 
@@ -99,10 +103,13 @@ class _AyahWordViewState extends State<AyahWordView>
   @override
   void didUpdateWidget(AyahWordView old) {
     super.didUpdateWidget(old);
-    if (old.hidden && !widget.hidden) {
-      _play(_WordEffect.reveal, 400);
-    } else if (!old.hidden && widget.hidden) {
-      _play(_WordEffect.hide, 400);
+    if (old.hidden != widget.hidden) {
+      if (widget.fade) {
+        _play(widget.hidden ? _WordEffect.hide : _WordEffect.reveal, 400);
+      } else if (_effect == _WordEffect.hide || _effect == _WordEffect.reveal) {
+        _controller?.stop();
+        _effect = null;
+      }
     } else if (old.mark != widget.mark) {
       if (widget.mark == MushafWordMark.correct) {
         _play(_WordEffect.glow, 650);

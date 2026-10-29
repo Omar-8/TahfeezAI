@@ -1,0 +1,84 @@
+<en-US>
+• Smoother recitation: words reveal, glow and get marked without stutter, even on long recitations
+• Fixed a crash that could happen while reciting a long passage
+• New: turn animations off in Settings → App theme → Animations
+• A finished page now ends with a gentle vibration instead of a full-page glow
+</en-US>
+<ar>
+• تلاوة أكثر سلاسة: تظهر الكلمات وتتوهج وتُصحَّح دون تقطّع، حتى في التلاوات الطويلة
+• إصلاح عطل كان قد يحدث أثناء تلاوة مقطع طويل
+• جديد: يمكنك إيقاف الحركات من الإعدادات ← مظهر التطبيق ← الحركات
+• عند إتمام الصفحة تشعر باهتزاز خفيف بدلاً من توهّج الصفحة كاملة
+</ar>
+<bn-BD>
+• আরও মসৃণ তিলাওয়াত: দীর্ঘ তিলাওয়াতেও শব্দগুলো আটকে না গিয়ে প্রকাশিত হয়, উজ্জ্বল হয় ও চিহ্নিত হয়
+• দীর্ঘ অংশ তিলাওয়াতের সময় হতে পারে এমন একটি ক্র্যাশ ঠিক করা হয়েছে
+• নতুন: সেটিংস → অ্যাপের থিম → অ্যানিমেশন থেকে অ্যানিমেশন বন্ধ করুন
+• পৃষ্ঠা শেষ হলে এখন পুরো পৃষ্ঠা উজ্জ্বল হওয়ার বদলে হালকা কম্পন হয়
+</bn-BD>
+<de-DE>
+• Flüssigere Rezitation: Wörter erscheinen, leuchten und werden markiert, ohne zu ruckeln – auch bei langen Rezitationen
+• Absturz behoben, der beim Rezitieren eines langen Abschnitts auftreten konnte
+• Neu: Animationen unter Einstellungen → App-Design → Animationen ausschalten
+• Eine fertige Seite endet jetzt mit einer sanften Vibration statt mit einem Leuchten der ganzen Seite
+</de-DE>
+<es-ES>
+• Recitación más fluida: las palabras aparecen, brillan y se marcan sin tirones, incluso en recitaciones largas
+• Corregido un cierre inesperado que podía ocurrir al recitar un pasaje largo
+• Nuevo: desactiva las animaciones en Ajustes → Tema de la aplicación → Animaciones
+• Al terminar una página ahora notas una vibración suave en lugar de un brillo en toda la página
+</es-ES>
+<fa>
+• تلاوت روان‌تر: واژه‌ها حتی در تلاوت‌های طولانی بدون لرزش نمایان می‌شوند، می‌درخشند و علامت می‌خورند
+• رفع خرابی‌ای که ممکن بود هنگام تلاوت یک بخش طولانی رخ دهد
+• جدید: پویانمایی را از تنظیمات ← پوستهٔ برنامه ← پویانمایی خاموش کنید
+• پایان یک صفحه اکنون با لرزشی ملایم همراه است، نه درخشش کل صفحه
+</fa>
+<fr-FR>
+• Récitation plus fluide : les mots apparaissent, brillent et sont marqués sans saccade, même lors de longues récitations
+• Correction d'un plantage qui pouvait survenir pendant la récitation d'un long passage
+• Nouveau : désactivez les animations dans Réglages → Thème de l'application → Animations
+• Une page terminée se conclut désormais par une légère vibration au lieu d'un éclat sur toute la page
+</fr-FR>
+<id>
+• Tilawah lebih mulus: kata-kata muncul, bercahaya, dan ditandai tanpa tersendat, bahkan pada tilawah panjang
+• Memperbaiki crash yang bisa terjadi saat membaca bagian yang panjang
+• Baru: matikan animasi di Pengaturan → Tema aplikasi → Animasi
+• Halaman yang selesai kini diakhiri getaran lembut, bukan cahaya di seluruh halaman
+</id>
+<kk>
+• Жатығырақ оқу: сөздер ұзақ оқуда да кідіріссіз ашылады, жарқырайды және белгіленеді
+• Ұзақ үзінді оқып жатқанда болуы мүмкін ақау түзетілді
+• Жаңа: анимацияларды Баптаулар → Қолданба тақырыбы → Анимациялар бөлімінде өшіріңіз
+• Бет аяқталғанда енді бүкіл бет жарқырамайды, оның орнына жеңіл діріл болады
+</kk>
+<ms>
+• Bacaan lebih lancar: perkataan muncul, bercahaya dan ditanda tanpa tersekat, walaupun dalam bacaan yang panjang
+• Membaiki ranap yang boleh berlaku semasa membaca petikan yang panjang
+• Baharu: matikan animasi di Tetapan → Tema aplikasi → Animasi
+• Halaman yang selesai kini diakhiri dengan getaran lembut, bukan cahaya pada seluruh halaman
+</ms>
+<ru-RU>
+• Более плавное чтение: слова появляются, подсвечиваются и отмечаются без рывков, даже при долгом чтении
+• Исправлен сбой, который мог возникать при чтении длинного отрывка
+• Новое: анимацию можно отключить в разделе Настройки → Тема приложения → Анимация
+• Завершённая страница теперь отмечается лёгкой вибрацией вместо свечения всей страницы
+</ru-RU>
+<sw>
+• Usomaji laini zaidi: maneno yanafunuliwa, yanang'aa na kuwekewa alama bila kukwama, hata katika usomaji mrefu
+• Tumerekebisha hitilafu iliyoweza kufunga programu wakati wa kusoma kifungu kirefu
+• Mpya: zima uhuishaji katika Mipangilio → Mandhari ya programu → Uhuishaji
+• Ukurasa uliokamilika sasa unaishia kwa mtetemo mwepesi badala ya ukurasa mzima kung'aa
+</sw>
+<tr-TR>
+• Daha akıcı tilavet: kelimeler uzun tilavetlerde bile takılmadan açılır, parlar ve işaretlenir
+• Uzun bir bölüm okunurken oluşabilen bir çökme düzeltildi
+• Yeni: animasyonları Ayarlar → Uygulama teması → Animasyonlar bölümünden kapatın
+• Biten bir sayfa artık tüm sayfanın parlaması yerine hafif bir titreşimle sona eriyor
+</tr-TR>
+<ur>
+• زیادہ رواں تلاوت: لمبی تلاوت میں بھی الفاظ بغیر اٹکے ظاہر ہوتے، چمکتے اور نشان زد ہوتے ہیں
+• ایک کریش درست کیا گیا جو لمبا حصہ تلاوت کرتے ہوئے ہو سکتا تھا
+• نیا: ترتیبات ← ایپ کی تھیم ← اینیمیشن سے اینیمیشن بند کریں
+• مکمل صفحہ اب پورے صفحے کی چمک کے بجائے ہلکی سی تھرتھراہٹ پر ختم ہوتا ہے
+</ur>

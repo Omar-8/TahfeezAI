@@ -92,6 +92,14 @@ class AyahModePageState extends ConsumerState<AyahModePage> {
   /// rebuilding the whole page for it each time made Ayah mode stutter.
   final _blocks = <int, (List<bool>, List<MushafWordMark?>, Object, Widget)>{};
 
+  /// Each word's mask as last built, and whether this build changes many
+  /// at once — a recitation starting or ending, hide mode turned on: those
+  /// change at once, not fading word by word (every word on the page
+  /// fading together stalled Ayah mode). One word revealed still fades.
+  List<bool>? _masks;
+  bool _manyChanged = false;
+  static const _fadeAtMost = 3;
+
   /// Brings the page's word [index] into view (revealing and hiding).
   ///
   /// The top of its ayah's card, as the modes show an ayah — unless that
@@ -489,6 +497,16 @@ class AyahModePageState extends ConsumerState<AyahModePage> {
               : overlay.isHidden(words[i]))
         : hide.enabled && i >= uncovered;
     MushafWordMark? mark(int i) => overlay?.marks[words[i]];
+    final masks = [for (var i = 0; i < words.length; i++) hidden(i)];
+    final before = _masks;
+    if (before != null && before.length == masks.length) {
+      var changed = 0;
+      for (var i = 0; i < masks.length; i++) {
+        if (masks[i] != before[i]) changed++;
+      }
+      if (changed > 0) _manyChanged = changed > _fadeAtMost;
+    }
+    _masks = masks;
 
     final ayahs = _ayahs();
     // Ayah mode's text size (its view settings), over the reader's own.
@@ -678,6 +696,7 @@ class AyahModePageState extends ConsumerState<AyahModePage> {
       hidden: masks,
       marks: marks,
       colors: colors,
+      fade: !_manyChanged,
     );
     _blocks[ayahId] = (masks, marks, colors, block);
     return block;
@@ -758,9 +777,13 @@ class _AyahBlock extends ConsumerWidget {
     required this.hidden,
     required this.marks,
     required this.colors,
+    required this.fade,
   });
 
   final int mushafId, pageNumber, ayahId;
+
+  /// Whether its words fade as they are hidden or revealed.
+  final bool fade;
 
   /// Each word's key on the page (to scroll it into view).
   final List<GlobalKey> wordKeys;
@@ -921,6 +944,7 @@ class _AyahBlock extends ConsumerWidget {
                       style: styleOf(marks[k]),
                       mark: marks[k],
                       colors: colors,
+                      fade: fade,
                       fontFamily: view.quranFont.family,
                       onTap: hidden[k]
                           ? null

@@ -36,8 +36,32 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(MaterialApp), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('splash-progress')),
+        findsNothing,
+        reason: 'the splash faded out over the app, then gone',
+      );
     },
   );
+
+  testWidgets('the app is drawn under the splash as it fades, not faded in', (
+    tester,
+  ) async {
+    final completer = Completer<void>()..complete();
+    await tester.pumpWidget(gate(completer.future));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.byType(MaterialApp), findsOneWidget);
+    expect(find.byKey(const ValueKey('splash-progress')), findsOneWidget);
+    expect(
+      find.ancestor(
+        of: find.byType(MaterialApp),
+        matching: find.byType(FadeTransition),
+      ),
+      findsNothing,
+    );
+    await tester.pumpAndSettle();
+  });
 
   testWidgets('never builds the real app before seeding completes', (
     tester,

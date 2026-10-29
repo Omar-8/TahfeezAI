@@ -237,6 +237,29 @@ void main() {
     expect(inkOf(tester, 1002, 1), Colors.transparent);
   });
 
+  testWidgets('many words hidden at once change at once; one revealed fades', (
+    tester,
+  ) async {
+    await pump(tester, mode: ReaderMode.ayah);
+    final hide = container.read(mushafHideModeProvider.notifier);
+    hide.toggle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(
+      inkOf(tester, 1002, 0),
+      Colors.transparent,
+      reason: 'the whole page hidden: no fade',
+    );
+    await tester.pumpAndSettle();
+    hide.revealNextWord(2);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+    final midway = inkOf(tester, 1002, 0)!;
+    expect(midway.a, greaterThan(0), reason: 'fading in');
+    expect(midway.a, lessThan(1));
+    await tester.pumpAndSettle();
+  });
+
   testWidgets("a recitation's marks: recited words inked by how they went", (
     tester,
   ) async {

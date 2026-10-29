@@ -5,7 +5,8 @@
 //   flutter drive --profile --driver=test_driver/perf_driver.dart \
 //     --target=integration_test/effects_perf_test.dart -d <phone>
 //
-// (Uninstalls the app at the end, as every flutter drive run does.)
+// (Uninstalls the app at the end, as every flutter drive run does, unless
+// --keep-app-running.)
 // The summaries land in build/perf/.
 import 'dart:io';
 
@@ -26,6 +27,8 @@ import 'package:tahfeez_ai/quran/quran_providers.dart';
 void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
+  // No accessibility tree (semanticsEnabled): a phone builds one only for a
+  // service that reads the screen (TalkBack) — here it doubled the frames.
   testWidgets('word animations, frame timing', (tester) async {
     final prefs = SharedPreferencesAsync();
     await prefs.setBool('firstRun.welcome', true);
@@ -62,28 +65,49 @@ void main() {
     final overlay = container.read(mushafWordOverlayProvider.notifier);
 
     // A recitation's pace: a word every 0.35 s, each revealed and marked
-    // right, to the page's last word.
-    Future<void> recite() async {
+    // right, to the page's last word — traced 10 words at a time (the
+    // phone's trace holds only a few seconds: a whole recitation kept just
+    // its end), each part reported as `<mode>.<nn>`; the driver joins them.
+    Future<void> recite(String key) async {
       final revealed = <WordRef>{};
       final marks = <WordRef, MushafWordMark>{};
-      overlay.set(MushafWordOverlay(first: words.first, last: words.last));
-      await run(1);
-      for (final w in words) {
-        revealed.add(w);
-        marks[w] = MushafWordMark.correct;
-        overlay.set(
-          MushafWordOverlay(
-            first: words.first,
-            last: words.last,
-            revealed: {...revealed},
-            marks: {...marks},
-          ),
+      const perPart = 10;
+      for (var part = 0; part * perPart < words.length; part++) {
+        final said = words.skip(part * perPart).take(perPart);
+        final last = (part + 1) * perPart >= words.length;
+        await binding.traceAction(
+          () async {
+            if (part == 0) {
+              overlay.set(
+                MushafWordOverlay(first: words.first, last: words.last),
+              );
+              await run(1);
+            }
+            for (final w in said) {
+              revealed.add(w);
+              marks[w] = MushafWordMark.correct;
+              overlay.set(
+                MushafWordOverlay(
+                  first: words.first,
+                  last: words.last,
+                  revealed: {...revealed},
+                  marks: {...marks},
+                ),
+              );
+              await run(0.35);
+            }
+            if (last) {
+              await run(2);
+              overlay.set(null);
+              await run(1);
+            }
+          },
+          reportKey: '$key.${part.toString().padLeft(2, '0')}',
+          // Frames and garbage collection only: the engine's string
+          // conversions alone would fill the trace.
+          streams: const ['Dart', 'Embedder', 'GC'],
         );
-        await run(0.35);
       }
-      await run(2);
-      overlay.set(null);
-      await run(1);
     }
 
     for (final (mode, key) in [
@@ -93,9 +117,9 @@ void main() {
       container.read(readerModeProvider.notifier).set(mode);
       await go('/quran/surah/36');
       debugPrint('perf: $key, ${words.length} words');
-      await binding.traceAction(recite, reportKey: key);
+      await recite(key);
       await go('/home');
     }
     expect(Platform.isAndroid, isTrue);
-  });
+  }, semanticsEnabled: false);
 }

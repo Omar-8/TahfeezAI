@@ -45,12 +45,63 @@ class _TahfeezBootstrapGateState extends State<TahfeezBootstrapGate> {
   Widget build(BuildContext context) {
     return FutureBuilder<void>(
       future: _ready,
-      builder: (context, snapshot) => AnimatedSwitcher(
-        duration: const Duration(milliseconds: 350),
-        child: snapshot.connectionState == ConnectionState.done
-            ? const TahfeezApp()
-            : const _BootstrapSplash(),
-      ),
+      builder: (context, snapshot) {
+        final ready = snapshot.connectionState == ConnectionState.done;
+        // The app drawn as it is, the splash fading out over it — not the
+        // two cross-faded: the app's first frames inside a fading layer
+        // (its glass navigation bar's blur among them) showed as a black
+        // screen for a moment on Android 11 (OpenGL), seconds on a slow
+        // phone.
+        return Stack(
+          fit: StackFit.expand,
+          textDirection: TextDirection.ltr,
+          children: [
+            if (ready) const TahfeezApp(),
+            _FadeOut(visible: !ready, child: const _BootstrapSplash()),
+          ],
+        );
+      },
+    );
+  }
+}
+
+/// [child] until [visible] turns false, then faded out and gone.
+class _FadeOut extends StatefulWidget {
+  const _FadeOut({required this.visible, required this.child});
+
+  final bool visible;
+  final Widget child;
+
+  @override
+  State<_FadeOut> createState() => _FadeOutState();
+}
+
+class _FadeOutState extends State<_FadeOut>
+    with SingleTickerProviderStateMixin {
+  late final _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 350),
+    value: 1,
+  )..addStatusListener((_) => setState(() {}));
+
+  @override
+  void didUpdateWidget(covariant _FadeOut oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!widget.visible && oldWidget.visible) _controller.reverse();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_controller.isDismissed) return const SizedBox.shrink();
+    return IgnorePointer(
+      ignoring: !widget.visible,
+      child: FadeTransition(opacity: _controller, child: widget.child),
     );
   }
 }
@@ -81,7 +132,7 @@ class _BootstrapSplash extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // The whole screen (the switcher around it would let it shrink to the
+    // The whole screen (whatever is around it could let it shrink to the
     // emblem: a dark square on black).
     return Directionality(
       textDirection: TextDirection.ltr,
