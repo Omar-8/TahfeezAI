@@ -12,11 +12,11 @@ by `python3 tool/make_play_listing.py` from the landing page's media
 |---|---|
 | File | `build/app/outputs/bundle/release/app-release.aab` (`flutter build appbundle --release`, no `--dart-define`s — see `docs/PLAY_DATA_SAFETY.md`) |
 | Package | `ai.tahfeez.tahfeez_ai` |
-| Version | 1.0.0 (versionCode 1) — `version:` in `pubspec.yaml` |
+| Version | 1.0.1 (versionCode 2) — `version:` in `pubspec.yaml`; 1.0.0 (1) on internal testing |
 | Signed with | the upload key (`android/key.properties`; CN=Omar Attia, OU=TahfeezAI); SHA-256 `D4:2A:7E:18:46:FC:47:4F:5F:2C:92:F3:C6:1F:6F:ED:66:0F:3D:82:0B:48:EF:DC:38:43:A2:83:6E:A8:A8:4C` |
 | SDK | min 24 (Android 7.0), target 36 |
 | Acoustic model | v3.7 (release `model-v3.7`, SHA-256 `7cbe486f…`), bundled |
-| Download size (bundletool 1.18.3, `get-size total --dimensions=ABI`) | arm64-v8a 173.8 MB, armeabi-v7a 167.3 MB, x86_64 167.7 MB — under Play's 200 MB (measured 2026-10-26, with the 8 new languages, their translations and tafsir, al-Sirāj and the surah-name calligraphy) |
+| Download size (bundletool, `get-size total --dimensions=ABI`) | arm64-v8a 169.5 MB, armeabi-v7a 174.2 MB, x86_64 177.9 MB — under Play's 200 MB (measured 2026-10-29: the Quran as ready-made xz databases and per-language packs instead of JSON; ONNX Runtime for 32-bit ARM and x86_64 too; the model stored uncompressed, read in place) |
 
 ## Main store listing
 
@@ -28,6 +28,7 @@ by `python3 tool/make_play_listing.py` from the landing page's media
 | App icon (512 × 512, 32-bit PNG) | `graphics/icon.png` |
 | Feature graphic (1,024 × 500) | `graphics/featureGraphic.png` |
 | Phone screenshots (8, 1,242 × 2,208) | `graphics/phoneScreenshots/` in their numbered order |
+| Translated screenshots (same 8, captions in the language) | `graphics/<Play language code>/phoneScreenshots/` — made by `python3 tool/make_play_localized.py`; Arabic's Home and Ayah mode show the app in Arabic |
 | Translations of the listing | `listings/<Play language code>/` — ar, de-DE, fr-FR, es-ES, ru-RU, tr-TR, id, ms, ur, fa, bn-BD, sw, kk; all in one file: `listings/all_languages.csv` (for Play's "Import translations"). Hausa, Kurdish, Pashto, Somali and Uzbek: no Play store-listing language — their users see English |
 
 ## Store settings

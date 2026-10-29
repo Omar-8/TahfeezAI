@@ -122,6 +122,26 @@ class _BootstrapSplash extends StatelessWidget {
                   ),
                 ),
               ),
+              // Setting up takes a while (the first start): a quiet bar
+              // under the name says it's working.
+              Transform.translate(
+                offset: const Offset(0, 172),
+                child: const _FadeIn(
+                  delay: Duration(milliseconds: 600),
+                  child: SizedBox(
+                    width: 120,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.all(Radius.circular(2)),
+                      child: LinearProgressIndicator(
+                        key: ValueKey('splash-progress'),
+                        minHeight: 3,
+                        color: TahfeezExplorationPalette.darkPrimary,
+                        backgroundColor: Color(0x33E8F2EC),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -130,20 +150,53 @@ class _BootstrapSplash extends StatelessWidget {
   }
 }
 
-class _FadeIn extends StatelessWidget {
-  const _FadeIn({required this.child});
+/// Fades [child] in (rising a little) after [delay] — by default just past
+/// the first frames, which are the slowest of a cold start: begun at once,
+/// the fade stutters through them.
+class _FadeIn extends StatefulWidget {
+  const _FadeIn({
+    required this.child,
+    this.delay = const Duration(milliseconds: 120),
+  });
 
   final Widget child;
+  final Duration delay;
 
   @override
-  Widget build(BuildContext context) => TweenAnimationBuilder<double>(
-    tween: Tween(begin: 0, end: 1),
-    duration: const Duration(milliseconds: 400),
-    curve: Curves.easeOut,
-    builder: (context, t, child) => Opacity(
-      opacity: t,
-      child: Transform.translate(offset: Offset(0, 8 * (1 - t)), child: child),
+  State<_FadeIn> createState() => _FadeInState();
+}
+
+class _FadeInState extends State<_FadeIn> with SingleTickerProviderStateMixin {
+  late final _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 450),
+  );
+  late final _t = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
+
+  @override
+  void initState() {
+    super.initState();
+    Future<void>.delayed(widget.delay, () {
+      if (mounted) _controller.forward();
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  // (Transitions: composited, not rebuilt every frame.)
+  @override
+  Widget build(BuildContext context) => FadeTransition(
+    opacity: _t,
+    child: SlideTransition(
+      position: Tween(
+        begin: const Offset(0, 0.2),
+        end: Offset.zero,
+      ).animate(_t),
+      child: widget.child,
     ),
-    child: child,
   );
 }

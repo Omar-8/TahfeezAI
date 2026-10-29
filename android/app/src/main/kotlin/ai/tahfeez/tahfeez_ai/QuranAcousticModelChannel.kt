@@ -20,7 +20,10 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import org.json.JSONObject
 import java.io.File
+import java.io.FileInputStream
+import java.nio.ByteBuffer
 import java.nio.FloatBuffer
+import java.nio.channels.FileChannel
 import java.security.MessageDigest
 import java.util.concurrent.Executors
 
@@ -28,9 +31,10 @@ import java.util.concurrent.Executors
  * The on-device Quran acoustic model (`LocalQuranAcousticModel` in Dart):
  * ONNX Runtime, loaded once and reused for every window.
  *
- * The model ships in the app (`assets/models/`, a Flutter asset) and is
- * extracted once to `<files>/models/bundled/` — ONNX Runtime loads from a
- * file. A development build may instead have one sideloaded at
+ * The model ships in the app (`assets/models/`, a Flutter asset, stored
+ * uncompressed — build.gradle.kts) and ONNX Runtime reads it from there,
+ * mapped from the app's own file: no copy of it (91 MB) in app storage.
+ * A development build may instead have one sideloaded at
  * `<external files>/models/quran_acoustic.onnx` (adb push) or
  * `<files>/models/quran_acoustic.onnx` (run-as copy), which comes first.
  * Each sits with its manifest `quran_acoustic.json`. The file's SHA-256 must
@@ -63,6 +67,9 @@ class QuranAcousticModelChannel private constructor(
         private const val MODEL = "quran_acoustic.onnx"
         private const val MANIFEST = "quran_acoustic.json"
 
+        /** Runs after a load watched by the crash guard. */
+        private const val GUARDED_RUNS = 3
+
         @Volatile private var instance: QuranAcousticModelChannel? = null
 
         /**
@@ -89,16 +96,21 @@ class QuranAcousticModelChannel private constructor(
             try {
                 val value: Any? = when (call.method) {
                     "status" -> status()
-                    "load" -> load(
-                        call.argument<String>("provider") ?: "cpu",
-                        call.argument<Int>("threads") ?: 0,
-                    )
-                    "run" -> run(call.argument<FloatArray>("samples")!!)
+                    "load" -> guarded("load") {
+                        load(
+                            call.argument<String>("provider") ?: "cpu",
+                            call.argument<Int>("threads") ?: 0,
+                        )
+                    }
+                    "run" -> firstRuns("run") { run(call.argument<FloatArray>("samples")!!) }
                     "streamReset" -> { streamReset(); null }
-                    "streamRun" -> streamRun(
-                        call.argument<FloatArray>("samples")!!,
-                        call.argument<Boolean>("commit") ?: true,
-                    )
+                    "streamRun" -> firstRuns("streamRun") {
+                        streamRun(
+                            call.argument<FloatArray>("samples")!!,
+                            call.argument<Boolean>("commit") ?: true,
+                        )
+                    }
+                    "resetGuard" -> { guardFile().delete(); null }
                     "unload" -> { close(); null }
                     "stats" -> stats()
                     else -> {
@@ -119,51 +131,117 @@ class QuranAcousticModelChannel private constructor(
         File(context.filesDir, "models/$MODEL"),
     )
 
-    /** The model to use: a sideloaded one, else the bundled one. */
-    private fun model(): File? = candidates().firstOrNull { it.isFile } ?: bundled()
+    /**
+     * The model to use — a sideloaded file, else the bundled asset: what
+     * it is, its manifest, and the bytes ONNX Runtime loads.
+     */
+    private class ModelSource(
+        val path: String,
+        val bytes: Long,
+        val manifest: String?,
+        /** Identifies this copy for the hash cache. */
+        val key: String,
+        /** A file's path, or the bundled model mapped in a direct buffer. */
+        val load: () -> Any,
+    )
+
+    private fun model(): ModelSource? {
+        candidates().firstOrNull { it.isFile }?.let { file ->
+            val manifest = File(file.parentFile, MANIFEST)
+            return ModelSource(
+                path = file.absolutePath,
+                bytes = file.length(),
+                manifest = if (manifest.isFile) manifest.readText() else null,
+                key = "${file.absolutePath}:${file.length()}:${file.lastModified()}",
+                load = { file.absolutePath },
+            )
+        }
+        return bundled()
+    }
 
     /**
-     * The model shipped in the app, extracted to app storage (once per app
-     * version: re-extracted when its size differs from the bundled
-     * manifest's); `null` when the build has none.
+     * The model shipped in the app, read in place: the asset is stored
+     * uncompressed, so it is a stretch of the app's own file, mapped (not
+     * read into the Java heap) when loading; `null` when the build has none.
+     * A copy an earlier version extracted is deleted (91 MB back).
      */
-    private fun bundled(): File? {
+    private fun bundled(): ModelSource? {
         val loader = FlutterInjector.instance().flutterLoader()
         val assets = context.assets
-        val manifestAsset = loader.getLookupKeyForAsset("assets/models/$MANIFEST")
-        val modelAsset = loader.getLookupKeyForAsset("assets/models/$MODEL")
         val manifestText = try {
-            assets.open(manifestAsset).bufferedReader().use { it.readText() }
+            assets.open(loader.getLookupKeyForAsset("assets/models/$MANIFEST"))
+                .bufferedReader().use { it.readText() }
         } catch (e: java.io.IOException) {
             return null
         }
-        val dir = File(context.filesDir, "models/bundled")
-        val model = File(dir, MODEL)
-        val manifest = File(dir, MANIFEST)
-        val bytes = JSONObject(manifestText).getLong("bytes")
-        if (model.isFile && model.length() == bytes && manifest.isFile &&
-            manifest.readText() == manifestText
-        ) {
-            return model
-        }
-        dir.mkdirs()
-        val partial = File(dir, "$MODEL.part")
-        assets.open(modelAsset).use { input ->
-            partial.outputStream().use { input.copyTo(it, 1 shl 20) }
-        }
-        if (partial.length() != bytes) {
-            partial.delete()
-            throw IllegalStateException("Bundled model is ${partial.length()} bytes, manifest says $bytes")
-        }
-        if (!partial.renameTo(model)) throw IllegalStateException("Could not place the bundled model")
-        manifest.writeText(manifestText)
-        Log.i("TahfeezAcoustic", "extracted the bundled model ($bytes bytes)")
-        return model
+        File(context.filesDir, "models/bundled").takeIf { it.isDirectory }?.deleteRecursively()
+        val asset = loader.getLookupKeyForAsset("assets/models/$MODEL")
+        val length = assets.openFd(asset).use { it.declaredLength }
+        val installed = context.packageManager
+            .getPackageInfo(context.packageName, 0).lastUpdateTime
+        return ModelSource(
+            path = "bundled:$asset",
+            bytes = length,
+            manifest = manifestText,
+            key = "bundled:$length:$installed",
+            load = {
+                assets.openFd(asset).use { fd ->
+                    FileInputStream(fd.fileDescriptor).channel.use { channel ->
+                        channel.map(FileChannel.MapMode.READ_ONLY, fd.startOffset, fd.declaredLength)
+                    }
+                }
+            },
+        )
     }
 
-    private fun manifestOf(model: File) = File(model.parentFile, MANIFEST)
+    /**
+     * The crash guard: a native crash in ONNX Runtime (a phone's processor
+     * it mishandles) takes the whole app down, every time recitation
+     * starts. So each risky call — loading, and the first few runs after
+     * it — leaves a mark while it runs, cleared when it returns (or
+     * throws: an error, not a crash). A mark found at the next start means
+     * the app died in one: [status] reports the model "crashed", off on
+     * this phone until the user tries again ("resetGuard") or the app is
+     * updated (the mark names the version it was made by).
+     */
+    private fun guardFile() = File(context.filesDir, "models/crash_guard.txt")
 
-    /** ONNX Runtime ships for 64-bit ARM only in release builds. */
+    private fun appStamp(): String =
+        context.packageManager.getPackageInfo(context.packageName, 0).lastUpdateTime.toString()
+
+    private fun <T> guarded(phase: String, block: () -> T): T {
+        val mark = guardFile()
+        mark.parentFile?.mkdirs()
+        mark.writeText("${appStamp()}\n$phase")
+        try {
+            return block()
+        } finally {
+            mark.delete()
+        }
+    }
+
+    private var runsSinceLoad = 0
+
+    private fun <T> firstRuns(phase: String, block: () -> T): T =
+        if (runsSinceLoad < GUARDED_RUNS) {
+            guarded(phase, block).also { runsSinceLoad++ }
+        } else {
+            block()
+        }
+
+    /** The phase the app died in last time (this version), else `null`. */
+    private fun crashedIn(): String? {
+        val mark = guardFile()
+        if (!mark.isFile) return null
+        val lines = mark.readLines()
+        if (lines.firstOrNull() != appStamp()) {
+            mark.delete()
+            return null
+        }
+        return lines.getOrNull(1) ?: "?"
+    }
+
+    /** ONNX Runtime ships for every ABI but 32-bit x86 in release builds. */
     private fun runtimeAvailable(): Boolean = try {
         OrtEnvironment.getEnvironment()
         true
@@ -172,7 +250,16 @@ class QuranAcousticModelChannel private constructor(
     }
 
     private fun status(): Map<String, Any?> {
-        if (!runtimeAvailable()) {
+        crashedIn()?.let { phase ->
+            return mapOf(
+                "state" to "crashed",
+                "detail" to "ONNX Runtime closed the app during $phase on " +
+                    "${Build.MANUFACTURER} ${Build.MODEL} (${Build.HARDWARE}, " +
+                    "Android ${Build.VERSION.RELEASE}, ${Build.SUPPORTED_ABIS.firstOrNull()})",
+            )
+        }
+        // (Its native library loads here, the first time.)
+        if (!guarded("start") { runtimeAvailable() }) {
             return mapOf(
                 "state" to "unsupported",
                 "detail" to "needs a 64-bit ARM device (${Build.SUPPORTED_ABIS.joinToString()})",
@@ -184,19 +271,17 @@ class QuranAcousticModelChannel private constructor(
                 "state" to "absent",
                 "searched" to searched.map { it.absolutePath },
             )
-        val manifest = manifestOf(model)
-        if (!manifest.isFile) {
-            return mapOf(
+        val manifest = model.manifest
+            ?: return mapOf(
                 "state" to "invalid",
-                "path" to model.absolutePath,
+                "path" to model.path,
                 "detail" to "No manifest ($MANIFEST) beside the model",
             )
-        }
         return mapOf(
             "state" to if (session != null) "loaded" else "present",
-            "path" to model.absolutePath,
-            "bytes" to model.length(),
-            "manifest" to manifest.readText(),
+            "path" to model.path,
+            "bytes" to model.bytes,
+            "manifest" to manifest,
             "provider" to loadedProvider,
         )
     }
@@ -226,12 +311,14 @@ class QuranAcousticModelChannel private constructor(
         close()
         val model = model()
             ?: throw IllegalStateException("No acoustic model on this device")
-        val manifest = JSONObject(manifestOf(model).readText())
+        val manifest = JSONObject(
+            model.manifest ?: throw IllegalStateException("No manifest ($MANIFEST) beside the model"),
+        )
         val started = SystemClock.elapsedRealtime()
         val expected = manifest.getString("sha256").lowercase()
-        if (model.length() != manifest.getLong("bytes")) {
+        if (model.bytes != manifest.getLong("bytes")) {
             throw IllegalStateException(
-                "Model is ${model.length()} bytes, manifest says ${manifest.getLong("bytes")}",
+                "Model is ${model.bytes} bytes, manifest says ${manifest.getLong("bytes")}",
             )
         }
         val hashStarted = SystemClock.elapsedRealtime()
@@ -254,7 +341,11 @@ class QuranAcousticModelChannel private constructor(
             }
         }
         val sessionStarted = SystemClock.elapsedRealtime()
-        session = environment.createSession(model.absolutePath, options)
+        runsSinceLoad = 0
+        session = when (val bytes = model.load()) {
+            is ByteBuffer -> environment.createSession(bytes, options)
+            else -> environment.createSession(bytes as String, options)
+        }
         env = environment
         loadedProvider = provider
         manifest.optJSONObject("stream")?.let {
@@ -272,26 +363,28 @@ class QuranAcousticModelChannel private constructor(
         )
     }
 
-    /** SHA-256 of [model], computed once per size + modification time. */
-    private fun verifiedHash(model: File): String {
-        val key = "${model.absolutePath}:${model.length()}:${model.lastModified()}"
+    /** SHA-256 of [model], computed once per copy (its [ModelSource.key]). */
+    private fun verifiedHash(model: ModelSource): String {
         val cache = File(context.filesDir, "models/verified.txt")
         if (cache.isFile) {
             val lines = cache.readLines()
-            if (lines.size == 2 && lines[0] == key) return lines[1]
+            if (lines.size == 2 && lines[0] == model.key) return lines[1]
         }
         val digest = MessageDigest.getInstance("SHA-256")
-        model.inputStream().buffered(1 shl 20).use { input ->
-            val buffer = ByteArray(1 shl 20)
-            while (true) {
-                val n = input.read(buffer)
-                if (n < 0) break
-                digest.update(buffer, 0, n)
+        when (val bytes = model.load()) {
+            is ByteBuffer -> digest.update(bytes)
+            else -> File(bytes as String).inputStream().buffered(1 shl 20).use { input ->
+                val buffer = ByteArray(1 shl 20)
+                while (true) {
+                    val n = input.read(buffer)
+                    if (n < 0) break
+                    digest.update(buffer, 0, n)
+                }
             }
         }
         val hash = digest.digest().joinToString("") { "%02x".format(it) }
         cache.parentFile?.mkdirs()
-        cache.writeText("$key\n$hash")
+        cache.writeText("${model.key}\n$hash")
         return hash
     }
 

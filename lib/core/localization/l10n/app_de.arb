@@ -548,5 +548,13 @@
   "recStrictnessLenientSub": "weniger falsche Markierungen; leichte Fehler können durchgehen.",
   "recStrictnessBalancedSub": "die empfohlene Mitte.",
   "recStrictnessStrictSub": "findet mehr Fehler; markiert gelegentlich auch ein richtiges Wort.",
-  "mushafPageTheme": "Seitendesign"
+  "mushafPageTheme": "Seitendesign",
+  "quranSetupFailed": "Der Koran konnte auf diesem Handy nicht eingerichtet werden.",
+  "quranSetupStorageFull": "Der Koran konnte nicht eingerichtet werden: Der Speicher dieses Handys ist voll. Gib etwas Speicher frei und versuche es erneut.",
+  "quranSetupRetry": "Erneut versuchen",
+  "quranSetupShare": "Details teilen",
+  "recNeeds64Bit": "Die Prüfung der Rezitation braucht ein 64-Bit-Handy. Lesen, Hören und Auswendiglernen funktionieren wie gewohnt.",
+  "meaningPacksPreparing": "Übersetzungen werden vorbereitet …",
+  "meaningPacksFailed": "Die Übersetzungen konnten nicht vorbereitet werden.",
+  "recModelCrashed": "Die Rezitationsprüfung hat die App auf diesem Handy geschlossen und ist deshalb ausgeschaltet. Lesen, Hören und Auswendiglernen funktionieren wie gewohnt."
 }

@@ -548,5 +548,13 @@
   "recStrictnessLenientSub": "lebih sedikit tanda keliru; beberapa kesalahan ringan bisa lolos.",
   "recStrictnessBalancedSub": "tingkat tengah yang disarankan.",
   "recStrictnessStrictSub": "menangkap lebih banyak kesalahan; sesekali bisa menandai kata yang benar.",
-  "mushafPageTheme": "Tema halaman"
+  "mushafPageTheme": "Tema halaman",
+  "quranSetupFailed": "Al-Qur'an tidak dapat disiapkan di ponsel ini.",
+  "quranSetupStorageFull": "Al-Qur'an tidak dapat disiapkan: penyimpanan ponsel ini penuh. Kosongkan sebagian ruang, lalu coba lagi.",
+  "quranSetupRetry": "Coba lagi",
+  "quranSetupShare": "Bagikan detail",
+  "recNeeds64Bit": "Pemeriksaan bacaan memerlukan ponsel 64-bit. Membaca, mendengarkan, dan menghafal tetap berjalan seperti biasa.",
+  "meaningPacksPreparing": "Menyiapkan terjemahan…",
+  "meaningPacksFailed": "Terjemahan tidak dapat disiapkan.",
+  "recModelCrashed": "Pemeriksaan bacaan menutup aplikasi di ponsel ini, jadi dimatikan. Membaca, mendengarkan, dan menghafal tetap berjalan seperti biasa."
 }

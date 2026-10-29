@@ -2,10 +2,13 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
+import 'package:flutter/foundation.dart' show compute;
 import 'package:flutter/services.dart' show rootBundle;
 
 import '../../../core/logging/app_logger.dart';
 import '../../../core/storage/browser_storage.dart';
+import '../../domain/models/mushaf_models.dart';
+import '../../domain/models/mushaf_token_models.dart';
 import '../../domain/quran_dataset_payload.dart';
 import '../../domain/repositories/quran_repository.dart';
 import '../../domain/repositories/tafsir_repository.dart';
@@ -78,7 +81,10 @@ class BundledDatasetSeeder {
   /// Marks which bundled dataset is installed; kept by Reset all data.
   static const seededVersionKey = 'quran.dataset.seeded_version';
 
-  Future<void> seedIfNeeded() async {
+  /// Returns why the canonical Quran could not be set up (the rest —
+  /// translations, tafsir, word meanings — is optional), `null` when it is
+  /// in place.
+  Future<String?> seedIfNeeded() async {
     final Map<String, dynamic> manifest;
     final Map<String, dynamic> hashes;
     try {
@@ -93,10 +99,10 @@ class BundledDatasetSeeder {
         error: e,
         stackTrace: st,
       );
-      return;
+      return 'Could not read the resource manifest: $e';
     }
 
-    await _seedCanonicalQuranAndMushaf(hashes, manifest);
+    final failure = await _seedCanonicalQuranAndMushaf(hashes, manifest);
     await _seedTranslation(
       hashes,
       assetPath: 'assets/quran/translations/en_rowwad.json',
@@ -169,6 +175,7 @@ class BundledDatasetSeeder {
         hashKey: 'tafsir/$name.json',
       );
     }
+    return failure;
   }
 
   Future<Uint8List?> _loadVerified(
@@ -176,6 +183,7 @@ class BundledDatasetSeeder {
     String assetPath,
     String hashKey, {
     required String resourceLabel,
+    void Function(String problem)? onProblem,
   }) async {
     final expectedHash = hashes[hashKey] as String?;
     if (expectedHash == null) {
@@ -183,6 +191,7 @@ class BundledDatasetSeeder {
         '$resourceLabel: no hash recorded in the resource manifest for $hashKey.',
         tag: 'BundledDatasetSeeder',
       );
+      onProblem?.call('No hash recorded for $hashKey');
       return null;
     }
     final Uint8List bytes;
@@ -195,21 +204,23 @@ class BundledDatasetSeeder {
         error: e,
         stackTrace: st,
       );
+      onProblem?.call('Could not load $assetPath: $e');
       return null;
     }
-    final actualHash = sha256.convert(bytes).toString();
+    final actualHash = await compute(_sha256Of, bytes);
     if (actualHash != expectedHash) {
       logger.error(
         '$resourceLabel: bundled asset $assetPath failed hash verification '
         '(expected $expectedHash, got $actualHash) — refusing to import it.',
         tag: 'BundledDatasetSeeder',
       );
+      onProblem?.call('$assetPath failed hash verification');
       return null;
     }
     return bytes;
   }
 
-  Future<void> _seedCanonicalQuranAndMushaf(
+  Future<String?> _seedCanonicalQuranAndMushaf(
     Map<String, dynamic> hashes,
     Map<String, dynamic> manifest,
   ) async {
@@ -224,20 +235,24 @@ class BundledDatasetSeeder {
     if (existingMeta != null && storedMarker == versionMarker) {
       // Cheap path: already seeded with this exact combination — never
       // touches the large canonical/Mushaf JSON files on this launch.
-      return;
+      return null;
     }
 
+    String? problem;
     final bytes = await _loadVerified(
       hashes,
       'assets/quran/quran_dataset.json',
       'quran_dataset.json',
       resourceLabel: 'Canonical Quran',
+      onProblem: (p) => problem = p,
     );
-    if (bytes == null) return;
+    if (bytes == null) return problem ?? 'Could not load the Quran dataset';
 
     try {
-      final json = jsonDecode(utf8.decode(bytes)) as Map<String, dynamic>;
-      var payload = quranDatasetPayloadFromJson(json);
+      // Decoded and parsed in the background (the splash keeps moving),
+      // straight from the bytes (no intermediate String: less memory at
+      // the peak, which low-end phones run short of).
+      var payload = await compute(_canonicalPayload, bytes);
 
       if (includeMushaf) {
         payload = await _mergeMushaf(payload, mushafHash);
@@ -251,6 +266,7 @@ class BundledDatasetSeeder {
         '${payload.mushafs.isEmpty ? '' : ' + Mushaf (${payload.mushafLines.length} lines, ${payload.mushafTokens.length} tokens)'}.',
         tag: 'BundledDatasetSeeder',
       );
+      return null;
     } on DatasetIntegrityException catch (e, st) {
       logger.error(
         'Bundled canonical Quran dataset failed integrity validation — '
@@ -260,6 +276,7 @@ class BundledDatasetSeeder {
         error: e,
         stackTrace: st,
       );
+      return 'The Quran dataset failed its integrity check: $e';
     } catch (e, st) {
       logger.error(
         'Failed to seed canonical Quran from bundled asset.',
@@ -267,7 +284,38 @@ class BundledDatasetSeeder {
         error: e,
         stackTrace: st,
       );
+      return '$e';
     }
+  }
+
+  // In a background isolate (compute): a large asset's hashing, decoding
+  // and parsing would hold up the frames meanwhile — the splash stutters.
+  static String _sha256Of(Uint8List bytes) => sha256.convert(bytes).toString();
+
+  static Map<String, dynamic> _decodeJsonSync(Uint8List bytes) =>
+      utf8.decoder.fuse(json.decoder).convert(bytes) as Map<String, dynamic>;
+
+  static Future<Map<String, dynamic>> _decodeJson(Uint8List bytes) =>
+      compute(_decodeJsonSync, bytes);
+
+  static QuranDatasetPayload _canonicalPayload(Uint8List bytes) =>
+      quranDatasetPayloadFromJson(_decodeJsonSync(bytes));
+
+  static (Mushaf, List<MushafLine>, List<MushafToken>) _mushafParts(
+    Uint8List bytes,
+  ) {
+    final json = _decodeJsonSync(bytes);
+    return (
+      mushafFromJson(json['mushaf'] as Map<String, dynamic>),
+      (json['mushafLines'] as List)
+          .cast<Map<String, dynamic>>()
+          .map(mushafLineFromJson)
+          .toList(),
+      (json['mushafTokens'] as List)
+          .cast<Map<String, dynamic>>()
+          .map(mushafTokenFromJson)
+          .toList(),
+    );
   }
 
   /// Loads and hash-verifies the (development-only) bundled Mushaf dataset
@@ -306,7 +354,7 @@ class BundledDatasetSeeder {
       );
       return payload;
     }
-    final actualHash = sha256.convert(bytes).toString();
+    final actualHash = await compute(_sha256Of, bytes);
     if (actualHash != expectedHash) {
       logger.error(
         'Mushaf dataset failed hash verification (expected $expectedHash, '
@@ -316,16 +364,7 @@ class BundledDatasetSeeder {
       return payload;
     }
 
-    final json = jsonDecode(utf8.decode(bytes)) as Map<String, dynamic>;
-    final mushaf = mushafFromJson(json['mushaf'] as Map<String, dynamic>);
-    final lines = (json['mushafLines'] as List)
-        .cast<Map<String, dynamic>>()
-        .map(mushafLineFromJson)
-        .toList();
-    final tokens = (json['mushafTokens'] as List)
-        .cast<Map<String, dynamic>>()
-        .map(mushafTokenFromJson)
-        .toList();
+    final (mushaf, lines, tokens) = await compute(_mushafParts, bytes);
 
     return QuranDatasetPayload(
       surahs: payload.surahs,
@@ -356,7 +395,7 @@ class BundledDatasetSeeder {
     if (bytes == null) return;
 
     try {
-      final json = jsonDecode(utf8.decode(bytes)) as Map<String, dynamic>;
+      final json = await _decodeJson(bytes);
       final book = translationBookFromJson(
         json['book'] as Map<String, dynamic>,
       );
@@ -400,7 +439,7 @@ class BundledDatasetSeeder {
     if (bytes == null) return;
 
     try {
-      final json = jsonDecode(utf8.decode(bytes)) as Map<String, dynamic>;
+      final json = await _decodeJson(bytes);
       final work = tafsirWorkFromJson(json['work'] as Map<String, dynamic>);
       final existing = await tafsirRepository.getInstalledTafsir(work.id);
       if (existing != null && existing.checksum == work.checksum) {
@@ -443,7 +482,7 @@ class BundledDatasetSeeder {
     );
     if (bytes == null) return;
     try {
-      final json = jsonDecode(utf8.decode(bytes)) as Map<String, dynamic>;
+      final json = await _decodeJson(bytes);
       final p = json['pack'] as Map<String, dynamic>;
       final pack = WbwLanguagePack(
         id: p['id'] as String,

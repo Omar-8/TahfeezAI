@@ -27,6 +27,9 @@ class WbwSelectedPackController extends _$WbwSelectedPackController {
 
   late Future<void> _restored;
 
+  /// Done once the stored choice is read.
+  Future<void> get restored => _restored;
+
   /// The app's language changed from [from]: a pack chosen in [from] goes
   /// back to the language's own (`activeWbwPack`); one chosen in another
   /// language stays.

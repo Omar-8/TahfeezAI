@@ -10,6 +10,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/components/components.dart';
 import '../../../../quran/domain/models/quran_location.dart';
 import '../../application/quran_index_providers.dart';
+import '../../../../quran/presentation/quran_unavailable_view.dart';
 
 /// The Juz navigator tab: all 30 Juz, each starting at the chapter/verse its
 /// first range begins at (`docs/reference/04_READER_SPEC.md` §4's Juz
@@ -26,11 +27,7 @@ class JuzIndexTab extends ConsumerWidget {
     return juzList.when(
       data: (units) {
         if (units.isEmpty) {
-          return TahfeezEmptyView(
-            icon: Icons.menu_book_outlined,
-            message: AppLocalizations.of(context)
-                .homeQuranDatasetUnavailableBody,
-          );
+          return const QuranUnavailableView();
         }
         return ListView.builder(
           padding: withBarSpace(
@@ -62,10 +59,7 @@ class JuzIndexTab extends ConsumerWidget {
         );
       },
       loading: () => const TahfeezLoadingView(),
-      error: (_, _) => TahfeezEmptyView(
-        icon: Icons.menu_book_outlined,
-        message: AppLocalizations.of(context).homeQuranDatasetUnavailableBody,
-      ),
+      error: (_, _) => const QuranUnavailableView(),
     );
   }
 }

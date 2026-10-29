@@ -34,21 +34,18 @@ android {
         versionName = flutter.versionName
     }
 
-    // A reduced ONNX Runtime (only the acoustic model's operators, arm64;
-    // tool/onnxruntime/build_reduced.sh): 15.9 MB instead of 33.0 MB. Used
-    // when built locally — the folder is not in git — and takes precedence
-    // over the Maven package's native libraries, whose Java API it matches
-    // (same version). Without it, the stock library is packaged.
-    val reducedOrt = file("src/main/jniLibs-ort")
-    if (reducedOrt.isDirectory) {
-        sourceSets["main"].jniLibs.srcDir(reducedOrt)
-        packaging.jniLibs.pickFirsts.addAll(
-            listOf(
-                "lib/arm64-v8a/libonnxruntime.so",
-                "lib/arm64-v8a/libonnxruntime4j_jni.so",
-            ),
-        )
-    }
+    // The acoustic model stays uncompressed in the app, so ONNX Runtime
+    // reads it in place (QuranAcousticModelChannel maps it) instead of a
+    // 91 MB copy in app storage. The download is compressed anyway.
+    androidResources.noCompress += "onnx"
+
+    // ONNX Runtime: Microsoft's own build (the Maven package's), on every
+    // phone. A reduced build of it (only the acoustic model's operators,
+    // arm64: tool/onnxruntime/build_reduced.sh, 15.9 MB instead of 33.0)
+    // was used until 2026-10-29 — set aside after a Samsung Galaxy S21
+    // crashed starting recitation: Microsoft's build is the one run on
+    // many phones. (To use the reduced one again: add
+    // src/main/jniLibs-ort as a jniLibs source, picked first.)
 
     // The Play upload key: android/key.properties (never in git — see
     // android/.gitignore) names the keystore and its passwords. Without it a
@@ -88,13 +85,17 @@ dependencies {
     // On-device Quran acoustic model (QuranAcousticModelChannel). The model
     // ships as a Flutter asset (assets/models/), extracted on first use.
     implementation("com.microsoft.onnxruntime:onnxruntime-android:1.30.0")
+    // Unpacks the ready-made Quran databases (xz; BundledDatabaseChannel).
+    implementation("org.tukaani:xz:1.10")
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }
 
-// The acoustic model needs a 64-bit ARM device (memory and speed), so a
-// release ships ONNX Runtime for arm64-v8a only: ~25 MB less per other ABI
-// in the bundle. Elsewhere the model reports itself unsupported. Debug and
-// profile builds keep every ABI (emulators).
+// Every ABI Flutter builds for gets ONNX Runtime, so recitation is checked
+// on 32-bit phones (armeabi-v7a) and x86_64 devices too — slower there,
+// but there (owner's decision, 2026-10-29). Play sends each phone only its
+// own: the stock library adds ~9 MB to a 32-bit phone's download, ~13 MB
+// to an x86_64's; arm64 keeps the reduced one. (32-bit x86: no Flutter
+// build, so no runtime.)
 // A build for chosen processors (`flutter build apk --target-platform
 // android-arm64`) packages only their native libraries — the plugins' too
 // (ONNX Runtime ships every ABI): ~60 MB less for arm64.
@@ -121,12 +122,19 @@ androidComponents {
         }
     }
     onVariants(selector().withBuildType("release")) { variant ->
-        variant.packaging.jniLibs.excludes.addAll(
-            listOf(
-                "lib/armeabi-v7a/libonnxruntime*.so",
-                "lib/x86_64/libonnxruntime*.so",
-                "lib/x86/libonnxruntime*.so",
-            ),
-        )
+        variant.packaging.jniLibs.excludes.add("lib/x86/libonnxruntime*.so")
     }
+}
+
+// The Quran's JSON datasets: the phone installs the same data as ready-made
+// databases (assets/quran/db/), so they're left out of Flutter's assets in
+// the app — only the web imports them.
+tasks.withType<Copy>().matching { it.name.startsWith("copyFlutterAssets") }.configureEach {
+    exclude(
+        "**/assets/quran/quran_dataset.json",
+        "**/assets/quran/mushaf/**",
+        "**/assets/quran/translations/**",
+        "**/assets/quran/tafsir/**",
+        "**/assets/quran/wbw/**",
+    )
 }

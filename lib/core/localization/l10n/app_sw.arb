@@ -548,5 +548,13 @@
   "recStrictnessLenientSub": "alama chache za uongo; baadhi ya makosa madogo yanaweza kupita.",
   "recStrictnessBalancedSub": "kiwango cha kati kinachopendekezwa.",
   "recStrictnessStrictSub": "hukamata makosa zaidi; mara chache kinaweza kuweka alama kwenye neno sahihi.",
-  "mushafPageTheme": "Mandhari ya ukurasa"
+  "mushafPageTheme": "Mandhari ya ukurasa",
+  "quranSetupFailed": "Qur'ani haikuweza kuandaliwa kwenye simu hii.",
+  "quranSetupStorageFull": "Qur'ani haikuweza kuandaliwa: hifadhi ya simu imejaa. Futa nafasi kidogo, kisha ujaribu tena.",
+  "quranSetupRetry": "Jaribu tena",
+  "quranSetupShare": "Shiriki maelezo",
+  "recNeeds64Bit": "Kukagua kisomo chako kunahitaji simu ya biti 64. Kusoma, kusikiliza na kuhifadhi vinafanya kazi kama kawaida.",
+  "meaningPacksPreparing": "Tafsiri zinaandaliwa…",
+  "meaningPacksFailed": "Tafsiri hazikuweza kuandaliwa.",
+  "recModelCrashed": "Ukaguzi wa kisomo ulifunga programu kwenye simu hii, kwa hivyo umezimwa. Kusoma, kusikiliza na kuhifadhi vinafanya kazi kama kawaida."
 }

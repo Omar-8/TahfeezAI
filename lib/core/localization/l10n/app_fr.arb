@@ -548,5 +548,13 @@
   "recStrictnessLenientSub": "moins de fausses marques ; quelques erreurs légères peuvent passer.",
   "recStrictnessBalancedSub": "le juste milieu recommandé.",
   "recStrictnessStrictSub": "repère plus d'erreurs ; il peut parfois marquer un mot correct.",
-  "mushafPageTheme": "Thème de la page"
+  "mushafPageTheme": "Thème de la page",
+  "quranSetupFailed": "Le Coran n'a pas pu être installé sur ce téléphone.",
+  "quranSetupStorageFull": "Le Coran n'a pas pu être installé : le stockage du téléphone est plein. Libérez de l'espace, puis réessayez.",
+  "quranSetupRetry": "Réessayer",
+  "quranSetupShare": "Partager les détails",
+  "recNeeds64Bit": "La vérification de la récitation nécessite un téléphone 64 bits. Lecture, écoute et mémorisation fonctionnent normalement.",
+  "meaningPacksPreparing": "Préparation des traductions…",
+  "meaningPacksFailed": "Les traductions n'ont pas pu être préparées.",
+  "recModelCrashed": "La vérification de la récitation a fermé l'application sur ce téléphone ; elle est donc désactivée. Lecture, écoute et mémorisation fonctionnent normalement."
 }

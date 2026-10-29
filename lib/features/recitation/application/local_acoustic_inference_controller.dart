@@ -279,6 +279,13 @@ class LocalAcousticInferenceController
     }
   }
 
+  /// After the model closed the app (the crash guard turned it off on
+  /// this phone): turns it back on and loads it again.
+  Future<void> retryAfterCrash() async {
+    await _model?.resetCrashGuard();
+    await _prepare();
+  }
+
   void _onSession(RecitationSessionState session) {
     final listening = session.phase == RecitationPhase.listening;
     final id = session.session?.id;

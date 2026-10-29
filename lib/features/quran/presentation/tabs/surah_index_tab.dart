@@ -14,6 +14,7 @@ import '../../../../memorization/application/memorization_today.dart';
 import '../../../memorize/presentation/memorize_screen.dart' show ScoreBar;
 import '../../../bookmarks/application/bookmarks_controller.dart';
 import '../../application/quran_index_providers.dart';
+import '../../../../quran/presentation/quran_unavailable_view.dart';
 
 enum _RevelationFilter { all, meccan, medinan }
 
@@ -315,11 +316,7 @@ class _SurahIndexTabState extends ConsumerState<SurahIndexTab> {
               final filtered = _apply(all);
               final art = ref.watch(surahNameArtProvider).value;
               if (all.isEmpty) {
-                return TahfeezEmptyView(
-                  icon: Icons.menu_book_outlined,
-                  message: AppLocalizations.of(context)
-                      .homeQuranDatasetUnavailableBody,
-                );
+                return const QuranUnavailableView();
               }
               if (filtered.isEmpty) {
                 return TahfeezEmptyView(
@@ -394,11 +391,7 @@ class _SurahIndexTabState extends ConsumerState<SurahIndexTab> {
               );
             },
             loading: () => const TahfeezLoadingView(),
-            error: (_, _) => TahfeezEmptyView(
-              icon: Icons.menu_book_outlined,
-              message: AppLocalizations.of(context)
-                  .homeQuranDatasetUnavailableBody,
-            ),
+            error: (_, _) => const QuranUnavailableView(),
           ),
         ),
       ],

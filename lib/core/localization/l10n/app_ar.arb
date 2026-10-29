@@ -548,5 +548,13 @@
   "recStrictnessLenientSub": "علامات خاطئة أقل، وقد تمرّ بعض الأخطاء الخفيفة.",
   "recStrictnessBalancedSub": "الوسط الموصى به.",
   "recStrictnessStrictSub": "يلتقط أخطاءً أكثر، وقد يعلّم أحيانًا كلمة صحيحة.",
-  "mushafPageTheme": "سمة الصفحة"
+  "mushafPageTheme": "سمة الصفحة",
+  "quranSetupFailed": "تعذّر تجهيز القرآن على هذا الهاتف.",
+  "quranSetupStorageFull": "تعذّر تجهيز القرآن: مساحة التخزين في هاتفك ممتلئة. أفرغ بعض المساحة ثم حاول مجددًا.",
+  "quranSetupRetry": "حاول مجددًا",
+  "quranSetupShare": "مشاركة التفاصيل",
+  "recNeeds64Bit": "مراجعة التلاوة تحتاج إلى هاتف 64 بت. القراءة والاستماع والحفظ تعمل كالمعتاد.",
+  "meaningPacksPreparing": "جارٍ تجهيز الترجمات…",
+  "meaningPacksFailed": "تعذّر تجهيز الترجمات.",
+  "recModelCrashed": "أغلقت مراجعة التلاوة التطبيق على هذا الهاتف، فأوقفناها. القراءة والاستماع والحفظ تعمل كالمعتاد."
 }

@@ -2,7 +2,6 @@ import '../../guide/guide.dart';
 
 import 'package:flutter/material.dart';
 
-import '../../../core/localization/generated/app_localizations.dart';
 
 import 'mushaf_zen_mode.dart';
 
@@ -18,6 +17,7 @@ import 'mushaf_pager.dart';
 import 'mushaf_page_title.dart';
 import 'reader_mode_toggle.dart';
 import '../application/reading_surah.dart';
+import '../../../quran/presentation/quran_unavailable_view.dart';
 
 /// Tahfeez's standalone Mushaf (paginated, printed-page-style) reader route
 /// — reached from the Quran index's Page tab, with no underlying
@@ -125,15 +125,6 @@ class _MushafReaderScreenState extends ConsumerState<MushafReaderScreen> {
   }
 
   Widget _unavailable(Color color) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Text(
-          AppLocalizations.of(context).homeQuranDatasetUnavailableBody,
-          textAlign: TextAlign.center,
-          style: TextStyle(color: color),
-        ),
-      ),
-    );
+    return const QuranUnavailableView();
   }
 }

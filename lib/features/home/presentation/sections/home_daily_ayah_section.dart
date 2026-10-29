@@ -8,6 +8,7 @@ import '../../../../core/theme/components/components.dart';
 import '../../../../core/theme/quran_text_style.dart';
 import '../../../../quran/domain/models/quran_location.dart';
 import '../../application/home_providers.dart';
+import '../../../../quran/presentation/quran_unavailable_view.dart';
 
 /// Home's Daily Ayah: today's verse in the Quran script, its first active
 /// translation, and a way into the reader at that verse. An honest "not
@@ -34,20 +35,10 @@ class HomeDailyAyahSection extends ConsumerWidget {
         const SizedBox(height: TahfeezSpacing.sm),
         dailyAyah.when(
           data: (ayah) => ayah == null
-              ? TahfeezCard(
-                  child: TahfeezEmptyView(
-                    icon: Icons.menu_book_outlined,
-                    message: l10n.homeQuranDatasetUnavailableBody,
-                  ),
-                )
+              ? TahfeezCard(child: const QuranUnavailableView())
               : _DailyAyahCard(ayah: ayah),
           loading: () => const TahfeezCard(child: TahfeezLoadingView()),
-          error: (_, _) => TahfeezCard(
-            child: TahfeezEmptyView(
-              icon: Icons.menu_book_outlined,
-              message: l10n.homeQuranDatasetUnavailableBody,
-            ),
-          ),
+          error: (_, _) => TahfeezCard(child: const QuranUnavailableView()),
         ),
       ],
     );

@@ -14,6 +14,7 @@ import '../application/search_controller.dart';
 import 'widgets/search_filter_sheet.dart';
 import 'widgets/search_history_section.dart';
 import 'widgets/search_result_sections.dart';
+import '../../../quran/presentation/quran_unavailable_view.dart';
 
 /// Tahfeez's search screen — this milestone's "dedicated search
 /// field/app bar; filter control; optional voice-search entry; recent
@@ -100,11 +101,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       ),
       body: SafeArea(
         child: !hasDataset
-            ? TahfeezEmptyView(
-                icon: Icons.search_outlined,
-                message: AppLocalizations.of(context)
-                    .homeQuranDatasetUnavailableBody,
-              )
+            ? const QuranUnavailableView(icon: Icons.search_outlined)
             : _committedQuery.trim().isEmpty
             ? _EmptyQueryBody(onSelectHistory: _runSearch)
             : _ResultsBody(query: _committedQuery, onResultTap: _onResultTap),

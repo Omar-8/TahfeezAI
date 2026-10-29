@@ -22,6 +22,10 @@ enum LocalAcousticModelState {
 
   /// Loaded and ready to run.
   loaded,
+
+  /// It closed the app last time (a native crash, caught by the crash
+  /// guard): off on this phone until tried again or the app is updated.
+  crashed,
 }
 
 class LocalAcousticModelStatus {
@@ -47,6 +51,8 @@ class LocalAcousticModelStatus {
   String toString() => switch (state) {
     LocalAcousticModelState.unsupported =>
       'On-device model not supported here${detail == null ? '' : ' ($detail)'}',
+    LocalAcousticModelState.crashed =>
+      'On-device model closed the app${detail == null ? '' : ' ($detail)'}',
     LocalAcousticModelState.absent =>
       'No acoustic model installed${detail == null ? '' : ' — looked in $detail'}',
     LocalAcousticModelState.invalid => 'Acoustic model unusable: $detail',
@@ -166,6 +172,11 @@ class LocalQuranAcousticModel implements QuranAcousticModel {
           LocalAcousticModelState.unsupported,
           detail: raw['detail'] as String?,
         );
+      case 'crashed':
+        return LocalAcousticModelStatus(
+          LocalAcousticModelState.crashed,
+          detail: raw['detail'] as String?,
+        );
       case 'absent':
         return LocalAcousticModelStatus(
           LocalAcousticModelState.absent,
@@ -217,6 +228,13 @@ class LocalQuranAcousticModel implements QuranAcousticModel {
       path: path,
       manifest: manifest,
     );
+  }
+
+  /// Turns it back on after it closed the app ([LocalAcousticModelState
+  /// .crashed]): the next load tries again.
+  Future<void> resetCrashGuard() async {
+    _loading = null;
+    await _channel.invokeMethod<void>('resetGuard');
   }
 
   /// Loads the model once (checking its SHA-256 against the manifest);

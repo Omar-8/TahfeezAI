@@ -2,17 +2,23 @@ import '../features/settings/presentation/about_screen.dart';
 
 import 'dart:async';
 
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart'
+    show TargetPlatform, defaultTargetPlatform, kIsWeb;
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio_background/just_audio_background.dart';
+import 'package:path_provider/path_provider.dart';
 
 import '../core/logging/error_reporting.dart';
 import '../core/logging/logging_package_logger.dart';
 import '../core/storage/storage_providers.dart';
 import '../wbw/wbw_providers.dart';
+import '../quran/data/import/bundled_database_installer.dart';
 import '../quran/data/import/bundled_dataset_seeder.dart';
+import '../quran/data/import/meaning_pack_store.dart';
+import '../quran/application/meaning_packs.dart';
+import '../quran/application/quran_setup.dart';
 import '../quran/quran_providers.dart';
 import '../quran/tafsir_providers.dart';
 import '../quran/translation_providers.dart';
@@ -70,7 +76,9 @@ Future<void> bootstrap() async {
   installGlobalErrorReporting(logger);
 
   final container = ProviderContainer();
-  final seeding = BundledDatasetSeeder(
+  // Its failure kept (quranSetupProvider): the screens needing the Quran
+  // show it, with a way to try again.
+  final seeder = BundledDatasetSeeder(
     quranRepository: container.read(quranRepositoryProvider),
     quranDatabase: container.read(quranDatabaseProvider),
     translationRepository: container.read(translationRepositoryProvider),
@@ -78,7 +86,42 @@ Future<void> bootstrap() async {
     wbwRepository: container.read(wbwRepositoryProvider),
     logger: logger,
     storage: container.read(browserStorageProvider),
-  ).seedIfNeeded();
+  );
+  // On Android the ready-made databases are unpacked into place; the web
+  // (and iOS, for now) imports the datasets.
+  Future<String?> setUp() async {
+    if (kIsWeb || defaultTargetPlatform != TargetPlatform.android) {
+      return seeder.seedIfNeeded();
+    }
+    final installer = BundledDatabaseInstaller(
+      storage: container.read(browserStorageProvider),
+      directory: await getApplicationDocumentsDirectory(),
+      logger: logger,
+    );
+    final failure = await installer.installIfNeeded();
+    if (failure != null) return failure;
+    // The app's language's translations, tafsir and word meanings (English
+    // and Arabic's are built in), then whichever are chosen as they change.
+    await container
+        .read(meaningPacksProvider.notifier)
+        .attach(
+          MeaningPackStore(
+            databases: {
+              MeaningPackKind.translation: container.read(
+                translationDatabaseProvider,
+              ),
+              MeaningPackKind.tafsir: container.read(tafsirDatabaseProvider),
+              MeaningPackKind.wbw: container.read(wbwDatabaseProvider),
+            },
+            temp: await getTemporaryDirectory(),
+            loadString: rootBundle.loadString,
+            unpack: BundledDatabaseInstaller.nativeUnpack,
+          ),
+        );
+    return null;
+  }
+
+  final seeding = container.read(quranSetupProvider.notifier).run(setUp);
   runApp(
     UncontrolledProviderScope(
       container: container,

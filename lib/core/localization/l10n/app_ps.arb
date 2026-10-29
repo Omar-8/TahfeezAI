@@ -548,5 +548,13 @@
   "recStrictnessLenientSub": "لږ غلطې نښې؛ ځینې سپکې تېروتنې کېدای شي تېرې شي.",
   "recStrictnessBalancedSub": "وړاندیز شوی منځنی حالت.",
   "recStrictnessStrictSub": "ډېرې تېروتنې نیسي؛ کله ناکله کېدای شي سمه کلمه هم په نښه کړي.",
-  "mushafPageTheme": "د مخ بڼه"
+  "mushafPageTheme": "د مخ بڼه",
+  "quranSetupFailed": "قرآن په دې تلیفون کې چمتو نه شو.",
+  "quranSetupStorageFull": "قرآن چمتو نه شو: د تلیفون حافظه ډکه ده. یو څه ځای خالي کړئ، بیا هڅه وکړئ.",
+  "quranSetupRetry": "بیا هڅه وکړئ",
+  "quranSetupShare": "جزئیات شریک کړئ",
+  "recNeeds64Bit": "د تلاوت څېړنه ۶۴-بټه تلیفون ته اړتیا لري. لوستل، اورېدل او حفظ لکه د تل په څېر کار کوي.",
+  "meaningPacksPreparing": "ژباړې چمتو کېږي…",
+  "meaningPacksFailed": "ژباړې چمتو نه شوې.",
+  "recModelCrashed": "د تلاوت څېړنې په دې تلیفون کې اپ وتړلو، نو بنده شوه. لوستل، اورېدل او حفظ لکه د تل په څېر کار کوي."
 }

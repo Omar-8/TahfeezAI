@@ -548,5 +548,13 @@
   "recStrictnessLenientSub": "calaamado been ah oo yar; khaladaad fudud qaarkood way gudbi karaan.",
   "recStrictnessBalancedSub": "heerka dhexe ee lagu taliyay.",
   "recStrictnessStrictSub": "khaladaad badan ayuu qabtaa; mararka qaarkood wuxuu calaamadeyn karaa eray sax ah.",
-  "mushafPageTheme": "Muuqaalka bogga"
+  "mushafPageTheme": "Muuqaalka bogga",
+  "quranSetupFailed": "Qur'aanka lagama diyaarin karin taleefankan.",
+  "quranSetupStorageFull": "Qur'aanka lama diyaarin karin: kaydka taleefanku waa buuxaa. Bannee meel yar, kadibna isku day mar kale.",
+  "quranSetupRetry": "Isku day mar kale",
+  "quranSetupShare": "La wadaag faahfaahinta",
+  "recNeeds64Bit": "Hubinta akhriskaagu waxay u baahan tahay taleefan 64-bit ah. Akhrinta, dhegaysiga iyo xifdintu sidii caadiga ahayd ayay u shaqeeyaan.",
+  "meaningPacksPreparing": "Tarjumaadaha waa la diyaarinayaa…",
+  "meaningPacksFailed": "Tarjumaadaha lama diyaarin karin.",
+  "recModelCrashed": "Hubinta akhrisku waxay xidhay barnaamijka taleefankan, sidaa darteed waa la damiyay. Akhrinta, dhegaysiga iyo xifdintu sidii caadiga ahayd ayay u shaqeeyaan."
 }

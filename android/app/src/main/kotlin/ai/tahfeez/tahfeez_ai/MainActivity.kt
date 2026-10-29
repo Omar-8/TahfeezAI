@@ -27,6 +27,11 @@ class MainActivity : AudioServiceActivity() {
             applicationContext,
             flutterEngine.dartExecutor.binaryMessenger,
         )
+        // The ready-made Quran databases, unpacked at the first start.
+        BundledDatabaseChannel.attach(
+            applicationContext,
+            flutterEngine.dartExecutor.binaryMessenger,
+        )
         // On-device recitation AI keeps the screen on while listening: with
         // it off, the app is moved to the slow cores (ScreenAwake in Dart).
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "tahfeez/screen")

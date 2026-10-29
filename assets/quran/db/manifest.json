@@ -1,0 +1,169 @@
+{
+  "version": "9f0234394435663a",
+  "databases": {
+    "quran": {
+      "sha256": "2846cbd56153e37a79c1072f293203ae968488a30e42cce8d96299196b970d94",
+      "bytes": 8613888,
+      "asset": "quran.sqlite.xz"
+    },
+    "translations": {
+      "sha256": "b89b9ddc6bf9e156f36b2ac741624178076daa57993d0b962b2eee9c488fbe30",
+      "bytes": 1511424,
+      "asset": "translations.sqlite.xz"
+    },
+    "tafsirs": {
+      "sha256": "071894ec72bf107b5e9257316aff965005a4b6ff82a0e86d2cac43c14723059f",
+      "bytes": 5935104,
+      "asset": "tafsirs.sqlite.xz"
+    },
+    "wbw_resources": {
+      "sha256": "554d10e1a9463842165c3a1864b0b3e67e1734411cc9002a5d4846bff9936df8",
+      "bytes": 5369856,
+      "asset": "wbw_resources.sqlite.xz"
+    }
+  },
+  "packs": {
+    "translation": {
+      "bn-rowwad": {
+        "sha256": "49df0b5b344e9e00a4d8675880dbf69d5f1d83618c6b37e90833501b51020bbd",
+        "asset": "packs/translation-bn-rowwad.sqlite.xz"
+      },
+      "ckb-bamoki": {
+        "sha256": "df7c9dac2523693e15615f09e9a2f0345736739c57137ce1be775cbacaf7be90",
+        "asset": "packs/translation-ckb-bamoki.sqlite.xz"
+      },
+      "de-rowwad": {
+        "sha256": "44457b15696886fdea69fe10e08322a061c4f96253480f29b6b1f8d84d85ce15",
+        "asset": "packs/translation-de-rowwad.sqlite.xz"
+      },
+      "es-noor": {
+        "sha256": "57d3173ba2ada8488cae363076e06d3d29b4a834a9f9db7ec4ae6c8827afb52e",
+        "asset": "packs/translation-es-noor.sqlite.xz"
+      },
+      "fa-rowwad": {
+        "sha256": "61a994ef87980af545c2cebce25ef406b5b72a908f437b3410cfaccbf600e02b",
+        "asset": "packs/translation-fa-rowwad.sqlite.xz"
+      },
+      "fr-noor": {
+        "sha256": "8217f269ebf6c0ddc0ebb3a1515640d387b6431c784a1d507cd9804d95c8adc8",
+        "asset": "packs/translation-fr-noor.sqlite.xz"
+      },
+      "ha-gumi": {
+        "sha256": "79d81516b7389851a57ff86857fc95f0c958cc4aa4a5f2354856462c720f806f",
+        "asset": "packs/translation-ha-gumi.sqlite.xz"
+      },
+      "id-affairs": {
+        "sha256": "0a1764217760ebbf19ff5a404b28813914c94f861c3bee591a11eb3b47cdb104",
+        "asset": "packs/translation-id-affairs.sqlite.xz"
+      },
+      "kk-altai": {
+        "sha256": "100d1f1d34480eff0040dfb6a375db708673a231585e4eb4af02351e75c5ece4",
+        "asset": "packs/translation-kk-altai.sqlite.xz"
+      },
+      "ms-basumayyah": {
+        "sha256": "e80b4d4fc7c0fb091aa04d144da61950dc670ea7918326ff8f901ac9f457014d",
+        "asset": "packs/translation-ms-basumayyah.sqlite.xz"
+      },
+      "ps-rowwad": {
+        "sha256": "9dcf87e63750d70901234355efba35cbe5f047dd71a8c80fbcaeee99f3a7d140",
+        "asset": "packs/translation-ps-rowwad.sqlite.xz"
+      },
+      "ru-rowwad": {
+        "sha256": "c21a3e07eff0969920e4117ae23bcf6beda63af333718c95571e758faf7178a7",
+        "asset": "packs/translation-ru-rowwad.sqlite.xz"
+      },
+      "so-yaqoub": {
+        "sha256": "9157778530726c29d16ba04d3771bc11286a41a29692a897a9256266166b64b4",
+        "asset": "packs/translation-so-yaqoub.sqlite.xz"
+      },
+      "sw-rowwad": {
+        "sha256": "cc4b5cc49327e876c6da20d7501985a528add32f5ac5a9d03c7947fd83e219ec",
+        "asset": "packs/translation-sw-rowwad.sqlite.xz"
+      },
+      "tr-rowwad": {
+        "sha256": "5dda48b0b03064c1761553bfa529a96ce4069d95fcfd2f47f5df76d0254d5881",
+        "asset": "packs/translation-tr-rowwad.sqlite.xz"
+      },
+      "ur-junagarhi": {
+        "sha256": "fdcdd13329c85d0cb6687f58a9108478840cc1e8740ad8eeba7915504696a1c5",
+        "asset": "packs/translation-ur-junagarhi.sqlite.xz"
+      },
+      "uz-rowwad": {
+        "sha256": "575141a87017c6eab4ca7a846b96db59ce25e5ac64c5181b6b2ca1e9e838ff24",
+        "asset": "packs/translation-uz-rowwad.sqlite.xz"
+      }
+    },
+    "tafsir": {
+      "bn-mukhtasar": {
+        "sha256": "15a9be8760d08326a9854a15785a22a46c9448f6fe02bb5fc4ebb89db45a25d7",
+        "asset": "packs/tafsir-bn-mukhtasar.sqlite.xz"
+      },
+      "ckb-mukhtasar": {
+        "sha256": "790490edd22ee8ce5c301791c178557d1e3b8e09735ee561084c091b6b3301bc",
+        "asset": "packs/tafsir-ckb-mukhtasar.sqlite.xz"
+      },
+      "es-mukhtasar": {
+        "sha256": "b7ae5b113769409e98ed523cd27d77d4871913e8d2abed4f3a29983631175202",
+        "asset": "packs/tafsir-es-mukhtasar.sqlite.xz"
+      },
+      "fa-mukhtasar": {
+        "sha256": "8ab0c8bbcd1a791471189705d31cf8aa92c33e4099a31c99b5579befe288d93c",
+        "asset": "packs/tafsir-fa-mukhtasar.sqlite.xz"
+      },
+      "fr-mukhtasar": {
+        "sha256": "535ab87adbe7cc2080f815b872e64085c5eebb1e82e222d8c501376d510d0cc5",
+        "asset": "packs/tafsir-fr-mukhtasar.sqlite.xz"
+      },
+      "id-mukhtasar": {
+        "sha256": "bc8307df76996ea8e3b933acef746d626b75ce1272fb0812b9088dd94f1078f1",
+        "asset": "packs/tafsir-id-mukhtasar.sqlite.xz"
+      },
+      "ps-mukhtasar": {
+        "sha256": "b1959fc66a8c23537d9654222665c6baa0aea2fcc10de30c5b00c2b615e7e6a6",
+        "asset": "packs/tafsir-ps-mukhtasar.sqlite.xz"
+      },
+      "ru-mukhtasar": {
+        "sha256": "6b6682ff027d04243e348a41d193c384298aeb8f6917be059859948712c935e2",
+        "asset": "packs/tafsir-ru-mukhtasar.sqlite.xz"
+      },
+      "tr-mukhtasar": {
+        "sha256": "e57ced2c4e2400427af04f79899f611b6d6a243cda0c6824c3479543b9f00513",
+        "asset": "packs/tafsir-tr-mukhtasar.sqlite.xz"
+      },
+      "ur-ahsanulbayan": {
+        "sha256": "71355c3cdc15af62879d4327ec0360e05f73e74ac43e5dff9da895573f7b7bc8",
+        "asset": "packs/tafsir-ur-ahsanulbayan.sqlite.xz"
+      },
+      "uz-mukhtasar": {
+        "sha256": "5c362dcd6720e2773515d163cacb69b3913134f176f650bf9f582612d95daedd",
+        "asset": "packs/tafsir-uz-mukhtasar.sqlite.xz"
+      }
+    },
+    "wbw": {
+      "bn-qurancom": {
+        "sha256": "0437911b283599d7f7260abab0e2c0419de452a4f38ca9496cfd8215002e3cf3",
+        "asset": "packs/wbw-bn-qurancom.sqlite.xz"
+      },
+      "fa-qurancom": {
+        "sha256": "91cb1e68e075b058bbf39f078324e3ec9e4a12217ef3c3959ec994fcba14c0dd",
+        "asset": "packs/wbw-fa-qurancom.sqlite.xz"
+      },
+      "fr-qurancom": {
+        "sha256": "851500823b1b1e2c2f8def111d1fb5710c717c3bfcdafd0449b454d0d406a7f9",
+        "asset": "packs/wbw-fr-qurancom.sqlite.xz"
+      },
+      "id-qurancom": {
+        "sha256": "7a50b4315c3fe7a8563b4aa1bbe04846eb7ae717b7315cb66372dae4032028a1",
+        "asset": "packs/wbw-id-qurancom.sqlite.xz"
+      },
+      "tr-qurancom": {
+        "sha256": "6e8e7f36647fe1035f649c7bb8e7ea02ed0912f078b2041686de9ae0afaab8d8",
+        "asset": "packs/wbw-tr-qurancom.sqlite.xz"
+      },
+      "ur-qurancom": {
+        "sha256": "557b7acdbd160dd3922c29235b2088ea1bf860d6984493e60131d31c2dc2cc47",
+        "asset": "packs/wbw-ur-qurancom.sqlite.xz"
+      }
+    }
+  }
+}

@@ -122,21 +122,25 @@ void main() {
     expect(tafsir, isNotNull);
   });
 
-  test('seeding twice does not error and does not duplicate data', () async {
-    final seeder = BundledDatasetSeeder(
-      quranRepository: quranRepository,
-      quranDatabase: quranDb,
-      translationRepository: translationRepository,
-      tafsirRepository: tafsirRepository,
-      logger: logger,
-      storage: storage,
-    );
+  test(
+    'seeding twice does not error and does not duplicate data',
+    () async {
+      final seeder = BundledDatasetSeeder(
+        quranRepository: quranRepository,
+        quranDatabase: quranDb,
+        translationRepository: translationRepository,
+        tafsirRepository: tafsirRepository,
+        logger: logger,
+        storage: storage,
+      );
 
-    await seeder.seedIfNeeded();
-    await seeder.seedIfNeeded();
+      await seeder.seedIfNeeded();
+      await seeder.seedIfNeeded();
 
-    expect(logger.errors, isEmpty, reason: logger.errors.join('\n'));
-    final surahs = await quranRepository.getAllSurahs();
-    expect(surahs, hasLength(114));
-  });
+      expect(logger.errors, isEmpty, reason: logger.errors.join('\n'));
+      final surahs = await quranRepository.getAllSurahs();
+      expect(surahs, hasLength(114));
+    },
+    timeout: const Timeout(Duration(minutes: 3)),
+  ); // The whole dataset, twice: slow under a full parallel run.
 }

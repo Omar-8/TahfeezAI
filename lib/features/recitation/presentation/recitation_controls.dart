@@ -1,6 +1,7 @@
 import 'dart:async' show unawaited;
 
 import '../../../core/localization/generated/app_localizations.dart';
+import '../../../ai/acoustic/local_quran_acoustic_model.dart';
 
 import 'package:flutter/foundation.dart' show ValueListenable;
 import 'package:flutter/material.dart';
@@ -12,6 +13,7 @@ import '../../listen/presentation/follow_along_sheet.dart';
 import '../../listen/presentation/listen_sheet.dart';
 import '../../listen/application/quran_audio_player.dart';
 
+import '../../../core/app_store/app_store_service.dart';
 import '../../../core/core_providers.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/components/tahfeez_bottom_sheet.dart';
@@ -2045,21 +2047,32 @@ class _ColourChoice extends StatelessWidget {
   }
 }
 
-class _RecitationAiNotice extends StatelessWidget {
+class _RecitationAiNotice extends ConsumerWidget {
   const _RecitationAiNotice({required this.config, this.inference});
 
   final RecitationAiConfig config;
   final LocalAcousticInferenceState? inference;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final model = inference?.model;
-    final message =
-        config.violation ??
-        inference?.error ??
-        (model != null && !model.usable ? '$model' : null);
+    final l10n = AppLocalizations.of(context);
+    // The model closed the app last time (the crash guard): said plainly,
+    // with a way to try again and the details to send.
+    final crashed = model?.state == LocalAcousticModelState.crashed;
+    final message = crashed
+        ? l10n.recModelCrashed
+        : config.violation ??
+              inference?.error ??
+              (model?.state == LocalAcousticModelState.unsupported
+                  // A 32-bit phone: the model needs 64 (memory and speed).
+                  ? l10n.recNeeds64Bit
+                  : model != null && !model.usable
+                  ? '$model'
+                  : null);
     if (message == null) return const SizedBox.shrink();
     final scheme = Theme.of(context).colorScheme;
+    final style = TextStyle(fontSize: 12, color: scheme.onErrorContainer);
     return Container(
       key: const ValueKey('recitation-ai-notice'),
       width: double.infinity,
@@ -2069,11 +2082,40 @@ class _RecitationAiNotice extends StatelessWidget {
         color: scheme.errorContainer,
         borderRadius: BorderRadius.circular(10),
       ),
-      child: Text(
-        message,
-        maxLines: 3,
-        overflow: TextOverflow.ellipsis,
-        style: TextStyle(fontSize: 12, color: scheme.onErrorContainer),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            message,
+            maxLines: crashed ? 4 : 3,
+            overflow: TextOverflow.ellipsis,
+            style: style,
+          ),
+          if (crashed)
+            Wrap(
+              spacing: TahfeezSpacing.xs,
+              children: [
+                TextButton(
+                  key: const ValueKey('recitation-ai-retry'),
+                  onPressed: () => ref
+                      .read(localAcousticInferenceControllerProvider.notifier)
+                      .retryAfterCrash(),
+                  child: Text(l10n.quranSetupRetry),
+                ),
+                TextButton(
+                  onPressed: () => ref
+                      .read(appStoreServiceProvider)
+                      .share(
+                        'Tahfeez AI ${ref.read(appVersionProvider).value ?? '?'}'
+                        ' — recitation checking closed the app\n'
+                        '${model?.detail ?? ''}',
+                      ),
+                  child: Text(l10n.quranSetupShare),
+                ),
+              ],
+            ),
+        ],
       ),
     );
   }

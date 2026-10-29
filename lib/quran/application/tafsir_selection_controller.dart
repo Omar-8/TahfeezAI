@@ -24,6 +24,9 @@ class TafsirSelectionController extends _$TafsirSelectionController {
 
   late Future<void> _restored;
 
+  /// Done once the stored choice is read.
+  Future<void> get restored => _restored;
+
   /// The app's language changed from [from] to [to]: a tafsir in [from]
   /// (or [from]'s default) becomes [to]'s; one in another language stays,
   /// and so does none.

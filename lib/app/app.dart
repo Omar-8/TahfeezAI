@@ -16,6 +16,7 @@ import '../core/theme/app_theme.dart';
 import '../core/theme/theme_controller.dart';
 import '../features/memorize/application/memorization_reminder.dart';
 import '../quran/application/meaning_language_follower.dart';
+import '../quran/presentation/meaning_packs_layer.dart';
 
 /// TahfeezAI's root widget.
 ///
@@ -90,7 +91,9 @@ class TahfeezApp extends ConsumerWidget {
           // The Mushaf's guide, above every screen and menu.
           // and a milestone just reached, gently, over that.
           builder: (context, child) => MilestoneLayer(
-            child: GuideLayer(child: child ?? const SizedBox.shrink()),
+            child: MeaningPacksLayer(
+              child: GuideLayer(child: child ?? const SizedBox.shrink()),
+            ),
           ),
         );
       },

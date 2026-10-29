@@ -1073,5 +1073,19 @@
   "recStrictnessLenientSub": "fewer false marks; some light mistakes may pass.",
   "recStrictnessBalancedSub": "the recommended middle.",
   "recStrictnessStrictSub": "catches more mistakes; now and then it may mark a correct word.",
-  "mushafPageTheme": "Page theme"
+  "mushafPageTheme": "Page theme",
+  "quranSetupFailed": "The Quran couldn't be set up on this phone.",
+  "quranSetupStorageFull": "The Quran couldn't be set up: this phone's storage is full. Free up some space, then try again.",
+  "quranSetupRetry": "Try again",
+  "quranSetupShare": "Share details",
+  "@quranSetupFailed": {
+    "description": "Where the Quran should be, when setting it up on the phone (first start) failed; the error follows."
+  },
+  "recNeeds64Bit": "Checking your recitation needs a 64-bit phone. Reading, listening and memorizing work as usual.",
+  "meaningPacksPreparing": "Getting the translations ready…",
+  "meaningPacksFailed": "The translations couldn't be prepared.",
+  "@meaningPacksPreparing": {
+    "description": "Over the app for a moment while the translations, tafsir and word meanings of a newly chosen language are unpacked."
+  },
+  "recModelCrashed": "Recitation checking closed the app on this phone, so it's turned off. Reading, listening and memorizing work as usual."
 }

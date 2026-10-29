@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.0+1
+version: 1.0.1+2
 
 environment:
   sdk: ^3.13.3
@@ -148,6 +148,12 @@ flutter:
     # The same emblem, cut out (transparent), over the splash's sky.
     - assets/branding/splash_emblem.png
     - assets/quran/resource_manifest.json
+    # The same data as ready-made databases (tool/quran_db/
+    # build_databases_test.dart): what Android and iOS install — a copy, no
+    # import. The JSON datasets above are left out of the Android build
+    # (android/app/build.gradle.kts); the web still imports them.
+    - assets/quran/db/
+    - assets/quran/db/packs/
     - assets/quran/translations/en_rowwad.json
     - assets/quran/translations/de_rowwad.json
     - assets/quran/tafsir/ar_muyassar.json

@@ -548,5 +548,13 @@
   "recStrictnessLenientSub": "menos marcas falsas; algunos errores leves pueden pasar.",
   "recStrictnessBalancedSub": "el punto medio recomendado.",
   "recStrictnessStrictSub": "detecta más errores; de vez en cuando puede marcar una palabra correcta.",
-  "mushafPageTheme": "Tema de la página"
+  "mushafPageTheme": "Tema de la página",
+  "quranSetupFailed": "No se pudo preparar el Corán en este teléfono.",
+  "quranSetupStorageFull": "No se pudo preparar el Corán: el almacenamiento del teléfono está lleno. Libera espacio y vuelve a intentarlo.",
+  "quranSetupRetry": "Reintentar",
+  "quranSetupShare": "Compartir detalles",
+  "recNeeds64Bit": "Revisar la recitación requiere un teléfono de 64 bits. Leer, escuchar y memorizar funcionan como siempre.",
+  "meaningPacksPreparing": "Preparando las traducciones…",
+  "meaningPacksFailed": "No se pudieron preparar las traducciones.",
+  "recModelCrashed": "La revisión de la recitación cerró la app en este teléfono, así que se ha desactivado. Leer, escuchar y memorizar funcionan como siempre."
 }

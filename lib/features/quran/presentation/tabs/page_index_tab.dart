@@ -11,6 +11,7 @@ import '../../../../core/theme/components/components.dart';
 import '../../../../quran/domain/models/quran_location.dart';
 import '../../../../quran/quran_providers.dart';
 import '../../application/quran_index_providers.dart';
+import '../../../../quran/presentation/quran_unavailable_view.dart';
 
 /// The Page navigator tab: jump directly to a Mushaf page number
 /// (`docs/reference/04_READER_SPEC.md` §4's Page navigator). Rendered as a
@@ -64,11 +65,7 @@ class _PageIndexTabState extends ConsumerState<PageIndexTab> {
       child: mushaf.when(
         data: (mushaf) {
           if (mushaf == null) {
-            return TahfeezEmptyView(
-              icon: Icons.menu_book_outlined,
-              message: AppLocalizations.of(context)
-                  .homeQuranDatasetUnavailableBody,
-            );
+            return const QuranUnavailableView();
           }
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -96,10 +93,7 @@ class _PageIndexTabState extends ConsumerState<PageIndexTab> {
           );
         },
         loading: () => const TahfeezLoadingView(),
-        error: (_, _) => TahfeezEmptyView(
-          icon: Icons.menu_book_outlined,
-          message: AppLocalizations.of(context).homeQuranDatasetUnavailableBody,
-        ),
+        error: (_, _) => const QuranUnavailableView(),
       ),
     );
   }

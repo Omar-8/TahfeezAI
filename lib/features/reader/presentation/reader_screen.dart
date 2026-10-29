@@ -22,6 +22,7 @@ import '../../mushaf/presentation/mushaf_pager.dart';
 import '../../recitation/presentation/recitation_controls.dart';
 import '../../mushaf/presentation/reader_mode_toggle.dart';
 import '../../mushaf/application/reading_surah.dart';
+import '../../../quran/presentation/quran_unavailable_view.dart';
 
 /// A Quran location (a surah, an ayah, an ayah range, a juz or a hizb)
 /// opened in the Mushaf at the page its first ayah is on. Opened at an
@@ -251,15 +252,6 @@ class _MushafModeScaffold extends ConsumerWidget {
   }
 
   Widget _unavailable(BuildContext context, Color color) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Text(
-          AppLocalizations.of(context).homeQuranDatasetUnavailableBody,
-          textAlign: TextAlign.center,
-          style: TextStyle(color: color),
-        ),
-      ),
-    );
+    return const QuranUnavailableView();
   }
 }

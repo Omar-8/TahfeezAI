@@ -548,5 +548,13 @@
   "recStrictnessLenientSub": "daha az yanlış işaret; bazı hafif hatalar geçebilir.",
   "recStrictnessBalancedSub": "önerilen orta ayar.",
   "recStrictnessStrictSub": "daha çok hata yakalar; ara sıra doğru bir kelimeyi işaretleyebilir.",
-  "mushafPageTheme": "Sayfa teması"
+  "mushafPageTheme": "Sayfa teması",
+  "quranSetupFailed": "Kur'an bu telefonda hazırlanamadı.",
+  "quranSetupStorageFull": "Kur'an hazırlanamadı: telefonun depolama alanı dolu. Biraz yer açıp tekrar deneyin.",
+  "quranSetupRetry": "Tekrar dene",
+  "quranSetupShare": "Ayrıntıları paylaş",
+  "recNeeds64Bit": "Okuma kontrolü 64 bit bir telefon gerektirir. Okuma, dinleme ve ezber her zamanki gibi çalışır.",
+  "meaningPacksPreparing": "Mealler hazırlanıyor…",
+  "meaningPacksFailed": "Mealler hazırlanamadı.",
+  "recModelCrashed": "Okuma kontrolü bu telefonda uygulamayı kapattığı için kapatıldı. Okuma, dinleme ve ezber her zamanki gibi çalışır."
 }

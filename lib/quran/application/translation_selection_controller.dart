@@ -30,6 +30,9 @@ class TranslationSelectionController extends _$TranslationSelectionController {
 
   late Future<void> _restored;
 
+  /// Done once the stored choice is read.
+  Future<void> get restored => _restored;
+
   /// The app's language changed from [from] to [to]: translations all in
   /// [from] (or [from]'s defaults) become [to]'s; a translation chosen in
   /// another language stays, with the rest.

@@ -1,0 +1,1 @@
+String deviceSummary() => 'web';
