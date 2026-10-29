@@ -67,6 +67,11 @@ android {
     buildTypes {
         release {
             signingConfig = signingConfigs.getByName(if (upload) "upload" else "debug")
+            // R8 keeps what JNI looks up by name (ONNX Runtime's classes).
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
         }
     }
 }
