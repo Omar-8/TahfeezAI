@@ -246,7 +246,7 @@ class BundledDatasetSeeder {
       resourceLabel: 'Canonical Quran',
       onProblem: (p) => problem = p,
     );
-    if (bytes == null) return problem ?? 'Could not load the Quran dataset';
+    if (bytes == null) return problem ?? "Could not load the Qur'an dataset";
 
     try {
       // Decoded and parsed in the background (the splash keeps moving),
@@ -276,7 +276,7 @@ class BundledDatasetSeeder {
         error: e,
         stackTrace: st,
       );
-      return 'The Quran dataset failed its integrity check: $e';
+      return "The Qur'an dataset failed its integrity check: $e";
     } catch (e, st) {
       logger.error(
         'Failed to seed canonical Quran from bundled asset.',

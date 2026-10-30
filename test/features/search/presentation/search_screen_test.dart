@@ -89,7 +89,7 @@ void main() {
 
     expect(
       find.text(
-        'This will appear automatically once a Quran dataset is added to the app.',
+        "This will appear automatically once a Qur'an dataset is added to the app.",
       ),
       findsOneWidget,
     );
@@ -134,7 +134,7 @@ void main() {
       await tester.enterText(find.byType(TextField), 'lafz');
       await tester.pumpAndSettle(const Duration(milliseconds: 400));
 
-      expect(find.text('Quran text'), findsOneWidget);
+      expect(find.text("Qur'an text"), findsOneWidget);
       expect(find.text('1:1'), findsWidgets);
     });
 
@@ -192,7 +192,7 @@ void main() {
 
       await tester.tap(find.byTooltip('Search filters'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Arabic Quran text'));
+      await tester.tap(find.text("Arabic Qur'an text"));
       await tester.pumpAndSettle();
       await tester.tapAt(const Offset(10, 10));
       await tester.pumpAndSettle();
@@ -200,7 +200,7 @@ void main() {
       await tester.enterText(find.byType(TextField), 'lafz');
       await tester.pumpAndSettle(const Duration(milliseconds: 400));
 
-      expect(find.text('Quran text'), findsNothing);
+      expect(find.text("Qur'an text"), findsNothing);
     });
   });
 }

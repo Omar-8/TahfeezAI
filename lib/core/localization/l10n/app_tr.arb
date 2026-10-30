@@ -452,6 +452,8 @@
   "guideDone": "Tamam",
   "guideTapToContinue": "Vurgulanan düğmeye dokunun",
   "guideIntro": "Bu sayfada çalışmanın yolları bunlar. Rehberi istediğiniz zaman kapatın.",
+  "guideWordTap": "Anlamını görmek için herhangi bir kelimeye dokunun; kelime sayfasında daha fazlası var. Deneyin, sonra «İleri»ye dokunun.",
+  "guideWordLongPress": "Ayetini açmak için bir kelimeye uzun basın: meal, tefsir, dinleme, yer imi ve daha fazlası. Deneyin, sonra «İleri»ye dokunun.",
   "guideRecite": "Oku: ezberden okuyun. Uygulama telefonunuzda dinler, sizi kelime kelime takip eder ve hataları işaretler.",
   "guideLoop": "Tekrar: bir bölümü tekrar tekrar okuyun — her ayeti ya da bölümün tamamını — istediğiniz kadar.",
   "guideListen": "Dinle: bir kâriyi dinleyin — bir ayet, bir bölüm ya da sureler — tekrar ve hız ayarıyla.",

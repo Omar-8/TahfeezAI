@@ -452,6 +452,8 @@
   "guideDone": "Selesai",
   "guideTapToContinue": "Ketuk tombol yang disorot",
   "guideIntro": "Inilah cara berlatih di halaman ini. Tutup panduan kapan saja.",
+  "guideWordTap": "Ketuk kata mana pun untuk melihat artinya, dan lebih lengkap di lembar kata. Coba, lalu ketuk «Berikutnya».",
+  "guideWordLongPress": "Tekan lama sebuah kata untuk membuka ayatnya: terjemahan, tafsir, dengar, penanda, dan lainnya. Coba, lalu ketuk «Berikutnya».",
   "guideRecite": "Baca: baca dari hafalan. Aplikasi mendengarkan di ponsel Anda, mengikuti kata demi kata, dan menandai kesalahan.",
   "guideLoop": "Ulang: baca satu bagian berulang-ulang — tiap ayat atau seluruh bagian — sebanyak yang Anda pilih.",
   "guideListen": "Dengar: dengarkan qari — satu ayat, satu bagian, atau beberapa surah — dengan pengulangan dan kecepatan.",

@@ -342,7 +342,7 @@ Future<void> main() async {
     displayName: 'English Translation - Rowwad Translation Center',
     languageCode: 'en',
     author: 'Rowwad Translation Center',
-    version: 1019, // QuranEnc key "english_rwwad" version 1.0.19
+    version: 1020, // QuranEnc key "english_rwwad" version 1.0.20
   );
   packagedAssetHashes['translations/en_rowwad.json'] = _writeJson(
     '$_outDir/translations/en_rowwad.json',
@@ -748,7 +748,7 @@ Future<void> main() async {
         'slug': en.book.slug,
         'resourceId': 'tahfeez.translation.en.rowwad',
         'quranEncKey': 'english_rwwad',
-        'version': '1.0.19',
+        'version': '1.0.20',
         'sourceHash': en.sourceHash,
         'ayahCount': en.verses.length,
       },

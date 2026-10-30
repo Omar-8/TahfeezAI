@@ -34,7 +34,13 @@ class GuideStep {
     this.wait,
     this.branches,
     this.card = true,
+    this.tryIt = false,
   });
+
+  /// A step to try on the page: the page in full view and usable, the card
+  /// at the top (the sheets it opens rise from the bottom), with Back and
+  /// Next.
+  final bool tryIt;
 
   /// The step's card shown. Off for the practice runs of Recite, Loop and
   /// Follow along: the explanation sheet before the recitation
@@ -59,6 +65,9 @@ enum GuideTour { overview, recite, loop, listen, follow, hide }
 
 List<GuideStep> guideSteps(GuideTour tour) => switch (tour) {
   GuideTour.overview => [
+    // First the page itself: a word tapped, then long-pressed.
+    GuideStep(null, (l) => l.guideWordTap, tryIt: true),
+    GuideStep(null, (l) => l.guideWordLongPress, tryIt: true),
     GuideStep('modes', (l) => l.guideIntro),
     GuideStep('mode-recite', (l) => l.guideRecite),
     GuideStep('mode-loop', (l) => l.guideLoop),
@@ -409,6 +418,33 @@ class _GuideOverlayState extends ConsumerState<_GuideOverlay> {
     // Its explanation is a sheet: nothing over it, the page usable.
     if (!step.card) return const SizedBox.shrink();
     final l10n = AppLocalizations.of(context);
+    if (step.tryIt) {
+      return Stack(
+        children: [
+          Positioned(
+            left: 16,
+            right: 16,
+            top: MediaQuery.paddingOf(context).top + kToolbarHeight + 12,
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 380),
+                child: _GuideCard(
+                  key: const ValueKey('guide-try-it'),
+                  text: step.text(l10n),
+                  index: guide.index,
+                  length: controller.length,
+                  waiting: false,
+                  tapToContinue: false,
+                  onBack: guide.index == 0 ? null : controller.back,
+                  onNext: controller.next,
+                  onClose: controller.close,
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
     if (step.practice) {
       // The page in full view and usable; the hint at the bottom, above
       // the recitation bar, until the run is over.
@@ -553,6 +589,7 @@ class _DimPainter extends CustomPainter {
 
 class _GuideCard extends StatelessWidget {
   const _GuideCard({
+    super.key,
     required this.text,
     required this.index,
     required this.length,

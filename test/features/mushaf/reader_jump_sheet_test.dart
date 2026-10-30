@@ -111,4 +111,66 @@ void main() {
     expect(router.state.uri.path, '/quran/ayah/3/3');
     expect(find.text('ayah 3:3'), findsOneWidget);
   });
+
+  testWidgets('a page typed: taken with OK; out of range, refused', (
+    tester,
+  ) async {
+    final router = await open(tester);
+    await tester.tap(find.byKey(const ValueKey('jump-page-number-value')));
+    await tester.pumpAndSettle();
+    final field = find.byKey(const ValueKey('jump-page-number-type'));
+    expect(field, findsOneWidget);
+
+    await tester.enterText(field, '999');
+    await tester.tap(find.byKey(const ValueKey('jump-page-number-type-ok')));
+    await tester.pumpAndSettle();
+    expect(find.text('1–604'), findsWidgets, reason: 'the range it takes');
+    expect(field, findsOneWidget, reason: 'still open');
+
+    await tester.enterText(field, '300');
+    await tester.tap(find.byKey(const ValueKey('jump-page-number-type-ok')));
+    await tester.pumpAndSettle();
+    expect(field, findsNothing);
+    expect(find.text('Page 300'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('jump-page')));
+    await tester.pumpAndSettle();
+    expect(router.state.uri.path, '/quran/page/1/300');
+  });
+
+  testWidgets('typing narrows the list; a value picked from it', (
+    tester,
+  ) async {
+    await open(tester);
+    await tester.tap(find.byKey(const ValueKey('jump-page-number-value')));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const ValueKey('jump-page-number-type')),
+      '12',
+    );
+    await tester.pumpAndSettle();
+    // 12, 120–129, 1200… (to 604): 12 and 120–129 only.
+    expect(find.byKey(const ValueKey('jump-page-number-pick-12')), findsOne);
+    expect(
+      find.byKey(const ValueKey('jump-page-number-pick-13')),
+      findsNothing,
+    );
+    await tester.tap(find.byKey(const ValueKey('jump-page-number-pick-123')));
+    await tester.pumpAndSettle();
+    expect(find.text('Page 123'), findsOneWidget);
+  });
+
+  testWidgets('an ayah typed, Enter taking it', (tester) async {
+    final router = await open(tester);
+    await tester.tap(find.byKey(const ValueKey('loop-jump-ayah-value')));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const ValueKey('loop-jump-ayah-type')),
+      '5',
+    );
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('jump-ayah')));
+    await tester.pumpAndSettle();
+    expect(router.state.uri.path, '/quran/ayah/3/5');
+  });
 }

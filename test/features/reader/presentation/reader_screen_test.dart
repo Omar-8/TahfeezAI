@@ -51,7 +51,7 @@ void main() {
 
     expect(
       find.text(
-        'This will appear automatically once a Quran dataset is added to the app.',
+        "This will appear automatically once a Qur'an dataset is added to the app.",
       ),
       findsOneWidget,
     );

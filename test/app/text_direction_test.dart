@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tahfeez_ai/features/home/application/home_providers.dart';
 import 'package:tahfeez_ai/features/mushaf/application/reader_mode.dart';
 import 'package:tahfeez_ai/quran/application/tafsir_selection_controller.dart';
 import 'package:tahfeez_ai/quran/application/translation_selection_controller.dart';
@@ -46,13 +47,12 @@ void main() {
           .toggle('en-rowwad');
     }
     await RealApp.settle(tester);
+    // Today's ayah's translation, whatever its length (94:5's is 40 letters).
+    final daily = container.read(dailyAyahProvider).value;
+    expect(daily?.translationLanguage, 'en');
     final translations = tester
         .widgetList<Text>(find.byType(Text))
-        .where(
-          (t) =>
-              (t.data ?? '').contains(RegExp('[a-zA-Z]{4,}')) &&
-              (t.data ?? '').length > 40,
-        )
+        .where((t) => t.data == daily!.translation)
         .toList();
     expect(translations, isNotEmpty, reason: 'the translation on Home');
     expect(translations.first.textDirection, TextDirection.ltr);

@@ -97,10 +97,10 @@ This rule, and the verification that it holds for every affected surah, is cover
 - **Title**: "English Translation - Rowwad Translation Center", in cooperation with the
   Rabwah Dawah Association, the Islamic Content Service Association in Languages, and
   IslamHouse.com.
-- **Version**: 1.0.19 (per QuranEnc's `/api/v1/translations/list` at integration time).
+- **Version**: 1.0.20 (per QuranEnc's `/api/v1/translations/list`; updated 2026-10-31 from 1.0.19, as QuranEnc's terms ask — its footnotes now numbered within each ayah).
 - **Downloaded from**: `https://quranenc.com/downloads/sqlite/english_rwwad.zip`.
 - **Content hash (SHA-256, of the extracted `.sqlite` file)**:
-  `77e2ede3d8e6d6b5c6e16ff78eda2d2b6cc0a6b7489c94a5dde4f7481f5fdee8`
+  `676589aec7deca80d3e7be8b87882f8fe222de0315214464c32fea585a56bcfa`
 - **Tahfeez identifiers**: `slug` `en-rowwad`; branding resource id
   `tahfeez.translation.en.rowwad`.
 - **License**: QuranEnc's Terms and Policies (see §5 for the full text) — redistribution

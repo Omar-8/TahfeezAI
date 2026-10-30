@@ -57,7 +57,7 @@ void main() {
     // unavailable/empty state rather than fabricated content.
     expect(
       find.text(
-        'This will appear automatically once a Quran dataset is added to the app.',
+        "This will appear automatically once a Qur'an dataset is added to the app.",
       ),
       findsOneWidget,
     );
@@ -69,7 +69,7 @@ void main() {
     );
     expect(
       find.text(
-        'Featured passages will appear once a Quran dataset is installed.',
+        "Featured passages will appear once a Qur'an dataset is installed.",
       ),
       findsOneWidget,
     );

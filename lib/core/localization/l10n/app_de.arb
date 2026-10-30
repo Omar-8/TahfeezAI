@@ -452,6 +452,8 @@
   "guideDone": "Fertig",
   "guideTapToContinue": "Tippe auf die hervorgehobene Schaltfläche",
   "guideIntro": "So kannst du auf dieser Seite üben. Schließe die Anleitung jederzeit.",
+  "guideWordTap": "Tippe auf ein Wort, um seine Bedeutung zu sehen – mehr dazu im Wortblatt. Probier es aus und tippe dann auf „Weiter“.",
+  "guideWordLongPress": "Halte ein Wort gedrückt, um seine Aya zu öffnen: Übersetzung, Tafsir, Anhören, Lesezeichen und mehr. Probier es aus und tippe dann auf „Weiter“.",
   "guideRecite": "Rezitieren: rezitiere auswendig. Die App hört auf deinem Telefon zu, folgt dir Wort für Wort und markiert Fehler.",
   "guideLoop": "Schleife: rezitiere einen Abschnitt immer wieder — jeden Vers oder den ganzen Abschnitt — so oft du willst.",
   "guideListen": "Hören: höre einen Rezitator — einen Vers, einen Abschnitt oder ganze Suren — mit Wiederholungen und Tempo.",

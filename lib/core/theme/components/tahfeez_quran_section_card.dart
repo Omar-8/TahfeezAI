@@ -130,19 +130,6 @@ class TahfeezQuranSectionCard extends StatelessWidget {
                   ],
                 ),
               ),
-              if (onBookmark != null)
-                IconButton(
-                  key: const ValueKey('section-card-bookmark'),
-                  visualDensity: VisualDensity.compact,
-                  tooltip: bookmarkTooltip,
-                  isSelected: bookmarked,
-                  icon: Icon(
-                    Icons.bookmark_border_rounded,
-                    color: scheme.onSurfaceVariant,
-                  ),
-                  selectedIcon: Icon(Icons.bookmark_rounded, color: accent),
-                  onPressed: onBookmark,
-                ),
               if (art case final art?)
                 Padding(
                   padding: const EdgeInsetsDirectional.only(
@@ -190,6 +177,20 @@ class TahfeezQuranSectionCard extends StatelessWidget {
                   Icons.chevron_right,
                   size: TahfeezIconSize.md,
                   color: scheme.onSurfaceVariant,
+                ),
+              // Last, at the card's end (after the calligraphy).
+              if (onBookmark != null)
+                IconButton(
+                  key: const ValueKey('section-card-bookmark'),
+                  visualDensity: VisualDensity.compact,
+                  tooltip: bookmarkTooltip,
+                  isSelected: bookmarked,
+                  icon: Icon(
+                    Icons.bookmark_border_rounded,
+                    color: scheme.onSurfaceVariant,
+                  ),
+                  selectedIcon: Icon(Icons.bookmark_rounded, color: accent),
+                  onPressed: onBookmark,
                 ),
             ],
           ),

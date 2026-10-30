@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "buildDate": "2026-10-25T11:23:57.066751Z",
+  "buildDate": "2026-10-30T23:08:27.636110Z",
   "canonicalQuranSource": "Tanzil Project (tanzil.net)",
   "canonicalQuranVersion": "Uthmani, Version 1.1",
   "canonicalQuranHash": "bf4f57b968d03f4131c070b1e285da9be0e0a108a21c910e872801ca273312c8",
@@ -31,8 +31,8 @@
       "slug": "en-rowwad",
       "resourceId": "tahfeez.translation.en.rowwad",
       "quranEncKey": "english_rwwad",
-      "version": "1.0.19",
-      "sourceHash": "77e2ede3d8e6d6b5c6e16ff78eda2d2b6cc0a6b7489c94a5dde4f7481f5fdee8",
+      "version": "1.0.20",
+      "sourceHash": "676589aec7deca80d3e7be8b87882f8fe222de0315214464c32fea585a56bcfa",
       "ayahCount": 6236
     },
     {
@@ -104,7 +104,7 @@
       "resourceId": "tahfeez.translation.bn.rowwad",
       "quranEncKey": "bengali_rwwad",
       "version": "unversioned upstream (tracked by sourceHash)",
-      "sourceHash": "34610bba38baa7aa5e711609c93c16f58fef0214447cb3774e833b4906365851",
+      "sourceHash": "a2ec7dcf492f2539a8579ef040f4ad89f9795985c69365f9685c5aebb54ee983",
       "ayahCount": 6236
     },
     {
@@ -347,7 +347,7 @@
   "toolVersion": "1.1.0",
   "packagedAssetHashes": {
     "quran_dataset.json": "f7218187450bd1f8e12438fbece08db9820e4780f5fa33e007d0edc506ce7104",
-    "translations/en_rowwad.json": "9f8260516e290f14072838e713c5ce52313e9e2954d6da7a374ded058c502e2b",
+    "translations/en_rowwad.json": "86568e204ea18a07a052141d1949025c2a210d4d88aff67f6ade069bdb5bea91",
     "translations/de_rowwad.json": "f300113d6f09024d46bbe08a0a9ade70a2f6c9f76ba67fccfe56970dc351f64f",
     "tafsir/ar_muyassar.json": "75583a480b3d2824dd781a9f088656d897b218d7413a66a58663e3d6e3a7410e",
     "translations/ur_junagarhi.json": "400e4405f08b41942142f321fadbef86c1a67672221a09317c59d1c19c91b87e",
@@ -357,7 +357,7 @@
     "translations/es_noor.json": "dfadfe2da23c312e418a9e378173865ec89ae5e014ced870119516671d097858",
     "translations/ru_rowwad.json": "4718a474eb3f804a9dd16d9800d4350687e11cd1fa41ddc5419685a71c0e07db",
     "translations/fa_rowwad.json": "b45282162691392f7936242c29cfc7af594299497128a93a110efc0b6fc66b1c",
-    "translations/bn_rowwad.json": "15d53f5229c4d6039ccfb96fef6b3e64f8c5885282044a51bb0b9a4d58cf5aaf",
+    "translations/bn_rowwad.json": "cb5ad4ee8855e83d4e86035f839ae4f7c547a67a29e4fe083dbd0a0f39346cf0",
     "translations/ms_basumayyah.json": "fef6fdb47db27536afcc412546553f567ed933caaf1ec307d2f14dee39299295",
     "translations/ha_gumi.json": "72f25a54cfe64e16220952b14da6ca93fe57463fc8556b4ade233b5ad117ddfb",
     "translations/ckb_bamoki.json": "c856c8ffc5a8ebf6df74e034bc8b0434438960d91d57ad2f6537efa9a03708be",

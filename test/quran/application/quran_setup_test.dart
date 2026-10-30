@@ -74,7 +74,7 @@ void main() {
   ) async {
     await pumpView(tester, 'Could not load assets/quran/quran_dataset.json');
     expect(
-      find.text("The Quran couldn't be set up on this phone."),
+      find.text("The Qur'an couldn't be set up on this phone."),
       findsOneWidget,
     );
     expect(

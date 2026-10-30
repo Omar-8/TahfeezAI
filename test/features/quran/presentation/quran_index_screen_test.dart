@@ -63,7 +63,7 @@ void main() {
 
     expect(
       find.text(
-        'This will appear automatically once a Quran dataset is added to the app.',
+        "This will appear automatically once a Qur'an dataset is added to the app.",
       ),
       findsOneWidget,
     );
@@ -194,6 +194,17 @@ void main() {
       );
       expect(button, findsOneWidget);
       expect(find.byTooltip('Bookmark surah'), findsWidgets);
+      // At the card's end, after everything else on it.
+      final card = tester.getRect(first);
+      final mark = tester.getRect(button);
+      expect(card.right - mark.right, lessThan(24));
+      for (final other in [
+        find.descendant(of: first, matching: find.byIcon(Icons.chevron_right)),
+        find.descendant(of: first, matching: find.text('Test Chapter One')),
+      ]) {
+        if (other.evaluate().isEmpty) continue;
+        expect(tester.getRect(other).right, lessThanOrEqualTo(mark.left));
+      }
       bool filled() => tester.widget<IconButton>(button).isSelected ?? false;
       expect(filled(), isFalse);
 

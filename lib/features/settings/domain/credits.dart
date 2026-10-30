@@ -48,12 +48,12 @@ const credits = <Credit>[
         'Tanzil text licence: verbatim copies only, with attribution '
         '(tanzil.net/docs/text_license); metadata CC BY',
     url: 'https://tanzil.net',
-    useEn: 'The Quran text and its structure (surahs, ayahs, juz, pages)',
+    useEn: "The Qur'an text and its structure (surahs, ayahs, juz, pages)",
     useAr: 'نصّ القرآن الكريم وبنيته (السور والآيات والأجزاء والصفحات)',
   ),
   Credit(
     group: CreditGroup.quran,
-    name: 'quran-transcript (Quran phonetizer)',
+    name: "quran-transcript (Qur'an phonetizer)",
     owner: 'Abdullah (obadx)',
     licence: 'MIT',
     url: 'https://github.com/obadx/quran-transcript',
@@ -167,7 +167,8 @@ const credits = <Credit>[
   Credit(
     group: CreditGroup.mushaf,
     name: 'Quran Engine page corpus (KFGQPC Madinah Mushaf)',
-    owner: 'quran.ws (Quran Engine); King Fahd Glorious Quran Printing Complex',
+    owner:
+        'quran.ws (Quran Engine); King Fahd Glorious Qur\'an Printing Complex',
     licence:
         'quran.ws data: CC BY 4.0. The Mushaf: the King Fahd Complex’s '
         'usage rights (free use, including in software)',
@@ -178,7 +179,7 @@ const credits = <Credit>[
         'Data from Quran Engine (quran-engine-pages-hafs-kfgqpc) by Quran.ws, '
         'licensed under CC BY 4.0. Source: https://cdn.quran.ws/qvp/v0.3.0/. '
         'Version: 0.3.0. Modified: no. Mus’haf al-Madinah © King Fahd '
-        'Glorious Qur’an Printing Complex, used under its usage rights.',
+        'Glorious Qur\'an Printing Complex, used under its usage rights.',
   ),
   Credit(
     group: CreditGroup.mushaf,
@@ -192,7 +193,7 @@ const credits = <Credit>[
   Credit(
     group: CreditGroup.mushaf,
     name: 'Quranic Universal Library: KFGQPC V2 layout and word data',
-    owner: 'Tarteel (QUL); King Fahd Glorious Quran Printing Complex',
+    owner: 'Tarteel (QUL); King Fahd Glorious Qur\'an Printing Complex',
     licence:
         'Layouts free for personal and commercial use (QUL); word data: '
         'no licence stated, used with credit. The Mushaf: the King Fahd '
@@ -208,7 +209,7 @@ const credits = <Credit>[
     owner: 'SIL Global; the Amiri Project Authors; the Noto Project Authors',
     licence: 'SIL Open Font License 1.1',
     url: 'https://github.com/aliftype/amiri',
-    useEn: 'The Quran text outside the printed pages',
+    useEn: "The Qur'an text outside the printed pages",
     useAr: 'نص القرآن خارج صفحات المصحف',
   ),
   Credit(
@@ -230,7 +231,7 @@ const credits = <Credit>[
     licence: 'MIT',
     url: 'https://huggingface.co/obadx/muaalem-model-v3_2',
     useEn:
-        'The Quran pronunciation model Tahfeez’s on-device model learned '
+        "The Qur'an pronunciation model Tahfeez’s on-device model learned "
         'from (as its teacher)',
     useAr: 'نموذج نطق القرآن الذي تعلّم منه نموذجُ تحفيظ على الجهاز',
     citation:

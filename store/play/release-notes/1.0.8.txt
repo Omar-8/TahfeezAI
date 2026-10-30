@@ -1,0 +1,85 @@
+<en-US>
+• The guide now begins by showing how to tap a word (its meaning) and long-press it (its ayah)
+• Type a page or ayah number, or pick it from the list, wherever you choose one
+• English and Bengali translations updated to their latest revisions
+• The surah bookmark button sits at the end of each card
+• "Qur'an" spelled with its apostrophe
+</en-US>
+<ar>
+• يبدأ الدليل الآن بشرح الضغط على كلمة (لمعناها) والضغط المطوّل عليها (لآيتها)
+• اكتب رقم الصفحة أو الآية أو اختره من القائمة، حيثما تختار رقمًا
+• تحديث الترجمتين الإنجليزية والبنغالية إلى أحدث مراجعاتهما
+• زر حفظ السورة في نهاية كل بطاقة
+</ar>
+<bn-BD>
+• গাইড এখন শুরু হয় শব্দে চাপ (অর্থ) ও দীর্ঘ চাপ (আয়াত) দেখিয়ে
+• যেখানেই নম্বর বাছেন, পৃষ্ঠা বা আয়াত নম্বর টাইপ করুন অথবা তালিকা থেকে বাছুন
+• ইংরেজি ও বাংলা অনুবাদ সর্বশেষ সংশোধনে হালনাগাদ
+• সূরার বুকমার্ক বোতাম প্রতিটি কার্ডের শেষে
+</bn-BD>
+<de-DE>
+• Die Anleitung zeigt jetzt zuerst: Wort antippen (Bedeutung), Wort gedrückt halten (Aya)
+• Seiten- oder Aya-Nummer eintippen oder aus der Liste wählen – überall, wo eine Zahl gewählt wird
+• Englische und bengalische Übersetzung auf die neueste Fassung aktualisiert
+• Das Lesezeichen einer Sure am Ende jeder Karte
+</de-DE>
+<es-ES>
+• La guía empieza mostrando cómo tocar una palabra (su significado) y mantenerla pulsada (su aleya)
+• Escribe el número de página o aleya, o elígelo de la lista, dondequiera que elijas uno
+• Traducciones inglesa y bengalí actualizadas a su última revisión
+• El marcador de sura, al final de cada tarjeta
+</es-ES>
+<fa>
+• راهنما اکنون با نشان دادن زدن روی واژه (معنا) و نگه داشتن آن (آیه) آغاز می‌شود
+• شمارهٔ صفحه یا آیه را تایپ کنید یا از فهرست برگزینید، هر جا که عددی انتخاب می‌کنید
+• ترجمه‌های انگلیسی و بنگالی به آخرین ویرایش به‌روز شد
+• دکمهٔ نشانک سوره در انتهای هر کارت
+</fa>
+<fr-FR>
+• Le guide commence par montrer comment toucher un mot (son sens) et appuyer longuement (son verset)
+• Tapez un numéro de page ou de verset, ou choisissez-le dans la liste, partout où l'on en choisit un
+• Traductions anglaise et bengalie mises à jour à leur dernière révision
+• Le favori de sourate à la fin de chaque carte
+</fr-FR>
+<id>
+• Panduan kini diawali dengan cara mengetuk kata (artinya) dan menekan lama (ayatnya)
+• Ketik nomor halaman atau ayat, atau pilih dari daftar, di mana pun Anda memilih angka
+• Terjemahan Inggris dan Bengali diperbarui ke revisi terbaru
+• Tombol penanda surah di ujung setiap kartu
+</id>
+<kk>
+• Нұсқаулық енді сөзді түрту (мағынасы) мен басып тұруды (аяты) көрсетуден басталады
+• Бет не аят нөмірін теріңіз немесе тізімнен таңдаңыз — сан таңдалатын барлық жерде
+• Ағылшын және бенгал аудармалары соңғы нұсқасына жаңартылды
+• Сүре бетбелгісі әр картаның соңында
+</kk>
+<ms>
+• Panduan kini bermula dengan cara mengetik perkataan (maknanya) dan menekan lama (ayatnya)
+• Taip nombor halaman atau ayat, atau pilih daripada senarai, di mana-mana anda memilih nombor
+• Terjemahan Inggeris dan Bengali dikemas kini ke semakan terkini
+• Butang penanda surah di hujung setiap kad
+</ms>
+<ru-RU>
+• Руководство теперь начинается с того, как нажать на слово (значение) и удерживать его (аят)
+• Вводите номер страницы или аята или выбирайте из списка — везде, где выбирается число
+• Английский и бенгальский переводы обновлены до последней редакции
+• Кнопка закладки суры — в конце каждой карточки
+</ru-RU>
+<sw>
+• Mwongozo sasa unaanza kwa kuonyesha kugusa neno (maana yake) na kulibonyeza kwa muda (aya yake)
+• Andika nambari ya ukurasa au aya, au ichague kwenye orodha, popote unapochagua nambari
+• Tafsiri za Kiingereza na Kibengali zimesasishwa hadi toleo la karibuni
+• Kitufe cha alamisho cha sura mwishoni mwa kila kadi
+</sw>
+<tr-TR>
+• Rehber artık bir kelimeye dokunmayı (anlamı) ve uzun basmayı (ayeti) göstererek başlıyor
+• Sayı seçilen her yerde sayfa ya da ayet numarasını yazın veya listeden seçin
+• İngilizce ve Bengalce mealler en son revizyonlarına güncellendi
+• Sure yer imi düğmesi her kartın sonunda
+</tr-TR>
+<ur>
+• رہنما اب لفظ پر ٹیپ (معنی) اور دیر تک دبانے (آیت) سے شروع ہوتا ہے
+• جہاں بھی نمبر چنیں، صفحہ یا آیت نمبر ٹائپ کریں یا فہرست سے چنیں
+• انگریزی اور بنگالی تراجم تازہ ترین نظرثانی پر اپڈیٹ
+• سورت کے بک مارک کا بٹن ہر کارڈ کے آخر میں
+</ur>

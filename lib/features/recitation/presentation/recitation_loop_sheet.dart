@@ -1,6 +1,7 @@
 import '../../guide/guide.dart';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../listen/application/quran_audio_player.dart';
@@ -571,25 +572,37 @@ class CountStepper extends StatelessWidget {
                 ? () => onChanged(value - 1)
                 : null,
           ),
-          PopupMenuButton<int>(
+          // The value itself: pressed, a number to type — or to pick from
+          // the list (an ayah among 286, a page among 604 is too far to
+          // step to).
+          InkWell(
             key: ValueKey('$id-value'),
-            initialValue: value,
-            onSelected: onChanged,
-            constraints: const BoxConstraints(maxHeight: 320),
-            itemBuilder: (context) => [
-              for (var v = min; v <= max; v++)
-                PopupMenuItem(value: v, height: 40, child: shown(v)),
-              if (untilStopped)
-                PopupMenuItem(value: 0, height: 40, child: shown(0)),
-            ],
+            borderRadius: BorderRadius.circular(TahfeezRadii.md),
+            onTap: () async {
+              final picked = await showDialog<int>(
+                context: context,
+                builder: (context) => _CountPicker(
+                  id: id,
+                  value: value,
+                  min: min,
+                  max: max,
+                  untilStopped: untilStopped,
+                  shown: shown,
+                ),
+              );
+              if (picked != null && picked != value) onChanged(picked);
+            },
             child: SizedBox(
               width: 48,
-              child: DefaultTextStyle.merge(
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontFeatures: const [FontFeature.tabularFigures()],
+              height: 40,
+              child: Center(
+                child: DefaultTextStyle.merge(
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
+                  child: shown(value),
                 ),
-                child: shown(value),
               ),
             ),
           ),
@@ -607,6 +620,145 @@ class CountStepper extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// [CountStepper]'s value pressed: a number typed (Enter or OK takes it),
+/// or picked from the list below — the list narrowed to what is typed.
+class _CountPicker extends StatefulWidget {
+  const _CountPicker({
+    required this.id,
+    required this.value,
+    required this.min,
+    required this.max,
+    required this.untilStopped,
+    required this.shown,
+  });
+
+  final String id;
+  final int value, min, max;
+  final bool untilStopped;
+  final Widget Function(int) shown;
+
+  @override
+  State<_CountPicker> createState() => _CountPickerState();
+}
+
+class _CountPickerState extends State<_CountPicker> {
+  static const _rowHeight = 44.0;
+
+  final _field = TextEditingController();
+  // Opened with the value it has near the top.
+  late final _list = ScrollController(
+    initialScrollOffset: widget.value >= widget.min
+        ? (widget.value - widget.min - 2).clamp(0, widget.max) * _rowHeight
+        : 0,
+  );
+  String? _error;
+
+  @override
+  void dispose() {
+    _field.dispose();
+    _list.dispose();
+    super.dispose();
+  }
+
+  String get _range => '${widget.min}–${widget.max}';
+
+  void _take() {
+    final typed = int.tryParse(_field.text.trim());
+    if (typed == null || typed < widget.min || typed > widget.max) {
+      setState(() => _error = _range);
+      return;
+    }
+    Navigator.of(context).pop(typed);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final material = MaterialLocalizations.of(context);
+    final scheme = Theme.of(context).colorScheme;
+    final typed = _field.text.trim();
+    final values = [
+      for (var v = widget.min; v <= widget.max; v++)
+        if (typed.isEmpty || '$v'.startsWith(typed)) v,
+      if (widget.untilStopped && typed.isEmpty) 0,
+    ];
+    return AlertDialog(
+      contentPadding: const EdgeInsets.fromLTRB(
+        TahfeezSpacing.md,
+        TahfeezSpacing.md,
+        TahfeezSpacing.md,
+        0,
+      ),
+      content: SizedBox(
+        width: 280,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              key: ValueKey('${widget.id}-type'),
+              controller: _field,
+              autofocus: true,
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              textInputAction: TextInputAction.done,
+              textAlign: TextAlign.center,
+              decoration: InputDecoration(
+                hintText: _range,
+                errorText: _error,
+                border: const OutlineInputBorder(),
+                isDense: true,
+              ),
+              onChanged: (_) {
+                setState(() => _error = null);
+                // The narrowed list from its top.
+                if (_list.hasClients) _list.jumpTo(0);
+              },
+              onSubmitted: (_) => _take(),
+            ),
+            const SizedBox(height: TahfeezSpacing.sm),
+            Flexible(
+              child: SizedBox(
+                height: 260,
+                child: ListView.builder(
+                  key: ValueKey('${widget.id}-list'),
+                  controller: _list,
+                  itemExtent: _rowHeight,
+                  itemCount: values.length,
+                  itemBuilder: (context, i) {
+                    final v = values[i];
+                    final current = v == widget.value;
+                    return ListTile(
+                      key: ValueKey('${widget.id}-pick-$v'),
+                      dense: true,
+                      selected: current,
+                      selectedTileColor: scheme.secondaryContainer,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(TahfeezRadii.md),
+                      ),
+                      title: Center(child: widget.shown(v)),
+                      onTap: () => Navigator.of(context).pop(v),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(material.cancelButtonLabel),
+        ),
+        FilledButton(
+          key: ValueKey('${widget.id}-type-ok'),
+          onPressed: _take,
+          child: Text(material.okButtonLabel),
+        ),
+      ],
     );
   }
 }

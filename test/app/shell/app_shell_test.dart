@@ -46,7 +46,7 @@ void main() {
     expect(find.byType(TahfeezPrimaryNavigationBar), findsOneWidget);
     expect(find.byType(TahfeezPrimaryNavigationRail), findsNothing);
     expect(find.text('Home'), findsOneWidget);
-    expect(find.text('Quran'), findsOneWidget);
+    expect(find.text("Qur'an"), findsOneWidget);
     expect(find.text('Settings'), findsOneWidget);
   });
 
@@ -58,7 +58,7 @@ void main() {
     // Home is the initial branch.
     expect(find.text('Daily Ayah'), findsOneWidget);
 
-    await tester.tap(find.text('Quran'));
+    await tester.tap(find.text("Qur'an"));
     await tester.pumpAndSettle();
     expect(find.byType(TabBar), findsOneWidget);
     expect(find.text('Surah'), findsOneWidget);

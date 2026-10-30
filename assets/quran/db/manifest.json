@@ -1,5 +1,5 @@
 {
-  "version": "9f0234394435663a",
+  "version": "c224c91c2fb56bd1",
   "databases": {
     "quran": {
       "sha256": "2846cbd56153e37a79c1072f293203ae968488a30e42cce8d96299196b970d94",
@@ -7,8 +7,8 @@
       "asset": "quran.sqlite.xz"
     },
     "translations": {
-      "sha256": "b89b9ddc6bf9e156f36b2ac741624178076daa57993d0b962b2eee9c488fbe30",
-      "bytes": 1511424,
+      "sha256": "3e02d676716b9e875a8a5a0c802ca8fd2f170ac85d035989b892f4c46b9d67a8",
+      "bytes": 1519616,
       "asset": "translations.sqlite.xz"
     },
     "tafsirs": {
@@ -25,7 +25,7 @@
   "packs": {
     "translation": {
       "bn-rowwad": {
-        "sha256": "49df0b5b344e9e00a4d8675880dbf69d5f1d83618c6b37e90833501b51020bbd",
+        "sha256": "7ddabe0b2f871ec6eb1d0edf5d18f9507051db818a42e99d64add6181f980787",
         "asset": "packs/translation-bn-rowwad.sqlite.xz"
       },
       "ckb-bamoki": {

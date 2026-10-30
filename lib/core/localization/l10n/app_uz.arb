@@ -452,6 +452,8 @@
   "guideDone": "Tayyor",
   "guideTapToContinue": "Ajratilgan tugmani bosing",
   "guideIntro": "Bu sahifada mashq qilish usullari shular. Qoʻllanmani istalgan vaqtda yoping.",
+  "guideWordTap": "Maʼnosini koʻrish uchun istalgan soʻzga bosing, batafsil — soʻz varaqasida. Sinab koʻring, soʻng «Keyingi»ni bosing.",
+  "guideWordLongPress": "Oyatini ochish uchun soʻzni bosib turing: tarjima, tafsir, tinglash, xatchoʻp va boshqalar. Sinab koʻring, soʻng «Keyingi»ni bosing.",
   "guideRecite": "Oʻqish: yoddan oʻqing. Ilova telefoningizda tinglaydi, sizni soʻzma-soʻz kuzatadi va xatolarni belgilaydi.",
   "guideLoop": "Takror: parchani qayta-qayta oʻqing — har bir oyatni yoki butun parchani — xohlagancha marta.",
   "guideListen": "Tinglash: qorini tinglang — oyat, parcha yoki butun suralar — takror va tezlik bilan.",

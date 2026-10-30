@@ -452,6 +452,8 @@
   "guideDone": "Hecho",
   "guideTapToContinue": "Toca el botón resaltado",
   "guideIntro": "Estas son las formas de practicar en esta página. Cierra la guía cuando quieras.",
+  "guideWordTap": "Toca cualquier palabra para ver su significado, y más en la ficha de la palabra. Pruébalo y luego toca «Siguiente».",
+  "guideWordLongPress": "Mantén pulsada una palabra para abrir su aleya: traducción, tafsir, escuchar, marcador y más. Pruébalo y luego toca «Siguiente».",
   "guideRecite": "Recitar: recita de memoria. La aplicación escucha en tu teléfono, te sigue palabra por palabra y marca los errores.",
   "guideLoop": "Bucle: recita un pasaje una y otra vez — cada aleya o el pasaje entero — tantas veces como elijas.",
   "guideListen": "Escuchar: oye a un recitador — una aleya, un pasaje o suras enteras — con repeticiones y velocidad.",

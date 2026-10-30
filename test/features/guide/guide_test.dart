@@ -62,7 +62,7 @@ void main() {
     container.read(guideProvider.notifier).start();
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('guide-card')), findsOneWidget);
-    expect(find.text('1/8'), findsOneWidget);
+    expect(find.text('1/10'), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('guide-next')));
     await tester.pumpAndSettle();
@@ -71,8 +71,9 @@ void main() {
     await tester.pumpAndSettle();
     expect(guide()!.index, 0);
 
-    // A step that only explains: taps on the control don't reach it.
-    container.read(guideProvider.notifier).next();
+    // A step that only explains (past the two to try on the page): taps on
+    // the control don't reach it.
+    container.read(guideProvider.notifier).start(GuideTour.overview, 3);
     await tester.pumpAndSettle();
     await tester.tap(find.text('recite'), warnIfMissed: false);
     await tester.pumpAndSettle();
@@ -87,12 +88,36 @@ void main() {
   testWidgets('choosing a mode at the end goes through to it and into its '
       'tour', (tester) async {
     await pump(tester);
-    container.read(guideProvider.notifier).start(GuideTour.overview, 7);
+    container
+        .read(guideProvider.notifier)
+        .start(GuideTour.overview, guideSteps(GuideTour.overview).length - 1);
     await tester.pumpAndSettle();
     await tester.tap(find.text('follow'));
     await tester.pumpAndSettle();
     expect(followTaps, 1, reason: 'the tap reached the button');
     expect(guide(), (tour: GuideTour.follow, index: 1));
+  });
+
+  testWidgets('first, a word tapped then long-pressed: tried on the page '
+      '(nothing blocks it), the card at the top with Next', (tester) async {
+    await pump(tester);
+    container.read(guideProvider.notifier).start();
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Tap any word'), findsOneWidget);
+    final card = tester.getRect(find.byKey(const ValueKey('guide-card')));
+    expect(card.center.dy, lessThan(300), reason: 'at the top');
+    expect(find.byKey(const ValueKey('guide-back')), findsNothing);
+    await tester.tap(find.text('recite'));
+    await tester.pumpAndSettle();
+    expect(reciteTaps, 1, reason: 'the page usable');
+
+    await tester.tap(find.byKey(const ValueKey('guide-next')));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('Long-press a word'), findsOneWidget);
+    expect(find.byKey(const ValueKey('guide-back')), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('guide-next')));
+    await tester.pumpAndSettle();
+    expect(guide()!.index, 2, reason: 'on to the modes');
   });
 
   testWidgets('practising: the page in full view and usable, the hint at '

@@ -22,7 +22,8 @@ final _cacheDir = Directory('tool/quran_data/.cache');
 const _viaApi = ['english_mokhtasar', 'russian_mokhtasar'];
 
 /// `dart run tool/quran_data/fetch_sources.dart [quranenc [key...] | wbw]`:
-/// everything; with `quranenc` only the QuranEnc translations and tafsir
+/// everything build_production_data.dart reads (but the QUL zips, which are
+/// copied into `sources/`); with `quranenc` only the QuranEnc translations and tafsir
 /// (with keys, only those, leaving the others as cached); with `wbw` only
 /// the word-by-word data (the canonical Tanzil text is left as cached in
 /// all three).
@@ -87,6 +88,22 @@ Future<void> main(List<String> args) async {
     'spanish_mokhtasar',
     'persian_mokhtasar',
     'bengali_mokhtasar',
+    // Added 2026-10-18: Malay, Hausa, Kurdish Sorani, Pashto, Swahili,
+    // Kazakh, Uzbek and Somali; Al-Mukhtasar in Kurdish, Pashto and Uzbek;
+    // al-Sirāj (Arabic word meanings). (Missing here, a fresh checkout's
+    // build_production_data failed — the iOS CI job, 2026-10-30.)
+    'malay_basumayyah',
+    'hausa_gummi',
+    'kurdish_bamoki',
+    'pashto_rwwad',
+    'swahili_rwwad',
+    'kazakh_altai',
+    'uzbek_rwwad',
+    'somali_yacob',
+    'kurdish_mokhtasar',
+    'pashto_mokhtasar',
+    'uzbek_mokhtasar',
+    'arabic_seraj',
   ]) {
     await _fetchQuranEnc(
       key: key,
@@ -97,6 +114,11 @@ Future<void> main(List<String> args) async {
   // rows, written here into the same table shape.
   for (final key in _viaApi) {
     await _fetchQuranEncViaApi(key);
+  }
+  // The word meanings too (left out, build_production_data skips them
+  // without a word).
+  for (final language in wbwLanguages) {
+    await _fetchQuranComWbw(language);
   }
 
   stdout.writeln('All sources fetched into ${_cacheDir.path}');

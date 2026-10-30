@@ -466,7 +466,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey('mem-tab-progress')));
       await tester.pumpAndSettle();
-      expect(find.text('28% of the Quran memorized'), findsOneWidget);
+      expect(find.text("28% of the Qur'an memorized"), findsOneWidget);
       expect(find.text('5 of 18 ayahs memorized'), findsOneWidget);
       expect(find.text('1 ayah marked, not recited yet'), findsOneWidget);
       expect(find.byKey(const ValueKey('mem-map-page-603')), findsOneWidget);

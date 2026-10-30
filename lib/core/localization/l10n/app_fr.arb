@@ -452,6 +452,8 @@
   "guideDone": "Terminé",
   "guideTapToContinue": "Touchez le bouton en surbrillance",
   "guideIntro": "Voici les façons de vous exercer sur cette page. Fermez le guide quand vous voulez.",
+  "guideWordTap": "Touchez un mot pour voir son sens, et davantage dans la fiche du mot. Essayez, puis touchez « Suivant ».",
+  "guideWordLongPress": "Appuyez longuement sur un mot pour ouvrir son verset : traduction, tafsir, écoute, favori et plus. Essayez, puis touchez « Suivant ».",
   "guideRecite": "Réciter : récitez de mémoire. L'application écoute sur votre téléphone, vous suit mot à mot et marque les erreurs.",
   "guideLoop": "Boucle : récitez un passage encore et encore — chaque verset ou tout le passage — autant de fois que vous voulez.",
   "guideListen": "Écouter : écoutez un récitateur — un verset, un passage ou des sourates entières — avec répétitions et vitesse.",

@@ -67,7 +67,7 @@ class BundledDatabaseInstaller {
         await _loadString('$assetDir/manifest.json'),
       ) as Map<String, dynamic>;
     } catch (e) {
-      return 'Could not read the Quran databases\' manifest: $e';
+      return "Could not read the Qur'an databases' manifest: $e";
     }
     final version = manifest['version'] as String;
     final databases = (manifest['databases'] as Map).cast<String, dynamic>();

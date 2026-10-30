@@ -65,6 +65,6 @@ final quranSetupProvider =
 /// The failure as a tester would send it: the app's version, the device,
 /// the error.
 String quranSetupReport(String failure, {required String version}) =>
-    'Tahfeez AI $version — the Quran could not be set up\n'
+    'Tahfeez AI $version — the Qur\'an could not be set up\n'
     '${deviceSummary()}\n'
     '$failure';
