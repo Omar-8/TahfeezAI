@@ -316,6 +316,7 @@ memLessonRest = Hari rehat. Anda masih boleh mempelajari pelajaran hari ini.
 memPlanFinished = Seluruh pelan telah dihafaz.
 memLessonHint = Bacalah dengan mod sembunyi hidup sehingga lancar tanpa kesilapan perkataan.
 memProgressTitle = Kemajuan
+memTabPlan = Rancangan
 memProgressShare = {percent}% Al-Quran dihafaz
 memProgressUnverified = {count, plural, =1{1 ayat ditandakan, belum dibaca} other{{count} ayat ditandakan, belum dibaca}}
 memMapTitle = Peta kekuatan

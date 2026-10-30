@@ -80,6 +80,15 @@ const reciters = [
     64,
     everyAyah: 'Mohammad_al_Tablaway_64kbps',
   ),
+  // Likewise (ar.mahmoudalialbanna by whole surahs); everyayah.com has
+  // him at 32 kbps only (mono) — every ayah checked there, 2026-10-30.
+  Reciter(
+    'ar.banna',
+    'Mahmoud Ali Al-Banna',
+    'محمود علي البنا',
+    32,
+    everyAyah: 'mahmoud_ali_al_banna_32kbps',
+  ),
 ];
 
 const defaultReciter = 'ar.alafasy';
@@ -159,6 +168,7 @@ const reciterDownloadBytes = <String, int>{
   'ar.muhammadjibreel': 750775826,
   // Every file's size summed (2026-10-29).
   'ar.tablawi': 854317956,
+  'ar.banna': 383583607,
 };
 
 /// [reciter]'s download size, as "≈ 640 MB" / "≈ 1.2 GB"; `null` if
@@ -170,9 +180,10 @@ String? reciterDownloadSize(Reciter reciter) {
 
 String _sizeLabel(double bytes) {
   final mb = bytes / (1000 * 1000);
-  return mb >= 1000
-      ? '≈ ${(mb / 1000).toStringAsFixed(1)} GB'
-      : '≈ ${mb.round()} MB';
+  if (mb >= 1000) return '≈ ${(mb / 1000).toStringAsFixed(1)} GB';
+  // A short surah: tenths of a megabyte (not "≈ 0 MB").
+  if (mb < 10) return '≈ ${mb.toStringAsFixed(1)} MB';
+  return '≈ ${mb.round()} MB';
 }
 
 /// Each juz's first ayah, as a global ayah number (1–6236), juz 1 first.
@@ -257,4 +268,138 @@ Iterable<int> juzAyahNumbers(int juz) sync* {
 String? juzDownloadSize(Reciter reciter, int juz) {
   final bytes = reciterDownloadBytes[reciter.edition];
   return bytes == null ? null : _sizeLabel(bytes * juzShare[juz - 1]);
+}
+
+/// Each surah's share of the whole recitation (by its letters, as
+/// [juzShare]), Al-Fatiha first — for its download size.
+const surahShare = <double>[
+  0.00043,
+  0.07945,
+  0.04527,
+  0.04932,
+  0.03689,
+  0.03854,
+  0.04367,
+  0.01640,
+  0.03358,
+  0.02306,
+  0.02369,
+  0.02208,
+  0.01073,
+  0.01072,
+  0.00867,
+  0.02368,
+  0.02013,
+  0.01989,
+  0.01186,
+  0.01636,
+  0.01527,
+  0.01605,
+  0.01349,
+  0.01736,
+  0.01173,
+  0.01708,
+  0.01455,
+  0.01797,
+  0.01305,
+  0.01053,
+  0.00654,
+  0.00473,
+  0.01740,
+  0.01088,
+  0.00976,
+  0.00926,
+  0.01174,
+  0.00925,
+  0.01468,
+  0.01545,
+  0.01023,
+  0.01064,
+  0.01089,
+  0.00446,
+  0.00628,
+  0.00806,
+  0.00732,
+  0.00760,
+  0.00462,
+  0.00456,
+  0.00467,
+  0.00400,
+  0.00436,
+  0.00448,
+  0.00508,
+  0.00527,
+  0.00768,
+  0.00616,
+  0.00592,
+  0.00473,
+  0.00290,
+  0.00232,
+  0.00241,
+  0.00329,
+  0.00363,
+  0.00329,
+  0.00408,
+  0.00387,
+  0.00341,
+  0.00292,
+  0.00292,
+  0.00336,
+  0.00261,
+  0.00314,
+  0.00205,
+  0.00330,
+  0.00252,
+  0.00239,
+  0.00237,
+  0.00167,
+  0.00132,
+  0.00101,
+  0.00228,
+  0.00135,
+  0.00142,
+  0.00077,
+  0.00091,
+  0.00116,
+  0.00176,
+  0.00104,
+  0.00077,
+  0.00096,
+  0.00051,
+  0.00031,
+  0.00048,
+  0.00087,
+  0.00034,
+  0.00122,
+  0.00048,
+  0.00050,
+  0.00048,
+  0.00038,
+  0.00022,
+  0.00041,
+  0.00029,
+  0.00023,
+  0.00035,
+  0.00013,
+  0.00029,
+  0.00025,
+  0.00025,
+  0.00014,
+  0.00022,
+  0.00025,
+];
+
+/// Surah [surah]'s ayahs, as global ayah numbers.
+Iterable<int> surahAyahNumbers(int surah) sync* {
+  final first = globalAyahNumber(surah * 1000 + 1);
+  for (var n = first; n < first + surahAyahCounts[surah - 1]; n++) {
+    yield n;
+  }
+}
+
+/// Surah [surah]'s download size for [reciter], as "≈ 3 MB"; `null` if
+/// unknown.
+String? surahDownloadSize(Reciter reciter, int surah) {
+  final bytes = reciterDownloadBytes[reciter.edition];
+  return bytes == null ? null : _sizeLabel(bytes * surahShare[surah - 1]);
 }

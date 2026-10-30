@@ -319,6 +319,7 @@
   "memPlanFinished": "Tout le plan est mémorisé.",
   "memLessonHint": "Récitez-la avec le mode masqué jusqu'à ce qu'elle vienne sans erreur de mot.",
   "memProgressTitle": "Progression",
+  "memTabPlan": "Plan",
   "memProgressShare": "{percent} % du Coran mémorisé",
   "memProgressUnverified": "{count, plural, =1{1 verset marqué, pas encore récité} other{{count} versets marqués, pas encore récités}}",
   "memMapTitle": "Carte de solidité",

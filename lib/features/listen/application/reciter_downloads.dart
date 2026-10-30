@@ -19,6 +19,7 @@ class ReciterDownload {
     this.downloading = false,
     this.failed = false,
     this.juz,
+    this.surah,
     this.jobDone = 0,
     this.jobTotal = 0,
   });
@@ -30,9 +31,9 @@ class ReciterDownload {
   /// The last download stopped on an error (the connection, the storage).
   final bool failed;
 
-  /// The download running (or last run): one juz, or `null` for the whole
-  /// Quran; its files done of its total.
-  final int? juz;
+  /// The download running (or last run): one juz or one surah, or neither
+  /// for the whole Quran; its files done of its total.
+  final int? juz, surah;
   final int jobDone, jobTotal;
 
   bool get complete => files >= _ayahCount;
@@ -128,24 +129,32 @@ class ReciterDownloads extends Notifier<Map<String, ReciterDownload>> {
       p.join(root.path, edition, '$n.mp3');
 
   /// Whether all of juz [juz] of [edition] is on the device.
-  bool juzComplete(String edition, int juz) {
+  bool juzComplete(String edition, int juz) =>
+      _allHere(edition, juzAyahNumbers(juz));
+
+  /// Whether all of surah [surah] of [edition] is on the device.
+  bool surahComplete(String edition, int surah) =>
+      _allHere(edition, surahAyahNumbers(surah));
+
+  bool _allHere(String edition, Iterable<int> ayahs) {
     final root = _root;
     if (root == null || (state[edition]?.files ?? 0) == 0) return false;
-    return juzAyahNumbers(juz)
-        .every((n) => File(_path(root, edition, n)).existsSync());
+    return ayahs.every((n) => File(_path(root, edition, n)).existsSync());
   }
 
   /// Downloads the ayahs of [edition] not on the device yet: of juz [juz],
-  /// or of the whole Quran.
-  Future<void> download(String edition, {int? juz}) async {
+  /// of surah [surah], or of the whole Quran.
+  Future<void> download(String edition, {int? juz, int? surah}) async {
     final root = await _rootDir();
     if (root == null || (state[edition]?.downloading ?? false)) return;
     final reciter = reciterFor(edition);
     final dir = Directory(p.join(root.path, edition));
     await dir.create(recursive: true);
-    final wanted = juz == null
-        ? [for (var n = 1; n <= _ayahCount; n++) n]
-        : juzAyahNumbers(juz).toList();
+    final wanted = juz != null
+        ? juzAyahNumbers(juz).toList()
+        : surah != null
+        ? surahAyahNumbers(surah).toList()
+        : [for (var n = 1; n <= _ayahCount; n++) n];
     final missing = [
       for (final n in wanted)
         if (!File(_path(root, edition, n)).existsSync()) n,
@@ -160,6 +169,7 @@ class ReciterDownloads extends Notifier<Map<String, ReciterDownload>> {
           downloading: downloading,
           failed: failed,
           juz: juz,
+          surah: surah,
           jobDone: done,
           jobTotal: missing.length,
         );

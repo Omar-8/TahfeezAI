@@ -319,6 +319,7 @@
   "memPlanFinished": "পুরো পরিকল্পনা মুখস্থ হয়েছে।",
   "memLessonHint": "লুকানো মোড চালু রেখে তিলাওয়াত করুন, যতক্ষণ না শব্দের ভুল ছাড়া আসে।",
   "memProgressTitle": "অগ্রগতি",
+  "memTabPlan": "পরিকল্পনা",
   "memProgressShare": "কুরআনের {percent}% মুখস্থ",
   "memProgressUnverified": "{count, plural, other{{count}টি আয়াত চিহ্নিত, এখনো তিলাওয়াত হয়নি}}",
   "memMapTitle": "মজবুতির মানচিত্র",

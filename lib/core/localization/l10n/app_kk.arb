@@ -319,6 +319,7 @@
   "memPlanFinished": "Бүкіл жоспар жатталды.",
   "memLessonHint": "Оны жасыру режимінде сөз қатесіз шыққанша оқыңыз.",
   "memProgressTitle": "Барыс",
+  "memTabPlan": "Жоспар",
   "memProgressShare": "Құранның {percent}% жатталды",
   "memProgressUnverified": "{count, plural, =1{1 аят белгіленген, әлі оқылмаған} other{{count} аят белгіленген, әлі оқылмаған}}",
   "memMapTitle": "Беріктік картасы",

@@ -319,6 +319,7 @@
   "memPlanFinished": "Seluruh rencana sudah dihafal.",
   "memLessonHint": "Bacalah dengan mode sembunyi aktif sampai lancar tanpa kesalahan kata.",
   "memProgressTitle": "Kemajuan",
+  "memTabPlan": "Rencana",
   "memProgressShare": "{percent}% Al-Qur'an telah dihafal",
   "memProgressUnverified": "{count, plural, other{{count} ayat ditandai, belum dibaca}}",
   "memMapTitle": "Peta kekuatan",

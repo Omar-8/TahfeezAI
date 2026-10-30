@@ -40,6 +40,36 @@ void main() {
     expect(reciterDownloadSize(tablawi), '≈ 854 MB');
   });
 
+  test('Al-Banna plays from everyayah.com (32 kbps, all it has there)', () {
+    final banna = reciterFor('ar.banna');
+    expect(banna.edition, 'ar.banna');
+    expect(
+      ayahAudioUrl(36001, banna),
+      'https://everyayah.com/data/mahmoud_ali_al_banna_32kbps/036001.mp3',
+    );
+    expect(reciterDownloadSize(banna), '≈ 384 MB');
+  });
+
+  test('surahs: their ayahs and their share of a download', () {
+    expect(surahShare, hasLength(114));
+    expect(
+      surahShare.fold<double>(0, (a, b) => a + b),
+      moreOrLessEquals(1, epsilon: 0.001),
+    );
+    expect(surahAyahNumbers(1), [1, 2, 3, 4, 5, 6, 7]);
+    expect(surahAyahNumbers(2).first, 8);
+    expect(surahAyahNumbers(2).length, 286);
+    expect(surahAyahNumbers(114).last, 6236);
+    expect(
+      [for (var s = 1; s <= 114; s++) ...surahAyahNumbers(s)],
+      [for (var n = 1; n <= 6236; n++) n],
+    );
+    final alafasy = reciterFor('ar.alafasy');
+    // Al-Baqara, about 8% of the Quran's letters; Al-Ikhlas, tenths of a MB.
+    expect(surahDownloadSize(alafasy, 2), '≈ 70 MB');
+    expect(surahDownloadSize(alafasy, 112), '≈ 0.1 MB');
+  });
+
   test('word audio follows Quran.com\'s positions, which join two words in '
       'four ayahs', () {
     expect(

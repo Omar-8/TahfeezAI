@@ -91,21 +91,40 @@ void main() {
     expect(find.text('Start'), findsNothing);
   });
 
-  testWidgets('the progress button named, beside its icon', (tester) async {
+  testWidgets('two tabs: the plan, then the progress (with marking what '
+      'is known in the top bar)', (tester) async {
     await tester.pumpWidget(app(const TodayPlan()));
     await tester.pumpAndSettle();
-    final button = find.byKey(const ValueKey('mem-open-progress'));
-    expect(
-      find.descendant(of: button, matching: find.text('Progress')),
-      findsOneWidget,
-    );
     expect(
       find.descendant(
-        of: button,
-        matching: find.byIcon(Icons.insights_outlined),
+        of: find.byKey(const ValueKey('mem-tab-plan')),
+        matching: find.text('Plan'),
       ),
       findsOneWidget,
     );
+    expect(find.text('Nothing recited yet today'), findsOneWidget);
+    expect(find.byKey(const ValueKey('mem-mark-known')), findsNothing);
+
+    // (Its progress loading here: the clock stepped, not settled.)
+    await tester.tap(find.byKey(const ValueKey('mem-tab-progress')));
+    for (var i = 0; i < 10; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    expect(find.text('Nothing recited yet today'), findsNothing);
+    expect(find.byKey(const ValueKey('mem-mark-known')), findsOneWidget);
+    expect(find.byType(MemorizationProgressView), findsOneWidget);
+
+    // Swiped back to the plan: its own top bar again.
+    await tester.fling(
+      find.byType(MemorizationProgressView),
+      const Offset(600, 0),
+      1000,
+    );
+    for (var i = 0; i < 10; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    expect(find.text('Nothing recited yet today'), findsOneWidget);
+    expect(find.byKey(const ValueKey('mem-mark-known')), findsNothing);
   });
 
   testWidgets("a part's Start: its first ayah asked into view in Ayah mode "
@@ -442,12 +461,10 @@ void main() {
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
       await tester.pumpWidget(
-        app(
-          const TodayPlan(),
-          extra: overrides(memories),
-          child: const MemorizationProgressScreen(),
-        ),
+        app(const TodayPlan(), extra: overrides(memories)),
       );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('mem-tab-progress')));
       await tester.pumpAndSettle();
       expect(find.text('28% of the Quran memorized'), findsOneWidget);
       expect(find.text('5 of 18 ayahs memorized'), findsOneWidget);

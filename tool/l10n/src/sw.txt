@@ -316,6 +316,7 @@ memLessonRest = Siku ya mapumziko. Bado unaweza kujifunza somo la leo.
 memPlanFinished = Mpango wote umehifadhiwa.
 memLessonHint = Lisome hali ya kuficha ikiwa imewashwa hadi lije bila makosa ya maneno.
 memProgressTitle = Maendeleo
+memTabPlan = Mpango
 memProgressShare = {percent}% ya Qur'ani imehifadhiwa
 memProgressUnverified = {count, plural, =1{Aya 1 imewekwa alama, bado haijasomwa} other{Aya {count} zimewekwa alama, bado hazijasomwa}}
 memMapTitle = Ramani ya nguvu

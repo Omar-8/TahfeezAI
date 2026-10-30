@@ -316,6 +316,7 @@ memLessonRest = Maalin nasasho. Weli waad baran kartaa casharka maanta.
 memPlanFinished = Qorshaha oo dhan waa la xifdiyay.
 memLessonHint = Ku akhri habka qarinta oo shidan ilaa uu ka yimaado khaladaad eray la'aan.
 memProgressTitle = Horumarka
+memTabPlan = Qorshe
 memProgressShare = {percent}% Qur'aanka ayaa la xifdiyay
 memProgressUnverified = {count, plural, =1{1 aayad waa la calaamadeeyay, weli lama akhrin} other{{count} aayadood waa la calaamadeeyay, weli lama akhrin}}
 memMapTitle = Khariidadda xoogga

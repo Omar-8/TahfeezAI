@@ -1,0 +1,70 @@
+<en-US>
+• New reciter: Mahmoud Ali Al-Banna
+• Download a reciter surah by surah, not only by juz
+• Memorize now has two tabs: your plan and your progress
+</en-US>
+<ar>
+• قارئ جديد: محمود علي البنا
+• يمكنك الآن تنزيل تلاوة القارئ سورةً سورة، لا جزءًا جزءًا فقط
+• صفحة الحفظ صارت بتبويبين: خطتك وتقدّمك
+</ar>
+<bn-BD>
+• নতুন ক্বারী: মাহমুদ আলী আল-বান্না
+• ক্বারীর তিলাওয়াত এখন সূরা ধরে ডাউনলোড করুন, শুধু পারা ধরে নয়
+• মুখস্থ এখন দুটি ট্যাবে: আপনার পরিকল্পনা ও আপনার অগ্রগতি
+</bn-BD>
+<de-DE>
+• Neuer Rezitator: Mahmoud Ali Al-Banna
+• Einen Rezitator jetzt Sure für Sure herunterladen, nicht nur nach Juz
+• Auswendiglernen hat jetzt zwei Tabs: dein Plan und dein Fortschritt
+</de-DE>
+<es-ES>
+• Nuevo recitador: Mahmoud Ali Al-Banna
+• Descarga a un recitador sura por sura, no solo por yuz
+• Memorizar ahora tiene dos pestañas: tu plan y tu progreso
+</es-ES>
+<fa>
+• قاری جدید: محمود علی البنا
+• اکنون می‌توانید تلاوت قاری را سوره‌به‌سوره دانلود کنید، نه فقط جزءبه‌جزء
+• حفظ اکنون دو زبانه دارد: برنامهٔ شما و پیشرفت شما
+</fa>
+<fr-FR>
+• Nouveau récitateur : Mahmoud Ali Al-Banna
+• Téléchargez un récitateur sourate par sourate, pas seulement par juz
+• Mémoriser a maintenant deux onglets : votre plan et vos progrès
+</fr-FR>
+<id>
+• Qari baru: Mahmoud Ali Al-Banna
+• Unduh bacaan qari per surah, tidak hanya per juz
+• Hafalan kini punya dua tab: rencana Anda dan kemajuan Anda
+</id>
+<kk>
+• Жаңа қари: Махмуд Әли әл-Бәнна
+• Қаридің оқуын енді тек пара бойынша емес, сүре бойынша да жүктеп алыңыз
+• Жаттау енді екі қойындыда: жоспарыңыз бен жетістігіңіз
+</kk>
+<ms>
+• Qari baharu: Mahmoud Ali Al-Banna
+• Muat turun bacaan qari surah demi surah, bukan hanya mengikut juzuk
+• Hafazan kini ada dua tab: rancangan anda dan kemajuan anda
+</ms>
+<ru-RU>
+• Новый чтец: Махмуд Али аль-Банна
+• Чтеца теперь можно скачивать по сурам, а не только по джузам
+• В разделе заучивания теперь две вкладки: ваш план и ваш прогресс
+</ru-RU>
+<sw>
+• Msomaji mpya: Mahmoud Ali Al-Banna
+• Pakua kisomo cha msomaji sura kwa sura, si kwa juzuu tu
+• Kuhifadhi sasa kuna vichupo viwili: mpango wako na maendeleo yako
+</sw>
+<tr-TR>
+• Yeni kâri: Mahmud Ali el-Benna
+• Bir kâriyi artık yalnızca cüz cüz değil, sure sure indirin
+• Ezber artık iki sekmeli: planınız ve ilerlemeniz
+</tr-TR>
+<ur>
+• نئے قاری: محمود علی البنا
+• اب قاری کی تلاوت صرف پارہ وار نہیں، سورت وار بھی ڈاؤن لوڈ کریں
+• حفظ میں اب دو ٹیب ہیں: آپ کا منصوبہ اور آپ کی پیش رفت
+</ur>

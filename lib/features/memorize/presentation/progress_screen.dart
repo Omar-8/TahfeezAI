@@ -1,4 +1,3 @@
-import '../../home/presentation/home_sky.dart';
 import '../../../core/ui/bar_space.dart';
 import '../../../core/localization/fallback_localizations.dart';
 
@@ -21,18 +20,18 @@ import 'mark_known_sheet.dart';
 import 'progress_visuals.dart';
 import 'memorize_screen.dart';
 
-/// Memorization progress (`docs/MEMORIZATION_MILESTONE.md`, M4): how much of
-/// the Quran is memorized, a strength map of every page juz by juz, and the
-/// weakest pages to revise — with marking what is already known.
-class MemorizationProgressScreen extends ConsumerWidget {
-  const MemorizationProgressScreen({super.key});
+/// "Mark as known" in a top bar: named where there is room for it beside
+/// the bar's [title], else its icon alone.
+class MarkKnownAction extends StatelessWidget {
+  const MarkKnownAction({super.key, required this.title});
+
+  final String title;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final map = ref.watch(progressMapProvider);
-    // The label where there is room for it beside the title (the back button,
-    // the icon and the padding take about 140 dp).
+    // The label where there is room for it beside the title (the back
+    // button, the icon and the padding take about 140 dp).
     final theme = Theme.of(context);
     final textScaler = MediaQuery.textScalerOf(context);
     double width(String text, TextStyle? style) => (TextPainter(
@@ -43,72 +42,72 @@ class MemorizationProgressScreen extends ConsumerWidget {
     )..layout()).width;
     final labelFits =
         width(l10n.memMarkKnown, theme.textTheme.labelLarge) +
-            width(l10n.memProgressTitle, theme.textTheme.titleLarge) +
+            width(title, theme.textTheme.titleLarge) +
             140 <=
         MediaQuery.sizeOf(context).width;
-    return SkyBackdrop(
-      child: Scaffold(
-        appBar: TahfeezAppBar(
-          title: Text(l10n.memProgressTitle),
-          centerTitle: false,
-          actions: [
-            if (labelFits)
-              TextButton.icon(
-                key: const ValueKey('mem-mark-known'),
-                onPressed: () => showMarkKnownSheet(context),
-                icon: const Icon(Icons.playlist_add_check),
-                label: Text(l10n.memMarkKnown),
-              )
-            else
-              IconButton(
-                key: const ValueKey('mem-mark-known'),
-                tooltip: l10n.memMarkKnown,
-                onPressed: () => showMarkKnownSheet(context),
-                icon: const Icon(Icons.playlist_add_check),
-              ),
-          ],
-        ),
-        body: map.when(
-          loading: () => const TahfeezLoadingView(),
-          error: (e, _) => TahfeezEmptyView(message: '$e'),
-          data: (map) => ListView(
-            padding: withBarSpace(
-              context,
-              const EdgeInsets.all(TahfeezSpacing.md),
-            ),
-            children: [
-              _Summary(map: map),
-              const SizedBox(height: TahfeezSpacing.lg),
-              TahfeezSectionHeader(
-                title: l10n.memStreakTitle,
-                icon: Icons.calendar_month_rounded,
-              ),
-              const SizedBox(height: TahfeezSpacing.sm),
-              const StreakCard(),
-              const SizedBox(height: TahfeezSpacing.lg),
-              TahfeezSectionHeader(
-                title: l10n.activityTitle,
-                icon: Icons.insights_rounded,
-              ),
-              const SizedBox(height: TahfeezSpacing.sm),
-              const _Activity(),
-              const SizedBox(height: TahfeezSpacing.lg),
-              TahfeezSectionHeader(
-                title: l10n.memMapTitle,
-                icon: Icons.grid_view_outlined,
-              ),
-              const SizedBox(height: TahfeezSpacing.sm),
-              _StrengthMap(map: map),
-              const SizedBox(height: TahfeezSpacing.lg),
-              TahfeezSectionHeader(
-                title: l10n.memWeakTitle,
-                icon: Icons.trending_down,
-              ),
-              const SizedBox(height: TahfeezSpacing.sm),
-              _WeakPages(map: map),
-            ],
+    return labelFits
+        ? TextButton.icon(
+            key: const ValueKey('mem-mark-known'),
+            onPressed: () => showMarkKnownSheet(context),
+            icon: const Icon(Icons.playlist_add_check),
+            label: Text(l10n.memMarkKnown),
+          )
+        : IconButton(
+            key: const ValueKey('mem-mark-known'),
+            tooltip: l10n.memMarkKnown,
+            onPressed: () => showMarkKnownSheet(context),
+            icon: const Icon(Icons.playlist_add_check),
+          );
+  }
+}
+
+/// Memorization progress (`docs/MEMORIZATION_MILESTONE.md`, M4), the
+/// Memorize screen's second tab ([MemorizeScreen]): how much of the Quran
+/// is memorized, the streak, the activity, a strength map of every page
+/// juz by juz, and the weakest pages to revise.
+class MemorizationProgressView extends ConsumerWidget {
+  const MemorizationProgressView({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final map = ref.watch(progressMapProvider);
+    return map.when(
+      loading: () => const TahfeezLoadingView(),
+      error: (e, _) => TahfeezEmptyView(message: '$e'),
+      data: (map) => ListView(
+        padding: withBarSpace(context, const EdgeInsets.all(TahfeezSpacing.md)),
+        children: [
+          _Summary(map: map),
+          const SizedBox(height: TahfeezSpacing.lg),
+          TahfeezSectionHeader(
+            title: l10n.memStreakTitle,
+            icon: Icons.calendar_month_rounded,
           ),
-        ),
+          const SizedBox(height: TahfeezSpacing.sm),
+          const StreakCard(),
+          const SizedBox(height: TahfeezSpacing.lg),
+          TahfeezSectionHeader(
+            title: l10n.activityTitle,
+            icon: Icons.insights_rounded,
+          ),
+          const SizedBox(height: TahfeezSpacing.sm),
+          const _Activity(),
+          const SizedBox(height: TahfeezSpacing.lg),
+          TahfeezSectionHeader(
+            title: l10n.memMapTitle,
+            icon: Icons.grid_view_outlined,
+          ),
+          const SizedBox(height: TahfeezSpacing.sm),
+          _StrengthMap(map: map),
+          const SizedBox(height: TahfeezSpacing.lg),
+          TahfeezSectionHeader(
+            title: l10n.memWeakTitle,
+            icon: Icons.trending_down,
+          ),
+          const SizedBox(height: TahfeezSpacing.sm),
+          _WeakPages(map: map),
+        ],
       ),
     );
   }

@@ -7,7 +7,6 @@ import '../../app/shell/app_shell.dart';
 import '../../features/bookmarks/presentation/bookmarks_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
 import '../../features/memorize/presentation/memorize_screen.dart';
-import '../../features/memorize/presentation/progress_screen.dart';
 import '../../features/quran/presentation/quran_index_screen.dart';
 import '../../features/search/presentation/search_screen.dart';
 import '../../features/settings/presentation/about_screen.dart';
@@ -76,13 +75,18 @@ GoRouter appRouter(Ref ref) {
             routes: [
               GoRoute(
                 path: AppRoutes.memorize,
-                builder: (context, state) => const MemorizeScreen(),
+                builder: (context, state) => MemorizeScreen(
+                  tab: state.uri.queryParameters['tab'] == 'progress'
+                      ? MemorizeTab.progress
+                      : MemorizeTab.plan,
+                ),
                 routes: [
                   ...quranLocationRoutes(),
+                  // The progress, once its own page: its tab now.
                   GoRoute(
                     path: 'progress',
-                    builder: (context, state) =>
-                        const MemorizationProgressScreen(),
+                    redirect: (context, state) =>
+                        '${AppRoutes.memorize}?tab=progress',
                   ),
                 ],
               ),

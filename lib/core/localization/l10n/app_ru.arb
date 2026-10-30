@@ -319,6 +319,7 @@
   "memPlanFinished": "Весь план заучен.",
   "memLessonHint": "Читайте его с включённым режимом скрытия, пока он не пойдёт без ошибок в словах.",
   "memProgressTitle": "Прогресс",
+  "memTabPlan": "План",
   "memProgressShare": "Заучено {percent}% Корана",
   "memProgressUnverified": "{count, plural, one{{count} аят отмечен, но ещё не прочитан} few{{count} аята отмечены, но ещё не прочитаны} many{{count} аятов отмечены, но ещё не прочитаны} other{{count} аята отмечены, но ещё не прочитаны}}",
   "memMapTitle": "Карта прочности",

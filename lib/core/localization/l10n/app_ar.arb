@@ -319,6 +319,7 @@
   "memPlanFinished": "حُفظت الخطة كلها.",
   "memLessonHint": "اتلُه مع إخفاء الآيات حتى يأتي دون خطأ في الكلمات.",
   "memProgressTitle": "التقدم",
+  "memTabPlan": "الخطة",
   "memProgressShare": "{percent}٪ من القرآن محفوظ",
   "memProgressUnverified": "{count, plural, =1{آية واحدة معلَّمة لم تُتلَ بعد} =2{آيتان معلَّمتان لم تُتليا بعد} few{{count} آيات معلَّمة لم تُتلَ بعد} other{{count} آية معلَّمة لم تُتلَ بعد}}",
   "memMapTitle": "خريطة القوة",

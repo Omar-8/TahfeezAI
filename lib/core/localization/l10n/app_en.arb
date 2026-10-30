@@ -710,6 +710,8 @@
   "memPlanFinished": "The whole plan is memorized.",
   "memLessonHint": "Recite it with hide mode on until it comes without word mistakes.",
   "memProgressTitle": "Progress",
+  "memTabPlan": "Plan",
+  "@memTabPlan": {"description": "The Memorize screen's first tab: today's lesson and revision, and the plan (beside the Progress tab)."},
   "memProgressShare": "{percent}% of the Quran memorized",
   "@memProgressShare": {
     "placeholders": {

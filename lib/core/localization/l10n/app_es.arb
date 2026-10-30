@@ -319,6 +319,7 @@
   "memPlanFinished": "Todo el plan está memorizado.",
   "memLessonHint": "Recítala con el modo oculto activado hasta que salga sin errores de palabras.",
   "memProgressTitle": "Progreso",
+  "memTabPlan": "Plan",
   "memProgressShare": "{percent}% del Corán memorizado",
   "memProgressUnverified": "{count, plural, =1{1 aleya marcada, aún no recitada} other{{count} aleyas marcadas, aún no recitadas}}",
   "memMapTitle": "Mapa de solidez",

@@ -319,6 +319,7 @@
   "memPlanFinished": "کل برنامه حفظ شد.",
   "memLessonHint": "آن را با حالت پنهان روشن تلاوت کنید تا بدون اشتباه در کلمات بیاید.",
   "memProgressTitle": "پیشرفت",
+  "memTabPlan": "برنامه",
   "memProgressShare": "{percent}% قرآن حفظ شده",
   "memProgressUnverified": "{count, plural, other{{count} آیه علامت خورده، هنوز تلاوت نشده}}",
   "memMapTitle": "نقشهٔ استحکام",

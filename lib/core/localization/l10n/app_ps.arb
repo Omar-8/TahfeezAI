@@ -319,6 +319,7 @@
   "memPlanFinished": "ټول پلان حفظ شو.",
   "memLessonHint": "د پټولو په حالت کې یې تر هغه ولولئ چې د کلمو له تېروتنو پرته راشي.",
   "memProgressTitle": "پرمختګ",
+  "memTabPlan": "پلان",
   "memProgressShare": "د قرآن {percent}% حفظ شو",
   "memProgressUnverified": "{count, plural, =1{1 آیت په نښه شوی، تر اوسه نه دی لوستل شوی} other{{count} آیتونه په نښه شوي، تر اوسه نه دي لوستل شوي}}",
   "memMapTitle": "د پیاوړتیا نقشه",

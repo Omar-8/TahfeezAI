@@ -32,6 +32,24 @@ class _FakeNetwork implements NetworkClient {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
+/// Saves a tiny file and records each address asked for.
+class _RecordingNetwork extends _FakeNetwork {
+  _RecordingNetwork(this.urls);
+
+  final List<String> urls;
+
+  @override
+  Future<Response> download(
+    String urlPath,
+    String savePath, {
+    void Function(int received, int total)? onReceiveProgress,
+    CancelToken? cancelToken,
+  }) {
+    urls.add(urlPath);
+    return super.download(urlPath, savePath, cancelToken: cancelToken);
+  }
+}
+
 void main() {
   late Directory root;
   late _FakeNetwork network;
@@ -84,6 +102,42 @@ void main() {
     expect(state()!.files, juz30);
     expect(downloads().localFile(114006, alafasy), isNotNull);
     expect(downloads().localFile(1001, alafasy), isNull);
+  });
+
+  test('one surah: only its ayahs, from its reciter\'s source; a juz it '
+      'is part of not complete', () async {
+    await downloads().ready();
+    await downloads().download('ar.alafasy', surah: 112);
+    expect(network.requests, 4);
+    expect(downloads().surahComplete('ar.alafasy', 112), isTrue);
+    expect(downloads().surahComplete('ar.alafasy', 113), isFalse);
+    expect(downloads().juzComplete('ar.alafasy', 30), isFalse);
+    expect(state()!.surah, 112);
+    expect(downloads().localFile(112001, alafasy), isNotNull);
+    expect(downloads().localFile(111005, alafasy), isNull);
+    // Its juz then fetches only what is missing.
+    network.requests = 0;
+    await downloads().download('ar.alafasy', juz: 30);
+    expect(network.requests, 6236 - juzFirstAyah[29] + 1 - 4);
+  });
+
+  test('a surah of an everyayah.com reciter: its files from there', () async {
+    final urls = <String>[];
+    container.dispose();
+    container = ProviderContainer(
+      overrides: [
+        reciterAudioDirectoryProvider.overrideWith((ref) async => root),
+        networkClientProvider.overrideWithValue(_RecordingNetwork(urls)),
+      ],
+    );
+    await downloads().ready();
+    await downloads().download('ar.banna', surah: 1);
+    expect(urls, hasLength(7));
+    expect(
+      urls.first,
+      'https://everyayah.com/data/mahmoud_ali_al_banna_32kbps/001001.mp3',
+    );
+    expect(downloads().surahComplete('ar.banna', 1), isTrue);
   });
 
   test('a failed download stops, keeps what it has, and resumes', () async {

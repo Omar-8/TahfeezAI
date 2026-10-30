@@ -319,6 +319,7 @@
   "memPlanFinished": "Der ganze Plan ist auswendig gelernt.",
   "memLessonHint": "Rezitiere sie im Ausblendmodus, bis sie ohne Wortfehler kommt.",
   "memProgressTitle": "Fortschritt",
+  "memTabPlan": "Plan",
   "memProgressShare": "{percent} % des Korans auswendig gelernt",
   "memProgressUnverified": "{count, plural, =1{1 Vers markiert, noch nicht rezitiert} other{{count} Verse markiert, noch nicht rezitiert}}",
   "memMapTitle": "Festigkeitskarte",

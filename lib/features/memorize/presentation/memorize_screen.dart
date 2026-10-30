@@ -4,11 +4,9 @@ import '../../../core/ui/motion.dart';
 import '../../../core/ui/bar_space.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../home/presentation/home_sky.dart';
 import '../../../core/localization/generated/app_localizations.dart';
-import '../../../core/routing/app_routes.dart';
 import '../../../core/routing/quran_location_routing.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/components/components.dart';
@@ -25,18 +23,49 @@ import '../../quran/application/quran_index_providers.dart';
 import '../../recitation/application/hifz_controller.dart';
 import 'mark_known_sheet.dart';
 import 'plan_sheet.dart';
+import 'progress_screen.dart';
 import '../../../core/ui/back_to_exit.dart';
 import '../../mushaf/application/reading_surah.dart';
 
-/// The Memorize tab: today's memorization, the three parts of a Hifz day
-/// (`docs/MEMORIZATION_MILESTONE.md`), with how today's recitation went.
-/// Each task opens the Mushaf at its range with hide mode on, the Hifz test
-/// set to it; the reciter starts with the mic.
-class MemorizeScreen extends ConsumerWidget {
-  const MemorizeScreen({super.key});
+/// The Memorize tab, in two tabs: the plan — today's memorization, the
+/// three parts of a Hifz day (`docs/MEMORIZATION_MILESTONE.md`), with how
+/// today's recitation went — and the progress
+/// ([MemorizationProgressView]). Each task opens the Mushaf at its range
+/// with hide mode on, the Hifz test set to it; the reciter starts with the
+/// mic.
+class MemorizeScreen extends ConsumerStatefulWidget {
+  const MemorizeScreen({super.key, this.tab = MemorizeTab.plan});
+
+  /// The tab it opens on (`/memorize?tab=progress`, `/memorize/progress`).
+  final MemorizeTab tab;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MemorizeScreen> createState() => _MemorizeScreenState();
+}
+
+class _MemorizeScreenState extends ConsumerState<MemorizeScreen>
+    with SingleTickerProviderStateMixin {
+  late final _tabs = TabController(
+    length: 2,
+    vsync: this,
+    initialIndex: widget.tab.index,
+  )..addListener(() => setState(() {})); // The top bar's action follows it.
+
+  @override
+  void didUpdateWidget(covariant MemorizeScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Asked for another tab (a link) while the screen is kept.
+    if (widget.tab != oldWidget.tab) _tabs.animateTo(widget.tab.index);
+  }
+
+  @override
+  void dispose() {
+    _tabs.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final plan = ref.watch(todayPlanProvider);
     final names = surahNames(ref);
@@ -64,98 +93,111 @@ class MemorizeScreen extends ConsumerWidget {
             title: Text(l10n.memTitle),
             centerTitle: false,
             actions: [
-              // Named, not only an icon: what it opens is plain to see. At most
-              // under half the bar — a long name at large text shortened, the
-              // title kept.
-              Padding(
-                padding: const EdgeInsetsDirectional.only(
-                  end: TahfeezSpacing.sm,
-                ),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxWidth: MediaQuery.sizeOf(context).width * 0.45,
+              // Marking what is already known, beside the progress.
+              if (_tabs.index == 1) MarkKnownAction(title: l10n.memTitle),
+            ],
+          ),
+          body: Column(
+            children: [
+              TabBar(
+                controller: _tabs,
+                tabs: [
+                  Tab(
+                    key: const ValueKey('mem-tab-plan'),
+                    text: l10n.memTabPlan,
                   ),
-                  child: TextButton.icon(
-                    key: const ValueKey('mem-open-progress'),
-                    onPressed: () => context.push(AppRoutes.memorizeProgress),
-                    icon: const Icon(Icons.insights_outlined),
-                    label: Text(
-                      l10n.memProgressTitle,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                  Tab(
+                    key: const ValueKey('mem-tab-progress'),
+                    text: l10n.memProgressTitle,
                   ),
+                ],
+              ),
+              Expanded(
+                child: TabBarView(
+                  controller: _tabs,
+                  children: [
+                    _plan(context, l10n, plan, names, section),
+                    const MemorizationProgressView(),
+                  ],
                 ),
               ),
             ],
-          ),
-          body: plan.when(
-            loading: () => const TahfeezLoadingView(),
-            error: (e, _) => TahfeezEmptyView(message: '$e'),
-            data: (today) => ListView(
-              padding: withBarSpace(
-                context,
-                const EdgeInsets.all(TahfeezSpacing.md),
-              ),
-              children: [
-                const _TodayScore(),
-                const SizedBox(height: TahfeezSpacing.lg),
-                section(
-                  l10n.memNewLesson,
-                  l10n.memLessonHint,
-                  Icons.auto_stories_outlined,
-                  _NewLessonCard(names: names),
-                ),
-                const SizedBox(height: TahfeezSpacing.lg),
-                if (today.isEmpty)
-                  TahfeezCard(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      spacing: TahfeezSpacing.sm,
-                      children: [
-                        Text(
-                          l10n.memEmptyTitle,
-                          style: Theme.of(context).textTheme.titleMedium,
-                        ),
-                        Text(l10n.memEmptyBody),
-                        Align(
-                          alignment: AlignmentDirectional.centerStart,
-                          child: FilledButton.tonalIcon(
-                            key: const ValueKey('mem-empty-mark-known'),
-                            onPressed: () => showMarkKnownSheet(context),
-                            icon: const Icon(Icons.playlist_add_check),
-                            label: Text(l10n.memMarkKnown),
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
-                else ...[
-                  if (today.recent.isNotEmpty) ...[
-                    section(
-                      l10n.memRecent,
-                      l10n.memRecentSub,
-                      Icons.replay_outlined,
-                      _TaskList(tasks: today.recent, names: names),
-                    ),
-                    const SizedBox(height: TahfeezSpacing.lg),
-                  ],
-                  if (today.old.isNotEmpty)
-                    section(
-                      l10n.memOld,
-                      l10n.memOldSub,
-                      Icons.history_edu_outlined,
-                      _TaskList(tasks: today.old, names: names),
-                    ),
-                ],
-              ],
-            ),
           ),
         ),
       ),
     );
   }
+
+  /// The plan tab: today's score, the new lesson and the revision.
+  Widget _plan(
+    BuildContext context,
+    AppLocalizations l10n,
+    AsyncValue<TodayPlan> plan,
+    Map<int, String> names,
+    Widget Function(String, String, IconData, Widget) section,
+  ) => plan.when(
+    loading: () => const TahfeezLoadingView(),
+    error: (e, _) => TahfeezEmptyView(message: '$e'),
+    data: (today) => ListView(
+      padding: withBarSpace(context, const EdgeInsets.all(TahfeezSpacing.md)),
+      children: [
+        const _TodayScore(),
+        const SizedBox(height: TahfeezSpacing.lg),
+        section(
+          l10n.memNewLesson,
+          l10n.memLessonHint,
+          Icons.auto_stories_outlined,
+          _NewLessonCard(names: names),
+        ),
+        const SizedBox(height: TahfeezSpacing.lg),
+        if (today.isEmpty)
+          TahfeezCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: TahfeezSpacing.sm,
+              children: [
+                Text(
+                  l10n.memEmptyTitle,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                Text(l10n.memEmptyBody),
+                Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: FilledButton.tonalIcon(
+                    key: const ValueKey('mem-empty-mark-known'),
+                    onPressed: () => showMarkKnownSheet(context),
+                    icon: const Icon(Icons.playlist_add_check),
+                    label: Text(l10n.memMarkKnown),
+                  ),
+                ),
+              ],
+            ),
+          )
+        else ...[
+          if (today.recent.isNotEmpty) ...[
+            section(
+              l10n.memRecent,
+              l10n.memRecentSub,
+              Icons.replay_outlined,
+              _TaskList(tasks: today.recent, names: names),
+            ),
+            const SizedBox(height: TahfeezSpacing.lg),
+          ],
+          if (today.old.isNotEmpty)
+            section(
+              l10n.memOld,
+              l10n.memOldSub,
+              Icons.history_edu_outlined,
+              _TaskList(tasks: today.old, names: names),
+            ),
+        ],
+      ],
+    ),
+  );
 }
+
+/// The Memorize screen's tabs.
+enum MemorizeTab { plan, progress }
 
 /// Each surah's name in the UI language, by number.
 Map<int, String> surahNames(WidgetRef ref) => <int, String>{

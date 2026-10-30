@@ -316,6 +316,7 @@ memLessonRest = Dam olish kuni. Bugungi darsni baribir oʻrganishingiz mumkin.
 memPlanFinished = Butun reja yodlandi.
 memLessonHint = Uni yashirish rejimida soʻz xatosiz chiqquncha oʻqing.
 memProgressTitle = Taraqqiyot
+memTabPlan = Reja
 memProgressShare = Qurʼonning {percent}% yodlandi
 memProgressUnverified = {count, plural, =1{1 oyat belgilangan, hali oʻqilmagan} other{{count} oyat belgilangan, hali oʻqilmagan}}
 memMapTitle = Mustahkamlik xaritasi

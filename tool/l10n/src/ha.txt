@@ -316,6 +316,7 @@ memLessonRest = Ranar hutu. Har yanzu za ka iya koyon darasin yau.
 memPlanFinished = An haddace dukan tsarin.
 memLessonHint = Karanta shi da yanayin ɓoyewa a kunne har ya zo ba tare da kuskuren kalmomi ba.
 memProgressTitle = Ci gaba
+memTabPlan = Tsari
 memProgressShare = An haddace {percent}% na Alƙur'ani
 memProgressUnverified = {count, plural, =1{An alamta aya 1, ba a karanta ba tukuna} other{An alamta ayoyi {count}, ba a karanta ba tukuna}}
 memMapTitle = Taswirar ƙarfi

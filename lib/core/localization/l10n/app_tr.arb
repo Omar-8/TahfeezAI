@@ -319,6 +319,7 @@
   "memPlanFinished": "Planın tamamı ezberlendi.",
   "memLessonHint": "Gizleme modu açıkken kelime hatası olmadan gelene kadar okuyun.",
   "memProgressTitle": "İlerleme",
+  "memTabPlan": "Plan",
   "memProgressShare": "Kur'an'ın %{percent} kadarı ezberlendi",
   "memProgressUnverified": "{count, plural, =1{1 ayet işaretli, henüz okunmadı} other{{count} ayet işaretli, henüz okunmadı}}",
   "memMapTitle": "Sağlamlık haritası",

@@ -319,6 +319,7 @@
   "memPlanFinished": "پورا منصوبہ حفظ ہو گیا۔",
   "memLessonHint": "چھپانے کا موڈ آن کر کے اسے پڑھیں یہاں تک کہ بغیر غلطی کے آ جائے۔",
   "memProgressTitle": "پیش رفت",
+  "memTabPlan": "منصوبہ",
   "memProgressShare": "قرآن کا {percent}% حفظ",
   "memProgressUnverified": "{count, plural, =1{1 آیت نشان زد، ابھی پڑھی نہیں گئی} other{{count} آیات نشان زد، ابھی پڑھی نہیں گئیں}}",
   "memMapTitle": "پختگی کا نقشہ",

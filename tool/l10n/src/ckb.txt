@@ -316,6 +316,7 @@ memLessonRest = ڕۆژی پشوو. هێشتا دەتوانیت وانەی ئەم
 memPlanFinished = هەموو پلانەکە لەبەرکرا.
 memLessonHint = بە دۆخی شاردنەوەی چالاک بیخوێنەوە تا بێ هەڵەی وشە دێت.
 memProgressTitle = پێشکەوتن
+memTabPlan = پلان
 memProgressShare = {percent}%ی قورئان لەبەرکراوە
 memProgressUnverified = {count, plural, =1{1 ئایەت نیشانەکراوە، هێشتا نەخوێندراوەتەوە} other{{count} ئایەت نیشانەکراون، هێشتا نەخوێندراونەتەوە}}
 memMapTitle = نەخشەی بەهێزی
