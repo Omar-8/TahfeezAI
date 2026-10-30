@@ -7,8 +7,8 @@ import '../storage/storage_providers.dart';
 import 'app_store_service.dart';
 
 /// When the app offers an update or asks to be rated:
-/// - an update, once Google Play has one and offers are on (Settings),
-///   not again for [updateSnooze] after "Later";
+/// - an update, whenever the app opens while Google Play has one and
+///   offers are on (Settings) — "Later" only closes it for that opening;
 /// - a rating, only after [reviewAfterUse] of use and [reviewAfterAyahs]
 ///   ayahs recited, then on about one opening in four, at most once per
 ///   [reviewEvery] (the store limits its prompt further).
@@ -27,11 +27,9 @@ class StorePrompts {
   final Random _random;
 
   static const notifyKey = 'store.updates.notify';
-  static const _snoozedKey = 'store.updates.snoozedUntil';
   static const _firstOpenKey = 'store.firstOpen';
   static const _reviewedKey = 'store.review.askedAt';
 
-  static const updateSnooze = Duration(days: 3);
   static const reviewAfterUse = Duration(days: 3);
   static const reviewAfterAyahs = 20;
   static const reviewEvery = Duration(days: 60);
@@ -47,16 +45,8 @@ class StorePrompts {
   /// Whether to offer an update now.
   Future<bool> shouldOfferUpdate() async {
     if (!await updateOffersOn()) return false;
-    final snoozed = await _date(_snoozedKey);
-    if (snoozed != null && _clock().isBefore(snoozed)) return false;
     return await _store.updateAvailable() ?? false;
   }
-
-  /// "Later": not asked again for a while.
-  Future<void> snoozeUpdate() => _storage.setString(
-    _snoozedKey,
-    _clock().add(updateSnooze).toIso8601String(),
-  );
 
   /// Maybe asks for a rating, given the ayahs recited so far; whether it
   /// asked.

@@ -23,6 +23,8 @@ class TahfeezQuranSectionCard extends StatelessWidget {
     this.onTap,
     this.onLongPress,
     this.bookmarked = false,
+    this.onBookmark,
+    this.bookmarkTooltip,
     this.progress,
     this.progressColor,
     this.progressLabel,
@@ -47,6 +49,12 @@ class TahfeezQuranSectionCard extends StatelessWidget {
 
   /// A small bookmark after the title.
   final bool bookmarked;
+
+  /// A bookmark button on the card (outlined, filled when [bookmarked]):
+  /// what a long press does too, in plain sight. Without it, a bookmarked
+  /// card shows a small mark beside its title.
+  final VoidCallback? onBookmark;
+  final String? bookmarkTooltip;
 
   /// A share (0-1) shown at the card's end in place of the chevron — its
   /// percentage over a short bar (e.g. how much of a surah is memorized);
@@ -97,7 +105,7 @@ class TahfeezQuranSectionCard extends StatelessWidget {
                             style: Theme.of(context).textTheme.bodyLarge,
                           ),
                         ),
-                        if (bookmarked)
+                        if (bookmarked && onBookmark == null)
                           Padding(
                             padding: const EdgeInsetsDirectional.only(
                               start: TahfeezSpacing.xs,
@@ -122,6 +130,19 @@ class TahfeezQuranSectionCard extends StatelessWidget {
                   ],
                 ),
               ),
+              if (onBookmark != null)
+                IconButton(
+                  key: const ValueKey('section-card-bookmark'),
+                  visualDensity: VisualDensity.compact,
+                  tooltip: bookmarkTooltip,
+                  isSelected: bookmarked,
+                  icon: Icon(
+                    Icons.bookmark_border_rounded,
+                    color: scheme.onSurfaceVariant,
+                  ),
+                  selectedIcon: Icon(Icons.bookmark_rounded, color: accent),
+                  onPressed: onBookmark,
+                ),
               if (art case final art?)
                 Padding(
                   padding: const EdgeInsetsDirectional.only(

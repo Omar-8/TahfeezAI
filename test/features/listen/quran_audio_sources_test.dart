@@ -50,6 +50,38 @@ void main() {
     expect(reciterDownloadSize(banna), '≈ 384 MB');
   });
 
+  test('every reciter: its own id, a known download size; those from '
+      'everyayah.com addressed by surah and ayah', () {
+    expect(reciters.map((r) => r.edition).toSet(), hasLength(reciters.length));
+    for (final r in reciters) {
+      expect(reciterDownloadSize(r), isNotNull, reason: r.edition);
+      final folder = r.everyAyah;
+      if (folder == null) continue;
+      expect(
+        ayahAudioUrl(9001, r),
+        'https://everyayah.com/data/$folder/009001.mp3',
+        reason: r.edition,
+      );
+    }
+    final everyAyah = {
+      for (final r in reciters)
+        if (r.everyAyah != null) r.edition,
+    };
+    expect(everyAyah, {
+      'ar.tablawi',
+      'ar.banna',
+      'ar.husarymuallim',
+      'ar.ghamdi',
+      'ar.dossary',
+      'ar.qatami',
+      'ar.abbad',
+      'ar.alijaber',
+      'ar.bukhatir',
+      'ar.yassersalamah',
+      'ar.mansoori',
+    });
+  });
+
   test('surahs: their ayahs and their share of a download', () {
     expect(surahShare, hasLength(114));
     expect(

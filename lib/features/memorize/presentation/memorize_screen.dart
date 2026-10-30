@@ -49,7 +49,7 @@ class _MemorizeScreenState extends ConsumerState<MemorizeScreen>
     length: 2,
     vsync: this,
     initialIndex: widget.tab.index,
-  )..addListener(() => setState(() {})); // The top bar's action follows it.
+  );
 
   @override
   void didUpdateWidget(covariant MemorizeScreen oldWidget) {
@@ -92,10 +92,8 @@ class _MemorizeScreenState extends ConsumerState<MemorizeScreen>
           appBar: TahfeezAppBar(
             title: Text(l10n.memTitle),
             centerTitle: false,
-            actions: [
-              // Marking what is already known, beside the progress.
-              if (_tabs.index == 1) MarkKnownAction(title: l10n.memTitle),
-            ],
+            // Marking what is already known: on both tabs.
+            actions: [MarkKnownAction(title: l10n.memTitle)],
           ),
           body: Column(
             children: [

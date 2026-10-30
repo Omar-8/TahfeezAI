@@ -379,10 +379,20 @@ class _SurahIndexTabState extends ConsumerState<SurahIndexTab> {
                       onTap: () => widget.onSelect(
                         QuranLocation.surah(indexed.surah.surahNo),
                       ),
-                      // Long-press: bookmark the surah (or remove it).
+                      // Its bookmark button (a long press too): bookmark the
+                      // surah, or remove it.
                       bookmarked: bookmarks.any(
                         (b) => b.isSurah && b.surahNo == indexed.surah.surahNo,
                       ),
+                      onBookmark: () =>
+                          _toggleSurahBookmark(context, indexed.surah.surahNo),
+                      bookmarkTooltip:
+                          bookmarks.any(
+                            (b) =>
+                                b.isSurah && b.surahNo == indexed.surah.surahNo,
+                          )
+                          ? AppLocalizations.of(context).bookmarkRemove
+                          : AppLocalizations.of(context).bookmarkSurah,
                       onLongPress: () =>
                           _toggleSurahBookmark(context, indexed.surah.surahNo),
                     ),

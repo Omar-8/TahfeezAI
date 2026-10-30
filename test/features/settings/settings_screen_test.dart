@@ -140,9 +140,19 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('No settings match'), findsOneWidget);
 
+    // Everything again: the language first, the app's About last — not
+    // on screen until the list is scrolled to its end.
     await tester.enterText(search, '');
     await tester.pumpAndSettle();
-    expect(find.byKey(const ValueKey('settings-about-app')), findsOneWidget);
+    expect(find.byKey(const ValueKey('settings-language')), findsOneWidget);
+    final about = find.byKey(const ValueKey('settings-about-app'));
+    expect(about, findsNothing);
+    await tester.dragUntilVisible(
+      about,
+      find.byType(ListView).first,
+      const Offset(0, -300),
+    );
+    expect(about, findsOneWidget);
   });
 
   testWidgets('About lists every source with its licence, and the licences', (

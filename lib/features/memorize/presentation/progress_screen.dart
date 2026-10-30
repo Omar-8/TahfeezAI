@@ -20,8 +20,8 @@ import 'mark_known_sheet.dart';
 import 'progress_visuals.dart';
 import 'memorize_screen.dart';
 
-/// "Mark as known" in a top bar: named where there is room for it beside
-/// the bar's [title], else its icon alone.
+/// "Mark as known" in a top bar, a glass pill: named where there is room
+/// for it beside the bar's [title], else its icon alone.
 class MarkKnownAction extends StatelessWidget {
   const MarkKnownAction({super.key, required this.title});
 
@@ -45,19 +45,50 @@ class MarkKnownAction extends StatelessWidget {
             width(title, theme.textTheme.titleLarge) +
             140 <=
         MediaQuery.sizeOf(context).width;
-    return labelFits
-        ? TextButton.icon(
-            key: const ValueKey('mem-mark-known'),
-            onPressed: () => showMarkKnownSheet(context),
-            icon: const Icon(Icons.playlist_add_check),
-            label: Text(l10n.memMarkKnown),
-          )
-        : IconButton(
-            key: const ValueKey('mem-mark-known'),
-            tooltip: l10n.memMarkKnown,
-            onPressed: () => showMarkKnownSheet(context),
-            icon: const Icon(Icons.playlist_add_check),
-          );
+    final scheme = theme.colorScheme;
+    final pill = TahfeezGlassSurface(
+      key: const ValueKey('mem-mark-known'),
+      borderRadius: BorderRadius.circular(TahfeezRadii.pill),
+      onTap: () => showMarkKnownSheet(context),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 40, minWidth: 40),
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: labelFits ? TahfeezSpacing.md : TahfeezSpacing.sm,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            spacing: TahfeezSpacing.xs,
+            children: [
+              Icon(Icons.playlist_add_check, size: 20, color: scheme.primary),
+              if (labelFits)
+                Text(
+                  l10n.memMarkKnown,
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: scheme.primary,
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+    return Padding(
+      padding: const EdgeInsetsDirectional.only(end: TahfeezSpacing.sm),
+      child: Center(
+        // Its icon alone: its name on a long press, and to a screen reader.
+        child: labelFits
+            ? Semantics(button: true, child: pill)
+            : Tooltip(
+                message: l10n.memMarkKnown,
+                child: Semantics(
+                  button: true,
+                  label: l10n.memMarkKnown,
+                  child: pill,
+                ),
+              ),
+      ),
+    );
   }
 }
 

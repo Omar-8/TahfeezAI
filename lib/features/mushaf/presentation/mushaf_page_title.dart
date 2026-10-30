@@ -9,6 +9,7 @@ import '../../../quran/application/quran_chapter_localization.dart';
 import '../../../quran/domain/models/mushaf_token_models.dart';
 import '../application/mushaf_page_providers.dart';
 import '../application/reading_surah.dart';
+import 'reader_jump_sheet.dart';
 
 /// A Mushaf app bar's title: the current page's Surah name, page number,
 /// and Juz number — live, computed from whatever page is actually on
@@ -98,29 +99,43 @@ class MushafPageTitle extends ConsumerWidget {
     // width truncated well before showing all three pieces of context.
     // Stacking vertically uses the app bar's normally-unused vertical
     // slack instead of fighting for horizontal room.
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          name,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ).copyWith(color: baseColor),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        Text(
-          subtitleParts.join(' · '),
-          style: TextStyle(
-            fontSize: 12,
-            color: baseColor?.withValues(alpha: 0.7),
+    // Pressed: where to go — a surah and an ayah, or a page — from here.
+    // (Looks the same: only a ripple shows it.)
+    return InkWell(
+      key: const ValueKey('mushaf-title'),
+      borderRadius: BorderRadius.circular(8),
+      onTap: () => showReaderJumpSheet(
+        context,
+        mushafId: mushafId,
+        pageNumber: pageNumber,
+        pageCount:
+            ref.read(mushafByIdProvider(mushafId)).value?.pageCount ?? 604,
+        surahNo: surahNo,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            name,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ).copyWith(color: baseColor),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-      ],
+          Text(
+            subtitleParts.join(' · '),
+            style: TextStyle(
+              fontSize: 12,
+              color: baseColor?.withValues(alpha: 0.7),
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
     );
   }
 

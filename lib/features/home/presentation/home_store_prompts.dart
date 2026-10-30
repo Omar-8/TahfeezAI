@@ -8,9 +8,9 @@ import '../../../core/app_store/store_prompts.dart';
 import '../../../core/localization/generated/app_localizations.dart';
 import '../../../memorization/application/activity_stats.dart';
 
-/// Once per app session, a moment after Home first shows: offers an update
-/// if Google Play has one (see [StorePrompts]); otherwise, now and then,
-/// asks for a rating. Draws nothing.
+/// Each time the app opens, a moment after Home first shows: offers an
+/// update while Google Play has one (see [StorePrompts]); otherwise, now
+/// and then, asks for a rating. Draws nothing.
 class HomeStorePrompts extends ConsumerStatefulWidget {
   const HomeStorePrompts({super.key});
 
@@ -47,7 +47,8 @@ class _HomeStorePromptsState extends ConsumerState<HomeStorePrompts> {
   Widget build(BuildContext context) => const SizedBox.shrink();
 }
 
-/// "A new version is available": update (Google Play's screen) or later.
+/// "A new version is available": update (Google Play's screen) or later
+/// (asked again the next time the app opens).
 Future<void> showUpdateOffer(BuildContext context, WidgetRef ref) async {
   final l10n = AppLocalizations.of(context);
   final update = await showDialog<bool>(
@@ -72,7 +73,5 @@ Future<void> showUpdateOffer(BuildContext context, WidgetRef ref) async {
   );
   if (update ?? false) {
     unawaited(ref.read(appStoreServiceProvider).update());
-  } else {
-    await ref.read(storePromptsProvider).snoozeUpdate();
   }
 }

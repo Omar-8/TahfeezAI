@@ -1,0 +1,98 @@
+<en-US>
+• 9 new reciters, 28 in all: Al-Husary (Muallim), Saad Al-Ghamdi, Yasser Al-Dossary, Nasser Al-Qatami and more
+• In the reader, tap the surah and page at the top to go to any surah, ayah or page
+• Bookmark a surah with one tap in the surah list
+• Memorize: "Mark what I know" always in the top bar
+• An available update is offered each time you open the app
+</en-US>
+<ar>
+• ٩ قرّاء جدد، ٢٨ قارئًا في المجموع: الحصري (المعلّم)، وسعد الغامدي، وياسر الدوسري، وناصر القطامي وغيرهم
+• في القارئ، اضغط اسم السورة ورقم الصفحة في الأعلى للانتقال إلى أي سورة أو آية أو صفحة
+• احفظ سورة في العلامات بضغطة واحدة في قائمة السور
+• الحفظ: زر «حدّد ما أحفظه» دائمًا في الشريط العلوي
+• يُعرض التحديث المتاح في كل مرة تفتح فيها التطبيق
+</ar>
+<bn-BD>
+• ৯ জন নতুন কারী, মোট ২৮: আল-হুসারি (মুআল্লিম), সাদ আল-গামদি, ইয়াসির আদ-দাওসারি, নাসির আল-কাতামি ও আরও
+• পাঠে উপরের সূরা ও পৃষ্ঠায় চাপুন — যেকোনো সূরা, আয়াত বা পৃষ্ঠায় যান
+• সূরার তালিকায় এক চাপে সূরা বুকমার্ক করুন
+• মুখস্থ: «যা জানি তা চিহ্নিত করুন» সবসময় উপরের বারে
+• নতুন আপডেট থাকলে প্রতিবার অ্যাপ খুললে দেখানো হয়
+</bn-BD>
+<de-DE>
+• 9 neue Rezitatoren, 28 insgesamt: Al-Husary (Muallim), Saad Al-Ghamdi, Yasser Al-Dossary, Nasser Al-Qatami und mehr
+• Im Leser oben auf Sure und Seite tippen, um zu jeder Sure, Aya oder Seite zu springen
+• Eine Sure mit einem Tipp in der Surenliste merken
+• Auswendiglernen: „Markieren, was ich kann“ immer in der oberen Leiste
+• Ein verfügbares Update wird bei jedem Öffnen der App angeboten
+</de-DE>
+<es-ES>
+• 9 recitadores nuevos, 28 en total: Al-Husary (Muallim), Saad Al-Ghamdi, Yasser Al-Dossary, Nasser Al-Qatami y más
+• En el lector, toca la sura y la página arriba para ir a cualquier sura, aleya o página
+• Guarda una sura con un toque en la lista de suras
+• Memorizar: «Marcar lo que ya sé» siempre en la barra superior
+• Una actualización disponible se ofrece cada vez que abres la aplicación
+</es-ES>
+<fa>
+• ۹ قاری جدید، در مجموع ۲۸: الحصری (معلّم)، سعد الغامدی، یاسر الدوسری، ناصر القطامی و دیگران
+• در صفحهٔ خواندن، روی نام سوره و صفحه در بالا بزنید تا به هر سوره، آیه یا صفحه بروید
+• با یک ضربه در فهرست سوره‌ها، سوره را نشانک کنید
+• حفظ: «علامت زدن آنچه بلدم» همیشه در نوار بالا
+• به‌روزرسانی موجود هر بار که برنامه را باز می‌کنید پیشنهاد می‌شود
+</fa>
+<fr-FR>
+• 9 nouveaux récitateurs, 28 au total : Al-Husary (Muallim), Saad Al-Ghamdi, Yasser Al-Dossary, Nasser Al-Qatami et d'autres
+• Dans la lecture, touchez la sourate et la page en haut pour aller à une sourate, un verset ou une page
+• Ajoutez une sourate aux favoris d'un toucher dans la liste
+• Mémoriser : « Marquer ce que je connais » toujours dans la barre du haut
+• Une mise à jour disponible est proposée à chaque ouverture de l'application
+</fr-FR>
+<id>
+• 9 qari baru, total 28: Al-Husary (Muallim), Saad Al-Ghamdi, Yasser Al-Dossary, Nasser Al-Qatami, dan lainnya
+• Di pembaca, ketuk surah dan halaman di atas untuk menuju surah, ayat, atau halaman mana pun
+• Tandai surah dengan satu ketukan di daftar surah
+• Hafalan: «Tandai yang sudah hafal» selalu di bilah atas
+• Pembaruan yang tersedia ditawarkan setiap kali aplikasi dibuka
+</id>
+<kk>
+• 9 жаңа қари, барлығы 28: әл-Хусари (Муаллим), Саад әл-Ғамди, Ясир әд-Дәусари, Насир әл-Қатами және басқалар
+• Оқу кезінде жоғарыдағы сүре мен бетті басып, кез келген сүреге, аятқа не бетке өтіңіз
+• Сүрелер тізімінде бір басумен сүрені бетбелгіге қосыңыз
+• Жаттау: «Білетінімді белгілеу» әрқашан жоғарғы жолақта
+• Қолжетімді жаңарту қолданбаны әр ашқан сайын ұсынылады
+</kk>
+<ms>
+• 9 qari baharu, 28 semuanya: Al-Husary (Muallim), Saad Al-Ghamdi, Yasser Al-Dossary, Nasser Al-Qatami dan lain-lain
+• Dalam pembaca, ketik surah dan halaman di atas untuk pergi ke mana-mana surah, ayat atau halaman
+• Tanda buku surah dengan satu ketikan dalam senarai surah
+• Hafazan: «Tandakan yang saya tahu» sentiasa di bar atas
+• Kemas kini yang tersedia ditawarkan setiap kali aplikasi dibuka
+</ms>
+<ru-RU>
+• 9 новых чтецов, всего 28: аль-Хусари (Муаллим), Саад аль-Гамиди, Ясир ад-Даусари, Насир аль-Катами и другие
+• В чтении нажмите на суру и страницу вверху, чтобы перейти к любой суре, аяту или странице
+• Добавляйте суру в закладки одним нажатием в списке сур
+• Заучивание: «Отметить то, что я знаю» всегда на верхней панели
+• Доступное обновление предлагается при каждом открытии приложения
+</ru-RU>
+<sw>
+• Wasomaji 9 wapya, 28 kwa jumla: Al-Husary (Muallim), Saad Al-Ghamdi, Yasser Al-Dossary, Nasser Al-Qatami na wengine
+• Katika usomaji, gusa sura na ukurasa juu ili kwenda sura, aya au ukurasa wowote
+• Weka alamisho kwa sura kwa mguso mmoja kwenye orodha ya sura
+• Kuhifadhi: «Weka alama ninachokijua» daima kwenye upau wa juu
+• Sasisho linalopatikana hutolewa kila unapofungua programu
+</sw>
+<tr-TR>
+• 9 yeni kâri, toplam 28: el-Husarî (Muallim), Saad el-Gamdi, Yasir ed-Devserî, Nasır el-Katamî ve diğerleri
+• Okurken üstteki sure ve sayfaya dokunarak herhangi bir sure, ayet ya da sayfaya gidin
+• Sure listesinde tek dokunuşla sureyi yer imlerine ekleyin
+• Ezber: «Bildiklerimi işaretle» her zaman üst çubukta
+• Mevcut bir güncelleme, uygulamayı her açışınızda sunulur
+</tr-TR>
+<ur>
+• 9 نئے قاری، کل 28: الحصری (معلم)، سعد الغامدی، یاسر الدوسری، ناصر القطامی اور دیگر
+• پڑھتے وقت اوپر سورت اور صفحے پر ٹیپ کریں اور کسی بھی سورت، آیت یا صفحے پر جائیں
+• سورتوں کی فہرست میں ایک ٹیپ سے سورت کو بک مارک کریں
+• حفظ: «جو یاد ہے نشان زد کریں» ہمیشہ اوپر کی پٹی میں
+• دستیاب اپڈیٹ ہر بار ایپ کھولنے پر پیش کی جاتی ہے
+</ur>

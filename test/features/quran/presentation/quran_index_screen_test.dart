@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:tahfeez_ai/features/reader/presentation/reader_screen.dart';
 import 'package:tahfeez_ai/core/localization/generated/app_localizations.dart';
 import 'package:tahfeez_ai/core/routing/quran_location_routing.dart';
+import 'package:tahfeez_ai/core/theme/components/components.dart';
 import 'package:tahfeez_ai/features/quran/presentation/quran_index_screen.dart';
 import 'package:tahfeez_ai/quran/data/import/quran_dataset_importer.dart';
 import 'package:tahfeez_ai/quran/data/quran_database.dart';
@@ -177,6 +178,35 @@ void main() {
 
       expect(find.text('Test Chapter One'), findsNothing);
       expect(find.text('Surah 2'), findsOneWidget);
+    });
+
+    testWidgets('each surah\'s bookmark button, in plain sight: bookmarks '
+        'it, filled; pressed again, removes it', (tester) async {
+      await tester.pumpWidget(wrap(db));
+      await tester.pumpAndSettle();
+      final first = find.ancestor(
+        of: find.text('Test Chapter One'),
+        matching: find.byType(TahfeezQuranSectionCard),
+      );
+      final button = find.descendant(
+        of: first,
+        matching: find.byKey(const ValueKey('section-card-bookmark')),
+      );
+      expect(button, findsOneWidget);
+      expect(find.byTooltip('Bookmark surah'), findsWidgets);
+      bool filled() => tester.widget<IconButton>(button).isSelected ?? false;
+      expect(filled(), isFalse);
+
+      await tester.tap(button);
+      await tester.pumpAndSettle();
+      expect(filled(), isTrue);
+      expect(find.text('Surah bookmarked'), findsOneWidget);
+
+      await tester.tap(button);
+      await tester.pumpAndSettle();
+      expect(filled(), isFalse);
+      // Its card still opens it (the button is not the card).
+      expect(find.byType(ReaderScreen), findsNothing);
     });
 
     testWidgets('tapping a chapter navigates to its QuranLocation', (

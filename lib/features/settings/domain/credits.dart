@@ -140,14 +140,19 @@ const credits = <Credit>[
   ),
   Credit(
     group: CreditGroup.translations,
-    name:
-        'Mohamed Al-Tablawi’s and Mahmoud Ali Al-Banna’s recitations '
-        '(ayahs)',
+    name: 'Recitations by ayah from everyayah.com',
     owner: 'EveryAyah (everyayah.com) — the reciters',
     licence: 'No licence stated; streamed with credit',
     url: 'https://everyayah.com',
-    useEn: 'Listening to ayahs and surahs (Al-Tablawi, Al-Banna)',
-    useAr: 'الاستماع إلى الآيات والسور (الطبلاوي، البنا)',
+    useEn:
+        'Listening to ayahs and surahs: Al-Tablawi, Al-Banna, Al-Husary '
+        '(Muallim), Saad Al-Ghamdi, Yasser Al-Dossary, Nasser Al-Qatami, '
+        'Fares Abbad, Ali Jaber, Salah Bukhatir, Yasser Salamah, Karim '
+        'Mansoori',
+    useAr:
+        'الاستماع إلى الآيات والسور: الطبلاوي، البنا، الحصري (المعلّم)، '
+        'سعد الغامدي، ياسر الدوسري، ناصر القطامي، فارس عباد، علي جابر، '
+        'صلاح بو خاطر، ياسر سلامة، كريم منصوري',
   ),
   Credit(
     group: CreditGroup.translations,

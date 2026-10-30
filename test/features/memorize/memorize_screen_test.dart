@@ -91,8 +91,8 @@ void main() {
     expect(find.text('Start'), findsNothing);
   });
 
-  testWidgets('two tabs: the plan, then the progress (with marking what '
-      'is known in the top bar)', (tester) async {
+  testWidgets('two tabs: the plan, then the progress; marking what is '
+      'known in the top bar on both', (tester) async {
     await tester.pumpWidget(app(const TodayPlan()));
     await tester.pumpAndSettle();
     expect(
@@ -103,7 +103,7 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('Nothing recited yet today'), findsOneWidget);
-    expect(find.byKey(const ValueKey('mem-mark-known')), findsNothing);
+    expect(find.byKey(const ValueKey('mem-mark-known')), findsOneWidget);
 
     // (Its progress loading here: the clock stepped, not settled.)
     await tester.tap(find.byKey(const ValueKey('mem-tab-progress')));
@@ -114,7 +114,7 @@ void main() {
     expect(find.byKey(const ValueKey('mem-mark-known')), findsOneWidget);
     expect(find.byType(MemorizationProgressView), findsOneWidget);
 
-    // Swiped back to the plan: its own top bar again.
+    // Swiped back to the plan.
     await tester.fling(
       find.byType(MemorizationProgressView),
       const Offset(600, 0),
@@ -124,7 +124,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 100));
     }
     expect(find.text('Nothing recited yet today'), findsOneWidget);
-    expect(find.byKey(const ValueKey('mem-mark-known')), findsNothing);
+    expect(find.byKey(const ValueKey('mem-mark-known')), findsOneWidget);
   });
 
   testWidgets("a part's Start: its first ayah asked into view in Ayah mode "

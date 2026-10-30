@@ -119,22 +119,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           body: Builder(
             builder: (context) {
-              sections.add((
-                words: [
-                  l10n.appName,
-                  'GitHub',
-                  l10n.settingsRate,
-                  l10n.settingsShare,
-                  l10n.settingsCheckUpdates,
-                  l10n.settingsUpdateOffers,
-                  l10n.aboutTitle,
-                  l10n.aboutSubtitle,
-                  l10n.privacyTitle,
-                ],
-                // First: the app — its version, source code, rating, sharing,
-                // updates, and its sources.
-                widget: const _AboutApp(),
-              ));
               group(
                 l10n.settingsLanguage,
                 Icons.translate,
@@ -394,6 +378,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   l10n.settingsResetSub,
                 ],
               );
+              sections.add((
+                words: [
+                  l10n.appName,
+                  'GitHub',
+                  l10n.settingsRate,
+                  l10n.settingsShare,
+                  l10n.settingsCheckUpdates,
+                  l10n.settingsUpdateOffers,
+                  l10n.aboutTitle,
+                  l10n.aboutSubtitle,
+                  l10n.privacyTitle,
+                ],
+                // Last: the app — its version, source code, rating, sharing,
+                // updates, and its sources.
+                widget: const _AboutApp(),
+              ));
               final query = _fold(_query.trim());
               final shown = [
                 for (final section in sections)
@@ -651,7 +651,7 @@ Future<void> _import(BuildContext context, WidgetRef ref) async {
   }
 }
 
-/// Settings' first section: the app's name and version, then the
+/// Settings' last section: the app's name and version, then the
 /// GitHub, rate, share, check for updates (and whether to be told of
 /// them), and its sources and licences.
 class _AboutApp extends ConsumerStatefulWidget {

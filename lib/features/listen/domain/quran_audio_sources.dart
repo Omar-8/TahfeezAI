@@ -89,6 +89,71 @@ const reciters = [
     32,
     everyAyah: 'mahmoud_ali_al_banna_32kbps',
   ),
+  // From everyayah.com too (the Islamic Network has them by whole surahs
+  // or not at all) — every ayah of each checked there, 2026-10-30.
+  Reciter(
+    'ar.husarymuallim',
+    'Al-Husary (Muallim)',
+    'الحصري (المعلّم)',
+    128,
+    everyAyah: 'Husary_Muallim_128kbps',
+  ),
+  Reciter(
+    'ar.ghamdi',
+    'Saad Al-Ghamdi',
+    'سعد الغامدي',
+    40,
+    everyAyah: 'Ghamadi_40kbps',
+  ),
+  Reciter(
+    'ar.dossary',
+    'Yasser Al-Dossary',
+    'ياسر الدوسري',
+    128,
+    everyAyah: 'Yasser_Ad-Dussary_128kbps',
+  ),
+  Reciter(
+    'ar.qatami',
+    'Nasser Al-Qatami',
+    'ناصر القطامي',
+    96,
+    everyAyah: 'Nasser_Alqatami_128kbps',
+  ),
+  Reciter(
+    'ar.abbad',
+    'Fares Abbad',
+    'فارس عباد',
+    64,
+    everyAyah: 'Fares_Abbad_64kbps',
+  ),
+  Reciter(
+    'ar.alijaber',
+    'Ali Jaber',
+    'علي جابر',
+    64,
+    everyAyah: 'Ali_Jaber_64kbps',
+  ),
+  Reciter(
+    'ar.bukhatir',
+    'Salah Bukhatir',
+    'صلاح بو خاطر',
+    128,
+    everyAyah: 'Salaah_AbdulRahman_Bukhatir_128kbps',
+  ),
+  Reciter(
+    'ar.yassersalamah',
+    'Yasser Salamah',
+    'ياسر سلامة',
+    128,
+    everyAyah: 'Yaser_Salamah_128kbps',
+  ),
+  Reciter(
+    'ar.mansoori',
+    'Karim Mansoori',
+    'كريم منصوري',
+    40,
+    everyAyah: 'Karim_Mansoori_40kbps',
+  ),
 ];
 
 const defaultReciter = 'ar.alafasy';
@@ -169,6 +234,15 @@ const reciterDownloadBytes = <String, int>{
   // Every file's size summed (2026-10-29).
   'ar.tablawi': 854317956,
   'ar.banna': 383583607,
+  'ar.husarymuallim': 2752910232,
+  'ar.ghamdi': 443859880,
+  'ar.dossary': 1495802496,
+  'ar.qatami': 1175429446,
+  'ar.abbad': 616976338,
+  'ar.alijaber': 727400695,
+  'ar.bukhatir': 1378130847,
+  'ar.yassersalamah': 1552740208,
+  'ar.mansoori': 1052913291,
 };
 
 /// [reciter]'s download size, as "≈ 640 MB" / "≈ 1.2 GB"; `null` if
