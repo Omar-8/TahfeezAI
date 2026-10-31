@@ -8,10 +8,11 @@ import 'package:tahfeez_ai/core/routing/app_router.dart';
 import 'package:tahfeez_ai/core/routing/quran_location_routing.dart';
 import 'package:tahfeez_ai/core/theme/components/components.dart';
 import 'package:tahfeez_ai/core/theme/tahfeez_content_widths.dart';
-import 'package:tahfeez_ai/core/ui/full_bleed_content.dart';
 import 'package:tahfeez_ai/features/home/presentation/home_screen.dart';
+import 'package:tahfeez_ai/features/memorize/presentation/memorize_screen.dart';
 import 'package:tahfeez_ai/features/mushaf/presentation/mushaf_reader_screen.dart';
 import 'package:tahfeez_ai/features/quran/presentation/quran_index_screen.dart';
+import 'package:tahfeez_ai/features/search/presentation/search_screen.dart';
 import 'package:tahfeez_ai/quran/domain/models/quran_location.dart';
 
 import '../../test_helpers/widget_test_overrides.dart';
@@ -119,7 +120,8 @@ void main() {
     expect(find.text('Surah'), findsNothing);
   });
 
-  testWidgets('the Mushaf spread is the only screen that can escape the cap', (
+  testWidgets('the tabs and the reader span the width (their sky), their '
+      'content in a centred column; other screens in the shell column', (
     tester,
   ) async {
     setDesktopSize(tester);
@@ -131,29 +133,32 @@ void main() {
     );
     final router = container.read(appRouterProvider);
 
-    // The normal shell stays capped.
-    expect(
-      tester.getSize(find.byType(HomeScreen)).width,
-      TahfeezContentWidth.maxReading,
-    );
-
-    router.go('/quran/page/1/1');
-    await tester.pumpAndSettle();
-    expect(find.byType(MushafReaderScreen), findsOneWidget);
-
-    // The spread request widens the active Mushaf page while it is mounted.
-    container.read(fullBleedContentProvider.notifier).request();
-    await tester.pumpAndSettle();
-    expect(
-      tester.getSize(find.byType(MushafReaderScreen)).width,
-      greaterThan(TahfeezContentWidth.maxReading),
-    );
-
+    for (final (route, screen) in [
+      ('/home', HomeScreen),
+      ('/quran', QuranIndexScreen),
+      ('/memorize', MemorizeScreen),
+      ('/quran/page/1/1', MushafReaderScreen),
+    ]) {
+      router.go(route);
+      await tester.pumpAndSettle();
+      expect(
+        tester.getSize(find.byType(screen)).width,
+        greaterThan(TahfeezContentWidth.maxReading),
+        reason: route,
+      );
+    }
+    // The Quran tab's list in the reading column, centred.
     router.go('/quran');
     await tester.pumpAndSettle();
-    expect(find.byType(QuranIndexScreen), findsOneWidget);
+    final list = tester.getRect(find.byType(TabBarView));
+    expect(list.width, TahfeezContentWidth.maxReading);
+    final area = tester.getRect(find.byType(QuranIndexScreen));
+    expect(list.center.dx, closeTo(area.center.dx, 1));
+
+    router.go('/quran/search');
+    await tester.pumpAndSettle();
     expect(
-      tester.getSize(find.byType(QuranIndexScreen)).width,
+      tester.getSize(find.byType(SearchScreen)).width,
       TahfeezContentWidth.maxReading,
     );
   });

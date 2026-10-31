@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/storage/storage_providers.dart';
 import '../../../core/theme/components/components.dart';
+import '../../../core/theme/tahfeez_content_widths.dart';
 
 /// The part of the day Home's sky shows.
 enum DayPart {
@@ -303,7 +304,9 @@ class DaySky extends StatelessWidget {
 
 /// A screen over the time-of-day sky, as Home is: the sky behind its top —
 /// its app bar's too, made see-through — and its cards frosted glass
-/// ([TahfeezGlass]). The Quran tab, Memorize, Progress, Settings.
+/// ([TahfeezGlass]). The Quran tab, Memorize, Progress, Settings. On a wide
+/// screen the sky spans it all and the screen keeps the reading column,
+/// centred.
 class SkyBackdrop extends StatelessWidget {
   const SkyBackdrop({super.key, required this.child});
 
@@ -328,7 +331,15 @@ class SkyBackdrop extends StatelessWidget {
                   scrolledUnderElevation: 0,
                 ),
               ),
-              child: child,
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    maxWidth: TahfeezContentWidth.maxReading,
+                  ),
+                  child: child,
+                ),
+              ),
             ),
           ),
         ],

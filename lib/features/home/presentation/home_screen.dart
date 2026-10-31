@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../../../core/ui/bar_space.dart';
@@ -11,7 +13,9 @@ import '../../../core/ui/back_to_exit.dart';
 import '../../../core/ui/first_run.dart';
 
 import '../../../core/localization/generated/app_localizations.dart';
+import '../../../core/theme/app_breakpoints.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/tahfeez_content_widths.dart';
 import '../../../core/theme/components/components.dart';
 import 'sections/home_daily_ayah_section.dart';
 import 'sections/home_featured_reading_section.dart';
@@ -43,43 +47,100 @@ class HomeScreen extends StatelessWidget {
 
     // Back on Home: once to be told, twice (within 2 s) to leave the app.
     // The sky of the time of day behind the top (under the status bar too),
-    // the cards frosted glass over it.
+    // the cards frosted glass over it. The shell gives Home the whole width
+    // (app_shell.dart): the sky spans it, and the cards keep a reading
+    // column — or, wide enough (a large tablet), two side by side.
+    // On a tablet the cards sit in the middle of the height (a phone fills
+    // it anyway), the sky reaching down behind them.
+    final centered = !TahfeezBreakpoint.of(context).isPhone;
+    final padding = withBarSpace(
+      context,
+      const EdgeInsets.all(TahfeezSpacing.md),
+    );
     return BackToExit(
       child: Stack(
         children: [
-          const Positioned(top: 0, left: 0, right: 0, child: HomeSky()),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: centered
+                ? HomeSky(height: MediaQuery.sizeOf(context).height * 0.8)
+                : const HomeSky(),
+          ),
           TahfeezGlass(
             child: SafeArea(
               bottom: false,
-              child: SingleChildScrollView(
-                padding: withBarSpace(
-                  context,
-                  const EdgeInsets.all(TahfeezSpacing.md),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    _HomeBrandHeader(l10n: l10n),
-                    // The first time Home shows: a word of welcome (a dialog; no
-                    // room of its own).
-                    const _WelcomeOnce(),
-                    const SizedBox(height: TahfeezSpacing.md),
-                    // Only when there are updates, with its own space below.
-                    const HomeResourceUpdatesBanner(),
-                    // (Spaced apart here, not above: hidden parts left a gap each,
-                    // three between the header and the daily ayah.)
-                    const Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      spacing: TahfeezSpacing.lg,
-                      children: [
-                        HomeDailyAyahSection(),
-                        HomeReadHistorySection(),
-                        HomeMemorizationSection(),
-                        HomeFeaturedReadingSection(),
-                      ],
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final twoColumns = constraints.maxWidth >= homeTwoColumnWidth;
+                  return SingleChildScrollView(
+                    padding: padding,
+                    child: ConstrainedBox(
+                      // At least the screen's height: room to centre in.
+                      constraints: BoxConstraints(
+                        minHeight: centered
+                            ? math.max(
+                                0,
+                                constraints.maxHeight - padding.vertical,
+                              )
+                            : 0,
+                      ),
+                      child: Center(
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            maxWidth: twoColumns
+                                ? homeWideMaxWidth
+                                : TahfeezContentWidth.maxReading,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              _HomeBrandHeader(l10n: l10n),
+                              // The first time Home shows: a word of welcome (a
+                              // dialog; no room of its own).
+                              const _WelcomeOnce(),
+                              const SizedBox(height: TahfeezSpacing.md),
+                              // Only when there are updates, with its own space
+                              // below.
+                              const HomeResourceUpdatesBanner(),
+                              // (Spaced apart here, not above: hidden parts left
+                              // a gap each, three between the header and the
+                              // daily ayah.)
+                              if (twoColumns)
+                                const Row(
+                                  key: ValueKey('home-two-columns'),
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  spacing: TahfeezSpacing.lg,
+                                  children: [
+                                    Expanded(
+                                      child: _Sections([
+                                        HomeDailyAyahSection(),
+                                        HomeReadHistorySection(),
+                                      ]),
+                                    ),
+                                    Expanded(
+                                      child: _Sections([
+                                        HomeMemorizationSection(),
+                                        HomeFeaturedReadingSection(),
+                                      ]),
+                                    ),
+                                  ],
+                                )
+                              else
+                                const _Sections([
+                                  HomeDailyAyahSection(),
+                                  HomeReadHistorySection(),
+                                  HomeMemorizationSection(),
+                                  HomeFeaturedReadingSection(),
+                                ]),
+                            ],
+                          ),
+                        ),
+                      ),
                     ),
-                  ],
-                ),
+                  );
+                },
               ),
             ),
           ),
@@ -87,6 +148,29 @@ class HomeScreen extends StatelessWidget {
       ),
     );
   }
+}
+
+/// From this width Home's sections sit in two columns (a 13" iPad upright,
+/// a desktop window); below it, one reading column as on a phone.
+@visibleForTesting
+const homeTwoColumnWidth = 900.0;
+
+/// The two columns' width at most, together.
+@visibleForTesting
+const homeWideMaxWidth = 1200.0;
+
+/// Home's sections, one below the other.
+class _Sections extends StatelessWidget {
+  const _Sections(this.children);
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    spacing: TahfeezSpacing.lg,
+    children: children,
+  );
 }
 
 /// The app's name, and below it the salam on one line.

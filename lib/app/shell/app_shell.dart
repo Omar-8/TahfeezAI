@@ -4,11 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/localization/generated/app_localizations.dart';
+import '../../core/routing/app_routes.dart';
 import '../../core/routing/quran_location_routing.dart';
 import '../../core/theme/app_breakpoints.dart';
 import '../../core/theme/components/components.dart';
 import '../../core/theme/tahfeez_content_widths.dart';
-import '../../core/ui/full_bleed_content.dart';
 import '../../features/recitation/presentation/recitation_controls.dart';
 
 /// Tahfeez's main app shell: the persistent chrome around Home/Quran/Settings.
@@ -49,15 +49,16 @@ class AppShell extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final breakpoint = TahfeezBreakpoint.of(context);
     final scheme = Theme.of(context).colorScheme;
-    // The full-width exception is owned by the active Mushaf pager. Gate it
-    // to the active branch's own Quran location route (a reader or Mushaf
-    // screen, in whichever tab opened it) because StatefulShellRoute keeps
-    // inactive branches mounted; this prevents a spread retained in another
-    // branch from widening Home/Memorize while still covering both
-    // standalone and in-reader Mushaf routes.
+    // The tabs' own screens and the reader (a Quran location route, in
+    // whichever tab opened it) lay themselves out across the width: their
+    // sky edge to edge, their content in a reading column (SkyBackdrop, Ayah
+    // mode), Home in two columns when wide (home_screen.dart), the printed
+    // page as large as it fits. Every other screen keeps the shell's column.
+    // Decided by the active branch's location alone, as StatefulShellRoute
+    // keeps inactive branches mounted.
     final fullBleed = _isStandaloneMushafRoute(currentLocation) ||
-        (isQuranLocationPath(currentLocation) &&
-        ref.watch(fullBleedContentProvider));
+        _fullWidthTabs.contains(Uri.tryParse(currentLocation)?.path) ||
+        isQuranLocationPath(currentLocation);
     // While a Mushaf is open (or a recitation session runs), the live
     // recitation bar takes the place of the Home/Quran/Settings navigation.
     final recitationBar = ref.watch(recitationBarVisibleProvider);
@@ -162,6 +163,14 @@ class AppShell extends ConsumerWidget {
     );
   }
 
+  /// The tabs' own screens, which keep their content in a column themselves.
+  static const _fullWidthTabs = {
+    AppRoutes.home,
+    AppRoutes.quran,
+    AppRoutes.memorize,
+    AppRoutes.settings,
+  };
+
   bool _isStandaloneMushafRoute(String location) {
     final segments = Uri.tryParse(location)?.pathSegments;
     return segments != null &&
@@ -204,9 +213,8 @@ class AppShell extends ConsumerWidget {
 /// needs the bespoke [TahfeezPrimaryNavigationBar]/[TahfeezPrimaryNavigationRail]
 /// treatment that generic component doesn't offer.
 ///
-/// [maxWidth] is `double.infinity` while a screen holds
-/// `fullBleedContentProvider`, which lets that branch fill the available
-/// content area instead of the reading column.
+/// [maxWidth] is `double.infinity` for the tabs' own screens and the reader,
+/// which then fill the available content area and keep their own columns.
 class _ConstrainedContent extends StatelessWidget {
   const _ConstrainedContent({
     required this.child,
