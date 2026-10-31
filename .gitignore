@@ -184,7 +184,8 @@ assets/models/*
 /docs/reference/
 
 # Kept here, never committed: Apple signing (private key, certificate,
-# profile, API key) and the App Store / layout media made for upload.
+# profile, API key), the Google Play API key and the App Store / layout media made for upload.
 /ios-signing/
+/play-signing/
 /TahfeezAI-AppStore/
 /TahfeezAI-iPad-layout/
