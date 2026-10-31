@@ -41,6 +41,11 @@ class TahfeezModalSheetActivity {
   }
 }
 
+/// How far from the screen's top a sheet opened now may reach at most:
+/// something kept in view above sheets while it is up (the guide's card on
+/// its steps to try on the page, whose sheets open below it). 0: nothing.
+double sheetTopFloor = 0;
+
 /// Constraints keeping a modal sheet opened from [context] below the app
 /// bar of the screen it was opened from (its nearest [Scaffold]'s): as tall
 /// as its content, never over the screen's header. Without an app bar,
@@ -58,6 +63,7 @@ BoxConstraints sheetBelowAppBar(BuildContext context) {
     // a shell, below other bars).
     top = math.max(top, box.localToGlobal(Offset.zero).dy + appBar);
   }
+  top = math.max(top, sheetTopFloor);
   return BoxConstraints(maxHeight: math.max(0, screen - top));
 }
 

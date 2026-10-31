@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/localization/generated/app_localizations.dart';
 import '../../core/theme/app_spacing.dart';
+import '../../core/theme/components/tahfeez_bottom_sheet.dart';
 import '../../core/ui/first_run.dart';
 import '../listen/application/follow_along_controller.dart';
 import '../listen/application/quran_audio_player.dart';
@@ -365,11 +366,46 @@ class _GuideOverlayState extends ConsumerState<_GuideOverlay> {
     WidgetsBinding.instance.addPostFrameCallback(_afterFrame);
   }
 
+  @override
+  void dispose() {
+    sheetTopFloor = 0;
+    super.dispose();
+  }
+
   void _afterFrame(Duration _) {
     if (!mounted) return;
     _scrollIntoView();
     _measure();
+    _keepSheetsBelowCard();
     WidgetsBinding.instance.addPostFrameCallback(_afterFrame);
+  }
+
+  /// The card of a step to try on the page.
+  final _tryItCard = GlobalKey();
+
+  /// On a step to try on the page, the sheets its word opens (the word's,
+  /// the ayah's) rise only up to below its card: their handles not under
+  /// it, still pulled down to close.
+  void _keepSheetsBelowCard() {
+    final box = _tryItCard.currentContext?.findRenderObject() as RenderBox?;
+    sheetTopFloor = box != null && box.attached && box.hasSize
+        ? box.localToGlobal(box.size.bottomLeft(Offset.zero)).dy + 8
+        : 0;
+  }
+
+  /// Back or Next on a step to try on the page: the sheet its word opened
+  /// closed first, so the next step's control is in view.
+  void _closeSheetsThen(VoidCallback move) {
+    for (final key in _targets.values) {
+      final context = key.currentContext;
+      if (context == null || !context.mounted) continue;
+      Navigator.maybeOf(
+        context,
+        rootNavigator: true,
+      )?.popUntil((route) => route is! PopupRoute);
+      break;
+    }
+    move();
   }
 
   /// The step whose control was last scrolled into view.
@@ -428,16 +464,21 @@ class _GuideOverlayState extends ConsumerState<_GuideOverlay> {
             child: Center(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 380),
-                child: _GuideCard(
-                  key: const ValueKey('guide-try-it'),
-                  text: step.text(l10n),
-                  index: guide.index,
-                  length: controller.length,
-                  waiting: false,
-                  tapToContinue: false,
-                  onBack: guide.index == 0 ? null : controller.back,
-                  onNext: controller.next,
-                  onClose: controller.close,
+                child: KeyedSubtree(
+                  key: _tryItCard,
+                  child: _GuideCard(
+                    key: const ValueKey('guide-try-it'),
+                    text: step.text(l10n),
+                    index: guide.index,
+                    length: controller.length,
+                    waiting: false,
+                    tapToContinue: false,
+                    onBack: guide.index == 0
+                        ? null
+                        : () => _closeSheetsThen(controller.back),
+                    onNext: () => _closeSheetsThen(controller.next),
+                    onClose: controller.close,
+                  ),
                 ),
               ),
             ),

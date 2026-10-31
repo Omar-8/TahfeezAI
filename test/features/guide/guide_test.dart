@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tahfeez_ai/core/localization/generated/app_localizations.dart';
+import 'package:tahfeez_ai/core/theme/components/tahfeez_bottom_sheet.dart';
 import 'package:tahfeez_ai/features/guide/guide.dart';
 import 'package:tahfeez_ai/features/mushaf/application/mushaf_hide_mode.dart';
 
@@ -118,6 +121,50 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('guide-next')));
     await tester.pumpAndSettle();
     expect(guide()!.index, 2, reason: 'on to the modes');
+  });
+
+  testWidgets("a word's sheet opened on a step to try: below the card, "
+      'still pulled down; Next closes it first', (tester) async {
+    await pump(tester);
+    container.read(guideProvider.notifier).start(GuideTour.overview, 1);
+    await tester.pumpAndSettle();
+    final card = tester.getRect(find.byKey(const ValueKey('guide-card')));
+    unawaited(
+      showTahfeezModalBottomSheet<void>(
+        context: tester.element(find.text('recite')),
+        builder: (_) => const SizedBox(height: 2000, child: Text('ayah sheet')),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final sheet = tester.getRect(find.byType(BottomSheet));
+    expect(
+      sheet.top,
+      greaterThanOrEqualTo(card.bottom),
+      reason: 'not under it',
+    );
+
+    // Pulled down by its top: closes.
+    await tester.dragFrom(
+      sheet.topCenter + const Offset(0, 6),
+      const Offset(0, 500),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('ayah sheet'), findsNothing);
+
+    unawaited(
+      showTahfeezModalBottomSheet<void>(
+        context: tester.element(find.text('recite')),
+        builder: (_) => const Text('ayah sheet'),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('guide-next')));
+    await tester.pumpAndSettle();
+    expect(find.text('ayah sheet'), findsNothing, reason: 'closed first');
+    expect(guide()!.index, 2);
+    await tester.tap(find.byKey(const ValueKey('guide-close')));
+    await tester.pumpAndSettle();
+    expect(sheetTopFloor, 0, reason: 'other sheets as before');
   });
 
   testWidgets('practising: the page in full view and usable, the hint at '
