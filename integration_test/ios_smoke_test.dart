@@ -23,7 +23,13 @@ void main() {
       }
     }
 
-    await run(20); // the first launch seeds the Quran database
+    // The first launch imports the Qur'an (on iOS from its datasets, no
+    // prebuilt database): until the app is up, at most two minutes.
+    for (var s = 0; s < 120 && find.byType(Navigator).evaluate().isEmpty; s++) {
+      await run(1);
+    }
+    expect(find.byType(Navigator), findsWidgets, reason: 'the app up');
+    await run(3);
     await binding.takeScreenshot('1-home');
 
     final router = GoRouter.of(tester.element(find.byType(Navigator).first));

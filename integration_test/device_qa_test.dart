@@ -29,6 +29,7 @@ import 'package:tahfeez_ai/features/listen/application/quran_audio_player.dart';
 import 'package:tahfeez_ai/features/mushaf/application/mushaf_hide_mode.dart';
 import 'package:tahfeez_ai/features/mushaf/application/reader_mode.dart';
 import 'package:tahfeez_ai/features/recitation/application/recitation_session_controller.dart';
+import 'package:tahfeez_ai/features/mushaf/presentation/mushaf_appearance_sheet.dart';
 
 /// Controls that leave the app (a browser, the share sheet, the file
 /// picker, the store): not tapped.
@@ -169,7 +170,8 @@ void main() {
         await run(0.8);
       }
       await shot('ayah-mode-${layout.name}-scrolled');
-      await tester.tap(find.byIcon(Icons.tune).first);
+      // Its appearance and view settings (the reader's settings button).
+      showMushafAppearanceSheet(tester.element(find.byType(Scaffold).last));
       await run(2);
       await shot('ayah-mode-${layout.name}-settings');
       await closeSheet();
