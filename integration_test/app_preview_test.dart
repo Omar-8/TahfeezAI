@@ -59,16 +59,23 @@ void main() {
       await wait(seconds);
     }
 
-    /// The screen's main list scrolled by [dy], slowly (as a finger would).
+    /// The screen's main list scrolled by [dy], smoothly (by its position,
+    /// not a drag: the test's touches would be drawn as a crosshair).
     Future<void> scroll(double dy, double seconds) async {
       final list = find.byType(Scrollable);
       if (list.evaluate().isEmpty) return;
-      await tester.timedDrag(
-        list.last,
-        Offset(0, -dy),
-        Duration(milliseconds: (seconds * 1000).round()),
+      final position = tester.state<ScrollableState>(list.last).position;
+      unawaited(
+        position.animateTo(
+          (position.pixels + dy).clamp(
+            position.minScrollExtent,
+            position.maxScrollExtent,
+          ),
+          duration: Duration(milliseconds: (seconds * 1000).round()),
+          curve: Curves.easeInOut,
+        ),
       );
-      await wait(0.6);
+      await wait(seconds + 0.6);
     }
 
     // Light, under a morning sky; Ayah mode with word meanings.

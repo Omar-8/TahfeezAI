@@ -43,10 +43,13 @@ jobs:
           import json, sys
           data = json.load(sys.stdin)
           runtime = [r for r in data['runtimes'] if r['platform'] == 'iOS' and r['isAvailable']][-1]
+          import re
           types = [t for t in data['devicetypes'] if '$1' in t['name']]
           if not types:
               sys.exit(1)
-          print(types[-1]['identifier'], runtime['identifier'])"
+          # The newest by the numbers in its name (iPhone 17 > 11, M5 > M4).
+          newest = max(types, key=lambda t: [int(n) for n in re.findall(r'\\d+', t['name'])])
+          print(newest['identifier'], runtime['identifier'])"
           }
           mkdir -p shots previews
           for device in iphone ipad duo; do
@@ -131,26 +134,17 @@ jobs:
         run: sudo apt-get update -q && sudo apt-get install -yq fonts-noto-core python3-pil ffmpeg
       - name: Screenshots, framed
         run: python3 tool/make_app_store_images.py raw/shots media/screenshots
-      # The tour between its marks (at most 29.5 s), filled to the
-      # preview's size, with a silent stereo track (Apple wants audio).
+      # The tour found in each recording, cut and encoded
+      # (tool/cut_app_preview.py).
       - name: App previews
         run: |
           set -e
           mkdir -p media/previews
           for device in iphone ipad duo; do
             [ -f raw/previews/$device.mov ] && [ -f raw/previews/$device.json ] || continue
-            read -r start length <<< "$(python3 -c "
-          import json
-          m = json.load(open('raw/previews/$device.json'))
-          print(m['start'], min(29.5, m['end'] - m['start']))")"
             if [ $device = ipad ]; then size=1200:1600; else size=886:1920; fi
-            ffmpeg -loglevel error -y -ss "$start" -t "$length" -i raw/previews/$device.mov \
-              -f lavfi -i anullsrc=channel_layout=stereo:sample_rate=44100 \
-              -vf "fps=30,scale=$size:force_original_aspect_ratio=increase,crop=$size,setsar=1" \
-              -c:v libx264 -profile:v high -level 4.0 -pix_fmt yuv420p \
-              -b:v 11M -maxrate 12M -bufsize 24M \
-              -c:a aac -b:a 256k -ar 44100 -shortest -movflags +faststart \
-              media/previews/$device.mp4
+            python3 tool/cut_app_preview.py raw/previews/$device.mov raw/previews/$device.json \
+              media/previews/$device.mp4 $size
             ffprobe -v error -show_entries format=duration:stream=codec_name,width,height,r_frame_rate,channels \
               -of compact media/previews/$device.mp4
           done
