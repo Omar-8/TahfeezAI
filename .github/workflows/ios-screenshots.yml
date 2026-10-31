@@ -61,9 +61,10 @@ jobs:
           mkdir -p shots previews
           for device in iphone ipad duo; do
             case $device in
-              iphone) found=$(pick "Pro Max" "iPhone 16 Pro Max" "iPhone 17 Pro Max") ;;
-              ipad) found=$(pick "iPad Pro 13-inch" "iPad Pro 13-inch (M4)") ;;
-              duo) found=$(pick "iPhone Duo") ;;
+              iphone) found=$(pick "Pro Max" "iPhone 16 Pro Max" "iPhone 17 Pro Max") || true ;;
+              ipad) found=$(pick "iPad Pro 13-inch" "iPad Pro 13-inch (M4)") || true ;;
+              # (No Duo simulator yet: none found is not an error.)
+              duo) found=$(pick "iPhone Duo") || true ;;
             esac
             if [ -z "$found" ]; then
               echo "::warning::No $device simulator on this runner: skipped"
