@@ -911,6 +911,8 @@
   "homeBackToExit": "Press back again to exit",
   "settingsRate": "Rate TahfeezAI",
   "settingsRateSub": "On Google Play",
+  "settingsRateSubAppStore": "On the App Store",
+  "@settingsRateSubAppStore": {"description": "Under Rate the app, on iOS: where it is rated."},
   "settingsShare": "Share TahfeezAI",
   "settingsShareSub": "Send it to a friend",
   "settingsShareText": "TahfeezAI helps you memorize the Qur'an and checks your recitation right on your phone: {url}",

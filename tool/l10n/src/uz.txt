@@ -427,6 +427,7 @@ activityMinutes = {minutes} daq
 homeBackToExit = Chiqish uchun yana orqaga bosing
 settingsRate = TahfeezAI ni baholash
 settingsRateSub = Google Play da
+settingsRateSubAppStore = App Store’da
 settingsShare = TahfeezAI ni ulashish
 settingsShareSub = Doʻstingizga yuboring
 settingsShareText = TahfeezAI Qurʼonni yodlashga yordam beradi va tilovatingizni telefoningizning oʻzida tekshiradi: {url}

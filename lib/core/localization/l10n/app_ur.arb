@@ -430,6 +430,7 @@
   "homeBackToExit": "باہر نکلنے کے لیے دوبارہ واپس دبائیں",
   "settingsRate": "TahfeezAI کی درجہ بندی کریں",
   "settingsRateSub": "Google Play پر",
+  "settingsRateSubAppStore": "App Store پر",
   "settingsShare": "TahfeezAI شیئر کریں",
   "settingsShareSub": "کسی دوست کو بھیجیں",
   "settingsShareText": "TahfeezAI قرآن حفظ کرنے میں مدد دیتی ہے اور آپ کے فون پر ہی آپ کی تلاوت جانچتی ہے: {url}",

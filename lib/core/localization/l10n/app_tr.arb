@@ -430,6 +430,7 @@
   "homeBackToExit": "Çıkmak için tekrar geri basın",
   "settingsRate": "TahfeezAI'yi değerlendir",
   "settingsRateSub": "Google Play'de",
+  "settingsRateSubAppStore": "App Store'da",
   "settingsShare": "TahfeezAI'yi paylaş",
   "settingsShareSub": "Bir arkadaşa gönderin",
   "settingsShareText": "TahfeezAI Kur'an ezberlemenize yardımcı olur ve okumanızı doğrudan telefonunuzda kontrol eder: {url}",

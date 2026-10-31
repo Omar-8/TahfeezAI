@@ -427,6 +427,7 @@ activityMinutes = Dak {minutes}
 homeBackToExit = Bonyeza nyuma tena ili kutoka
 settingsRate = Kadiria TahfeezAI
 settingsRateSub = Kwenye Google Play
+settingsRateSubAppStore = Kwenye App Store
 settingsShare = Shiriki TahfeezAI
 settingsShareSub = Mtumie rafiki
 settingsShareText = TahfeezAI inakusaidia kuhifadhi Qur'ani na inakagua kisomo chako moja kwa moja kwenye simu yako: {url}

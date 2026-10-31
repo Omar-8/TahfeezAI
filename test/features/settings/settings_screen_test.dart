@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tahfeez_ai/app/app.dart';
 import 'package:tahfeez_ai/core/localization/locale_controller.dart';
+import 'package:tahfeez_ai/core/core_providers.dart';
+import 'package:tahfeez_ai/core/platform/platform_capabilities.dart';
 import 'package:tahfeez_ai/core/storage/storage_providers.dart';
 import 'package:tahfeez_ai/core/theme/app_surface_tone.dart';
 import 'package:tahfeez_ai/core/theme/app_typography.dart';
@@ -249,4 +251,59 @@ void main() {
       findsOneWidget,
     );
   });
+
+  for (final ios in [true, false]) {
+    testWidgets('rating names this phone\'s store '
+        '(${ios ? 'iOS: the App Store' : 'Android: Google Play'})', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(390, 844);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            ...tahfeezWidgetTestOverrides(),
+            platformCapabilitiesProvider.overrideWithValue(_Platform(ios: ios)),
+          ],
+          child: const TahfeezApp(),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Settings'));
+      await tester.pumpAndSettle();
+      final rate = find.text('Rate TahfeezAI');
+      await tester.scrollUntilVisible(rate, 200, scrollable: _list);
+      expect(
+        find.text(ios ? 'On the App Store' : 'On Google Play'),
+        findsOneWidget,
+      );
+      expect(
+        find.text(ios ? 'On Google Play' : 'On the App Store'),
+        findsNothing,
+      );
+    });
+  }
+}
+
+class _Platform implements PlatformCapabilities {
+  const _Platform({required this.ios});
+
+  final bool ios;
+
+  @override
+  bool get isWeb => false;
+  @override
+  bool get isAndroid => !ios;
+  @override
+  bool get isIOS => ios;
+  @override
+  bool get supportsBackgroundAudioSession => true;
+  @override
+  bool get supportsHomeScreenWidgets => true;
+  @override
+  bool get supportsScheduledNotifications => true;
+  @override
+  bool get supportsNativeFileStorage => true;
 }

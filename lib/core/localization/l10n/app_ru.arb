@@ -430,6 +430,7 @@
   "homeBackToExit": "Нажмите «назад» ещё раз, чтобы выйти",
   "settingsRate": "Оценить TahfeezAI",
   "settingsRateSub": "В Google Play",
+  "settingsRateSubAppStore": "В App Store",
   "settingsShare": "Поделиться TahfeezAI",
   "settingsShareSub": "Отправить другу",
   "settingsShareText": "TahfeezAI помогает заучивать Коран и проверяет ваше чтение прямо на телефоне: {url}",

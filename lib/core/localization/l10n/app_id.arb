@@ -430,6 +430,7 @@
   "homeBackToExit": "Tekan kembali sekali lagi untuk keluar",
   "settingsRate": "Beri nilai TahfeezAI",
   "settingsRateSub": "Di Google Play",
+  "settingsRateSubAppStore": "Di App Store",
   "settingsShare": "Bagikan TahfeezAI",
   "settingsShareSub": "Kirim ke teman",
   "settingsShareText": "TahfeezAI membantu Anda menghafal Al-Qur'an dan memeriksa bacaan Anda langsung di ponsel: {url}",

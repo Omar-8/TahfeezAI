@@ -430,6 +430,7 @@
   "homeBackToExit": "বের হতে আবার ব্যাক চাপুন",
   "settingsRate": "TahfeezAI-কে রেটিং দিন",
   "settingsRateSub": "Google Play-তে",
+  "settingsRateSubAppStore": "App Store-এ",
   "settingsShare": "TahfeezAI শেয়ার করুন",
   "settingsShareSub": "বন্ধুকে পাঠান",
   "settingsShareText": "TahfeezAI কুরআন মুখস্থ করতে সাহায্য করে এবং আপনার ফোনেই তিলাওয়াত যাচাই করে: {url}",

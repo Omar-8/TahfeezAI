@@ -7,14 +7,12 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-/// The app's store listing (Google Play).
+/// The app's Google Play listing.
 const kPlayStoreUrl =
     'https://play.google.com/store/apps/details?id=ai.tahfeez.tahfeez_ai';
 
-/// The App Store listing, once the app has one
-/// (`https://apps.apple.com/app/id<number>`). Empty: on iOS, rating opens
-/// nothing beyond the in-app prompt, and sharing links Google Play.
-const kAppStoreUrl = '';
+/// The App Store listing (the app's Apple ID, App Store Connect).
+const kAppStoreUrl = 'https://apps.apple.com/app/id6829199977';
 
 /// The project's GitHub repository (public since 2026-10-19).
 const kGitHubUrl = 'https://github.com/Omar-8/TahfeezAI';
@@ -54,8 +52,7 @@ class PlatformAppStoreService implements AppStoreService {
   bool get _ios => !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
 
   @override
-  String get listingUrl =>
-      _ios && kAppStoreUrl.isNotEmpty ? kAppStoreUrl : kPlayStoreUrl;
+  String get listingUrl => _ios ? kAppStoreUrl : kPlayStoreUrl;
 
   @override
   Future<String> version() async {
@@ -103,8 +100,9 @@ class PlatformAppStoreService implements AppStoreService {
 
   @override
   Future<void> openListing() async {
-    if (_ios && kAppStoreUrl.isEmpty) return;
-    if (!await openUrl(listingUrl)) {
+    // On iOS straight to the App Store's review form.
+    final url = _ios ? '$kAppStoreUrl?action=write-review' : listingUrl;
+    if (!await openUrl(url)) {
       try {
         await InAppReview.instance.openStoreListing();
       } catch (_) {

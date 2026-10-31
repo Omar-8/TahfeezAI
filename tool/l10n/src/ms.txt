@@ -427,6 +427,7 @@ activityMinutes = {minutes} min
 homeBackToExit = Tekan kembali sekali lagi untuk keluar
 settingsRate = Nilai TahfeezAI
 settingsRateSub = Di Google Play
+settingsRateSubAppStore = Di App Store
 settingsShare = Kongsi TahfeezAI
 settingsShareSub = Hantar kepada rakan
 settingsShareText = TahfeezAI membantu anda menghafaz Al-Quran dan menyemak bacaan anda terus pada telefon anda: {url}

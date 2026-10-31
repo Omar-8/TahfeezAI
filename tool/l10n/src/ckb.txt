@@ -427,6 +427,7 @@ activityMinutes = {minutes} خولەک
 homeBackToExit = بۆ دەرچوون دووبارە گەڕانەوە دابگرە
 settingsRate = هەڵسەنگاندنی TahfeezAI
 settingsRateSub = لە Google Play
+settingsRateSubAppStore = لە App Store
 settingsShare = هاوبەشکردنی TahfeezAI
 settingsShareSub = بۆ هاوڕێیەک بینێرە
 settingsShareText = TahfeezAI یارمەتیت دەدات قورئان لەبەر بکەیت و خوێندنەوەکەت ڕاستەوخۆ لەسەر مۆبایلەکەت دەپشکنێت: {url}

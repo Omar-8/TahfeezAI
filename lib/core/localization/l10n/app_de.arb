@@ -430,6 +430,7 @@
   "homeBackToExit": "Zum Beenden erneut Zurück drücken",
   "settingsRate": "TahfeezAI bewerten",
   "settingsRateSub": "Bei Google Play",
+  "settingsRateSubAppStore": "Im App Store",
   "settingsShare": "TahfeezAI teilen",
   "settingsShareSub": "An einen Freund senden",
   "settingsShareText": "TahfeezAI hilft dir, den Koran auswendig zu lernen, und prüft deine Rezitation direkt auf dem Telefon: {url}",

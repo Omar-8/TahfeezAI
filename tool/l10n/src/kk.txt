@@ -427,6 +427,7 @@ activityMinutes = {minutes} мин
 homeBackToExit = Шығу үшін артқа тағы басыңыз
 settingsRate = TahfeezAI-ды бағалау
 settingsRateSub = Google Play-де
+settingsRateSubAppStore = App Store-да
 settingsShare = TahfeezAI-мен бөлісу
 settingsShareSub = Досыңызға жіберіңіз
 settingsShareText = TahfeezAI Құранды жаттауға көмектеседі және оқылымыңызды телефоныңыздың өзінде тексереді: {url}

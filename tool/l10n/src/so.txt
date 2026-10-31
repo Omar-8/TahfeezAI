@@ -427,6 +427,7 @@ activityMinutes = {minutes} daq
 homeBackToExit = Mar kale riix dib si aad uga baxdo
 settingsRate = Qiimee TahfeezAI
 settingsRateSub = Google Play
+settingsRateSubAppStore = App Store-ka
 settingsShare = La wadaag TahfeezAI
 settingsShareSub = U dir saaxiib
 settingsShareText = TahfeezAI waxay kaa caawisaa xifdinta Qur'aanka waxayna hubisaa tilaawadaada taleefankaaga laftiisa: {url}

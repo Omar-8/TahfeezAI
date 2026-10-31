@@ -762,7 +762,10 @@ class _AboutAppState extends ConsumerState<_AboutApp> {
             'settings-rate',
             Icons.star_outline_rounded,
             l10n.settingsRate,
-            l10n.settingsRateSub,
+            // Where it is rated: this phone's store.
+            ref.watch(platformCapabilitiesProvider).isIOS
+                ? l10n.settingsRateSubAppStore
+                : l10n.settingsRateSub,
             store.openListing,
           ),
           row(

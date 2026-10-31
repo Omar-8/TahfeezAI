@@ -427,6 +427,7 @@ activityMinutes = Minti {minutes}
 homeBackToExit = Sake danna baya don fita
 settingsRate = Ƙimanta TahfeezAI
 settingsRateSub = A Google Play
+settingsRateSubAppStore = A App Store
 settingsShare = Raba TahfeezAI
 settingsShareSub = Aika wa aboki
 settingsShareText = TahfeezAI tana taimaka maka haddace Alƙur'ani kuma tana duba karatunka a kan wayarka kai tsaye: {url}

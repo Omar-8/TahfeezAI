@@ -430,6 +430,7 @@
   "homeBackToExit": "Pulsa atrás otra vez para salir",
   "settingsRate": "Valorar TahfeezAI",
   "settingsRateSub": "En Google Play",
+  "settingsRateSubAppStore": "En la App Store",
   "settingsShare": "Compartir TahfeezAI",
   "settingsShareSub": "Envíasela a un amigo",
   "settingsShareText": "TahfeezAI te ayuda a memorizar el Corán y comprueba tu recitación en tu propio teléfono: {url}",
