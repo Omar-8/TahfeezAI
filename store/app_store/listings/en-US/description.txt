@@ -1,0 +1,49 @@
+Memorize the Quran with a listener in your pocket.
+
+Read the Madinah Mushaf, understand every word, and recite from memory while an AI on your device follows along — catching the slipped word, the skipped ayah and the missed madd. Free, offline, no ads, no account.
+
+RECITE FROM MEMORY — WITH FEEDBACK
+• Hide the page and recite: each word is revealed as you say it
+• Words coloured as you go: right, wrong, skipped or mispronounced — a word said right glows softly, a mistake sways, and a finished page glows with a gentle tap
+• A ring around the stop button breathes with your voice, so you know you are heard
+• Hears how you recite, not only what: letters, vowels, shadda and case endings, sound by sound against the Hafs pronunciation
+• Tajweed checked too: madd length, qalqala, ghunnah (ikhfa, iqlab, idgham, and a doubled noon or meem held), heavy and light letters, throat letters — each rule can be turned on or off
+• Choose how strict the check is: lenient, balanced or precise
+• A vibration or sound on a mistake, with tajweed mistakes alerted apart
+• Choose the colours of pronunciation and tajweed mistakes
+• Loop an ayah, follow along with a reciter, or test a whole page
+
+READ AND UNDERSTAND
+• The Madinah Mushaf page by page, exactly as printed — or ayah by ayah, swiped or in one continuous scroll
+• Word-by-word meanings and transliteration — in Arabic too, from al-Siraj
+• Translations in 18 languages and tafsir beside every ayah, following your language
+• Surah names in the Mushaf's own calligraphy; focus mode for the page alone
+• Search the whole Quran, in Arabic or in translation
+• Bookmarks and thematic passages coloured on the page
+
+LISTEN
+• 28 reciters, including Alafasy, Al-Husary, Al-Minshawi, Abdul Basit and As-Sudais
+• The ayah lights up as it is recited; repeat an ayah or a range
+• Download a reciter to listen offline; playback continues with the screen locked
+
+MEMORIZE WITH A PLAN
+• A daily lesson and spaced revision
+• Hide mode, Loop and Follow along
+• Every part's strength tracked, so you know what to revise
+• Your streak, a calendar of the days you recited, a ring of the 30 juz and gentle milestones
+
+MAKE IT YOURS
+• A sky in the colours of the time of day, glass cards and an Islamic geometric pattern
+• Light, dark, warm, sepia and black themes; 4 Quran fonts; text up to 200%
+• In 19 languages: Arabic, English, German, French, Spanish, Russian, Turkish, Indonesian, Malay, Urdu, Persian, Bengali, Hausa, Kurdish, Pashto, Swahili, Kazakh, Uzbek and Somali
+• iPhone and iPad
+
+YOUR VOICE STAYS ON YOUR DEVICE
+Your recitation is checked on the device by the app's own speech model and then discarded. Nothing is uploaded, there is no account, no analytics and no tracking. Reading, translations, tafsir, search, memorization and recitation checking all work without internet.
+
+A GIFT, NOT A PRODUCT
+No ads, no subscriptions, no purchases — free for everyone, forever. Tahfeez AI is open source: github.com/Omar-8/TahfeezAI
+
+The recitation model is young and still learning: it may miss a mistake or flag a correct word. Every version gets better — your feedback helps: tahfeez.ai.app@gmail.com
+
+With thanks to Tanzil, the King Fahd Complex, Quran Engine, QUL (Tarteel), QuranEnc, quran.com, the reciters, and the authors of the Muaalem model and of every dataset listed in the app's About screen.

@@ -57,7 +57,7 @@ class MeaningPackStore {
   final Directory temp;
   final Future<String> Function(String asset) loadString;
 
-  /// (Android's, in the app: BundledDatabaseInstaller.nativeUnpack.)
+  /// (The platform's, in the app: BundledDatabaseInstaller.nativeUnpack.)
   final DatabaseUnpacker unpack;
 
   Map<String, dynamic>? _manifest;

@@ -87,10 +87,12 @@ Future<void> bootstrap() async {
     logger: logger,
     storage: container.read(browserStorageProvider),
   );
-  // On Android the ready-made databases are unpacked into place; the web
-  // (and iOS, for now) imports the datasets.
+  // On Android and iOS the ready-made databases are unpacked into place;
+  // the web imports the datasets.
   Future<String?> setUp() async {
-    if (kIsWeb || defaultTargetPlatform != TargetPlatform.android) {
+    if (kIsWeb ||
+        (defaultTargetPlatform != TargetPlatform.android &&
+            defaultTargetPlatform != TargetPlatform.iOS)) {
       return seeder.seedIfNeeded();
     }
     final installer = BundledDatabaseInstaller(

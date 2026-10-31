@@ -19,12 +19,12 @@ typedef DatabaseUnpacker = Future<String> Function(
 /// (`openConnection`'s default: `<documents>/<name>.sqlite`) — at the first
 /// start, and again when the app brings new ones.
 ///
-/// Android only; elsewhere the bundled datasets are still imported
+/// Android and iOS; on the web the bundled datasets are still imported
 /// ([BundledDatasetSeeder]). Unpacking replaces that import on the phone:
 /// nothing to decode or insert (it needed a lot of memory and time, and
-/// failed on some phones). Android's own code unpacks (xz, streamed: little
-/// memory, native speed); each database is checked against its hash before
-/// it replaces the old one.
+/// failed on some phones). The platform's own code unpacks (xz, streamed:
+/// little memory, native speed); each database is checked against its hash
+/// before it replaces the old one.
 class BundledDatabaseInstaller {
   BundledDatabaseInstaller({
     required this.storage,
@@ -51,7 +51,8 @@ class BundledDatabaseInstaller {
 
   static const _channel = MethodChannel('tahfeez/bundled_db');
 
-  /// Android's own code unpacking an xz asset (BundledDatabaseChannel.kt).
+  /// The platform's own code unpacking an xz asset (Android's
+  /// BundledDatabaseChannel.kt, iOS's BundledDatabaseChannel.swift).
   static Future<String> nativeUnpack(String asset, String destination) async =>
       (await _channel.invokeMethod<String>('unpack', {
         'asset': asset,

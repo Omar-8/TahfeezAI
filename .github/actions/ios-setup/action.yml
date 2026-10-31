@@ -1,0 +1,80 @@
+# Everything an iOS build needs on GitHub's Mac runner, as ios.yml sets it
+# up: the newest Xcode, Flutter, the Mushaf engine, generated code, the
+# Qur'an data (from the private QUL sources) and the acoustic model.
+# Used by ios-screenshots.yml and ios-release.yml (ios.yml keeps its own
+# copy of these steps).
+name: iOS setup
+description: Xcode, Flutter, engine, generated code, Qur'an data and model for an iOS build
+inputs:
+  qul-sources-key:
+    description: The read-only deploy key of Omar-8/TahfeezAI-qul-sources
+    required: true
+  github-token:
+    description: For downloading the model release
+    required: true
+runs:
+  using: composite
+  steps:
+    - uses: actions/checkout@v4
+      with:
+        repository: Omar-8/TahfeezAI-qul-sources
+        ssh-key: ${{ inputs.qul-sources-key }}
+        path: qul-sources
+    - name: QUL sources
+      shell: bash
+      run: mkdir -p tool/quran_data/sources && cp qul-sources/*.zip tool/quran_data/sources/ && rm -rf qul-sources
+
+    - name: Xcode
+      shell: bash
+      run: |
+        xcode=$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)
+        sudo xcode-select -s "$xcode"
+        xcodebuild -version
+
+    - uses: subosito/flutter-action@v2
+      with:
+        flutter-version: 3.47.3
+        channel: stable
+        cache: true
+
+    - name: Rust targets cache
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+        key: cargo-${{ runner.os }}-qvp-v0.2.2
+
+    - name: Mushaf engine
+      shell: bash
+      run: bash third_party/qvp_flutter/scripts/build-engine-ios.sh
+
+    - name: Dependencies and generated code
+      shell: bash
+      run: |
+        flutter pub get
+        dart run build_runner build --delete-conflicting-outputs
+        flutter gen-l10n
+
+    - name: Quran data cache
+      uses: actions/cache@v4
+      with:
+        path: |
+          tool/quran_data/.cache
+          assets/quran/quran_engine
+        key: quran-data-${{ hashFiles('tool/quran_data/**/*.dart', 'tool/quran_engine/fetch_page_data.sh') }}
+
+    - name: Acoustic model
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+      run: |
+        gh release download model-v3.7 --dir assets/models --clobber
+        python3 -c "import hashlib,json; m=json.load(open('assets/models/quran_acoustic.json')); h=hashlib.sha256(open('assets/models/quran_acoustic.onnx','rb').read()).hexdigest(); assert h==m['sha256'], h; print('model ok', m['id'])"
+
+    - name: Mushaf pages and Qur'an data
+      shell: bash
+      run: |
+        [ -f assets/quran/quran_engine/pages/604.qvp ] || bash tool/quran_engine/fetch_page_data.sh --all
+        [ -d tool/quran_data/.cache ] || dart run tool/quran_data/fetch_sources.dart
+        dart run tool/quran_data/build_production_data.dart

@@ -3,12 +3,14 @@ import Flutter
 import UIKit
 
 /// TahfeezAI's own channels on iOS (Android: MainActivity.kt and
-/// QuranAcousticModelChannel.kt): the acoustic model, the mistake alert
-/// and keeping the screen on while the on-device recitation AI listens.
+/// QuranAcousticModelChannel.kt, BundledDatabaseChannel.kt): the acoustic
+/// model, the ready-made Quran databases, the mistake alert and keeping the
+/// screen on while the on-device recitation AI listens.
 public class TahfeezIosPlugin: NSObject, FlutterPlugin {
   public static func register(with registrar: FlutterPluginRegistrar) {
     let messenger = registrar.messenger()
     QuranAcousticModelChannel.attach(messenger)
+    BundledDatabaseChannel.attach(messenger)
 
     FlutterMethodChannel(name: "tahfeez/screen", binaryMessenger: messenger)
       .setMethodCallHandler { call, result in

@@ -15,11 +15,15 @@ differs only in the compiled Dart code).
 | Mushaf engine (Rust, dart:ffi) | `third_party/qvp_flutter/ios/`, `scripts/build-engine-ios.sh` (patch 0004, `PATCHES.md`) | Needs `qvp_ffi.xcframework` built on a Mac |
 | Engine backend chosen on iOS | `mushaf_quran_engine_providers.dart` | The ffi backend (as Android) |
 | Acoustic model (ONNX Runtime) | `packages/tahfeez_ios/ios/Classes/QuranAcousticModelChannel.swift` | Port of `QuranAcousticModelChannel.kt`, same channel and methods; CPU, Core ML (`nnapi`/`coreml`) or XNNPACK |
+| Ready-made Qur'an databases | `packages/tahfeez_ios/ios/Classes/BundledDatabaseChannel.swift` | Port of `BundledDatabaseChannel.kt` (xz via Apple's Compression): unpacked at the first start, as on Android, instead of importing the datasets |
 | Mistake alert, screen on | `packages/tahfeez_ios/ios/Classes/TahfeezIosPlugin.swift` | Haptic (`.error`) and a system tock; idle timer off |
 | Recitation, on-device AI, mistake alert row | recitation providers, `recitation_ai_config.dart`, Hifz settings | Enabled on iOS as on Android |
 | Daily reminder | `daily_reminder_scheduler.dart`, `AppDelegate.swift` | Darwin settings; permission asked when turned on |
 | Microphone text, background audio, languages | `ios/Runner/Info.plist` | `NSMicrophoneUsageDescription` (English only so far), `UIBackgroundModes: audio`, six `CFBundleLocalizations` |
 | Store | `app_store_service.dart` | No in-app updates on iOS; rating via the in-app prompt; `kAppStoreUrl` empty until the listing exists |
+
+Releasing (App ID, certificate, profile, TestFlight, screenshots), with no
+Mac: `docs/IOS_RELEASE.md`.
 
 ## Steps on the Mac
 

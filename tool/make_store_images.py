@@ -70,14 +70,13 @@ def font(path, size, weight="Regular"):
 
 
 def gradient(top, bottom):
-    img = Image.new("RGB", (W, H), top)
-    px = img.load()
+    # One column, stretched across (the same pixels, drawn once).
+    column = Image.new("RGB", (1, H), top)
+    px = column.load()
     for y in range(H):
         t = y / (H - 1)
-        c = tuple(round(top[i] + (bottom[i] - top[i]) * t) for i in range(3))
-        for x in range(W):
-            px[x, y] = c
-    return img
+        px[0, y] = tuple(round(top[i] + (bottom[i] - top[i]) * t) for i in range(3))
+    return column.resize((W, H), Image.NEAREST)
 
 
 def glow(img, centre, radius, colour, alpha):
@@ -113,46 +112,51 @@ def wrap(draw, text, f, width):
 
 
 def frame(shot: Path, headline, sub, dark, arabic):
+    # Sizes are for the 1242-wide canvas; other canvases (the App Store's,
+    # make_app_store_images.py) scale them.
+    def z(v):
+        return round(v * W / 1242)
+
     if dark:
         bg = gradient(NIGHT, NIGHT_GREEN).convert("RGBA")
-        glow(bg, (W // 2, int(H * 0.62)), 520, ACCENT, 70)
+        glow(bg, (W // 2, int(H * 0.62)), z(520), ACCENT, 70)
         head_c, sub_c, bezel = (236, 242, 239), MINT, (8, 12, 10)
     else:
         bg = gradient(CREAM, MINT_PALE).convert("RGBA")
-        glow(bg, (W // 2, int(H * 0.64)), 520, MINT, 60)
+        glow(bg, (W // 2, int(H * 0.64)), z(520), MINT, 60)
         head_c, sub_c, bezel = INK, EMERALD, (24, 32, 29)
     d = ImageDraw.Draw(bg)
 
     # The caption: headline, then its line, centred.
     face = AR_FONT if arabic else UI_FONT
-    hf, sf = font(face, 78, "Bold"), font(face, 40, "Regular")
+    hf, sf = font(face, z(78), "Bold"), font(face, z(40), "Regular")
     direction = "rtl" if arabic else None
-    y = 120
-    for line in wrap(d, headline, hf, W - 160):
+    y = z(120)
+    for line in wrap(d, headline, hf, W - z(160)):
         d.text((W // 2, y), line, font=hf, fill=head_c, anchor="ma", direction=direction)
-        y += 122 if arabic else 96  # (the Arabic font's lines are taller)
-    y += 14
-    for line in wrap(d, sub, sf, W - 200):
+        y += z(122) if arabic else z(96)  # (the Arabic font's lines are taller)
+    y += z(14)
+    for line in wrap(d, sub, sf, W - z(200)):
         d.text((W // 2, y), line, font=sf, fill=sub_c, anchor="ma", direction=direction)
-        y += 54
+        y += z(54)
     # A small gold rule under the caption.
-    d.rounded_rectangle((W // 2 - 40, y + 18, W // 2 + 40, y + 24), 3, fill=GOLD)
+    d.rounded_rectangle((W // 2 - z(40), y + z(18), W // 2 + z(40), y + z(24)), z(3), fill=GOLD)
 
     # The phone: the screenshot in a bezel, a soft shadow below it.
     screen = Image.open(shot).convert("RGB")
     sh = round(screen.height * PHONE_W / screen.width)
     screen = screen.resize((PHONE_W, sh), Image.LANCZOS)
-    top = max(y + 70, H - sh - 40)
-    pad = 16
+    top = max(y + z(70), H - sh - z(40))
+    pad = z(16)
     bx = (W - PHONE_W) // 2 - pad
     shadow = Image.new("RGBA", bg.size, (0, 0, 0, 0))
     ImageDraw.Draw(shadow).rounded_rectangle(
-        (bx + 10, top + 30, bx + PHONE_W + 2 * pad - 10, top + sh + 2 * pad + 40),
-        78, fill=(0, 0, 0, 120 if dark else 70))
-    bg.alpha_composite(shadow.filter(ImageFilter.GaussianBlur(36)))
+        (bx + z(10), top + z(30), bx + PHONE_W + 2 * pad - z(10), top + sh + 2 * pad + z(40)),
+        z(78), fill=(0, 0, 0, 120 if dark else 70))
+    bg.alpha_composite(shadow.filter(ImageFilter.GaussianBlur(z(36))))
     ImageDraw.Draw(bg).rounded_rectangle(
-        (bx, top, bx + PHONE_W + 2 * pad, top + sh + 2 * pad), 76, fill=bezel)
-    bg.alpha_composite(rounded(screen, 60), (bx + pad, top + pad))
+        (bx, top, bx + PHONE_W + 2 * pad, top + sh + 2 * pad), z(76), fill=bezel)
+    bg.alpha_composite(rounded(screen, z(60)), (bx + pad, top + pad))
     return bg.convert("RGB")
 
 

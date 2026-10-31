@@ -1,0 +1,141 @@
+# A signed App Store build, uploaded to App Store Connect (TestFlight
+# first; submitted for review from App Store Connect). Run by hand.
+#
+# Secrets (docs/IOS_RELEASE.md says how each is made):
+#   IOS_TEAM_ID              the Apple developer team's ID (10 characters)
+#   IOS_DIST_P12_BASE64      the Apple Distribution certificate and its key (.p12), base64
+#   IOS_DIST_P12_PASSWORD    that .p12's password
+#   IOS_PROFILE_BASE64       the App Store provisioning profile (.mobileprovision), base64
+#   ASC_KEY_ID               the App Store Connect API key's ID
+#   ASC_ISSUER_ID            its issuer ID
+#   ASC_KEY_P8_BASE64        the key itself (AuthKey_<id>.p8), base64
+name: iOS release
+
+on:
+  workflow_dispatch:
+    inputs:
+      upload:
+        description: Upload to App Store Connect (off = build the .ipa only)
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    runs-on: macos-15
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/ios-setup
+        with:
+          qul-sources-key: ${{ secrets.QUL_SOURCES_KEY }}
+          github-token: ${{ github.token }}
+
+      # A keychain of this run's own with the certificate; the profile
+      # where Xcode looks. Both gone with the runner.
+      - name: Certificate and profile
+        shell: bash
+        env:
+          P12: ${{ secrets.IOS_DIST_P12_BASE64 }}
+          P12_PASSWORD: ${{ secrets.IOS_DIST_P12_PASSWORD }}
+          PROFILE: ${{ secrets.IOS_PROFILE_BASE64 }}
+        run: |
+          set -eo pipefail
+          keychain="$RUNNER_TEMP/signing.keychain-db"
+          password=$(openssl rand -hex 16)
+          echo "$P12" | base64 --decode > "$RUNNER_TEMP/dist.p12"
+          security create-keychain -p "$password" "$keychain"
+          security set-keychain-settings -lut 21600 "$keychain"
+          security unlock-keychain -p "$password" "$keychain"
+          security import "$RUNNER_TEMP/dist.p12" -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k "$keychain"
+          security set-key-partition-list -S apple-tool:,apple: -k "$password" "$keychain" > /dev/null
+          security list-keychains -d user -s "$keychain" $(security list-keychains -d user | tr -d '"')
+          rm "$RUNNER_TEMP/dist.p12"
+
+          echo "$PROFILE" | base64 --decode > "$RUNNER_TEMP/app.mobileprovision"
+          security cms -D -i "$RUNNER_TEMP/app.mobileprovision" > "$RUNNER_TEMP/profile.plist"
+          uuid=$(/usr/libexec/PlistBuddy -c 'Print UUID' "$RUNNER_TEMP/profile.plist")
+          name=$(/usr/libexec/PlistBuddy -c 'Print Name' "$RUNNER_TEMP/profile.plist")
+          dir="$HOME/Library/MobileDevice/Provisioning Profiles"
+          mkdir -p "$dir"
+          cp "$RUNNER_TEMP/app.mobileprovision" "$dir/$uuid.mobileprovision"
+          echo "PROFILE_NAME=$name" >> "$GITHUB_ENV"
+          echo "profile: $name ($uuid)"
+
+      # Manual signing for the app's target only (the pods sign nothing),
+      # in this run's copy of the project.
+      - name: Signing settings
+        shell: bash
+        env:
+          TEAM: ${{ secrets.IOS_TEAM_ID }}
+        run: |
+          python3 - <<'EOF'
+          import os
+          path = 'ios/Runner.xcodeproj/project.pbxproj'
+          s = open(path).read()
+          line = 'PRODUCT_BUNDLE_IDENTIFIER = ai.tahfeez.tahfeezAi;'
+          signing = (
+              line + '\n'
+              '\t\t\t\tCODE_SIGN_STYLE = Manual;\n'
+              f'\t\t\t\tDEVELOPMENT_TEAM = {os.environ["TEAM"]};\n'
+              f'\t\t\t\tPROVISIONING_PROFILE_SPECIFIER = "{os.environ["PROFILE_NAME"]}";\n'
+              '\t\t\t\t"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Distribution";'
+          )
+          assert s.count(line) == 3, s.count(line)  # Debug, Release, Profile
+          s = s.replace(line, signing)
+          open(path, 'w').write(s)
+          EOF
+          cat > ios/ExportOptions.plist <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key><string>app-store-connect</string>
+            <key>teamID</key><string>$TEAM</string>
+            <key>signingStyle</key><string>manual</string>
+            <key>signingCertificate</key><string>Apple Distribution</string>
+            <key>provisioningProfiles</key>
+            <dict><key>ai.tahfeez.tahfeezAi</key><string>$PROFILE_NAME</string></dict>
+            <key>uploadSymbols</key><true/>
+          </dict>
+          </plist>
+          EOF
+
+      # The version and build number are pubspec.yaml's (as on Android).
+      - name: Build the .ipa
+        shell: bash
+        run: |
+          set -eo pipefail
+          flutter build ipa --release --export-options-plist=ios/ExportOptions.plist 2>&1 | tee build.log
+          ls -la build/ios/ipa/
+
+      - name: Upload to App Store Connect
+        if: inputs.upload
+        shell: bash
+        env:
+          KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ISSUER: ${{ secrets.ASC_ISSUER_ID }}
+          KEY: ${{ secrets.ASC_KEY_P8_BASE64 }}
+        run: |
+          set -eo pipefail
+          mkdir -p ~/.appstoreconnect/private_keys
+          echo "$KEY" | base64 --decode > ~/.appstoreconnect/private_keys/AuthKey_$KEY_ID.p8
+          xcrun altool --upload-app --type ios \
+            --file "$(ls build/ios/ipa/*.ipa | head -1)" \
+            --apiKey "$KEY_ID" --apiIssuer "$ISSUER"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ios-release
+          path: |
+            build/ios/ipa/*.ipa
+            build.log
+          if-no-files-found: warn
+
+      - name: Remove the keychain
+        if: always()
+        shell: bash
+        run: security delete-keychain "$RUNNER_TEMP/signing.keychain-db" || true
