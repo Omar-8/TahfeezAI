@@ -37,29 +37,36 @@ jobs:
           set -o pipefail
           now() { perl -MTime::HiRes=time -e 'printf "%.3f\n", time'; }
           stamp() { perl -MTime::HiRes=time -ne '$|=1; printf "%.3f %s", time, $_'; }
-          # The newest device type whose name has $1, on the newest iOS.
+          # A device type: the first of $2.. (exact names; ones known to work
+          # with flutter drive — on the iPhone 17 Pro Max it never attached)
+          # on the runner, else the newest whose name has $1; newest iOS.
           pick() {
             xcrun simctl list -j | python3 -c "
-          import json, sys
+          import json, re, sys
           data = json.load(sys.stdin)
           runtime = [r for r in data['runtimes'] if r['platform'] == 'iOS' and r['isAvailable']][-1]
-          import re
-          types = [t for t in data['devicetypes'] if '$1' in t['name']]
+          types = [t for t in data['devicetypes'] if sys.argv[1] in t['name']]
           if not types:
               sys.exit(1)
+          by_name = {t['name']: t for t in types}
+          preferred = [by_name[n] for n in sys.argv[2:] if n in by_name]
           # The newest by the numbers in its name (iPhone 17 > 11, M5 > M4).
-          newest = max(types, key=lambda t: [int(n) for n in re.findall(r'\\d+', t['name'])])
-          print(newest['identifier'], runtime['identifier'])"
+          chosen = preferred[0] if preferred else max(
+              types, key=lambda t: [int(n) for n in re.findall(r'\\d+', t['name'])])
+          print(chosen['identifier'], runtime['identifier'])" "$@"
           }
+          # At most [seconds] for a command (a hung flutter drive otherwise
+          # holds the whole step until its time-out).
+          limit() { perl -e 'alarm shift; exec @ARGV' "$@"; }
           mkdir -p shots previews
           for device in iphone ipad duo; do
             case $device in
-              iphone) match="Pro Max" ;;
-              ipad) match="iPad Pro 13-inch" ;;
-              duo) match="iPhone Duo" ;;
+              iphone) found=$(pick "Pro Max" "iPhone 16 Pro Max" "iPhone 17 Pro Max") ;;
+              ipad) found=$(pick "iPad Pro 13-inch" "iPad Pro 13-inch (M4)") ;;
+              duo) found=$(pick "iPhone Duo") ;;
             esac
-            if ! found=$(pick "$match"); then
-              echo "::warning::No '$match' simulator on this runner: $device skipped"
+            if [ -z "$found" ]; then
+              echo "::warning::No $device simulator on this runner: skipped"
               continue
             fi
             read -r type runtime <<< "$found"
@@ -72,7 +79,7 @@ jobs:
               --batteryState charged --batteryLevel 100
 
             rm -rf screenshots
-            flutter drive \
+            limit 1500 flutter drive \
               --driver=test_driver/integration_test.dart \
               --target=integration_test/store_screenshots_test.dart \
               -d "$udid" 2>&1 | tee "shots-$device.log" || echo "::warning::$device screenshots failed"
@@ -84,7 +91,7 @@ jobs:
             recorder=$!
             sleep 2
             started=$(now)
-            flutter drive \
+            limit 1500 flutter drive \
               --driver=test_driver/integration_test.dart \
               --target=integration_test/app_preview_test.dart \
               -d "$udid" 2>&1 | stamp | tee "preview-$device.log" || echo "::warning::$device preview failed"
