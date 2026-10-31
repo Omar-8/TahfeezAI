@@ -1,0 +1,49 @@
+Kur'an'ı cebindeki bir dinleyiciyle ezberle.
+
+Medine Mushafı'nı oku, her kelimeyi anla ve ezberden oku; cihazındaki yapay zekâ seni takip etsin: kayan kelimeyi, atlanan ayeti ve eksik kalan meddi yakalar. Ücretsiz, çevrimdışı, reklamsız, hesapsız.
+
+EZBERDEN OKU, GERİ BİLDİRİM AL
+• Sayfayı gizle ve oku: her kelime sen söyledikçe açılır
+• Kelimeler okudukça renklenir: doğru, yanlış, atlanmış veya hatalı telaffuz; doğru kelime yumuşakça parlar, hata sallanır, biten sayfa hafif bir titreşimle parlar
+• Durdur düğmesinin etrafındaki halka sesinle nefes alır; duyulduğunu bilirsin
+• Neyi değil, nasıl okuduğunu da duyar: harfler, harekeler, şedde ve kelime sonları, Hafs rivayetine göre ses ses
+• Tecvid de kontrol edilir: med uzunluğu, kalkale, gunne (ihfa, iklab, idgam, şeddeli nun ve mimde gunne), kalın ve ince harfler, boğaz harfleri; her kural açılıp kapatılabilir
+• Kontrolün ne kadar sıkı olacağını seç: hoşgörülü, dengeli veya hassas
+• Hata olunca titreşim veya ses; tecvid hataları için ayrı uyarı
+• Telaffuz ve tecvid hatalarının renklerini seç
+• Bir ayeti tekrarla, bir kâriyi takip et veya bütün bir sayfada kendini sına
+
+OKU VE ANLA
+• Medine Mushafı sayfa sayfa, basıldığı gibi; ya da ayet ayet, kaydırarak veya kesintisiz akışta
+• Kelime kelime anlam ve okunuş; Arapça olarak da, es-Sirâc'tan
+• 18 dilde meal ve her ayetin yanında tefsir, senin dilinde
+• Sure adları Mushaf'ın kendi hattıyla; yalnızca sayfa için odak modu
+• Tüm Kur'an'da Arapça veya mealde arama
+• Yer imleri ve sayfada renklendirilmiş konu bölümleri
+
+DİNLE
+• Alafasy, el-Husarî, el-Minşâvî, Abdulbâsıt ve es-Sudeys dahil 28 kâri
+• Okunan ayet ışıldar; bir ayeti veya aralığı tekrarla
+• Bir kâriyi indirip çevrimdışı dinle; ekran kapalıyken de çalmaya devam eder
+
+PLANLA EZBERLE
+• Günlük ders ve aralıklı tekrar
+• Gizleme modu, döngü ve takip
+• Her bölümün sağlamlığı izlenir; neyi tekrarlayacağını bilirsin
+• Serin, okuduğun günlerin takvimi, 30 cüzlük halka ve hoş kilometre taşları
+
+ZEVKİNE GÖRE
+• Günün saatinin renklerinde bir gökyüzü, cam kartlar ve İslami geometrik desen
+• Açık, koyu, sıcak, sepya ve siyah temalar; 4 Kur'an yazı tipi; %200'e kadar metin
+• 19 dilde: Arapça, İngilizce, Almanca, Fransızca, İspanyolca, Rusça, Türkçe, Endonezce, Malayca, Urduca, Farsça, Bengalce, Hausaca, Kürtçe, Peştuca, Svahili, Kazakça, Özbekçe ve Somalice
+• iPhone ve iPad
+
+SESİN CİHAZINDA KALIR
+Okuman, uygulamanın kendi ses modeliyle cihazda kontrol edilir ve sonra silinir. Hiçbir şey yüklenmez; hesap, analiz ve takip yoktur. Okuma, mealler, tefsir, arama, ezber ve okuma kontrolü internetsiz çalışır.
+
+BİR ÜRÜN DEĞİL, BİR HEDİYE
+Reklam, abonelik ve satın alma yok; herkes için sonsuza dek ücretsiz. Tahfeez AI açık kaynaklıdır: github.com/Omar-8/TahfeezAI
+
+Okuma modeli henüz genç ve öğreniyor: bir hatayı kaçırabilir ya da doğru bir kelimeyi işaretleyebilir. Her sürüm daha iyi; geri bildirimin yardımcı olur: tahfeez.ai.app@gmail.com
+
+Tanzil'e, Kral Fahd Kompleksi'ne, Quran Engine'e, QUL'a (Tarteel), QuranEnc'e, quran.com'a, kârilere ve Muaalem modelinin ve uygulamanın Hakkında ekranında listelenen tüm veri setlerinin yazarlarına teşekkürler.

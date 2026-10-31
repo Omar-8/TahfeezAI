@@ -1,0 +1,49 @@
+Hifadhi Qur'ani ukiwa na msikilizaji mfukoni mwako.
+
+Soma Msahafu wa Madina, elewa kila neno, na usome kwa moyo huku AI kwenye kifaa chako ikikufuatilia — inanasa neno lililoteleza, aya iliyorukwa na madd isiyotimia. Bure, bila intaneti, bila matangazo, bila akaunti.
+
+SOMA KWA MOYO, UPATE MAREKEBISHO
+• Ficha ukurasa na usome: kila neno linaonekana unapolitamka
+• Maneno hupakwa rangi unaposoma: sahihi, kosa, lililorukwa au lililotamkwa vibaya — neno sahihi linang'aa kwa upole, kosa linayumba, na ukurasa uliokamilika unang'aa kwa mtetemo mwepesi
+• Pete kuzunguka kitufe cha kusimamisha inapumua pamoja na sauti yako, ili ujue unasikika
+• Inasikia jinsi unavyosoma, si tu unachosoma: herufi, irabu, shadda na miisho ya maneno, sauti kwa sauti kwa kisomo cha Hafs
+• Tajwidi pia inakaguliwa: urefu wa madd, qalqala, ghunna (ikhfa, iqlab, idgham, nun na mim zenye shadda), herufi nzito na nyepesi, herufi za koo — kila kanuni inaweza kuwashwa au kuzimwa
+• Chagua ukali wa ukaguzi: mpole, wa wastani au makini
+• Mtetemo au sauti kosa linapotokea, na tahadhari tofauti kwa makosa ya tajwidi
+• Chagua rangi za makosa ya matamshi na ya tajwidi
+• Rudia aya, fuata msomaji, au jipime kwa ukurasa mzima
+
+SOMA NA UELEWE
+• Msahafu wa Madina ukurasa kwa ukurasa, kama ulivyochapishwa — au aya kwa aya, kwa kutelezesha au mfululizo
+• Maana na tafsiri ya matamshi neno kwa neno — pia kwa Kiarabu, kutoka al-Siraj
+• Tafsiri katika lugha 18 na tafsiri ya maelezo kando ya kila aya, kwa lugha yako
+• Majina ya sura kwa hati ya Msahafu wenyewe; hali ya kuzingatia kwa ukurasa peke yake
+• Tafuta katika Qur'ani nzima, kwa Kiarabu au katika tafsiri
+• Alamisho na vifungu vya mada vilivyopakwa rangi kwenye ukurasa
+
+SIKILIZA
+• Wasomaji 28, wakiwemo Alafasy, Al-Husary, Al-Minshawi, Abdul Basit na As-Sudais
+• Aya huwaka inaposomwa; rudia aya moja au sehemu
+• Pakua msomaji ili usikilize bila intaneti; usomaji unaendelea skrini ikiwa imezimwa
+
+HIFADHI KWA MPANGO
+• Somo la kila siku na marudio yenye vipindi
+• Hali ya kuficha, kurudia na kufuatilia
+• Uimara wa kila sehemu unafuatiliwa, ili ujue cha kurudia
+• Mfululizo wa siku zako, kalenda ya siku ulizosoma, pete ya juzuu 30 na hatua ndogo za mafanikio
+
+KWA LADHA YAKO
+• Anga lenye rangi za wakati wa siku, kadi za kioo na muundo wa kijiometri wa Kiislamu
+• Mandhari angavu, giza, joto, sepia na nyeusi; fonti 4 za Qur'ani; maandishi hadi 200%
+• Kwa lugha 19: Kiarabu, Kiingereza, Kijerumani, Kifaransa, Kihispania, Kirusi, Kituruki, Kiindonesia, Kimalei, Kiurdu, Kiajemi, Kibengali, Kihausa, Kikurdi, Kipashto, Kiswahili, Kikazakh, Kiuzbeki na Kisomali
+• iPhone na iPad
+
+SAUTI YAKO INABAKI KWENYE KIFAA CHAKO
+Kisomo chako kinakaguliwa kwenye kifaa na modeli ya sauti ya programu yenyewe, kisha kinafutwa. Hakuna kinachopakiwa; hakuna akaunti, takwimu wala ufuatiliaji. Kusoma, tafsiri, tafsiri ya maelezo, utafutaji, kuhifadhi na ukaguzi wa kisomo vyote hufanya kazi bila intaneti.
+
+ZAWADI, SI BIDHAA
+Hakuna matangazo, usajili wala ununuzi — bure kwa wote, milele. Tahfeez AI ni chanzo huria: github.com/Omar-8/TahfeezAI
+
+Modeli ya kisomo bado ni changa na inajifunza: inaweza kukosa kosa au kuweka alama kwenye neno sahihi. Kila toleo ni bora zaidi — maoni yako yanasaidia: tahfeez.ai.app@gmail.com
+
+Shukrani kwa Tanzil, Kituo cha Mfalme Fahd, Quran Engine, QUL (Tarteel), QuranEnc, quran.com, wasomaji, na waandishi wa modeli ya Muaalem na kila seti ya data iliyoorodheshwa kwenye skrini ya Kuhusu ya programu.

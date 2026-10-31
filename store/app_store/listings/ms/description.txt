@@ -1,0 +1,49 @@
+Hafaz Al-Quran dengan pendengar di dalam poket anda.
+
+Baca Mushaf Madinah, fahami setiap perkataan, dan baca dari ingatan sementara AI pada peranti anda mengikuti — menangkap perkataan yang tergelincir, ayat yang tertinggal dan mad yang tidak cukup panjang. Percuma, luar talian, tanpa iklan, tanpa akaun.
+
+TASMIK DARI INGATAN, DENGAN TEGURAN
+• Sembunyikan halaman dan baca: setiap perkataan muncul apabila anda menyebutnya
+• Perkataan diwarnakan semasa anda membaca: betul, salah, tertinggal atau salah sebutan — perkataan yang betul bercahaya lembut, kesilapan bergoyang, dan halaman yang selesai bersinar dengan getaran lembut
+• Gelang di sekeliling butang berhenti bernafas bersama suara anda, jadi anda tahu anda didengari
+• Mendengar bagaimana anda membaca, bukan hanya apa: huruf, baris, sabdu dan hujung perkataan, bunyi demi bunyi mengikut riwayat Hafs
+• Tajwid juga disemak: panjang mad, qalqalah, dengung (ikhfa', iqlab, idgham, nun dan mim bersabdu), huruf tebal dan nipis, huruf halqi — setiap hukum boleh dihidupkan atau dimatikan
+• Pilih tahap ketegasan semakan: longgar, seimbang atau teliti
+• Getaran atau bunyi apabila tersilap, dengan amaran berasingan untuk tajwid
+• Pilih warna kesilapan sebutan dan tajwid
+• Ulang satu ayat, ikut qari, atau uji diri pada satu halaman penuh
+
+BACA DAN FAHAMI
+• Mushaf Madinah halaman demi halaman, sama seperti cetakannya — atau ayat demi ayat, dileret atau skrol berterusan
+• Makna dan transliterasi kata demi kata — juga dalam bahasa Arab, daripada al-Siraj
+• Terjemahan dalam 18 bahasa dan tafsir di sebelah setiap ayat, dalam bahasa anda
+• Nama surah dalam khat mushaf; mod fokus untuk halaman sahaja
+• Cari dalam seluruh Al-Quran, dalam bahasa Arab atau terjemahan
+• Penanda buku dan petikan bertema diwarnakan pada halaman
+
+DENGAR
+• 28 qari, termasuk Alafasy, Al-Husary, Al-Minshawi, Abdul Basit dan As-Sudais
+• Ayat menyala semasa dibacakan; ulang satu ayat atau julat ayat
+• Muat turun qari untuk mendengar luar talian; main balik diteruskan walaupun skrin dimatikan
+
+HAFAZ DENGAN PELAN
+• Pelajaran harian dan ulang kaji berjarak
+• Mod sembunyi, ulang dan ikut bacaan
+• Kekuatan setiap bahagian dijejak, jadi anda tahu apa yang perlu diulang kaji
+• Rentetan hari anda, kalendar hari-hari anda membaca, gelang 30 juzuk dan pencapaian kecil
+
+IKUT CITA RASA ANDA
+• Langit dengan warna mengikut waktu, kad kaca dan corak geometri Islam
+• Tema cerah, gelap, hangat, sepia dan hitam; 4 fon Al-Quran; teks sehingga 200%
+• Dalam 19 bahasa: Arab, Inggeris, Jerman, Perancis, Sepanyol, Rusia, Turki, Indonesia, Melayu, Urdu, Parsi, Bengali, Hausa, Kurdi, Pashto, Swahili, Kazakh, Uzbek dan Somali
+• iPhone dan iPad
+
+SUARA ANDA KEKAL DI PERANTI ANDA
+Bacaan anda disemak pada peranti oleh model suara aplikasi sendiri, kemudian dibuang. Tiada apa yang dimuat naik; tiada akaun, tiada analitik, tiada penjejakan. Bacaan, terjemahan, tafsir, carian, hafazan dan semakan bacaan semuanya berfungsi tanpa internet.
+
+HADIAH, BUKAN PRODUK
+Tanpa iklan, tanpa langganan, tanpa pembelian — percuma untuk semua, selamanya. Tahfeez AI ialah sumber terbuka: github.com/Omar-8/TahfeezAI
+
+Model bacaan ini masih baharu dan sedang belajar: ia mungkin terlepas kesilapan atau menandakan perkataan yang betul. Setiap versi semakin baik — maklum balas anda membantu: tahfeez.ai.app@gmail.com
+
+Terima kasih kepada Tanzil, Kompleks Raja Fahd, Quran Engine, QUL (Tarteel), QuranEnc, quran.com, para qari, serta penyusun model Muaalem dan setiap set data yang disenaraikan di skrin Perihal aplikasi.
