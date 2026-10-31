@@ -1,0 +1,70 @@
+<en-US>
+• Faster first start after installing or updating
+• Tablets: Home in two columns, and the Mushaf and Ayah mode fill the whole screen
+• The guide: a word's or ayah's sheet no longer hides under its card, and Next closes it first
+</en-US>
+<ar>
+• تشغيل أول أسرع بعد التثبيت أو التحديث
+• على الأجهزة اللوحية: الرئيسية في عمودين، والمصحف ووضع الآيات بملء الشاشة
+• الدليل: لم تعد نافذة الكلمة أو الآية تختفي تحت بطاقته، و«التالي» يغلقها أولًا
+</ar>
+<bn-BD>
+• ইনস্টল বা হালনাগাদের পর প্রথম চালু আরও দ্রুত
+• ট্যাবলেটে: হোম দুই কলামে, আর মুসহাফ ও আয়াত মোড পুরো স্ক্রিন জুড়ে
+• গাইড: শব্দ বা আয়াতের শিট আর কার্ডের নিচে ঢাকা পড়ে না, আর ‘পরবর্তী’ আগে সেটি বন্ধ করে
+</bn-BD>
+<de-DE>
+• Schnellerer erster Start nach Installation oder Update
+• Tablets: Startseite in zwei Spalten, Mushaf und Aya-Modus füllen den ganzen Bildschirm
+• Anleitung: Das Fenster eines Wortes oder einer Aya liegt nicht mehr unter ihrer Karte, und „Weiter“ schließt es zuerst
+</de-DE>
+<es-ES>
+• Primer inicio más rápido tras instalar o actualizar
+• Tabletas: Inicio en dos columnas, y el Mushaf y el modo aleya ocupan toda la pantalla
+• La guía: la hoja de una palabra o aleya ya no queda bajo su tarjeta, y Siguiente la cierra primero
+</es-ES>
+<fa>
+• اجرای نخست سریع‌تر پس از نصب یا به‌روزرسانی
+• تبلت‌ها: خانه در دو ستون، و مصحف و حالت آیه تمام صفحه را می‌گیرند
+• راهنما: برگهٔ واژه یا آیه دیگر زیر کارت آن پنهان نمی‌شود و «بعدی» نخست آن را می‌بندد
+</fa>
+<fr-FR>
+• Premier démarrage plus rapide après installation ou mise à jour
+• Tablettes : l'accueil sur deux colonnes, le Mushaf et le mode verset occupent tout l'écran
+• Le guide : la fiche d'un mot ou d'un verset ne passe plus sous sa carte, et Suivant la ferme d'abord
+</fr-FR>
+<id>
+• Pembukaan pertama lebih cepat setelah memasang atau memperbarui
+• Tablet: Beranda dalam dua kolom, Mushaf dan mode ayat memenuhi seluruh layar
+• Panduan: lembar kata atau ayat tak lagi tertutup kartunya, dan Berikutnya menutupnya lebih dulu
+</id>
+<kk>
+• Орнатудан не жаңартудан кейінгі алғашқы іске қосу жылдамырақ
+• Планшеттерде: Басты бет екі бағанда, мұсхаф пен аят режимі бүкіл экранды алады
+• Нұсқаулық: сөздің не аяттың парағы енді карточкасының астында қалмайды, ал «Келесі» алдымен оны жабады
+</kk>
+<ms>
+• Pelancaran pertama lebih pantas selepas memasang atau mengemas kini
+• Tablet: Laman Utama dalam dua lajur, Mushaf dan mod ayat memenuhi seluruh skrin
+• Panduan: helaian perkataan atau ayat tidak lagi terlindung di bawah kadnya, dan Seterusnya menutupnya dahulu
+</ms>
+<ru-RU>
+• Более быстрый первый запуск после установки или обновления
+• Планшеты: главная в две колонки, мусхаф и режим аятов на весь экран
+• Руководство: окно слова или аята больше не прячется под его карточкой, а «Далее» сначала закрывает его
+</ru-RU>
+<sw>
+• Kuanza kwa mara ya kwanza kwa kasi zaidi baada ya kusakinisha au kusasisha
+• Kompyuta kibao: Mwanzo katika safu mbili, na Msahafu na hali ya aya zinajaza skrini nzima
+• Mwongozo: karatasi ya neno au aya haifichwi tena chini ya kadi yake, na Ifuatayo inaifunga kwanza
+</sw>
+<tr-TR>
+• Yükleme veya güncellemeden sonra daha hızlı ilk açılış
+• Tabletler: Ana sayfa iki sütunda, Mushaf ve ayet modu tüm ekranı kaplıyor
+• Rehber: kelimenin ya da ayetin penceresi artık kartının altında kalmıyor ve İleri önce onu kapatıyor
+</tr-TR>
+<ur>
+• انسٹال یا اپڈیٹ کے بعد پہلی بار تیز تر آغاز
+• ٹیبلیٹ پر: ہوم دو کالموں میں، اور مصحف اور آیت موڈ پوری اسکرین پر
+• رہنما: لفظ یا آیت کی شیٹ اب اس کے کارڈ کے نیچے نہیں چھپتی، اور ”اگلا“ پہلے اسے بند کرتا ہے
+</ur>

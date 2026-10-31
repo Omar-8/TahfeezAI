@@ -182,3 +182,9 @@ assets/models/*
 /MILESTONES_OVERVIEW.md
 /prompts/
 /docs/reference/
+
+# Kept here, never committed: Apple signing (private key, certificate,
+# profile, API key) and the App Store / layout media made for upload.
+/ios-signing/
+/TahfeezAI-AppStore/
+/TahfeezAI-iPad-layout/
