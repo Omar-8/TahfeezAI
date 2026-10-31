@@ -3,18 +3,22 @@ import Compression
 import Flutter
 import Foundation
 
-/// Unpacks a ready-made Quran database — an xz-compressed Flutter asset
-/// (assets/quran/db/) — into a file, for BundledDatabaseInstaller in Dart:
-/// the iOS twin of Android's `BundledDatabaseChannel.kt`. Streamed (Apple's
-/// Compression framework reads xz as `COMPRESSION_LZMA`), on a background
-/// queue, hashing what it writes. Returns the SHA-256, in hex.
+/// Unpacks a ready-made Quran database — a zlib- (the main ones) or
+/// xz-compressed (the meaning packs) Flutter asset (assets/quran/db/) —
+/// into a file, for BundledDatabaseInstaller in Dart: the iOS twin of
+/// Android's `BundledDatabaseChannel.kt`. Streamed (Apple's Compression
+/// framework: `COMPRESSION_ZLIB`, `COMPRESSION_LZMA`), on background
+/// threads (several at once), hashing what it writes. Returns the SHA-256, in hex.
 enum BundledDatabaseChannel {
   private struct Failure: Error, CustomStringConvertible {
     let description: String
     init(_ description: String) { self.description = description }
   }
 
-  private static let worker = DispatchQueue(label: "tahfeez.bundled_db", qos: .userInitiated)
+  // Concurrent: the databases are unpacked all at once, each on its own
+  // thread.
+  private static let worker = DispatchQueue(
+    label: "tahfeez.bundled_db", qos: .userInitiated, attributes: .concurrent)
 
   static func attach(_ messenger: FlutterBinaryMessenger) {
     FlutterMethodChannel(name: "tahfeez/bundled_db", binaryMessenger: messenger)
@@ -67,7 +71,16 @@ enum BundledDatabaseChannel {
       dst.deallocate()
       stream.deallocate()
     }
-    guard compression_stream_init(stream, COMPRESSION_STREAM_DECODE, COMPRESSION_LZMA)
+    // The main databases are zlib (quick); the meaning packs xz (smaller).
+    // Apple's ZLIB is raw deflate: the zlib header's 2 bytes are skipped
+    // (its checksum at the end is never reached; the SHA-256 checks it all).
+    let zlib = source.hasSuffix(".zlib")
+    if zlib {
+      var header = [UInt8](repeating: 0, count: 2)
+      guard input.read(&header, maxLength: 2) == 2 else { throw Failure("\(source): empty") }
+    }
+    guard compression_stream_init(
+      stream, COMPRESSION_STREAM_DECODE, zlib ? COMPRESSION_ZLIB : COMPRESSION_LZMA)
       == COMPRESSION_STATUS_OK
     else {
       throw Failure("cannot start unpacking")

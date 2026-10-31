@@ -42,11 +42,11 @@ class _Memory implements BrowserStorage {
   final assets = <String, String>{};
   final databases = <String, Object>{};
   for (final MapEntry(key: name, value: text) in contents.entries) {
-    assets['${BundledDatabaseInstaller.assetDir}/$name.sqlite.xz'] = text;
+    assets['${BundledDatabaseInstaller.assetDir}/$name.sqlite.zlib'] = text;
     databases[name] = {
       'sha256': badHash ? 'nope' : sha256.convert(utf8.encode(text)).toString(),
       'bytes': text.length,
-      'asset': '$name.sqlite.xz',
+      'asset': '$name.sqlite.zlib',
     };
   }
   return (
@@ -148,20 +148,15 @@ void main() {
   test(
     'the real bundle unpacks into the Quran',
     () async {
-      // The databases tool/quran_db/build_databases_test.dart built, unpacked
-      // by the xz tool as Android's code would.
+      // The databases tool/quran_db/build_databases_test.dart built (zlib),
+      // unpacked as the phone's code would.
       final real = BundledDatabaseInstaller(
         storage: storage,
         directory: dir,
         logger: LoggingPackageLogger(),
         loadString: (asset) async => File(asset).readAsStringSync(),
         unpack: (asset, destination) async {
-          final out = await Process.run('xz', [
-            '-d',
-            '-c',
-            asset,
-          ], stdoutEncoding: null);
-          final bytes = out.stdout as List<int>;
+          final bytes = zlib.decode(File(asset).readAsBytesSync());
           File(destination).writeAsBytesSync(bytes);
           return sha256.convert(bytes).toString();
         },

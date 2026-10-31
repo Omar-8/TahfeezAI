@@ -9,14 +9,20 @@ import 'package:tahfeez_ai/quran/data/tafsir_database.dart';
 import 'package:tahfeez_ai/quran/data/translation_database.dart';
 import 'package:tahfeez_ai/wbw/data/wbw_database.dart';
 
-/// Unpacks a bundled xz asset as Android's code would (the xz tool here).
+/// Unpacks a bundled asset as the phone's code would: zlib (the main
+/// databases) or xz (the packs; the xz tool here).
 Future<String> _unpack(String asset, String destination) async {
-  final out = await Process.run('xz', [
-    '-d',
-    '-c',
-    asset,
-  ], stdoutEncoding: null);
-  final bytes = out.stdout as List<int>;
+  final List<int> bytes;
+  if (asset.endsWith('.zlib')) {
+    bytes = zlib.decode(File(asset).readAsBytesSync());
+  } else {
+    final out = await Process.run('xz', [
+      '-d',
+      '-c',
+      asset,
+    ], stdoutEncoding: null);
+    bytes = out.stdout as List<int>;
+  }
   File(destination).writeAsBytesSync(bytes);
   return sha256.convert(bytes).toString();
 }
@@ -33,7 +39,7 @@ void main() {
     // The ready-made databases as the phone gets them.
     Future<File> base(String name) async {
       final file = File('${dir.path}/$name.sqlite');
-      await _unpack('assets/quran/db/$name.sqlite.xz', file.path);
+      await _unpack('assets/quran/db/$name.sqlite.zlib', file.path);
       return file;
     }
 

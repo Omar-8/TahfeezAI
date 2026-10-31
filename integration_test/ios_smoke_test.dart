@@ -23,8 +23,8 @@ void main() {
       }
     }
 
-    // The first launch imports the Qur'an (on iOS from its datasets, no
-    // prebuilt database): until the app is up, at most two minutes.
+    // The first launch unpacks the Qur'an's databases: until the app is
+    // up, at most two minutes (a slow simulator).
     for (var s = 0; s < 120 && find.byType(Navigator).evaluate().isEmpty; s++) {
       await run(1);
     }

@@ -134,8 +134,12 @@ void main() {
     for (final name in BundledDatabaseInstaller.names) {
       final db = file(name);
       final bytes = db.readAsBytesSync();
-      final asset = '$name.sqlite.xz';
-      File('${out.path}/$asset').writeAsBytesSync(await xz(db.path));
+      // zlib (deflate), not xz: unpacked at the first start, where it's
+      // ~5x quicker (native zlib on both phones; xz was ~0.6 s for the
+      // Qur'an's alone), for ~3 MB more download. The packs stay xz.
+      final asset = '$name.sqlite.zlib';
+      File('${out.path}/$asset')
+          .writeAsBytesSync(ZLibCodec(level: 9).encode(bytes));
       files[name] = {
         'sha256': sha256.convert(bytes).toString(),
         'bytes': bytes.length,

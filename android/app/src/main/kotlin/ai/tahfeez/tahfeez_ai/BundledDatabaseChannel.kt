@@ -10,10 +10,12 @@ import org.tukaani.xz.XZInputStream
 import java.io.BufferedInputStream
 import java.io.FileOutputStream
 import java.security.MessageDigest
+import java.util.zip.InflaterInputStream
 
 /**
- * Unpacks a ready-made Quran database — an xz-compressed Flutter asset
- * (assets/quran/db/) — into a file, for BundledDatabaseInstaller in Dart:
+ * Unpacks a ready-made Quran database — a zlib- (the main ones) or
+ * xz-compressed (the meaning packs) Flutter asset (assets/quran/db/) — into
+ * a file, for BundledDatabaseInstaller in Dart:
  * streamed (xz's standard level needs ~9 MB to unpack), on a background
  * thread, hashing what it writes. Returns the SHA-256, in hex.
  */
@@ -32,11 +34,19 @@ object BundledDatabaseChannel {
                     val key = FlutterInjector.instance().flutterLoader().getLookupKeyForAsset(asset)
                     val digest = MessageDigest.getInstance("SHA-256")
                     context.assets.open(key).use { raw ->
-                        XZInputStream(BufferedInputStream(raw, 1 shl 16)).use { xz ->
+                        val buffered = BufferedInputStream(raw, 1 shl 16)
+                        // The main databases are zlib (quick, native); the
+                        // meaning packs xz (smaller).
+                        val unpacking = if (asset.endsWith(".zlib")) {
+                            InflaterInputStream(buffered)
+                        } else {
+                            XZInputStream(buffered)
+                        }
+                        unpacking.use { input ->
                             FileOutputStream(dest).use { out ->
                                 val buffer = ByteArray(1 shl 16)
                                 while (true) {
-                                    val n = xz.read(buffer)
+                                    val n = input.read(buffer)
                                     if (n < 0) break
                                     digest.update(buffer, 0, n)
                                     out.write(buffer, 0, n)

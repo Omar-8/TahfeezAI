@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 
 import '../../../core/logging/app_logger.dart';
+import '../../../app/startup_timing.dart';
 import '../../../core/storage/browser_storage.dart';
 
 /// Unpacks bundled [asset] (xz) into the file at [destination]; returns the
@@ -79,9 +80,14 @@ class BundledDatabaseInstaller {
     }
     try {
       directory.createSync(recursive: true);
-      for (final name in names) {
-        await _install(name, (databases[name] as Map).cast<String, dynamic>());
-      }
+      // All at once: the platform unpacks each on its own thread.
+      await Future.wait([
+        for (final name in names)
+          _install(
+            name,
+            (databases[name] as Map).cast<String, dynamic>(),
+          ).then((_) => startupMark('database $name unpacked')),
+      ]);
     } catch (e, st) {
       logger.error(
         'Could not install the bundled Quran databases.',

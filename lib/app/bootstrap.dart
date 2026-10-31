@@ -23,6 +23,7 @@ import '../quran/quran_providers.dart';
 import '../quran/tafsir_providers.dart';
 import '../quran/translation_providers.dart';
 import 'bootstrap_gate.dart';
+import 'startup_timing.dart';
 
 /// Single, explicit startup sequence for TahfeezAI.
 ///
@@ -44,25 +45,33 @@ import 'bootstrap_gate.dart';
 /// gets a chance to read from the database before seeding completes: the
 /// real app widget tree ([TahfeezApp]) simply doesn't build until then.
 Future<void> bootstrap() async {
+  startupMark('bootstrap');
   // The credited sources' notices on Flutter's licence page.
   registerCreditLicences();
   WidgetsFlutterBinding.ensureInitialized();
   // The first frame is the app's own splash (bootstrap_gate.dart): the
   // system splash's icon, in place, with the app's name below it.
   // Recitation audio as a media session (background playback, the
-  // notification and lock-screen controls); before any player exists.
-  if (!kIsWeb) {
-    await JustAudioBackground.init(
-      androidNotificationChannelId: 'ai.tahfeez.tahfeez_ai.audio',
-      androidNotificationChannelName: 'Recitation audio',
-      androidNotificationOngoing: true,
-    );
-  }
+  // notification and lock-screen controls); before any player exists — the
+  // app (where players are made) waits for it behind the splash. Not
+  // awaited here: it takes ~0.4 s, alongside the Qur'an's setup.
+  final audioSession = kIsWeb
+      ? Future<void>.value()
+      : JustAudioBackground.init(
+          androidNotificationChannelId: 'ai.tahfeez.tahfeez_ai.audio',
+          androidNotificationChannelName: 'Recitation audio',
+          androidNotificationOngoing: true,
+        ).then((_) => startupMark('audio session'));
   // Portrait only, phones and tablets (the Android manifest says so too).
-  await SystemChrome.setPreferredOrientations([
-    DeviceOrientation.portraitUp,
-    DeviceOrientation.portraitDown,
-  ]);
+  // These two system calls are not awaited: the first answer waits for the
+  // platform to finish starting the screen (~0.35 s on a phone), and the
+  // splash needn't. They are sent in order, before the first frame's.
+  unawaited(
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]),
+  );
   // Without this, `AnnotatedRegion<SystemUiOverlayStyle>`'s
   // `systemNavigationBarColor` has no effect on some Android versions/skins
   // until edge-to-edge is explicitly enabled — declaring the style alone
@@ -70,8 +79,9 @@ Future<void> bootstrap() async {
   // Android 11 (API 30) emulator, where the system navigation bar stayed
   // its own default dark color regardless of the app's requested color
   // until this call was added.
-  await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  unawaited(SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge));
 
+  startupMark('system UI');
   final logger = LoggingPackageLogger();
   installGlobalErrorReporting(logger);
 
@@ -101,6 +111,7 @@ Future<void> bootstrap() async {
       logger: logger,
     );
     final failure = await installer.installIfNeeded();
+    startupMark('databases');
     if (failure != null) return failure;
     // The app's language's translations, tafsir and word meanings (English
     // and Arabic's are built in), then whichever are chosen as they change.
@@ -120,6 +131,7 @@ Future<void> bootstrap() async {
             unpack: BundledDatabaseInstaller.nativeUnpack,
           ),
         );
+    startupMark('meaning packs');
     return null;
   }
 
@@ -127,7 +139,7 @@ Future<void> bootstrap() async {
   runApp(
     UncontrolledProviderScope(
       container: container,
-      child: TahfeezBootstrapGate(seeding: seeding),
+      child: TahfeezBootstrapGate(seeding: seeding, audioSession: audioSession),
     ),
   );
 }

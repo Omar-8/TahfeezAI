@@ -4,6 +4,7 @@ import 'app.dart';
 import '../core/theme/app_colors.dart';
 import '../core/ui/app_name_text.dart';
 import '../features/home/presentation/home_sky.dart';
+import 'startup_timing.dart';
 
 /// Shown for the (typically brief, but real on a cold/first launch — see
 /// `bootstrap.dart`'s own doc comment) window while [BundledDatasetSeeder]
@@ -24,20 +25,36 @@ import '../features/home/presentation/home_sky.dart';
 /// swaps to the real app the instant seeding finishes — never delaying it
 /// further than the seeding itself already does.
 class TahfeezBootstrapGate extends StatefulWidget {
-  const TahfeezBootstrapGate({super.key, required this.seeding});
+  const TahfeezBootstrapGate({
+    super.key,
+    required this.seeding,
+    this.audioSession,
+  });
 
   final Future<void> seeding;
+
+  /// The media session's setup (bootstrap's), which the app's audio players
+  /// need first: waited for too.
+  final Future<void>? audioSession;
 
   @override
   State<TahfeezBootstrapGate> createState() => _TahfeezBootstrapGateState();
 }
 
 class _TahfeezBootstrapGateState extends State<TahfeezBootstrapGate> {
+  bool _shown = false;
+
   /// At least this long, so the name is seen rather than flashed.
   static const _minimum = Duration(milliseconds: 900);
 
   late final Future<void> _ready = Future.wait([
-    widget.seeding.then((_) {}, onError: (_) {}),
+    widget.seeding.then((_) => startupMark('set up'), onError: (_) {}),
+    ?widget.audioSession?.then(
+      (_) {},
+      onError: (Object e) {
+        debugPrint('The audio session could not be set up: $e');
+      },
+    ),
     Future<void>.delayed(_minimum),
   ]);
 
@@ -47,6 +64,13 @@ class _TahfeezBootstrapGateState extends State<TahfeezBootstrapGate> {
       future: _ready,
       builder: (context, snapshot) {
         final ready = snapshot.connectionState == ConnectionState.done;
+        if (ready && !_shown) {
+          _shown = true;
+          startupMark('app shown');
+          WidgetsBinding.instance.addPostFrameCallback(
+            (_) => startupMark('app first frame'),
+          );
+        }
         // The app drawn as it is, the splash fading out over it — not the
         // two cross-faded: the app's first frames inside a fading layer
         // (its glass navigation bar's blur among them) showed as a black

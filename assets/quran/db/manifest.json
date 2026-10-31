@@ -1,25 +1,25 @@
 {
-  "version": "c224c91c2fb56bd1",
+  "version": "fe05fe2008923792",
   "databases": {
     "quran": {
       "sha256": "2846cbd56153e37a79c1072f293203ae968488a30e42cce8d96299196b970d94",
       "bytes": 8613888,
-      "asset": "quran.sqlite.xz"
+      "asset": "quran.sqlite.zlib"
     },
     "translations": {
       "sha256": "3e02d676716b9e875a8a5a0c802ca8fd2f170ac85d035989b892f4c46b9d67a8",
       "bytes": 1519616,
-      "asset": "translations.sqlite.xz"
+      "asset": "translations.sqlite.zlib"
     },
     "tafsirs": {
       "sha256": "071894ec72bf107b5e9257316aff965005a4b6ff82a0e86d2cac43c14723059f",
       "bytes": 5935104,
-      "asset": "tafsirs.sqlite.xz"
+      "asset": "tafsirs.sqlite.zlib"
     },
     "wbw_resources": {
       "sha256": "554d10e1a9463842165c3a1864b0b3e67e1734411cc9002a5d4846bff9936df8",
       "bytes": 5369856,
-      "asset": "wbw_resources.sqlite.xz"
+      "asset": "wbw_resources.sqlite.zlib"
     }
   },
   "packs": {

@@ -38,6 +38,9 @@ android {
     // reads it in place (QuranAcousticModelChannel maps it) instead of a
     // 91 MB copy in app storage. The download is compressed anyway.
     androidResources.noCompress += "onnx"
+    // The ready-made databases are compressed already (zlib, xz): stored
+    // as they are, not deflated a second time (unpacked once more on start).
+    androidResources.noCompress += listOf("zlib", "xz")
 
     // A reduced ONNX Runtime (only the acoustic model's operators, arm64;
     // tool/onnxruntime/build_reduced.sh): 15.9 MB instead of 33.0 MB. Used
