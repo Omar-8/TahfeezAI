@@ -19,6 +19,14 @@
 		<string>ru</string>
 		<string>fa</string>
 		<string>bn</string>
+		<string>ckb</string>
+		<string>ha</string>
+		<string>kk</string>
+		<string>ms</string>
+		<string>ps</string>
+		<string>so</string>
+		<string>sw</string>
+		<string>uz</string>
 	</array>
 	<key>CFBundleDisplayName</key>
 	<string>TahfeezAI</string>
@@ -43,7 +51,7 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>TahfeezAI listens while you recite to follow your place and point out mistakes. The audio is checked on your iPhone and never sent anywhere.</string>
+	<string>TahfeezAI listens while you recite to follow your place and point out mistakes. The audio is checked on your device and never sent anywhere.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>audio</string>

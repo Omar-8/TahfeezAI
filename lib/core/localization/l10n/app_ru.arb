@@ -443,6 +443,7 @@
   "updateUpToDate": "У вас последняя версия TahfeezAI",
   "updateCheckFailed": "Обновления приходят через Google Play: установите TahfeezAI из Google Play, чтобы получать их.",
   "updateCheckFailedAppStore": "Не удалось связаться с App Store. Попробуйте позже.",
+  "iosMicrophoneUsage": "TahfeezAI слушает ваше чтение, чтобы следить за местом и указывать на ошибки. Аудио проверяется на вашем устройстве и никуда не отправляется.",
   "settingsSearchHint": "Поиск настроек",
   "settingsNoMatch": "Подходящих настроек нет",
   "settingsGitHub": "GitHub",

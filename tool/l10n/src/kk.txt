@@ -440,6 +440,7 @@ updateLater = Кейінірек
 updateUpToDate = TahfeezAI соңғы нұсқада
 updateCheckFailed = Жаңартулар Google Play арқылы келеді: оларды алу үшін TahfeezAI-ды Google Play-ден орнатыңыз.
 updateCheckFailedAppStore = App Store-ға қосылу мүмкін болмады. Кейінірек қайталап көріңіз.
+iosMicrophoneUsage = TahfeezAI оқып жатқаныңызды тыңдап, орныңызды қадағалайды және қателерді көрсетеді. Аудио құрылғыңызда тексеріледі және ешқайда жіберілмейді.
 settingsSearchHint = Баптауларды іздеу
 settingsNoMatch = Сәйкес баптау жоқ
 settingsGitHub = GitHub

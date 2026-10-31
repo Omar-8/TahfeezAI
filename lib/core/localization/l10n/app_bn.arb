@@ -443,6 +443,7 @@
   "updateUpToDate": "TahfeezAI হালনাগাদ আছে",
   "updateCheckFailed": "আপডেট আসে Google Play-এর মাধ্যমে: পেতে Google Play থেকে TahfeezAI ইনস্টল করুন।",
   "updateCheckFailedAppStore": "App Store-এ পৌঁছানো যায়নি। পরে আবার চেষ্টা করুন।",
+  "iosMicrophoneUsage": "TahfeezAI আপনার তিলাওয়াত শোনে, যাতে আপনি কোথায় আছেন তা অনুসরণ করতে ও ভুল দেখাতে পারে। অডিও আপনার ডিভাইসেই যাচাই হয় এবং কখনো কোথাও পাঠানো হয় না।",
   "settingsSearchHint": "সেটিংস খুঁজুন",
   "settingsNoMatch": "কোনো সেটিং মেলেনি",
   "settingsGitHub": "GitHub",

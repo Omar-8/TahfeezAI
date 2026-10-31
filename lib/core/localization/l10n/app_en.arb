@@ -926,6 +926,8 @@
   "updateCheckFailed": "Updates come through Google Play: install TahfeezAI from Google Play to get them.",
   "updateCheckFailedAppStore": "Couldn't reach the App Store. Try again later.",
   "@updateCheckFailedAppStore": {"description": "iOS: the App Store's version could not be looked up (offline, or not yet listed)."},
+  "iosMicrophoneUsage": "TahfeezAI listens while you recite to follow your place and point out mistakes. The audio is checked on your device and never sent anywhere.",
+  "@iosMicrophoneUsage": {"description": "iOS: the system's microphone permission prompt (NSMicrophoneUsageDescription). Not used in Dart; tool/l10n/build_ios_strings.py copies it into ios/Runner/<code>.lproj/InfoPlist.strings."},
   "@settingsShareText": {
     "placeholders": {
       "url": {

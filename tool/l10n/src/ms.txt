@@ -440,6 +440,7 @@ updateLater = Nanti
 updateUpToDate = TahfeezAI adalah versi terkini
 updateCheckFailed = Kemas kini datang melalui Google Play: pasang TahfeezAI dari Google Play untuk mendapatkannya.
 updateCheckFailedAppStore = Tidak dapat menghubungi App Store. Cuba lagi nanti.
+iosMicrophoneUsage = TahfeezAI mendengar bacaan anda untuk mengikuti kedudukan anda dan menunjukkan kesilapan. Audio disemak pada peranti anda dan tidak pernah dihantar ke mana-mana.
 settingsSearchHint = Cari tetapan
 settingsNoMatch = Tiada tetapan sepadan
 settingsGitHub = GitHub

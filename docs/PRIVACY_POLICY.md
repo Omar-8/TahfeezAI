@@ -1,6 +1,6 @@
 # TahfeezAI — Privacy Policy
 
-_Last updated: 10 October 2026_
+_Last updated: 31 October 2026_
 
 TahfeezAI helps you read and memorize the Quran. It is built to keep your data on your phone. There are no accounts, no ads, no analytics and no tracking.
 
@@ -16,13 +16,13 @@ We (the developers) never receive any of this data, and we have no server that s
 
 Only to play recitation audio, and only when you ask for it:
 
-- **Ayah recitations** stream from the Islamic Network audio service (`cdn.islamic.network`, run by alquran.cloud).
+- **Ayah recitations** stream from the Islamic Network audio service (`cdn.islamic.network`, run by alquran.cloud), or, for some reciters, from EveryAyah (`everyayah.com`).
 - **Single-word audio** streams from Quran.com's audio service (`audio.qurancdn.com`).
-- **Downloading a reciter** for offline listening fetches that reciter's audio files from the Islamic Network service and stores them on your phone; you can delete them at any time.
+- **Downloading a reciter** for offline listening fetches that reciter's audio files from the same service and stores them on your phone; you can delete them at any time.
 
 These requests contain only the name of the audio file (which reciter and which ayah or word). Like any internet request, they also reveal your device's IP address to that service, which is governed by its own privacy terms. No other information about you is sent. Everything else — the Quran text, translations, tafsir and word meanings — is part of the app and works without internet.
 
-On Android the app also asks Google Play, on your phone, whether an update is available, and may show Google Play's own rating box now and then; both are handled by Google Play under its terms, and the app sends nothing of its own. Sharing the app hands a short text with its store link to the app you choose.
+On Android the app also asks Google Play, on your phone, whether an update is available, and may show Google Play's own rating box now and then; both are handled by Google Play under its terms, and the app sends nothing of its own. On iPhone and iPad the app asks the App Store (`itunes.apple.com`) for the version number of the app's listing, to know whether an update is available; that request names only the app, not you, and like any request reveals your IP address to Apple. Sharing the app hands a short text with its store link to the app you choose.
 
 ## Backups
 

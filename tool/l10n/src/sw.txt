@@ -440,6 +440,7 @@ updateLater = Baadaye
 updateUpToDate = TahfeezAI iko katika toleo la karibuni
 updateCheckFailed = Masasisho yanakuja kupitia Google Play: sakinisha TahfeezAI kutoka Google Play ili kuyapata.
 updateCheckFailedAppStore = Haikuweza kufikia App Store. Jaribu tena baadaye.
+iosMicrophoneUsage = TahfeezAI inakusikiliza unaposoma ili kufuata ulipofika na kuonyesha makosa. Sauti inakaguliwa kwenye kifaa chako na haitumwi popote.
 settingsSearchHint = Tafuta mipangilio
 settingsNoMatch = Hakuna mipangilio inayolingana
 settingsGitHub = GitHub

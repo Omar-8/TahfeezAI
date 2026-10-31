@@ -443,6 +443,7 @@
   "updateUpToDate": "TahfeezAI güncel",
   "updateCheckFailed": "Güncellemeler Google Play üzerinden gelir: almak için TahfeezAI'yi Google Play'den yükleyin.",
   "updateCheckFailedAppStore": "App Store'a ulaşılamadı. Daha sonra tekrar deneyin.",
+  "iosMicrophoneUsage": "TahfeezAI, yerinizi takip etmek ve hataları göstermek için okurken sizi dinler. Ses cihazınızda kontrol edilir ve hiçbir yere gönderilmez.",
   "settingsSearchHint": "Ayarlarda ara",
   "settingsNoMatch": "Eşleşen ayar yok",
   "settingsGitHub": "GitHub",

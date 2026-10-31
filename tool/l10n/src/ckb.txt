@@ -440,6 +440,7 @@ updateLater = دواتر
 updateUpToDate = TahfeezAI نوێیە
 updateCheckFailed = نوێکارییەکان لە ڕێگەی Google Play دێن: TahfeezAI لە Google Play دابمەزرێنە بۆ وەرگرتنیان.
 updateCheckFailedAppStore = نەتوانرا پەیوەندی بە App Store بکرێت. دواتر هەوڵ بدەرەوە.
+iosMicrophoneUsage = TahfeezAI لە کاتی خوێندنەوەدا گوێت لێ دەگرێت بۆ ئەوەی شوێنەکەت بپێت و هەڵەکان نیشان بدات. دەنگەکە لەسەر ئامێرەکەت دەپشکنرێت و بۆ هیچ شوێنێک نانێردرێت.
 settingsSearchHint = گەڕان لە ڕێکخستنەکان
 settingsNoMatch = هیچ ڕێکخستنێک ناگونجێت
 settingsGitHub = GitHub

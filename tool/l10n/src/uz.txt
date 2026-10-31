@@ -440,6 +440,7 @@ updateLater = Keyinroq
 updateUpToDate = TahfeezAI eng soʻnggi versiyada
 updateCheckFailed = Yangilanishlar Google Play orqali keladi: ularni olish uchun TahfeezAI ni Google Play dan oʻrnating.
 updateCheckFailedAppStore = App Store’ga ulanib bo‘lmadi. Keyinroq qayta urinib ko‘ring.
+iosMicrophoneUsage = TahfeezAI qayerdaligingizni kuzatish va xatolarni ko'rsatish uchun tilovatingizni tinglaydi. Audio qurilmangizda tekshiriladi va hech qayerga yuborilmaydi.
 settingsSearchHint = Sozlamalarni qidirish
 settingsNoMatch = Mos sozlama yoʻq
 settingsGitHub = GitHub

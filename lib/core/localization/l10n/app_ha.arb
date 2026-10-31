@@ -443,6 +443,7 @@
   "updateUpToDate": "TahfeezAI tana kan sabuwar siga",
   "updateCheckFailed": "Sabuntawa suna zuwa ta Google Play: girka TahfeezAI daga Google Play don samun su.",
   "updateCheckFailedAppStore": "Ba a iya isa App Store ba. Sake gwadawa daga baya.",
+  "iosMicrophoneUsage": "TahfeezAI na sauraronka yayin karatu don bin inda kake da nuna kurakurai. Ana duba sautin a kan na'urarka kuma ba a aika shi ko'ina.",
   "settingsSearchHint": "Nemi saituna",
   "settingsNoMatch": "Babu saitin da ya dace",
   "settingsGitHub": "GitHub",
