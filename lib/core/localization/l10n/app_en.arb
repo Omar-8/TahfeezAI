@@ -924,6 +924,8 @@
   "updateLater": "Later",
   "updateUpToDate": "TahfeezAI is up to date",
   "updateCheckFailed": "Updates come through Google Play: install TahfeezAI from Google Play to get them.",
+  "updateCheckFailedAppStore": "Couldn't reach the App Store. Try again later.",
+  "@updateCheckFailedAppStore": {"description": "iOS: the App Store's version could not be looked up (offline, or not yet listed)."},
   "@settingsShareText": {
     "placeholders": {
       "url": {

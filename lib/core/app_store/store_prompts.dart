@@ -7,7 +7,7 @@ import '../storage/storage_providers.dart';
 import 'app_store_service.dart';
 
 /// When the app offers an update or asks to be rated:
-/// - an update, whenever the app opens while Google Play has one and
+/// - an update, whenever the app opens while its store has one and
 ///   offers are on (Settings) — "Later" only closes it for that opening;
 /// - a rating, only after [reviewAfterUse] of use and [reviewAfterAyahs]
 ///   ayahs recited, then on about one opening in four, at most once per

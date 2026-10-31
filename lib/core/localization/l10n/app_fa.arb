@@ -442,6 +442,7 @@
   "updateLater": "بعداً",
   "updateUpToDate": "TahfeezAI به‌روز است",
   "updateCheckFailed": "به‌روزرسانی‌ها از Google Play می‌آیند: برای دریافت آن‌ها TahfeezAI را از Google Play نصب کنید.",
+  "updateCheckFailedAppStore": "دسترسی به App Store ممکن نشد. بعداً دوباره امتحان کنید.",
   "settingsSearchHint": "جستجوی تنظیمات",
   "settingsNoMatch": "تنظیمی مطابقت ندارد",
   "settingsGitHub": "GitHub",

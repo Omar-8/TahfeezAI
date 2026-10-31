@@ -442,6 +442,7 @@
   "updateLater": "Nanti",
   "updateUpToDate": "TahfeezAI sudah versi terbaru",
   "updateCheckFailed": "Pembaruan datang melalui Google Play: pasang TahfeezAI dari Google Play untuk mendapatkannya.",
+  "updateCheckFailedAppStore": "Tidak dapat menghubungi App Store. Coba lagi nanti.",
   "settingsSearchHint": "Cari pengaturan",
   "settingsNoMatch": "Tidak ada pengaturan yang cocok",
   "settingsGitHub": "GitHub",

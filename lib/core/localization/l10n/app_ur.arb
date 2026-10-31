@@ -442,6 +442,7 @@
   "updateLater": "بعد میں",
   "updateUpToDate": "TahfeezAI تازہ ترین ہے",
   "updateCheckFailed": "اپ ڈیٹس Google Play کے ذریعے آتی ہیں: انہیں پانے کے لیے TahfeezAI کو Google Play سے انسٹال کریں۔",
+  "updateCheckFailedAppStore": "App Store سے رابطہ نہ ہو سکا۔ بعد میں دوبارہ کوشش کریں۔",
   "settingsSearchHint": "ترتیبات تلاش کریں",
   "settingsNoMatch": "کوئی ترتیب نہیں ملی",
   "settingsGitHub": "GitHub",

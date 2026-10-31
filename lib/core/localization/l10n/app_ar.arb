@@ -442,6 +442,7 @@
   "updateLater": "لاحقًا",
   "updateUpToDate": "TahfeezAI محدّث",
   "updateCheckFailed": "تصل التحديثات عبر Google Play: ثبّت TahfeezAI من Google Play للحصول عليها.",
+  "updateCheckFailedAppStore": "تعذّر الوصول إلى App Store. حاول لاحقًا.",
   "settingsSearchHint": "ابحث في الإعدادات",
   "settingsNoMatch": "لا توجد إعدادات مطابقة",
   "settingsGitHub": "GitHub",

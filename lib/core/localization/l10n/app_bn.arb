@@ -442,6 +442,7 @@
   "updateLater": "পরে",
   "updateUpToDate": "TahfeezAI হালনাগাদ আছে",
   "updateCheckFailed": "আপডেট আসে Google Play-এর মাধ্যমে: পেতে Google Play থেকে TahfeezAI ইনস্টল করুন।",
+  "updateCheckFailedAppStore": "App Store-এ পৌঁছানো যায়নি। পরে আবার চেষ্টা করুন।",
   "settingsSearchHint": "সেটিংস খুঁজুন",
   "settingsNoMatch": "কোনো সেটিং মেলেনি",
   "settingsGitHub": "GitHub",

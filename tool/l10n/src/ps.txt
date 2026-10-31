@@ -439,6 +439,7 @@ updateNow = تازه کړئ
 updateLater = وروسته
 updateUpToDate = TahfeezAI تازه ده
 updateCheckFailed = تازه نسخې د Google Play له لارې راځي: د ترلاسه کولو لپاره TahfeezAI له Google Play نه نصب کړئ.
+updateCheckFailedAppStore = App Store ته رسېدل ونه شول. وروسته بیا هڅه وکړئ.
 settingsSearchHint = تنظیمات ولټوئ
 settingsNoMatch = هیڅ تنظیم سمون نه خوري
 settingsGitHub = GitHub

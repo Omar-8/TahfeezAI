@@ -442,6 +442,7 @@
   "updateLater": "Mar dambe",
   "updateUpToDate": "TahfeezAI waa nooca ugu dambeeyay",
   "updateCheckFailed": "Cusboonaysiintu waxay timaadaa Google Play: ka rakib TahfeezAI Google Play si aad u hesho.",
+  "updateCheckFailedAppStore": "Lama gaari karin App Store. Mar dambe isku day.",
   "settingsSearchHint": "Raadi dejinta",
   "settingsNoMatch": "Ma jiro dejin ku habboon",
   "settingsGitHub": "GitHub",

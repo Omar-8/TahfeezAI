@@ -442,6 +442,7 @@
   "updateLater": "Baadaye",
   "updateUpToDate": "TahfeezAI iko katika toleo la karibuni",
   "updateCheckFailed": "Masasisho yanakuja kupitia Google Play: sakinisha TahfeezAI kutoka Google Play ili kuyapata.",
+  "updateCheckFailedAppStore": "Haikuweza kufikia App Store. Jaribu tena baadaye.",
   "settingsSearchHint": "Tafuta mipangilio",
   "settingsNoMatch": "Hakuna mipangilio inayolingana",
   "settingsGitHub": "GitHub",

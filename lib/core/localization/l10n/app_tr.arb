@@ -442,6 +442,7 @@
   "updateLater": "Sonra",
   "updateUpToDate": "TahfeezAI güncel",
   "updateCheckFailed": "Güncellemeler Google Play üzerinden gelir: almak için TahfeezAI'yi Google Play'den yükleyin.",
+  "updateCheckFailedAppStore": "App Store'a ulaşılamadı. Daha sonra tekrar deneyin.",
   "settingsSearchHint": "Ayarlarda ara",
   "settingsNoMatch": "Eşleşen ayar yok",
   "settingsGitHub": "GitHub",

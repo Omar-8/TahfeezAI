@@ -683,7 +683,11 @@ class _AboutAppState extends ConsumerState<_AboutApp> {
       messenger.showSnackBar(
         SnackBar(
           content: Text(
-            available == null ? l10n.updateCheckFailed : l10n.updateUpToDate,
+            available == null
+                ? (ref.read(platformCapabilitiesProvider).isIOS
+                      ? l10n.updateCheckFailedAppStore
+                      : l10n.updateCheckFailed)
+                : l10n.updateUpToDate,
           ),
         ),
       );
@@ -775,7 +779,8 @@ class _AboutAppState extends ConsumerState<_AboutApp> {
             l10n.settingsShareSub,
             () => store.share(l10n.settingsShareText(store.listingUrl)),
           ),
-          if (android) ...[
+          // Updates: Google Play's, or the App Store's on iOS.
+          if (android || ref.watch(platformCapabilitiesProvider).isIOS) ...[
             row(
               'settings-check-updates',
               Icons.system_update_outlined,

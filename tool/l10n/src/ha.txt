@@ -439,6 +439,7 @@ updateNow = Sabunta
 updateLater = Daga baya
 updateUpToDate = TahfeezAI tana kan sabuwar siga
 updateCheckFailed = Sabuntawa suna zuwa ta Google Play: girka TahfeezAI daga Google Play don samun su.
+updateCheckFailedAppStore = Ba a iya isa App Store ba. Sake gwadawa daga baya.
 settingsSearchHint = Nemi saituna
 settingsNoMatch = Babu saitin da ya dace
 settingsGitHub = GitHub
