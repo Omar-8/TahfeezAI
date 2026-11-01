@@ -70,6 +70,10 @@ class _QuranEngineMushafPageContentState
   /// and marks. `null` while no overlay is on this page.
   (Set<int>, Map<int, MushafWordMark>)? _appliedOverlay;
 
+  /// Hide mode's hidden words last applied exactly (uncovered from a word
+  /// other than the first, see [_applyMask]); `null` otherwise.
+  Set<int>? _windowed;
+
   /// Bands behind the next word; ink colours on recited words.
   static const _markStyles = {
     MushafWordMark.current: (color: Color(0x552F80ED), ink: false),
@@ -350,11 +354,10 @@ class _QuranEngineMushafPageContentState
     if (overlay != null) {
       final refs = page.wordRefs;
       final hideMode = ref.read(mushafHideModeProvider);
-      final uncovered = hideMode.revealedOn(widget.pageNumber);
       final hidden = <int>{
         for (var i = 0; i < refs.length; i++)
           if (overlay.followHideMode
-              ? hideMode.enabled && i >= uncovered
+              ? hideMode.isWordHidden(widget.pageNumber, i)
               : overlay.isHidden(refs[i]))
             i,
       };
@@ -381,6 +384,52 @@ class _QuranEngineMushafPageContentState
   void _applyMask(MushafHideModeState hideMode) {
     final page = _page;
     if (page == null) return;
+    // Uncovered from a word other than the page's first ("Test me"): the
+    // exact words hidden (the engine's own mask counts from the start).
+    final from = hideMode.enabled ? hideMode.startOf(widget.pageNumber) : 0;
+    if (from > 0) {
+      final hidden = {
+        for (var i = 0; i < page.wordCount; i++)
+          if (hideMode.isWordHidden(widget.pageNumber, i)) i,
+      };
+      final before = _windowed;
+      if (before != null && setEquals(before, hidden)) return;
+      page.setHiddenWords(hidden);
+      _appliedMask = null;
+      _windowed = hidden;
+      // Words uncovered with the buttons: animated in, in order (as below).
+      if (page is MushafWordEffectsPage && !_calm && before != null) {
+        final shown = [
+          for (final i in before)
+            if (!hidden.contains(i)) i,
+        ]..sort();
+        if (shown.length <= _maxReveals) {
+          for (final i in shown) {
+            _reveal(page as MushafWordEffectsPage, i, null);
+          }
+        }
+      }
+      return;
+    }
+    if (_windowed case final before?) {
+      _windowed = null;
+      page.setHiddenWords(const {});
+      _appliedMask = null;
+      // The eye: the whole page shown — its hidden words fading in, as
+      // below.
+      if (!hideMode.enabled) {
+        _appliedMask = (hidden: false, revealed: 0);
+        if (page is MushafWordEffectsPage && !_calm) {
+          for (final i in before) {
+            (page as MushafWordEffectsPage).playWordEffect(
+              i,
+              MushafWordEffect.inkIn,
+            );
+          }
+        }
+        return;
+      }
+    }
     final wanted = (
       hidden: hideMode.enabled,
       revealed: hideMode.enabled ? hideMode.revealedOn(widget.pageNumber) : 0,

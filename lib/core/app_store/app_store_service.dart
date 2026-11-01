@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart'
     show TargetPlatform, defaultTargetPlatform, kIsWeb, visibleForTesting;
+import 'package:flutter/widgets.dart' show Rect;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_review/in_app_review.dart';
 import 'package:in_app_update/in_app_update.dart';
@@ -65,7 +66,9 @@ abstract class AppStoreService {
   /// The store listing, to rate the app there.
   Future<void> openListing();
 
-  Future<void> share(String text);
+  /// [origin]: the widget it is shared from, where an iPad's share popover
+  /// points (without one the iPad shows nothing) — see [shareOrigin].
+  Future<void> share(String text, {Rect? origin});
 
   /// This platform's store listing, to link to.
   String get listingUrl;
@@ -177,9 +180,11 @@ class PlatformAppStoreService implements AppStoreService {
   }
 
   @override
-  Future<void> share(String text) async {
+  Future<void> share(String text, {Rect? origin}) async {
     try {
-      await SharePlus.instance.share(ShareParams(text: text));
+      await SharePlus.instance.share(
+        ShareParams(text: text, sharePositionOrigin: origin),
+      );
     } catch (_) {
       // Nothing shared.
     }

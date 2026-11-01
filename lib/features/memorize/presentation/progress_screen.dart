@@ -1,4 +1,5 @@
 import '../../../core/ui/bar_space.dart';
+import '../../../core/ui/motion.dart';
 import '../../../core/localization/fallback_localizations.dart';
 
 import 'package:flutter/material.dart';
@@ -157,7 +158,25 @@ class _Activity extends ConsumerWidget {
     final number = NumberFormat.decimalPattern(
       intlLocaleOf(Localizations.localeOf(context)),
     );
-    final minutes = stats.mushafSeconds ~/ 60;
+    // Counting up as it appears, as the share of the Qur'an does.
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: motion(context, const Duration(milliseconds: 1100)),
+      curve: Curves.easeOutCubic,
+      builder: (context, t, _) => _card(context, l10n, theme, stats, t, number),
+    );
+  }
+
+  Widget _card(
+    BuildContext context,
+    AppLocalizations l10n,
+    ThemeData theme,
+    ActivityStats stats,
+    double t,
+    NumberFormat number,
+  ) {
+    String count(int n) => number.format((n * t).round());
+    final minutes = (stats.mushafSeconds * t).round() ~/ 60;
     final time = minutes >= 60
         ? l10n.activityHoursMinutes(minutes ~/ 60, minutes % 60)
         : l10n.activityMinutes(minutes);
@@ -191,14 +210,14 @@ class _Activity extends ConsumerWidget {
               Expanded(
                 child: cell(
                   Icons.mic_none_rounded,
-                  number.format(stats.recitedAyahs),
+                  count(stats.recitedAyahs),
                   l10n.activityAyahsRecited,
                 ),
               ),
               Expanded(
                 child: cell(
                   Icons.short_text_rounded,
-                  number.format(stats.recitedWords),
+                  count(stats.recitedWords),
                   l10n.activityWordsRecited,
                 ),
               ),
@@ -209,7 +228,7 @@ class _Activity extends ConsumerWidget {
               Expanded(
                 child: cell(
                   Icons.headphones_rounded,
-                  number.format(stats.heardAyahs),
+                  count(stats.heardAyahs),
                   l10n.activityAyahsHeard,
                 ),
               ),

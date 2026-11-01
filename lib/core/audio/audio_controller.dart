@@ -15,6 +15,14 @@ abstract class AudioController {
 
   Future<void> playUrl(String url, {AudioItemInfo? info});
 
+  /// Plays [url] from [start] to [end] only (a word or two of an ayah).
+  Future<void> playClip(
+    String url,
+    Duration start,
+    Duration end, {
+    AudioItemInfo? info,
+  });
+
   /// Plays [urls] one after another; [AudioPlaybackState.currentIndex] says
   /// which. Throws when the first can't be loaded (e.g. offline). [items]:
   /// each one's title for the media notification and lock screen.

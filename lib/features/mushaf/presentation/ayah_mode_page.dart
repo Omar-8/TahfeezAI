@@ -8,6 +8,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/localization/generated/app_localizations.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/quran_text_style.dart';
+import '../../../quran/application/tajweed_colours.dart';
+import '../../quran/presentation/surah_info_sheet.dart';
 import '../../../quran/application/ayah_reading_extras.dart';
 import '../../../quran/application/recent_quran_location.dart';
 import '../../../quran/domain/models/quran_location.dart';
@@ -476,26 +478,29 @@ class AyahModePageState extends ConsumerState<AyahModePage> {
     ref.listen(ayahModeTargetProvider, (_, _) => _bringTargetIntoView());
     // Revealing or hiding word by word (the bar's buttons): the boundary
     // kept in view — the last word shown.
+    // (Not when uncovering starts at another word — a "Test me" question
+    // set up: its ayah is the one brought into view.)
     ref.listen(
       mushafHideModeProvider.select(
-        (h) => h.enabled ? h.revealedOn(widget.pageNumber) : null,
+        (h) => h.enabled
+            ? (
+                revealed: h.revealedOn(widget.pageNumber),
+                start: h.startOf(widget.pageNumber),
+              )
+            : null,
       ),
-      (previous, revealed) {
-        if (revealed == null || previous == null || revealed == previous) {
-          return;
-        }
-        _scrollToWord((revealed - 1).clamp(0, words.length - 1));
+      (previous, now) {
+        if (now == null || previous == null || now == previous) return;
+        if (now.start != previous.start && now.start > 0) return;
+        _scrollToWord((now.revealed - 1).clamp(0, words.length - 1));
       },
     );
 
     final overlay = ref.watch(mushafWordOverlayProvider);
     final hide = ref.watch(mushafHideModeProvider);
-    final uncovered = hide.revealedOn(widget.pageNumber);
-    bool hidden(int i) => overlay != null
-        ? (overlay.followHideMode
-              ? hide.enabled && i >= uncovered
-              : overlay.isHidden(words[i]))
-        : hide.enabled && i >= uncovered;
+    bool hidden(int i) => overlay != null && !overlay.followHideMode
+        ? overlay.isHidden(words[i])
+        : hide.isWordHidden(widget.pageNumber, i);
     MushafWordMark? mark(int i) => overlay?.marks[words[i]];
     final masks = [for (var i = 0; i < words.length; i++) hidden(i)];
     final before = _masks;
@@ -725,20 +730,27 @@ class _SurahHeader extends ConsumerWidget {
       padding: const EdgeInsets.only(bottom: TahfeezSpacing.md),
       child: Column(
         children: [
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: TahfeezSpacing.sm),
-            decoration: BoxDecoration(
-              border: Border.symmetric(
-                horizontal: BorderSide(
-                  color: colors.secondaryText.withValues(alpha: 0.35),
+          // Tapped: about the surah.
+          InkWell(
+            key: ValueKey('ayah-mode-surah-info-$surahNo'),
+            onTap: () => showSurahInfoSheet(context, surahNo: surahNo),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: TahfeezSpacing.sm),
+              decoration: BoxDecoration(
+                border: Border.symmetric(
+                  horizontal: BorderSide(
+                    color: colors.secondaryText.withValues(alpha: 0.35),
+                  ),
                 ),
               ),
-            ),
-            child: Text(
-              '$surahNo · $name',
-              textAlign: TextAlign.center,
-              style: theme.textTheme.titleMedium?.copyWith(color: colors.text),
+              child: Text(
+                '$surahNo · $name',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: colors.text,
+                ),
+              ),
             ),
           ),
           if (bismillah != null && bismillah.isNotEmpty)
@@ -843,8 +855,8 @@ class _AyahBlock extends ConsumerWidget {
 
     // Each page word's text: its canonical word, with any canonical words
     // the engine joins into it (15:7 «لَّوْمَا»).
-    String textOf(int k) {
-      if (canonical == null) return '';
+    List<String> wordsOf(int k) {
+      if (canonical == null) return const [];
       final from = words[k].wordIndex;
       final to = k + 1 < words.length
           ? words[k + 1].wordIndex
@@ -852,8 +864,14 @@ class _AyahBlock extends ConsumerWidget {
       return [
         for (final w in canonical)
           if (w.wordIndex >= from && w.wordIndex < to) w.text,
-      ].join(' ');
+      ];
     }
+
+    String textOf(int k) => wordsOf(k).join(' ');
+    // Tajweed colours, when chosen (read once, the first time).
+    final tajweed = view.showTajweed
+        ? ref.watch(tajweedIndexProvider).value
+        : null;
 
     return AnimatedContainer(
       key: ValueKey('ayah-mode-$ayahId'),
@@ -939,6 +957,13 @@ class _AyahBlock extends ConsumerWidget {
                         'ayah-word-${words[k].ayahId}:${words[k].wordIndex}',
                       ),
                       text: textOf(k),
+                      tajweed:
+                          tajweed?.spansIn(
+                            ayahId,
+                            words[k].wordIndex,
+                            wordsOf(k),
+                          ) ??
+                          const [],
                       meaning: meanings[words[k].wordIndex],
                       hidden: hidden[k],
                       style: styleOf(marks[k]),

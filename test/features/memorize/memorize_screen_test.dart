@@ -10,7 +10,9 @@ import 'package:tahfeez_ai/features/home/presentation/sections/home_memorization
 import 'package:tahfeez_ai/features/memorize/presentation/mark_known_sheet.dart';
 import 'package:tahfeez_ai/features/memorize/presentation/memorize_screen.dart';
 import 'package:tahfeez_ai/features/memorize/presentation/progress_screen.dart';
+import 'package:tahfeez_ai/features/memorize/presentation/test_me_card.dart';
 import 'package:tahfeez_ai/features/memorize/presentation/test_summary_sheet.dart';
+import 'package:tahfeez_ai/features/recitation/application/hifz_controller.dart';
 import 'package:tahfeez_ai/features/quran/application/quran_index_providers.dart';
 import 'package:tahfeez_ai/memorization/application/memorization_progress.dart';
 import 'package:tahfeez_ai/memorization/application/memorization_today.dart';
@@ -66,9 +68,13 @@ void main() {
     NewLesson? lesson,
     MemorizationRepository? repo,
     List<Override> extra = const [],
+    Map<int, AyahMemory> memories = const {},
   }) => ProviderScope(
     overrides: [
       ...extra,
+      // (The progress tests give their own.)
+      if (extra.isEmpty)
+        ayahMemoriesProvider.overrideWith((ref) => Stream.value(memories)),
       todayPlanProvider.overrideWith((ref) async => plan),
       activePlanProvider.overrideWith((ref) => Stream.value(memPlan)),
       newLessonProvider.overrideWith((ref) async => lesson),
@@ -158,6 +164,7 @@ void main() {
           ),
         ),
         ayahPagesProvider.overrideWith((ref) async => {112001: 604}),
+        ayahMemoriesProvider.overrideWith((ref) => Stream.value(const {})),
       ],
     );
     addTearDown(container.dispose);
@@ -186,6 +193,127 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('reader'), findsOneWidget);
     expect(container.read(ayahModeTargetProvider), 112001);
+  });
+
+  testWidgets('Test me: the first words of a memorized ayah, where it is '
+      'when asked, another place, and Start with the words given', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(500, 2400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    const words = {
+      112001: ['قُلْ', 'هُوَ', 'ٱللَّهُ', 'أَحَدٌ'],
+      112002: ['ٱللَّهُ', 'ٱلصَّمَدُ'],
+      113001: ['قُلْ', 'أَعُوذُ', 'بِرَبِّ', 'ٱلْفَلَقِ'],
+    };
+    final container = ProviderContainer(
+      overrides: [
+        todayPlanProvider.overrideWith(
+          (ref) async => const TodayPlan(
+            recent: [
+              RevisionTask(ayahIds: [112001, 112002]),
+            ],
+          ),
+        ),
+        activePlanProvider.overrideWith((ref) => Stream.value(null)),
+        newLessonProvider.overrideWith((ref) async => null),
+        todayAttemptsProvider.overrideWith((ref) => Stream.value(const [])),
+        indexedSurahsProvider.overrideWith((ref) async => names),
+        defaultMushafProvider.overrideWith(
+          (ref) async => const Mushaf(
+            id: 1,
+            code: 'test',
+            scriptId: 1,
+            pageCount: 604,
+            linesPerPage: 15,
+            qiraah: 'Hafs',
+            edition: 'test',
+            renderingType: MushafRenderingType.unicodeText,
+          ),
+        ),
+        ayahPagesProvider.overrideWith(
+          (ref) async => {112001: 604, 112002: 604, 113001: 604},
+        ),
+        ayahMemoriesProvider.overrideWith(
+          (ref) => Stream.value({
+            for (final id in words.keys)
+              id: AyahMemory(ayahId: id, status: MemoryStatus.memorized),
+            114001: const AyahMemory(
+              ayahId: 114001,
+              status: MemoryStatus.learning,
+            ),
+          }),
+        ),
+        testMeAyahWordsProvider.overrideWith(
+          (ref, id) async => words[id] ?? const [],
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+    final router = GoRouter(
+      routes: [
+        GoRoute(path: '/', builder: (_, _) => const MemorizeScreen()),
+        GoRoute(
+          path: '/quran/page/:m/:p',
+          builder: (_, _) => const Scaffold(body: Text('reader')),
+        ),
+      ],
+    );
+    addTearDown(router.dispose);
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp.router(
+          routerConfig: router,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    // (Tall enough to show it without scrolling.)
+    expect(find.text('Test me'), findsOneWidget);
+    String prompt() => tester
+        .widget<Text>(find.byKey(const ValueKey('mem-test-me-prompt')))
+        .data!;
+    final prompts = {
+      '${words[112001]!.take(3).join(' ')} …': 112001,
+      '${words[112002]!.take(1).join(' ')} …': 112002,
+      '${words[113001]!.take(3).join(' ')} …': 113001,
+    };
+    final asked = prompts[prompt()];
+    expect(asked, isNotNull, reason: 'a memorized ayah, never 114001');
+    // Where it is: hidden until asked.
+    expect(find.byKey(const ValueKey('mem-test-me-where')), findsNothing);
+    await tester.tap(find.byKey(const ValueKey('mem-test-me-show')));
+    await tester.pump();
+    expect(
+      find.text(
+        '${asked! ~/ 1000 == 112 ? 'Al-Ikhlas' : 'Al-Falaq'} ${asked % 1000} · Page 604',
+      ),
+      findsOneWidget,
+    );
+    // Another place: never the same twice in a row, hidden again.
+    await tester.tap(find.byKey(const ValueKey('mem-test-me-another')));
+    await tester.pumpAndSettle();
+    final next = prompts[prompt()]!;
+    expect(next, isNot(asked));
+    expect(find.byKey(const ValueKey('mem-test-me-where')), findsNothing);
+    // Start: the test from it, its first words given.
+    await tester.tap(find.byKey(const ValueKey('mem-test-me-start')));
+    await tester.pumpAndSettle();
+    expect(find.text('reader'), findsOneWidget);
+    final requested = container.read(requestedHifzRangeProvider)!;
+    expect(requested.from, (chapterNo: next ~/ 1000, verseNo: next % 1000));
+    expect(requested.to, switch (next) {
+      112001 => (chapterNo: 112, verseNo: 2),
+      _ => requested.from,
+    });
+    expect(
+      container.read(requestedHifzRangeProvider.notifier).prompt,
+      next == 112002 ? 1 : 3,
+    );
   });
 
   testWidgets('today: each part\'s strength, or how today\'s recitation of '

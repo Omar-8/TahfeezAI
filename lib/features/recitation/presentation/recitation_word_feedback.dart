@@ -5,6 +5,9 @@ import '../../../ai/acoustic/quran_acoustic_verifier.dart';
 import '../../../core/localization/generated/app_localizations.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../quran/domain/models/quran_refs.dart';
+import '../../listen/application/quran_audio_player.dart';
+import '../../listen/application/reciter_controller.dart';
+import '../../listen/domain/word_timings.dart';
 import '../../mushaf/application/mushaf_word_overlay.dart';
 import '../application/acoustic_verification_controller.dart';
 import 'recitation_controls.dart';
@@ -31,6 +34,9 @@ class RecitationWordFeedback extends ConsumerWidget {
     final mark = overlay?.marks[wordRef];
     final l10n = AppLocalizations.of(context);
     final List<String> lines;
+    // A mistake on the word's first letter: its correction starts at the
+    // word before, which may join into it.
+    var onFirstLetter = false;
     switch (mark) {
       case MushafWordMark.wrong:
         final heard = overlay!.heard[wordRef];
@@ -55,6 +61,7 @@ class RecitationWordFeedback extends ConsumerWidget {
                   const <RecitationError>[])
             if (e.type.isError) e,
         ];
+        onFirstLetter = errors.any((e) => e.letter == 0);
         lines = errors.isEmpty
             ? [l10n.recFeedbackPronunciation]
             : {
@@ -101,6 +108,10 @@ class RecitationWordFeedback extends ConsumerWidget {
                       color: scheme.onErrorContainer,
                     ),
                   ),
+                _ListenToCorrection(
+                  wordRef: wordRef,
+                  fromPrevious: onFirstLetter,
+                ),
               ],
             ),
           ),
@@ -118,6 +129,60 @@ class RecitationWordFeedback extends ConsumerWidget {
 
   static String _capital(String s) =>
       s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);
+}
+
+/// "Listen to the correction": the word as the chosen reciter recites it,
+/// joined to the next word — or, for a reciter without word timings, the
+/// word alone, said so beneath.
+class _ListenToCorrection extends ConsumerWidget {
+  const _ListenToCorrection({
+    required this.wordRef,
+    required this.fromPrevious,
+  });
+
+  final WordRef wordRef;
+  final bool fromPrevious;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final scheme = Theme.of(context).colorScheme;
+    final timed = hasWordTimings(ref.watch(reciterProvider));
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextButton.icon(
+          key: const ValueKey('recitation-word-listen'),
+          style: TextButton.styleFrom(
+            foregroundColor: scheme.onErrorContainer,
+            padding: EdgeInsets.zero,
+            visualDensity: VisualDensity.compact,
+          ),
+          icon: const Icon(Icons.volume_up_outlined),
+          label: Text(l10n.recFeedbackListen),
+          onPressed: () async {
+            final messenger = ScaffoldMessenger.of(context);
+            final played = await ref
+                .read(quranAudioPlayerProvider.notifier)
+                .playCorrection(
+                  wordRef.ayahId,
+                  wordRef.wordIndex,
+                  fromPrevious: fromPrevious,
+                );
+            if (played == CorrectionPlayback.failed) {
+              showListenOffline(messenger, l10n.listenOffline);
+            }
+          },
+        ),
+        if (!timed)
+          Text(
+            l10n.recFeedbackListenAlone,
+            style: Theme.of(context).textTheme.bodySmall
+                ?.copyWith(color: scheme.onErrorContainer),
+          ),
+      ],
+    );
+  }
 }
 
 /// The phonetic script the recognizer hears in (Quran Phonetic Script),

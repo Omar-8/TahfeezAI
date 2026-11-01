@@ -66,6 +66,20 @@ class JustAudioController implements AudioController {
     await _player.play();
   }
 
+  @override
+  Future<void> playClip(
+    String url,
+    Duration start,
+    Duration end, {
+    AudioItemInfo? info,
+  }) async {
+    final child = _source(url, info);
+    await _player.setAudioSource(
+      ClippingAudioSource(child: child, start: start, end: end, tag: child.tag),
+    );
+    await _player.play();
+  }
+
   /// The recitation files are constant-bitrate MP3s, some (Ahmad al-Ajamy's
   /// first ayah of a surah, cdn.islamic.network) with a Xing header from a
   /// longer recording: 183,901 bytes claimed for a 39,618-byte 106:1.
@@ -80,7 +94,7 @@ class JustAudioController implements AudioController {
   );
 
   /// [url] tagged for the media session (notification, lock screen).
-  static AudioSource _source(String url, AudioItemInfo? info) =>
+  static ProgressiveAudioSource _source(String url, AudioItemInfo? info) =>
       ProgressiveAudioSource(
         Uri.parse(url),
         options: _options,

@@ -16,26 +16,32 @@ EZBERDEN OKU, GERİ BİLDİRİM AL
 OKU VE ANLA
 • Medine Mushafı sayfa sayfa, basıldığı gibi; ya da ayet ayet, kaydırarak veya kesintisiz akışta
 • Kelime kelime anlam ve okunuş; Arapça olarak da, es-Sirâc'tan
-• 18 dilde meal ve her ayetin yanında tefsir, senin dilinde
+• 23 dilde meal ve her ayetin yanında tefsir, senin dilinde
+• Ayet modunda harflerde tecvit renkleri, kural kural
+• Bir surenin adına dokun: anlamı, nüzul yeri ve daha fazlası
+• Bir ayeti mealiyle birlikte görsel olarak paylaş
 • Sure adları Mushaf'ın kendi hattıyla; yalnızca sayfa için odak modu
 • Tüm Kur'an'da Arapça veya mealde arama
 • Yer imleri ve sayfada renklendirilmiş konu bölümleri
 
 DİNLE
-• Alafasy, el-Husarî, el-Minşâvî, Abdulbâsıt ve es-Sudeys dahil 28 kâri
+• Alafasy, el-Husarî, el-Minşâvî, Abdulbâsıt ve es-Sudeys dahil 31 kâri
 • Okunan ayet ışıldar; bir ayeti veya aralığı tekrarla
 • Bir kâriyi indirip çevrimdışı dinle; ekran kapalıyken de çalmaya devam eder
+• Her ayetten sonra sesli okunan bir meal, 8 dilde
+• Gece dinlemek için uyku zamanlayıcısı
 
 PLANLA EZBERLE
 • Günlük ders ve aralıklı tekrar
 • Gizleme modu, döngü ve takip
+• Beni sına: ezberindeki rastgele bir yerin ilk kelimeleri — ezberden devam et
 • Her bölümün sağlamlığı izlenir; neyi tekrarlayacağını bilirsin
 • Serin, okuduğun günlerin takvimi, 30 cüzlük halka ve hoş kilometre taşları
 
 ZEVKİNE GÖRE
 • Günün saatinin renklerinde bir gökyüzü, cam kartlar ve İslami geometrik desen
 • Açık, koyu, sıcak, sepya ve siyah temalar; 4 Kur'an yazı tipi; %200'e kadar metin
-• 19 dilde: Arapça, İngilizce, Almanca, Fransızca, İspanyolca, Rusça, Türkçe, Endonezce, Malayca, Urduca, Farsça, Bengalce, Hausaca, Kürtçe, Peştuca, Svahili, Kazakça, Özbekçe ve Somalice
+• 25 dilde: Arapça, İngilizce, Almanca, Fransızca, İspanyolca, Portekizce, Felemenkçe, Danca, Yunanca, Rusça, Türkçe, Endonezce, Malayca, Urduca, Farsça, Bengalce, Hausaca, Kürtçe, Peştuca, Svahili, Kazakça, Özbekçe, Somalice, Japonca ve Korece
 • iPhone ve iPad
 
 SESİN CİHAZINDA KALIR

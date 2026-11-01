@@ -27,6 +27,12 @@
 		<string>so</string>
 		<string>sw</string>
 		<string>uz</string>
+		<string>nl</string>
+		<string>da</string>
+		<string>el</string>
+		<string>ja</string>
+		<string>ko</string>
+		<string>pt</string>
 	</array>
 	<key>CFBundleDisplayName</key>
 	<string>TahfeezAI</string>

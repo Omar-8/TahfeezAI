@@ -24,9 +24,30 @@ class FakeAudioController implements AudioController {
     _controller.add(_current);
   }
 
+  /// The last single file played.
+  String? url;
+
   @override
   Future<void> playUrl(String url, {AudioItemInfo? info}) async {
+    this.url = url;
     _emit((s) => s.copyWith(isPlaying: true, durationMs: 60000));
+  }
+
+  /// The last clip played: its file, start and end.
+  (String, Duration, Duration)? clip;
+
+  @override
+  Future<void> playClip(
+    String url,
+    Duration start,
+    Duration end, {
+    AudioItemInfo? info,
+  }) async {
+    clip = (url, start, end);
+    _emit(
+      (s) =>
+          s.copyWith(isPlaying: true, durationMs: (end - start).inMilliseconds),
+    );
   }
 
   /// The last queue played.

@@ -97,7 +97,17 @@ def rounded(img, radius):
 
 
 def wrap(draw, text, f, width):
-    words, lines, line = text.split(), [], ""
+    words, lines, line = [], [], ""
+    # A word wider than the line (Japanese has no spaces) is broken by
+    # character.
+    for w in text.split():
+        while draw.textlength(w, font=f) > width:
+            n = len(w)
+            while n > 1 and draw.textlength(w[:n], font=f) > width:
+                n -= 1
+            words.append(w[:n])
+            w = w[n:]
+        words.append(w)
     for w in words:
         trial = (line + " " + w).strip()
         if draw.textlength(trial, font=f) <= width:

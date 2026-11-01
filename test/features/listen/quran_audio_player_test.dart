@@ -150,4 +150,68 @@ void main() {
     expect(container.read(quranAudioPlayerProvider)?.ayahId, 112001);
     expect(container.read(mushafFocusAyahProvider)?.ayahId, 112001);
   });
+
+  test(
+    'a translation chosen: each ayah, then its translation read aloud — '
+    'the ayah still the one highlighted; the media item names the reader',
+    () async {
+      final audio = FakeAudioController();
+      final container = ProviderContainer(
+        overrides: [
+          audioControllerProvider.overrideWithValue(audio),
+          defaultMushafProvider.overrideWith((ref) async => null),
+        ],
+      );
+      addTearDown(container.dispose);
+      await container
+          .read(quranAudioPlayerProvider.notifier)
+          .playRange(
+            112003,
+            112004,
+            options: const ListenOptions(translationVoice: 'en.walk'),
+          );
+      expect(audio.queue, hasLength(4));
+      expect(audio.queue[0], endsWith('/64/ar.alafasy/6224.mp3'));
+      expect(audio.queue[1], endsWith('/192/en.walk/6224.mp3'));
+      expect(audio.queue[2], endsWith('/64/ar.alafasy/6225.mp3'));
+      expect(audio.queue[3], endsWith('/192/en.walk/6225.mp3'));
+      expect(audio.items![1].subtitle, startsWith('Ibrahim Walk'));
+
+      audio.advanceTo(1);
+      await Future<void>.delayed(Duration.zero);
+      final now = container.read(quranAudioPlayerProvider)!;
+      expect(now.ayahId, 112003, reason: 'its translation: still 112:3');
+      expect(now.isTranslation, isTrue);
+      expect(now.recitedBetween(0, 4), 2, reason: 'two ayahs recited');
+    },
+  );
+
+  test(
+    'no translation chosen (or one no longer offered): the ayahs alone',
+    () async {
+      final audio = FakeAudioController();
+      final container = ProviderContainer(
+        overrides: [
+          audioControllerProvider.overrideWithValue(audio),
+          defaultMushafProvider.overrideWith((ref) async => null),
+        ],
+      );
+      addTearDown(container.dispose);
+      await container
+          .read(quranAudioPlayerProvider.notifier)
+          .playRange(
+            112003,
+            112004,
+            options: const ListenOptions(translationVoice: 'xx.gone'),
+          );
+      expect(audio.queue, hasLength(2));
+      expect(
+        ListenOptions.fromJson(
+          const ListenOptions(translationVoice: 'fr.leclerc').toJson(),
+        ).translationVoice,
+        'fr.leclerc',
+        reason: 'saved',
+      );
+    },
+  );
 }

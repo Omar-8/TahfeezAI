@@ -79,6 +79,9 @@ void main() {
       'ar.bukhatir',
       'ar.yassersalamah',
       'ar.mansoori',
+      'ar.juhani',
+      'ar.matroud',
+      'ar.tunaiji',
     });
   });
 

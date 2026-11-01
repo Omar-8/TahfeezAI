@@ -43,6 +43,12 @@ List<String> defaultTranslationSlugs(String language) => switch (language) {
   'kk' => const ['kk-altai'],
   'uz' => const ['uz-rowwad'],
   'so' => const ['so-yaqoub'],
+  'nl' => const ['nl-rowwad'],
+  'ko' => const ['ko-hamid'],
+  'ja' => const ['ja-sato'],
+  'el' => const ['el-rowwad'],
+  'pt' => const ['pt-nasr'],
+  // Danish: no translation found that may be shipped (2026-11-01).
   _ => const ['en-rowwad'],
 };
 
@@ -66,6 +72,8 @@ String? defaultTafsirId(String language) => switch (language) {
   'ckb' => 'ckb-mukhtasar',
   'ps' => 'ps-mukhtasar',
   'uz' => 'uz-mukhtasar',
-  // Malay, Hausa, Swahili, Kazakh and Somali: no Al-Mukhtasar (2026-10-25).
+  'ja' => 'ja-mukhtasar',
+  // Malay, Hausa, Swahili, Kazakh, Somali (2026-10-25), Dutch, Korean,
+  // Greek, Portuguese and Danish (2026-11-01): no Al-Mukhtasar.
   _ => 'en-mukhtasar',
 };

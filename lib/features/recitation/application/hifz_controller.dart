@@ -1,4 +1,5 @@
-import '../../../ai/acoustic/quran_acoustic_verifier.dart' show TajweedRule;
+import '../../../ai/acoustic/quran_acoustic_verifier.dart'
+    show RecitationErrorType, TajweedRule;
 import '../../../memorization/application/activity_stats.dart';
 
 import 'dart:async';
@@ -371,9 +372,19 @@ class RequestedHifzRange extends Notifier<HifzRange?> {
   @override
   HifzRange? build() => null;
 
-  void request(HifzRange range) => state = range;
+  /// Its first words given, not recited ("Test me"): shown before the
+  /// test starts and not judged.
+  int prompt = 0;
 
-  void clear() => state = null;
+  void request(HifzRange range, {int prompt = 0}) {
+    this.prompt = prompt;
+    state = range;
+  }
+
+  void clear() {
+    prompt = 0;
+    state = null;
+  }
 }
 
 final requestedHifzRangeProvider =
@@ -579,6 +590,12 @@ class HifzController extends Notifier<HifzState> {
     });
     ref.listen(quranWordCorpusProvider, (_, next) {
       _corpus = next.value;
+      // A prompt asked for before the corpus was loaded: shown now.
+      if (_corpus != null && _prompt > 0) {
+        Future.microtask(() {
+          if (ref.mounted) _showPrompt();
+        });
+      }
     }, fireImmediately: true);
     ref.listen(recitationSessionControllerProvider, (_, next) {
       _onSession(next);
@@ -589,8 +606,9 @@ class HifzController extends Notifier<HifzState> {
       if (next == null) return;
       Future.microtask(() {
         if (!ref.mounted || state.running) return;
-        setRange(next);
-        ref.read(requestedHifzRangeProvider.notifier).clear();
+        final requested = ref.read(requestedHifzRangeProvider.notifier);
+        setRange(next, prompt: requested.prompt);
+        requested.clear();
       });
     }, fireImmediately: true);
     // Share the reciter's position (see recitationPositionProvider).
@@ -638,7 +656,11 @@ class HifzController extends Notifier<HifzState> {
     });
     // Turning pages by hand: listen for the reciter on the new page(s).
     ref.listen(mushafRecitationTargetProvider, (_, _) => _onPagesChanged());
-    ref.listen(mushafPageWordRangesProvider, (_, _) => _onPagesChanged());
+    ref.listen(mushafPageWordRangesProvider, (_, _) {
+      _onPagesChanged();
+      // A "Test me" question's page now on screen.
+      _showPrompt();
+    });
     ref.listen(fullBleedContentProvider, (_, _) => _onPagesChanged());
     _acousticPosition =
         ref.watch(recitationAiConfigProvider).position ==
@@ -660,7 +682,63 @@ class HifzController extends Notifier<HifzState> {
     return const HifzState();
   }
 
-  void setRange(HifzRange? range) => state = state.copyWith(range: () => range);
+  void setRange(HifzRange? range, {int prompt = 0}) {
+    _prompt = range == null ? 0 : prompt;
+    _promptShownOn = null;
+    state = state.copyWith(range: () => range);
+    _showPrompt();
+  }
+
+  /// The range's first words given, not recited ("Test me": see
+  /// [RequestedHifzRange.prompt]) — until its test starts.
+  var _prompt = 0;
+
+  /// The page the given words were uncovered on, once it was on screen.
+  int? _promptShownOn;
+
+  /// A "Test me" question: hide mode uncovers its page from the question's
+  /// first word, its given words shown — then revealing, hiding, scrolling
+  /// and turning pages go on as they always do (hidden back past it, the
+  /// page is covered whole again). Waits for its page to be on screen.
+  void _showPrompt() {
+    final range = state.range, corpus = _corpus;
+    if (_prompt == 0 || range == null || corpus == null) return;
+    if (state.running || state.loop != null || _promptShownOn != null) return;
+    final start = corpus.verseStartPosition(range.from);
+    if (start == null) return;
+    for (final MapEntry(key: page, value: words)
+        in ref.read(mushafPageWordRangesProvider).entries) {
+      final from = corpus.positionOf(words.first);
+      final to = corpus.positionOf(words.last);
+      if (from == null || to == null || start < from || start > to) continue;
+      // A new question: the last recitation's colours go.
+      if (_results) {
+        _results = false;
+        _judge = null;
+        ref.read(mushafWordOverlayProvider.notifier).set(null);
+      }
+      _promptShownOn = page;
+      ref
+          .read(mushafHideModeProvider.notifier)
+          .showFrom(page, start: start - from, count: _prompt);
+      return;
+    }
+  }
+
+  /// The words of the question shown when its test starts (the given ones,
+  /// and any revealed by hand since): given, not recited.
+  int _promptGiven(int start, int end) {
+    final page = _promptShownOn;
+    final corpus = _corpus;
+    if (page == null || corpus == null) return 0;
+    final hide = ref.read(mushafHideModeProvider);
+    final words = ref.read(mushafPageWordRangesProvider)[page];
+    final from = words == null ? null : corpus.positionOf(words.first);
+    // Hidden back past it (the page covered again): nothing given.
+    if (from == null || hide.startOf(page) != start - from) return 0;
+    final shown = hide.revealedOn(page) - (start - from);
+    return shown.clamp(0, end - start + 1);
+  }
 
   /// The range chosen before a loop (restored when its session ends).
   HifzRange? _rangeBeforeLoop;
@@ -688,6 +766,41 @@ class HifzController extends Notifier<HifzState> {
     return judge.revealed.any(
       (p) => !judge.given.contains(p) && words[p].ref.ayahId == ayahId,
     );
+  }
+
+  /// The last finished test and its pass, for [lastPronunciation].
+  HifzJudge? _lastTest;
+  int _lastTestPass = 0;
+
+  /// How the last finished recitation was pronounced, word by word: the
+  /// right words recited whose pronunciation was checked, those whose only
+  /// mistakes are tajweed, and those with a vowel said wrong or left out
+  /// (sure verdicts only; for the first recitations' hints).
+  ({int checked, int tajweed, int vowels}) lastPronunciation() {
+    final judge = _lastTest;
+    if (judge == null) return (checked: 0, tajweed: 0, vowels: 0);
+    final acoustic = ref.read(acousticVerificationControllerProvider).words;
+    var checked = 0, tajweed = 0, vowels = 0;
+    for (final p in judge.revealed) {
+      if (judge.given.contains(p)) continue;
+      final verdict = judge.marked[p];
+      if (verdict != null && verdict != HifzVerdict.correct) continue;
+      final a = acoustic[judge.corpus.words[p].ref];
+      if (a == null || a.pass != _lastTestPass) continue;
+      if (a.type == RecitationErrorType.uncertain) continue;
+      checked++;
+      if (!a.isMistake || !a.isSure) continue;
+      if (a.isTajweedOnly) {
+        tajweed++;
+      } else if (a.errors.any(
+        (e) =>
+            e.type == RecitationErrorType.wrongVowel ||
+            e.type == RecitationErrorType.missingVowel,
+      )) {
+        vowels++;
+      }
+    }
+    return (checked: checked, tajweed: tajweed, vowels: vowels);
   }
 
   /// The words before the range stay shown (see [setLoop]); for one
@@ -731,7 +844,11 @@ class HifzController extends Notifier<HifzState> {
   /// included — while the page is otherwise back to normal.
   void _clear() {
     _showHeld();
-    if (_judge case final judge?) _record(judge);
+    if (_judge case final judge?) {
+      _record(judge);
+      _lastTest = judge;
+      _lastTestPass = _pass;
+    }
     _syncToHideMode();
     _matcher = null;
     _locating = false;
@@ -943,7 +1060,14 @@ class HifzController extends Notifier<HifzState> {
           _loopEnd = corpus.words[end].ref;
           _startJudge(start, corpus.verseEndPosition(chosen.from)!);
         } else {
-          _startJudge(start, end);
+          // A "Test me" question: its words shown so far given; asked once.
+          _startJudge(
+            start,
+            end,
+            preRevealed: _prompt > 0 ? _promptGiven(start, end) : 0,
+          );
+          _prompt = 0;
+          _promptShownOn = null;
         }
         if (loop != null) {
           state = _withLoop(state, 1, chosen.from);

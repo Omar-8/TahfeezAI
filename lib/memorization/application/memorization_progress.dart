@@ -73,13 +73,18 @@ final milestonesReachedProvider = FutureProvider<List<Milestone>>((ref) async {
   );
 });
 
-/// The milestone to show now, once — the highest of those newly reached;
+/// The milestone to show now — each newly reached one once, the highest
+/// first, the others after it ([dismiss]); surahs memorized before their
+/// congratulation shows are congratulated together ([SurahsMilestone]).
 /// `null` when none. Those reached before this was first used (an update,
 /// a backup restored) are remembered without being shown.
 class MilestoneController extends Notifier<Milestone?> {
   static const storageKey = 'milestones.shown.v1';
 
   Set<String>? _shown;
+
+  /// Waiting to be shown, the first shown now ([state]).
+  final _queue = <Milestone>[];
 
   @override
   Milestone? build() {
@@ -115,12 +120,40 @@ class MilestoneController extends Notifier<Milestone?> {
     shown.addAll(fresh.map((m) => m.id));
     await storage.setString(storageKey, jsonEncode(shown.toList()));
     if (!ref.mounted || first && fresh.length > 3) return;
-    fresh.sort((a, b) => b.rank - a.rank);
-    state = fresh.first;
+    final surahs = [
+      for (final m in fresh)
+        if (m is SurahMilestone) m.surah,
+    ];
+    if (surahs.isNotEmpty) {
+      // With those still waiting (not yet on screen: [dismiss] takes the
+      // ones shown out).
+      final waiting = _queue.whereType<SurahsMilestone>().firstOrNull;
+      _queue.remove(waiting);
+      _queue.add(SurahsMilestone([...?waiting?.surahs, ...surahs]..sort()));
+    }
+    _queue.addAll(fresh.where((m) => m is! SurahMilestone));
+    _queue.sort((a, b) => b.rank - a.rank);
+    state = _queue.first;
   }
 
-  /// The milestone shown: no longer pending.
-  void dismiss() => state = null;
+  /// [shown] was shown: the next waiting, if any. Surahs added to it while
+  /// it was on screen stay waiting.
+  void dismiss([Milestone? shown]) {
+    shown ??= state;
+    if (shown is SurahsMilestone) {
+      final waiting = _queue.whereType<SurahsMilestone>().firstOrNull;
+      _queue.remove(waiting);
+      final rest = [
+        for (final s in waiting?.surahs ?? const <int>[])
+          if (!shown.surahs.contains(s)) s,
+      ];
+      if (rest.isNotEmpty) _queue.add(SurahsMilestone(rest));
+      _queue.sort((a, b) => b.rank - a.rank);
+    } else {
+      _queue.removeWhere((m) => m.id == shown?.id);
+    }
+    state = _queue.firstOrNull;
+  }
 }
 
 final milestoneProvider = NotifierProvider<MilestoneController, Milestone?>(

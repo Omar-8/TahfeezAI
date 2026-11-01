@@ -12,7 +12,22 @@ void main() {
   tearDownAll(RealApp.close);
 
   const rtl = {'ckb', 'ps'};
-  for (final code in const ['ms', 'ha', 'ckb', 'ps', 'sw', 'kk', 'uz', 'so']) {
+  for (final code in const [
+    'ms',
+    'ha',
+    'ckb',
+    'ps',
+    'sw',
+    'kk',
+    'uz',
+    'so',
+    'nl',
+    'da',
+    'el',
+    'ja',
+    'ko',
+    'pt',
+  ]) {
     testWidgets('$code: Home in its language and direction', (tester) async {
       await RealApp.launch(tester, locale: code);
       final context = tester.element(find.byType(Scaffold).first);

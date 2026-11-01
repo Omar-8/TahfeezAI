@@ -11,6 +11,7 @@ import '../../../quran/presentation/translation_packs_sheet.dart';
 import '../../settings/presentation/arabic_font_choices.dart';
 import '../application/mushaf_page_translations.dart';
 import '../application/reader_mode.dart';
+import 'tajweed_palette.dart';
 
 /// What each ayah shows under its Arabic, and how: Ayah mode's view
 /// settings, also the ayah sheet's (one set, shared).
@@ -117,6 +118,18 @@ class AyahViewOptions extends ConsumerWidget {
           view.showWordMeanings,
           (v) => view.copyWith(showWordMeanings: v),
         ),
+        toggle(
+          'ayah-view-tajweed',
+          l10n.ayahViewTajweed,
+          view.showTajweed,
+          (v) => view.copyWith(showTajweed: v),
+        ),
+        // What each colour means, while they are shown.
+        if (view.showTajweed)
+          const Padding(
+            padding: EdgeInsetsDirectional.only(start: 16, bottom: 8),
+            child: TajweedLegend(),
+          ),
         // One size for all of it: the Arabic, word meanings,
         // transliteration, translations and tafsir.
         Row(

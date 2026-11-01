@@ -1,5 +1,5 @@
 {
-  "version": "fe05fe2008923792",
+  "version": "cc285d4d5deb5093",
   "databases": {
     "quran": {
       "sha256": "2846cbd56153e37a79c1072f293203ae968488a30e42cce8d96299196b970d94",
@@ -7,13 +7,13 @@
       "asset": "quran.sqlite.zlib"
     },
     "translations": {
-      "sha256": "3e02d676716b9e875a8a5a0c802ca8fd2f170ac85d035989b892f4c46b9d67a8",
+      "sha256": "110f0031359732c41ef0ed8318d9171958af0776cc9e57c677793ba6d79538f4",
       "bytes": 1519616,
       "asset": "translations.sqlite.zlib"
     },
     "tafsirs": {
-      "sha256": "071894ec72bf107b5e9257316aff965005a4b6ff82a0e86d2cac43c14723059f",
-      "bytes": 5935104,
+      "sha256": "7cafe970a5828f55839d3217667ce8f5140f064122930fb5c726ef6b1900e9a2",
+      "bytes": 5943296,
       "asset": "tafsirs.sqlite.zlib"
     },
     "wbw_resources": {
@@ -36,6 +36,10 @@
         "sha256": "44457b15696886fdea69fe10e08322a061c4f96253480f29b6b1f8d84d85ce15",
         "asset": "packs/translation-de-rowwad.sqlite.xz"
       },
+      "el-rowwad": {
+        "sha256": "4c10197a44c0596df949f5e17673f11fa12a45ca7a5906dbf96d47995c514c31",
+        "asset": "packs/translation-el-rowwad.sqlite.xz"
+      },
       "es-noor": {
         "sha256": "57d3173ba2ada8488cae363076e06d3d29b4a834a9f9db7ec4ae6c8827afb52e",
         "asset": "packs/translation-es-noor.sqlite.xz"
@@ -56,17 +60,33 @@
         "sha256": "0a1764217760ebbf19ff5a404b28813914c94f861c3bee591a11eb3b47cdb104",
         "asset": "packs/translation-id-affairs.sqlite.xz"
       },
+      "ja-sato": {
+        "sha256": "7503f8c92b1cbc835fe35f579d33b49b630b0e7392419abbe0b8d8e5435c1722",
+        "asset": "packs/translation-ja-sato.sqlite.xz"
+      },
       "kk-altai": {
         "sha256": "100d1f1d34480eff0040dfb6a375db708673a231585e4eb4af02351e75c5ece4",
         "asset": "packs/translation-kk-altai.sqlite.xz"
+      },
+      "ko-hamid": {
+        "sha256": "fcac1813984e28251c00ed30f0843424f969c70170a067d1d4ff27fc517d2d45",
+        "asset": "packs/translation-ko-hamid.sqlite.xz"
       },
       "ms-basumayyah": {
         "sha256": "e80b4d4fc7c0fb091aa04d144da61950dc670ea7918326ff8f901ac9f457014d",
         "asset": "packs/translation-ms-basumayyah.sqlite.xz"
       },
+      "nl-rowwad": {
+        "sha256": "6062a7c4abf8f3c1480266d258129d5a3fb59239ce9a12901eb9dfdbb503ad31",
+        "asset": "packs/translation-nl-rowwad.sqlite.xz"
+      },
       "ps-rowwad": {
         "sha256": "9dcf87e63750d70901234355efba35cbe5f047dd71a8c80fbcaeee99f3a7d140",
         "asset": "packs/translation-ps-rowwad.sqlite.xz"
+      },
+      "pt-nasr": {
+        "sha256": "6947dbc5b770a1a887f35ebac882e4a8f0473fb0ae02e778eca20123842637e4",
+        "asset": "packs/translation-pt-nasr.sqlite.xz"
       },
       "ru-rowwad": {
         "sha256": "c21a3e07eff0969920e4117ae23bcf6beda63af333718c95571e758faf7178a7",
@@ -94,6 +114,18 @@
       }
     },
     "tafsir": {
+      "ar-mukhtasar": {
+        "sha256": "7ae123ba349a80674f1567ed1abf6fbe3e7600608fa71d026f777d76ca741796",
+        "asset": "packs/tafsir-ar-mukhtasar.sqlite.xz"
+      },
+      "ar-nafahat": {
+        "sha256": "fd66a43d1d4511a718e67797703c29912b3ab8b0036d5561335d69db5c0d78b5",
+        "asset": "packs/tafsir-ar-nafahat.sqlite.xz"
+      },
+      "ar-yaseer": {
+        "sha256": "c369dd8e3a5236799012a75a9313822502cab4d7d7a351f77a7f172497b4d73f",
+        "asset": "packs/tafsir-ar-yaseer.sqlite.xz"
+      },
       "bn-mukhtasar": {
         "sha256": "15a9be8760d08326a9854a15785a22a46c9448f6fe02bb5fc4ebb89db45a25d7",
         "asset": "packs/tafsir-bn-mukhtasar.sqlite.xz"
@@ -117,6 +149,10 @@
       "id-mukhtasar": {
         "sha256": "bc8307df76996ea8e3b933acef746d626b75ce1272fb0812b9088dd94f1078f1",
         "asset": "packs/tafsir-id-mukhtasar.sqlite.xz"
+      },
+      "ja-mukhtasar": {
+        "sha256": "00fa5d43a5f37aeba1c74db4f92d637ea7a899b001f18a977fdd2edb8064af21",
+        "asset": "packs/tafsir-ja-mukhtasar.sqlite.xz"
       },
       "ps-mukhtasar": {
         "sha256": "b1959fc66a8c23537d9654222665c6baa0aea2fcc10de30c5b00c2b615e7e6a6",

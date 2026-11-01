@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/sharing/image_sharer.dart';
 import '../../core/app_store/app_store_service.dart';
 import '../../core/localization/generated/app_localizations.dart';
 import '../../core/theme/app_spacing.dart';
@@ -69,7 +70,10 @@ class QuranUnavailableView extends ConsumerWidget {
                 TextButton.icon(
                   onPressed: () => ref
                       .read(appStoreServiceProvider)
-                      .share(quranSetupReport(failure, version: version)),
+                      .share(
+                        quranSetupReport(failure, version: version),
+                        origin: shareOrigin(context),
+                      ),
                   icon: const Icon(Icons.share_outlined),
                   label: Text(l10n.quranSetupShare),
                 ),

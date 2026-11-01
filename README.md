@@ -66,18 +66,23 @@ It is a gift, not a product:
 - **Focus mode** — the page alone, full screen, nothing else in view.
 - **Search** the Arabic text (with or without diacritics) and the translations — offline.
 - **Passage tints** that colour each rukūʿ, so a page's structure is visible at a glance.
+- **Tajweed colours** in Ayah mode — madd, ghunnah, ikhfāʾ, iqlāb, idghām, qalqala and silent letters, each in its own colour, with a key.
+- **About each surah** — tap its name at its start: Meccan or Medinan, order of revelation, ayahs, rukūʿs, pages, juz, sajdahs, and how much of it you've memorized.
+- **Share an ayah as an image** — the ayah, its reference and translation on a calm card, light or dark.
 
 ### Understand
 
 - **Word by word**: the meaning under every word — in English, Urdu, Indonesian, Turkish, Persian, Bengali or French — with **transliteration**; in Arabic, the meanings of each ayah's difficult words from **al-Sirāj**. Tap a word for its details and audio.
-- **Translations** in 18 languages: English, German, French, Spanish, Russian, Turkish, Indonesian, Malay, Urdu, Persian, Bengali, Hausa, Kurdish (Sorani), Pashto, Swahili, Kazakh, Uzbek and Somali.
-- **Tafsir**: At-Tafsir Al-Muyassar and al-Sirāj (Arabic), Al-Mukhtasar (English, French, Spanish, Russian, Turkish, Indonesian, Persian, Bengali, Kurdish, Pashto, Uzbek) and Ahsan-ul-Bayan (Urdu).
+- **Translations** in 23 languages: English, German, French, Spanish, Portuguese, Dutch, Greek, Russian, Turkish, Indonesian, Malay, Urdu, Persian, Bengali, Hausa, Kurdish (Sorani), Pashto, Swahili, Kazakh, Uzbek, Somali, Japanese and Korean.
+- **Tafsir**: At-Tafsir Al-Muyassar, Al-Mukhtasar, Al-Nafahat Al-Makkiyyah, Bayan Ma'ani Al-Quran and al-Sirāj (Arabic), Al-Mukhtasar (English, French, Spanish, Russian, Turkish, Indonesian, Persian, Bengali, Kurdish, Pashto, Uzbek, Japanese) and Ahsan-ul-Bayan (Urdu).
 - Translations, tafsir and word meanings **follow the app's language** — unless you choose another.
 
 ### Listen
 
-- **28 renowned reciters** — Mishary Alafasy, Al-Husary (murattal, mujawwad and *muallim*, the teaching recitation), Al-Minshawi, Abdul Basit, As-Sudais, Ash-Shuraym, Al-Muaiqly, Saad Al-Ghamdi, Yasser Al-Dossary, Nasser Al-Qatami, Al-Tablawi, Al-Banna and more.
+- **31 renowned reciters** — Mishary Alafasy, Al-Husary (murattal, mujawwad and *muallim*, the teaching recitation), Al-Minshawi, Abdul Basit, As-Sudais, Ash-Shuraym, Al-Muaiqly, Saad Al-Ghamdi, Yasser Al-Dossary, Nasser Al-Qatami, Al-Tablawi, Al-Banna and more.
 - The ayah being recited **lights up and is followed** page after page; playback speed; repeat an ayah or a range; download a reciter to listen offline — **the whole Quran, a juz or a single surah**.
+- **A translation read aloud after each ayah** — English, Urdu, French, Russian, Persian, Turkish, Kazakh or Uzbek.
+- **Sleep timer** — pause after 15 to 60 minutes, or at the end of the ayah playing.
 
 ### Tajweed feedback
 
@@ -111,6 +116,7 @@ Each word is coloured as you go — right, wrong, skipped or mispronounced — w
 ### Memorize
 
 - **Hide mode** — the page covered; words appear as you recite them correctly (or reveal them word by word, ayah by ayah).
+- **Test me** — like a teacher: the first words of a random place in what you've memorized (weaker parts more often), its location hidden until you ask; continue from memory.
 - **Four ways to practise**: **Recite** from memory · **Loop** a range a number of times (strict mode pauses on a mistake) · **Listen** · **Follow along** — the reciter recites an ayah, then it's your turn.
 - **A memorization plan** — today's new lesson and **spaced revision** of what you already know, each part's **strength** tracked from your recitations.
 - **Progress**, beside the plan in its own tab — the Quran as a **ring of its 30 juz**, a **strength map** of every page, and your **streak** with a **calendar** of the days you recited (a square a day, darker the more you recited); mark what you already know to start where you are.
@@ -123,7 +129,7 @@ Each word is coloured as you go — right, wrong, skipped or mispronounced — w
 - **Reader themes** for the page — light, warm, sepia, dark, black.
 - **4 Quran fonts** for Ayah mode (Scheherazade New, Amiri Quran, Noto Naskh Arabic, Lateef) and **3 Arabic fonts** for the app (Noto Kufi, Almarai, Tajawal).
 - **Text size** from 80 % to 200 %, and the app follows your phone's own text size.
-- **19 languages** — العربية · English · Deutsch · Français · Español · Русский · Türkçe · Bahasa Indonesia · Bahasa Melayu · اردو · فارسی · বাংলা · Hausa · کوردی · پښتو · Kiswahili · Қазақша · Oʻzbekcha · Soomaali — with full right-to-left layout; the translation and tafsir follow your language.
+- **25 languages** — العربية · English · Deutsch · Français · Español · Português · Nederlands · Dansk · Ελληνικά · Русский · Türkçe · Bahasa Indonesia · Bahasa Melayu · اردو · فارسی · বাংলা · Hausa · کوردی · پښتو · Kiswahili · Қазақша · Oʻzbekcha · Soomaali · 日本語 · 한국어 — with full right-to-left layout; the translation and tafsir follow your language.
 - Tested for phones from 280 px foldable cover screens to tablets, in portrait and landscape.
 
 ## Screenshots
@@ -178,7 +184,7 @@ git clone https://github.com/Omar-8/TahfeezAI.git
 cd TahfeezAI
 flutter pub get
 dart run build_runner build --delete-conflicting-outputs   # Drift, Freezed, Riverpod
-flutter gen-l10n                                           # the 19 languages
+flutter gen-l10n                                           # the 25 languages
 ```
 
 ### 2. Quran data (not in git: rebuilt from its sources, checksums verified)
@@ -259,7 +265,7 @@ TahfeezAI stands on the generous work of others. Full details — versions, chec
 
 - **Quran text** — [Tanzil Project](https://tanzil.net) (Uthmani, verbatim).
 - **The Mushaf** — Mus'haf al-Madinah © [King Fahd Glorious Qur'an Printing Complex](https://qurancomplex.gov.sa); page data from [Quran Engine](https://github.com/quran-ws/quran-engine) by Quran.ws (CC BY 4.0); layout and word data provided by [QUL — Quranic Universal Library](https://qul.tarteel.ai) (Tarteel).
-- **Translations and tafsir** — [QuranEnc.com](https://quranenc.com): Rowwad Translation Center, Noor International Center, the Indonesian Ministry of Religious Affairs, Muhammad Junagarhi, At-Tafsir Al-Muyassar, Al-Mukhtasar.
+- **Translations and tafsir** — [QuranEnc.com](https://quranenc.com): Rowwad Translation Center, Noor International Center, the Indonesian Ministry of Religious Affairs, Muhammad Junagarhi, At-Tafsir Al-Muyassar, Al-Mukhtasar, Al-Nafahat Al-Makkiyyah (Muhammad ibn Salih al-Shawi), Bayan Ma'ani Al-Quran.
 - **Word meanings and transliteration** — quran.com data.
 - **Recitations** — the reciters, served by [islamic.network](https://alquran.cloud), [everyayah.com](https://everyayah.com) (eleven reciters, ayah by ayah; no licence stated there — listed openly in the resources document) and [quran.com](https://quran.com) (word audio).
 - **Speech model** — trained from [obadx/muaalem-model-v3_2](https://huggingface.co/obadx/muaalem-model-v3_2) (MIT) with the [quran-transcript](https://github.com/obadx/quran-transcript) phonetizer (MIT); training audio from public recitation datasets (Tarteel, everyayah.com, RetaSy and others) — credited with thanks; where a source states no licence, its use is listed openly in the resources document.

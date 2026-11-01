@@ -194,6 +194,11 @@ class RecitationSessionController extends Notifier<RecitationSessionState> {
     }
   }
 
+  /// The app's own audio (a word, a correction) is playing: the mic keeps
+  /// recording, but recognition hears silence meanwhile — the reciter's
+  /// voice is not the reader's recitation. The session goes on untouched.
+  bool appAudioPlaying = false;
+
   void pause() {
     if (_state.phase == RecitationPhase.listening) {
       _emit(_state.copyWith(phase: RecitationPhase.paused));
@@ -239,7 +244,9 @@ class RecitationSessionController extends Notifier<RecitationSessionState> {
     if (_state.phase != RecitationPhase.listening) return;
     _sink?.add(chunk);
     _recordedBytes += chunk.length;
-    if (_live.hasListener) _live.add(chunk);
+    if (_live.hasListener) {
+      _live.add(appAudioPlaying ? Uint8List(chunk.length) : chunk);
+    }
     final elapsed = _format!.durationOf(_recordedBytes);
     // The UI timer shows whole seconds; don't rebuild for every ~100 ms
     // chunk.

@@ -1,0 +1,160 @@
+<en-US>
+• 6 new languages: Nederlands, Dansk, Ελληνικά, 日本語, 한국어, Português
+• Tajweed colours, Test me, surah info, and sharing an ayah as an image
+• Listen to the correction: tap a marked word to hear the reciter say it right
+• The translation read aloud after each ayah, and a sleep timer
+• 3 more reciters and 3 more Arabic tafsirs
+• The mic keeps working after you play a word mid-recitation
+</en-US>
+<ar>
+• ست لغات جديدة: الهولندية والدنماركية واليونانية واليابانية والكورية والبرتغالية
+• ألوان التجويد، و«اختبرني»، ومعلومات السورة، ومشاركة الآية صورةً
+• استمع إلى التصحيح: اضغط على الكلمة المعلَّمة لتسمع القارئ يتلوها صحيحة
+• قراءة الترجمة بعد كل آية، ومؤقّت النوم
+• ثلاثة قرّاء جدد وثلاثة تفاسير عربية جديدة
+• يبقى الميكروفون يعمل بعد تشغيل كلمة أثناء التلاوة
+</ar>
+<bn-BD>
+• ৬টি নতুন ভাষা: ডাচ, ড্যানিশ, গ্রিক, জাপানি, কোরিয়ান, পর্তুগিজ
+• তাজবীদের রং, ‘আমাকে পরীক্ষা করুন’, সূরার তথ্য, আর আয়াত ছবি হিসেবে শেয়ার
+• সংশোধন শুনুন: চিহ্নিত শব্দে চাপুন, কারী সঠিকভাবে পড়বেন
+• প্রতিটি আয়াতের পর অনুবাদ পাঠ, আর ঘুমের টাইমার
+• আরও ৩ জন কারী ও ৩টি আরবি তাফসীর
+• তিলাওয়াতের মাঝে শব্দ বাজালেও মাইক চালু থাকে
+</bn-BD>
+<da-DK>
+• 6 nye sprog: Nederlands, Dansk, Ελληνικά, 日本語, 한국어, Português
+• Tajwid-farver, Test mig, surainfo og deling af et vers som billede
+• Lyt til rettelsen: tryk på et markeret ord og hør recitatoren sige det rigtigt
+• Oversættelsen læst op efter hvert vers og en sleep-timer
+• 3 nye recitatorer og 3 nye arabiske tafsirer
+• Mikrofonen virker stadig, når du afspiller et ord under recitationen
+</da-DK>
+<de-DE>
+• 6 neue Sprachen: Nederlands, Dansk, Ελληνικά, 日本語, 한국어, Português
+• Tadschwid-Farben, Teste mich, Sure-Infos und Teilen einer Aya als Bild
+• Korrektur anhören: Tippe auf ein markiertes Wort und höre es richtig rezitiert
+• Die Übersetzung nach jeder Aya vorgelesen, und ein Schlaf-Timer
+• 3 weitere Rezitatoren und 3 weitere arabische Tafsire
+• Das Mikrofon bleibt aktiv, wenn du während der Rezitation ein Wort abspielst
+</de-DE>
+<el-GR>
+• 6 νέες γλώσσες: Nederlands, Dansk, Ελληνικά, 日本語, 한국어, Português
+• Χρώματα ταζουίντ, «Εξέτασέ με», πληροφορίες σούρας και κοινοποίηση αγιά ως εικόνα
+• Ακούστε τη διόρθωση: πατήστε μια σημειωμένη λέξη για να την ακούσετε σωστά
+• Η μετάφραση διαβάζεται μετά από κάθε αγιά, και χρονοδιακόπτης ύπνου
+• 3 νέοι αναγνώστες και 3 νέα αραβικά ταφσίρ
+• Το μικρόφωνο συνεχίζει να λειτουργεί όταν παίζετε μια λέξη στην απαγγελία
+</el-GR>
+<es-ES>
+• 6 idiomas nuevos: Nederlands, Dansk, Ελληνικά, 日本語, 한국어, Português
+• Colores de tajwid, Ponme a prueba, información de la sura y compartir una aleya como imagen
+• Escucha la corrección: toca una palabra marcada y oye al recitador decirla bien
+• La traducción leída tras cada aleya y un temporizador de sueño
+• 3 recitadores y 3 tafsires árabes más
+• El micrófono sigue funcionando al reproducir una palabra durante la recitación
+</es-ES>
+<fa>
+• ۶ زبان تازه: هلندی، دانمارکی، یونانی، ژاپنی، کره‌ای، پرتغالی
+• رنگ‌های تجوید، «مرا بیازما»، اطلاعات سوره و هم‌رسانی آیه به‌صورت تصویر
+• شنیدن تصحیح: روی واژهٔ نشان‌دار بزنید تا قاری آن را درست بخواند
+• خواندن ترجمه پس از هر آیه، و زمان‌سنج خواب
+• ۳ قاری و ۳ تفسیر عربی تازه
+• میکروفون پس از پخش یک واژه در میان تلاوت همچنان کار می‌کند
+</fa>
+<fr-FR>
+• 6 nouvelles langues : Nederlands, Dansk, Ελληνικά, 日本語, 한국어, Português
+• Couleurs du tajwid, Teste-moi, infos de la sourate et partage d'un verset en image
+• Écouter la correction : touchez un mot marqué pour l'entendre bien récité
+• La traduction lue après chaque verset, et une minuterie de sommeil
+• 3 récitateurs et 3 tafsirs arabes de plus
+• Le micro continue de fonctionner quand vous écoutez un mot pendant la récitation
+</fr-FR>
+<id>
+• 6 bahasa baru: Nederlands, Dansk, Ελληνικά, 日本語, 한국어, Português
+• Warna tajwid, Uji saya, info surah, dan berbagi ayat sebagai gambar
+• Dengarkan koreksinya: ketuk kata yang ditandai untuk mendengar qari membacanya dengan benar
+• Terjemahan dibacakan setelah tiap ayat, dan pengatur waktu tidur
+• 3 qari dan 3 tafsir Arab baru
+• Mikrofon tetap berfungsi setelah memutar kata saat membaca
+</id>
+<ja-JP>
+• 新しい言語6つ：Nederlands、Dansk、Ελληνικά、日本語、한국어、Português
+• タジュウィードの色分け、「テストする」、スーラ情報、アーヤを画像で共有
+• 訂正を聞く：印の付いた単語をタップすると、読誦者の正しい読み方が聞けます
+• 各アーヤの後に訳文の読み上げ、スリープタイマー
+• 読誦者3人とアラビア語タフスィール3冊を追加
+• 読誦中に単語を再生してもマイクが止まらなくなりました
+</ja-JP>
+<kk>
+• 6 жаңа тіл: Nederlands, Dansk, Ελληνικά, 日本語, 한국어, Português
+• Тәжуид түстері, «Мені тексер», сүре туралы ақпарат және аятты сурет ретінде бөлісу
+• Түзетуді тыңдау: белгіленген сөзді басып, қаридің дұрыс оқуын тыңдаңыз
+• Әр аяттан кейін аударманы оқу және ұйқы таймері
+• Тағы 3 қари және 3 арабша тәпсір
+• Қырағат кезінде сөз ойнатқаннан кейін де микрофон жұмыс істейді
+</kk>
+<ko-KR>
+• 새 언어 6개: Nederlands, Dansk, Ελληνικά, 日本語, 한국어, Português
+• 타즈위드 색상, 시험해 보기, 수라 정보, 아야를 이미지로 공유
+• 교정 듣기: 표시된 단어를 누르면 낭송자의 올바른 낭송을 들을 수 있습니다
+• 각 아야 뒤에 번역 낭독, 수면 타이머
+• 낭송자 3명과 아랍어 타프시르 3종 추가
+• 낭송 중 단어를 재생해도 마이크가 계속 작동합니다
+</ko-KR>
+<ms>
+• 6 bahasa baharu: Nederlands, Dansk, Ελληνικά, 日本語, 한국어, Português
+• Warna tajwid, Uji saya, maklumat surah, dan kongsi ayat sebagai gambar
+• Dengar pembetulan: ketik perkataan bertanda untuk mendengar qari membacanya dengan betul
+• Terjemahan dibacakan selepas setiap ayat, dan pemasa tidur
+• 3 qari dan 3 tafsir Arab baharu
+• Mikrofon terus berfungsi selepas memainkan perkataan semasa membaca
+</ms>
+<nl-NL>
+• 6 nieuwe talen: Nederlands, Dansk, Ελληνικά, 日本語, 한국어, Português
+• Tajwied-kleuren, Test mij, soera-info en een vers delen als afbeelding
+• Luister naar de verbetering: tik op een gemarkeerd woord en hoor het goed gereciteerd
+• De vertaling voorgelezen na elk vers, en een slaaptimer
+• 3 nieuwe recitatoren en 3 nieuwe Arabische tafsirs
+• De microfoon blijft werken als je tijdens het reciteren een woord afspeelt
+</nl-NL>
+<pt-BR>
+• 6 novos idiomas: Nederlands, Dansk, Ελληνικά, 日本語, 한국어, Português
+• Cores do tajweed, Teste-me, informações da surata e compartilhar um versículo como imagem
+• Ouvir a correção: toque numa palavra marcada para ouvi-la recitada certa
+• A tradução lida após cada versículo e um temporizador de sono
+• Mais 3 recitadores e 3 tafsirs em árabe
+• O microfone continua funcionando ao tocar uma palavra durante a recitação
+</pt-BR>
+<ru-RU>
+• 6 новых языков: Nederlands, Dansk, Ελληνικά, 日本語, 한국어, Português
+• Цвета таджвида, «Проверь меня», сведения о суре и отправка аята картинкой
+• Послушать исправление: нажмите на отмеченное слово, чтобы услышать его верное чтение
+• Перевод зачитывается после каждого аята, и таймер сна
+• Ещё 3 чтеца и 3 арабских тафсира
+• Микрофон продолжает работать, если во время чтения прослушать слово
+</ru-RU>
+<sw>
+• Lugha 6 mpya: Nederlands, Dansk, Ελληνικά, 日本語, 한국어, Português
+• Rangi za tajwidi, Nijaribu, habari za sura, na kushiriki aya kama picha
+• Sikiliza usahihisho: gusa neno lililowekwa alama umsikie msomaji akilisoma sahihi
+• Tafsiri inasomwa baada ya kila aya, na kipima muda wa kulala
+• Wasomaji 3 na tafsiri 3 za Kiarabu zaidi
+• Maikrofoni inaendelea kufanya kazi ukicheza neno katikati ya kisomo
+</sw>
+<tr-TR>
+• 6 yeni dil: Nederlands, Dansk, Ελληνικά, 日本語, 한국어, Português
+• Tecvid renkleri, Beni sına, sure bilgisi ve ayeti görsel olarak paylaşma
+• Düzeltmeyi dinle: işaretli kelimeye dokunun, kâri doğrusunu okusun
+• Her ayetten sonra mealin sesli okunması ve uyku zamanlayıcısı
+• 3 yeni kâri ve 3 yeni Arapça tefsir
+• Kıraat sırasında bir kelimeyi dinlediğinizde mikrofon artık durmuyor
+</tr-TR>
+<ur>
+• 6 نئی زبانیں: ڈچ، ڈینش، یونانی، جاپانی، کوریائی، پرتگالی
+• تجوید کے رنگ، ”مجھے آزمائیں“، سورت کی معلومات، اور آیت بطور تصویر شیئر کرنا
+• درستی سنیں: نشان زدہ لفظ پر ٹیپ کریں اور قاری سے اس کی درست تلاوت سنیں
+• ہر آیت کے بعد ترجمہ پڑھ کر سنانا، اور نیند کا ٹائمر
+• 3 نئے قاری اور 3 نئی عربی تفاسیر
+• تلاوت کے دوران لفظ چلانے کے بعد بھی مائیک کام کرتا رہتا ہے
+</ur>

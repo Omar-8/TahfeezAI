@@ -8,14 +8,16 @@
 # out-of-memory killer took the desktop session with it (2026-10-13).
 #
 #   tool/test_responsive_all.sh            # all shards
-#   SHARDS=60 MEMORY=3G tool/test_responsive_all.sh
+#   SHARDS=80 MEMORY=4G tool/test_responsive_all.sh
+#   (80 shards and 4G since 2026-11-01: with 25 languages the last of
+#   60 shards outgrew even 4G)
 #   FROM=12 tool/test_responsive_all.sh    # resume at shard 12
 set -u
 cd "$(dirname "$0")/.."
 
 TEST=${TEST:-test/app/responsive_reader_test.dart}
-SHARDS=${SHARDS:-60}
-MEMORY=${MEMORY:-3G}
+SHARDS=${SHARDS:-80}
+MEMORY=${MEMORY:-4G}
 FROM=${FROM:-0}
 LOGS=${LOGS:-build/responsive}
 mkdir -p "$LOGS"

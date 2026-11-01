@@ -49,8 +49,8 @@ Mac: `docs/IOS_RELEASE.md`.
    - CPU and memory while reciting (Instruments), as measured on the
      POCO F3 (~0.55 core, RTF 0.11).
 
-## Still open
+## Checked on a device
 
-- A privacy policy that names the App Store as well as Google Play.
-- Whether `record` and `just_audio` agree on the audio session (reciting
-  right after listening) — check on the device.
+On a real iPhone (2026-10-31, 1.0.9): reciting works (the mic prompt, the
+model, words followed, mistakes marked), and `record` and `just_audio`
+share the audio session — reciting right after listening is fine.

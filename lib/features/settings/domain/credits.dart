@@ -53,6 +53,15 @@ const credits = <Credit>[
   ),
   Credit(
     group: CreditGroup.quran,
+    name: 'Tajweed annotations (quran-tajweed)',
+    owner: 'Collin Fair (cpfair)',
+    licence: 'CC BY 4.0',
+    url: 'https://github.com/cpfair/quran-tajweed',
+    useEn: "Ayah mode's tajweed colours",
+    useAr: 'ألوان التجويد في وضع الآيات',
+  ),
+  Credit(
+    group: CreditGroup.quran,
     name: "quran-transcript (Qur'an phonetizer)",
     owner: 'Abdullah (obadx)',
     licence: 'MIT',
@@ -104,12 +113,38 @@ const credits = <Credit>[
   ),
   Credit(
     group: CreditGroup.translations,
+    name:
+        'Malay (Abdullah Basumayyah), Hausa (Abu Bakr Gumi), Kurdish Sorani '
+        '(Muhammad Salih Bamoki), Kazakh (Khalifa Altai), Somali (Abdullah '
+        'Hasan Yaqoub), Korean (Hamid Choi), Japanese (Saeed Sato) and '
+        'Portuguese (Helmi Nasr) '
+        'translations; Pashto, Swahili, Uzbek, Dutch and Greek (Rowwad); '
+        'Al-Mukhtasar in Kurdish, Pashto, Uzbek and Japanese',
+    owner: 'QuranEnc',
+    licence: 'QuranEnc terms: unmodified, with attribution and version',
+    url: 'https://quranenc.com',
+    useEn: 'Translations of the meanings and short tafsir',
+    useAr: 'ترجمات المعاني والتفسير المختصر',
+  ),
+  Credit(
+    group: CreditGroup.translations,
     name: 'Ahsan-ul-Bayan (Urdu tafsir, the Junagarhi translation’s notes)',
     owner: 'Hafiz Salahuddin Yusuf — via QuranEnc',
     licence: 'QuranEnc terms: unmodified, with attribution',
     url: 'https://quranenc.com',
     useEn: 'Urdu tafsir',
     useAr: 'التفسير بالأردية',
+  ),
+  Credit(
+    group: CreditGroup.translations,
+    name:
+        'Al-Mukhtasar in Arabic; Al-Nafahat Al-Makkiyyah (Muhammad ibn Salih '
+        'al-Shawi); Bayan Ma\'ani Al-Quran Al-Karim',
+    owner: 'QuranEnc',
+    licence: 'QuranEnc terms: unmodified, with attribution',
+    url: 'https://quranenc.com',
+    useEn: 'Arabic tafsir',
+    useAr: 'التفسير بالعربية',
   ),
   Credit(
     group: CreditGroup.translations,
@@ -140,6 +175,23 @@ const credits = <Credit>[
   ),
   Credit(
     group: CreditGroup.translations,
+    name: 'Translation readings (audio)',
+    owner: 'Islamic Network (alquran.cloud) — the readers',
+    licence: 'Licensed by the readers for free redistribution; streamed',
+    url: 'https://alquran.cloud',
+    useEn:
+        'A translation read after each ayah: Ibrahim Walk (English), '
+        'Shamshad Ali Khan (Urdu), Youssouf Leclerc (French), Elmir Kuliev '
+        '(Russian), Hedayatfar (Persian), Diyanet Vakfı (Turkish), Khalifah '
+        'Altai (Kazakh), Muhammad Sodik Muhammad Yusuf (Uzbek)',
+    useAr:
+        'ترجمة مسموعة بعد كل آية: إبراهيم ووك (الإنجليزية)، شمشاد علي خان '
+        '(الأردية)، يوسف لوكلير (الفرنسية)، إلمير كولييف (الروسية)، هدايت‌فر '
+        '(الفارسية)، وقف الديانة (التركية)، خليفة ألطاي (الكازاخية)، محمد '
+        'صادق محمد يوسف (الأوزبكية)',
+  ),
+  Credit(
+    group: CreditGroup.translations,
     name: 'Recitations by ayah from everyayah.com',
     owner: 'EveryAyah (everyayah.com) — the reciters',
     licence: 'No licence stated; streamed with credit',
@@ -148,11 +200,13 @@ const credits = <Credit>[
         'Listening to ayahs and surahs: Al-Tablawi, Al-Banna, Al-Husary '
         '(Muallim), Saad Al-Ghamdi, Yasser Al-Dossary, Nasser Al-Qatami, '
         'Fares Abbad, Ali Jaber, Salah Bukhatir, Yasser Salamah, Karim '
-        'Mansoori',
+        'Mansoori, Abdullah Awad Al-Juhani, Abdullah Matroud, Khalifa '
+        'Al-Tunaiji',
     useAr:
         'الاستماع إلى الآيات والسور: الطبلاوي، البنا، الحصري (المعلّم)، '
         'سعد الغامدي، ياسر الدوسري، ناصر القطامي، فارس عباد، علي جابر، '
-        'صلاح بو خاطر، ياسر سلامة، كريم منصوري',
+        'صلاح بو خاطر، ياسر سلامة، كريم منصوري، عبد الله عواد الجهني، '
+        'عبد الله المطرود، خليفة الطنيجي',
   ),
   Credit(
     group: CreditGroup.translations,

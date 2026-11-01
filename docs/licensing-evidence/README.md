@@ -54,3 +54,9 @@ from the machine that collected these; its statement is the copy in the
 | `model/hf-obadx-qdat-README.md` | QDAT: **MIT**. |
 | `model/hf-greentechapps-user_recited_verses_full-README.md` | v3.7's real phone recordings (`greentechapps/user_recited_verses_full`, fetched 2026-10-21): **CC BY 4.0**; "cleaned and tested from an old Tarteel audio dataset released publicly … originally collected by the Tarteel project". |
 | `model/hf-google-fleurs-README.md` | G22 candidate audio (`google/fleurs`, config `ar_eg`, fetched 2026-10-21): **CC BY 4.0** ("All datasets are licensed under the Creative Commons license (CC-BY)"). |
+
+## Tajweed colours — cpfair/quran-tajweed (collected 2026-10-31)
+
+| File | What it is |
+|---|---|
+| `tajweed/cpfair-quran-tajweed-README-496f71cd.md` | `README.md` of github.com/cpfair/quran-tajweed at commit `496f71cd191da00fa2a37ded79dbbddb033bb0ad` (2021-10-12, the latest): "This data file is licensed under a Creative Commons Attribution 4.0 International License" (the annotations, `output/tajweed.hafs.uthmani-pause-sajdah.json`), the Tanzil text under Tanzil's terms. The repository itself states no licence file; the README's grant covers the data Tahfeez uses. |

@@ -1,5 +1,6 @@
 import 'dart:async' show unawaited;
 
+import '../../../core/sharing/image_sharer.dart';
 import '../../../core/localization/generated/app_localizations.dart';
 import '../../../ai/acoustic/local_quran_acoustic_model.dart';
 
@@ -8,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/audio/audio_models.dart';
+import '../../listen/presentation/sleep_timer_choices.dart';
 import '../../listen/application/follow_along_controller.dart';
 import '../../listen/presentation/follow_along_sheet.dart';
 import '../../listen/presentation/listen_sheet.dart';
@@ -28,6 +30,9 @@ import '../application/live_recognition_controller.dart';
 import '../application/recitation_providers.dart';
 import '../application/mushaf_recitation_target.dart';
 import '../application/sajdah_reminder.dart';
+import '../application/recitation_hints.dart';
+import '../../../core/storage/storage_providers.dart';
+import '../../../core/ui/first_run.dart';
 import '../../guide/guide.dart';
 import '../../../memorization/application/activity_stats.dart';
 import '../../../ai/hifz/hifz_judge.dart';
@@ -251,6 +256,61 @@ Future<void> showSajdahReminder(BuildContext context, WidgetRef ref) {
   );
 }
 
+/// After one of the first recitations: a tip when the check marked much of
+/// it — tajweed checking off, or lenient strictness (see
+/// [recitationHintAfter]). Not in the guide's practice, nor between
+/// Follow along's turns.
+Future<void> _offerRecitationHint(BuildContext context, WidgetRef ref) async {
+  if (!ref.read(firstRunPromptsProvider)) return;
+  if (!ref.read(liveRecognitionEnabledProvider)) return;
+  if (ref.read(guideProvider) != null) return;
+  if (ref.exists(followAlongControllerProvider) &&
+      ref.read(followAlongControllerProvider) != null) {
+    return;
+  }
+  // The last words' checks still arriving: a few seconds at most.
+  for (var i = 0; i < 25; i++) {
+    if (ref.read(acousticVerificationControllerProvider).pending == 0) break;
+    await Future<void>.delayed(const Duration(milliseconds: 200));
+    if (!context.mounted) return;
+  }
+  final hint = await recitationHintAfter(
+    ref.read(browserStorageProvider),
+    ref.read(hifzSettingsProvider),
+    ref.read(hifzControllerProvider.notifier).lastPronunciation(),
+  );
+  if (hint == null || !context.mounted) return;
+  final l10n = AppLocalizations.of(context);
+  final apply = await showDialog<bool>(
+    context: context,
+    useRootNavigator: true,
+    builder: (context) => AlertDialog(
+      key: ValueKey('recitation-hint-${hint.name}'),
+      icon: const Icon(Icons.lightbulb_outline),
+      title: Text(l10n.recHintTitle),
+      content: Text(switch (hint) {
+        RecitationHint.tajweedOff => l10n.recHintTajweed,
+        RecitationHint.lenient => l10n.recHintLenient,
+      }),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: Text(l10n.recHintLater),
+        ),
+        FilledButton(
+          key: const ValueKey('recitation-hint-apply'),
+          onPressed: () => Navigator.of(context).pop(true),
+          child: Text(switch (hint) {
+            RecitationHint.tajweedOff => l10n.recHintTajweedAction,
+            RecitationHint.lenient => l10n.recHintLenientAction,
+          }),
+        ),
+      ],
+    ),
+  );
+  if (apply == true) applyRecitationHint(ref, hint);
+}
+
 class RecitationBottomBar extends ConsumerWidget {
   const RecitationBottomBar({super.key, required this.navigation});
 
@@ -279,6 +339,12 @@ class RecitationBottomBar extends ConsumerWidget {
           next.phase == RecitationPhase.error) {
         ref.read(recitationSessionControllerProvider.notifier).dismissError();
       }
+    });
+
+    // One of the first recitations over, much of it marked: a tip.
+    ref.listen(recitationSessionControllerProvider, (previous, next) {
+      if (previous?.isActive != true || next.isActive) return;
+      unawaited(_offerRecitationHint(context, ref));
     });
 
     // A session over: its results (each ayah's grade and strength) — not
@@ -949,6 +1015,8 @@ class _ListenControls extends ConsumerWidget {
     final player = ref.read(quranAudioPlayerProvider.notifier);
     final audio = ref.watch(audioControllerProvider);
     final centered = ref.watch(platformCapabilitiesProvider).isWeb;
+    // Follow along's reciter turns: no sleep timer (it is for listening).
+    final following = ref.watch(followAlongControllerProvider) != null;
     return StreamBuilder<AudioPlaybackState>(
       stream: audio.state,
       initialData: const AudioPlaybackState(isPlaying: true),
@@ -1001,6 +1069,8 @@ class _ListenControls extends ConsumerWidget {
                       semanticsLabel: '${l10n.listenSpeed} $speed',
                     ),
                   ),
+                  if (!following)
+                    SleepTimerButton(style: BarButtonGroup.buttonStyle),
                 ],
               ),
             ),
@@ -2157,6 +2227,7 @@ class _RecitationAiNotice extends ConsumerWidget {
                         'Tahfeez AI ${ref.read(appVersionProvider).value ?? '?'}'
                         ' — recitation checking closed the app\n'
                         '${model?.detail ?? ''}',
+                        origin: shareOrigin(context),
                       ),
                   child: Text(l10n.quranSetupShare),
                 ),

@@ -18,6 +18,8 @@ import '../../quran/application/quran_index_providers.dart';
 import '../../recitation/application/mushaf_recitation_target.dart';
 import '../../recitation/presentation/recitation_loop_sheet.dart'
     show CountStepper, VersePicker;
+import 'sleep_timer_choices.dart';
+import '../../../quran/presentation/meaning_language_names.dart';
 import '../application/listen_options.dart';
 import '../application/quran_audio_player.dart';
 import '../application/reciter_controller.dart';
@@ -356,6 +358,64 @@ class _ListenSheetState extends ConsumerState<_ListenSheet> {
               ],
             ),
           ),
+          // A translation read aloud after each ayah (streamed).
+          GuideTarget(
+            id: 'listen-translation',
+            child: TahfeezCard(
+              key: const ValueKey('listen-translation-card'),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  label(l10n.listenTranslationAudio),
+                  DropdownButton<String>(
+                    key: const ValueKey('listen-translation-voice'),
+                    isExpanded: true,
+                    value:
+                        translationVoiceFor(_options.translationVoice)
+                            ?.edition ??
+                        '',
+                    items: [
+                      DropdownMenuItem(
+                        value: '',
+                        child: Text(l10n.listenTranslationNone),
+                      ),
+                      for (final v in translationVoices)
+                        DropdownMenuItem(
+                          value: v.edition,
+                          child: Text(
+                            '${nativeLanguageName(v.language)} · ${v.reader}',
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                    ],
+                    onChanged: (edition) => setState(
+                      () => _options = _options.copyWith(
+                        translationVoice: edition ?? '',
+                      ),
+                    ),
+                  ),
+                  if (_options.translationVoice.isNotEmpty)
+                    Text(
+                      l10n.listenTranslationAudioSub,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+          // Pausing after a while, for listening at night.
+          GuideTarget(
+            id: 'listen-sleep',
+            child: TahfeezCard(
+              key: const ValueKey('listen-sleep-timer-card'),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [label(l10n.sleepTimer), const SleepTimerChoices()],
+              ),
+            ),
+          ),
           GuideTarget(
             id: 'listen-options',
             child: TahfeezCard(
@@ -370,14 +430,6 @@ class _ListenSheetState extends ConsumerState<_ListenSheet> {
                       () => _options = _options.copyWith(
                         continueToNextSurahs: on,
                       ),
-                    ),
-                  ),
-                  SwitchListTile(
-                    key: const ValueKey('listen-follow'),
-                    title: Text(l10n.listenFollow),
-                    value: _options.followPages,
-                    onChanged: (on) => setState(
-                      () => _options = _options.copyWith(followPages: on),
                     ),
                   ),
                   SwitchListTile(

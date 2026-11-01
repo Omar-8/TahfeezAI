@@ -187,6 +187,53 @@ const _launchTranslations = [
     version: 'unversioned upstream (tracked by sourceHash)',
     versionCode: 1,
   ),
+  // Added 2026-11-01 with their languages (QuranEnc's Korean Rowwad is
+  // unfinished — 1,955 empty ayahs — so Hamid Choi's; nothing in Danish).
+  (
+    key: 'dutch_center',
+    slug: 'nl-rowwad',
+    displayName: 'Dutch Translation - Rowwad Translation Center',
+    language: 'nl',
+    author: 'Rowwad Translation Center',
+    version: '2.0.10',
+    versionCode: 2010,
+  ),
+  (
+    key: 'korean_hamid',
+    slug: 'ko-hamid',
+    displayName: 'Korean Translation - Hamid Choi',
+    language: 'ko',
+    author: 'Hamid Choi',
+    version: 'unversioned upstream (tracked by sourceHash)',
+    versionCode: 1,
+  ),
+  (
+    key: 'japanese_saeedsato',
+    slug: 'ja-sato',
+    displayName: 'Japanese Translation - Saeed Sato',
+    language: 'ja',
+    author: 'Saeed Sato',
+    version: '1.0.13',
+    versionCode: 1013,
+  ),
+  (
+    key: 'greek_rwwad',
+    slug: 'el-rowwad',
+    displayName: 'Greek Translation - Rowwad Translation Center',
+    language: 'el',
+    author: 'Rowwad Translation Center',
+    version: 'unversioned upstream (tracked by sourceHash)',
+    versionCode: 1,
+  ),
+  (
+    key: 'portuguese_nasr',
+    slug: 'pt-nasr',
+    displayName: 'Portuguese Translation - Helmi Nasr',
+    language: 'pt',
+    author: 'Helmi Nasr',
+    version: '1.4.1',
+    versionCode: 1401,
+  ),
 ];
 
 const _mukhtasarAuthor = 'Tafsir Center for Quranic Studies';
@@ -261,6 +308,37 @@ const _launchTafsirs = [
     id: 'uz-mukhtasar',
     displayName: 'Al-Muxtasar: Qurʼoni karim tafsiri (Oʻzbekcha)',
     language: 'uz',
+  ),
+  // Added 2026-11-01 (none in Dutch, Korean, Greek, Portuguese or Danish).
+  (
+    key: 'japanese_mokhtasar',
+    id: 'ja-mukhtasar',
+    displayName: 'クルアーン簡潔注釈（日本語）',
+    language: 'ja',
+  ),
+];
+
+/// More Arabic tafsirs (owner's request, 2026-11-01), besides Al-Muyassar
+/// and al-Sirāj. Al-Yaseer's entries begin with the ayah number ("255- …"),
+/// kept as published.
+const _arabicTafsirs = [
+  (
+    key: 'arabic_mokhtasar',
+    id: 'ar-mukhtasar',
+    displayName: 'المختصر في تفسير القرآن الكريم',
+    author: _mukhtasarAuthor,
+  ),
+  (
+    key: 'arabic_nafahat',
+    id: 'ar-nafahat',
+    displayName: 'النفحات المكية',
+    author: 'Muhammad ibn Salih al-Shawi',
+  ),
+  (
+    key: 'arabic_yaseer',
+    id: 'ar-yaseer',
+    displayName: 'بيان معاني القرآن الكريم',
+    author: 'QuranEnc.com', // its page names no author
   ),
 ];
 
@@ -439,14 +517,31 @@ Future<void> main() async {
     extraTranslations.add((r, t.key, t.version));
   }
   final extraTafsirs = <(QuranEncTafsirResult, String)>[];
-  for (final t in _launchTafsirs) {
+  for (final t in [
+    for (final t in _launchTafsirs)
+      (
+        key: t.key,
+        id: t.id,
+        displayName: t.displayName,
+        language: t.language,
+        author: _mukhtasarAuthor,
+      ),
+    for (final t in _arabicTafsirs)
+      (
+        key: t.key,
+        id: t.id,
+        displayName: t.displayName,
+        language: 'ar',
+        author: t.author,
+      ),
+  ]) {
     final merged = _tafsirMergedAyahs[t.key] ?? const <String>{};
     final r = parseQuranEncTafsir(
       sqliteFile: File('$_cache/${t.key}/${t.key}.sqlite'),
       tafsirId: t.id,
       displayName: t.displayName,
       languageCode: t.language,
-      author: _mukhtasarAuthor,
+      author: t.author,
       version: 1,
       leaveOut: merged,
     );

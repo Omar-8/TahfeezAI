@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/ui/type_once.dart';
 import '../../../../core/localization/generated/app_localizations.dart';
 import '../../../../core/routing/quran_location_routing.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -167,32 +168,42 @@ class _DailyAyahCard extends ConsumerWidget {
                         width: constraints.maxWidth,
                         textScaler: MediaQuery.textScalerOf(context),
                       );
-                      return Directionality(
-                        textDirection: TextDirection.rtl,
-                        child: Text.rich(
-                          TextSpan(
-                            children: [
-                              TextSpan(text: text),
-                              const TextSpan(text: ' '),
-                              WidgetSpan(
-                                alignment: PlaceholderAlignment.middle,
-                                // Its number in a drawn star, not a font
-                                // glyph.
-                                child: TahfeezStarNumber(
-                                  key: const ValueKey('daily-ayah-number'),
-                                  label: _arabicDigits(ayah.verseNo),
-                                  color: scheme.tertiary,
-                                  size: size * _starShare,
-                                  textStyle: const TextStyle(
-                                    fontFamily: 'Noto Naskh Arabic',
+                      // Typed out as the app opens, its number appearing
+                      // at the end.
+                      return TypeOnce(
+                        id: 'daily-ayah',
+                        length: text.length,
+                        delay: const Duration(milliseconds: 600),
+                        builder: (context, typed) => Directionality(
+                          textDirection: TextDirection.rtl,
+                          child: Text.rich(
+                            TextSpan(
+                              children: [
+                                ...typedSpans(text, typed),
+                                const TextSpan(text: ' '),
+                                WidgetSpan(
+                                  alignment: PlaceholderAlignment.middle,
+                                  // Its number in a drawn star, not a font
+                                  // glyph.
+                                  child: Opacity(
+                                    opacity: ((typed - 0.9) * 10).clamp(0, 1),
+                                    child: TahfeezStarNumber(
+                                      key: const ValueKey('daily-ayah-number'),
+                                      label: _arabicDigits(ayah.verseNo),
+                                      color: scheme.tertiary,
+                                      size: size * _starShare,
+                                      textStyle: const TextStyle(
+                                        fontFamily: 'Noto Naskh Arabic',
+                                      ),
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
+                            key: const ValueKey('daily-ayah-text'),
+                            textAlign: TextAlign.center,
+                            style: styleAt(size),
                           ),
-                          key: const ValueKey('daily-ayah-text'),
-                          textAlign: TextAlign.center,
-                          style: styleAt(size),
                         ),
                       );
                     },

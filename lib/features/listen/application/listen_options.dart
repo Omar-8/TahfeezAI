@@ -15,6 +15,7 @@ class ListenOptions {
     this.followPages = true,
     this.highlight = true,
     this.continueToNextSurahs = false,
+    this.translationVoice = '',
   });
 
   final int ayahRepeats, rangeRepeats;
@@ -23,26 +24,32 @@ class ListenOptions {
   /// Once the range is done (at a surah's end), go on to the next surahs.
   final bool continueToNextSurahs;
 
+  /// The translation read after each ayah ([TranslationVoice.edition]);
+  /// empty: none.
+  final String translationVoice;
+
   ListenOptions copyWith({
     int? ayahRepeats,
     int? rangeRepeats,
     bool? followPages,
     bool? highlight,
     bool? continueToNextSurahs,
+    String? translationVoice,
   }) => ListenOptions(
     ayahRepeats: ayahRepeats ?? this.ayahRepeats,
     rangeRepeats: rangeRepeats ?? this.rangeRepeats,
     followPages: followPages ?? this.followPages,
     highlight: highlight ?? this.highlight,
     continueToNextSurahs: continueToNextSurahs ?? this.continueToNextSurahs,
+    translationVoice: translationVoice ?? this.translationVoice,
   );
 
   Map<String, Object> toJson() => {
     'ayahRepeats': ayahRepeats,
     'rangeRepeats': rangeRepeats,
-    'followPages': followPages,
     'highlight': highlight,
     'continueToNextSurahs': continueToNextSurahs,
+    'translationVoice': translationVoice,
   };
 
   static ListenOptions fromJson(Object? json) {
@@ -53,9 +60,13 @@ class ListenOptions {
     return ListenOptions(
       ayahRepeats: count('ayahRepeats'),
       rangeRepeats: count('rangeRepeats'),
-      followPages: flag('followPages', true),
+      // Always turned (the switch was removed; an old saved "off" ignored).
+      followPages: true,
       highlight: flag('highlight', true),
       continueToNextSurahs: flag('continueToNextSurahs', false),
+      translationVoice: json['translationVoice'] is String
+          ? json['translationVoice'] as String
+          : '',
     );
   }
 }

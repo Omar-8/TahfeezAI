@@ -1,0 +1,55 @@
+Lær Koranen udenad med en lytter i lommen.
+
+Læs Medina-Mushaf, forstå hvert ord, og reciter udenad, mens en AI på din telefon følger med — og fanger det forkerte ord, det oversprungne vers og den manglende madd. Gratis, offline, ingen reklamer, ingen konto.
+
+RECITER UDENAD — MED FEEDBACK
+• Skjul siden og reciter: hvert ord vises, mens du siger det
+• Ordene farves undervejs: rigtigt, forkert, sprunget over eller forkert udtalt — et rigtigt ord gløder blødt, en fejl vipper, og en færdig side gløder med et blidt tryk
+• En ring om stopknappen ånder med din stemme, så du ved, at du bliver hørt
+• Hører hvordan du reciterer, ikke kun hvad: bogstaver, vokaler, shadda og kasusendelser, lyd for lyd mod Ḥafṣ-udtalen
+• Tajweed kontrolleres også: madd-længde, qalqala, ghunnah (ikhfāʾ, iqlāb, idghām og en dobbelt nūn eller mīm holdt), tunge og lette bogstaver, strubebogstaver — hver regel kan slås til eller fra
+• Vælg hvor streng kontrollen er: mild, afbalanceret eller præcis
+• En vibration eller lyd ved en fejl, med tajweedfejl meldt for sig
+• Vælg farverne for udtale- og tajweedfejl
+• Gentag et vers, reciter med en recitator, eller test en hel side
+
+LÆS OG FORSTÅ
+• Medina-Mushaf side for side, præcis som trykt — eller vers for vers, swipet eller i én fortløbende rulning
+• Ordbetydninger og translitteration — også på arabisk, fra al-Sirāj
+• Oversættelser på 23 sprog og tafsir ved hvert vers, på dit sprog
+• Tajweedfarver på bogstaverne i verstilstand, regel for regel
+• Tryk på en suras navn for dens betydning, åbenbaring og mere
+• Del et vers som billede, med oversættelsen
+• Suranavne i Mushafens egen kalligrafi; fokustilstand for siden alene
+• Søg i hele Koranen, på arabisk eller i oversættelse
+• Bogmærker og tematiske afsnit farvet på siden
+
+LYT
+• 31 recitatorer, blandt andre Alafasy, Al-Husary, Al-Minshawi, Abdul Basit og As-Sudais
+• Verset lyser op, mens det reciteres; gentag et vers eller et interval
+• Hent en recitator til offline lytning; afspilningen fortsætter med skærmen slukket
+• En oversættelse læst op efter hvert vers, på 8 sprog
+• En sleeptimer til lytning om aftenen
+
+LÆR UDENAD MED EN PLAN
+• En daglig lektion og spredt repetition
+• Skjul-tilstand, Gentag og Recitér med
+• Test mig: de første ord fra et tilfældigt sted, du kan — fortsæt udenad
+• Styrken af hver del følges, så du ved, hvad du skal repetere
+• Din stime, en kalender over dage med recitation, en ring med de 30 juz og blide milepæle
+
+GØR DEN TIL DIN
+• En himmel i farverne fra tidspunktet på dagen, glaskort og et islamisk geometrisk mønster
+• Lyse, mørke, varme, sepia og sorte temaer; 4 Koran-skrifttyper; tekst op til 200%
+• På 25 sprog, blandt andre dansk, engelsk, arabisk, tyrkisk, urdu, tysk, fransk, japansk og koreansk
+• Telefoner og tablets
+
+DIN STEMME BLIVER PÅ DIN TELEFON
+Din recitation kontrolleres på enheden af appens egen talemodel og kasseres derefter. Intet uploades, der er ingen konto, ingen analyser og ingen sporing. Læsning, oversættelser, tafsir, søgning, udenadslære og recitationskontrol virker alle uden internet.
+
+EN GAVE, IKKE ET PRODUKT
+Ingen reklamer, ingen abonnementer, ingen køb — gratis for alle, for altid. Tahfeez AI er open source: github.com/Omar-8/TahfeezAI
+
+Recitationsmodellen er ung og stadig ved at lære: den kan overse en fejl eller markere et rigtigt ord. Hver version bliver bedre — din feedback hjælper: tahfeez.ai.app@gmail.com
+
+Med tak til Tanzil, King Fahd Complex, Quran Engine, QUL (Tarteel), QuranEnc, quran.com, recitatorerne og ophavsmændene til Muaalem-modellen og til hvert datasæt, der står i appens Om-skærm.

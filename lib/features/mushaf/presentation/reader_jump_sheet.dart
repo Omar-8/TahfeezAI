@@ -8,6 +8,7 @@ import '../../../core/theme/components/components.dart';
 import '../../../quran/domain/models/quran_location.dart';
 import '../../../quran/domain/models/quran_refs.dart';
 import '../../../quran/domain/quran_ayah_numbers.dart';
+import '../../quran/presentation/surah_info_sheet.dart';
 import '../../quran/application/quran_index_providers.dart';
 import '../../recitation/presentation/recitation_loop_sheet.dart'
     show CountStepper, VersePicker;
@@ -95,6 +96,21 @@ class _ReaderJumpState extends ConsumerState<_ReaderJump> {
                 () => _verse = (chapterNo: _verse.chapterNo, verseNo: a),
               ),
             ),
+          // About the surah chosen: where it was revealed, its ayahs…
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: TextButton.icon(
+              key: const ValueKey('jump-surah-info'),
+              icon: const Icon(Icons.info_outline_rounded),
+              label: Text(l10n.surahInfoAbout),
+              onPressed: () {
+                Navigator.of(context).pop();
+                if (widget.reader.mounted) {
+                  showSurahInfoSheet(widget.reader, surahNo: _verse.chapterNo);
+                }
+              },
+            ),
+          ),
           FilledButton.icon(
             key: const ValueKey('jump-ayah'),
             style: FilledButton.styleFrom(

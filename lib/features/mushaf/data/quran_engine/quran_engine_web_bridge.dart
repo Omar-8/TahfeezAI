@@ -285,7 +285,7 @@ class QuranEngineWebPage {
   /// (`page.hitTestViewEx`). `word`/`deco` are `-1` (the WASM `NONE`
   /// sentinel, matching `qvp.js`'s own `_hitEx`) when nothing of that kind
   /// was hit — a resolved word index can legitimately be `0`.
-  ({int word, int deco, String? wordKey})? hitTest(
+  ({int word, int deco, String? wordKey, int? surahBanner})? hitTest(
     double localX,
     double localY,
   ) {
@@ -304,7 +304,22 @@ class QuranEngineWebPage {
     final word = (hit.getProperty('word'.toJS) as JSNumber).toDartInt;
     final deco = (hit.getProperty('deco'.toJS) as JSNumber).toDartInt;
     final wordKeyJs = hit.getProperty('wordKey'.toJS) as JSString?;
-    return (word: word, deco: deco, wordKey: wordKeyJs?.toDart);
+    // A surah's name banner (`page.decos[i]`: kind 1, with its surah).
+    int? surahBanner;
+    if (deco >= 0) {
+      final info = (_page.getProperty(
+        'decos'.toJS,
+      ) as JSArray?)?.toDart.elementAtOrNull(deco) as JSObject?;
+      final kind = (info?.getProperty('kind'.toJS) as JSNumber?)?.toDartInt;
+      final surah = (info?.getProperty('surah'.toJS) as JSNumber?)?.toDartInt;
+      if (kind == 1 && surah != null && surah > 0) surahBanner = surah;
+    }
+    return (
+      word: word,
+      deco: deco,
+      wordKey: wordKeyJs?.toDart,
+      surahBanner: surahBanner,
+    );
   }
 
   /// `page.findWord(surah, ayah, word)` — resolves a canonical

@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -14,10 +15,12 @@ import '../../../quran/application/tafsir_selection_controller.dart';
 import '../../../quran/application/tafsir_verse_text.dart';
 import '../../../quran/domain/models/ayah_models.dart';
 import '../../../quran/domain/models/quran_refs.dart';
+import '../../../quran/domain/models/tajweed_models.dart';
 import '../../../quran/presentation/meaning_resource_names.dart';
 import '../../../quran/presentation/translation_block.dart';
 import '../../../quran/quran_providers.dart';
 import '../application/mushaf_page_translations.dart';
+import 'tajweed_palette.dart';
 import '../domain/mushaf_appearance.dart';
 
 // What an ayah shows in Ayah mode and in the ayah sheet alike: its words
@@ -48,10 +51,15 @@ class AyahWordView extends StatefulWidget {
     this.onTap,
     this.onLongPress,
     this.fade = true,
+    this.tajweed = const [],
   });
 
   final String fontFamily;
   final String text;
+
+  /// Its letters coloured by their tajweed rules (Ayah mode's "Tajweed
+  /// colours"), also over a recitation's mark on the word.
+  final List<TajweedSpan> tajweed;
   final String? meaning;
   final bool hidden;
   final ({Color color, bool ink})? style;
@@ -77,6 +85,11 @@ class _AyahWordViewState extends State<AyahWordView>
     with SingleTickerProviderStateMixin {
   AnimationController? _controller;
   _WordEffect? _effect;
+
+  // The word's tajweed runs, for the text and spans they were split from.
+  String? _runsText;
+  List<TajweedSpan>? _runsSpans;
+  List<(String, TajweedGroup?)> _runs = const [];
 
   static const _mistakes = {
     MushafWordMark.wrong,
@@ -148,17 +161,44 @@ class _AyahWordViewState extends State<AyahWordView>
       _WordEffect.hide => 1 - smooth,
       _ => widget.hidden ? 0.0 : 1.0,
     };
-    final word = Text(
-      widget.text,
-      textDirection: TextDirection.rtl,
-      style: quranTextStyle(
-        color: inkAlpha == 0
-            ? Colors.transparent
-            : ink.withValues(alpha: ink.a * inkAlpha),
-        fontFamily: widget.fontFamily,
-        fontSize: 28,
-      ),
+    Color faded(Color c) => inkAlpha == 0
+        ? Colors.transparent
+        : c.withValues(alpha: c.a * inkAlpha);
+    final style = quranTextStyle(
+      color: faded(ink),
+      fontFamily: widget.fontFamily,
+      fontSize: 28,
     );
+    // Tajweed colours over everything: a recited word inked by how it
+    // went (green, red…) keeps its tajweed letters in their own colours.
+    final tajweed = widget.tajweed;
+    final Widget word;
+    if (tajweed.isEmpty) {
+      word = Text(widget.text, textDirection: TextDirection.rtl, style: style);
+    } else {
+      // Split once per word (not on every frame of its animation).
+      if (_runsText != widget.text || !listEquals(_runsSpans, tajweed)) {
+        _runsText = widget.text;
+        _runsSpans = tajweed;
+        _runs = tajweedRuns(widget.text, tajweed);
+      }
+      final dark = isDarkPage(colors.background);
+      word = Text.rich(
+        TextSpan(
+          children: [
+            for (final (text, group) in _runs)
+              TextSpan(
+                text: text,
+                style: group == null
+                    ? null
+                    : TextStyle(color: faded(tajweedColor(group, dark: dark))),
+              ),
+          ],
+        ),
+        textDirection: TextDirection.rtl,
+        style: style,
+      );
+    }
     final glow = _effect == _WordEffect.glow
         ? [
             BoxShadow(
@@ -207,6 +247,31 @@ class _AyahWordViewState extends State<AyahWordView>
       ),
     );
   }
+}
+
+/// [text] in runs: each run's letters under one of [spans]' groups (a
+/// later span over an earlier one), or none (the text's own colour). Only
+/// the colour changes between runs, so the letters stay joined.
+@visibleForTesting
+List<(String, TajweedGroup?)> tajweedRuns(
+  String text,
+  List<TajweedSpan> spans,
+) {
+  final groups = List<TajweedGroup?>.filled(text.length, null);
+  for (final s in spans) {
+    for (var i = s.start; i < s.end && i < text.length; i++) {
+      groups[i] = s.group;
+    }
+  }
+  final runs = <(String, TajweedGroup?)>[];
+  var from = 0;
+  for (var i = 1; i <= text.length; i++) {
+    if (i == text.length || groups[i] != groups[from]) {
+      runs.add((text.substring(from, i), groups[from]));
+      from = i;
+    }
+  }
+  return runs;
 }
 
 class AyahTransliteration extends ConsumerWidget {

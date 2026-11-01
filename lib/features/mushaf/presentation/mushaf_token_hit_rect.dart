@@ -23,6 +23,7 @@ class MushafTokenHitRect {
     required this.canonicalAyahId,
     required this.canonicalWordIndex,
     required this.text,
+    this.surahBanner,
   });
 
   final Rect rect;
@@ -31,4 +32,7 @@ class MushafTokenHitRect {
   final int? canonicalAyahId;
   final int? canonicalWordIndex;
   final String text;
+
+  /// The surah whose name banner was tapped (a decoration), if it was one.
+  final int? surahBanner;
 }

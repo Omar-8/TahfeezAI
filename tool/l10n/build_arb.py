@@ -21,7 +21,10 @@ keys = [k for k in en if not k.startswith('@')]
 
 def shape(text):
     """Its placeholders, and the ICU forms (plural / select) and their cases."""
-    names = set(re.findall(r'\{(\w+)\}', text))
+    # A plural case's text ({1日}, written without spaces in Japanese) is not
+    # a placeholder.
+    bare = re.sub(r'(=\d+|zero|one|two|few|many|other)\{', '\0', text)
+    names = set(re.findall(r'\{([A-Za-z_]\w*)\}', bare))
     icu = re.findall(r'\{(\w+), (plural|select),', text)
     cases = sorted(re.findall(r'(=\d+|zero|one|two|few|many|other)\{', text))
     names |= {n for n, _ in icu}

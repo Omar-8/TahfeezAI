@@ -1,0 +1,55 @@
+Memoriseer de Koran met een luisteraar op zak.
+
+Lees de Mushaf van Medina, begrijp elk woord en reciteer uit je hoofd terwijl een AI op je telefoon meeleest — en het verkeerde woord, het overgeslagen vers en de gemiste madd opvangt. Gratis, offline, geen advertenties, geen account.
+
+UIT JE HOOFD RECITEREN — MET FEEDBACK
+• Verberg de pagina en reciteer: elk woord verschijnt terwijl je het zegt
+• Woorden krijgen onderweg een kleur: goed, fout, overgeslagen of verkeerd uitgesproken — een goed woord gloeit zacht, een fout wiebelt, en een voltooide pagina gloeit met een zachte tik
+• Een ring rond de stopknop ademt mee met je stem, zodat je weet dat je wordt gehoord
+• Hoort hoe je reciteert, niet alleen wat: letters, klinkers, shadda en naamvalsuitgangen, klank voor klank tegen de uitspraak van Ḥafṣ
+• Ook tajweed wordt gecontroleerd: maddlengte, qalqala, ghunnah (ikhfāʾ, iqlāb, idghām, en een dubbele nūn of mīm aangehouden), zware en lichte letters, keelletters — elke regel kan aan of uit
+• Kies hoe streng de controle is: mild, gebalanceerd of nauwkeurig
+• Een trilling of geluid bij een fout, met tajweedfouten apart gemeld
+• Kies de kleuren van uitspraak- en tajweedfouten
+• Herhaal een vers, reciteer mee met een reciteur, of toets een hele pagina
+
+LEZEN EN BEGRIJPEN
+• De Mushaf van Medina pagina voor pagina, precies zoals gedrukt — of vers voor vers, swipend of doorlopend
+• Woordbetekenissen en transliteratie — ook in het Arabisch, uit al-Sirāj
+• Vertalingen in 23 talen en tafsir naast elk vers, in jouw taal
+• Tajweedkleuren op de letters in versmodus, regel voor regel
+• Tik op de naam van een soera voor haar betekenis, openbaring en meer
+• Deel een vers als afbeelding, met de vertaling
+• Soeranamen in de eigen kalligrafie van de Mushaf; focusmodus voor alleen de pagina
+• Zoek in de hele Koran, in het Arabisch of in vertaling
+• Bladwijzers en thematische passages gekleurd op de pagina
+
+LUISTEREN
+• 31 reciteurs, onder wie Alafasy, Al-Husary, Al-Minshawi, Abdul Basit en As-Sudais
+• Het vers licht op terwijl het wordt gereciteerd; herhaal een vers of een reeks
+• Download een reciteur om offline te luisteren; afspelen gaat door met het scherm uit
+• Een voorgelezen vertaling na elk vers, in 8 talen
+• Een slaaptimer om 's avonds te luisteren
+
+MEMORISEREN MET EEN PLAN
+• Een dagelijkse les en gespreide herhaling
+• Verbergmodus, Herhalen en Meereciteren
+• Overhoor me: de eerste woorden van een willekeurige plek die je kent — ga uit je hoofd verder
+• De sterkte van elk deel wordt bijgehouden, zodat je weet wat je moet herhalen
+• Je reeks, een kalender van de dagen dat je reciteerde, een ring van de 30 juz en zachte mijlpalen
+
+HELEMAAL VAN JOU
+• Een lucht in de kleuren van het tijdstip, glazen kaarten en een islamitisch geometrisch patroon
+• Lichte, donkere, warme, sepia en zwarte thema's; 4 Koranlettertypen; tekst tot 200%
+• In 25 talen, waaronder Nederlands, Engels, Arabisch, Turks, Frans, Duits, Urdu, Indonesisch, Japans en Koreaans
+• Telefoons en tablets
+
+JE STEM BLIJFT OP JE TELEFOON
+Je recitatie wordt op het apparaat gecontroleerd door het eigen spraakmodel van de app en daarna weggegooid. Er wordt niets geüpload, er is geen account, geen analyse en geen tracking. Lezen, vertalingen, tafsir, zoeken, memoriseren en recitatiecontrole werken allemaal zonder internet.
+
+EEN GESCHENK, GEEN PRODUCT
+Geen advertenties, geen abonnementen, geen aankopen — gratis voor iedereen, voor altijd. Tahfeez AI is open source: github.com/Omar-8/TahfeezAI
+
+Het recitatiemodel is jong en nog aan het leren: het kan een fout missen of een goed woord markeren. Elke versie wordt beter — je feedback helpt: tahfeez.ai.app@gmail.com
+
+Met dank aan Tanzil, het King Fahd Complex, Quran Engine, QUL (Tarteel), QuranEnc, quran.com, de reciteurs, en de makers van het Muaalem-model en van elke dataset die in het Over-scherm van de app staat.

@@ -174,6 +174,28 @@ void main() {
     expect(recorded.contains(9), isFalse);
   });
 
+  test('the app\'s own audio playing: the session and mic go on, the '
+      'recording keeps everything, recognition hears silence', () async {
+    await controller().start(startLocation: startPage);
+    final live = <Uint8List>[];
+    controller().liveAudio.listen(live.add);
+
+    controller().appAudioPlaying = true;
+    source.emitSeconds(1, value: 7);
+    await pumpEventQueue();
+    controller().appAudioPlaying = false;
+    source.emitSeconds(1, value: 5);
+    await pumpEventQueue();
+
+    expect(state().phase, RecitationPhase.listening);
+    expect(state().elapsed, const Duration(seconds: 2));
+    expect(live.map((c) => c.length), [32000, 32000]);
+    expect(live.first.every((b) => b == 0), isTrue);
+    expect(live.last.every((b) => b == 5), isTrue);
+    final recorded = store.sinks.values.single.bytes.toBytes();
+    expect(recorded.where((b) => b == 7), hasLength(32000));
+  });
+
   test('stop closes the mic, finishes one recording and saves the '
       'session', () async {
     await controller().start(startLocation: startPage);

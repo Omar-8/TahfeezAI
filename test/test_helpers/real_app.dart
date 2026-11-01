@@ -25,6 +25,7 @@ import 'package:tahfeez_ai/features/mushaf/domain/quran_engine/quran_engine_mush
 import 'package:tahfeez_ai/features/mushaf/presentation/mushaf_token_hit_rect.dart';
 import 'package:tahfeez_ai/features/quran/application/quran_index_providers.dart';
 import 'package:tahfeez_ai/features/settings/presentation/theme_choices.dart';
+import 'package:tahfeez_ai/memorization/domain/repositories/memorization_repository.dart';
 import 'package:tahfeez_ai/memorization/memorization_providers.dart';
 import 'package:tahfeez_ai/quran/application/quran_script_code.dart';
 import 'package:tahfeez_ai/quran/application/tafsir_selection_controller.dart';
@@ -123,6 +124,7 @@ class RealApp {
     AppThemeChoice appTheme = AppThemeChoice.light,
     bool passages = false,
     bool firstRun = false,
+    MemorizationRepository memorization = const EmptyMemorizationRepository(),
   }) async {
     recordErrors();
     tester.view.physicalSize = size;
@@ -141,9 +143,7 @@ class RealApp {
           ref.onDispose(db.close);
           return db;
         }),
-        memorizationRepositoryProvider.overrideWithValue(
-          const EmptyMemorizationRepository(),
-        ),
+        memorizationRepositoryProvider.overrideWithValue(memorization),
         audioControllerProvider.overrideWith((ref) => FakeAudioController()),
         mushafQuranEngineBackendProvider.overrideWith((ref) async => _backend),
         localeControllerProvider.overrideWithBuild((ref, _) => Locale(locale)),

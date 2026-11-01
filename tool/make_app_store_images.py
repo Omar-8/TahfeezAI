@@ -55,12 +55,7 @@ def main():
             continue
         msi.W, msi.H, msi.PHONE_W = w, h, phone_w
         for lang, captions in languages.items():
-            family = {"bn-BD": "NotoSansBengali", "ru-RU": "NotoSans", "kk": "NotoSans"}.get(lang)
-            if family:
-                msi.font = lambda path, size, weight="Regular", family=family: plain_font(
-                    mpl.NOTO / f"{family}-{'Bold' if weight == 'Bold' else 'Regular'}.ttf", size)
-            else:
-                msi.font = plain_font
+            mpl.use_font(lang, plain_font)
             if captions is None:
                 shots = [(name, msi.CAPTIONS[name][:2]) for name in SHARED + ENGLISH_MORE]
             else:

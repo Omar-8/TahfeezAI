@@ -105,8 +105,24 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('settings-language')));
     await tester.pumpAndSettle();
+    // The last of the list too (once hidden under the bottom bar).
+    final portuguese = find.byKey(const ValueKey('settings-language-pt'));
+    await tester.dragUntilVisible(
+      portuguese,
+      find.byType(ListView).last,
+      const Offset(0, -300),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(portuguese);
+    await tester.pumpAndSettle();
+    expect(container.read(localeControllerProvider), const Locale('pt'));
+
+    await tester.drag(find.byType(ListView).first, const Offset(0, 2000));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('settings-language')));
+    await tester.pumpAndSettle();
     // Back to the system language.
-    await tester.tap(find.text('لغة النظام').last);
+    await tester.tap(find.byKey(const ValueKey('settings-language-')));
     await tester.pumpAndSettle();
     expect(container.read(localeControllerProvider), isNull);
   });

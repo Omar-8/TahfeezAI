@@ -403,6 +403,7 @@ class _QuranEngineWebPageViewState extends State<_QuranEngineWebPageView> {
           canonicalAyahId: null,
           canonicalWordIndex: null,
           text: '',
+          surahBanner: hit.surahBanner,
         ),
       );
       return;

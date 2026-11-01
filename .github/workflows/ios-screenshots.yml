@@ -139,7 +139,7 @@ jobs:
           name: ios-raw-captures
           path: raw
       - name: Tools
-        run: sudo apt-get update -q && sudo apt-get install -yq fonts-noto-core python3-pil ffmpeg
+        run: sudo apt-get update -q && sudo apt-get install -yq fonts-noto-core fonts-noto-cjk python3-pil ffmpeg
       - name: Screenshots, framed
         run: python3 tool/make_app_store_images.py raw/shots media/screenshots
       # The tour found in each recording, cut and encoded

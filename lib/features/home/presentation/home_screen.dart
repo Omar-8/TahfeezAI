@@ -2,6 +2,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../../core/ui/type_once.dart';
+
 import '../../../core/ui/bar_space.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -201,11 +203,17 @@ class _HomeBrandHeader extends StatelessWidget {
           FittedBox(
             fit: BoxFit.scaleDown,
             alignment: AlignmentDirectional.centerStart,
-            child: Text(
-              l10n.homeSalam,
-              maxLines: 1,
-              style: theme.textTheme.bodyLarge?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
+            // Typed out as the app opens.
+            child: TypeOnce(
+              id: 'home-salam',
+              length: l10n.homeSalam.length,
+              delay: const Duration(milliseconds: 250),
+              builder: (context, typed) => Text.rich(
+                TextSpan(children: typedSpans(l10n.homeSalam, typed)),
+                maxLines: 1,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
               ),
             ),
           ),

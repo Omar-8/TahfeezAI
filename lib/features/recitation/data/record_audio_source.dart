@@ -44,9 +44,11 @@ class RecordPackageAudioSource implements RecitationAudioSource {
         echoCancel: processing,
         noiseSuppress: processing,
         autoGain: processing,
-        // A phone call or another app taking the mic shouldn't silently
-        // end the session.
-        audioInterruption: AudioInterruptionMode.pauseResume,
+        // Never paused by audio focus: the app's own audio (a word played
+        // mid-recitation) took it for good and left the mic paused (owner,
+        // 2026-11-01: playing audio must not touch the recitation or the
+        // mic). A phone call meanwhile just records silence.
+        audioInterruption: AudioInterruptionMode.none,
       ),
     );
     await _recorder.setOnConfigChanged(null);

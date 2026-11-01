@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.9+12
+version: 1.1.0+13
 
 environment:
   sdk: ^3.13.3
@@ -90,6 +90,9 @@ dependency_overrides:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  # Timers run on a fake clock (the sleep timer's tests); already in the
+  # SDK's own dependencies.
+  fake_async: ^1.3.3
   # On-device checks (e.g. live recognition against a real engine) —
   # never part of the app.
   integration_test:
@@ -161,6 +164,8 @@ flutter:
     - assets/quran/translations/de_rowwad.json
     - assets/quran/tafsir/ar_muyassar.json
     - assets/quran/surah_names/surah_names.json
+    # Tajweed colours for Ayah mode (tool/quran_data/build_tajweed.py).
+    - assets/quran/tajweed/tajweed.json
     # Word meanings (translation milestone T3; licence unverified, owner
     # decision — docs/THIRD_PARTY_RESOURCES.md).
     - assets/quran/wbw/en_qurancom.json
@@ -201,6 +206,16 @@ flutter:
     - assets/quran/tafsir/ps_mukhtasar.json
     - assets/quran/tafsir/uz_mukhtasar.json
     - assets/quran/tafsir/ar_seraj.json
+    # Added 2026-11-01: Dutch, Korean, Japanese, Greek and Portuguese.
+    - assets/quran/translations/nl_rowwad.json
+    - assets/quran/translations/ko_hamid.json
+    - assets/quran/translations/ja_sato.json
+    - assets/quran/translations/el_rowwad.json
+    - assets/quran/translations/pt_nasr.json
+    - assets/quran/tafsir/ja_mukhtasar.json
+    - assets/quran/tafsir/ar_mukhtasar.json
+    - assets/quran/tafsir/ar_nafahat.json
+    - assets/quran/tafsir/ar_yaseer.json
     # Expected Hafs pronunciation of every ayah for acoustic verification —
     # tool/acoustic_verification/build_reference.py.
     - assets/quran/recitation/phonetic_reference_hafs.json

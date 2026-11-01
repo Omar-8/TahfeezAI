@@ -16,26 +16,32 @@ SETOR HAFALAN, DENGAN KOREKSI
 BACA DAN PAHAMI
 • Mushaf Madinah halaman demi halaman, persis seperti cetakannya — atau ayat demi ayat, digeser atau bergulir terus
 • Arti dan transliterasi kata per kata — juga dalam bahasa Arab, dari al-Sirāj
-• Terjemahan dalam 18 bahasa dan tafsir di samping setiap ayat, dalam bahasa Anda
+• Terjemahan dalam 23 bahasa dan tafsir di samping setiap ayat, dalam bahasa Anda
+• Warna tajwid pada huruf di mode ayat, hukum demi hukum
+• Ketuk nama surah untuk melihat arti, tempat turun, dan lainnya
+• Bagikan ayat sebagai gambar, beserta terjemahannya
 • Nama surah dengan kaligrafi mushaf; mode fokus untuk halaman saja
 • Cari di seluruh Al-Qur'an, dalam bahasa Arab atau terjemahan
 • Penanda dan bagian tematik diwarnai di halaman
 
 DENGARKAN
-• 28 qari, termasuk Alafasy, Al-Husary, Al-Minshawi, Abdul Basit, dan As-Sudais
+• 31 qari, termasuk Alafasy, Al-Husary, Al-Minshawi, Abdul Basit, dan As-Sudais
 • Ayat menyala saat dibacakan; ulangi satu ayat atau rentang ayat
 • Unduh qari untuk mendengar offline; pemutaran tetap berjalan saat layar mati
+• Terjemahan yang dibacakan setelah setiap ayat, dalam 8 bahasa
+• Pengatur waktu tidur untuk mendengarkan di malam hari
 
 MENGHAFAL DENGAN RENCANA
 • Pelajaran harian dan murajaah berjarak
 • Mode sembunyi, ulang, dan ikuti bacaan
+• Uji saya: kata-kata pertama dari tempat acak yang Anda hafal — lanjutkan dari hafalan
 • Kekuatan setiap bagian terpantau, jadi Anda tahu apa yang perlu dimurajaah
 • Rangkaian hari Anda, kalender hari-hari membaca, cincin 30 juz, dan pencapaian kecil
 
 SESUAI SELERA ANDA
 • Langit berwarna sesuai waktu, kartu kaca, dan pola geometris Islami
 • Tema terang, gelap, hangat, sepia, dan hitam; 4 font Al-Qur'an; teks hingga 200%
-• Dalam 19 bahasa: Arab, Inggris, Jerman, Prancis, Spanyol, Rusia, Turki, Indonesia, Melayu, Urdu, Persia, Bengali, Hausa, Kurdi, Pashto, Swahili, Kazakh, Uzbek, dan Somalia
+• Dalam 25 bahasa: Arab, Inggris, Jerman, Prancis, Spanyol, Portugis, Belanda, Denmark, Yunani, Rusia, Turki, Indonesia, Melayu, Urdu, Persia, Bengali, Hausa, Kurdi, Pashto, Swahili, Kazakh, Uzbek, Somalia, Jepang, dan Korea
 • Ponsel dan tablet
 
 SUARA ANDA TETAP DI PONSEL ANDA

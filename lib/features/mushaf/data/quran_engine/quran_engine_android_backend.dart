@@ -282,6 +282,11 @@ class QuranEngineAndroidPage
                 canonicalAyahId: null,
                 canonicalWordIndex: null,
                 text: decoration.text,
+                surahBanner:
+                    decoration.decoration == QvpDecorationKind.surahName &&
+                        decoration.surah > 0
+                    ? decoration.surah
+                    : null,
               ),
             ),
       onEmptyTap: onEmptyHit,

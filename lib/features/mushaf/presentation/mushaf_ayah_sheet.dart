@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/localization/generated/app_localizations.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/components/components.dart';
+import '../../../quran/application/tajweed_colours.dart';
 import '../../../quran/application/ayah_reading_extras.dart';
 import '../../../quran/application/tafsir_selection_controller.dart';
 import '../../quran/application/quran_index_providers.dart';
@@ -15,6 +16,7 @@ import '../../listen/presentation/listen_sheet.dart';
 import '../application/mushaf_page_translations.dart';
 import '../application/reader_mode.dart';
 import '../domain/mushaf_appearance.dart';
+import 'ayah_share_sheet.dart';
 import 'ayah_view_options.dart';
 import 'ayah_view_parts.dart';
 
@@ -52,6 +54,9 @@ class _AyahDetailSheetBody extends ConsumerWidget {
         if (s.surah.surahNo == chapterNo) s.localizedName ?? s.arabicName,
     ].firstOrNull;
     final words = ref.watch(ayahCanonicalWordsProvider(ayahId)).value;
+    final tajweed = view.showTajweed
+        ? ref.watch(tajweedIndexProvider).value
+        : null;
     final meanings = view.showWordMeanings
         ? ref.watch(ayahWordMeaningsProvider(ayahId)).value ?? const {}
         : const <int, String>{};
@@ -104,6 +109,12 @@ class _AyahDetailSheetBody extends ConsumerWidget {
                   ),
                 ),
               ),
+              IconButton(
+                key: const ValueKey('ayah-sheet-share'),
+                icon: const Icon(Icons.share_outlined),
+                tooltip: l10n.shareAyahTitle,
+                onPressed: () => showAyahShareSheet(context, ayahId: ayahId),
+              ),
               _BookmarkButtons(ayahId: ayahId),
             ],
           ),
@@ -134,6 +145,11 @@ class _AyahDetailSheetBody extends ConsumerWidget {
                               'ayah-sheet-word-$ayahId:${w.wordIndex}',
                             ),
                             text: w.text,
+                            tajweed:
+                                tajweed?.spansIn(ayahId, w.wordIndex, [
+                                  w.text,
+                                ]) ??
+                                const [],
                             meaning: meanings[w.wordIndex],
                             hidden: false,
                             style: null,

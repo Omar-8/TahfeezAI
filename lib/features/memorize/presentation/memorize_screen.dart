@@ -24,6 +24,7 @@ import '../../recitation/application/hifz_controller.dart';
 import 'mark_known_sheet.dart';
 import 'plan_sheet.dart';
 import 'progress_screen.dart';
+import 'test_me_card.dart';
 import '../../../core/ui/back_to_exit.dart';
 import '../../mushaf/application/reading_surah.dart';
 
@@ -148,6 +149,8 @@ class _MemorizeScreenState extends ConsumerState<MemorizeScreen>
           _NewLessonCard(names: names),
         ),
         const SizedBox(height: TahfeezSpacing.lg),
+        // (With its own space below; nothing when nothing is memorized.)
+        TestMeSection(names: names),
         if (today.isEmpty)
           TahfeezCard(
             child: Column(
@@ -350,13 +353,15 @@ class _TodayScore extends ConsumerWidget {
 VerseRef _verse(int ayah) => (chapterNo: ayah ~/ 1000, verseNo: ayah % 1000);
 
 /// Opens the Mushaf at [first]'s page (or [page]) with hide mode on and the
-/// Hifz test set to [first]..[last].
+/// Hifz test set to [first]..[last] — its first [prompt] words given
+/// ("Test me").
 Future<void> reciteAyahs(
   BuildContext context,
   WidgetRef ref,
   int first,
   int last, {
   int? page,
+  int prompt = 0,
 }) async {
   final mushaf = await ref.read(defaultMushafProvider.future);
   final pages = await ref.read(ayahPagesProvider.future);
@@ -365,7 +370,7 @@ Future<void> reciteAyahs(
   ref.read(requestedHifzRangeProvider.notifier).request((
     from: _verse(first),
     to: _verse(last),
-  ));
+  ), prompt: prompt);
   final hide = ref.read(mushafHideModeProvider.notifier);
   if (!ref.read(mushafHideModeProvider).enabled) hide.toggle();
   // Ayah mode: the part's first ayah brought into view, not the page's top

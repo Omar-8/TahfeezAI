@@ -17,7 +17,9 @@ import '../../../quran/application/meaning_defaults.dart';
 import '../../quran/application/quran_index_providers.dart';
 import '../../recitation/application/mushaf_recitation_target.dart';
 import '../../recitation/application/recitation_session_controller.dart';
+import '../data/word_timings_repository.dart';
 import '../domain/quran_audio_sources.dart';
+import '../domain/word_timings.dart';
 import 'listen_options.dart';
 import 'reciter_downloads.dart';
 import 'reciter_controller.dart';
@@ -30,6 +32,7 @@ class NowPlaying {
     this.index,
     this.reciter, {
     this.options = const ListenOptions(highlight: false, followPages: false),
+    this.translations = const {},
   }) : word = null;
 
   const NowPlaying.word(int ayahId, int wordIndex)
@@ -37,6 +40,7 @@ class NowPlaying {
       index = 0,
       reciter = null,
       options = const ListenOptions(),
+      translations = const {},
       word = (ayahId: ayahId, wordIndex: wordIndex);
 
   /// The ayahs in play order, repetitions included.
@@ -46,11 +50,29 @@ class NowPlaying {
   final ListenOptions options;
   final ({int ayahId, int wordIndex})? word;
 
+  /// The places in [ayahIds] that are the ayah before them translated
+  /// (read aloud after it), not recited.
+  final Set<int> translations;
+
   bool get isWord => word != null;
+
+  /// Its ayah's translation is playing, not the ayah.
+  bool get isTranslation => translations.contains(index);
+
+  /// Recited ayahs (not translations) from place [from] up to [to].
+  int recitedBetween(int from, int to) => [
+    for (var k = from; k < to; k++)
+      if (!translations.contains(k)) k,
+  ].length;
   int? get ayahId => isWord ? null : ayahIds[index];
 
-  NowPlaying at(int i) =>
-      NowPlaying.ayahs(ayahIds, i, reciter, options: options);
+  NowPlaying at(int i) => NowPlaying.ayahs(
+    ayahIds,
+    i,
+    reciter,
+    options: options,
+    translations: translations,
+  );
 }
 
 /// Streams Quran audio (`docs/AUDIO_MILESTONE.md`) through the app's audio
@@ -102,7 +124,9 @@ class QuranAudioPlayer extends Notifier<NowPlaying?> {
     if (playback.completed && _started) {
       final last = now.isWord ? null : now.ayahIds.last;
       if (!now.isWord) {
-        ref.read(activityStatsProvider.notifier).add(heardAyahs: 1);
+        if (!now.isTranslation) {
+          ref.read(activityStatsProvider.notifier).add(heardAyahs: 1);
+        }
         _finished.add(now);
       }
       _clear();
@@ -125,9 +149,12 @@ class QuranAudioPlayer extends Notifier<NowPlaying?> {
     }
     final i = playback.currentIndex;
     if (!now.isWord && i != null && i != now.index && i < now.ayahIds.length) {
-      // The ayah before it was heard through.
+      // The ayahs before it were heard through (translations not counted).
       if (i > now.index) {
-        ref.read(activityStatsProvider.notifier).add(heardAyahs: i - now.index);
+        final heard = now.recitedBetween(now.index, i);
+        if (heard > 0) {
+          ref.read(activityStatsProvider.notifier).add(heardAyahs: heard);
+        }
       }
       state = now.at(i);
       _follow();
@@ -209,7 +236,16 @@ class QuranAudioPlayer extends Notifier<NowPlaying?> {
     ref.read(mushafHideModeProvider.notifier).setRevealed({page: ends[k]});
   }
 
+  /// A word playing during a recitation: recognition hears silence, so
+  /// the reciter is not taken for the reader (the mic and session go on).
+  void _muteRecognition(bool mute) {
+    final session = ref.read(recitationSessionControllerProvider.notifier);
+    session.appAudioPlaying =
+        mute && ref.read(recitationSessionControllerProvider).isActive;
+  }
+
   void _clear() {
+    _muteRecognition(false);
     state = null;
     _turnedTo = null;
     ref.read(mushafFocusAyahProvider.notifier).clear(this);
@@ -226,9 +262,25 @@ class QuranAudioPlayer extends Notifier<NowPlaying?> {
   }) async {
     if (ayahIds.isEmpty) return false;
     final reciter = reciterFor(ref.read(reciterProvider));
+    // A translation chosen: each ayah, then its translation read aloud.
+    final voice = translationVoiceFor(options.translationVoice);
+    final queue = voice == null
+        ? ayahIds
+        : [
+            for (final a in ayahIds) ...[a, a],
+          ];
+    final translations = voice == null
+        ? const <int>{}
+        : {for (var k = 1; k < queue.length; k += 2) k};
     _started = false;
     _played = false;
-    state = NowPlaying.ayahs(ayahIds, 0, reciter, options: options);
+    state = NowPlaying.ayahs(
+      queue,
+      0,
+      reciter,
+      options: options,
+      translations: translations,
+    );
     _follow();
     try {
       final audio = ref.read(audioControllerProvider);
@@ -239,13 +291,23 @@ class QuranAudioPlayer extends Notifier<NowPlaying?> {
       await audio.setSpeed(ref.read(listenSpeedProvider));
       await audio.playQueue(
         [
-          for (final a in ayahIds)
-            switch (downloads.localFile(a, reciter)) {
-              final path? => Uri.file(path).toString(),
-              null => ayahAudioUrl(a, reciter),
-            },
+          for (final (k, a) in queue.indexed)
+            if (translations.contains(k))
+              translationAudioUrl(a, voice!)
+            else
+              switch (downloads.localFile(a, reciter)) {
+                final path? => Uri.file(path).toString(),
+                null => ayahAudioUrl(a, reciter),
+              },
         ],
-        items: [for (final a in ayahIds) _info(a, reciter)],
+        items: [
+          for (final (k, a) in queue.indexed)
+            _info(
+              a,
+              reciter,
+              translation: translations.contains(k) ? voice : null,
+            ),
+        ],
       );
       return true;
     } catch (_) {
@@ -256,7 +318,11 @@ class QuranAudioPlayer extends Notifier<NowPlaying?> {
 
   /// [ayahId] as the media notification shows it: "Al-Baqara · 255", by
   /// the reciter (names in the app's language).
-  AudioItemInfo _info(int ayahId, Reciter reciter) {
+  AudioItemInfo _info(
+    int ayahId,
+    Reciter reciter, {
+    TranslationVoice? translation,
+  }) {
     final surahNo = ayahId ~/ 1000;
     // (The surah names once loaded — a Mushaf open has them.)
     final names = ref.exists(indexedSurahsProvider)
@@ -269,7 +335,9 @@ class QuranAudioPlayer extends Notifier<NowPlaying?> {
     final language = ref.read(localeControllerProvider)?.languageCode;
     return AudioItemInfo(
       title: '${surah ?? surahNo} · ${ayahId % 1000}',
-      subtitle: language != null && usesArabicScript(language)
+      subtitle: translation != null
+          ? translation.reader
+          : language != null && usesArabicScript(language)
           ? reciter.nameAr
           : reciter.nameEn,
     );
@@ -310,6 +378,7 @@ class QuranAudioPlayer extends Notifier<NowPlaying?> {
     _started = false;
     _played = false;
     state = NowPlaying.word(ayahId, wordIndex);
+    _muteRecognition(true);
     try {
       await ref
           .read(audioControllerProvider)
@@ -321,11 +390,75 @@ class QuranAudioPlayer extends Notifier<NowPlaying?> {
     }
   }
 
+  /// A recitation mistake's correction: word [wordIndex] of [ayahId] as the
+  /// chosen reciter recites it, with the next word (and the one before
+  /// when [fromPrevious]) — [correctionClip]. A reciter without word
+  /// timings, or a word without one, gets the word alone ([playWord]).
+  Future<CorrectionPlayback> playCorrection(
+    int ayahId,
+    int wordIndex, {
+    bool fromPrevious = false,
+  }) async {
+    final reciter = reciterFor(ref.read(reciterProvider));
+    WordSpan? clip;
+    AyahWordTimings? timings;
+    try {
+      timings = await ref
+          .read(wordTimingsRepositoryProvider)
+          .timings(reciter.edition, ayahId);
+      if (timings != null) {
+        clip = correctionClip(
+          timings,
+          quranComWordPosition(ayahId, wordIndex),
+          fromPrevious: fromPrevious,
+        );
+      }
+    } catch (_) {
+      // Not fetched (offline, or the service down): the word alone, which
+      // says offline itself if it is.
+    }
+    if (clip == null) {
+      return await playWord(ayahId, wordIndex)
+          ? CorrectionPlayback.wordAlone
+          : CorrectionPlayback.failed;
+    }
+    ref.read(mushafFocusAyahProvider.notifier).clear(this);
+    _started = false;
+    _played = false;
+    state = NowPlaying.word(ayahId, wordIndex);
+    _muteRecognition(true);
+    try {
+      final audio = ref.read(audioControllerProvider);
+      final downloads = ref.read(reciterDownloadsProvider.notifier);
+      await downloads.ready();
+      await audio.setSpeed(ref.read(listenSpeedProvider));
+      await audio.playClip(
+        // A reciter timed by surah: cut from that surah's recording.
+        timings?.surahUrl ??
+            switch (downloads.localFile(ayahId, reciter)) {
+              final path? => Uri.file(path).toString(),
+              null => ayahAudioUrl(ayahId, reciter),
+            },
+        Duration(milliseconds: clip.startMs),
+        Duration(milliseconds: clip.endMs),
+        info: _info(ayahId, reciter),
+      );
+      return CorrectionPlayback.reciter;
+    } catch (_) {
+      _clear();
+      return CorrectionPlayback.failed;
+    }
+  }
+
   Future<void> stop() async {
     _clear();
     await ref.read(audioControllerProvider).stop();
   }
 }
+
+/// How a correction played: cut from the reciter's ayah, the word alone
+/// (no timings), or not at all (offline).
+enum CorrectionPlayback { reciter, wordAlone, failed }
 
 /// When the offline message was last shown, so repeated taps while offline
 /// show it once in a while rather than stacking.

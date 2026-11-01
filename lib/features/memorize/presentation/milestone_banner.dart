@@ -43,8 +43,9 @@ class _MilestoneLayerState extends ConsumerState<MilestoneLayer> {
   void _hide() {
     _timer?.cancel();
     if (_showing == null) return;
+    final shown = _showing;
     setState(() => _showing = null);
-    ref.read(milestoneProvider.notifier).dismiss();
+    ref.read(milestoneProvider.notifier).dismiss(shown);
   }
 
   @override
@@ -98,6 +99,16 @@ class _MilestoneLayerState extends ConsumerState<MilestoneLayer> {
   }
 }
 
+/// [items] as a list in the app's language: "A, B and C".
+String joinList(AppLocalizations l10n, List<String> items) => switch (items) {
+  [] => '',
+  [final only] => only,
+  _ =>
+    items.sublist(0, items.length - 1).join(l10n.listSeparator) +
+        l10n.listLastSeparator +
+        items.last,
+};
+
 class _Banner extends ConsumerWidget {
   const _Banner({super.key, required this.milestone, required this.onDismiss});
 
@@ -113,6 +124,13 @@ class _Banner extends ConsumerWidget {
       JuzMilestone(:final juz) => l10n.milestoneJuz(juz),
       SurahMilestone(:final surah) => l10n.milestoneSurah(
         surahNames(ref)[surah] ?? '$surah',
+      ),
+      SurahsMilestone(:final surahs) when surahs.length == 1 =>
+        l10n.milestoneSurah(
+          surahNames(ref)[surahs.single] ?? '${surahs.single}',
+        ),
+      SurahsMilestone(:final surahs) => l10n.milestoneSurahs(
+        joinList(l10n, [for (final s in surahs) surahNames(ref)[s] ?? '$s']),
       ),
       ShareMilestone(:final percent) => l10n.memProgressShare(percent),
       StreakMilestone(:final days) => l10n.memStreakDays(days),

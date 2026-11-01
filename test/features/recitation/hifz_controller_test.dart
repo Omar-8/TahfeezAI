@@ -968,6 +968,124 @@ void main() {
     },
   );
 
+  /// A "Test me" question for 2:255–256 asked from the Memorize tab, its
+  /// first three words given.
+  Future<int> askTestMe() async {
+    await setUpHifz();
+    await session().stop();
+    await pumpEventQueue();
+    // A fresh page, covered whole (as the Memorize tab opens it), with
+    // where its ayahs (2:253–256) end.
+    container.read(mushafHideModeProvider.notifier)
+      ..reportPageWords(
+        42,
+        wordCount: page42Last - page42First + 1,
+        ayahBoundaries: [
+          for (var v = 253; v <= 256; v++)
+            corpus.verseEndPosition((chapterNo: 2, verseNo: v))! -
+                page42First +
+                1,
+        ],
+      )
+      ..setRevealed({42: 0});
+    container.read(requestedHifzRangeProvider.notifier).request((
+      from: (chapterNo: 2, verseNo: 255),
+      to: (chapterNo: 2, verseNo: 256),
+    ), prompt: 3);
+    await pumpEventQueue();
+    return corpus.verseStartPosition((chapterNo: 2, verseNo: 255))!;
+  }
+
+  bool hiddenOnPage(int position) => container
+      .read(mushafHideModeProvider)
+      .isWordHidden(42, position - page42First);
+
+  test('Test me: hide mode uncovers its page from the question, its given '
+      'words shown (the ayahs before stay covered); the test then starts '
+      'after them, the given words never coloured', () async {
+    final start = await askTestMe();
+    final hide = container.read(mushafHideModeProvider);
+    expect(hide.startOf(42), start - page42First);
+    expect(hiddenOnPage(start - 1), isTrue, reason: 'the ayah before');
+    for (var p = start; p < start + 3; p++) {
+      expect(hiddenOnPage(p), isFalse, reason: 'given');
+    }
+    expect(hiddenOnPage(start + 3), isTrue);
+
+    await session().start(startLocation: const QuranLocation.page(1, 42));
+    await pumpEventQueue();
+    expect(hifz().expected, corpus.words[start + 3].ref);
+    await recite(kursi.split(' ').skip(3).take(4).join(' '));
+    final overlay = container.read(mushafWordOverlayProvider)!;
+    for (var p = start; p < start + 3; p++) {
+      expect(overlay.marks.containsKey(corpus.words[p].ref), isFalse);
+    }
+    expect(overlay.marks[corpus.words[start + 3].ref], MushafWordMark.correct);
+  });
+
+  test(
+    'Test me: revealing goes on as always from the question (word, ayah, '
+    'to the page\'s end); what was shown is given when the test starts',
+    () async {
+      final start = await askTestMe();
+      final kursiEnd = corpus.verseEndPosition((chapterNo: 2, verseNo: 255))!;
+      final hide = container.read(mushafHideModeProvider.notifier);
+      hide.revealNextWord(42);
+      expect(hiddenOnPage(start + 3), isFalse);
+      expect(hiddenOnPage(start + 4), isTrue);
+      hide.revealNextAyah(42);
+      expect(hiddenOnPage(kursiEnd), isFalse, reason: 'the rest of its ayah');
+      expect(hiddenOnPage(kursiEnd + 1), isTrue);
+      expect(
+        hiddenOnPage(page42First),
+        isTrue,
+        reason: 'not the page\'s start',
+      );
+      while (hide.revealNextWord(42) != null) {}
+      expect(
+        container.read(mushafHideModeProvider).fullyRevealed(42),
+        isTrue,
+        reason: 'to the page\'s end: the next reveal turns the page',
+      );
+
+      // Back to the end of 2:255 (2:256 covered again).
+      hide.hideLastAyah(42);
+      await session().start(startLocation: const QuranLocation.page(1, 42));
+      await pumpEventQueue();
+      expect(
+        hifz().expected,
+        corpus.words[kursiEnd + 1].ref,
+        reason: '2:255, shown by hand, given',
+      );
+    },
+  );
+
+  test('Test me: hidden back past the question, the page is covered whole '
+      'again, as always — and the test starts from its first word', () async {
+    final start = await askTestMe();
+    final hide = container.read(mushafHideModeProvider.notifier);
+    hide.hideLastWord(42);
+    hide.hideLastWord(42);
+    expect(
+      container.read(mushafHideModeProvider).startOf(42),
+      start - page42First,
+    );
+    hide.hideLastWord(42);
+    final state = container.read(mushafHideModeProvider);
+    expect(state.startOf(42), 0, reason: 'reset');
+    expect(state.revealedOn(42), 0);
+    expect(hide.revealNextWord(42), 42);
+    expect(
+      hiddenOnPage(page42First),
+      isFalse,
+      reason: 'from the page\'s start',
+    );
+
+    await session().start(startLocation: const QuranLocation.page(1, 42));
+    await pumpEventQueue();
+    expect(hifz().expected, corpus.words[start].ref, reason: 'nothing given');
+  });
+
   group('memorization: each test recorded per ayah', () {
     const kursiVerse = (chapterNo: 2, verseNo: 255);
 

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// The first page on screen for a reported [page]: in a two-page spread
@@ -16,12 +17,22 @@ class MushafHideModeState {
     this.revealed = const {},
     this.wordCounts = const {},
     this.ayahBoundaries = const {},
+    this.startOn = const {},
   });
 
   final bool enabled;
 
   /// Page number → words uncovered on that page (from its first word).
   final Map<int, int> revealed;
+
+  /// Page number → the first word uncovered (words before it stay hidden):
+  /// uncovering from a word other than the page's first ("Test me" starts
+  /// at its question). Absent: from the page's first word. Revealing goes
+  /// on as usual; hiding past it covers the whole page again.
+  final Map<int, int> startOn;
+
+  /// The first word uncovered on [pageNumber] (see [startOn]).
+  int startOf(int pageNumber) => startOn[pageNumber] ?? 0;
 
   /// Page number → total words, as reported by each rendered page.
   final Map<int, int> wordCounts;
@@ -35,8 +46,12 @@ class MushafHideModeState {
   /// Whether the page's word at [wordIndex] (reading order, from 0) is
   /// currently hidden.
   bool isWordHidden(int pageNumber, int wordIndex) =>
-      enabled && wordIndex >= revealedOn(pageNumber);
+      enabled &&
+      (wordIndex >= revealedOn(pageNumber) || wordIndex < startOf(pageNumber));
 
+  /// Uncovered to the page's end — from its first word, or (with
+  /// [startOn]) from where uncovering began: revealing then goes on to
+  /// the next page.
   bool fullyRevealed(int pageNumber) {
     final total = wordCounts[pageNumber];
     return total != null && revealedOn(pageNumber) >= total;
@@ -61,16 +76,23 @@ class MushafHideModeState {
   int? previousHidePage(int currentPage, {required bool spread}) {
     if (!enabled) return null;
     for (final page in [if (spread) currentPage + 1, currentPage]) {
-      if (_shownOn(page) > 0) return page;
+      if (_visibleOn(page) > 0) return page;
     }
     return null;
   }
 
-  /// Words uncovered on [pageNumber], never more than it has.
+  /// Where the uncovered words on [pageNumber] end, never past its last
+  /// word.
   int _shownOn(int pageNumber) {
     final shown = revealedOn(pageNumber);
     final total = wordCounts[pageNumber];
     return total == null || shown <= total ? shown : total;
+  }
+
+  /// How many words on [pageNumber] are uncovered (from [startOf]).
+  int _visibleOn(int pageNumber) {
+    final n = _shownOn(pageNumber) - startOf(pageNumber);
+    return n < 0 ? 0 : n;
   }
 
   MushafHideModeState copyWith({
@@ -78,12 +100,14 @@ class MushafHideModeState {
     Map<int, int>? revealed,
     Map<int, int>? wordCounts,
     Map<int, List<int>>? ayahBoundaries,
+    Map<int, int>? startOn,
   }) {
     return MushafHideModeState(
       enabled: enabled ?? this.enabled,
       revealed: revealed ?? this.revealed,
       wordCounts: wordCounts ?? this.wordCounts,
       ayahBoundaries: ayahBoundaries ?? this.ayahBoundaries,
+      startOn: startOn ?? this.startOn,
     );
   }
 }
@@ -134,9 +158,7 @@ class MushafHideModeController extends Notifier<MushafHideModeState> {
   int? hideLastWord(int currentPage, {bool spread = false}) {
     final page = state.previousHidePage(currentPage, spread: spread);
     if (page == null) return null;
-    state = state.copyWith(
-      revealed: {...state.revealed, page: state._shownOn(page) - 1},
-    );
+    _hideTo(page, state._shownOn(page) - 1);
     return page;
   }
 
@@ -149,8 +171,30 @@ class MushafHideModeController extends Notifier<MushafHideModeState> {
     final shown = state._shownOn(page);
     final boundaries = state.ayahBoundaries[page] ?? const <int>[];
     final start = boundaries.lastWhere((b) => b < shown, orElse: () => 0);
-    state = state.copyWith(revealed: {...state.revealed, page: start});
+    _hideTo(page, start);
     return page;
+  }
+
+  /// Covers [page] back to word [end]; hidden past where uncovering began
+  /// ([MushafHideModeState.startOn]): the whole page covered, as usual.
+  void _hideTo(int page, int end) {
+    if (end <= state.startOf(page)) {
+      state = state.copyWith(
+        revealed: {...state.revealed, page: 0},
+        startOn: {...state.startOn}..remove(page),
+      );
+    } else {
+      state = state.copyWith(revealed: {...state.revealed, page: end});
+    }
+  }
+
+  /// Uncovers [count] words of [page] from its word [start] (the words
+  /// before it stay covered) — "Test me" at its question.
+  void showFrom(int page, {required int start, required int count}) {
+    state = state.copyWith(
+      revealed: {...state.revealed, page: start + count},
+      startOn: {...state.startOn, page: start},
+    );
   }
 
   /// Marks [pages] fully uncovered — used when going back to a previous
@@ -162,6 +206,7 @@ class MushafHideModeController extends Notifier<MushafHideModeState> {
         ...state.revealed,
         for (final page in pages) page: state.wordCounts[page] ?? _allWords,
       },
+      startOn: {...state.startOn}..removeWhere((p, _) => pages.contains(p)),
     );
   }
 
@@ -169,7 +214,11 @@ class MushafHideModeController extends Notifier<MushafHideModeState> {
   /// its first word) — used to carry a recitation test's progress back
   /// into hide mode.
   void setRevealed(Map<int, int> revealed) {
-    state = state.copyWith(revealed: {...state.revealed, ...revealed});
+    state = state.copyWith(
+      revealed: {...state.revealed, ...revealed},
+      startOn: {...state.startOn}
+        ..removeWhere((p, _) => revealed.containsKey(p)),
+    );
   }
 
   /// Stand-in for "every word" before a page has reported its count.
@@ -182,7 +231,7 @@ class MushafHideModeController extends Notifier<MushafHideModeState> {
     List<int> ayahBoundaries = const [],
   }) {
     if (state.wordCounts[pageNumber] == wordCount &&
-        state.ayahBoundaries.containsKey(pageNumber)) {
+        listEquals(state.ayahBoundaries[pageNumber], ayahBoundaries)) {
       return;
     }
     final revealed = state.revealedOn(pageNumber);

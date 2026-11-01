@@ -1,5 +1,6 @@
 import 'package:file_picker/file_picker.dart';
 
+import '../../../core/sharing/image_sharer.dart';
 import '../../../core/ui/bar_space.dart';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -122,40 +123,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               group(
                 l10n.settingsLanguage,
                 Icons.translate,
-                DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    key: const ValueKey('settings-language'),
-                    isExpanded: true,
-                    borderRadius: BorderRadius.circular(TahfeezRadii.md),
-                    value: locale?.languageCode ?? '',
-                    onChanged: (code) => ref
-                        .read(localeControllerProvider.notifier)
-                        .setLocale(
-                          code == null || code.isEmpty ? null : Locale(code),
-                        ),
-                    items: [
-                      for (final (code, flag, label) in [
-                        ('', '🌐', l10n.settingsLanguageSystem),
-                        ...kAppLanguages,
-                      ])
-                        DropdownMenuItem(
-                          value: code,
-                          child: Row(
-                            spacing: TahfeezSpacing.smPlus,
-                            children: [
-                              Text(flag, style: const TextStyle(fontSize: 22)),
-                              Flexible(
-                                child: Text(
-                                  label,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: theme.textTheme.bodyLarge,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                    ],
-                  ),
+                _LanguageRow(
+                  key: const ValueKey('settings-language'),
+                  code: locale?.languageCode ?? '',
+                  onChanged: (code) => ref
+                      .read(localeControllerProvider.notifier)
+                      .setLocale(code.isEmpty ? null : Locale(code)),
                 ),
                 words: [
                   l10n.settingsLanguageSystem,
@@ -777,7 +750,10 @@ class _AboutAppState extends ConsumerState<_AboutApp> {
             Icons.share_outlined,
             l10n.settingsShare,
             l10n.settingsShareSub,
-            () => store.share(l10n.settingsShareText(store.listingUrl)),
+            () => store.share(
+              l10n.settingsShareText(store.listingUrl),
+              origin: shareOrigin(context),
+            ),
           ),
           // Updates: Google Play's, or the App Store's on iOS.
           if (android || ref.watch(platformCapabilitiesProvider).isIOS) ...[
@@ -841,6 +817,85 @@ class _ListenSettings extends ConsumerWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// The app language, chosen in a sheet over the whole app: a dropdown opens
+/// inside the tab, where the bottom bar covers the end of its 26 entries.
+class _LanguageRow extends StatelessWidget {
+  const _LanguageRow({super.key, required this.code, required this.onChanged});
+
+  final String code;
+  final ValueChanged<String> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final languages = [
+      ('', '🌐', l10n.settingsLanguageSystem),
+      ...kAppLanguages,
+    ];
+    final (_, flag, label) = languages.firstWhere(
+      (l) => l.$1 == code,
+      orElse: () => languages.first,
+    );
+    Widget entry(String flag, String label) => Row(
+      spacing: TahfeezSpacing.smPlus,
+      children: [
+        Text(flag, style: const TextStyle(fontSize: 22)),
+        Flexible(
+          child: Text(
+            label,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.bodyLarge,
+          ),
+        ),
+      ],
+    );
+    return InkWell(
+      borderRadius: BorderRadius.circular(TahfeezRadii.md),
+      onTap: () => showTahfeezModalBottomSheet<void>(
+        context: context,
+        title: l10n.settingsLanguage,
+        builder: (sheet) => RadioGroup<String>(
+          groupValue: code,
+          onChanged: (picked) {
+            Navigator.of(sheet).pop();
+            if (picked != null && picked != code) onChanged(picked);
+          },
+          child: ListView(
+            shrinkWrap: true,
+            padding: const EdgeInsets.fromLTRB(
+              TahfeezSpacing.sm,
+              0,
+              TahfeezSpacing.sm,
+              TahfeezSpacing.md,
+            ),
+            children: [
+              for (final (value, flag, label) in languages)
+                RadioListTile<String>(
+                  key: ValueKey('settings-language-$value'),
+                  value: value,
+                  title: entry(flag, label),
+                ),
+            ],
+          ),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: TahfeezSpacing.sm),
+        child: Row(
+          children: [
+            Expanded(child: entry(flag, label)),
+            Icon(
+              Icons.arrow_drop_down,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

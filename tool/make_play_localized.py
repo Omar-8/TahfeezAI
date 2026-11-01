@@ -9,12 +9,15 @@ takes in Arabic too.
 """
 from pathlib import Path
 
+from PIL import ImageFont
+
 import make_store_images as msi
 from make_play_listing import PHONE
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "store/play/graphics"
-NOTO = Path("/usr/share/fonts/truetype/noto")  # system Noto: Bengali, and Cyrillic
+NOTO = Path("/usr/share/fonts/truetype/noto")  # system Noto: Bengali, Cyrillic, Greek
+CJK = Path("/usr/share/fonts/opentype/noto")
 
 # Shots taken with the app in a language, in place of the English ones.
 IN_LANGUAGE = {"ar": {"01-home-light": "15-home-arabic-light", "04-ayah-mode-light": "16-ayah-mode-arabic-light"}}
@@ -154,6 +157,66 @@ CAPTIONS = {
         ("Әр сөзді түсініңіз", "Сөз мағыналары, транслитерация және аударма"),
         ("Прогресіңізді көріңіз", "Жаттаған әр бетіңіз бір қарағанда"),
     ],
+    "nl-NL": [
+        ("Elk woord gecontroleerd", "Reciteer van de pagina: goed in groen, fouten in rood"),
+        ("Hoort de klinker die je zegt", "Op de hamza: ḍamma verwacht, fatḥa gehoord"),
+        ("Reciteer uit je hoofd", "Elk woord verschijnt als je het goed zegt"),
+        ("Je dagelijkse Koran-metgezel", "Vers van de dag, verder lezen, herhaling van vandaag"),
+        ("Elke soera zoals de Mushaf haar schrijft", "Namen in kalligrafie, glas boven de lucht van het uur"),
+        ("De Mushaf van Medina", "Elke pagina zoals gedrukt, scherp op elk scherm"),
+        ("Begrijp elk woord", "Woordbetekenissen, transliteratie en vertaling"),
+        ("Zie je voortgang", "Elke gememoriseerde pagina in één oogopslag"),
+    ],
+    "da-DK": [
+        ("Hvert ord kontrolleret", "Reciter fra siden: rigtigt i grønt, fejl i rødt"),
+        ("Hører den vokal, du siger", "På hamza: ḍamma forventet, fatḥa hørt"),
+        ("Reciter udenad", "Hvert ord vises, når du siger det rigtigt"),
+        ("Din daglige Koran-følgesvend", "Dagens vers, fortsæt læsningen, dagens repetition"),
+        ("Hver sura, som Mushaf skriver den", "Navne i kalligrafi, glas over timens himmel"),
+        ("Medina-Mushaf", "Hver side som trykt, skarp på enhver skærm"),
+        ("Forstå hvert ord", "Ordbetydninger, translitteration og oversættelse"),
+        ("Se dine fremskridt", "Hver side, du har lært udenad, med ét blik"),
+    ],
+    "el-GR": [
+        ("Κάθε λέξη ελεγμένη", "Απάγγειλε από τη σελίδα: σωστά με πράσινο, λάθη με κόκκινο"),
+        ("Ακούει το φωνήεν που λες", "Στη χάμζα: αναμενόταν ντάμμα, ακούστηκε φάτχα"),
+        ("Απάγγειλε από μνήμης", "Κάθε λέξη εμφανίζεται όταν τη λες σωστά"),
+        ("Ο καθημερινός σύντροφός σου στο Κοράνιο", "Εδάφιο της ημέρας, συνέχεια ανάγνωσης, σημερινή επανάληψη"),
+        ("Κάθε σούρα όπως τη γράφει το Μους'χαφ", "Ονόματα σε καλλιγραφία, γυαλί πάνω από τον ουρανό της ώρας"),
+        ("Το Μους'χαφ της Μεδίνας", "Κάθε σελίδα όπως τυπώθηκε, καθαρή σε κάθε οθόνη"),
+        ("Κατάλαβε κάθε λέξη", "Σημασίες λέξεων, μεταγραφή και μετάφραση"),
+        ("Δες την πρόοδό σου", "Κάθε σελίδα που απομνημόνευσες, με μια ματιά"),
+    ],
+    "ja-JP": [
+        ("すべての語をチェック", "ページを見て読誦：正しい語は緑、間違いは赤"),
+        ("発音した母音を聞き取る", "ハムザで：ダンマのはずがファトハと聞こえました"),
+        ("暗記で読誦", "正しく言うと、語が一つずつ現れます"),
+        ("毎日のクルアーンの友", "今日のアーヤ、続きを読む、今日の復習"),
+        ("ムスハフの書体でスーラを", "書道のスーラ名、時間帯の空にガラスのカード"),
+        ("マディーナのムスハフ", "印刷どおりのページを、どの画面でも鮮明に"),
+        ("一語一語を理解", "語の意味、音写、対訳"),
+        ("進み具合がひと目で", "暗記したページを一覧で"),
+    ],
+    "ko-KR": [
+        ("모든 단어를 확인", "쪽을 보며 낭송: 맞으면 초록, 틀리면 빨강"),
+        ("말한 모음까지 듣습니다", "함자에서: 담마가 맞는데 파트하로 들렸습니다"),
+        ("외워서 낭송", "바르게 말하면 단어가 하나씩 나타납니다"),
+        ("매일의 꾸란 동반자", "오늘의 아야, 이어 읽기, 오늘의 복습"),
+        ("무스하프 서체 그대로의 수라", "서예로 쓴 이름, 시간대 하늘 위의 유리 카드"),
+        ("메디나 무스하프", "인쇄된 그대로의 쪽을 어느 화면에서나 선명하게"),
+        ("모든 단어를 이해", "단어 뜻, 음역, 번역"),
+        ("진행 상황을 한눈에", "외운 쪽을 한눈에"),
+    ],
+    "pt-BR": [
+        ("Cada palavra conferida", "Recite pela página: certo em verde, erros em vermelho"),
+        ("Ouve a vogal que você diz", "No hamza: esperado ḍamma, ouvido fatḥa"),
+        ("Recite de memória", "Cada palavra aparece quando você a diz certo"),
+        ("Seu companheiro diário do Alcorão", "Versículo do dia, continuar lendo, revisão de hoje"),
+        ("Cada surata como o Mushaf a escreve", "Nomes em caligrafia, vidro sobre o céu da hora"),
+        ("O Mushaf de Medina", "Cada página como impressa, nítida em qualquer tela"),
+        ("Entenda cada palavra", "Significados, transliteração e tradução"),
+        ("Veja seu progresso", "Cada página memorizada, num relance"),
+    ],
 }
 
 
@@ -164,18 +227,30 @@ def source(name):
     raise FileNotFoundError(name)
 
 
+def use_font(lang, plain_font):
+    """The captions' font for [lang]: Bengali, Cyrillic and Greek (the
+    bundled Noto Sans has none) in the system's Noto, two static files each
+    (no weight axis); Japanese and Korean in the system's Noto Sans CJK (its
+    JP and KR faces in one collection); the rest in [plain_font]."""
+    family = {"bn-BD": "NotoSansBengali", "ru-RU": "NotoSans", "kk": "NotoSans",
+              "el-GR": "NotoSans"}.get(lang)
+    cjk = {"ja-JP": 0, "ko-KR": 1}.get(lang)
+    if cjk is not None:
+        msi.font = lambda path, size, weight="Regular", index=cjk: ImageFont.truetype(
+            str(CJK / f"NotoSansCJK-{'Bold' if weight == 'Bold' else 'Regular'}.ttc"),
+            size, index=index)
+    elif family:
+        msi.font = lambda path, size, weight="Regular", family=family: plain_font(
+            NOTO / f"{family}-{'Bold' if weight == 'Bold' else 'Regular'}.ttf", size)
+    else:
+        msi.font = plain_font
+
+
 def main():
     plain_font = msi.font
     for lang, captions in CAPTIONS.items():
         assert len(captions) == len(PHONE), lang
-        # Bengali and Cyrillic (the bundled Noto Sans has neither): the
-        # system's Noto, two static files each (no weight axis).
-        family = {"bn-BD": "NotoSansBengali", "ru-RU": "NotoSans", "kk": "NotoSans"}.get(lang)
-        if family:
-            msi.font = lambda path, size, weight="Regular", family=family: plain_font(
-                NOTO / f"{family}-{'Bold' if weight == 'Bold' else 'Regular'}.ttf", size)
-        else:
-            msi.font = plain_font
+        use_font(lang, plain_font)
         out = OUT / lang / "phoneScreenshots"
         out.mkdir(parents=True, exist_ok=True)
         for old in out.glob("*.png"):

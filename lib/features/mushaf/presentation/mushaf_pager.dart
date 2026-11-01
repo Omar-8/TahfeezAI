@@ -4,6 +4,8 @@ import 'package:flutter/rendering.dart' show ScrollCacheExtent;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../quran/presentation/surah_info_sheet.dart';
+
 import '../../../core/core_providers.dart';
 import '../../../core/theme/app_breakpoints.dart';
 import '../../../core/ui/full_bleed_content.dart';
@@ -749,6 +751,11 @@ class _MushafPagerState extends ConsumerState<MushafPager> {
     // ayahMarker/otherMarker/unknown token renders normally but is not a
     // recited Quran word, per this project's explicit "markers must not
     // participate in word-by-word" rule.
+    // A surah's name banner: about the surah.
+    if (hitRect.surahBanner case final surahNo?) {
+      showSurahInfoSheet(context, surahNo: surahNo);
+      return;
+    }
     if (hitRect.tokenType != MushafTokenType.quranWord) return;
     final ayahId = hitRect.canonicalAyahId;
     final wordIndex = hitRect.canonicalWordIndex;

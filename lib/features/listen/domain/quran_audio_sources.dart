@@ -154,9 +154,81 @@ const reciters = [
     40,
     everyAyah: 'Karim_Mansoori_40kbps',
   ),
+  // Added 2026-11-01 (owner's request), from everyayah.com — every ayah of
+  // each checked there.
+  Reciter(
+    'ar.juhani',
+    'Abdullah Awad Al-Juhani',
+    'عبد الله عواد الجهني',
+    128,
+    everyAyah: 'Abdullaah_3awwaad_Al-Juhaynee_128kbps',
+  ),
+  Reciter(
+    'ar.matroud',
+    'Abdullah Matroud',
+    'عبد الله المطرود',
+    128,
+    everyAyah: 'Abdullah_Matroud_128kbps',
+  ),
+  Reciter(
+    'ar.tunaiji',
+    'Khalifa Al-Tunaiji',
+    'خليفة الطنيجي',
+    64,
+    everyAyah: 'khalefa_al_tunaiji_64kbps',
+  ),
 ];
 
 const defaultReciter = 'ar.alafasy';
+
+/// A translation read aloud, ayah by ayah (an Islamic Network audio
+/// edition), played after each ayah when chosen in the Listen menu.
+class TranslationVoice {
+  const TranslationVoice(this.edition, this.language, this.reader, this.kbps);
+
+  /// The CDN edition, e.g. `en.walk` (the setting's value).
+  final String edition;
+
+  /// Its language's code (named in itself in the menu).
+  final String language;
+
+  /// Who reads it (and whose translation, where that differs).
+  final String reader;
+  final int kbps;
+}
+
+/// Every verse-by-verse translation reading on the Islamic Network in an
+/// app language, each served at [TranslationVoice.kbps] — checked on each
+/// surah's first and last ayah and every 50th (2,776 files), 2026-10-31.
+const translationVoices = [
+  TranslationVoice('en.walk', 'en', 'Ibrahim Walk (Saheeh International)', 192),
+  TranslationVoice('ur.khan', 'ur', 'Shamshad Ali Khan', 64),
+  TranslationVoice('fr.leclerc', 'fr', 'Youssouf Leclerc', 128),
+  TranslationVoice('ru.kuliev-audio', 'ru', 'Elmir Kuliev', 128),
+  TranslationVoice(
+    'fa.hedayatfarfooladvand',
+    'fa',
+    'Hedayatfar (Fooladvand)',
+    40,
+  ),
+  TranslationVoice('tr.vakfi-audio', 'tr', 'Diyanet Vakfı', 128),
+  TranslationVoice('kk.khalifahaltai-audio', 'kk', 'Khalifah Altai', 128),
+  TranslationVoice(
+    'uz.sodik-audio',
+    'uz',
+    'Muhammad Sodik Muhammad Yusuf',
+    128,
+  ),
+];
+
+/// The voice for [edition]; `null` for none (or one no longer offered).
+TranslationVoice? translationVoiceFor(String? edition) =>
+    translationVoices.where((v) => v.edition == edition).firstOrNull;
+
+/// Ayah [ayahId] of [voice]'s translation (streamed; never downloaded).
+String translationAudioUrl(int ayahId, TranslationVoice voice) =>
+    'https://cdn.islamic.network/quran/audio/${voice.kbps}/'
+    '${voice.edition}/${globalAyahNumber(ayahId)}.mp3';
 
 Reciter reciterFor(String edition) => reciters.firstWhere(
   (r) => r.edition == edition,
@@ -243,6 +315,9 @@ const reciterDownloadBytes = <String, int>{
   'ar.bukhatir': 1378130847,
   'ar.yassersalamah': 1552740208,
   'ar.mansoori': 1052913291,
+  'ar.juhani': 1177015868,
+  'ar.matroud': 1613355087,
+  'ar.tunaiji': 792626170,
 };
 
 /// [reciter]'s download size, as "≈ 640 MB" / "≈ 1.2 GB"; `null` if

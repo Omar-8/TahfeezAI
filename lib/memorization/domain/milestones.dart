@@ -37,6 +37,20 @@ class SurahMilestone extends Milestone {
   int get rank => 1;
 }
 
+/// Surahs memorized since the last one was congratulated, together:
+/// "You memorized Al-Ikhlas, Al-Falaq and An-Nas" (one or more).
+class SurahsMilestone extends Milestone {
+  const SurahsMilestone(this.surahs);
+
+  final List<int> surahs;
+
+  @override
+  String get id => 'surahs-${surahs.join('-')}';
+
+  @override
+  int get rank => 1;
+}
+
 class ShareMilestone extends Milestone {
   const ShareMilestone(this.percent);
 

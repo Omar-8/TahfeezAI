@@ -19,7 +19,7 @@ import 'package:sqlite3/sqlite3.dart';
 final _cacheDir = Directory('tool/quran_data/.cache');
 
 /// The QuranEnc resources with no sqlite export, fetched through its API.
-const _viaApi = ['english_mokhtasar', 'russian_mokhtasar'];
+const _viaApi = ['english_mokhtasar', 'russian_mokhtasar', 'arabic_nafahat'];
 
 /// `dart run tool/quran_data/fetch_sources.dart [quranenc [key...] | wbw]`:
 /// everything build_production_data.dart reads (but the QUL zips, which are
@@ -104,6 +104,19 @@ Future<void> main(List<String> args) async {
     'pashto_mokhtasar',
     'uzbek_mokhtasar',
     'arabic_seraj',
+    // Added 2026-11-01: Dutch, Korean, Japanese, Greek and
+    // Portuguese; Al-Mukhtasar in
+    // Japanese.
+    'dutch_center',
+    'korean_hamid',
+    'japanese_saeedsato',
+    'greek_rwwad',
+    'japanese_mokhtasar',
+    'portuguese_nasr',
+    // Added 2026-11-01: more Arabic tafsirs (al-Nafaḥāt al-Makkiyyah only
+    // through the API, below).
+    'arabic_mokhtasar',
+    'arabic_yaseer',
   ]) {
     await _fetchQuranEnc(
       key: key,

@@ -146,6 +146,12 @@ class BundledDatasetSeeder {
       'kk_altai',
       'uz_rowwad',
       'so_yaqoub',
+      // Added 2026-11-01.
+      'nl_rowwad',
+      'ko_hamid',
+      'ja_sato',
+      'el_rowwad',
+      'pt_nasr',
     ]) {
       await _seedTranslation(
         hashes,
@@ -168,6 +174,11 @@ class BundledDatasetSeeder {
       'ps_mukhtasar',
       'uz_mukhtasar',
       'ar_seraj',
+      // Added 2026-11-01.
+      'ja_mukhtasar',
+      'ar_mukhtasar',
+      'ar_nafahat',
+      'ar_yaseer',
     ]) {
       await _seedTafsir(
         hashes,
