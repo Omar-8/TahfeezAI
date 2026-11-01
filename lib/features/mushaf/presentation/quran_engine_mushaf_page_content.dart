@@ -366,7 +366,24 @@ class _QuranEngineMushafPageContentState
           if (overlay.marks.containsKey(refs[i])) i: overlay.marks[refs[i]]!,
       };
       final applied = _appliedOverlay;
-      if (applied == null || !setEquals(applied.$1, hidden)) {
+      // A hide still fading out: this newer state applied now instead.
+      final pending = _maskLater?.isActive ?? false;
+      _maskLater?.cancel();
+      // Words hidden again (a word or ayah hidden back): their ink into
+      // the paper first, then hidden — the reveal's fade reversed.
+      final covered = applied == null || _calm || page is! MushafWordEffectsPage
+          ? const <int>{}
+          : hidden.difference(applied.$1);
+      if (covered.isNotEmpty && covered.length <= _maxReveals) {
+        final effects = page as MushafWordEffectsPage;
+        for (final i in covered) {
+          effects.playWordEffect(i, MushafWordEffect.inkOut);
+        }
+        page.setHiddenWords(hidden.difference(covered));
+        _maskLater = Timer(MushafWordEffect.inkOutTime, () {
+          if (mounted && _page == page) page.setHiddenWords(hidden);
+        });
+      } else if (pending || applied == null || !setEquals(applied.$1, hidden)) {
         page.setHiddenWords(hidden);
       }
       _appliedOverlay = (hidden, marks);
@@ -394,7 +411,26 @@ class _QuranEngineMushafPageContentState
       };
       final before = _windowed;
       if (before != null && setEquals(before, hidden)) return;
-      page.setHiddenWords(hidden);
+      _maskLater?.cancel();
+      // Words covered again with the buttons: faded out first (below,
+      // uncovered ones fade in).
+      final covered = before == null || _calm || page is! MushafWordEffectsPage
+          ? const <int>{}
+          : hidden.difference(before);
+      if (covered.isNotEmpty && covered.length <= _maxReveals) {
+        final effects = page as MushafWordEffectsPage;
+        for (final i in covered) {
+          effects.playWordEffect(i, MushafWordEffect.inkOut);
+        }
+        page.setHiddenWords(hidden.difference(covered));
+        _maskLater = Timer(MushafWordEffect.inkOutTime, () {
+          if (mounted && _page == page && setEquals(_windowed, hidden)) {
+            page.setHiddenWords(hidden);
+          }
+        });
+      } else {
+        page.setHiddenWords(hidden);
+      }
       _appliedMask = null;
       _windowed = hidden;
       // Words uncovered with the buttons: animated in, in order (as below).
@@ -467,6 +503,25 @@ class _QuranEngineMushafPageContentState
       for (var i = before.revealed; i < page.wordCount; i++) {
         effects.playWordEffect(i, MushafWordEffect.inkIn);
       }
+      return;
+    }
+    // Words covered again with hide mode's buttons: into the paper first,
+    // then hidden — the reverse of uncovering (below).
+    if (page is MushafWordEffectsPage &&
+        !_calm &&
+        before != null &&
+        before.hidden &&
+        wanted.hidden &&
+        wanted.revealed < before.revealed &&
+        before.revealed - wanted.revealed <= _maxReveals) {
+      final effects = page as MushafWordEffectsPage;
+      for (var i = wanted.revealed; i < before.revealed; i++) {
+        effects.playWordEffect(i, MushafWordEffect.inkOut);
+      }
+      _maskLater = Timer(MushafWordEffect.inkOutTime, () {
+        if (!mounted || _page != page || _appliedMask != wanted) return;
+        page.setMemorizationMask(hidden: true, revealedWords: wanted.revealed);
+      });
       return;
     }
     page.setMemorizationMask(

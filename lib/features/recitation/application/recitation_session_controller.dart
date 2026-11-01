@@ -96,6 +96,7 @@ class RecitationSessionController extends Notifier<RecitationSessionState> {
   RecitationAudioFormat? _format;
   RecitationRecordingSink? _sink;
   StreamSubscription<Uint8List>? _capture;
+  StreamSubscription<bool>? _calls;
   int _recordedBytes = 0;
   bool _disposed = false;
 
@@ -189,6 +190,11 @@ class RecitationSessionController extends Notifier<RecitationSessionState> {
           lastCompleted: _state.lastCompleted,
         ),
       );
+      // A phone call: paused, resumed by the reader when back (what was
+      // recited so far kept).
+      _calls = _source.calls.listen((inCall) {
+        if (inCall) pause();
+      }, onError: (Object _, StackTrace _) {});
     } catch (error) {
       await _fail(error);
     }
@@ -267,6 +273,8 @@ class RecitationSessionController extends Notifier<RecitationSessionState> {
     } catch (_) {
       // Already closed — nothing to release.
     }
+    await _calls?.cancel();
+    _calls = null;
     await _capture?.cancel();
     _capture = null;
     if (session == null || format == null) return null;

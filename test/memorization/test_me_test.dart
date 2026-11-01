@@ -30,8 +30,8 @@ void main() {
     );
   });
 
-  test('only memorized ayahs are asked, with up to two more after it in '
-      'its surah', () {
+  test('only memorized ayahs are asked, with up to two more after it — on '
+      'into the next surah (Al-Ikhlas into Al-Falaq)', () {
     final memories = {
       for (final id in [112001, 112002, 112003, 112004, 113001]) id: memory(id),
       114001: memory(114001, status: MemoryStatus.learning),
@@ -41,13 +41,12 @@ void main() {
       final q = TestMe.pick(memories, random: math.Random(seed), now: now)!;
       seen.add(q.first);
       expect(memories[q.first]!.status, MemoryStatus.memorized);
-      expect(q.last ~/ 1000, q.first ~/ 1000, reason: 'within its surah');
-      expect(q.last - q.first, lessThan(TestMe.span));
-      // As far as memorized ayahs go.
+      // As far as memorized ayahs go (113:2 is not).
       expect(q.last, switch (q.first) {
         112001 => 112003,
         112002 => 112004,
-        112003 => 112004,
+        112003 => 113001,
+        112004 => 113001,
         _ => q.first,
       });
     }

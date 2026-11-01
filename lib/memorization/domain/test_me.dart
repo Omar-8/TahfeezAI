@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import '../../quran/domain/quran_ayah_numbers.dart' show surahAyahCounts;
 import 'models/memorization_models.dart';
 import 'strength_model.dart';
 
@@ -12,7 +13,8 @@ class TestMeQuestion {
   final int first;
 
   /// The last ayah to recite: up to [TestMe.span] memorized ayahs from
-  /// [first], within its surah.
+  /// [first] — on into the next surah when that is memorized too (as a
+  /// teacher would let Al-Ikhlas run on into Al-Falaq).
   final int last;
 
   @override
@@ -70,11 +72,19 @@ abstract final class TestMe {
       }
       at -= w;
     }
-    // The next memorized ayahs of its surah (stable ids are surah × 1000 +
-    // ayah, consecutive within a surah).
+    // The next memorized ayahs, across a surah's end (stable ids are
+    // surah × 1000 + ayah).
+    int? after(int id) {
+      final surah = id ~/ 1000;
+      if (id % 1000 < surahAyahCounts[surah - 1]) return id + 1;
+      return surah < 114 ? (surah + 1) * 1000 + 1 : null;
+    }
+
     var last = first;
-    while (last - first < span - 1 && memorized(last + 1)) {
-      last++;
+    for (var n = 1; n < span; n++) {
+      final next = after(last);
+      if (next == null || !memorized(next)) break;
+      last = next;
     }
     return TestMeQuestion(first: first, last: last);
   }

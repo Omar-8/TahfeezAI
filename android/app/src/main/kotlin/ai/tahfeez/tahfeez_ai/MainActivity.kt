@@ -27,6 +27,11 @@ class MainActivity : AudioServiceActivity() {
             applicationContext,
             flutterEngine.dartExecutor.binaryMessenger,
         )
+        // A call (ringing, in a call, VoIP): the recitation pauses.
+        CallStateChannel.attach(
+            applicationContext,
+            flutterEngine.dartExecutor.binaryMessenger,
+        )
         // The ready-made Quran databases, unpacked at the first start.
         BundledDatabaseChannel.attach(
             applicationContext,

@@ -54,3 +54,16 @@ Mac: `docs/IOS_RELEASE.md`.
 On a real iPhone (2026-10-31, 1.0.9): reciting works (the mic prompt, the
 model, words followed, mistakes marked), and `record` and `just_audio`
 share the audio session — reciting right after listening is fine.
+
+## Audio session while reciting (2026-11-01)
+
+Unconfigured, `audio_session` gives `just_audio` its "music" configuration
+(category `playback`) on the first sound — on iOS that would stop the
+recording when a word or a correction is played mid-recitation. So while a
+recitation runs, `RecordPackageAudioSource` sets `playAndRecord` (default to
+speaker, Bluetooth HFP and A2DP), the recorder's own category, and puts
+`music()` back when it stops. On iOS the recorder pauses for interruptions
+(`pauseResume`) — the app's own audio never interrupts its session, a call
+does — and the session pauses too (`calls`: the session's interruption
+events). **Not yet tried on an iPhone:** test playing a word mid-recitation
+and a call during one before releasing.

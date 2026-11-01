@@ -57,6 +57,10 @@ void main() {
   late FakeRecognizer recognizer;
   late ProviderContainer container;
   late ProviderSubscription<HifzState> hifzListener;
+
+  /// The test as it completed (a range ends its recitation by itself then,
+  /// which clears the live state).
+  HifzState? finished;
   late int vibrations;
   late int beeps;
   // What the memorization recorder was given.
@@ -147,7 +151,10 @@ void main() {
         ..setRevealed({42: revealedOnPage});
     }
     container.listen(liveRecognitionControllerProvider, (_, _) {});
-    hifzListener = container.listen(hifzControllerProvider, (_, _) {});
+    finished = null;
+    hifzListener = container.listen(hifzControllerProvider, (_, next) {
+      if (next.completed) finished ??= next;
+    });
     await container.read(quranWordCorpusProvider.future);
     final settings = container.read(hifzSettingsProvider.notifier);
     settings.update(
@@ -182,9 +189,8 @@ void main() {
       session().pause(); // pause: flushes the held last word
       await pumpEventQueue();
 
-      expect(hifz().counts[HifzVerdict.correct], 50);
-      expect(hifz().completed, isTrue);
-      expect(hifz().running, isFalse);
+      expect(finished!.counts[HifzVerdict.correct], 50);
+      expect(finished!.running, isFalse);
       final done = container.read(mushafWordOverlayProvider)!;
       expect(done.isHidden(firstWord), isFalse);
       // Every recited word coloured correct (green); no next word left.
@@ -193,6 +199,27 @@ void main() {
       expect(vibrations, 0);
     },
   );
+
+  test('a range recited to its end ends the recitation (no longer left '
+      'listening); its colours stay', () async {
+    const kursiVerse = (chapterNo: 2, verseNo: 255);
+    await setUpHifz(from: kursiVerse, to: kursiVerse);
+    await recite(kursi);
+    session().pause(); // pause: flushes the held last word
+    await pumpEventQueue();
+    expect(finished, isNotNull);
+    // Once its last ayah's pronunciation check is in (none here).
+    await Future<void>.delayed(const Duration(milliseconds: 600));
+    expect(
+      container.read(recitationSessionControllerProvider).isActive,
+      isFalse,
+    );
+    final firstWord = corpus.words[corpus.verseStartPosition(kursiVerse)!].ref;
+    expect(
+      container.read(mushafWordOverlayProvider)!.marks[firstWord],
+      MushafWordMark.correct,
+    );
+  });
 
   test('with the sound alert a mistake beeps, not vibrates', () async {
     const kursiVerse = (chapterNo: 2, verseNo: 255);
@@ -643,9 +670,8 @@ void main() {
     );
     session().pause();
     await pumpEventQueue();
-    expect(hifz().counts[HifzVerdict.skipped], 1);
-    expect(hifz().counts[HifzVerdict.repeated], 1);
-    expect(hifz().completed, isTrue);
+    expect(finished!.counts[HifzVerdict.skipped], 1);
+    expect(finished!.counts[HifzVerdict.repeated], 1);
     expect(vibrations, 1, reason: 'the skip');
     final marks = container.read(mushafWordOverlayProvider)!.marks;
     expect(
@@ -672,8 +698,7 @@ void main() {
     await recite(words.skip(20).join(' '));
     session().pause();
     await pumpEventQueue();
-    expect(hifz().counts[HifzVerdict.correct], 50);
-    expect(hifz().completed, isTrue);
+    expect(finished!.counts[HifzVerdict.correct], 50);
   });
 
   test('page transition: moving past the visible page turns it', () async {

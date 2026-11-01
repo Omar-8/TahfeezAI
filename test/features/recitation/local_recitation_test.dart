@@ -611,6 +611,9 @@ void main() {
 
     HifzState hifz() => container.read(hifzControllerProvider);
 
+    /// The test as it completed.
+    HifzState? finished;
+
     Future<void> setUpHifz({
       bool range = true,
       ({int chapterNo, int verseNo})? to,
@@ -672,7 +675,11 @@ void main() {
       ));
       if (hidden) container.read(mushafHideModeProvider.notifier).toggle();
       container.listen(liveRecognitionControllerProvider, (_, _) {});
-      container.listen(hifzControllerProvider, (_, _) {});
+      finished = null;
+      container.listen(hifzControllerProvider, (_, next) {
+        // As it completed: a range then ends its recitation by itself.
+        if (next.completed) finished ??= next;
+      });
       container.listen(acousticVerificationControllerProvider, (_, _) {});
       await container.read(quranWordCorpusProvider.future);
       await container.read(quranPhonemeResourcesProvider.future);
@@ -719,28 +726,30 @@ void main() {
         reason: 'Google is off',
       );
       await play('self_correction');
-      expect(hifz().counts[HifzVerdict.skipped], 1);
-      expect(hifz().counts[HifzVerdict.selfCorrected], 1);
-      expect(hifz().counts[HifzVerdict.wrong], 0);
-      expect(hifz().completed, isTrue);
+      expect(finished!.counts[HifzVerdict.skipped], 1);
+      expect(finished!.counts[HifzVerdict.selfCorrected], 1);
+      expect(finished!.counts[HifzVerdict.wrong], 0);
     });
 
     test(
       'recited words appear one after another, never several at once',
       () async {
         await setUpHifz(to: (chapterNo: 36, verseNo: 8));
-        var shown = 0, most = 0;
+        // (The most shown: once done, the recitation ends and hide mode
+        // keeps the words shown instead.)
+        var shown = 0, most = 0, peak = 0;
         container.listen(mushafWordOverlayProvider, (_, next) {
           final n = next?.revealed.length ?? 0;
           if (n - shown > most) most = n - shown;
           shown = n;
+          if (n > peak) peak = n;
         });
         await play('page_start');
-        for (var i = 0; i < 100 && shown < hifz().revealed.length; i++) {
+        for (var i = 0; i < 100 && peak < 37; i++) {
           await Future<void>.delayed(const Duration(milliseconds: 50));
         }
-        expect(hifz().revealed, hasLength(37));
-        expect(shown, 37, reason: 'all shown in the end');
+        expect(finished!.revealed, hasLength(37));
+        expect(peak, 37, reason: 'all shown in the end');
         expect(most, 1);
       },
     );

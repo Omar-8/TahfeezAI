@@ -822,7 +822,10 @@ class HifzController extends Notifier<HifzState> {
     final judge = _judge;
     if (judge == null) return;
     _publish(judge.revealManually(wholeAyah: wholeAyah));
-    if (!_loopOn()) _followPage();
+    if (!_loopOn()) {
+      _followPage();
+      _endFinishedRange();
+    }
   }
 
   /// Hides the last revealed word (or back to the start of its ayah) and
@@ -1332,8 +1335,49 @@ class HifzController extends Notifier<HifzState> {
     ];
     if (mistakes.isNotEmpty) _alert(mistakes);
     _publish(events, running: true, paced: _acousticPosition);
-    if (!_loopOn()) _followPage();
+    if (!_loopOn()) {
+      _followPage();
+      _endFinishedRange();
+    }
   }
+
+  /// A fixed range — a lesson, a "Test me" question — recited to its end
+  /// (not a loop: Follow along's turns and loops end their own way): the
+  /// recitation ends, as Stop would, once its last ayah's pronunciation
+  /// check is in ([settleAcousticCheck]). It was left listening, nothing
+  /// more to hear (owner, 2026-11-01).
+  void _endFinishedRange() {
+    final judge = _judge;
+    if (judge == null ||
+        !judge.completed ||
+        state.range == null ||
+        state.loop != null ||
+        _endingRange) {
+      return;
+    }
+    _endingRange = true;
+    final lastAyah = state.last?.ayahId;
+    unawaited(() async {
+      try {
+        if (lastAyah != null) {
+          await settleAcousticCheck(ref, lastAyah: lastAyah, pass: _pass);
+        }
+        // The recited words still appearing one after another shown first
+        // (ending shows the rest at once).
+        for (var i = 0; i < 100 && ref.mounted && _held.isNotEmpty; i++) {
+          await Future<void>.delayed(const Duration(milliseconds: 50));
+        }
+        if (!ref.mounted || _judge != judge) return;
+        if (ref.read(recitationSessionControllerProvider).isActive) {
+          await ref.read(recitationSessionControllerProvider.notifier).stop();
+        }
+      } finally {
+        _endingRange = false;
+      }
+    }());
+  }
+
+  var _endingRange = false;
 
   /// Words a mistake alert was given for (once each per recitation — with
   /// a loop, per repetition).

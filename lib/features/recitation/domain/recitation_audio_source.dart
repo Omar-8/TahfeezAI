@@ -36,6 +36,10 @@ abstract class RecitationAudioSource {
   /// instant and never re-prompts for permission.
   Future<RecitationAudioCapture> start(RecitationAudioFormat requested);
 
+  /// Whether a phone call is on (ringing, in a call, a VoIP call), as it
+  /// changes — the session pauses for one. Empty where it can't be told.
+  Stream<bool> get calls;
+
   /// Closes the microphone. The capture stream completes afterwards.
   Future<void> stop();
 

@@ -40,6 +40,12 @@ class FakeAudioSource implements RecitationAudioSource {
     mic!.add(Uint8List(bytes)..fillRange(0, bytes, value));
   }
 
+  /// A phone call starting or ending, as the platform reports it.
+  final callEvents = StreamController<bool>.broadcast();
+
+  @override
+  Stream<bool> get calls => callEvents.stream;
+
   @override
   Future<void> stop() async {
     stopCalls++;
@@ -194,6 +200,29 @@ void main() {
     expect(live.last.every((b) => b == 5), isTrue);
     final recorded = store.sinks.values.single.bytes.toBytes();
     expect(recorded.where((b) => b == 7), hasLength(32000));
+  });
+
+  test('a phone call pauses the session (the mic stays open); the reader '
+      'resumes after it', () async {
+    await controller().start(startLocation: startPage);
+    source.emitSeconds(1);
+    await pumpEventQueue();
+
+    source.callEvents.add(true);
+    await pumpEventQueue();
+    expect(state().phase, RecitationPhase.paused);
+    source.emitSeconds(3, value: 9);
+    source.callEvents.add(false);
+    await pumpEventQueue();
+    // Not resumed by itself.
+    expect(state().phase, RecitationPhase.paused);
+    expect(source.micOpen, isTrue);
+
+    controller().resume();
+    source.emitSeconds(1);
+    await pumpEventQueue();
+    expect(state().elapsed, const Duration(seconds: 2));
+    expect(store.sinks.values.single.bytes.toBytes().contains(9), isFalse);
   });
 
   test('stop closes the mic, finishes one recording and saves the '
