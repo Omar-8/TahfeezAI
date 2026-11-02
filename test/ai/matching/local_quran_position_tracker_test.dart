@@ -593,6 +593,126 @@ void main() {
       );
     });
 
+    group('the isti\'adha and the basmala are passed over', () {
+      // The reciters' own: 'restart' opens with the isti'adha (frames
+      // 0–133) and Al-Fatiha's basmala (134–240); 'page_start' is Ya-Sin.
+      ReplayResult yasinWith(
+        List<(AcousticFrames, int, int)> parts, {
+        int from = 36001,
+        bool trusted = false,
+      }) {
+        final frames = joinFrames(parts);
+        return replay(
+          PositionScenario('page_start', {
+            'note': '',
+            'chunk_ends': [
+              for (var e = 32; e < frames.frames; e += 32) e,
+              frames.frames,
+            ],
+            'focus': [from, 36012],
+            'anchor': from,
+            'trust_anchor': trusted,
+            'focus_only': true,
+            'recited': <int>[],
+          }),
+          frames: frames,
+        );
+      }
+
+      test('before the page on screen, searched alone', () {
+        // Searching the page only, the basmala was not found as one: fitted
+        // as the page before's «بِهِۦ جَمْعًا», it held the reciter 8 s and
+        // dropped «إِنَّ» (page 600, owner 2026-11-02).
+        final fatiha = scenarios['restart']!.frames();
+        final yasin = scenarios['page_start']!.frames();
+        for (final (name, upTo) in [('isti\'adha', 133), ('both', 240)]) {
+          final r = yasinWith([(fatiha, 0, upTo), (yasin, 0, 560)]);
+          final log = r.log.join(' / ');
+          expect(r.log, contains(startsWith('passed over 16:98:5')));
+          if (upTo == 240) {
+            expect(r.log, contains(startsWith('passed over 1:1:1')));
+          }
+          expect(r.placed.first.$1, pos(36, 1, 1), reason: '$name: $log');
+          // «يسٓ» ends 97 frames into Ya-Sin: placed within a chunk or two.
+          expect(
+            r.placed.first.$2,
+            lessThanOrEqualTo(upTo + 1 + 97 + 64),
+            reason: '$name: $log',
+          );
+          expect(r.verdicts.keys, [HifzVerdict.correct], reason: name);
+        }
+      });
+
+      test('between ayahs, in the middle of a recitation', () {
+        // A basmala comes in 1.28 s chunks: «بِسْمِ ٱللَّهِ» alone was
+        // set aside as other speech, and «…ٱلرَّحِيمِ» then taken for words.
+        final fatiha = scenarios['restart']!.frames();
+        final yasin = scenarios['page_start']!.frames();
+        for (final (name, a, b, formula) in [
+          ('basmala', 134, 240, '1:1:1'),
+          ('isti\'adha', 0, 133, '16:98:5'),
+        ]) {
+          final r = yasinWith([
+            (yasin, 0, 390),
+            (fatiha, a, b),
+            (yasin, 391, 700),
+          ], trusted: true);
+          expect(
+            r.log,
+            contains(startsWith('passed over $formula')),
+            reason: name,
+          );
+          expect(r.verdicts.keys, [
+            HifzVerdict.correct,
+          ], reason: '$name: ${r.log.join(' / ')}');
+          expect(r.placed.map((p) => p.$1), contains(pos(36, 5, 2)));
+        }
+      });
+
+      test('except in Al-Fatiha, where it is the first ayah', () {
+        final fatiha = scenarios['restart']!.frames();
+        final frames = joinFrames([(fatiha, 134, 560)]);
+        final r = replay(
+          PositionScenario('restart', {
+            'note': '',
+            'chunk_ends': [
+              for (var e = 32; e < frames.frames; e += 32) e,
+              frames.frames,
+            ],
+            'focus': [1001, 1007],
+            'anchor': 1001,
+            'trust_anchor': false,
+            'focus_only': true,
+            'recited': <int>[],
+          }),
+          frames: frames,
+        );
+        expect(r.log, isNot(contains(startsWith('passed over 1:1:1'))));
+        expect(
+          [for (final p in r.placed.take(4)) p.$1],
+          [for (var w = 1; w <= 4; w++) pos(1, 1, w)],
+        );
+      });
+    });
+
+    test('searching the page on screen, nothing off it is placed', () {
+      // The fit around a word found was widened 3 words each way, past the
+      // page's edge. Here the page "starts" at 36:2: «يسٓ» before it.
+      final r = replay(
+        PositionScenario('page_start', {
+          'note': '',
+          'chunk_ends': scenarios['page_start']!.chunkEnds,
+          'focus': [36002, 36012],
+          'anchor': 36002,
+          'trust_anchor': false,
+          'focus_only': true,
+          'recited': <int>[],
+        }),
+      );
+      expect(r.placed.first.$1, pos(36, 2, 1), reason: r.log.join(' / '));
+      expect(r.placed.where((p) => p.$1 < pos(36, 2, 1)), isEmpty);
+    });
+
     test('follow latency stays near the 2 s hop + 1 s context', () {
       for (final name in scenarios.keys) {
         final follow = run(name).$2.meanFollowSeconds;

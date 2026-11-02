@@ -513,7 +513,7 @@ class QuranAcousticVerifier {
     final chosen = <PhoneticToken>[];
     // Per unit, a vowel dropped at a stop and the last word said before it
     // (null: the unit's end) — checked below for a different vowel said.
-    final finalVowel = <int, (PhoneticToken, int?)>{};
+    final finalVowel = <int, (PhoneticToken, int?, bool)>{};
     for (var n = 0; n < order.length; n++) {
       final u = order[n];
       final unit = byUnit[u]!;
@@ -596,6 +596,32 @@ class QuranAcousticVerifier {
           }
         }
       }
+      // An ayah's end judged without its last vowel (the stop form, the
+      // default): a different vowel said there is still a mistake — at a
+      // stop, or said on into the next ayah, where the stop form may fit
+      // better than the joined one («ٱلْقُبُورُ وَحُصِّلَ» for «ٱلْقُبُورِ»,
+      // owner 2026-11-02). The stop form has no vowel to compare: the
+      // joined form's.
+      final flowEnd =
+          forms?.wasl != null &&
+          (candidate == null ||
+              !joinedEnds.any((j) => _sameTokens(j, candidate!)));
+      if (flowEnd) {
+        // The vowel the joined form ends with (the stop form has none).
+        final joined = forms!.apply(
+          unit,
+          stop: false,
+          start: false,
+          end: true,
+          begin: false,
+        );
+        if (joined.isNotEmpty &&
+            joined.last.kind == PhoneticTokenKind.vowel &&
+            ShortVowel.ofToken(joined.last.token) != null) {
+          // Judged only if said on into the next ayah (decided below).
+          finalVowel[u] = (joined.last, null, true);
+        }
+      }
       if (candidate == null) {
         chosen.addAll(unit);
         continue;
@@ -614,11 +640,11 @@ class QuranAcousticVerifier {
         if (ofWord.isNotEmpty &&
             ofWord.last.kind == PhoneticTokenKind.vowel &&
             ShortVowel.ofToken(ofWord.last.token) != null) {
-          finalVowel[u] = (ofWord.last, splitAfter);
+          finalVowel[u] = (ofWord.last, splitAfter, false);
         }
       } else if (stop) {
         for (final x in unit) {
-          if (x.unitFinalVowel) finalVowel[u] = (x, null);
+          if (x.unitFinalVowel) finalVowel[u] = (x, null, false);
         }
       }
       chosen.addAll(candidate);
@@ -632,7 +658,7 @@ class QuranAcousticVerifier {
       stoppedUnits: stopAfter,
     );
     // A different vowel said just before a pause is still a mistake.
-    for (final MapEntry(key: u, value: (vowel, lastWord))
+    for (final MapEntry(key: u, value: (vowel, lastWord, ayahEnd))
         in finalVowel.entries) {
       final ks = [
         for (var k = 0; k < chosen.length; k++)
@@ -653,6 +679,17 @@ class QuranAcousticVerifier {
         }
       }
       final f1 = math.min(t - 1, math.min(nextStart - 1, spans[k]!.end + 12));
+      // An ayah's end said on into the next: no stop heard — no silence
+      // (a weak vowel is not one), no qalqala on its last letter (the
+      // stop's «أَحَدْ» before «ٱللَّهُ»), the next word heard.
+      final saidOn =
+          ayahEnd &&
+          nextStart < t &&
+          !(chosen[k].kind == PhoneticTokenKind.marker) &&
+          !_silenceBetween(frames, spans[k]!.end, nextStart);
+      // Stopped there: its stop form, whose last vowel is not said — not
+      // judged (what follows is the next ayah's start).
+      if (ayahEnd && !saidOn) continue;
       final before = [
         for (var i = lo; i <= k; i++)
           if (spans[i] != null) chosen[i].token,
@@ -677,7 +714,10 @@ class QuranAcousticVerifier {
         ctcLogProbability(local, [...before, v]),
         ctcLogProbability(local, [...flow, v]),
       );
-      final ok = math.max(ctcLogProbability(local, before), said(vowel.token));
+      // At a stop the vowel may be dropped; said on, it may not.
+      final ok = saidOn
+          ? said(vowel.token)
+          : math.max(ctcLogProbability(local, before), said(vowel.token));
       var best = double.negativeInfinity;
       String? observed;
       for (final v in ShortVowel.values) {
@@ -690,10 +730,20 @@ class QuranAcousticVerifier {
       }
       final llr = best - ok;
       if (llr > -thresholds.correct) {
+        final wrong = llr >= thresholds.error;
+        // Said on with another vowel: one mistake, that vowel — not also
+        // a vowel said on the stop form's silent last letter.
+        if (wrong && saidOn) {
+          out.removeWhere(
+            (v) =>
+                v.type == RecitationErrorType.sukunError &&
+                identical(v.token, chosen[k]),
+          );
+        }
         out.add(
           PhonemeVerdict(
             token: vowel,
-            type: llr >= thresholds.error
+            type: wrong
                 ? RecitationErrorType.wrongVowel
                 : RecitationErrorType.uncertain,
             likelihoodRatio: llr,
@@ -780,6 +830,20 @@ class QuranAcousticVerifier {
       if (run >= math.max(thresholds.pauseFrames, stopInsideFrames)) {
         return true;
       }
+    }
+    return false;
+  }
+
+  /// Whether frames [from]..[to] (exclusive) hold a stop's silence: a run
+  /// of [AcousticThresholds.pauseFrames] frames where the blank is all but
+  /// certain. (A weak vowel between two words keeps the blank likeliest
+  /// but not certain: «ٱلْقُبُورُ وَحُصِّلَ», 0.6–0.75.)
+  bool _silenceBetween(AcousticFrames frames, int from, int to) {
+    const certain = -0.105; // ln 0.9
+    var run = 0;
+    for (var f = from + 1; f < to; f++) {
+      run = frames.at(f, ctcBlank) >= certain ? run + 1 : 0;
+      if (run >= thresholds.pauseFrames) return true;
     }
     return false;
   }

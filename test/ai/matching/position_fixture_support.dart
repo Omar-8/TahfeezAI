@@ -47,6 +47,7 @@ class PositionScenario {
       focus = (json['focus']! as List).cast<int>(),
       anchor = json['anchor']! as int,
       trustAnchor = json['trust_anchor']! as bool,
+      focusOnly = json['focus_only'] == true,
       recited = (json['recited']! as List).cast<int>();
 
   final String name, note;
@@ -58,6 +59,9 @@ class PositionScenario {
 
   /// First and last ayah id on screen.
   final List<int> focus;
+
+  /// Locating searches [focus] only (as the app does for a page).
+  final bool focusOnly;
   final int anchor;
   final bool trustAnchor;
 
@@ -169,7 +173,11 @@ ReplayResult replay(
   final anchor = pos(scenario.anchor);
   tracker
     ..start(anchor: anchor, trustAnchor: scenario.trustAnchor)
-    ..setFocus(pos(scenario.focus[0]), pos(scenario.focus[1], last: true));
+    ..setFocus(
+      pos(scenario.focus[0]),
+      pos(scenario.focus[1], last: true),
+      only: scenario.focusOnly,
+    );
   HifzJudge? judge = scenario.trustAnchor
       ? HifzJudge(corpus, start: anchor, end: corpus.length - 1)
       : null;

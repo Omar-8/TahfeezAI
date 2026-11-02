@@ -589,6 +589,17 @@ class LocalQuranPositionTracker implements RecitationPositionMatcher {
         // windows), fitting clearly better than the skip.
         final partial =
             nearOk && f.coverage >= 0.25 && f.cost + 0.2 < near.cost;
+        // Only begun, nothing else fitting: wait for the rest — taken now
+        // as other speech, «بِسْمِ ٱللَّهِ» would be set aside and the rest
+        // («…ٱلرَّحِيمِ») too little to tell (a basmala mid-surah).
+        if (!nearOk &&
+            !flush &&
+            !whole &&
+            f.prefixSpeech <= config.extraFrames &&
+            f.coverage >= 0.25 &&
+            window.frames - 1 - f.alignedEnd <= config.extraFrames) {
+          return const [];
+        }
         if (whole || partial) {
           _log('passed over ${_fmt(a)} formula');
           _mark = from + f.alignedEnd + 1;
@@ -777,6 +788,31 @@ class LocalQuranPositionTracker implements RecitationPositionMatcher {
         !(flush && hypothesis.length >= config.minLocateSymbols ~/ 2)) {
       return const [];
     }
+    // A formula said first (the basmala, the isti'adha), wherever the
+    // reciter is: passed over, and what follows located on its own. Searched
+    // for here as well — a page-only search never finds it, and the words
+    // after it fit badly until it is out of the window (8 s at the top of
+    // page 600 — owner, 2026-11-02).
+    for (final (a, b) in _formulas) {
+      if ((_hasFocus && _focusStart <= b && _focusEnd >= a) ||
+          (_cursor != null && _cursor! >= a && _cursor! <= b + 1)) {
+        continue; // it is the text here (Al-Fatiha)
+      }
+      final f = _align(resources, window, a, b, flexible: true);
+      if (f != null &&
+          f.prefixSpeech <= config.extraFrames &&
+          f.coverage >= 0.7 &&
+          f.cost <= config.followCost) {
+        // Still being said: its last word may be cut off — wait, or the
+        // rest («ٱلرَّجِيمِ») spoils what comes next (a basmala).
+        if (!flush && window.frames - 1 - f.alignedEnd <= config.extraFrames) {
+          return const [];
+        }
+        _log('passed over ${_fmt(a)} formula');
+        _mark = from + f.alignedEnd + 1;
+        return const [];
+      }
+    }
     // Candidates from each search area, nearest first.
     final scopes = <(String, int?, int?, double)>[
       if (_hasFocus && _focusOnly)
@@ -802,11 +838,14 @@ class LocalQuranPositionTracker implements RecitationPositionMatcher {
         )) {
           continue; // already found in a nearer area
         }
+        // Page only: no word off it, not even at the edges (a basmala fitted
+        // as the last words of the page before, «بِهِۦ جَمْعًا», held the
+        // reciter at the top of page 600 for 8 s — owner, 2026-11-02).
         final a = _align(
           resources,
           window,
-          math.max(0, c.firstWord - 3),
-          math.min(corpus.length - 1, c.lastWord + 3),
+          math.max(_focusOnly ? _focusStart : 0, c.firstWord - 3),
+          math.min(_focusOnly ? _focusEnd : corpus.length - 1, c.lastWord + 3),
           flexible: true,
         );
         if (a == null) continue;

@@ -569,6 +569,99 @@ void main() {
     );
   });
 
+  group('an ayah\'s last vowel: dropped at a stop, said when joined', () {
+    // The owner's rule (2026-11-02): stopping at an ayah's end, its last
+    // vowel may be dropped; said on into the next ayah, it must be the
+    // right one («ٱلْقُبُورُ وَحُصِّلَ» for «ٱلْقُبُورِ» went unflagged).
+    _Pair pair(WordRef last, WordRef first) {
+      final span = reference.span([last, first]);
+      final units = {for (final t in span.tokens) t.unit}.toList()..sort();
+      List<PhoneticToken> unit(int u) => [
+        for (final t in span.tokens)
+          if (t.unit == u) t,
+      ];
+      return (end: unit(units.first), next: unit(units.last), span: span);
+    }
+
+    List<int> flowing(_Pair p, {ShortVowel? lastVowel}) {
+      final forms = p.span.pauses;
+      final end = forms[p.end.first.unit]!.apply(
+        p.end,
+        stop: false,
+        start: false,
+        begin: false,
+      );
+      final next = forms[p.next.first.unit]!.apply(
+        p.next,
+        stop: false,
+        start: false,
+        end: false,
+      );
+      return [
+        for (final (i, t) in end.indexed)
+          if (!t.optional)
+            i == end.length - 1 && lastVowel != null
+                ? lastVowel.token
+                : t.token,
+        for (final t in next)
+          if (!t.optional) t.token,
+      ];
+    }
+
+    List<PhonemeVerdict> errors(_Pair p, AcousticFrames frames) => verifier
+        .verify(
+          frames,
+          p.span.tokens,
+          pauses: p.span.pauses,
+          openStart: true,
+          openEnd: true,
+        )
+        .where((v) => v.type.isError)
+        .toList();
+
+    test('said on with another vowel: a mistake', () {
+      // «ٱلْقُبُورِ وَحُصِّلَ» (100:9–10) said «ٱلْقُبُورُ وَحُصِّلَ».
+      final p = pair(
+        (ayahId: 100009, wordIndex: 6),
+        (ayahId: 100010, wordIndex: 0),
+      );
+      expect(errors(p, clearFrames(flowing(p))), isEmpty);
+      // Said weakly, as the owner's: the blank likelier on its frames (the
+      // vowel-less stop form then fits better than the joined one).
+      final heard = flowing(p, lastVowel: ShortVowel.damma);
+      final frames = clearFrames(heard);
+      final at = p.end.where((t) => !t.optional).length - 1;
+      for (final f in [1 + 3 * at, 2 + 3 * at]) {
+        for (var c = 0; c < frames.classes; c++) {
+          frames.logProbs[f * frames.classes + c] = c == ctcBlank
+              ? log(0.7)
+              : c == ShortVowel.damma.token
+              ? log(0.25)
+              : -20;
+        }
+      }
+      final wrong = errors(p, frames);
+      expect(wrong.map((v) => v.type), [RecitationErrorType.wrongVowel]);
+      expect(wrong.single.token.word, (ayahId: 100009, wordIndex: 6));
+    });
+
+    test('stopped, the vowel dropped: fine', () {
+      final p = pair(
+        (ayahId: 100009, wordIndex: 6),
+        (ayahId: 100010, wordIndex: 0),
+      );
+      final stopped = [
+        for (final t in [...p.end, ...p.next])
+          if (!t.optional) t.token,
+      ];
+      final cut = p.end.where((t) => !t.optional).length;
+      expect(
+        errors(p, clearFrames(stopped, pauseAfter: cut, pauseFrames: 8)),
+        isEmpty,
+      );
+    });
+  });
+
   test('stopping inside a joined unit is a stop, not a mistake', () {
     // 2:7 «غِشَٰوَةٌ ۖ وَلَهُمْ»: in flow one unit (the tanween merges into the
     // و); stopping after غِشَٰوَةٌ (a waqf mark) it is said «غِشَاوَه», and
@@ -663,3 +756,10 @@ void main() {
     }
   });
 }
+
+/// An ayah's last unit and the next ayah's first, as in a reference span.
+typedef _Pair = ({
+  List<PhoneticToken> end,
+  List<PhoneticToken> next,
+  PhoneticSpan span,
+});
