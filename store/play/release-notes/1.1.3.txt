@@ -1,0 +1,80 @@
+<en-US>
+• Recitation finds you on the page on screen at once, and skips the basmala and isti'adha
+• A wrong last vowel is caught when you join two verses
+</en-US>
+<ar>
+• المتابعة تجدك فورًا في الصفحة الظاهرة، وتتجاوز البسملة والاستعاذة
+• يُكتشف الخطأ في حركة آخر الآية عند وصلها بالتي بعدها
+</ar>
+<bn-BD>
+• তিলাওয়াত পর্দার পৃষ্ঠাতেই আপনাকে সঙ্গে সঙ্গে খুঁজে পায়, বিসমিল্লাহ ও ইস্তিআযা বাদ দেয়
+• দুটি আয়াত মিলিয়ে পড়লে শেষ হরকতের ভুল ধরা পড়ে
+</bn-BD>
+<da-DK>
+• Recitationen finder dig straks på siden på skærmen og springer basmala og isti'adha over
+• En forkert sidste vokal fanges, når du forbinder to vers
+</da-DK>
+<de-DE>
+• Die Rezitation findet dich sofort auf der angezeigten Seite und überspringt Basmala und Isti'adha
+• Ein falscher letzter Vokal wird erkannt, wenn du zwei Verse verbindest
+</de-DE>
+<el-GR>
+• Η απαγγελία σας βρίσκει αμέσως στη σελίδα της οθόνης και παραλείπει τη μπασμάλα και την ιστιάζα
+• Ένα λάθος τελικό φωνήεν εντοπίζεται όταν ενώνετε δύο στίχους
+</el-GR>
+<es-ES>
+• La recitación te encuentra al instante en la página en pantalla y omite la basmala y la isti'adha
+• Se detecta una última vocal incorrecta al unir dos aleyas
+</es-ES>
+<fa>
+• دنبال‌کردن تلاوت شما را فوراً در صفحهٔ روی نمایشگر پیدا می‌کند و از بسمله و استعاذه می‌گذرد
+• خطای حرکت پایان آیه هنگام وصل دو آیه شناسایی می‌شود
+</fa>
+<fr-FR>
+• La récitation vous trouve aussitôt sur la page affichée et ignore la basmala et l'isti'adha
+• Une dernière voyelle erronée est relevée quand vous enchaînez deux versets
+</fr-FR>
+<id>
+• Bacaan langsung menemukan Anda di halaman yang tampil, serta melewati basmalah dan isti'adzah
+• Harakat akhir yang salah terdeteksi saat Anda menyambung dua ayat
+</id>
+<ja-JP>
+• 画面のページですぐに読誦位置を見つけ、バスマラとイスティアーザは読み飛ばします
+• 二つの節をつなげて読むとき、最後の母音の誤りを検出します
+</ja-JP>
+<kk>
+• Оқу экрандағы беттен сізді бірден табады, басмала мен истиазаны өткізіп жібереді
+• Екі аятты жалғағанда соңғы дауыстының қатесі анықталады
+</kk>
+<ko-KR>
+• 낭송 추적이 화면의 페이지에서 바로 위치를 찾고, 바스말라와 이스티아다는 건너뜁니다
+• 두 구절을 이어 읽을 때 마지막 모음의 실수를 잡아냅니다
+</ko-KR>
+<ms>
+• Bacaan terus menemui anda di halaman pada skrin, dan melangkau basmalah serta isti'azah
+• Baris akhir yang salah dikesan apabila anda menyambung dua ayat
+</ms>
+<nl-NL>
+• De recitatie vindt je meteen op de pagina op het scherm en slaat de basmala en isti'adha over
+• Een verkeerde laatste klinker wordt opgemerkt als je twee verzen verbindt
+</nl-NL>
+<pt-BR>
+• A recitação encontra você na hora na página da tela e ignora a basmala e a isti'adha
+• Uma última vogal errada é detectada quando você une dois versículos
+</pt-BR>
+<ru-RU>
+• Чтение сразу находит вас на открытой странице и пропускает басмалу и истиазу
+• Ошибка в последнем гласном отмечается, когда вы соединяете два аята
+</ru-RU>
+<sw>
+• Usomaji unakupata papo hapo kwenye ukurasa ulio kwenye skrini, na unaruka basmala na isti'adha
+• Irabu ya mwisho isiyo sahihi inagunduliwa unapounganisha aya mbili
+</sw>
+<tr-TR>
+• Okuma, ekrandaki sayfada sizi hemen bulur; besmele ve istiazeyi atlar
+• İki ayeti birleştirdiğinizde son harekedeki hata yakalanır
+</tr-TR>
+<ur>
+• تلاوت آپ کو اسکرین والے صفحے پر فوراً ڈھونڈ لیتی ہے، اور بسم اللہ و تعوذ کو چھوڑ دیتی ہے
+• دو آیات ملا کر پڑھنے پر آخری حرکت کی غلطی پکڑی جاتی ہے
+</ur>
