@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart' show AppLifecycleListener;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../quran/domain/models/quran_location.dart';
@@ -97,6 +98,7 @@ class RecitationSessionController extends Notifier<RecitationSessionState> {
   RecitationRecordingSink? _sink;
   StreamSubscription<Uint8List>? _capture;
   StreamSubscription<bool>? _calls;
+  AppLifecycleListener? _lifecycle;
   int _recordedBytes = 0;
   bool _disposed = false;
 
@@ -195,6 +197,13 @@ class RecitationSessionController extends Notifier<RecitationSessionState> {
       _calls = _source.calls.listen((inCall) {
         if (inCall) pause();
       }, onError: (Object _, StackTrace _) {});
+      // Another app opened (or the screen turned off): paused the same way,
+      // the session and its progress kept for when the reader is back.
+      try {
+        _lifecycle = AppLifecycleListener(onHide: pause, onPause: pause);
+      } catch (_) {
+        // No app lifecycle here (a test without the widgets binding).
+      }
     } catch (error) {
       await _fail(error);
     }
@@ -275,6 +284,8 @@ class RecitationSessionController extends Notifier<RecitationSessionState> {
     }
     await _calls?.cancel();
     _calls = null;
+    _lifecycle?.dispose();
+    _lifecycle = null;
     await _capture?.cancel();
     _capture = null;
     if (session == null || format == null) return null;

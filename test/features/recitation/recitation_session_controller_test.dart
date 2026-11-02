@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:flutter/widgets.dart' show AppLifecycleState;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tahfeez_ai/features/recitation/application/recitation_providers.dart';
@@ -200,6 +201,31 @@ void main() {
     expect(live.last.every((b) => b == 5), isTrue);
     final recorded = store.sinks.values.single.bytes.toBytes();
     expect(recorded.where((b) => b == 7), hasLength(32000));
+  });
+
+  test('leaving the app pauses the session, kept for the reader\'s '
+      'return', () async {
+    final binding = TestWidgetsFlutterBinding.ensureInitialized();
+    binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await controller().start(startLocation: startPage);
+    source.emitSeconds(1);
+    await pumpEventQueue();
+
+    binding
+      ..handleAppLifecycleStateChanged(AppLifecycleState.inactive)
+      ..handleAppLifecycleStateChanged(AppLifecycleState.hidden);
+    await pumpEventQueue();
+    expect(state().phase, RecitationPhase.paused);
+
+    binding
+      ..handleAppLifecycleStateChanged(AppLifecycleState.inactive)
+      ..handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await pumpEventQueue();
+    // Not resumed by itself: the reader carries on when ready.
+    expect(state().phase, RecitationPhase.paused);
+    controller().resume();
+    expect(state().phase, RecitationPhase.listening);
+    expect(state().elapsed, const Duration(seconds: 1));
   });
 
   test('a phone call pauses the session (the mic stays open); the reader '

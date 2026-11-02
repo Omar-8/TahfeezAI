@@ -1,5 +1,8 @@
-import 'package:flutter/foundation.dart' show listEquals;
+import 'package:flutter/foundation.dart' show listEquals, mapEquals;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../core/storage/storage_providers.dart';
+import 'mushaf_progress_store.dart';
 
 /// The first page on screen for a reported [page]: in a two-page spread
 /// the right-hand page is always the odd one (pages 1|2, 3|4, …), whichever
@@ -114,7 +117,38 @@ class MushafHideModeState {
 
 class MushafHideModeController extends Notifier<MushafHideModeState> {
   @override
-  MushafHideModeState build() => const MushafHideModeState();
+  MushafHideModeState build() {
+    // Kept on the phone: hide mode and the words uncovered, as they were
+    // when the app was last closed — restored when it starts again.
+    final store = MushafProgressStore(ref.read(browserStorageProvider));
+    listenSelf((previous, next) {
+      if (previous != null &&
+          previous.enabled == next.enabled &&
+          mapEquals(previous.revealed, next.revealed) &&
+          mapEquals(previous.startOn, next.startOn)) {
+        return;
+      }
+      store.saveHide(
+        enabled: next.enabled,
+        revealed: next.revealed,
+        startOn: next.startOn,
+      );
+    });
+    if (MushafProgressStore.restoreOnce(MushafProgressStore.hideKey)) {
+      store.loadHide().then((saved) {
+        // Only into a state not yet touched (nothing uncovered, hide mode
+        // not turned on since the app started).
+        if (saved == null || !ref.mounted) return;
+        if (state.enabled || state.revealed.isNotEmpty) return;
+        state = state.copyWith(
+          enabled: saved.enabled,
+          revealed: saved.revealed,
+          startOn: saved.startOn,
+        );
+      });
+    }
+    return const MushafHideModeState();
+  }
 
   /// Turns hide mode on or off. Either way every page starts over fully
   /// hidden next time it is enabled.

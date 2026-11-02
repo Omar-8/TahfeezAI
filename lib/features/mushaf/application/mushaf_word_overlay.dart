@@ -1,7 +1,9 @@
 import 'package:flutter/foundation.dart' show immutable, mapEquals, setEquals;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/storage/storage_providers.dart';
 import '../../../quran/domain/models/quran_refs.dart';
+import 'mushaf_progress_store.dart';
 
 /// Reading order of canonical words (ayah ids are `chapter*1000+verse`, so
 /// comparing them compares surah first, then ayah).
@@ -112,12 +114,36 @@ class MushafWordOverlay {
 }
 
 class MushafWordOverlayController extends Notifier<MushafWordOverlay?> {
+  late MushafProgressStore _store;
+
+  /// The colours shown are a finished recitation's from before the app was
+  /// last closed (restored), not one of this run's.
+  bool restored = false;
+
   @override
-  MushafWordOverlay? build() => null;
+  MushafWordOverlay? build() {
+    // A finished recitation's colours are kept on the phone (a recitation
+    // under way, or none, clears them) and shown again when the app starts.
+    _store = MushafProgressStore(ref.read(browserStorageProvider));
+    if (MushafProgressStore.restoreOnce(MushafProgressStore.resultsKey)) {
+      _store.loadResults().then((saved) {
+        if (saved == null || !ref.mounted || state != null) return;
+        restored = true;
+        state = saved;
+      });
+    }
+    return null;
+  }
 
   void set(MushafWordOverlay? overlay) {
     if (!ref.mounted || overlay == state) return;
+    restored = false;
     state = overlay;
+    _store.saveResults(
+      overlay != null && overlay.followHideMode && !overlay.hideUnrevealed
+          ? overlay
+          : null,
+    );
   }
 }
 

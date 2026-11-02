@@ -646,11 +646,13 @@ class HifzController extends Notifier<HifzState> {
     });
     ref.listen(mushafHideModeProvider, (previous, next) {
       if (previous?.enabled == next.enabled) return;
-      // Turning hide mode on or off clears a finished recitation's colours.
-      if (_results) {
+      // Turning hide mode on or off clears a finished recitation's colours
+      // (this run's, or restored from before the app was closed).
+      final overlay = ref.read(mushafWordOverlayProvider.notifier);
+      if (_results || overlay.restored) {
         _results = false;
         _judge = null;
-        ref.read(mushafWordOverlayProvider.notifier).set(null);
+        overlay.set(null);
       }
       _updateOverlay();
     });
