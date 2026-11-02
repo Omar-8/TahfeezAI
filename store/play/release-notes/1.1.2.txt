@@ -1,0 +1,60 @@
+<en-US>
+• Skipping a word or going back no longer jumps to the same word earlier in the surah: the recitation stays where you are
+</en-US>
+<ar>
+• تخطّي كلمة أو الرجوع لم يعد ينقلك إلى الكلمة نفسها في موضع سابق من السورة: تبقى المتابعة حيث أنت
+</ar>
+<bn-BD>
+• কোনো শব্দ বাদ দিলে বা ফিরে গেলে আর সূরার আগের একই শব্দে লাফ দেয় না: তিলাওয়াত আপনি যেখানে আছেন সেখানেই থাকে
+</bn-BD>
+<da-DK>
+• At springe et ord over eller gå tilbage springer ikke længere til det samme ord tidligere i suraen: recitationen bliver, hvor du er
+</da-DK>
+<de-DE>
+• Ein Wort auszulassen oder zurückzugehen springt nicht mehr zum gleichen Wort weiter vorn in der Sure: die Verfolgung bleibt, wo du bist
+</de-DE>
+<el-GR>
+• Η παράλειψη μιας λέξης ή η επιστροφή δεν πηδά πια στην ίδια λέξη νωρίτερα στη σούρα: η παρακολούθηση μένει εκεί που είστε
+</el-GR>
+<es-ES>
+• Saltarte una palabra o volver atrás ya no salta a la misma palabra antes en la sura: el seguimiento se queda donde estás
+</es-ES>
+<fa>
+• جاانداختن یک واژه یا برگشتن دیگر شما را به همان واژه در جای پیشین سوره نمی‌برد: دنبال‌کردن همان‌جا می‌ماند که هستید
+</fa>
+<fr-FR>
+• Sauter un mot ou revenir en arrière ne renvoie plus au même mot plus tôt dans la sourate : le suivi reste là où vous êtes
+</fr-FR>
+<id>
+• Melewatkan kata atau kembali tidak lagi melompat ke kata yang sama di bagian awal surah: bacaan tetap diikuti di posisi Anda
+</id>
+<ja-JP>
+• 単語を飛ばしたり戻ったりしても、スーラ前方の同じ単語へ飛ばなくなりました：追跡は今の位置にとどまります
+</ja-JP>
+<kk>
+• Сөзді өткізіп жіберу не кері оралу енді сүренің алдыңғы бөлігіндегі сол сөзге секірмейді: қадағалау сіз тұрған жерде қалады
+</kk>
+<ko-KR>
+• 단어를 건너뛰거나 되돌아가도 더 이상 수라 앞부분의 같은 단어로 이동하지 않습니다: 지금 위치를 그대로 따라갑니다
+</ko-KR>
+<ms>
+• Melangkau perkataan atau berpatah balik tidak lagi melompat ke perkataan sama lebih awal dalam surah: bacaan kekal diikuti di tempat anda
+</ms>
+<nl-NL>
+• Een woord overslaan of teruggaan springt niet meer naar hetzelfde woord eerder in de soera: het volgen blijft waar je bent
+</nl-NL>
+<pt-BR>
+• Pular uma palavra ou voltar não salta mais para a mesma palavra antes na surata: o acompanhamento fica onde você está
+</pt-BR>
+<ru-RU>
+• Пропуск слова или возврат больше не перебрасывает к такому же слову раньше в суре: отслеживание остаётся там, где вы
+</ru-RU>
+<sw>
+• Kuruka neno au kurudi nyuma hakurukii tena neno lilelile mapema katika sura: ufuatiliaji unabaki ulipo
+</sw>
+<tr-TR>
+• Bir kelimeyi atlamak ya da geri dönmek artık surenin önceki kısmındaki aynı kelimeye atlatmıyor: takip olduğunuz yerde kalır
+</tr-TR>
+<ur>
+• کوئی لفظ چھوڑنے یا پیچھے جانے پر اب سورت میں پہلے والے اسی لفظ پر نہیں جاتا: تلاوت وہیں رہتی ہے جہاں آپ ہیں
+</ur>
