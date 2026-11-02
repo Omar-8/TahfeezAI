@@ -360,6 +360,29 @@ class LocalQuranPositionTracker implements RecitationPositionMatcher {
     return frames > 0 && cost / frames <= config.pauseFollowCost;
   }
 
+  /// A skip ahead to [fit]'s first word: within the surah, and that word
+  /// fitting on its own — a wrong word after Al-Falaq's «وَمِن شَرِّ» was
+  /// taken for Al-Nas's «ٱلنَّاسِ» (cost 1.4) seven words on, carried by
+  /// the next word, and the correction then not heard (owner, 2026-11-02).
+  bool _skipBelievable(_Fit fit, int next) {
+    if (corpus.words[fit.firstWord].ref.ayahId ~/ 1000 !=
+        corpus.words[next].ref.ayahId ~/ 1000) {
+      return false;
+    }
+    var cost = 0.0, frames = 0;
+    for (var k = 0; k < fit.tokens.length; k++) {
+      final t = fit.tokens[k];
+      final s = fit.spans[k];
+      if (s == null || t.optional || t.unitFinalVowel) continue;
+      if (_positionOf(t) != fit.firstWord) continue;
+      for (var f = s.start; f <= s.end; f++) {
+        cost += fit.excess[f];
+        frames++;
+      }
+    }
+    return frames > 0 && cost / frames <= config.followCost;
+  }
+
   /// The cost of [fit]'s best-fitting word of 4 sounds or more (its
   /// required sounds' frames).
   double _clearestWord(_Fit fit) {
@@ -508,7 +531,8 @@ class LocalQuranPositionTracker implements RecitationPositionMatcher {
             (_placedWords.isNotEmpty &&
                 near.requiredPlaced >= config.minRepeatSounds &&
                 (near.firstWord == next + 1 ||
-                    near.lastWord > near.firstWord)));
+                    near.lastWord > near.firstWord) &&
+                _skipBelievable(near, next)));
     // A formula said between ayahs (a surah's basmala, the isti'adha) —
     // also preferred to a skip ahead that fits no better: a slow basmala
     // can pass for the next surah's words a little ahead («…ٱلرَّحِيمِ» as
@@ -1160,8 +1184,14 @@ class LocalQuranPositionTracker implements RecitationPositionMatcher {
       }
     }
     for (final w in finished.skip(skipTo)) {
+      // Fitting worse than a continuation may (only at a pause, where the
+      // expected word is let account for the sound before it): not shown
+      // as said right — mumbling there once turned 112:3 green word by word
+      // (owner, 2026-11-02). 1.2% of the owner's placed words.
       final similarity = w.cost >= config.wrongWordCost
           ? 0.4
+          : w.cost > config.followCost
+          ? 0.6
           : (1 - w.cost / (2 * config.wrongWordCost)).clamp(0.75, 1.0);
       _log(
         'placed ${w.words.map(_fmt).join(' ')} at '
