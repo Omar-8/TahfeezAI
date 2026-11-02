@@ -15,7 +15,7 @@ import 'reader_jump_sheet.dart';
 /// and Juz number — live, computed from whatever page is actually on
 /// screen (never the location the reader was originally opened with, which
 /// can differ once the user has paged around).
-class MushafPageTitle extends ConsumerWidget {
+class MushafPageTitle extends ConsumerStatefulWidget {
   const MushafPageTitle({
     super.key,
     required this.mushafId,
@@ -42,7 +42,22 @@ class MushafPageTitle extends ConsumerWidget {
   final int? surahNoOverride;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MushafPageTitle> createState() => _MushafPageTitleState();
+}
+
+class _MushafPageTitleState extends ConsumerState<MushafPageTitle> {
+  /// What was last shown, kept while a turned-to page's data or its
+  /// surah's name is still loading — so the title does not flash a
+  /// different layout ("Page N" alone, "Surah N") for a frame or two.
+  String? _lastName;
+  int? _lastJuz;
+  int? _lastSurah;
+
+  int get mushafId => widget.mushafId;
+  int get pageNumber => widget.pageNumber;
+
+  @override
+  Widget build(BuildContext context) {
     final bundle = ref
         .watch(mushafPageDataProvider(mushafId, pageNumber))
         .value;
@@ -54,9 +69,23 @@ class MushafPageTitle extends ConsumerWidget {
     final baseColor = DefaultTextStyle.of(context).style.color;
 
     if (bundle == null) {
-      return Text(
-        AppLocalizations.of(context).homeContinueReadingPage(pageNumber),
-        overflow: TextOverflow.ellipsis,
+      final name = _lastName;
+      if (name == null) {
+        return Text(
+          AppLocalizations.of(context).homeContinueReadingPage(pageNumber),
+          overflow: TextOverflow.ellipsis,
+        );
+      }
+      return _title(
+        context,
+        name,
+        [
+          AppLocalizations.of(context).homeContinueReadingPage(pageNumber),
+          if (_lastJuz != null)
+            AppLocalizations.of(context).homeContinueReadingJuz(_lastJuz!),
+        ],
+        baseColor,
+        _lastSurah,
       );
     }
 
@@ -64,7 +93,7 @@ class MushafPageTitle extends ConsumerWidget {
     // in Ayah mode); else the one the page starts with.
     final reading = ref.watch(readingSurahProvider);
     final surahNo =
-        surahNoOverride ??
+        widget.surahNoOverride ??
         (reading != null && reading.page == pageNumber
             ? reading.surah
             : _firstSurahNo(bundle));
@@ -82,25 +111,40 @@ class MushafPageTitle extends ConsumerWidget {
               .value
               ?.name;
 
+    // The surah's name still loading: the last one shown, if any.
     final name =
         localizedName ??
+        _lastName ??
         (surahNo != null
             ? AppLocalizations.of(context).homeContinueReadingSurah(surahNo)
             : AppLocalizations.of(context).readerMushaf);
 
+    if (localizedName != null) _lastName = localizedName;
+    _lastJuz = bundle.juzNo;
+    _lastSurah = surahNo;
     final subtitleParts = <String>[
       AppLocalizations.of(context).homeContinueReadingPage(pageNumber),
       if (bundle.juzNo != null)
         AppLocalizations.of(context).homeContinueReadingJuz(bundle.juzNo!),
     ];
 
-    // Two lines (Surah name, then page/Juz), not one long joined string:
-    // a single line competing with the mode switch and Appearance icon for
-    // width truncated well before showing all three pieces of context.
-    // Stacking vertically uses the app bar's normally-unused vertical
-    // slack instead of fighting for horizontal room.
-    // Pressed: where to go — a surah and an ayah, or a page — from here.
-    // (Looks the same: only a ripple shows it.)
+    return _title(context, name, subtitleParts, baseColor, surahNo);
+  }
+
+  // Two lines (Surah name, then page/Juz), not one long joined string:
+  // a single line competing with the mode switch and Appearance icon for
+  // width truncated well before showing all three pieces of context.
+  // Stacking vertically uses the app bar's normally-unused vertical
+  // slack instead of fighting for horizontal room.
+  // Pressed: where to go — a surah and an ayah, or a page — from here.
+  // (Looks the same: only a ripple shows it.)
+  Widget _title(
+    BuildContext context,
+    String name,
+    List<String> subtitleParts,
+    Color? baseColor,
+    int? surahNo,
+  ) {
     return InkWell(
       key: const ValueKey('mushaf-title'),
       borderRadius: BorderRadius.circular(8),
