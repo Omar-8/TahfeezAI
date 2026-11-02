@@ -1,6 +1,6 @@
 # TahfeezAI — Privacy Policy
 
-_Last updated: 31 October 2026_
+_Last updated: 2 November 2026_
 
 TahfeezAI helps you read and memorize the Quran. It is built to keep your data on your phone. There are no accounts, no ads, no analytics and no tracking.
 
@@ -18,6 +18,7 @@ Only to play recitation audio, and only when you ask for it:
 
 - **Ayah recitations** stream from the Islamic Network audio service (`cdn.islamic.network`, run by alquran.cloud), or, for some reciters, from EveryAyah (`everyayah.com`).
 - **Single-word audio** streams from Quran.com's audio service (`audio.qurancdn.com`).
+- **Listen to the correction** asks Quran.com (`api.quran.com`, `api.qurancdn.com`) where each word falls in the reciter's recording, and for some reciters plays that recording from QuranicAudio (`download.quranicaudio.com`). The timings are kept only until the app closes.
 - **Downloading a reciter** for offline listening fetches that reciter's audio files from the same service and stores them on your phone; you can delete them at any time.
 
 These requests contain only the name of the audio file (which reciter and which ayah or word). Like any internet request, they also reveal your device's IP address to that service, which is governed by its own privacy terms. No other information about you is sent. Everything else — the Quran text, translations, tafsir and word meanings — is part of the app and works without internet.
