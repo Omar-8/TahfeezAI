@@ -108,6 +108,21 @@ class PositionScenario {
   }
 }
 
+/// Stretches of recordings' frames played one after another (frames
+/// [from]..[to] of each, inclusive).
+AcousticFrames joinFrames(List<(AcousticFrames, int, int)> parts) {
+  final out = <double>[];
+  for (final (f, from, to) in parts) {
+    out.addAll(f.logProbs.sublist(from * f.classes, (to + 1) * f.classes));
+  }
+  return AcousticFrames(
+    frames: out.length ~/ parts.first.$1.classes,
+    classes: parts.first.$1.classes,
+    logProbs: Float32List.fromList(out),
+    frameDuration: parts.first.$1.frameDuration,
+  );
+}
+
 /// What the tracker did over a scenario.
 class ReplayResult {
   ReplayResult(this.scenario);
@@ -133,6 +148,7 @@ class ReplayResult {
 ReplayResult replay(
   PositionScenario scenario, {
   LocalPositionTrackerConfig config = const LocalPositionTrackerConfig(),
+  AcousticFrames? frames,
 }) {
   final corpus = loadTestCorpus();
   final resources = loadTestPhonemes();
@@ -157,7 +173,7 @@ ReplayResult replay(
   HifzJudge? judge = scenario.trustAnchor
       ? HifzJudge(corpus, start: anchor, end: corpus.length - 1)
       : null;
-  final frames = scenario.frames();
+  frames ??= scenario.frames();
   var start = 0;
   for (final (i, chunkEnd) in scenario.chunkEnds.indexed) {
     // The final flush may count a partial frame the model did not output.

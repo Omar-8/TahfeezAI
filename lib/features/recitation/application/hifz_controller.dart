@@ -1101,6 +1101,15 @@ class HifzController extends Notifier<HifzState> {
           pageEnd: pageEnd,
           uncovered: already,
         );
+        // Where on the page is looked for, not taken on trust: the first
+        // hidden word could otherwise be "heard" in anything said before
+        // the recitation, and a reciter further down found only word by
+        // word (owner, 2026-11-02). (The on-device tracker.)
+        if (_acousticPosition) {
+          _matcher = _newMatcher()
+            ..start(anchor: _judge!.expected)
+            ..setFocus(_judge!.expected, pageEnd, only: true);
+        }
       }
       return;
     }

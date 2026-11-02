@@ -161,10 +161,14 @@ void main() {
       final ayahs = (m['ayahs']! as List).cast<int>();
       int chapter(int a) => a ~/ 1000;
       int verse(int a) => a % 1000;
-      container.read(hifzControllerProvider.notifier).setRange((
-        from: (chapterNo: chapter(ayahs.first), verseNo: verse(ayahs.first)),
-        to: (chapterNo: chapter(ayahs.last), verseNo: verse(ayahs.last)),
-      ));
+      // REPLAY_FREE=1: no range, as reciting from the open page (the
+      // start is located, not trusted).
+      if (Platform.environment['REPLAY_FREE'] != '1') {
+        container.read(hifzControllerProvider.notifier).setRange((
+          from: (chapterNo: chapter(ayahs.first), verseNo: verse(ayahs.first)),
+          to: (chapterNo: chapter(ayahs.last), verseNo: verse(ayahs.last)),
+        ));
+      }
       final session = container.read(
         recitationSessionControllerProvider.notifier,
       );

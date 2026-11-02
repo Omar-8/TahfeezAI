@@ -29,8 +29,8 @@ class LocalPositionTrackerConfig {
   const LocalPositionTrackerConfig({
     this.followCost = 0.8,
     this.pauseFollowCost = 1.6,
-    this.pageCost = 0.8,
-    this.nearbyCost = 0.7,
+    this.pageCost = 0.45,
+    this.nearbyCost = 0.45,
     this.quranCost = 0.5,
     this.margin = 0.15,
     this.minLocateSymbols = 14,
@@ -46,7 +46,25 @@ class LocalPositionTrackerConfig {
     this.pauseFrames = 5,
     this.endMargin = 3,
     this.strayCost = 0.5,
+    this.startCost = 0.6,
+    this.locateWordCost = 0.1,
+    this.maxFramesPerLetter = 20,
+    this.maxFramesPerLetterRough = 14,
+    this.startFramesPerSound = 17,
   });
+
+  /// The most the first word of a session may cost on its own, and the
+  /// most audio (frames per sound that must be said) it may take. Real
+  /// recitation (the position fixtures, 4 reciters): every word ≤ 0.53 and
+  /// ≤ 16.4 frames a sound, first words ≤ 0.14 and ≤ 13.9.
+  final double startCost, startFramesPerSound;
+
+  /// The most the best-fitting word of a located place may cost.
+  final double locateWordCost;
+
+  /// The most audio a placed word may take, in frames per letter of its
+  /// pronunciation: fitting closely (cost ≤ 0.2), or only roughly.
+  final double maxFramesPerLetter, maxFramesPerLetterRough;
 
   /// The most the next word may cost when the audio paused
   /// right after them: the pause settles where they end, and a tajweed
@@ -58,7 +76,10 @@ class LocalPositionTrackerConfig {
   final double followCost;
 
   /// The most a located place may cost: on the visible page, nearby, or
-  /// anywhere in the Quran (the further, the surer it must be).
+  /// anywhere in the Quran (the further, the surer it must be). Real
+  /// recitation is located at 0.00–0.10, a learner's up to 0.39 (the
+  /// owner's sessions); English speech before a basmala was located on
+  /// Al-Fatiha at 0.56 (owner, 2026-11-02).
   final double pageCost, nearbyCost, quranCost;
 
   /// How much better than any other place the located one must fit, unless
@@ -155,6 +176,13 @@ class LocalQuranPositionTracker implements RecitationPositionMatcher {
   final _frames = _FrameBuffer();
 
   int? _cursor;
+
+  /// Where the first word must be: the trusted start, or the place located.
+  int? _startAt;
+
+  /// As started: the anchor, and whether it was trusted.
+  int? _anchor;
+  bool _trusted = false;
   bool _locked = false;
   int _focusStart = 0, _focusEnd = 0;
   bool _hasFocus = false;
@@ -191,7 +219,8 @@ class LocalQuranPositionTracker implements RecitationPositionMatcher {
   @override
   void start({int? anchor, bool trustAnchor = false, int? from}) {
     _cursor = anchor;
-    _locked = trustAnchor && anchor != null;
+    _startAt = _anchor = anchor;
+    _locked = _trusted = trustAnchor && anchor != null;
     _mark = from == null
         ? _frames.end
         : from.clamp(_frames.start, _frames.end).toInt();
@@ -331,6 +360,30 @@ class LocalQuranPositionTracker implements RecitationPositionMatcher {
     return frames > 0 && cost / frames <= config.pauseFollowCost;
   }
 
+  /// The cost of [fit]'s best-fitting word of 4 sounds or more (its
+  /// required sounds' frames).
+  double _clearestWord(_Fit fit) {
+    final cost = <int, double>{}, frames = <int, int>{}, sounds = <int, int>{};
+    for (var k = 0; k < fit.tokens.length; k++) {
+      final t = fit.tokens[k];
+      final s = fit.spans[k];
+      if (s == null || t.optional || t.unitFinalVowel) continue;
+      final p = _positionOf(t);
+      sounds[p] = (sounds[p] ?? 0) + 1;
+      for (var f = s.start; f <= s.end; f++) {
+        cost[p] = (cost[p] ?? 0) + fit.excess[f];
+        frames[p] = (frames[p] ?? 0) + 1;
+      }
+    }
+    var best = double.infinity;
+    for (final p in cost.keys) {
+      // A short word («لَمْ») fits almost any sound closely.
+      if (sounds[p]! < config.minRepeatSounds) continue;
+      best = math.min(best, cost[p]! / frames[p]!);
+    }
+    return best;
+  }
+
   /// Whether the sound before [fit] may be passed over: 2 frames, or less
   /// than an extra word's before a close fit.
   bool _leadIn(_Fit fit) =>
@@ -440,11 +493,22 @@ class LocalQuranPositionTracker implements RecitationPositionMatcher {
     // A skip ahead needs as much evidence as going back: a sound or two that
     // fits a word further on (a basmala's tail as «مَا», the start of «يَلِدْ»
     // as «يُولَدْ») would otherwise mark the words in between skipped.
+    // Before the first word is placed there is no skip ahead: a word or two
+    // further on that other speech happens to fit (Ya-Sin's «…ِيم» endings
+    // as «ٱلرَّحِيمِ», Al-Ikhlas's «ٱللَّهُ» as «لِلَّهِ», English speech)
+    // would mark the words before it skipped and uncover them. A reciter
+    // who did start further on is found by locating instead. Past more than
+    // one word it takes two words in a row: after other speech, a «…ِين»
+    // passed for «ٱلدِّينِ» eight words on, and «ٱلْحَمْدُ» said next was
+    // taken for going back (owner, 2026-11-02).
     final nearOk =
         near != null &&
         _usable(near, config.followCost) &&
         (near.firstWord <= next ||
-            near.requiredPlaced >= config.minRepeatSounds);
+            (_placedWords.isNotEmpty &&
+                near.requiredPlaced >= config.minRepeatSounds &&
+                (near.firstWord == next + 1 ||
+                    near.lastWord > near.firstWord)));
     // A formula said between ayahs (a surah's basmala, the isti'adha) —
     // also preferred to a skip ahead that fits no better: a slow basmala
     // can pass for the next surah's words a little ahead («…ٱلرَّحِيمِ» as
@@ -755,12 +819,26 @@ class LocalQuranPositionTracker implements RecitationPositionMatcher {
         return const [];
       }
     }
+    // Some word of it must fit closely: real recitation, a learner's too,
+    // has one at 0.00–0.06 in every place located (the owner's sessions,
+    // the position fixtures). English speech was once located on Al-Fatiha
+    // at 0.39, its words 0.23–0.61, and the words after the basmala shown
+    // as recited (owner, 2026-11-02).
+    final clearest = _clearestWord(best.alignment);
+    if (clearest > config.locateWordCost) {
+      _log(
+        'locate: no clear word at ${_fmt(bestFirst)} '
+        '(best ${clearest.toStringAsFixed(2)}) — waiting',
+      );
+      return const [];
+    }
     final relocated = MatchRelocated(
       from: current,
       to: corpus.words[bestFirst].ref,
       scope: best.scope,
     );
     _locked = true;
+    _startAt = bestFirst;
     _log(
       'located ${_fmt(bestFirst)}..${_fmt(bestLast)} (${best.scope}, cost '
       '${best.alignment.cost.toStringAsFixed(2)}'
@@ -978,6 +1056,62 @@ class LocalQuranPositionTracker implements RecitationPositionMatcher {
       pendingSounds = 0;
     }
     if (finished.isEmpty) return const [];
+    // The session's first word must fit on its own, and not be stretched
+    // over far more audio than its sounds take: other speech (another
+    // surah, English) can carry a short first word along with a later one
+    // that fits — «بِسْمِ» over 4.6 s of «يسٓ», or at cost 1.4–1.8 before
+    // a clear «ٱللَّهِ», «…أَحَدٌ ٱللَّهُ» as «بِسْمِ ٱللَّهِ» at 0.79. Its
+    // audio is set aside as not the text.
+    if (_emittedMax < 0) {
+      final w = finished.first;
+      final perSound = (w.end - w.start + 1) / math.max(1, w.sounds);
+      // …and be where the recitation starts: a fit from there may leave
+      // its first words empty and finish one further on («يَوْمِ» in
+      // English, owner 2026-11-02).
+      if (w.cost > config.startCost ||
+          perSound > config.startFramesPerSound ||
+          (_startAt != null && w.words.first != _startAt)) {
+        _log(
+          'not a start: ${w.words.map(_fmt).join(' ')} '
+          '(cost ${w.cost.toStringAsFixed(2)}, '
+          '${perSound.toStringAsFixed(1)} frames a sound)',
+        );
+        _mark = from + w.end + 1;
+        _tail = const {};
+        // A place located but not begun: look again, as at the start.
+        _startAt = _anchor;
+        _cursor = _anchor;
+        _locked = _trusted;
+        return const [];
+      }
+    }
+    // No word is stretched over far more audio than its sounds take: other
+    // speech carried along by a word that fits around it («ٱلرَّحْمَٰنِ»
+    // over 6.8 s of English, owner 2026-11-02). The owner's 8,536 clearly
+    // recited words: at most 15.9 frames a letter («الٓمٓ», its madd held).
+    // The words before it are placed; its audio is set aside.
+    // A word fitting only roughly (cost over 0.2): at most 13.9.
+    final long = finished.indexWhere(
+      (w) =>
+          (w.end - w.start + 1) / math.max(1, w.heard.length) >
+          (w.cost <= 0.2
+              ? config.maxFramesPerLetter
+              : config.maxFramesPerLetterRough),
+    );
+    if (long == 0) {
+      final w = finished.first;
+      _log(
+        'too long for ${w.words.map(_fmt).join(' ')}: '
+        '${w.end - w.start + 1} frames "${w.heard}"',
+      );
+      _mark = from + w.end + 1;
+      _tail = const {};
+      return [
+        if (_emittedMax >= 0)
+          const WordHeard(ref: null, heard: '…', similarity: 0),
+      ];
+    }
+    if (long > 0) finished.removeRange(long, finished.length);
     _mark = from + finished.last.end + 1;
     lastPlacedFrame = _mark;
     // The closing sounds of the last word (its last 3 tokens placed).

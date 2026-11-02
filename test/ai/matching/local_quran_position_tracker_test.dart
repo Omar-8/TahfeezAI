@@ -458,6 +458,114 @@ void main() {
       expect(r.events, isEmpty);
     });
 
+    test('other speech uncovers none of the surah the test starts at', () {
+      // Al-Fatiha's test started, then other surahs recited: their «…ِيم»
+      // endings passed for «ٱلرَّحِيمِ», «يسٓ» or «…أَحَدٌ ٱللَّهُ» for
+      // «بِسْمِ ٱللَّهِ» — and the ayah uncovered (owner, 2026-11-02, with
+      // English speech). Each is located where it really is instead.
+      for (final name in [
+        'page_start',
+        'mid_ayah',
+        'ayahs_away',
+        'repeated_then_context',
+        'repeated_alone',
+        'skip',
+        'repeat',
+        'self_correction',
+        'hesitation',
+      ]) {
+        final s = scenarios[name]!;
+        final r = replay(
+          PositionScenario(name, {
+            'note': s.note,
+            'chunk_ends': s.chunkEnds,
+            'last_chunks': s.lastChunks.toList(),
+            'focus': [1001, 1007],
+            'anchor': 1001,
+            'trust_anchor': true,
+            'recited': s.recited,
+          }),
+        );
+        expect(
+          r.heard.where((w) => w.ayahId < 2000),
+          isEmpty,
+          reason: '$name: ${r.log.take(6).join(' / ')}',
+        );
+        expect(r.verdicts[HifzVerdict.correct], isNull, reason: name);
+      }
+    });
+
+    test('after other speech, the expected word is heard as soon as said', () {
+      // Al-Fatiha's basmala, then other speech (Ya-Sin standing in for the
+      // English the owner played, 2026-11-02), then «ٱلْحَمْدُ لِلَّهِ…».
+      // A «…ِين» in it once passed for «ٱلدِّينِ» eight words on, and the
+      // ayah said next was taken for going back: not heard at all.
+      final fatiha = scenarios['restart']!.frames();
+      final yasin = scenarios['page_start']!.frames();
+      for (final other in [40, 150, 250]) {
+        final frames = joinFrames([
+          (fatiha, 0, 245),
+          (yasin, 10, 10 + other - 1),
+          (fatiha, 246, 560),
+        ]);
+        final r = replay(
+          PositionScenario('restart', {
+            'note': '',
+            'chunk_ends': [
+              for (var e = 50; e < frames.frames; e += 50) e,
+              frames.frames,
+            ],
+            'focus': [1001, 1007],
+            'anchor': 1001,
+            'trust_anchor': true,
+            'recited': <int>[],
+          }),
+          frames: frames,
+        );
+        // «ٱلْحَمْدُ» ends 281 frames in, without the other speech: placed
+        // at the end of the chunk it ends in.
+        final said = 281 + other;
+        final alhamdu = pos(1, 2, 1);
+        expect(r.placed.where((p) => p.$1 == alhamdu).map((p) => p.$2), [
+          (said ~/ 50 + 1) * 50,
+        ], reason: '$other frames: ${r.log.join(' / ')}');
+        expect(r.verdicts[HifzVerdict.skipped], isNull, reason: '$other');
+      }
+    });
+
+    test('a word is not placed over far more audio than it takes', () {
+      // English during 1:3 was stretched over 6.8 s as «ٱلرَّحْمَٰنِ», then
+      // 1:3 itself taken for the basmala's same words (owner, 2026-11-02).
+      // Here 1:3:1's own frames, each held 8 times as long.
+      final fatiha = scenarios['restart']!.frames();
+      final frames = joinFrames([
+        (fatiha, 0, 360),
+        for (var f = 361; f <= 404; f++)
+          for (var i = 0; i < 8; i++) (fatiha, f, f),
+        (fatiha, 405, 470),
+      ]);
+      final r = replay(
+        PositionScenario('restart', {
+          'note': '',
+          'chunk_ends': [
+            for (var e = 32; e < frames.frames; e += 32) e,
+            frames.frames,
+          ],
+          'focus': [1001, 1007],
+          'anchor': 1001,
+          'trust_anchor': true,
+          'recited': <int>[],
+        }),
+        frames: frames,
+      );
+      expect(r.log, contains(startsWith('too long for 1:3:1')));
+      expect(
+        r.placed.map((p) => p.$1),
+        isNot(contains(pos(1, 3, 1))),
+        reason: r.log.join(' / '),
+      );
+    });
+
     test('follow latency stays near the 2 s hop + 1 s context', () {
       for (final name in scenarios.keys) {
         final follow = run(name).$2.meanFollowSeconds;
