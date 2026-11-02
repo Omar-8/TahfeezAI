@@ -533,6 +533,33 @@ void main() {
       }
     });
 
+    test('a word said one ahead goes there, not to the same words further '
+        'back', () {
+      // «ٱلرَّحْمَٰنِ» left out after «ٱلْعَٰلَمِينَ»: «ٱلرَّحِيمِ» is 1:3:2,
+      // not the basmala's, six words back (as «ٱلَّذِينَ» after 4:75's
+      // «وَٱلنِّسَآءِ» was taken for 4:74's, owner 2026-11-02).
+      final fatiha = scenarios['restart']!.frames();
+      final frames = joinFrames([(fatiha, 0, 371), (fatiha, 403, 560)]);
+      final r = replay(
+        PositionScenario('restart', {
+          'note': '',
+          'chunk_ends': [
+            for (var e = 32; e < frames.frames; e += 32) e,
+            frames.frames,
+          ],
+          'focus': [1001, 1007],
+          'anchor': 1001,
+          'trust_anchor': true,
+          'recited': <int>[],
+        }),
+        frames: frames,
+      );
+      final order = [for (final p in r.placed) p.$1];
+      final after = order.sublist(order.indexOf(pos(1, 2, 4)) + 1);
+      expect(after.first, pos(1, 3, 2), reason: r.log.join(' / '));
+      expect(after, isNot(contains(pos(1, 1, 4))));
+    });
+
     test('a word is not placed over far more audio than it takes', () {
       // English during 1:3 was stretched over 6.8 s as «ٱلرَّحْمَٰنِ», then
       // 1:3 itself taken for the basmala's same words (owner, 2026-11-02).

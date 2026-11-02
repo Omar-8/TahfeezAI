@@ -50,6 +50,7 @@ class LocalPositionTrackerConfig {
     this.locateWordCost = 0.1,
     this.maxFramesPerLetter = 20,
     this.maxFramesPerLetterRough = 14,
+    this.nearerMargin = 0.1,
     this.startFramesPerSound = 17,
   });
 
@@ -65,6 +66,10 @@ class LocalPositionTrackerConfig {
   /// The most audio a placed word may take, in frames per letter of its
   /// pronunciation: fitting closely (cost ≤ 0.2), or only roughly.
   final double maxFramesPerLetter, maxFramesPerLetterRough;
+
+  /// How much worse a place just ahead may fit than one further back and
+  /// still be taken, as the nearer.
+  final double nearerMargin;
 
   /// The most the next word may cost when the audio paused
   /// right after them: the pause settles where they end, and a tajweed
@@ -360,6 +365,39 @@ class LocalQuranPositionTracker implements RecitationPositionMatcher {
     return frames > 0 && cost / frames <= config.pauseFollowCost;
   }
 
+  /// [fit], or — when it goes back further than the word ahead is — the
+  /// same words a word or two on, fitting about as well: the nearer place.
+  /// «ٱلَّذِينَ» said after «وَٱلنِّسَآءِ» (4:75) was taken for 4:74's, 21
+  /// words back, and the recitation followed from there (owner,
+  /// 2026-11-02).
+  _Fit? _nearer(
+    PhonemeResources resources,
+    AcousticFrames window,
+    _Fit? fit,
+    int next,
+    int last,
+  ) {
+    if (fit == null || fit.firstWord >= next - 1) return fit;
+    final ahead = _align(resources, window, next, last, flexible: true);
+    if (ahead == null ||
+        ahead.firstWord - next >= next - fit.firstWord ||
+        ahead.cost > fit.cost + config.nearerMargin ||
+        !_usable(ahead, config.followCost) ||
+        (ahead.firstWord > next &&
+            !(_placedWords.isNotEmpty &&
+                ahead.requiredPlaced >= config.minRepeatSounds &&
+                (ahead.firstWord == next + 1 ||
+                    ahead.lastWord > ahead.firstWord) &&
+                _skipBelievable(ahead, next)))) {
+      return fit;
+    }
+    _log(
+      'nearer: ${_fmt(ahead.firstWord)} (${ahead.cost.toStringAsFixed(2)}) '
+      'over ${_fmt(fit.firstWord)} (${fit.cost.toStringAsFixed(2)})',
+    );
+    return ahead;
+  }
+
   /// A skip ahead to [fit]'s first word: within the surah, and that word
   /// fitting on its own — a wrong word after Al-Falaq's «وَمِن شَرِّ» was
   /// taken for Al-Nas's «ٱلنَّاسِ» (cost 1.4) seven words on, carried by
@@ -512,7 +550,8 @@ class LocalQuranPositionTracker implements RecitationPositionMatcher {
         math.max(next - 40, previousAyah ?? next),
       ),
     );
-    final near = _align(resources, window, first, last, flexible: true);
+    var near = _align(resources, window, first, last, flexible: true);
+    near = _nearer(resources, window, near, next, last);
     // A skip ahead needs as much evidence as going back: a sound or two that
     // fits a word further on (a basmala's tail as «مَا», the start of «يَلِدْ»
     // as «يُولَدْ») would otherwise mark the words in between skipped.
@@ -654,13 +693,23 @@ class LocalQuranPositionTracker implements RecitationPositionMatcher {
       if (blankRun >= 2 && speech >= config.extraFrames) {
         final cut = f - blankRun;
         final rest = window.slice(cut, window.frames - 1);
-        final fit = _align(resources, rest, first, last, flexible: true);
+        final fit = _nearer(
+          resources,
+          rest,
+          _align(resources, rest, first, last, flexible: true),
+          next,
+          last,
+        );
         if (fit != null &&
             fit.prefixSpeech <= 2 &&
             _usable(fit, config.followCost) &&
-            fit.firstWord <= next &&
             (fit.firstWord == next ||
-                fit.requiredPlaced >= config.minRepeatSounds)) {
+                (fit.requiredPlaced >= config.minRepeatSounds &&
+                    (fit.firstWord < next ||
+                        // the word ahead skipped (see [_nearer])
+                        (fit.firstWord == next + 1 &&
+                            _placedWords.isNotEmpty &&
+                            _skipBelievable(fit, next)))))) {
           _log(
             'not the text, then ${_fmt(fit.firstWord)} '
             '(cost ${fit.cost.toStringAsFixed(2)})',
