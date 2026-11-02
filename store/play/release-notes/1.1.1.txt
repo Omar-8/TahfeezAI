@@ -1,0 +1,140 @@
+<en-US>
+• Recitation follows you more reliably: other speech nearby is no longer taken for the Quran
+• A word said again after a mistake is picked up right away
+• A mumbled or unclear word shows as a mistake, not green
+• Your progress is kept: leaving the app pauses the recitation, and hidden words and the last results survive closing it
+• Steadier page titles in the Mushaf, and reveal buttons keep their size while reciting
+</en-US>
+<ar>
+• متابعة أدق للتلاوة: الكلام القريب لم يعد يُحسب قرآنًا
+• الكلمة المُعادة بعد الخطأ تُلتقط فورًا
+• الكلمة غير الواضحة تظهر خطأً لا أخضر
+• يُحفظ تقدّمك: مغادرة التطبيق توقف التلاوة مؤقتًا، والكلمات المخفية وآخر النتائج تبقى بعد إغلاقه
+• عناوين صفحات المصحف أثبت، وأزرار الكشف تحتفظ بحجمها أثناء التلاوة
+</ar>
+<bn-BD>
+• তিলাওয়াত আরও নির্ভরযোগ্যভাবে অনুসরণ: আশেপাশের কথা আর কুরআন ধরা হয় না
+• ভুলের পর আবার বলা শব্দ সঙ্গে সঙ্গে ধরা পড়ে
+• অস্পষ্ট শব্দ সবুজ নয়, ভুল হিসেবে দেখায়
+• অগ্রগতি সংরক্ষিত: অ্যাপ ছাড়লে তিলাওয়াত থামে, লুকানো শব্দ ও শেষ ফলাফল বন্ধ করার পরও থাকে
+• মুসহাফে স্থির পৃষ্ঠা-শিরোনাম, তিলাওয়াতের সময় দেখানোর বোতাম আগের আকারে
+</bn-BD>
+<da-DK>
+• Recitationen følges mere pålideligt: tale i nærheden tages ikke længere for Koranen
+• Et ord sagt igen efter en fejl opfanges med det samme
+• Et utydeligt ord vises som en fejl, ikke grønt
+• Dine fremskridt gemmes: forlader du appen, sættes recitationen på pause, og skjulte ord og seneste resultater bevares efter lukning
+• Roligere sidetitler i Mushaf, og vis-knapperne beholder deres størrelse under recitation
+</da-DK>
+<de-DE>
+• Die Rezitation wird zuverlässiger verfolgt: Gespräche in der Nähe gelten nicht mehr als Koran
+• Ein nach einem Fehler wiederholtes Wort wird sofort erkannt
+• Ein undeutliches Wort wird als Fehler gezeigt, nicht grün
+• Dein Fortschritt bleibt: Verlassen der App pausiert, verdeckte Wörter und letzte Ergebnisse bleiben nach dem Schließen
+• Ruhigere Seitentitel im Mushaf; Aufdeck-Tasten behalten beim Rezitieren ihre Größe
+</de-DE>
+<el-GR>
+• Πιο αξιόπιστη παρακολούθηση: η ομιλία γύρω σας δεν θεωρείται πια Κοράνι
+• Μια λέξη που ξαναλέτε μετά από λάθος αναγνωρίζεται αμέσως
+• Μια ασαφής λέξη εμφανίζεται ως λάθος, όχι πράσινη
+• Η πρόοδός σας μένει: η έξοδος θέτει σε παύση, κρυμμένες λέξεις και τελευταία αποτελέσματα μένουν μετά το κλείσιμο
+• Πιο σταθεροί τίτλοι σελίδων στο Μους'χαφ και κουμπιά αποκάλυψης σε κανονικό μέγεθος
+</el-GR>
+<es-ES>
+• La recitación se sigue mejor: las conversaciones cercanas ya no se toman por Corán
+• Una palabra repetida tras un error se reconoce al instante
+• Una palabra poco clara se marca como error, no en verde
+• Tu progreso se guarda: salir de la app pausa la recitación, y las palabras ocultas y los últimos resultados se mantienen al cerrarla
+• Títulos de página más estables en el Mushaf; los botones de mostrar mantienen su tamaño
+</es-ES>
+<fa>
+• دنبال‌کردن دقیق‌تر تلاوت: صحبت‌های اطراف دیگر قرآن شمرده نمی‌شود
+• واژه‌ای که پس از اشتباه دوباره گفته شود بی‌درنگ شناخته می‌شود
+• واژهٔ نامفهوم به‌صورت اشتباه نشان داده می‌شود، نه سبز
+• پیشرفت شما حفظ می‌شود: خروج از برنامه تلاوت را متوقف می‌کند و واژه‌های پنهان و آخرین نتایج پس از بستن می‌مانند
+• عنوان‌های پایدارتر صفحه در مصحف و دکمه‌های نمایش با اندازهٔ کامل هنگام تلاوت
+</fa>
+<fr-FR>
+• La récitation est mieux suivie : les paroles alentour ne sont plus prises pour le Coran
+• Un mot redit après une erreur est reconnu tout de suite
+• Un mot indistinct est marqué comme erreur, pas en vert
+• Vos progrès sont gardés : quitter l'app met en pause, mots cachés et derniers résultats restent après fermeture
+• Titres de page plus stables dans le Mushaf ; les boutons gardent leur taille pendant la récitation
+</fr-FR>
+<id>
+• Bacaan diikuti lebih andal: percakapan di sekitar tidak lagi dianggap Al-Qur'an
+• Kata yang diucapkan ulang setelah salah langsung dikenali
+• Kata yang tidak jelas ditandai salah, bukan hijau
+• Kemajuan tersimpan: keluar dari aplikasi menjeda bacaan, kata tersembunyi dan hasil terakhir tetap ada setelah ditutup
+• Judul halaman Mushaf lebih stabil, tombol tampilkan tetap berukuran penuh saat membaca
+</id>
+<ja-JP>
+• 読誦の追跡がより確実に：周囲の会話をクルアーンと誤認しません
+• 間違いの後に言い直した単語をすぐに認識します
+• 不明瞭な単語は緑ではなく間違いとして表示されます
+• 進捗を保持：アプリを離れると一時停止し、隠した単語と最後の結果は終了後も残ります
+• ムスハフのページ見出しが安定し、表示ボタンは読誦中も同じ大きさです
+</ja-JP>
+<kk>
+• Қырағат сенімдірек қадағаланады: айналадағы сөз енді Құран деп саналмайды
+• Қателіктен кейін қайталанған сөз бірден танылады
+• Анық емес сөз жасыл емес, қате ретінде көрсетіледі
+• Прогресс сақталады: қолданбадан шықсаңыз қырағат кідіртіледі, жасырын сөздер мен соңғы нәтижелер жапқаннан кейін де қалады
+• Мұсхафта бет атаулары тұрақты, ашу батырмалары қырағат кезінде өлшемін сақтайды
+</kk>
+<ko-KR>
+• 낭송을 더 정확하게 따라갑니다: 주변 대화를 꾸란으로 인식하지 않습니다
+• 실수 후 다시 말한 단어를 바로 인식합니다
+• 불분명한 단어는 초록색이 아닌 실수로 표시됩니다
+• 진행 상황 유지: 앱을 나가면 낭송이 일시 정지되고, 숨긴 단어와 마지막 결과는 종료 후에도 남습니다
+• 무스하프의 페이지 제목이 안정적이며, 보기 버튼은 낭송 중에도 크기를 유지합니다
+</ko-KR>
+<ms>
+• Bacaan diikuti dengan lebih tepat: perbualan berdekatan tidak lagi dianggap al-Quran
+• Perkataan yang diulang selepas kesilapan dikenal pasti serta-merta
+• Perkataan yang tidak jelas ditanda salah, bukan hijau
+• Kemajuan disimpan: keluar dari aplikasi menjeda bacaan, perkataan tersembunyi dan keputusan terakhir kekal selepas ditutup
+• Tajuk halaman Mushaf lebih stabil, butang dedah kekal saiznya semasa membaca
+</ms>
+<nl-NL>
+• De recitatie wordt beter gevolgd: gepraat in de buurt geldt niet meer als Koran
+• Een woord dat je na een fout opnieuw zegt, wordt meteen herkend
+• Een onduidelijk woord wordt als fout getoond, niet groen
+• Je voortgang blijft: de app verlaten pauzeert, verborgen woorden en laatste resultaten blijven na afsluiten
+• Rustigere paginatitels in de Mushaf; de toonknoppen houden hun grootte tijdens het reciteren
+</nl-NL>
+<pt-BR>
+• A recitação é acompanhada com mais precisão: conversas por perto não contam mais como Alcorão
+• Uma palavra repetida após um erro é reconhecida na hora
+• Uma palavra pouco clara aparece como erro, não em verde
+• Seu progresso fica salvo: sair do app pausa a recitação, e palavras ocultas e últimos resultados continuam após fechar
+• Títulos de página mais estáveis no Mushaf; os botões de revelar mantêm o tamanho
+</pt-BR>
+<ru-RU>
+• Чтение отслеживается надёжнее: разговоры рядом больше не принимаются за Коран
+• Слово, повторённое после ошибки, распознаётся сразу
+• Невнятное слово отмечается как ошибка, а не зелёным
+• Прогресс сохраняется: выход из приложения ставит чтение на паузу, скрытые слова и последние результаты остаются после закрытия
+• Более стабильные заголовки страниц в Мусхафе; кнопки показа сохраняют размер во время чтения
+</ru-RU>
+<sw>
+• Kisomo kinafuatiliwa kwa uhakika zaidi: mazungumzo ya karibu hayahesabiwi tena kuwa Qur'ani
+• Neno linalorudiwa baada ya kosa linatambuliwa mara moja
+• Neno lisilo wazi linaonyeshwa kama kosa, si kijani
+• Maendeleo yako yanahifadhiwa: kutoka kwenye programu kunasitisha kisomo, maneno yaliyofichwa na matokeo ya mwisho hubaki baada ya kufunga
+• Vichwa vya kurasa vilivyo thabiti katika Mushaf, vitufe vya kufunua hubaki na ukubwa wake
+</sw>
+<tr-TR>
+• Kıraat daha güvenilir takip ediliyor: yakındaki konuşmalar artık Kur'an sayılmıyor
+• Hatadan sonra tekrar söylenen kelime hemen tanınıyor
+• Belirsiz bir kelime yeşil değil, hata olarak gösteriliyor
+• İlerlemeniz korunuyor: uygulamadan çıkınca kıraat duraklar, gizli kelimeler ve son sonuçlar kapattıktan sonra da kalır
+• Mushaf'ta daha sakin sayfa başlıkları; gösterme düğmeleri kıraat sırasında boyutunu korur
+</tr-TR>
+<ur>
+• تلاوت کی بہتر پیروی: آس پاس کی گفتگو اب قرآن نہیں سمجھی جاتی
+• غلطی کے بعد دوبارہ کہا گیا لفظ فوراً پہچانا جاتا ہے
+• غیر واضح لفظ سبز نہیں بلکہ غلطی کے طور پر دکھایا جاتا ہے
+• آپ کی پیش رفت محفوظ: ایپ چھوڑنے پر تلاوت رک جاتی ہے، چھپے الفاظ اور آخری نتائج بند کرنے کے بعد بھی رہتے ہیں
+• مصحف میں صفحے کے عنوان زیادہ مستحکم، تلاوت کے دوران ظاہر کرنے کے بٹن اپنے سائز میں
+</ur>
