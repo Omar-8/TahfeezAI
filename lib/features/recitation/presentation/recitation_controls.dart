@@ -872,6 +872,10 @@ class _SessionControls extends ConsumerWidget {
 
   final RecitationSessionState state;
 
+  /// The reveal/hide buttons' own width (four buttons, the dividers, the
+  /// group's padding and the gap before the eye).
+  static const _stepsWidth = 4 * 42.0 + 3 + 4 + 8;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final scheme = Theme.of(context).colorScheme;
@@ -977,26 +981,52 @@ class _SessionControls extends ConsumerWidget {
               ),
           ],
         ),
-        // The reveal/hide buttons (to help the test along, or go back)
-        // scale down rather than overflow; the eye keeps its size and place.
-        SizedBox(width: centered ? _centeredGroupGap : 8),
-        // On a phone they fill the rest of the row, the eye at its end.
-        Flexible(
-          fit: centered ? FlexFit.loose : FlexFit.tight,
-          child: Row(
-            mainAxisSize: centered ? MainAxisSize.min : MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: const [
-              Flexible(
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: MushafHideControls(part: MushafHideControlsPart.steps),
+        // The reveal/hide buttons (to help the test along, or go back);
+        // the eye keeps its size and place.
+        if (centered) ...[
+          const SizedBox(width: _centeredGroupGap),
+          // Together in the middle, scaled down rather than overflowing.
+          const Flexible(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Flexible(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: MushafHideControls(
+                      part: MushafHideControlsPart.steps,
+                    ),
+                  ),
                 ),
-              ),
-              MushafHideControls(part: MushafHideControlsPart.pinned),
-            ],
+                MushafHideControls(part: MushafHideControlsPart.pinned),
+              ],
+            ),
           ),
-        ),
+        ] else ...[
+          // On a phone they fill the rest of the row as before a session
+          // (the same gaps), only as tall as stop and pause.
+          // On the narrowest phones, where they don't fit at their width,
+          // they scale down instead.
+          const SizedBox(width: 12),
+          Expanded(
+            child: LayoutBuilder(
+              builder: (context, box) => box.maxWidth >= _stepsWidth
+                  ? const MushafHideControls(
+                      part: MushafHideControlsPart.steps,
+                      expand: true,
+                      short: true,
+                    )
+                  : const FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: AlignmentDirectional.centerEnd,
+                      child: MushafHideControls(
+                        part: MushafHideControlsPart.steps,
+                      ),
+                    ),
+            ),
+          ),
+          const MushafHideControls(part: MushafHideControlsPart.pinned),
+        ],
       ],
     );
   }
@@ -1188,11 +1218,16 @@ class MushafHideControls extends ConsumerWidget {
     super.key,
     this.part = MushafHideControlsPart.all,
     this.expand = false,
+    this.short = false,
   });
 
   /// The reveal/hide buttons stretched over the width they are given, as
   /// tall as the bar's labelled modes (the phone's bar in hide mode).
   final bool expand;
+
+  /// Stretched ([expand]) but only as tall as the bar's other groups: beside
+  /// stop and pause while reciting.
+  final bool short;
 
   /// Which of the controls to build: the bar places the eye
   /// ([MushafHideControlsPart.pinned]) where it never moves, and
@@ -1254,10 +1289,15 @@ class MushafHideControls extends ConsumerWidget {
             key: ValueKey(key),
             style: expand
                 ? BarButtonGroup.buttonStyle.copyWith(
-                    fixedSize: const WidgetStatePropertyAll(
-                      Size(double.infinity, BarButtonGroup.labelledHeight),
+                    fixedSize: WidgetStatePropertyAll(
+                      Size(
+                        double.infinity,
+                        short
+                            ? BarButtonGroup.height
+                            : BarButtonGroup.labelledHeight,
+                      ),
                     ),
-                    iconSize: const WidgetStatePropertyAll(24),
+                    iconSize: WidgetStatePropertyAll(short ? 20 : 24),
                   )
                 : BarButtonGroup.buttonStyle,
             icon: Icon(icon),
@@ -1331,7 +1371,7 @@ class MushafHideControls extends ConsumerWidget {
                     textDirection: TextDirection.ltr,
                     child: BarButtonGroup(
                       expand: expand,
-                      groupHeight: expand
+                      groupHeight: expand && !short
                           ? BarButtonGroup.labelledHeight
                           : BarButtonGroup.height,
                       children: [

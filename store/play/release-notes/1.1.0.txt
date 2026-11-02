@@ -5,6 +5,7 @@
 • The translation read aloud after each ayah, and a sleep timer
 • 3 more reciters and 3 more Arabic tafsirs
 • The mic keeps working after you play a word mid-recitation
+• A call pauses the recitation, and Test me runs on into the next surah
 </en-US>
 <ar>
 • ست لغات جديدة: الهولندية والدنماركية واليونانية واليابانية والكورية والبرتغالية
@@ -13,6 +14,7 @@
 • قراءة الترجمة بعد كل آية، ومؤقّت النوم
 • ثلاثة قرّاء جدد وثلاثة تفاسير عربية جديدة
 • يبقى الميكروفون يعمل بعد تشغيل كلمة أثناء التلاوة
+• المكالمة توقف التلاوة مؤقتًا، و«اختبرني» يستمر إلى السورة التالية
 </ar>
 <bn-BD>
 • ৬টি নতুন ভাষা: ডাচ, ড্যানিশ, গ্রিক, জাপানি, কোরিয়ান, পর্তুগিজ
@@ -21,6 +23,7 @@
 • প্রতিটি আয়াতের পর অনুবাদ পাঠ, আর ঘুমের টাইমার
 • আরও ৩ জন কারী ও ৩টি আরবি তাফসীর
 • তিলাওয়াতের মাঝে শব্দ বাজালেও মাইক চালু থাকে
+• কল এলে তিলাওয়াত থেমে যায়, আর ‘আমাকে পরীক্ষা করুন’ পরের সূরায় চলে যায়
 </bn-BD>
 <da-DK>
 • 6 nye sprog: Nederlands, Dansk, Ελληνικά, 日本語, 한국어, Português
@@ -29,6 +32,7 @@
 • Oversættelsen læst op efter hvert vers og en sleep-timer
 • 3 nye recitatorer og 3 nye arabiske tafsirer
 • Mikrofonen virker stadig, når du afspiller et ord under recitationen
+• Et opkald sætter recitationen på pause, og Test mig fortsætter i næste sura
 </da-DK>
 <de-DE>
 • 6 neue Sprachen: Nederlands, Dansk, Ελληνικά, 日本語, 한국어, Português
@@ -37,6 +41,7 @@
 • Die Übersetzung nach jeder Aya vorgelesen, und ein Schlaf-Timer
 • 3 weitere Rezitatoren und 3 weitere arabische Tafsire
 • Das Mikrofon bleibt aktiv, wenn du während der Rezitation ein Wort abspielst
+• Ein Anruf pausiert die Rezitation; Teste mich läuft in die nächste Sure
 </de-DE>
 <el-GR>
 • 6 νέες γλώσσες: Nederlands, Dansk, Ελληνικά, 日本語, 한국어, Português
@@ -45,6 +50,7 @@
 • Η μετάφραση διαβάζεται μετά από κάθε αγιά, και χρονοδιακόπτης ύπνου
 • 3 νέοι αναγνώστες και 3 νέα αραβικά ταφσίρ
 • Το μικρόφωνο συνεχίζει να λειτουργεί όταν παίζετε μια λέξη στην απαγγελία
+• Μια κλήση παύει την απαγγελία· το «Εξέτασέ με» πάει στην επόμενη σούρα
 </el-GR>
 <es-ES>
 • 6 idiomas nuevos: Nederlands, Dansk, Ελληνικά, 日本語, 한국어, Português
@@ -53,6 +59,7 @@
 • La traducción leída tras cada aleya y un temporizador de sueño
 • 3 recitadores y 3 tafsires árabes más
 • El micrófono sigue funcionando al reproducir una palabra durante la recitación
+• Una llamada pausa la recitación; Ponme a prueba sigue en otra sura
 </es-ES>
 <fa>
 • ۶ زبان تازه: هلندی، دانمارکی، یونانی، ژاپنی، کره‌ای، پرتغالی
@@ -61,6 +68,7 @@
 • خواندن ترجمه پس از هر آیه، و زمان‌سنج خواب
 • ۳ قاری و ۳ تفسیر عربی تازه
 • میکروفون پس از پخش یک واژه در میان تلاوت همچنان کار می‌کند
+• تماس تلفنی تلاوت را متوقف می‌کند و «مرا بیازما» در سورهٔ بعد ادامه می‌یابد
 </fa>
 <fr-FR>
 • 6 nouvelles langues : Nederlands, Dansk, Ελληνικά, 日本語, 한국어, Português
@@ -69,6 +77,7 @@
 • La traduction lue après chaque verset, et une minuterie de sommeil
 • 3 récitateurs et 3 tafsirs arabes de plus
 • Le micro continue de fonctionner quand vous écoutez un mot pendant la récitation
+• Un appel suspend la récitation ; Teste-moi va à la sourate suivante
 </fr-FR>
 <id>
 • 6 bahasa baru: Nederlands, Dansk, Ελληνικά, 日本語, 한국어, Português
@@ -77,6 +86,7 @@
 • Terjemahan dibacakan setelah tiap ayat, dan pengatur waktu tidur
 • 3 qari dan 3 tafsir Arab baru
 • Mikrofon tetap berfungsi setelah memutar kata saat membaca
+• Panggilan menjeda bacaan, dan Uji saya berlanjut ke surah berikutnya
 </id>
 <ja-JP>
 • 新しい言語6つ：Nederlands、Dansk、Ελληνικά、日本語、한국어、Português
@@ -85,6 +95,7 @@
 • 各アーヤの後に訳文の読み上げ、スリープタイマー
 • 読誦者3人とアラビア語タフスィール3冊を追加
 • 読誦中に単語を再生してもマイクが止まらなくなりました
+• 着信で読誦が一時停止し、「テストする」は次のスーラへ続きます
 </ja-JP>
 <kk>
 • 6 жаңа тіл: Nederlands, Dansk, Ελληνικά, 日本語, 한국어, Português
@@ -93,6 +104,7 @@
 • Әр аяттан кейін аударманы оқу және ұйқы таймері
 • Тағы 3 қари және 3 арабша тәпсір
 • Қырағат кезінде сөз ойнатқаннан кейін де микрофон жұмыс істейді
+• Қоңырау қырағатты кідіртеді, ал «Мені тексер» келесі сүреге жалғасады
 </kk>
 <ko-KR>
 • 새 언어 6개: Nederlands, Dansk, Ελληνικά, 日本語, 한국어, Português
@@ -101,6 +113,7 @@
 • 각 아야 뒤에 번역 낭독, 수면 타이머
 • 낭송자 3명과 아랍어 타프시르 3종 추가
 • 낭송 중 단어를 재생해도 마이크가 계속 작동합니다
+• 전화가 오면 낭송이 일시 정지되고, 시험해 보기는 다음 수라로 이어집니다
 </ko-KR>
 <ms>
 • 6 bahasa baharu: Nederlands, Dansk, Ελληνικά, 日本語, 한국어, Português
@@ -109,6 +122,7 @@
 • Terjemahan dibacakan selepas setiap ayat, dan pemasa tidur
 • 3 qari dan 3 tafsir Arab baharu
 • Mikrofon terus berfungsi selepas memainkan perkataan semasa membaca
+• Panggilan menjeda bacaan, dan Uji saya diteruskan ke surah seterusnya
 </ms>
 <nl-NL>
 • 6 nieuwe talen: Nederlands, Dansk, Ελληνικά, 日本語, 한국어, Português
@@ -117,6 +131,7 @@
 • De vertaling voorgelezen na elk vers, en een slaaptimer
 • 3 nieuwe recitatoren en 3 nieuwe Arabische tafsirs
 • De microfoon blijft werken als je tijdens het reciteren een woord afspeelt
+• Een oproep pauzeert het reciteren, en Test mij gaat door in de volgende soera
 </nl-NL>
 <pt-BR>
 • 6 novos idiomas: Nederlands, Dansk, Ελληνικά, 日本語, 한국어, Português
@@ -125,6 +140,7 @@
 • A tradução lida após cada versículo e um temporizador de sono
 • Mais 3 recitadores e 3 tafsirs em árabe
 • O microfone continua funcionando ao tocar uma palavra durante a recitação
+• Uma chamada pausa a recitação, e o Teste-me continua na surata seguinte
 </pt-BR>
 <ru-RU>
 • 6 новых языков: Nederlands, Dansk, Ελληνικά, 日本語, 한국어, Português
@@ -133,6 +149,7 @@
 • Перевод зачитывается после каждого аята, и таймер сна
 • Ещё 3 чтеца и 3 арабских тафсира
 • Микрофон продолжает работать, если во время чтения прослушать слово
+• Звонок ставит чтение на паузу, а «Проверь меня» продолжает в следующей суре
 </ru-RU>
 <sw>
 • Lugha 6 mpya: Nederlands, Dansk, Ελληνικά, 日本語, 한국어, Português
@@ -141,6 +158,7 @@
 • Tafsiri inasomwa baada ya kila aya, na kipima muda wa kulala
 • Wasomaji 3 na tafsiri 3 za Kiarabu zaidi
 • Maikrofoni inaendelea kufanya kazi ukicheza neno katikati ya kisomo
+• Simu husimamisha kisomo, na Nijaribu inaendelea kwenye sura inayofuata
 </sw>
 <tr-TR>
 • 6 yeni dil: Nederlands, Dansk, Ελληνικά, 日本語, 한국어, Português
@@ -149,6 +167,7 @@
 • Her ayetten sonra mealin sesli okunması ve uyku zamanlayıcısı
 • 3 yeni kâri ve 3 yeni Arapça tefsir
 • Kıraat sırasında bir kelimeyi dinlediğinizde mikrofon artık durmuyor
+• Arama kıraati duraklatır, Beni sına sonraki sureyle devam eder
 </tr-TR>
 <ur>
 • 6 نئی زبانیں: ڈچ، ڈینش، یونانی، جاپانی، کوریائی، پرتگالی
@@ -157,4 +176,5 @@
 • ہر آیت کے بعد ترجمہ پڑھ کر سنانا، اور نیند کا ٹائمر
 • 3 نئے قاری اور 3 نئی عربی تفاسیر
 • تلاوت کے دوران لفظ چلانے کے بعد بھی مائیک کام کرتا رہتا ہے
+• کال آنے پر تلاوت رک جاتی ہے، اور ”مجھے آزمائیں“ اگلی سورت میں جاری رہتا ہے
 </ur>
