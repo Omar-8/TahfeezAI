@@ -613,5 +613,12 @@
   "recFeedbackListenAlone": "Qorining soʻz vaqtlari yoʻq, shuning uchun faqat soʻzning oʻzi eshittiriladi — keyingi soʻzga ulanishi va oxirgi harakatisiz.",
   "milestoneSurahs": "{surahs} suralari yodlandi",
   "listSeparator": ", ",
-  "listLastSeparator": " va "
+  "listLastSeparator": " va ",
+  "tipListenTranslation": "Bilasizmi? Tinglayotganingizda har bir oyatdan keyin tarjima o'z tilingizda ovoz chiqarib o'qilishi mumkin.",
+  "tipPageTheme": "Bilasizmi? Mus'haf sahifasining yorug'dan to'q ranggacha bir nechta rang mavzusi bor. Ko'zingizga eng qulayini tanlang.",
+  "tipShowMe": "Ko'rsating",
+  "tipDontShowAgain": "Buni boshqa ko'rsatmang",
+  "tipClose": "Yopish",
+  "guideTipTranslation": "Shu yerda tarjimani tanlang, so'ng Ijro etishni bosing. U oqim orqali keladi, shuning uchun internet kerak.",
+  "guideTipPageTheme": "Sahifa ranglarini o'zgartirish uchun mavzuga bosing."
 }

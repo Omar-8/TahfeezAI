@@ -662,6 +662,73 @@ void main() {
     });
   });
 
+  // 98:2's end «صُحُفًۭا مُّطَهَّرَةًۭ» joined to 98:3 «فِيهَا»: the tanween
+  // hidden in the ف merges the two ayahs' edges into one unit in flow. Its
+  // joined form («…رَتَں») was missing from the data, so said joined the
+  // ت was a wrong letter (owner, 2026-11-03).
+  group('an ayah end joined by a hidden tanween', () {
+    final span = reference.span([
+      for (var w = 4; w < 6; w++) (ayahId: 98002, wordIndex: w),
+      (ayahId: 98003, wordIndex: 0),
+    ]);
+    final end = span.tokens.firstWhere((t) => t.word.ayahId == 98002).unit;
+    final next = span.tokens.firstWhere((t) => t.word.ayahId == 98003).unit;
+    List<PhoneticToken> of(int unit) => [
+      for (final t in span.tokens)
+        if (t.unit == unit) t,
+    ];
+
+    test('its joined form is there', () {
+      expect(span.pauses[end]?.wasl, isNotNull);
+    });
+
+    test('joined: «…رَتَن فِيهَا» is right', () {
+      final joined = span.pauses[end]!.apply(
+        of(end),
+        stop: false,
+        start: false,
+        end: true,
+        begin: false,
+      );
+      final after = span.pauses[next]?.joined == null
+          ? of(next)
+          : span.pauses[next]!.apply(
+              of(next),
+              stop: false,
+              start: false,
+              end: false,
+              begin: true,
+            );
+      final found = verifier.verify(
+        clearFrames([
+          for (final t in [...joined, ...after]) t.token,
+        ]),
+        span.tokens,
+        pauses: span.pauses,
+      );
+      expect(found.where((v) => v.type.isError), isEmpty);
+    });
+
+    test('stopped: «…رَهْ», then «فِيهَا», is right', () {
+      final stopped = span.pauses[end]!.apply(
+        of(end),
+        stop: true,
+        start: false,
+        end: true,
+        begin: false,
+      );
+      final heard = [
+        for (final t in [...stopped, ...of(next)]) t.token,
+      ];
+      final found = verifier.verify(
+        clearFrames(heard, pauseAfter: stopped.length - 1),
+        span.tokens,
+        pauses: span.pauses,
+      );
+      expect(found.where((v) => v.type.isError), isEmpty);
+    });
+  });
+
   test('stopping inside a joined unit is a stop, not a mistake', () {
     // 2:7 «غِشَٰوَةٌ ۖ وَلَهُمْ»: in flow one unit (the tanween merges into the
     // و); stopping after غِشَٰوَةٌ (a waqf mark) it is said «غِشَاوَه», and

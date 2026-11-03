@@ -613,5 +613,12 @@
   "recFeedbackListenAlone": "Für Ihren Rezitator gibt es keine Wortzeiten, daher erklingt nur das Wort allein – ohne Verbindung zum nächsten Wort und ohne seinen letzten Vokal.",
   "milestoneSurahs": "Suren {surahs} auswendig gelernt",
   "listSeparator": ", ",
-  "listLastSeparator": " und "
+  "listLastSeparator": " und ",
+  "tipListenTranslation": "Schon gewusst? Beim Zuhören kann nach jedem Vers eine Übersetzung in deiner Sprache vorgelesen werden.",
+  "tipPageTheme": "Schon gewusst? Die Mushaf-Seite gibt es in mehreren Farbthemen, von hell bis dunkel. Wähle das, das für deine Augen am angenehmsten ist.",
+  "tipShowMe": "Zeig es mir",
+  "tipDontShowAgain": "Nicht mehr anzeigen",
+  "tipClose": "Schließen",
+  "guideTipTranslation": "Wähle hier eine Übersetzung und tippe dann auf Abspielen. Sie wird gestreamt und braucht daher Internet.",
+  "guideTipPageTheme": "Tippe auf ein Thema, um die Farben der Seite zu ändern."
 }

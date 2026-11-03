@@ -613,5 +613,12 @@
   "recFeedbackListenAlone": "Kârinizin kelime zamanlamaları yok; bu yüzden kelime tek başına çalınır — sonraki kelimeye bağlanışı ve son harekesi olmadan.",
   "milestoneSurahs": "{surahs} sureleri ezberlendi",
   "listSeparator": ", ",
-  "listLastSeparator": " ve "
+  "listLastSeparator": " ve ",
+  "tipListenTranslation": "Biliyor muydunuz? Dinlerken her ayetten sonra kendi dilinizde bir meal sesli okunabilir.",
+  "tipPageTheme": "Biliyor muydunuz? Mushaf sayfasının açıktan koyuya birkaç renk teması var. Gözünüzü en az yoranı seçin.",
+  "tipShowMe": "Göster",
+  "tipDontShowAgain": "Bunu bir daha gösterme",
+  "tipClose": "Kapat",
+  "guideTipTranslation": "Buradan bir meal seçin, sonra Çal'a basın. Akış olarak gelir, bu yüzden internet gerekir.",
+  "guideTipPageTheme": "Sayfanın renklerini değiştirmek için bir temaya dokunun."
 }

@@ -613,5 +613,12 @@
   "recFeedbackListenAlone": "Din recitator har ingen ordtider, så kun ordet alene afspilles — uden forbindelsen til næste ord eller den sidste vokal.",
   "milestoneSurahs": "Surerne {surahs} lært udenad",
   "listSeparator": ", ",
-  "listLastSeparator": " og "
+  "listLastSeparator": " og ",
+  "tipListenTranslation": "Vidste du det? Mens du lytter, kan en oversættelse læses højt efter hvert vers, på dit sprog.",
+  "tipPageTheme": "Vidste du det? Mushaf-siden findes i flere farvetemaer, fra lyst til mørkt. Vælg det, der er mest behageligt for øjnene.",
+  "tipShowMe": "Vis mig",
+  "tipDontShowAgain": "Vis ikke dette igen",
+  "tipClose": "Luk",
+  "guideTipTranslation": "Vælg en oversættelse her, og tryk så på Afspil. Den streames, så den kræver internet.",
+  "guideTipPageTheme": "Tryk på et tema for at ændre sidens farver."
 }

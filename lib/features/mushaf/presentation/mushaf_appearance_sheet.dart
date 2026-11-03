@@ -5,6 +5,7 @@ import '../../../core/localization/generated/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/components/components.dart';
+import '../../guide/guide.dart';
 import '../../settings/presentation/theme_choices.dart';
 import '../application/mushaf_appearance_controller.dart';
 import '../application/mushaf_passages.dart';
@@ -55,25 +56,29 @@ class MushafAppearanceOptions extends ConsumerWidget {
             style: Theme.of(context).textTheme.titleSmall,
           ),
         ),
-        Wrap(
-          key: const ValueKey('mushaf-page-theme'),
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            for (final appearance in MushafAppearance.values)
-              ChoiceChip(
-                avatar: ThemeSwatch(
-                  paper: appearance.colors.background,
-                  ink: appearance.colors.text,
+        GuideTarget(
+          id: 'mushaf-page-theme',
+          child: Wrap(
+            key: const ValueKey('mushaf-page-theme'),
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final appearance in MushafAppearance.values)
+                ChoiceChip(
+                  key: ValueKey('mushaf-page-theme-${appearance.name}'),
+                  avatar: ThemeSwatch(
+                    paper: appearance.colors.background,
+                    ink: appearance.colors.text,
+                  ),
+                  showCheckmark: false,
+                  label: Text(mushafAppearanceName(appearance, l10n)),
+                  selected: appearance == selected,
+                  onSelected: (_) => ref
+                      .read(mushafAppearanceControllerProvider.notifier)
+                      .setAppearance(appearance),
                 ),
-                showCheckmark: false,
-                label: Text(mushafAppearanceName(appearance, l10n)),
-                selected: appearance == selected,
-                onSelected: (_) => ref
-                    .read(mushafAppearanceControllerProvider.notifier)
-                    .setAppearance(appearance),
-              ),
-          ],
+            ],
+          ),
         ),
         const SizedBox(height: 8),
         SwitchListTile(

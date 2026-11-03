@@ -613,5 +613,12 @@
   "recFeedbackListenAlone": "Qari Anda tidak memiliki waktu per kata, jadi yang diputar hanya katanya saja — tanpa sambungan ke kata berikutnya atau harakat terakhirnya.",
   "milestoneSurahs": "Surah {surahs} telah dihafal",
   "listSeparator": ", ",
-  "listLastSeparator": " dan "
+  "listLastSeparator": " dan ",
+  "tipListenTranslation": "Tahukah Anda? Saat mendengarkan, terjemahan dalam bahasa Anda dapat dibacakan setelah setiap ayat.",
+  "tipPageTheme": "Tahukah Anda? Halaman Mushaf punya beberapa tema warna, dari terang hingga gelap. Pilih yang paling nyaman di mata.",
+  "tipShowMe": "Tunjukkan",
+  "tipDontShowAgain": "Jangan tampilkan lagi",
+  "tipClose": "Tutup",
+  "guideTipTranslation": "Pilih terjemahan di sini, lalu tekan Putar. Diputar secara streaming, jadi perlu internet.",
+  "guideTipPageTheme": "Ketuk sebuah tema untuk mengubah warna halaman."
 }

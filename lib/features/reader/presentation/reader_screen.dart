@@ -1,3 +1,4 @@
+import '../../guide/app_tips_host.dart';
 import '../../guide/guide.dart';
 
 import 'package:flutter/material.dart';
@@ -200,6 +201,8 @@ class _MushafModeScaffold extends ConsumerWidget {
                 const ZenModeButton(),
                 // The guide to the modes (left of the reader's own settings).
                 const GuideButton(),
+                // The reader's tips, when they fit (nothing shown).
+                const AppTipsHost(),
               ],
             ),
       // Reports the page on screen to the app shell's recitation bar.

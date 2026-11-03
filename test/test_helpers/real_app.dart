@@ -4,6 +4,7 @@ import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tahfeez_ai/app/app.dart';
 import 'package:tahfeez_ai/core/core_providers.dart';
@@ -125,6 +126,7 @@ class RealApp {
     bool passages = false,
     bool firstRun = false,
     MemorizationRepository memorization = const EmptyMemorizationRepository(),
+    List<Override> overrides = const [],
   }) async {
     recordErrors();
     tester.view.physicalSize = size;
@@ -148,6 +150,7 @@ class RealApp {
         mushafQuranEngineBackendProvider.overrideWith((ref) async => _backend),
         localeControllerProvider.overrideWithBuild((ref, _) => Locale(locale)),
         firstRunPromptsProvider.overrideWithValue(firstRun),
+        ...overrides,
       ],
     );
     addTearDown(container.dispose);

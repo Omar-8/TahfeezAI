@@ -613,5 +613,12 @@
   "recFeedbackListenAlone": "Akhristahaagu ma laha waqtiyada erayada, sidaa darteed erayga keligii ayaa la shidayaa — iyadoo aan lagu xirin erayga xiga ama shaqalkiisa ugu dambeeya.",
   "milestoneSurahs": "Suuradaha {surahs} waa la xifdiyay",
   "listSeparator": ", ",
-  "listLastSeparator": " iyo "
+  "listLastSeparator": " iyo ",
+  "tipListenTranslation": "Ma ogtahay? Inta aad dhegaysanayso, tarjumad ayaa lagu akhriyi karaa cod dheer aayad kasta kadib, luqaddaada.",
+  "tipPageTheme": "Ma ogtahay? Bogga Mushafka wuxuu leeyahay dhowr midab, laga bilaabo iftiin ilaa mugdi. Dooro kan indhahaaga ugu raaxada badan.",
+  "tipShowMe": "I tus",
+  "tipDontShowAgain": "Mar dambe ha tusin",
+  "tipClose": "Xir",
+  "guideTipTranslation": "Halkan ka dooro tarjumad, kadibna riix Daar. Waa toos, sidaa darteed waxay u baahan tahay internet.",
+  "guideTipPageTheme": "Taabo midab si aad u beddesho midabada bogga."
 }

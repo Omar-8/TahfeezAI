@@ -1200,5 +1200,19 @@
   "listSeparator": ", ",
   "@listSeparator": {"description": "Between items of a list but the last two, e.g. the ', ' in 'Al-Ikhlas, Al-Falaq and An-Nas' (spaces included)"},
   "listLastSeparator": " and ",
-  "@listLastSeparator": {"description": "Between the last two items of a list, e.g. the ' and ' in 'Al-Ikhlas, Al-Falaq and An-Nas' (spaces included)"}
+  "@listLastSeparator": {"description": "Between the last two items of a list, e.g. the ' and ' in 'Al-Ikhlas, Al-Falaq and An-Nas' (spaces included)"},
+  "tipListenTranslation": "Did you know? While you listen, a translation can be read aloud after each ayah, in your language.",
+  "@tipListenTranslation": {"description": "A tip shown a while into listening: a translation can be read aloud after each ayah."},
+  "tipPageTheme": "Did you know? The Mushaf page comes in several colour themes, from light to dark. Choose the one easiest on your eyes.",
+  "@tipPageTheme": {"description": "A tip shown in the reader: the Mushaf page has several colour themes."},
+  "tipShowMe": "Show me",
+  "@tipShowMe": {"description": "Button of a tip: shows where the feature is."},
+  "tipDontShowAgain": "Don't show this again",
+  "@tipDontShowAgain": {"description": "Checkbox of a tip: never show this tip again."},
+  "tipClose": "Close",
+  "@tipClose": {"description": "Button of a tip: closes it."},
+  "guideTipTranslation": "Choose a translation here, then press Play. It streams, so it needs internet.",
+  "@guideTipTranslation": {"description": "After a tip's Show me: the card by the Listen menu's translation choice."},
+  "guideTipPageTheme": "Tap a theme to change the page's colours.",
+  "@guideTipPageTheme": {"description": "After a tip's Show me: the card by the page themes."}
 }

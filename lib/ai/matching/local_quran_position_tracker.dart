@@ -167,7 +167,8 @@ class LocalQuranPositionTracker implements RecitationPositionMatcher {
            if (corpus.positionOf((ayahId: ayah, wordIndex: first))
                case final from?)
              (from, from + last - first),
-       ];
+       ],
+       _istiadha = corpus.positionOf((ayahId: 16098, wordIndex: 4));
 
   final QuranWordCorpus corpus;
   final PhonemeResources? Function() _resources;
@@ -177,6 +178,18 @@ class LocalQuranPositionTracker implements RecitationPositionMatcher {
   /// Formulas said around recitation that are also Quran text elsewhere:
   /// passed over unless that text is where the reciter is.
   final List<(int, int)> _formulas;
+
+  /// The isti'adha's first word here («بِٱللَّهِ»): its «أَعُوذُ» is not
+  /// Quran text, so the speech before it may be that long ([_formulaLead]).
+  final int? _istiadha;
+
+  /// The speech a formula from [a] may follow: «أَعُوذُ» before the
+  /// isti'adha's Quran words — 0.5 s said briskly, up to 1 s slowly (it
+  /// was 12 frames, over [LocalPositionTrackerConfig.extraFrames], and
+  /// neither it nor the basmala after it was passed over: 7 s before
+  /// Al-Bayyinah was followed — owner, 2026-11-03).
+  int _formulaLead(int a) =>
+      a == _istiadha ? config.extraFrames + 18 : config.extraFrames;
 
   final _frames = _FrameBuffer();
 
@@ -582,7 +595,7 @@ class LocalQuranPositionTracker implements RecitationPositionMatcher {
         final f = _align(resources, window, a, b, flexible: true);
         if (f == null || !_usable(f, config.followCost)) continue;
         final whole =
-            f.prefixSpeech <= config.extraFrames &&
+            f.prefixSpeech <= _formulaLead(a) &&
             f.coverage >= 0.7 &&
             (!nearOk || f.cost <= near.cost);
         // Under way: part of a long formula (a slow basmala spans several
@@ -595,7 +608,7 @@ class LocalQuranPositionTracker implements RecitationPositionMatcher {
         if (!nearOk &&
             !flush &&
             !whole &&
-            f.prefixSpeech <= config.extraFrames &&
+            f.prefixSpeech <= _formulaLead(a) &&
             f.coverage >= 0.25 &&
             window.frames - 1 - f.alignedEnd <= config.extraFrames) {
           return const [];
@@ -800,7 +813,7 @@ class LocalQuranPositionTracker implements RecitationPositionMatcher {
       }
       final f = _align(resources, window, a, b, flexible: true);
       if (f != null &&
-          f.prefixSpeech <= config.extraFrames &&
+          f.prefixSpeech <= _formulaLead(a) &&
           f.coverage >= 0.7 &&
           f.cost <= config.followCost) {
         // Still being said: its last word may be cut off — wait, or the

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tahfeez_ai/features/mushaf/application/reader_mode.dart';
+import 'package:tahfeez_ai/memorization/application/memorization_today.dart';
+import 'package:tahfeez_ai/memorization/domain/recitation_score.dart';
 
 import '../test_helpers/real_app.dart';
 
@@ -59,4 +62,63 @@ void main() {
     expect(find.byKey(const ValueKey('surah-info-1')), findsNothing);
     await RealApp.quit(tester);
   });
+
+  for (final (locale, ayahs, memorized) in [
+    ('en', '7', '6 of 7 ayahs memorized'),
+    ('ar', '7', null),
+  ]) {
+    testWidgets('$locale: the memorization line in the values\' column, '
+        'below the numbers', (tester) async {
+      await RealApp.launch(
+        tester,
+        route: '/quran/surah/1',
+        mode: ReaderMode.ayah,
+        locale: locale,
+        // A smaller phone, larger text: the line wraps.
+        size: const Size(360, 780),
+        textScale: 1.3,
+        overrides: [
+          surahProgressProvider.overrideWith(
+            (ref) async => {
+              1: const SurahProgress(
+                ayahs: 7,
+                memorized: 6,
+                latest: RecitationScore(),
+              ),
+            },
+          ),
+        ],
+      );
+      await tester.tap(find.byKey(const ValueKey('ayah-mode-surah-info-1')));
+      await RealApp.settle(tester);
+      final rtl = locale == 'ar';
+      // Where its first letter is drawn (not its box: text aligned to the
+      // box's far side starts there).
+      double start(Finder f) {
+        final paragraph = tester.renderObject<RenderParagraph>(f);
+        final first = paragraph
+            .getBoxesForSelection(
+              const TextSelection(baseOffset: 0, extentOffset: 1),
+            )
+            .first;
+        final at = paragraph.localToGlobal(Offset.zero);
+        return rtl ? at.dx + first.right : at.dx + first.left;
+      }
+
+      final count = find.descendant(
+        of: find.byKey(const ValueKey('surah-info-ayahs')),
+        matching: find.byType(Text),
+      );
+      final line = find.descendant(
+        of: find.byKey(const ValueKey('surah-info-memorized')),
+        matching: find.byType(Text),
+      );
+      expect(tester.widget<Text>(count.last).data, contains(ayahs));
+      if (memorized != null) {
+        expect(tester.widget<Text>(line.last).data, memorized);
+      }
+      expect(start(line.last), moreOrLessEquals(start(count.last)));
+      await RealApp.quit(tester);
+    });
+  }
 }

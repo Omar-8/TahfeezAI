@@ -613,5 +613,12 @@
   "recFeedbackListenAlone": "Tu recitador no tiene tiempos por palabra, así que suena solo la palabra, sin su enlace con la siguiente ni su última vocal.",
   "milestoneSurahs": "Suras {surahs} memorizadas",
   "listSeparator": ", ",
-  "listLastSeparator": " y "
+  "listLastSeparator": " y ",
+  "tipListenTranslation": "¿Sabías que? Mientras escuchas, se puede leer en voz alta una traducción después de cada aleya, en tu idioma.",
+  "tipPageTheme": "¿Sabías que? La página del Mushaf tiene varios temas de color, de claro a oscuro. Elige el más cómodo para tus ojos.",
+  "tipShowMe": "Muéstrame",
+  "tipDontShowAgain": "No volver a mostrar",
+  "tipClose": "Cerrar",
+  "guideTipTranslation": "Elige aquí una traducción y pulsa Reproducir. Se transmite en línea, así que necesita internet.",
+  "guideTipPageTheme": "Toca un tema para cambiar los colores de la página."
 }

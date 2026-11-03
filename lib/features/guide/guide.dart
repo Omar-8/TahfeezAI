@@ -62,7 +62,21 @@ class GuideStep {
   final Map<String, (GuideTour, int)>? branches;
 }
 
-enum GuideTour { overview, recite, loop, listen, follow, hide }
+enum GuideTour {
+  overview,
+  recite,
+  loop,
+  listen,
+  follow,
+  hide,
+
+  /// A tip's "Show me" (app_tips.dart): its control lit in the sheet it
+  /// opened; tapped, the guide is over.
+  tipTranslation,
+  tipPageTheme;
+
+  bool get isTip => this == tipTranslation || this == tipPageTheme;
+}
 
 List<GuideStep> guideSteps(GuideTour tour) => switch (tour) {
   GuideTour.overview => [
@@ -147,6 +161,20 @@ List<GuideStep> guideSteps(GuideTour tour) => switch (tour) {
       card: false,
     ),
   ],
+  GuideTour.tipTranslation => [
+    GuideStep(
+      'listen-translation',
+      (l) => l.guideTipTranslation,
+      wait: GuideWait.tap,
+    ),
+  ],
+  GuideTour.tipPageTheme => [
+    GuideStep(
+      'mushaf-page-theme',
+      (l) => l.guideTipPageTheme,
+      wait: GuideWait.tap,
+    ),
+  ],
 };
 
 /// The guide's place: which tour, which step.
@@ -182,6 +210,8 @@ class GuideController extends Notifier<GuideState?> {
     if (s == null) return;
     if (s.index + 1 < length) {
       state = (tour: s.tour, index: s.index + 1);
+    } else if (s.tour.isTip) {
+      state = null;
     } else if (s.tour != GuideTour.overview) {
       // A mode learned: what it started stops (so the modes show again),
       // and back to choosing another.
@@ -667,12 +697,13 @@ class _GuideCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                Text(
-                  '${index + 1}/$length',
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
+                if (length > 1)
+                  Text(
+                    '${index + 1}/$length',
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
                   ),
-                ),
                 const Spacer(),
                 IconButton(
                   key: const ValueKey('guide-close'),

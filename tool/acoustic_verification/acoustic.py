@@ -731,18 +731,25 @@ def join_forms(uth_a: str, uth_b: str):
         n_b = len({t.unit for t in reference(' '.join(part_b))})
     except Exception:
         return None
-    if len({t.unit for t in joined}) != n_a + n_b:
+    units = len({t.unit for t in joined})
+    # The join merges A's last unit and B's first into one (a tanween or
+    # nun sakinah hidden or merged into B's first letter: «مُّطَهَّرَةًۭ
+    # فِيهَا» -tan fīhā, ikhfa): split by word, each ayah its own part.
+    merged = units == n_a + n_b - 1
+    if units != n_a + n_b and not merged:
         return None
     out_a, out_b = [], []
     for t in joined:
-        if t.unit == n_a - 1:
+        if t.unit == n_a - 1 and not (merged and t.word >= len(part_a)):
             t.word += a0
             t.unit = ua
             out_a.append(t)
-        elif t.unit == n_a:
+        elif t.unit == (n_a - 1 if merged else n_a):
             t.word -= len(part_a)
             t.unit = ub
             out_b.append(t)
     if not out_a or not out_b or any(t.word < 0 for t in out_b):
+        return None
+    if merged and sorted({t.word for t in out_b}) != b_words:
         return None
     return out_a, out_b

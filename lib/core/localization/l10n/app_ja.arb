@@ -613,5 +613,12 @@
   "recFeedbackListenAlone": "この読誦者には単語ごとのタイミングがないため、単語だけを再生します（次の単語へのつながりや最後の母音は含まれません）。",
   "milestoneSurahs": "{surahs}を暗記しました",
   "listSeparator": "、",
-  "listLastSeparator": "、"
+  "listLastSeparator": "、",
+  "tipListenTranslation": "ご存じですか？聴いている間、各節のあとに翻訳をあなたの言語で読み上げることができます。",
+  "tipPageTheme": "ご存じですか？ムスハフのページには明るいものから暗いものまで、いくつかの配色テーマがあります。目に優しいものを選びましょう。",
+  "tipShowMe": "見てみる",
+  "tipDontShowAgain": "今後表示しない",
+  "tipClose": "閉じる",
+  "guideTipTranslation": "ここで翻訳を選び、再生を押してください。ストリーミングのためインターネットが必要です。",
+  "guideTipPageTheme": "テーマをタップするとページの色が変わります。"
 }

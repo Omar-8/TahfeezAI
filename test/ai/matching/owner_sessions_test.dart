@@ -73,6 +73,14 @@ const _sessions = <_Session>[
     from: 100006,
     to: 102008,
   ),
+  (
+    tag: 'owner1103_v37',
+    note:
+        '2026-11-03 10:55 page 598, the isti\'adha and basmala said on '
+        'into Al-Bayyinah; 98:2 four times, stopped and joined',
+    from: 97001,
+    to: 98007,
+  ),
 ];
 
 AcousticFrames? _frames(String tag) {
@@ -292,6 +300,44 @@ void main() {
         reason: '$found',
       );
     });
+
+    test('11-03: «أَعُوذُ» said slowly, the basmala on without a pause: '
+        'both passed over, «لَمْ» heard at once', () {
+      final r = run('owner1103_v37');
+      expect(r.log, contains(startsWith('passed over 16:98:5')));
+      expect(r.log, contains(startsWith('passed over 1:1:1')));
+      final placed = placedAt(r);
+      expect(placed.first, pos(98, 1, 1));
+      // «لَمْ» ends at frame 153 (it was placed at ~330 on the phone).
+      expect(r.placed.first.$2, lessThanOrEqualTo(224));
+      expect(placed.where((p) => p < pos(98, 1, 1)), isEmpty);
+    });
+
+    // «صُحُفًۭا مُّطَهَّرَةًۭ» then «فِيهَا»: joined, the tanween hidden in
+    // the ف (-ratan fīhā) — the ت said is right; stopped, «…رَهْ».
+    for (final (note, from, to) in [
+      ('joined', 955, 1100),
+      ('stopped', 340, 480),
+      ('stopped again', 650, 805),
+    ]) {
+      test('11-03: «مُّطَهَّرَةًۭ» $note: no wrong letter or vowel', () {
+        final found = mistakes(
+          'owner1103_v37',
+          from,
+          to,
+          ayahThenNext(98002, 6, 98003),
+        );
+        expect(
+          found.where(
+            (v) =>
+                v.token.word == (ayahId: 98002, wordIndex: 5) &&
+                v.type != RecitationErrorType.ghunnahMissing,
+          ),
+          isEmpty,
+          reason: '$found',
+        );
+      });
+    }
 
     test('14:38: «أَحَدْ» with its qalqala, then «ٱللَّهُ»: a stop, no '
         'mistake', () {

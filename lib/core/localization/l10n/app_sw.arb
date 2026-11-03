@@ -613,5 +613,12 @@
   "recFeedbackListenAlone": "Msomaji wako hana nyakati za maneno, kwa hiyo neno pekee ndilo litachezwa — bila kuunganishwa na neno linalofuata wala irabu yake ya mwisho.",
   "milestoneSurahs": "Sura {surahs} zimehifadhiwa",
   "listSeparator": ", ",
-  "listLastSeparator": " na "
+  "listLastSeparator": " na ",
+  "tipListenTranslation": "Je, unajua? Unaposikiliza, tafsiri inaweza kusomwa kwa sauti baada ya kila aya, kwa lugha yako.",
+  "tipPageTheme": "Je, unajua? Ukurasa wa Mushaf una mandhari kadhaa za rangi, kuanzia angavu hadi giza. Chagua inayostarehesha macho yako zaidi.",
+  "tipShowMe": "Nionyeshe",
+  "tipDontShowAgain": "Usionyeshe tena",
+  "tipClose": "Funga",
+  "guideTipTranslation": "Chagua tafsiri hapa, kisha bonyeza Cheza. Inatiririshwa, kwa hiyo inahitaji intaneti.",
+  "guideTipPageTheme": "Gusa mandhari ili kubadilisha rangi za ukurasa."
 }

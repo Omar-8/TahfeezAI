@@ -1,7 +1,7 @@
+import '../../guide/app_tips_host.dart';
 import '../../guide/guide.dart';
 
 import 'package:flutter/material.dart';
-
 
 import 'mushaf_zen_mode.dart';
 
@@ -94,6 +94,8 @@ class _MushafReaderScreenState extends ConsumerState<MushafReaderScreen> {
                 const ZenModeButton(),
                 // The guide to the modes (left of the reader's own settings).
                 const GuideButton(),
+                // The reader's tips, when they fit (nothing shown).
+                const AppTipsHost(),
               ],
             ),
       // Reports the page on screen to the app shell's recitation bar.

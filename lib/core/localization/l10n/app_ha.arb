@@ -613,5 +613,12 @@
   "recFeedbackListenAlone": "Babu lokutan kalmomi ga makarancinka, don haka kalmar kaɗai za a kunna — ba tare da haɗinta da kalma ta gaba ko wasalin ƙarshe ba.",
   "milestoneSurahs": "An haddace surorin {surahs}",
   "listSeparator": ", ",
-  "listLastSeparator": " da "
+  "listLastSeparator": " da ",
+  "tipListenTranslation": "Ka sani? Yayin da kake saurare, ana iya karanta fassara da babbar murya bayan kowace aya, a harshenka.",
+  "tipPageTheme": "Ka sani? Shafin Mushaf yana da launuka da dama, daga haske zuwa duhu. Zaɓi wanda ya fi sauƙi ga idanunka.",
+  "tipShowMe": "Nuna min",
+  "tipDontShowAgain": "Kada a sake nuna wannan",
+  "tipClose": "Rufe",
+  "guideTipTranslation": "Zaɓi fassara a nan, sannan danna Kunna. Ana yaɗa ta kai tsaye, don haka tana buƙatar intanet.",
+  "guideTipPageTheme": "Taɓa wani launi don canza launukan shafin."
 }

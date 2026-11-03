@@ -97,13 +97,9 @@ class _SurahInfo extends ConsumerWidget {
               ),
             ),
           ),
-          Flexible(
-            child: Text(
-              value,
-              textAlign: TextAlign.end,
-              style: theme.textTheme.bodyLarge,
-            ),
-          ),
+          // The values in one column, from the middle: a long one ("6 of 7
+          // ayahs memorized") wraps there, not pushed to the far edge.
+          Expanded(child: Text(value, style: theme.textTheme.bodyLarge)),
         ],
       ),
     );
@@ -179,6 +175,7 @@ class _SurahInfo extends ConsumerWidget {
                   fact(
                     l10n.memScoreMemorization,
                     l10n.memPageAyahs(progress.memorized, progress.ayahs),
+                    key: const ValueKey('surah-info-memorized'),
                   ),
               ],
             ),

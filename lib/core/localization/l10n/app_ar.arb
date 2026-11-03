@@ -613,5 +613,12 @@
   "recFeedbackListenAlone": "لا توجد توقيتات كلمات لقارئك، فتُسمَع الكلمة وحدها — دون وصلها بما بعدها ولا حركتها الأخيرة.",
   "milestoneSurahs": "حُفظت سور {surahs}",
   "listSeparator": " و",
-  "listLastSeparator": " و"
+  "listLastSeparator": " و",
+  "tipListenTranslation": "هل تعلم؟ أثناء الاستماع يمكن أن تُقرأ ترجمةٌ بصوتٍ مسموع بعد كل آية، بلغتك.",
+  "tipPageTheme": "هل تعلم؟ لصفحة المصحف عدة ألوان، من الفاتح إلى الداكن. اختر أريحها لعينيك.",
+  "tipShowMe": "أرني",
+  "tipDontShowAgain": "لا تُظهر هذا مرة أخرى",
+  "tipClose": "إغلاق",
+  "guideTipTranslation": "اختر ترجمةً من هنا، ثم اضغط تشغيل. تُبثّ عبر الإنترنت، فتحتاج إلى اتصال.",
+  "guideTipPageTheme": "اضغط على لونٍ لتغيير ألوان الصفحة."
 }
