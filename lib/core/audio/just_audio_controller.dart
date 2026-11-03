@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 
@@ -17,9 +18,26 @@ import 'audio_models.dart';
 /// implementation later requires no changes outside `lib/core/audio/`.
 class JustAudioController implements AudioController {
   JustAudioController({AudioPlayer? player})
-    : _player = player ?? AudioPlayer() {
+    : _player = player ?? AudioPlayer(),
+      _fresh = player == null && kIsWeb {
     _stateController = StreamController<AudioPlaybackState>.broadcast();
     _current = const AudioPlaybackState();
+    _listen();
+  }
+
+  AudioPlayer _player;
+
+  /// In a browser, a new player for each new source: just_audio's web side
+  /// keeps the first playlist it was given (by its fixed id), so every
+  /// later queue would play that one again — every ayah's Play button the
+  /// first ayah's audio. The phones' players are kept.
+  final bool _fresh;
+  double _speed = 1;
+  late final StreamController<AudioPlaybackState> _stateController;
+  var _subscriptions = <StreamSubscription<void>>[];
+  late AudioPlaybackState _current;
+
+  void _listen() {
     _subscriptions = [
       _player.playingStream.listen(
         (playing) => _update((s) => s.copyWith(isPlaying: playing)),
@@ -47,10 +65,36 @@ class JustAudioController implements AudioController {
     ];
   }
 
-  final AudioPlayer _player;
-  late final StreamController<AudioPlaybackState> _stateController;
-  late final List<StreamSubscription<void>> _subscriptions;
-  late AudioPlaybackState _current;
+  /// Before a new source (in a browser): the old player gone, a new one at
+  /// the same speed. Returns the player to play.
+  Future<AudioPlayer> _playerForNewSource() async {
+    if (!_fresh) return _player;
+    final old = _player;
+    for (final sub in _subscriptions) {
+      await sub.cancel();
+    }
+    _subscriptions = [];
+    _player = AudioPlayer();
+    await _player.setSpeed(_speed);
+    unawaited(old.dispose());
+    return _player;
+  }
+
+  /// A new player heard from once its source is loaded ([_playerForNewSource]):
+  /// its first state, idle before loading, would read as playback stopped.
+  void _listenIfNew() {
+    if (_subscriptions.isEmpty) _listen();
+  }
+
+  /// Plays [player] until it stops or pauses; a player replaced meanwhile
+  /// (a newer source) ends quietly.
+  Future<void> _play(AudioPlayer player) async {
+    try {
+      await player.play();
+    } catch (_) {
+      if (identical(player, _player)) rethrow;
+    }
+  }
 
   void _update(AudioPlaybackState Function(AudioPlaybackState) transform) {
     _current = transform(_current);
@@ -62,8 +106,10 @@ class JustAudioController implements AudioController {
 
   @override
   Future<void> playUrl(String url, {AudioItemInfo? info}) async {
-    await _player.setAudioSource(_source(url, info));
-    await _player.play();
+    final player = await _playerForNewSource();
+    await player.setAudioSource(_source(url, info));
+    _listenIfNew();
+    await _play(player);
   }
 
   @override
@@ -74,10 +120,12 @@ class JustAudioController implements AudioController {
     AudioItemInfo? info,
   }) async {
     final child = _source(url, info);
-    await _player.setAudioSource(
+    final player = await _playerForNewSource();
+    await player.setAudioSource(
       ClippingAudioSource(child: child, start: start, end: end, tag: child.tag),
     );
-    await _player.play();
+    _listenIfNew();
+    await _play(player);
   }
 
   /// The recitation files are constant-bitrate MP3s, some (Ahmad al-Ajamy's
@@ -111,11 +159,13 @@ class JustAudioController implements AudioController {
     List<String> urls, {
     List<AudioItemInfo>? items,
   }) async {
-    await _player.setAudioSources([
+    final player = await _playerForNewSource();
+    await player.setAudioSources([
       for (var i = 0; i < urls.length; i++)
         _source(urls[i], items != null && i < items.length ? items[i] : null),
     ]);
-    await _player.play();
+    _listenIfNew();
+    await _play(player);
   }
 
   @override
@@ -131,7 +181,10 @@ class JustAudioController implements AudioController {
   Future<void> seek(Duration position) => _player.seek(position);
 
   @override
-  Future<void> setSpeed(double speed) => _player.setSpeed(speed);
+  Future<void> setSpeed(double speed) {
+    _speed = speed;
+    return _player.setSpeed(speed);
+  }
 
   @override
   Future<void> setContentOption(AudioContentOption option) async {

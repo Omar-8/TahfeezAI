@@ -618,5 +618,12 @@
   "tipTajweedOff": "Banyak hukum tajwid ditanda dalam bacaan terakhir anda. Jika anda masih belajar tajwid, anda boleh mematikan semakan tajwid dalam tetapan hafazan: hanya huruf dan baris akan disemak.",
   "tipLenient": "Banyak baris ditanda dalam bacaan terakhir anda. Jika terasa terlalu banyak, anda boleh menjadikan semakan sebutan longgar dalam tetapan hafazan: hanya kesilapan yang lebih jelas akan ditanda.",
   "recModelDownloading": "Menyediakan semakan bacaan: {percent}% (sekali sahaja)",
-  "recWebUnsupported": "Pelayar ini tidak dapat menjalankan semakan bacaan. Cuba Chrome, Edge, Firefox atau Safari versi terkini."
+  "recWebUnsupported": "Pelayar ini tidak dapat menjalankan semakan bacaan. Cuba Chrome, Edge, Firefox atau Safari versi terkini.",
+  "privacyRecitationWeb": "Bacaan anda disemak pada peranti anda, dalam pelayar. Audio tidak pernah dihantar ke mana-mana dan tidak disimpan.",
+  "privacyLocalWeb": "Kemajuan hafazan, rancangan, penanda dan tetapan anda kekal pada peranti anda, dalam pelayar ini. Tiada akaun.",
+  "privacyNetworkWeb": "Internet digunakan untuk memuatkan apl dan model semakan bacaan, memainkan audio bacaan dan fon daripada Google Fonts; permintaan itu hanya menyebut nama fail.",
+  "privacyDeleteWeb": "Tetapan → Set semula semua data memadam segalanya; mengosongkan data laman ini dalam pelayar anda juga.",
+  "getAppTitle": "TahfeezAI dibuat untuk telefon anda",
+  "getAppBody": "Aplikasinya lebih pantas, berfungsi tanpa talian dan menyemak bacaan anda pada telefon itu sendiri. Dapatkannya percuma di {store}.",
+  "getAppOpen": "Dapatkan di {store}"
 }

@@ -618,5 +618,12 @@
   "tipTajweedOff": "Oxirgi tilovatingizda koʻp tajvid qoidalari belgilandi. Agar hali tajvidni oʻrganayotgan boʻlsangiz, Hifz sozlamalarida tajvid tekshiruvini oʻchirib qoʻyishingiz mumkin: shunda faqat harflar va harakatlar tekshiriladi.",
   "tipLenient": "Oxirgi tilovatingizda koʻp harakatlar belgilandi. Agar bu ortiqcha tuyulgan boʻlsa, Hifz sozlamalarida talaffuz tekshiruvini yumshoq qilishingiz mumkin: shunda faqat aniqroq xatolar belgilanadi.",
   "recModelDownloading": "Tilovat tekshiruvi tayyorlanmoqda: {percent}% (faqat bir marta)",
-  "recWebUnsupported": "Bu brauzer tilovat tekshiruvini ishga tushira olmaydi. Chrome, Edge, Firefox yoki Safari’ning yangi versiyasini sinab koʻring."
+  "recWebUnsupported": "Bu brauzer tilovat tekshiruvini ishga tushira olmaydi. Chrome, Edge, Firefox yoki Safari’ning yangi versiyasini sinab koʻring.",
+  "privacyRecitationWeb": "Tilovatingiz qurilmangizda, brauzer ichida tekshiriladi. Ovoz hech qayerga yuborilmaydi va saqlanmaydi.",
+  "privacyLocalWeb": "Yodlash yutuqlari, rejalar, xatchoʻplar va sozlamalaringiz qurilmangizda, shu brauzerda qoladi. Hisoblar yoʻq.",
+  "privacyNetworkWeb": "Internet ilova va tilovat tekshiruv modelini yuklash, tilovat ovozini ijro etish va Google Fonts shriftlari uchun ishlatiladi; bu soʻrovlarda faqat fayl nomi boʻladi.",
+  "privacyDeleteWeb": "Sozlamalar → Barcha maʼlumotlarni tiklash hammasini oʻchiradi; brauzerda shu saytning maʼlumotlarini tozalash ham.",
+  "getAppTitle": "TahfeezAI telefoningiz uchun yaratilgan",
+  "getAppBody": "Ilova tezroq, internetsiz ishlaydi va tilovatingizni telefonning oʻzida tekshiradi. Uni {store} dan bepul oling.",
+  "getAppOpen": "{store} dan olish"
 }

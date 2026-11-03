@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/theme/components/tahfeez_bottom_sheet.dart';
 import '../../../core/localization/generated/app_localizations.dart';
 import '../../../core/theme/quran_text_style.dart';
 import '../../../quran/application/tafsir_library_controller.dart';
@@ -42,7 +43,8 @@ class AyahViewOptions extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (showLayout) ...[
+        // (A wide browser window: always continuous, no choice.)
+        if (showLayout && !isWideWebWindow(context)) ...[
           Text(l10n.ayahView, style: Theme.of(context).textTheme.titleSmall),
           const SizedBox(height: 8),
           SegmentedButton<AyahLayout>(

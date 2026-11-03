@@ -44,10 +44,17 @@ class _FakeHifz extends HifzController {
   HifzState build() => const HifzState();
 
   bool showBefore = false;
+  bool keepMarks = false;
 
   @override
-  void setLoop(HifzRange range, HifzLoop loop, {bool showBefore = false}) {
+  void setLoop(
+    HifzRange range,
+    HifzLoop loop, {
+    bool showBefore = false,
+    bool keepMarks = false,
+  }) {
     this.showBefore = showBefore;
+    this.keepMarks = keepMarks;
     loopRange = range;
     this.loop = loop;
   }
@@ -130,6 +137,7 @@ void main() {
     ));
     expect(hifz.loop!.count, 1);
     expect(hifz.showBefore, isTrue, reason: 'the ayahs before stay shown');
+    expect(hifz.keepMarks, isFalse, reason: 'the first turn starts clean');
 
     // A loop's earlier pass completing is not the turn's end.
     hifz.set(
@@ -151,6 +159,11 @@ void main() {
     audio.finish();
     await Future<void>.delayed(Duration.zero);
     expect(run()!.phase, FollowAlongPhase.user);
+    expect(
+      hifz.keepMarks,
+      isTrue,
+      reason: "the first ayah's colours stay as the next is recited",
+    );
     await userRecites(1);
     expect(run(), isNull, reason: 'the last ayah done');
   });

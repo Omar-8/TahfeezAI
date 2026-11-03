@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import '../../../core/ui/web_margin_scroll.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -331,14 +333,10 @@ class SkyBackdrop extends StatelessWidget {
                   scrolledUnderElevation: 0,
                 ),
               ),
-              child: Align(
-                alignment: Alignment.topCenter,
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(
-                    maxWidth: TahfeezContentWidth.maxReading,
-                  ),
-                  child: child,
-                ),
+              // (In a browser, the wheel over the margins scrolls it too.)
+              child: WebMarginScroll(
+                maxWidth: TahfeezContentWidth.maxReading,
+                child: child,
               ),
             ),
           ),

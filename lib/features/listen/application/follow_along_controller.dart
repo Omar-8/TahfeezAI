@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../ai/hifz/hifz_judge.dart' show HifzVerdict;
 import '../../../quran/domain/models/quran_refs.dart';
 import '../../recitation/application/acoustic_settle.dart';
+import '../../../memorization/application/memorization_today.dart';
 import '../../recitation/application/hifz_controller.dart';
 import '../../recitation/application/recitation_position.dart';
 import '../../recitation/application/mushaf_recitation_target.dart';
@@ -218,6 +219,8 @@ class FollowAlongController extends Notifier<FollowAlongState?> {
     FollowAlongOptions options,
   ) async {
     ref.read(followAlongOptionsProvider.notifier).set(options);
+    // Its results at its end, all its turns together (as a recitation's).
+    ref.read(testSummaryProvider.notifier).beginRun();
     final ayahs = ayahRange(
       from.chapterNo * 1000 + from.verseNo,
       to.chapterNo * 1000 + to.verseNo,
@@ -273,6 +276,9 @@ class FollowAlongController extends Notifier<FollowAlongState?> {
           ),
           // The ayahs before the one recited stay readable.
           showBefore: true,
+          // The colours of this run's earlier turns stay (its first turn
+          // starts clean).
+          keepMarks: s.index > 0 || s.round > 1 || s.again,
         );
     await ref
         .read(recitationSessionControllerProvider.notifier)

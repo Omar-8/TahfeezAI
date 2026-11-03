@@ -2502,7 +2502,8 @@ Speed (1.28 s chunks of the owner's recitation, Node 22 on a 16-thread desktop):
 ~0.31–0.45 s a chunk (RTF ~0.3); 1 thread 0.8–2.0 s (slower than real time once the 5.12 s
 of left context fills). Threads need a cross-origin-isolated page: hosts that cannot set
 COOP/COEP headers get them from `web/isolation_sw.js` (registered by `web/flutter_bootstrap.js`,
-one reload at the first visit). COEP is `credentialless`, so reciters' audio from other hosts
+one reload at the first visit; the Flutter renderer itself is kept single-threaded,
+`forceSingleThreadedSkwasm`, as its threads garbled glyphs now and then). COEP is `credentialless`, so reciters' audio from other hosts
 still plays; Safari has no `credentialless` and runs single-threaded.
 
 Numerics: WebAssembly computes `MatMulNBits` in full precision, while the phones' accuracy

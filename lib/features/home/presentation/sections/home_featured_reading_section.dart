@@ -40,7 +40,10 @@ class HomeFeaturedReadingSection extends ConsumerWidget {
               );
             }
             final textScale = MediaQuery.textScalerOf(context).scale(1);
-            final web = ref.watch(platformCapabilitiesProvider).isWeb;
+            // A wide browser window (a phone's browser: as the app).
+            final web =
+                ref.watch(platformCapabilitiesProvider).isWeb &&
+                MediaQuery.sizeOf(context).width >= webWideFrom;
             Widget card(FeaturedChapterRef chapter) {
               final count = l10n.homeFeaturedAyahCount(chapter.surah.ayahCount);
               final occasion = switch (chapter.occasion) {

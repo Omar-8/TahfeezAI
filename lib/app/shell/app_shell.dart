@@ -8,6 +8,7 @@ import '../../core/routing/app_routes.dart';
 import '../../core/routing/quran_location_routing.dart';
 import '../../core/theme/app_breakpoints.dart';
 import '../../core/theme/components/components.dart';
+import '../../core/ui/web_margin_scroll.dart';
 import '../../core/theme/tahfeez_content_widths.dart';
 import '../../features/recitation/presentation/recitation_controls.dart';
 
@@ -230,12 +231,7 @@ class _ConstrainedContent extends StatelessWidget {
       return SizedBox(width: double.infinity, child: child);
     }
 
-    return Align(
-      alignment: Alignment.topCenter,
-      child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: maxWidth),
-        child: child,
-      ),
-    );
+    // (In a browser, the wheel over the margins scrolls it too.)
+    return WebMarginScroll(maxWidth: maxWidth, child: child);
   }
 }

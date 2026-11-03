@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart' show listEquals;
+import 'package:flutter/foundation.dart' show kIsWeb, listEquals;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -213,6 +213,8 @@ class _AyahWordViewState extends State<AyahWordView>
     return GestureDetector(
       onTap: widget.onTap,
       onLongPress: widget.onLongPress,
+      // In a browser, a right-click too (the mouse's long press).
+      onSecondaryTap: kIsWeb ? widget.onLongPress : null,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

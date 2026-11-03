@@ -89,6 +89,18 @@ class TestSummaryController extends Notifier<TestSummary?> {
   @override
   TestSummary? build() => null;
 
+  /// A Follow along run: every turn (a session each) in one summary.
+  String? _run;
+
+  /// Starts a run: its turns' ayahs gathered into one summary.
+  void beginRun() {
+    _run = 'run-${DateTime.now().microsecondsSinceEpoch}';
+    state = null;
+  }
+
+  /// The run over: sessions summed up one by one again.
+  void endRun() => _run = null;
+
   /// Records [attempts] (`MemorizationRepository.recordTest`) and adds them,
   /// with each ayah's strength before and after, to their session's
   /// summary.
@@ -110,7 +122,7 @@ class TestSummaryController extends Notifier<TestSummary?> {
           after: strength(after[a.ayahId]),
         ),
     ];
-    final sessionId = attempts.first.sessionId;
+    final sessionId = _run ?? attempts.first.sessionId;
     final current = state;
     state = TestSummary(sessionId, [
       if (current != null && current.sessionId == sessionId) ...current.rows,

@@ -1,5 +1,6 @@
 import '../core/localization/fallback_localizations.dart';
 import '../features/guide/guide.dart';
+import 'get_the_app_prompt.dart';
 import '../features/memorize/presentation/milestone_banner.dart';
 
 import 'package:dynamic_color/dynamic_color.dart';
@@ -13,6 +14,7 @@ import '../core/localization/supported_locales.dart';
 import '../core/routing/app_router.dart';
 import '../core/theme/app_surface_tone.dart';
 import '../core/theme/app_theme.dart';
+import '../core/theme/components/tahfeez_bottom_sheet.dart';
 import '../core/theme/theme_controller.dart';
 import '../features/memorize/application/memorization_reminder.dart';
 import '../quran/application/meaning_language_follower.dart';
@@ -91,15 +93,44 @@ class TahfeezApp extends ConsumerWidget {
           routerConfig: router,
           // The Mushaf's guide, above every screen and menu.
           // and a milestone just reached, gently, over that.
-          builder: (context, child) => AnimationsOff(
-            child: MilestoneLayer(
-              child: MeaningPacksLayer(
-                child: GuideLayer(child: child ?? const SizedBox.shrink()),
+          builder: (context, child) => _WebSheetWidth(
+            // (In a phone's browser: where to get the app.)
+            child: GetTheAppPrompt(
+              child: AnimationsOff(
+                child: MilestoneLayer(
+                  child: MeaningPacksLayer(
+                    child: GuideLayer(child: child ?? const SizedBox.shrink()),
+                  ),
+                ),
               ),
             ),
           ),
         );
       },
+    );
+  }
+}
+
+/// In a wide browser window, every bottom sheet — those not sized by
+/// [sheetBelowAppBar] too — as wide as the reading column
+/// ([webSheetMaxWidth]); elsewhere the theme as it is.
+class _WebSheetWidth extends StatelessWidget {
+  const _WebSheetWidth({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final width = webSheetMaxWidth(context);
+    if (width == double.infinity) return child;
+    final theme = Theme.of(context);
+    return Theme(
+      data: theme.copyWith(
+        bottomSheetTheme: theme.bottomSheetTheme.copyWith(
+          constraints: BoxConstraints(maxWidth: width),
+        ),
+      ),
+      child: child,
     );
   }
 }

@@ -146,7 +146,7 @@ Future<DailyAyahReference?> dailyAyah(Ref ref) async {
 /// not touch `docs/CLEAN_ROOM_RULES.md`'s "never generate canonical Quran
 /// text with AI" rule — they are the same kind of reference a table of
 /// contents would list.
-const featuredReadingSurahNumbers = <int>[1, 18, 36, 55, 67];
+const featuredReadingSurahNumbers = <int>[1, 2, 18, 36, 55, 67];
 
 /// Why a featured chapter is shown first today.
 enum FeaturedOccasion { friday, night }

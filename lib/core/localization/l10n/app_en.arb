@@ -1210,5 +1210,19 @@
   "recModelDownloading": "Getting recitation checking ready: {percent}% (once only)",
   "@recModelDownloading": {"description": "Web, over the recitation bar: the recitation model's first download (kept afterwards).", "placeholders": {"percent": {"type": "int"}}},
   "recWebUnsupported": "This browser can't run recitation checking. Try a recent Chrome, Edge, Firefox or Safari.",
-  "@recWebUnsupported": {"description": "Web: the browser cannot run the recitation model (no WebAssembly SIMD)."}
+  "@recWebUnsupported": {"description": "Web: the browser cannot run the recitation model (no WebAssembly SIMD)."},
+  "privacyRecitationWeb": "Your recitation is checked on your device, in the browser. The audio is never sent anywhere and is not saved.",
+  "@privacyRecitationWeb": {"description": "The About screen's privacy card in a browser (the web app): as the phone's line, for a browser."},
+  "privacyLocalWeb": "Your memorization progress, plans, bookmarks and settings stay on your device, in this browser. There are no accounts.",
+  "@privacyLocalWeb": {"description": "The About screen's privacy card in a browser (the web app): as the phone's line, for a browser."},
+  "privacyNetworkWeb": "The internet is used to load the app and its recitation model, to play recitation audio, and for fonts from Google Fonts; those requests name just the file.",
+  "@privacyNetworkWeb": {"description": "The About screen's privacy card in a browser (the web app): as the phone's line, for a browser."},
+  "privacyDeleteWeb": "Settings → Reset all data deletes everything; clearing this site's data in your browser removes it too.",
+  "@privacyDeleteWeb": {"description": "The About screen's privacy card in a browser (the web app): as the phone's line, for a browser."},
+  "getAppTitle": "TahfeezAI is made for your phone",
+  "@getAppTitle": {"description": "The web app opened in a phone's browser: a dialog pointing to the store app."},
+  "getAppBody": "The app is faster, works offline and checks your recitation on the phone itself. Get it free on {store}.",
+  "@getAppBody": {"description": "The phone-browser dialog; store: Google Play or App Store.", "placeholders": {"store": {"type": "String"}}},
+  "getAppOpen": "Get it on {store}",
+  "@getAppOpen": {"description": "The phone-browser dialog; store: Google Play or App Store.", "placeholders": {"store": {"type": "String"}}}
 }

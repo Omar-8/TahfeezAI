@@ -737,16 +737,18 @@ class _AboutAppState extends ConsumerState<_AboutApp> {
               if (kGitHubUrl.isNotEmpty) store.openUrl(kGitHubUrl);
             },
           ),
-          row(
-            'settings-rate',
-            Icons.star_outline_rounded,
-            l10n.settingsRate,
-            // Where it is rated: this phone's store.
-            ref.watch(platformCapabilitiesProvider).isIOS
-                ? l10n.settingsRateSubAppStore
-                : l10n.settingsRateSub,
-            store.openListing,
-          ),
+          // Rated in the phone's store: not in a browser.
+          if (!ref.watch(platformCapabilitiesProvider).isWeb)
+            row(
+              'settings-rate',
+              Icons.star_outline_rounded,
+              l10n.settingsRate,
+              // Where it is rated: this phone's store.
+              ref.watch(platformCapabilitiesProvider).isIOS
+                  ? l10n.settingsRateSubAppStore
+                  : l10n.settingsRateSub,
+              store.openListing,
+            ),
           row(
             'settings-share',
             Icons.share_outlined,

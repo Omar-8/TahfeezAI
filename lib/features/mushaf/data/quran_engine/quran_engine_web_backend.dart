@@ -153,7 +153,8 @@ class QuranEngineWebBackend implements QuranEngineMushafBackend {
   }
 }
 
-class QuranEngineWebPageAdapter implements QuranEngineMushafPage {
+class QuranEngineWebPageAdapter
+    implements QuranEngineMushafPage, MushafWordEffectsPage {
   QuranEngineWebPageAdapter({required this.pageNumber, required this.page}) {
     if (_biggerTextPages.contains(pageNumber)) page.textZoom = _biggerTextZoom;
   }
@@ -179,7 +180,6 @@ class QuranEngineWebPageAdapter implements QuranEngineMushafPage {
     ValueChanged<MushafTokenHitRect>? onWordHit,
     ValueChanged<MushafTokenHitRect>? onDecorationHit,
     VoidCallback? onEmptyHit,
-    // Long press isn't bridged from the web view yet.
     ValueChanged<MushafTokenHitRect>? onWordLongHit,
   }) {
     page.paperColorCss = _cssHex(paper);
@@ -187,10 +187,29 @@ class QuranEngineWebPageAdapter implements QuranEngineMushafPage {
       page: page,
       ink: ink,
       onWordHit: onWordHit,
+      onWordLongHit: onWordLongHit,
       onDecorationHit: onDecorationHit,
       onEmptyHit: onEmptyHit,
     );
   }
+
+  /// The phones' word effects, drawn over the canvas in the browser
+  /// ([QuranEngineWebPage.playEffect]); the halo/letters choice is the
+  /// phones' finer drawing — here a band behind the word.
+  @override
+  void playWordEffect(
+    int wordIndex,
+    MushafWordEffect effect, {
+    Color? color,
+    Duration delay = Duration.zero,
+    bool halo = true,
+    bool letters = true,
+  }) => page.playEffect(
+    effect.name,
+    wordIndex,
+    _rgba(color ?? const Color(0xFF43A047)),
+    delay.inMicroseconds / 1000,
+  );
 
   @override
   int highlightWord(WordRef target, {String mode = 'band'}) =>
@@ -322,6 +341,7 @@ class _QuranEngineWebPageView extends StatefulWidget {
     required this.page,
     required this.ink,
     required this.onWordHit,
+    required this.onWordLongHit,
     required this.onDecorationHit,
     required this.onEmptyHit,
   });
@@ -329,6 +349,7 @@ class _QuranEngineWebPageView extends StatefulWidget {
   final QuranEngineWebPage page;
   final Color ink;
   final ValueChanged<MushafTokenHitRect>? onWordHit;
+  final ValueChanged<MushafTokenHitRect>? onWordLongHit;
   final ValueChanged<MushafTokenHitRect>? onDecorationHit;
   final VoidCallback? onEmptyHit;
 
@@ -342,11 +363,13 @@ class _QuranEngineWebPageViewState extends State<_QuranEngineWebPageView> {
   void initState() {
     super.initState();
     widget.page.onTap = _handleTap;
+    widget.page.onLongPress = _handleLongPress;
   }
 
   @override
   void dispose() {
     widget.page.onTap = null;
+    widget.page.onLongPress = null;
     super.dispose();
   }
 
@@ -367,6 +390,25 @@ class _QuranEngineWebPageViewState extends State<_QuranEngineWebPageView> {
         });
         return HtmlElementView(viewType: widget.page.viewType);
       },
+    );
+  }
+
+  /// A long press on a word: its ayah ([onWordLongHit]).
+  void _handleLongPress(double localX, double localY) {
+    final hit = widget.page.hitTest(localX, localY);
+    if (hit == null || hit.word < 0) return;
+    final rawKey = hit.wordKey;
+    if (rawKey == null) return;
+    final ref = QuranEngineRefAdapter.wordRefFromEngineKey(rawKey);
+    widget.onWordLongHit?.call(
+      MushafTokenHitRect(
+        rect: Rect.zero,
+        sourceTokenId: hit.word,
+        tokenType: MushafTokenType.quranWord,
+        canonicalAyahId: ref.ayahId,
+        canonicalWordIndex: ref.wordIndex,
+        text: '',
+      ),
     );
   }
 

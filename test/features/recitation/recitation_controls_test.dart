@@ -263,27 +263,54 @@ void main() {
     }
   });
 
-  testWidgets('web centers the bar buttons as one group', (tester) async {
-    tester.view.physicalSize = const Size(1200, 800);
+  testWidgets('a phone-sized browser window: the bar exactly as the app\'s', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    Future<List<Rect>> buttons(bool web) async {
+      await tester.pumpWidget(const SizedBox());
+      await tester.pumpWidget(app(web: web));
+      await tester.pumpAndSettle();
+      return [
+        for (final t in [
+          'Start recitation',
+          'Loop recitation',
+          'Listen',
+          'Follow along',
+          'Hide ayahs',
+        ])
+          tester.getRect(find.byTooltip(t)),
+      ];
+    }
+
+    expect(await buttons(true), await buttons(false));
+  });
+
+  testWidgets('a wide browser window: the bar three quarters as wide as '
+      'the two-page spread, centred; with the ayahs hidden, the modes stay and the '
+      'reveal buttons share the room', (tester) async {
+    tester.view.physicalSize = const Size(1440, 900);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(app(web: true));
     await tester.pumpAndSettle();
-
     final mic = tester.getRect(find.byTooltip('Start recitation'));
     final eye = tester.getRect(find.byTooltip('Hide ayahs'));
-    // The eye is the group's last button.
-    final groupCenter = (mic.left + eye.right) / 2;
-    expect(groupCenter, closeTo(600, 2));
-    // The mic, Loop, Listen and Follow along buttons, then the hide
-    // controls.
-    final loop = tester.getRect(find.byTooltip('Loop recitation'));
-    final listen = tester.getRect(find.byTooltip('Listen'));
-    final follow = tester.getRect(find.byTooltip('Follow along'));
-    expect(loop.left - mic.right, lessThan(24), reason: 'beside the mic');
-    expect(listen.left - loop.right, lessThan(24), reason: 'beside Loop');
-    expect(follow.left - listen.right, lessThan(24), reason: 'beside Listen');
-    expect(eye.left - follow.right, lessThan(40), reason: 'kept together');
+    // The spread at this size: ~1,010 wide; the bar three quarters of it.
+    expect(eye.right - mic.left, closeTo(0.75 * 1010, 25));
+    expect((mic.left + eye.right) / 2, closeTo(720, 4), reason: 'centred');
+
+    await tester.tap(find.byKey(const ValueKey('mushaf-hide-toggle')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('modes-open')), findsNothing);
+    expect(find.byTooltip('Loop recitation'), findsOneWidget);
+    // The reveal buttons stretched over their share, not phone-sized.
+    expect(
+      tester.getSize(find.byKey(const ValueKey('mushaf-reveal-word'))).width,
+      greaterThan(80),
+    );
   });
 
   testWidgets('Android keeps the mic and hide buttons at the edges', (

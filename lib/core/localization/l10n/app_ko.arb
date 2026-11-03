@@ -618,5 +618,12 @@
   "tipTajweedOff": "지난 낭송에서 타즈위드 규칙이 많이 표시되었습니다. 아직 타즈위드를 배우는 중이라면 히프즈 설정에서 타즈위드 확인을 끌 수 있습니다: 그러면 글자와 모음만 확인합니다.",
   "tipLenient": "지난 낭송에서 모음이 많이 표시되었습니다. 너무 많다고 느꼈다면 히프즈 설정에서 발음 확인을 너그럽게로 바꿀 수 있습니다: 그러면 더 분명한 실수만 표시됩니다.",
   "recModelDownloading": "낭송 확인 준비 중: {percent}% (한 번만)",
-  "recWebUnsupported": "이 브라우저에서는 낭송 확인을 실행할 수 없습니다. 최신 Chrome, Edge, Firefox 또는 Safari를 사용해 보세요."
+  "recWebUnsupported": "이 브라우저에서는 낭송 확인을 실행할 수 없습니다. 최신 Chrome, Edge, Firefox 또는 Safari를 사용해 보세요.",
+  "privacyRecitationWeb": "낭송은 브라우저에서, 사용자의 기기 안에서 확인됩니다. 오디오는 어디로도 보내지지 않고 저장되지 않습니다.",
+  "privacyLocalWeb": "암기 진도, 계획, 북마크, 설정은 이 브라우저, 사용자의 기기에 남습니다. 계정은 없습니다.",
+  "privacyNetworkWeb": "인터넷은 앱과 낭송 모델을 불러오고, 낭송 오디오를 재생하고, Google Fonts의 글꼴을 받는 데 쓰입니다. 이 요청에는 파일 이름만 담깁니다.",
+  "privacyDeleteWeb": "설정 → 모든 데이터 초기화로 모두 지워집니다. 브라우저에서 이 사이트의 데이터를 지워도 마찬가지입니다.",
+  "getAppTitle": "TahfeezAI는 휴대폰을 위해 만들어졌습니다",
+  "getAppBody": "앱은 더 빠르고 오프라인에서도 작동하며 휴대폰 자체에서 낭송을 확인합니다. {store}에서 무료로 받으세요.",
+  "getAppOpen": "{store}에서 받기"
 }

@@ -492,6 +492,10 @@ class AyahModePageState extends ConsumerState<AyahModePage> {
       (previous, now) {
         if (now == null || previous == null || now == previous) return;
         if (now.start != previous.start && now.start > 0) return;
+        // An ayah opened at (Daily ayah, Continue reading) held in view
+        // as the page settles: hide mode's own updates (the page's words
+        // counted as it opens) don't move it away.
+        if (_pinIsTarget) return;
         _scrollToWord((now.revealed - 1).clamp(0, words.length - 1));
       },
     );
@@ -702,6 +706,7 @@ class AyahModePageState extends ConsumerState<AyahModePage> {
       marks: marks,
       colors: colors,
       fade: !_manyChanged,
+      lastWordOnPage: indices.last,
     );
     _blocks[ayahId] = (masks, marks, colors, block);
     return block;
@@ -790,9 +795,13 @@ class _AyahBlock extends ConsumerWidget {
     required this.marks,
     required this.colors,
     required this.fade,
+    required this.lastWordOnPage,
   });
 
   final int mushafId, pageNumber, ayahId;
+
+  /// Its last word's place among the page's words (hide mode counts them).
+  final int lastWordOnPage;
 
   /// Whether its words fade as they are hidden or revealed.
   final bool fade;
@@ -914,6 +923,20 @@ class _AyahBlock extends ConsumerWidget {
                 onPressed: () async {
                   final messenger = ScaffoldMessenger.of(context);
                   final message = AppLocalizations.of(context).listenOffline;
+                  // Hidden (hide mode): uncovered as it plays — the page up
+                  // to its end, as hide mode uncovers.
+                  // (Not a recitation's own hidden words, as it runs.)
+                  final overlay = ref.read(mushafWordOverlayProvider);
+                  if (anyHidden &&
+                      (overlay == null || overlay.followHideMode)) {
+                    final hide = ref.read(mushafHideModeProvider.notifier);
+                    final shown = ref
+                        .read(mushafHideModeProvider)
+                        .revealedOn(pageNumber);
+                    if (shown <= lastWordOnPage) {
+                      hide.setRevealed({pageNumber: lastWordOnPage + 1});
+                    }
+                  }
                   final played = await ref
                       .read(quranAudioPlayerProvider.notifier)
                       .playAyahs([

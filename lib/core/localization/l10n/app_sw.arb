@@ -618,5 +618,12 @@
   "tipTajweedOff": "Kanuni nyingi za tajwidi ziliwekwa alama katika usomaji wako wa mwisho. Ikiwa bado unajifunza tajwidi, unaweza kuzima ukaguzi wa tajwidi katika mipangilio ya hifdhi: kisha herufi na irabu pekee ndizo zitakaguliwa.",
   "tipLenient": "Irabu nyingi ziliwekwa alama katika usomaji wako wa mwisho. Ikiwa hilo lilionekana kuwa nyingi mno, unaweza kufanya ukaguzi wa matamshi uwe mpole katika mipangilio ya hifdhi: kisha makosa yaliyo wazi zaidi pekee ndiyo yatawekwa alama.",
   "recModelDownloading": "Kuandaa ukaguzi wa usomaji: {percent}% (mara moja tu)",
-  "recWebUnsupported": "Kivinjari hiki hakiwezi kuendesha ukaguzi wa usomaji. Jaribu toleo jipya la Chrome, Edge, Firefox au Safari."
+  "recWebUnsupported": "Kivinjari hiki hakiwezi kuendesha ukaguzi wa usomaji. Jaribu toleo jipya la Chrome, Edge, Firefox au Safari.",
+  "privacyRecitationWeb": "Usomaji wako hukaguliwa kwenye kifaa chako, ndani ya kivinjari. Sauti haitumwi popote wala haihifadhiwi.",
+  "privacyLocalWeb": "Maendeleo ya hifdhi, mipango, alamisho na mipangilio yako hubaki kwenye kifaa chako, katika kivinjari hiki. Hakuna akaunti.",
+  "privacyNetworkWeb": "Intaneti hutumika kupakia programu na modeli ya kukagua usomaji, kucheza sauti ya usomaji, na fonti kutoka Google Fonts; maombi hayo hutaja jina la faili tu.",
+  "privacyDeleteWeb": "Mipangilio → Weka upya data yote hufuta kila kitu; kufuta data ya tovuti hii kwenye kivinjari chako pia.",
+  "getAppTitle": "TahfeezAI imetengenezwa kwa ajili ya simu yako",
+  "getAppBody": "Programu ni ya haraka zaidi, inafanya kazi bila mtandao na hukagua usomaji wako kwenye simu yenyewe. Ipate bure kwenye {store}.",
+  "getAppOpen": "Ipate kwenye {store}"
 }

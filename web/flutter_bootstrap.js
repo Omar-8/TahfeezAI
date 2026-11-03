@@ -20,5 +20,8 @@
       // No worker: the app runs without threads.
     }
   }
-  _flutter.loader.load();
+  // The renderer single-threaded: its threads garbled glyphs now and then
+  // (letters missing or misplaced in translation text, seen in Chromium).
+  // The recitation model keeps its own threads (web/acoustic).
+  _flutter.loader.load({ config: { forceSingleThreadedSkwasm: true } });
 })();

@@ -618,5 +618,12 @@
   "tipTajweedOff": "Din seneste recitation fik mange tajweedregler markeret. Hvis du stadig er ved at lære tajweed, kan du slå tajweedkontrollen fra i Hifz-indstillingerne: så kontrolleres kun bogstaver og vokaler.",
   "tipLenient": "Din seneste recitation fik mange vokaler markeret. Hvis det virkede af meget, kan du gøre udtalekontrollen mild i Hifz-indstillingerne: så markeres kun tydeligere fejl.",
   "recModelDownloading": "Gør recitationskontrollen klar: {percent} % (kun én gang)",
-  "recWebUnsupported": "Denne browser kan ikke køre recitationskontrollen. Prøv en nyere Chrome, Edge, Firefox eller Safari."
+  "recWebUnsupported": "Denne browser kan ikke køre recitationskontrollen. Prøv en nyere Chrome, Edge, Firefox eller Safari.",
+  "privacyRecitationWeb": "Din recitation kontrolleres på din enhed, i browseren. Lyden sendes aldrig nogen steder hen og gemmes ikke.",
+  "privacyLocalWeb": "Dine fremskridt, planer, bogmærker og indstillinger bliver på din enhed, i denne browser. Der er ingen konti.",
+  "privacyNetworkWeb": "Internettet bruges til at indlæse appen og dens recitationsmodel, til at afspille recitationer og til skrifttyper fra Google Fonts; disse forespørgsler nævner kun filen.",
+  "privacyDeleteWeb": "Indstillinger → Nulstil alle data sletter alt; det gør det også at rydde dette websteds data i din browser.",
+  "getAppTitle": "TahfeezAI er lavet til din telefon",
+  "getAppBody": "Appen er hurtigere, virker offline og kontrollerer din recitation på selve telefonen. Hent den gratis på {store}.",
+  "getAppOpen": "Hent den på {store}"
 }

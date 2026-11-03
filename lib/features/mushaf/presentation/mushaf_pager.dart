@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show ScrollCacheExtent;
@@ -6,6 +8,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../quran/presentation/surah_info_sheet.dart';
 
+import '../../../core/theme/components/tahfeez_bottom_sheet.dart';
+import '../../../core/ui/web_margin_scroll.dart';
 import '../../../core/core_providers.dart';
 import '../../../core/theme/app_breakpoints.dart';
 import '../../../core/ui/full_bleed_content.dart';
@@ -34,6 +38,15 @@ class _MushafWebScrollBehavior extends MaterialScrollBehavior {
     ...super.dragDevices,
     PointerDeviceKind.mouse,
   };
+
+  /// No scrollbars over the Mushaf (as on the phones): one flashing up as
+  /// pages are swiped is noise.
+  @override
+  Widget buildScrollbar(
+    BuildContext context,
+    Widget child,
+    ScrollableDetails details,
+  ) => child;
 }
 
 /// The swipeable Mushaf page surface — extracted from [MushafPageView] one
@@ -63,6 +76,19 @@ class _MushafWebScrollBehavior extends MaterialScrollBehavior {
 /// [_handleWheelPointerSignal]) that turns exactly one page per wheel
 /// notch, with a short cooldown, instead of a continuous multi-page
 /// scroll — native/mobile behavior is untouched.
+/// In a browser, the Mushaf's two-page spread as laid out: each page's
+/// frame width and the gutter between them, centred in the window — so the
+/// recitation bar can sit under the pages (`RecitationBottomBar`); `null`
+/// when one page shows (or none).
+/// The width of the Mushaf's two-page spread in a browser window of [size]:
+/// a printed page is ~0.68 as wide as tall, the reader's bars take ~170
+/// (1,010 wide at 1440 × 900, as measured).
+double webSpreadWidth(Size size) =>
+    math.min(size.width - 32, 2 * 0.68 * (size.height - 170) + 20);
+
+final ValueNotifier<({double pageWidth, double gutter})?> webSpreadPages =
+    ValueNotifier(null);
+
 class MushafPager extends ConsumerStatefulWidget {
   const MushafPager({
     super.key,
@@ -82,6 +108,15 @@ class MushafPager extends ConsumerStatefulWidget {
 }
 
 class _MushafPagerState extends ConsumerState<MushafPager> {
+  /// Pagers on screen (see [dispose]).
+  static var _mountedPagers = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _mountedPagers++;
+  }
+
   bool? _twoPageSpread;
   late PageController _controller;
 
@@ -129,6 +164,12 @@ class _MushafPagerState extends ConsumerState<MushafPager> {
 
   @override
   void dispose() {
+    // The spread's widths go with the last Mushaf on screen (one replacing
+    // another — focus mode, Ayah ↔ Mushaf mode — has published its own).
+    _mountedPagers--;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_mountedPagers == 0) webSpreadPages.value = null;
+    });
     _requestedFullBleed = false;
     _scheduleFullBleedApply();
     if (_twoPageSpread != null) _controller.dispose();
@@ -260,8 +301,12 @@ class _MushafPagerState extends ConsumerState<MushafPager> {
   /// left alone entirely — that one *is* already claimed by the
   /// `PageView`'s own native, drag-like continuous scrolling, which reads
   /// the same as a deliberate swipe and is fine to leave continuous.
+  ///
+  /// Not in Ayah mode: there the wheel scrolls the page's own ayahs (arrow
+  /// keys and horizontal swipes still turn pages).
   void _handleWheelPointerSignal(PointerSignalEvent event) {
     if (event is! PointerScrollEvent) return;
+    if (ref.read(readerModeProvider) == ReaderMode.ayah) return;
     final dx = event.scrollDelta.dx;
     final dy = event.scrollDelta.dy;
     if (dx.abs() >= dy.abs()) return;
@@ -298,6 +343,7 @@ class _MushafPagerState extends ConsumerState<MushafPager> {
   static const _webBorderWidth = 5.0;
   static const _webPagePadding = EdgeInsets.zero;
   static const _webGutterWidth = 50.0;
+
   static const _webOuterPadding = EdgeInsets.zero;
   static const _webSpreadOuterPadding = EdgeInsets.only(bottom: 10);
   // Small page number printed over the web frame's bottom border: centred
@@ -319,6 +365,7 @@ class _MushafPagerState extends ConsumerState<MushafPager> {
     double? aspectRatio,
     String? label,
     Color? labelColor,
+    bool inSpread = false,
   }) {
     final outline = Theme.of(context).colorScheme.outlineVariant;
     // Frame chrome that must be counted when fitting the page box into the
@@ -384,6 +431,17 @@ class _MushafPagerState extends ConsumerState<MushafPager> {
         final labelBoxHeight = label == null
             ? 0.0
             : labelFontSize * _webPageNumberStripFactor;
+        if (inSpread) {
+          final frame = pageWidth + borderChrome + _webPagePadding.horizontal;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted && _twoPageSpread == true) {
+              webSpreadPages.value = (
+                pageWidth: frame,
+                gutter: _webGutterWidth,
+              );
+            }
+          });
+        }
         return Container(
           width: pageWidth + borderChrome + _webPagePadding.horizontal,
           height: pageHeight + verticalChrome,
@@ -475,10 +533,12 @@ class _MushafPagerState extends ConsumerState<MushafPager> {
     final size = MediaQuery.sizeOf(context);
     final isLandscape = size.width > size.height;
     // Ayah mode's continuous layout: one scroll, no pages to swipe.
+    // (A wide browser window: always — no two-page view of ayahs.)
     final continuous =
         ref.watch(readerModeProvider) == ReaderMode.ayah &&
-        ref.watch(ayahViewPreferencesProvider.select((v) => v.layout)) ==
-            AyahLayout.continuous;
+        (isWideWebWindow(context) ||
+            ref.watch(ayahViewPreferencesProvider.select((v) => v.layout)) ==
+                AyahLayout.continuous);
     final useTwoPageSpread =
         !continuous &&
         breakpoint.isAtLeastTablet &&
@@ -490,13 +550,48 @@ class _MushafPagerState extends ConsumerState<MushafPager> {
       _twoPageSpread = null;
       _requestedFullBleed = false;
       _scheduleFullBleedApply();
-      return AyahModeContinuous(
+      // A wide browser window: the ayahs as wide as the two-page spread,
+      // the bar under them laid out as under its pages (the same widths
+      // as in Mushaf mode); else nothing to line the bar up with.
+      final wide = isWideWebWindow(context);
+      // (As measured under the Mushaf's pages if they were shown at this
+      // window size; else as they would be.)
+      final estimate = (
+        pageWidth:
+            (webSpreadWidth(MediaQuery.sizeOf(context)) - _webGutterWidth) / 2,
+        gutter: _webGutterWidth,
+      );
+      final measured = webSpreadPages.value;
+      final width = MediaQuery.sizeOf(context).width;
+      // (Kept while it fits the window: focus mode, a taller window, keeps
+      // the bar and the column as they were.)
+      final spread = !wide
+          ? null
+          : measured != null &&
+                2 * measured.pageWidth + measured.gutter <= width - 32
+          ? measured
+          : estimate;
+      if (webSpreadPages.value != spread) {
+        WidgetsBinding.instance.addPostFrameCallback(
+          (_) => webSpreadPages.value = spread,
+        );
+      }
+      final ayahs = AyahModeContinuous(
         key: const ValueKey('continuous'),
         mushafId: widget.mushafId,
         pageCount: widget.pageCount,
         initialPageNumber: _currentPageNumber,
         onPageChanged: _onPageChanged,
       );
+      // A wide browser window: as wide as the Mushaf's two pages side by
+      // side, centred (the wheel over the margins scrolls it too) — not
+      // lines across the whole window.
+      return wide
+          ? WebMarginScroll(
+              maxWidth: 2 * spread!.pageWidth + spread.gutter,
+              child: ayahs,
+            )
+          : ayahs;
     }
     _ensureController(useTwoPageSpread);
     // Page-turn requests from the shell's bottom bar (hide mode's buttons at
@@ -531,6 +626,12 @@ class _MushafPagerState extends ConsumerState<MushafPager> {
     // pager's page order is fixed (see [_rightToLeft]).
     final appDirection = Directionality.of(context);
 
+    if (!useTwoPageSpread && webSpreadPages.value != null) {
+      // One page at a time: nothing to line the bar up with.
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => webSpreadPages.value = null,
+      );
+    }
     if (!useTwoPageSpread) {
       _itemCount = widget.pageCount;
       final pageView = PageView.builder(
@@ -576,8 +677,11 @@ class _MushafPagerState extends ConsumerState<MushafPager> {
           // wider viewport (tablets, and virtually every Web browser
           // window) it forced the page into a narrow, needlessly margined
           // column instead of letting it use the space actually available.
+          // Framed in a wide browser window; a phone's browser shows the
+          // page as the phone app does — full height, no border.
+          final frame = isWeb && isWideWebWindow(context);
           final framed = Center(
-            child: isWeb
+            child: frame
                 ? _bordered(
                     context,
                     page,
@@ -588,7 +692,7 @@ class _MushafPagerState extends ConsumerState<MushafPager> {
           );
           return Directionality(
             textDirection: appDirection,
-            child: isWeb
+            child: frame
                 ? Padding(padding: _webOuterPadding, child: framed)
                 : framed,
           );
@@ -679,6 +783,7 @@ class _MushafPagerState extends ConsumerState<MushafPager> {
                               ? '$rightPageNumber'
                               : null,
                           labelColor: appearanceColors.text,
+                          inSpread: true,
                         ),
                       )
                     : rightPage,

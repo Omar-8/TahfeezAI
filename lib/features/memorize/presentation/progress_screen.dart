@@ -1,3 +1,4 @@
+import '../../../core/core_providers.dart';
 import '../../../core/ui/bar_space.dart';
 import '../../../core/ui/motion.dart';
 import '../../../core/localization/fallback_localizations.dart';
@@ -331,18 +332,23 @@ Color? _cellColor(PageProgress p, ColorScheme scheme) {
   return ScoreBar.colorOf(s, scheme).withValues(alpha: 0.35 + 0.65 * share);
 }
 
-class _StrengthMap extends StatelessWidget {
+class _StrengthMap extends ConsumerWidget {
   const _StrengthMap({required this.map});
 
   final ProgressMap map;
 
   static const _gap = 3.0;
 
+  /// In a browser: a juz row's width from which the map has another
+  /// column of juz.
+  static const _columnWidth = 300.0;
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final web = ref.watch(platformCapabilitiesProvider).isWeb;
     Widget legend(Color? fill, String label) => Row(
       mainAxisSize: MainAxisSize.min,
       spacing: TahfeezSpacing.xs,
@@ -360,43 +366,75 @@ class _StrengthMap extends StatelessWidget {
       ],
     );
 
+    Widget juzRow(JuzProgress juz, {required bool fill}) => Row(
+      children: [
+        SizedBox(
+          width: 26,
+          child: Text(
+            '${juz.juz}',
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
+          ),
+        ),
+        Expanded(
+          child: LayoutBuilder(
+            builder: (context, box) {
+              final n = juz.pages.length;
+              final cell = ((box.maxWidth - (n - 1) * _gap) / n).clamp(
+                4.0,
+                // In a browser, as wide as the row allows (a juz's pages
+                // across its column); the apps keep their cells.
+                fill ? 28.0 : 16.0,
+              );
+              return Row(
+                spacing: _gap,
+                children: [
+                  for (final p in juz.pages) _PageCell(page: p, size: cell),
+                ],
+              );
+            },
+          ),
+        ),
+      ],
+    );
+
     return TahfeezCard(
       key: const ValueKey('mem-strength-map'),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: _gap,
         children: [
-          for (final juz in map.juz)
-            Row(
-              children: [
-                SizedBox(
-                  width: 26,
-                  child: Text(
-                    '${juz.juz}',
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: scheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: LayoutBuilder(
-                    builder: (context, box) {
-                      final n = juz.pages.length;
-                      final cell = ((box.maxWidth - (n - 1) * _gap) / n).clamp(
-                        4.0,
-                        16.0,
-                      );
-                      return Row(
-                        spacing: _gap,
-                        children: [
-                          for (final p in juz.pages)
-                            _PageCell(page: p, size: cell),
-                        ],
-                      );
-                    },
-                  ),
-                ),
-              ],
+          if (!web)
+            for (final juz in map.juz) juzRow(juz, fill: false)
+          else
+            // Responsive: as many columns of juz as fit (1–15 down the
+            // first of two), the pages filling each.
+            LayoutBuilder(
+              builder: (context, box) {
+                final columns = (box.maxWidth / _columnWidth).floor().clamp(
+                  1,
+                  3,
+                );
+                final perColumn = (map.juz.length / columns).ceil();
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  spacing: TahfeezSpacing.md,
+                  children: [
+                    for (var c = 0; c < columns; c++)
+                      Expanded(
+                        child: Column(
+                          spacing: _gap,
+                          children: [
+                            for (final juz
+                                in map.juz.skip(c * perColumn).take(perColumn))
+                              juzRow(juz, fill: true),
+                          ],
+                        ),
+                      ),
+                  ],
+                );
+              },
             ),
           const SizedBox(height: TahfeezSpacing.sm),
           Wrap(

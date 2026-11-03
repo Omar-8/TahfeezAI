@@ -63,7 +63,8 @@ abstract class QuranEngineMushafPage {
   /// `QuranEngineMushafPageContent.build` in
   /// `../../presentation/quran_engine_mushaf_page_content.dart`).
   /// [onWordHit]/[onDecorationHit] fire with [MushafTokenHitRect];
-  /// [onWordLongHit] on a long press on a word (Android only for now).
+  /// [onWordLongHit] on a long press on a word (in a browser: a right-click,
+  /// a long touch, or the mouse held down).
   Widget buildView({
     required Color ink,
     required Color paper,

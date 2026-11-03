@@ -1,9 +1,11 @@
 import 'dart:math' as math;
 import 'dart:ui' show ImageFilter;
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
 import '../app_spacing.dart';
+import '../tahfeez_content_widths.dart';
 
 /// Tracks whether a Tahfeez modal bottom sheet is currently open, plus a
 /// short cooldown just after one closes. Flutter Web's platform-view
@@ -64,8 +66,25 @@ BoxConstraints sheetBelowAppBar(BuildContext context) {
     top = math.max(top, box.localToGlobal(Offset.zero).dy + appBar);
   }
   top = math.max(top, sheetTopFloor);
-  return BoxConstraints(maxHeight: math.max(0, screen - top));
+  return BoxConstraints(
+    maxHeight: math.max(0, screen - top),
+    maxWidth: webSheetMaxWidth(context),
+  );
 }
+
+/// In a wide browser window, a sheet is no wider than the reading column
+/// (the Quran list's width), not the whole window; a phone (its browser
+/// too) and the apps keep full-width sheets.
+double webSheetMaxWidth(BuildContext context) =>
+    isWideWebWindow(context) ? TahfeezContentWidth.maxReading : double.infinity;
+
+/// A browser window wide enough for the wide-window layout ([webWideFrom]);
+/// a phone's browser, and the apps, are not.
+bool isWideWebWindow(BuildContext context) =>
+    kIsWeb && MediaQuery.sizeOf(context).width >= webWideFrom;
+
+/// A browser window's width from which its wide-window layout applies.
+const webWideFrom = 840.0;
 
 /// Shows a Tahfeez modal bottom sheet with a consistent drag handle, header,
 /// and safe-area padding — below the app bar ([sheetBelowAppBar]) unless

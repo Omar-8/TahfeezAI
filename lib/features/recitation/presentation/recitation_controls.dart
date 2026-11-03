@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:async' show unawaited;
 
 import '../../../core/sharing/image_sharer.dart';
@@ -34,6 +35,8 @@ import '../application/recitation_hints.dart';
 import '../../../core/storage/storage_providers.dart';
 import '../../../ai/acoustic/acoustic_model_download.dart';
 import '../../guide/app_tips.dart';
+import '../../mushaf/presentation/mushaf_pager.dart'
+    show webSpreadPages, webSpreadWidth;
 import '../../guide/app_tips_host.dart';
 import '../../guide/guide.dart';
 import '../../../memorization/application/activity_stats.dart';
@@ -289,6 +292,9 @@ Future<RecitationHint?> _recitationHint(
   );
 }
 
+/// The results last shown (a Follow along run's not shown twice).
+TestSummary? _shownSummary;
+
 /// The last session's tip ([_recitationHint]), worked out as it ended.
 Future<RecitationHint?>? _sessionHint;
 
@@ -355,6 +361,7 @@ class RecitationBottomBar extends ConsumerWidget {
           ref.read(followAlongControllerProvider) != null) {
         return;
       }
+      _shownSummary = next;
       // After the Sujood al-Tilawah reminder, if it is up.
       final reminder = _sajdahPopup;
       if (reminder == null) {
@@ -367,6 +374,28 @@ class RecitationBottomBar extends ConsumerWidget {
           unawaited(_offerSessionTip(context, ref));
         });
       }
+    });
+
+    // A Follow along run over: its results, all its turns together — shown
+    // as its last turn's arrive (above), or, with none still to come (it
+    // was stopped while the reciter recited), a moment later.
+    ref.listen(followAlongControllerProvider, (previous, next) {
+      if (previous == null || next != null) return;
+      final summaries = ref.read(testSummaryProvider.notifier);
+      Future<void>.delayed(const Duration(milliseconds: 2500), () {
+        summaries.endRun();
+        final summary = ref.read(testSummaryProvider);
+        if (!context.mounted ||
+            summary == null ||
+            summary.rows.isEmpty ||
+            identical(summary, _shownSummary) ||
+            ref.read(recitationSessionControllerProvider).isActive ||
+            ref.read(guideProvider) != null) {
+          return;
+        }
+        _shownSummary = summary;
+        showTestSummarySheet(context, summary);
+      });
     });
 
     // An ayah of prostration recited: a reminder of Sujood al-Tilawah.
@@ -415,7 +444,11 @@ class RecitationBottomBar extends ConsumerWidget {
         recognition != null && aiConfig.acoustic == QuranAcousticBackend.local
         ? ref.watch(localAcousticInferenceControllerProvider)
         : null;
-    final centered = ref.watch(platformCapabilitiesProvider).isWeb;
+    // A wide browser window: the bar's controls three quarters as wide as
+    // the Mushaf's two-page spread, the modes never folded into one button.
+    final barWidth = wideWebBarWidth(context, ref);
+    final starting = state.phase == RecitationPhase.starting;
+    final hidden = ref.watch(mushafHideModeProvider.select((h) => h.enabled));
     // A run of ayahs playing (not a single word): its controls take the
     // mic's place.
     final playing = ref.watch(quranAudioPlayerProvider);
@@ -457,45 +490,51 @@ class RecitationBottomBar extends ConsumerWidget {
                       horizontal: 6,
                       vertical: 12,
                     ),
-                    child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 200),
-                      child: state.isActive
-                          ? _SessionControls(
-                              key: const ValueKey(
-                                'recitation-session-controls',
-                              ),
-                              state: state,
-                            )
-                          : listening
-                          ? const _ListenControls(
-                              key: ValueKey('listen-controls'),
-                            )
-                          : GuideTarget(
-                              id: 'bar',
-                              child: Row(
-                                key: const ValueKey('recitation-start'),
-                                // Web keeps the buttons together in the middle
-                                // of the (usually wide) bar; Android spreads them
-                                // to the edges, within thumb reach.
-                                mainAxisAlignment: centered
-                                    ? MainAxisAlignment.center
-                                    : MainAxisAlignment.spaceBetween,
-                                children: [
-                                  ..._idleRow(
+                    child: _BarWidth(
+                      width: barWidth,
+                      child: AnimatedSwitcher(
+                        duration: const Duration(milliseconds: 200),
+                        child: state.isActive
+                            ? _SessionControls(
+                                key: const ValueKey(
+                                  'recitation-session-controls',
+                                ),
+                                state: state,
+                              )
+                            : listening
+                            ? const _ListenControls(
+                                key: ValueKey('listen-controls'),
+                              )
+                            : GuideTarget(
+                                id: 'bar',
+                                child: _UnderPages(
+                                  key: const ValueKey('recitation-start'),
+                                  wide: barWidth != null,
+                                  left: _ModeButtons(
                                     location: location,
-                                    starting:
-                                        state.phase == RecitationPhase.starting,
+                                    starting: starting,
                                     recognition: recognition != null,
-                                    hidden: ref.watch(
-                                      mushafHideModeProvider.select(
-                                        (h) => h.enabled,
-                                      ),
-                                    ),
-                                    centered: centered,
+                                    collapsed: false,
+                                    expand: true,
                                   ),
-                                ],
+                                  right: _RevealUnderPage(hidden: hidden),
+                                  otherwise: Row(
+                                    // Spread to the edges, within thumb reach.
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      ..._idleRow(
+                                        location: location,
+                                        starting: starting,
+                                        recognition: recognition != null,
+                                        hidden: hidden,
+                                        roomy: barWidth != null,
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ),
-                            ),
+                      ),
                     ),
                   ),
                 ),
@@ -587,51 +626,139 @@ List<Widget> _idleRow({
   required bool starting,
   required bool recognition,
   required bool hidden,
-  required bool centered,
+  required bool roomy,
 }) {
+  // Folded into one button with hide mode on — unless there is room (a
+  // wide browser window): then the modes and the reveal buttons share it.
+  final collapsed = hidden && !roomy;
   final modes = _ModeButtons(
     location: location,
     starting: starting,
     recognition: recognition,
-    collapsed: hidden,
-    expand: !hidden && !centered,
+    collapsed: collapsed,
+    expand: !collapsed,
   );
-  if (!centered) {
-    return [
-      if (hidden) ...[
-        modes,
-        const SizedBox(width: 12),
-        const Expanded(
+  return [
+    if (hidden) ...[
+      if (collapsed) modes else Expanded(child: modes),
+      const SizedBox(width: 12),
+      const Expanded(
+        child: MushafHideControls(
+          part: MushafHideControlsPart.steps,
+          expand: true,
+        ),
+      ),
+    ] else ...[
+      Expanded(child: modes),
+      const SizedBox(width: 12),
+    ],
+    const MushafHideControls(part: MushafHideControlsPart.pinned),
+  ];
+}
+
+/// In a wide browser window, the bar's controls' width: three quarters of
+/// the Mushaf's two-page spread (its pages as tall as the window allows,
+/// their gutter and frames), at most the window less its margins; `null` on a
+/// phone, a tablet's app, or a phone-sized browser window — the bar as it
+/// is there.
+double? wideWebBarWidth(BuildContext context, WidgetRef ref) {
+  if (!ref.watch(platformCapabilitiesProvider).isWeb) return null;
+  final size = MediaQuery.sizeOf(context);
+  if (size.width < webWideFrom) return null;
+  // Three quarters of the spread's width.
+  return math.min(size.width - 32, math.max(560, 0.75 * webSpreadWidth(size)));
+}
+
+/// [child] centred at [width] (a wide browser window), else as it is.
+class _BarWidth extends StatelessWidget {
+  const _BarWidth({required this.width, required this.child});
+
+  final double? width;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final width = this.width;
+    if (width == null) return child;
+    return ValueListenableBuilder(
+      valueListenable: webSpreadPages,
+      builder: (context, spread, child) => Center(
+        child: ConstrainedBox(
+          // Under a two-page spread: as wide as both pages and their gutter
+          // (the controls split between them, [_UnderPages]).
+          constraints: BoxConstraints(
+            maxWidth: spread == null
+                ? width
+                : 2 * spread.pageWidth + spread.gutter,
+          ),
+          child: child,
+        ),
+      ),
+      child: child,
+    );
+  }
+}
+
+/// In a wide browser window showing two pages ([webSpreadPages]): [left]
+/// under the left page and [right] under the right one, each as wide as
+/// its page (mirrored in a right-to-left language); else [otherwise].
+class _UnderPages extends StatelessWidget {
+  const _UnderPages({
+    super.key,
+    required this.wide,
+    required this.left,
+    required this.right,
+    required this.otherwise,
+  });
+
+  final bool wide;
+  final Widget left, right, otherwise;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!wide) return otherwise;
+    return ValueListenableBuilder(
+      valueListenable: webSpreadPages,
+      builder: (context, spread, _) {
+        if (spread == null) return otherwise;
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(width: spread.pageWidth, child: left),
+            SizedBox(width: spread.gutter),
+            SizedBox(width: spread.pageWidth, child: right),
+          ],
+        );
+      },
+    );
+  }
+}
+
+/// Under the right page (a wide browser window): the reveal buttons over
+/// its width when the ayahs are hidden ([short]: as tall as stop and
+/// pause), and the eye at its end.
+class _RevealUnderPage extends StatelessWidget {
+  const _RevealUnderPage({required this.hidden, this.short = false});
+
+  final bool hidden, short;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    children: [
+      if (hidden)
+        Expanded(
           child: MushafHideControls(
             part: MushafHideControlsPart.steps,
             expand: true,
+            short: short,
           ),
-        ),
-      ] else ...[
-        Expanded(child: modes),
-        const SizedBox(width: 12),
-      ],
+        )
+      else
+        const Spacer(),
+      const SizedBox(width: 12),
       const MushafHideControls(part: MushafHideControlsPart.pinned),
-    ];
-  }
-  return [
-    modes,
-    if (centered) const SizedBox(width: _centeredGroupGap),
-    const Flexible(
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Flexible(
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: MushafHideControls(part: MushafHideControlsPart.steps),
-            ),
-          ),
-          MushafHideControls(part: MushafHideControlsPart.pinned),
-        ],
-      ),
-    ),
-  ];
+    ],
+  );
 }
 
 /// The recitation bar's modes before one starts: recite (the mic), loop,
@@ -885,7 +1012,6 @@ class _SessionControls extends ConsumerWidget {
     final canControl =
         state.phase == RecitationPhase.listening ||
         state.phase == RecitationPhase.paused;
-    final centered = ref.watch(platformCapabilitiesProvider).isWeb;
     // Follow along, strict: a turn with mistakes, its marks in view — try
     // again or skip on (the hint above says so).
     // …or a strict loop's pass, the same way.
@@ -943,67 +1069,50 @@ class _SessionControls extends ConsumerWidget {
     }
     // Laid out like the bar before a session: stop and pause where the mic
     // was, the reveal/hide buttons and the eye at the end — so they never
-    // move, recording or not. The web keeps the buttons together in the
-    // middle.
-    return Row(
-      mainAxisAlignment: centered
-          ? MainAxisAlignment.center
-          : MainAxisAlignment.start,
+    // move, recording or not.
+    final controls = BarButtonGroup(
       children: [
-        BarButtonGroup(
-          children: [
-            GuideTarget(
-              id: 'session-stop',
-              // A ring that swells with the voice the microphone hears.
-              child: MicLevelRing(
-                active: state.phase == RecitationPhase.listening,
-                child: IconButton(
-                  style: BarButtonGroup.buttonStyle,
-                  color: scheme.error,
-                  icon: const Icon(Icons.stop_rounded),
-                  tooltip: l10n.recStop,
-                  onPressed: canControl ? controller.stop : null,
-                ),
-              ),
-            ),
-            if (state.phase == RecitationPhase.paused)
-              IconButton(
-                style: BarButtonGroup.buttonStyle,
-                icon: const Icon(Icons.play_arrow_rounded),
-                tooltip: l10n.recResume,
-                onPressed: controller.resume,
-              )
-            else
-              IconButton(
-                style: BarButtonGroup.buttonStyle,
-                icon: const Icon(Icons.pause_rounded),
-                tooltip: l10n.recPause,
-                onPressed: canControl ? controller.pause : null,
-              ),
-          ],
-        ),
-        // The reveal/hide buttons (to help the test along, or go back);
-        // the eye keeps its size and place.
-        if (centered) ...[
-          const SizedBox(width: _centeredGroupGap),
-          // Together in the middle, scaled down rather than overflowing.
-          const Flexible(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Flexible(
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: MushafHideControls(
-                      part: MushafHideControlsPart.steps,
-                    ),
-                  ),
-                ),
-                MushafHideControls(part: MushafHideControlsPart.pinned),
-              ],
+        GuideTarget(
+          id: 'session-stop',
+          // A ring that swells with the voice the microphone hears.
+          child: MicLevelRing(
+            active: state.phase == RecitationPhase.listening,
+            child: IconButton(
+              style: BarButtonGroup.buttonStyle,
+              color: scheme.error,
+              icon: const Icon(Icons.stop_rounded),
+              tooltip: l10n.recStop,
+              onPressed: canControl ? controller.stop : null,
             ),
           ),
-        ] else ...[
+        ),
+        if (state.phase == RecitationPhase.paused)
+          IconButton(
+            style: BarButtonGroup.buttonStyle,
+            icon: const Icon(Icons.play_arrow_rounded),
+            tooltip: l10n.recResume,
+            onPressed: controller.resume,
+          )
+        else
+          IconButton(
+            style: BarButtonGroup.buttonStyle,
+            icon: const Icon(Icons.pause_rounded),
+            tooltip: l10n.recPause,
+            onPressed: canControl ? controller.pause : null,
+          ),
+      ],
+    );
+    // In a wide browser window showing two pages: stop and pause under the
+    // left page, the reveal buttons over the right one's width.
+    return _UnderPages(
+      wide: wideWebBarWidth(context, ref) != null,
+      left: Align(alignment: AlignmentDirectional.centerStart, child: controls),
+      right: const _RevealUnderPage(hidden: true, short: true),
+      otherwise: Row(
+        children: [
+          controls,
+          // The reveal/hide buttons (to help the test along, or go back);
+          // the eye keeps its size and place.
           // On a phone they fill the rest of the row as before a session
           // (the same gaps), only as tall as stop and pause.
           // On the narrowest phones, where they don't fit at their width,
@@ -1028,7 +1137,7 @@ class _SessionControls extends ConsumerWidget {
           ),
           const MushafHideControls(part: MushafHideControlsPart.pinned),
         ],
-      ],
+      ),
     );
   }
 }
@@ -1045,7 +1154,6 @@ class _ListenControls extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final player = ref.read(quranAudioPlayerProvider.notifier);
     final audio = ref.watch(audioControllerProvider);
-    final centered = ref.watch(platformCapabilitiesProvider).isWeb;
     // Follow along's reciter turns: no sleep timer (it is for listening).
     final following = ref.watch(followAlongControllerProvider) != null;
     return StreamBuilder<AudioPlaybackState>(
@@ -1054,64 +1162,69 @@ class _ListenControls extends ConsumerWidget {
       builder: (context, snapshot) {
         final playback = snapshot.data ?? const AudioPlaybackState();
         final speed = playback.speed;
-        return Row(
-          mainAxisAlignment: centered
-              ? MainAxisAlignment.center
-              : MainAxisAlignment.start,
-          children: [
-            GuideTarget(
-              id: 'listen-controls',
-              child: BarButtonGroup(
-                children: [
-                  IconButton(
-                    key: const ValueKey('listen-stop'),
-                    style: BarButtonGroup.buttonStyle,
-                    color: scheme.error,
-                    icon: const Icon(Icons.stop_rounded),
-                    tooltip: l10n.listenStop,
-                    onPressed: player.stop,
-                  ),
-                  if (playback.isPlaying)
-                    IconButton(
-                      key: const ValueKey('listen-pause'),
-                      style: BarButtonGroup.buttonStyle,
-                      icon: const Icon(Icons.pause_rounded),
-                      tooltip: l10n.recPause,
-                      onPressed: player.pause,
-                    )
-                  else
-                    IconButton(
-                      key: const ValueKey('listen-resume'),
-                      style: BarButtonGroup.buttonStyle,
-                      icon: const Icon(Icons.play_arrow_rounded),
-                      tooltip: l10n.recResume,
-                      onPressed: player.resume,
-                    ),
-                  TextButton(
-                    key: const ValueKey('listen-speed'),
-                    style: TextButton.styleFrom(
-                      minimumSize: const Size(46, BarButtonGroup.height),
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    onPressed: () => player.cycleSpeed(speed),
-                    child: Text(
-                      '${speed == speed.roundToDouble() ? speed.toInt() : speed}×',
-                      semanticsLabel: '${l10n.listenSpeed} $speed',
-                    ),
-                  ),
-                  if (!following)
-                    SleepTimerButton(style: BarButtonGroup.buttonStyle),
-                ],
+        final controls = GuideTarget(
+          id: 'listen-controls',
+          child: BarButtonGroup(
+            children: [
+              IconButton(
+                key: const ValueKey('listen-stop'),
+                style: BarButtonGroup.buttonStyle,
+                color: scheme.error,
+                icon: const Icon(Icons.stop_rounded),
+                tooltip: l10n.listenStop,
+                onPressed: player.stop,
               ),
-            ),
-            // Revealing follows the recitation: only the eye stays.
-            if (centered)
-              const SizedBox(width: _centeredGroupGap)
-            else
+              if (playback.isPlaying)
+                IconButton(
+                  key: const ValueKey('listen-pause'),
+                  style: BarButtonGroup.buttonStyle,
+                  icon: const Icon(Icons.pause_rounded),
+                  tooltip: l10n.recPause,
+                  onPressed: player.pause,
+                )
+              else
+                IconButton(
+                  key: const ValueKey('listen-resume'),
+                  style: BarButtonGroup.buttonStyle,
+                  icon: const Icon(Icons.play_arrow_rounded),
+                  tooltip: l10n.recResume,
+                  onPressed: player.resume,
+                ),
+              TextButton(
+                key: const ValueKey('listen-speed'),
+                style: TextButton.styleFrom(
+                  minimumSize: const Size(46, BarButtonGroup.height),
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                onPressed: () => player.cycleSpeed(speed),
+                child: Text(
+                  '${speed == speed.roundToDouble() ? speed.toInt() : speed}×',
+                  semanticsLabel: '${l10n.listenSpeed} $speed',
+                ),
+              ),
+              if (!following)
+                SleepTimerButton(style: BarButtonGroup.buttonStyle),
+            ],
+          ),
+        );
+        // In a wide browser window showing two pages: the controls under
+        // the left page, the eye at the right one's end.
+        return _UnderPages(
+          wide: wideWebBarWidth(context, ref) != null,
+          left: Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: controls,
+          ),
+          right: const _RevealUnderPage(hidden: false),
+          otherwise: Row(
+            children: [
+              controls,
+              // Revealing follows the recitation: only the eye stays.
               const Spacer(),
-            const MushafHideControls(part: MushafHideControlsPart.pinned),
-          ],
+              const MushafHideControls(part: MushafHideControlsPart.pinned),
+            ],
+          ),
         );
       },
     );
@@ -1206,9 +1319,6 @@ class HifzSettingsButton extends ConsumerWidget {
     );
   }
 }
-
-/// Gap between button groups when the bar's controls are centered (web).
-const _centeredGroupGap = 24.0;
 
 /// Memorization hide mode for the open Mushaf: an eye toggle that hides
 /// every word (ayah markers and numbers stay), and — while hiding —
@@ -1876,9 +1986,12 @@ class _HifzSettingsSheetState extends ConsumerState<_HifzSettingsSheet>
     final settings = ref.watch(hifzSettingsProvider);
     final controller = ref.read(hifzSettingsProvider.notifier);
     final capabilities = ref.watch(platformCapabilitiesProvider);
-    // The mistake alert's vibration and beep: Android, iOS and the web.
+    // The mistake alert's vibration and beep: Android and iOS; the web's
+    // beep.
     final alerts =
         capabilities.isAndroid || capabilities.isIOS || capabilities.isWeb;
+    // A browser: no vibration choice (the sound only).
+    final web = capabilities.isWeb;
     Widget toggle(
       String title,
       String subtitle,
@@ -2069,11 +2182,13 @@ class _HifzSettingsSheetState extends ConsumerState<_HifzSettingsSheet>
                 multiSelectionEnabled: true,
                 emptySelectionAllowed: true,
                 segments: [
-                  ButtonSegment(
-                    value: MistakeAlert.vibrate,
-                    icon: const Icon(Icons.vibration),
-                    label: Text(AppLocalizations.of(context).recAlertVibrate),
-                  ),
+                  // (A browser: the sound alone.)
+                  if (!web)
+                    ButtonSegment(
+                      value: MistakeAlert.vibrate,
+                      icon: const Icon(Icons.vibration),
+                      label: Text(AppLocalizations.of(context).recAlertVibrate),
+                    ),
                   ButtonSegment(
                     value: MistakeAlert.sound,
                     icon: const Icon(Icons.volume_up_outlined),
@@ -2081,14 +2196,16 @@ class _HifzSettingsSheetState extends ConsumerState<_HifzSettingsSheet>
                   ),
                 ],
                 selected: {
-                  if (settings.alert.vibrates) MistakeAlert.vibrate,
+                  if (!web && settings.alert.vibrates) MistakeAlert.vibrate,
                   if (settings.alert.beeps) MistakeAlert.sound,
                 },
                 showSelectedIcon: false,
                 onSelectionChanged: (s) => controller.update(
                   settings.copyWith(
                     alert: MistakeAlert.of(
-                      vibrate: s.contains(MistakeAlert.vibrate),
+                      vibrate: web
+                          ? settings.alert.vibrates
+                          : s.contains(MistakeAlert.vibrate),
                       sound: s.contains(MistakeAlert.sound),
                     ),
                   ),
@@ -2107,11 +2224,13 @@ class _HifzSettingsSheetState extends ConsumerState<_HifzSettingsSheet>
                 multiSelectionEnabled: true,
                 emptySelectionAllowed: true,
                 segments: [
-                  ButtonSegment(
-                    value: MistakeAlert.vibrate,
-                    icon: const Icon(Icons.vibration),
-                    label: Text(AppLocalizations.of(context).recAlertVibrate),
-                  ),
+                  // (A browser: the sound alone.)
+                  if (!web)
+                    ButtonSegment(
+                      value: MistakeAlert.vibrate,
+                      icon: const Icon(Icons.vibration),
+                      label: Text(AppLocalizations.of(context).recAlertVibrate),
+                    ),
                   ButtonSegment(
                     value: MistakeAlert.sound,
                     icon: const Icon(Icons.volume_up_outlined),
@@ -2119,14 +2238,17 @@ class _HifzSettingsSheetState extends ConsumerState<_HifzSettingsSheet>
                   ),
                 ],
                 selected: {
-                  if (settings.tajweedAlert.vibrates) MistakeAlert.vibrate,
+                  if (!web && settings.tajweedAlert.vibrates)
+                    MistakeAlert.vibrate,
                   if (settings.tajweedAlert.beeps) MistakeAlert.sound,
                 },
                 showSelectedIcon: false,
                 onSelectionChanged: (s) => controller.update(
                   settings.copyWith(
                     tajweedAlert: MistakeAlert.of(
-                      vibrate: s.contains(MistakeAlert.vibrate),
+                      vibrate: web
+                          ? settings.tajweedAlert.vibrates
+                          : s.contains(MistakeAlert.vibrate),
                       sound: s.contains(MistakeAlert.sound),
                     ),
                   ),

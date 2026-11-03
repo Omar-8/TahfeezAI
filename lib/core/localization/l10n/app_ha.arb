@@ -618,5 +618,12 @@
   "tipTajweedOff": "An yi alama a kan dokokin tajwidi da yawa a karatunka na ƙarshe. Idan har yanzu kana koyon tajwidi, za ka iya kashe duba tajwidi a saitunan hifzi: haruffa da wasula kawai za a duba.",
   "tipLenient": "An yi alama a kan wasula da yawa a karatunka na ƙarshe. Idan hakan ya yi yawa, za ka iya sassauta duba lafazi a saitunan hifzi: kurakurai mafi bayyana kawai za a yi wa alama.",
   "recModelDownloading": "Ana shirya duba karatu: {percent}% (sau ɗaya kawai)",
-  "recWebUnsupported": "Wannan burauzar ba za ta iya gudanar da duba karatu ba. Gwada sabon Chrome, Edge, Firefox ko Safari."
+  "recWebUnsupported": "Wannan burauzar ba za ta iya gudanar da duba karatu ba. Gwada sabon Chrome, Edge, Firefox ko Safari.",
+  "privacyRecitationWeb": "Ana duba karatunka a na'urarka, a cikin burauza. Ba a aika sautin ko'ina ba kuma ba a adana shi ba.",
+  "privacyLocalWeb": "Ci gaban haddarka, tsare-tsare, alamomi da saitunanka suna zama a na'urarka, a wannan burauzar. Babu asusu.",
+  "privacyNetworkWeb": "Ana amfani da intanet don loda manhajar da samfurin duba karatu, kunna sautin karatu, da rubutun haruffa daga Google Fonts; waɗannan buƙatun suna ambaton fayil kawai.",
+  "privacyDeleteWeb": "Saituna → Sake saita duk bayanai yana goge komai; share bayanan wannan shafin a burauzarka ma haka.",
+  "getAppTitle": "An yi TahfeezAI don wayarka",
+  "getAppBody": "Manhajar ta fi sauri, tana aiki ba tare da intanet ba kuma tana duba karatunka a wayar kanta. Samu ta kyauta a {store}.",
+  "getAppOpen": "Samu a {store}"
 }

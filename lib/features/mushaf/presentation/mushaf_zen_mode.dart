@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/localization/generated/app_localizations.dart';
+import '../../../core/platform/browser_fullscreen.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../domain/mushaf_appearance.dart';
 
@@ -12,8 +13,20 @@ import '../domain/mushaf_appearance.dart';
 /// navigation bars hidden, the recitation bar kept. Until turned off, or the
 /// Mushaf is left.
 class MushafZenMode extends Notifier<bool> {
+  static var _following = false;
+
   @override
-  bool build() => false;
+  bool build() {
+    // In a browser: its own full screen left (Escape, a phone's Back) ends
+    // focus mode too.
+    if (!_following) {
+      _following = true;
+      onBrowserFullscreenLeft(() {
+        if (ref.mounted && state) set(false);
+      });
+    }
+    return false;
+  }
 
   void set(bool on) {
     if (!ref.mounted || on == state) return;
@@ -23,6 +36,8 @@ class MushafZenMode extends Notifier<bool> {
         on ? SystemUiMode.immersiveSticky : SystemUiMode.edgeToEdge,
       ),
     );
+    // A browser: its own full screen too (the phones hide their bars above).
+    setBrowserFullscreen(on);
   }
 }
 
@@ -69,6 +84,20 @@ class _ZenModeLayerState extends ConsumerState<ZenModeLayer> {
   void initState() {
     super.initState();
     _zen = ref.read(mushafZenModeProvider.notifier);
+    HardwareKeyboard.instance.addHandler(_onKey);
+  }
+
+  /// Escape leaves focus mode (a browser without its own full screen
+  /// too: iPhone Safari).
+  bool _onKey(KeyEvent event) {
+    if (event is! KeyDownEvent ||
+        event.logicalKey != LogicalKeyboardKey.escape ||
+        !mounted ||
+        !ref.read(mushafZenModeProvider)) {
+      return false;
+    }
+    _zen.set(false);
+    return true;
   }
 
   void _showPill() {
@@ -93,6 +122,7 @@ class _ZenModeLayerState extends ConsumerState<ZenModeLayer> {
 
   @override
   void dispose() {
+    HardwareKeyboard.instance.removeHandler(_onKey);
     _fade?.cancel();
     final zen = _zen;
     Future.microtask(() => zen.set(false));

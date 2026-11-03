@@ -618,5 +618,12 @@
   "tipTajweedOff": "In deiner letzten Rezitation wurden viele Tajweed-Regeln markiert. Wenn du Tajweed noch lernst, kannst du die Tajweed-Prüfung in den Hifz-Einstellungen ausschalten: Dann werden nur Buchstaben und Vokale geprüft.",
   "tipLenient": "In deiner letzten Rezitation wurden viele Vokale markiert. Wenn dir das zu viel war, kannst du die Aussprache-Prüfung in den Hifz-Einstellungen auf nachsichtig stellen: Dann werden nur deutlichere Fehler markiert.",
   "recModelDownloading": "Rezitationsprüfung wird vorbereitet: {percent} % (nur einmal)",
-  "recWebUnsupported": "Dieser Browser kann die Rezitationsprüfung nicht ausführen. Versuche ein aktuelles Chrome, Edge, Firefox oder Safari."
+  "recWebUnsupported": "Dieser Browser kann die Rezitationsprüfung nicht ausführen. Versuche ein aktuelles Chrome, Edge, Firefox oder Safari.",
+  "privacyRecitationWeb": "Deine Rezitation wird auf deinem Gerät geprüft, im Browser. Der Ton wird nirgendwohin gesendet und nicht gespeichert.",
+  "privacyLocalWeb": "Dein Lernfortschritt, deine Pläne, Lesezeichen und Einstellungen bleiben auf deinem Gerät, in diesem Browser. Es gibt keine Konten.",
+  "privacyNetworkWeb": "Das Internet wird genutzt, um die App und ihr Rezitationsmodell zu laden, Rezitationen abzuspielen und Schriften von Google Fonts zu holen; diese Anfragen nennen nur die Datei.",
+  "privacyDeleteWeb": "Einstellungen → Alle Daten zurücksetzen löscht alles; ebenso das Löschen der Daten dieser Website im Browser.",
+  "getAppTitle": "TahfeezAI ist für dein Telefon gemacht",
+  "getAppBody": "Die App ist schneller, funktioniert offline und prüft deine Rezitation direkt auf dem Telefon. Hol sie dir kostenlos bei {store}.",
+  "getAppOpen": "Bei {store} laden"
 }

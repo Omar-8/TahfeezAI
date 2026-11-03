@@ -618,5 +618,12 @@
   "tipTajweedOff": "Banyak hukum tajwid ditandai dalam bacaan terakhir Anda. Jika Anda masih belajar tajwid, Anda bisa mematikan pemeriksaan tajwid di pengaturan hafalan: lalu hanya huruf dan harakat yang diperiksa.",
   "tipLenient": "Banyak harakat ditandai dalam bacaan terakhir Anda. Jika terasa terlalu banyak, Anda bisa membuat pemeriksaan pelafalan longgar di pengaturan hafalan: lalu hanya kesalahan yang lebih jelas yang ditandai.",
   "recModelDownloading": "Menyiapkan pemeriksaan bacaan: {percent}% (sekali saja)",
-  "recWebUnsupported": "Browser ini tidak bisa menjalankan pemeriksaan bacaan. Coba Chrome, Edge, Firefox, atau Safari versi terbaru."
+  "recWebUnsupported": "Browser ini tidak bisa menjalankan pemeriksaan bacaan. Coba Chrome, Edge, Firefox, atau Safari versi terbaru.",
+  "privacyRecitationWeb": "Bacaan Anda diperiksa di perangkat Anda, di dalam browser. Audio tidak pernah dikirim ke mana pun dan tidak disimpan.",
+  "privacyLocalWeb": "Kemajuan hafalan, rencana, penanda, dan pengaturan Anda tetap di perangkat Anda, di browser ini. Tidak ada akun.",
+  "privacyNetworkWeb": "Internet digunakan untuk memuat aplikasi dan model pemeriksa bacaan, memutar audio bacaan, dan font dari Google Fonts; permintaan itu hanya menyebut nama file.",
+  "privacyDeleteWeb": "Pengaturan → Atur ulang semua data menghapus semuanya; menghapus data situs ini di browser Anda juga.",
+  "getAppTitle": "TahfeezAI dibuat untuk ponsel Anda",
+  "getAppBody": "Aplikasinya lebih cepat, berjalan offline, dan memeriksa bacaan Anda di ponsel itu sendiri. Dapatkan gratis di {store}.",
+  "getAppOpen": "Dapatkan di {store}"
 }

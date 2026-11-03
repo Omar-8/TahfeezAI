@@ -120,7 +120,7 @@ void main() {
       final chapters = await container.read(
         featuredReadingChaptersProvider.future,
       );
-      // Every entry in `featuredReadingSurahNumbers` (1, 18, 36, 55, 67) is
+      // Every entry in `featuredReadingSurahNumbers` (1, 2, 18, 36, 55, 67) is
       // within the synthetic fixture's 114 surahs, so all resolve.
       expect(chapters, hasLength(featuredReadingSurahNumbers.length));
       // Today's order may bring Al-Kahf or Al-Mulk first (featuredOrderFor).

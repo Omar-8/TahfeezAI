@@ -618,5 +618,12 @@
   "tipTajweedOff": "Dans votre dernière récitation, de nombreuses règles de tajwid ont été signalées. Si vous apprenez encore le tajwid, vous pouvez désactiver sa vérification dans les réglages Hifz : seules les lettres et les voyelles sont alors vérifiées.",
   "tipLenient": "Dans votre dernière récitation, de nombreuses voyelles ont été signalées. Si cela vous a semblé trop, vous pouvez rendre la vérification de la prononciation indulgente dans les réglages Hifz : seules les erreurs plus nettes sont alors signalées.",
   "recModelDownloading": "Préparation de la vérification de la récitation : {percent} % (une seule fois)",
-  "recWebUnsupported": "Ce navigateur ne peut pas exécuter la vérification de la récitation. Essayez un Chrome, Edge, Firefox ou Safari récent."
+  "recWebUnsupported": "Ce navigateur ne peut pas exécuter la vérification de la récitation. Essayez un Chrome, Edge, Firefox ou Safari récent.",
+  "privacyRecitationWeb": "Votre récitation est vérifiée sur votre appareil, dans le navigateur. L'audio n'est jamais envoyé nulle part ni enregistré.",
+  "privacyLocalWeb": "Votre progression, vos plans, signets et réglages restent sur votre appareil, dans ce navigateur. Il n'y a pas de compte.",
+  "privacyNetworkWeb": "Internet sert à charger l'app et son modèle de récitation, à lire les récitations et à obtenir des polices de Google Fonts ; ces requêtes ne nomment que le fichier.",
+  "privacyDeleteWeb": "Réglages → Réinitialiser toutes les données efface tout ; effacer les données de ce site dans votre navigateur aussi.",
+  "getAppTitle": "TahfeezAI est faite pour votre téléphone",
+  "getAppBody": "L'app est plus rapide, fonctionne hors ligne et vérifie votre récitation sur le téléphone même. Obtenez-la gratuitement sur {store}.",
+  "getAppOpen": "L'obtenir sur {store}"
 }

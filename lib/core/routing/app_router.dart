@@ -22,6 +22,7 @@ part 'app_router.g.dart';
 @Riverpod(keepAlive: true)
 GoRouter appRouter(Ref ref) {
   final router = GoRouter(
+    navigatorKey: rootNavigatorKey,
     initialLocation: AppRoutes.home,
     routes: [
       StatefulShellRoute(
@@ -213,3 +214,6 @@ class _FadingBranchesState extends State<FadingBranches>
     );
   }
 }
+
+/// The app's root navigator (prompts shown above every screen).
+final rootNavigatorKey = GlobalKey<NavigatorState>();

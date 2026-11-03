@@ -335,11 +335,10 @@ final hifzSettingsProvider =
 /// Vibrates on a mistake; overridden in tests.
 /// A short vibration for a mistake (Android: the device's vibrator — the
 /// touch-feedback setting MIUI and others often turn down is not used;
-/// iOS: the haptic engine; the web: the browser's, where it vibrates).
+/// iOS: the haptic engine; not in a browser, which has the sound only).
 final hifzHapticsProvider = Provider<void Function()>((ref) {
   final capabilities = ref.watch(platformCapabilitiesProvider);
-  final native =
-      capabilities.isAndroid || capabilities.isIOS || capabilities.isWeb;
+  final native = capabilities.isAndroid || capabilities.isIOS;
   const channel = MethodChannel('tahfeez/alert');
   return native
       ? () => unawaited(channel.invokeMethod<void>('vibrate', 120))
@@ -347,11 +346,11 @@ final hifzHapticsProvider = Provider<void Function()>((ref) {
 });
 
 /// A gentle double tap for a page recited to its end (Android: the
-/// device's vibrator, softly; the web: the browser's).
+/// device's vibrator, softly).
 final hifzPageDoneHapticsProvider = Provider<void Function()>((ref) {
   final capabilities = ref.watch(platformCapabilitiesProvider);
   const channel = MethodChannel('tahfeez/alert');
-  return capabilities.isAndroid || capabilities.isWeb
+  return capabilities.isAndroid
       ? () => unawaited(channel.invokeMethod<void>('pageDone'))
       : () {};
 });
@@ -753,10 +752,19 @@ class HifzController extends Notifier<HifzState> {
   /// Loops [range] in the next recitation session (started right after);
   /// the session's end ends the loop. [showBefore]: the words before the
   /// range stay shown in hide mode (Follow along).
-  void setLoop(HifzRange range, HifzLoop loop, {bool showBefore = false}) {
+  ///
+  /// [keepMarks]: the page's colours so far stay as this loop is recited
+  /// (Follow along's later turns: its earlier ones').
+  void setLoop(
+    HifzRange range,
+    HifzLoop loop, {
+    bool showBefore = false,
+    bool keepMarks = false,
+  }) {
     if (state.running) return;
     if (state.loop == null) _rangeBeforeLoop = state.range;
     _showBefore = showBefore;
+    _keepMarks = keepMarks;
     lastLoop = loop;
     state = state.copyWith(range: () => range, loop: () => loop);
   }
@@ -810,6 +818,27 @@ class HifzController extends Notifier<HifzState> {
   /// The words before the range stay shown (see [setLoop]); for one
   /// session.
   var _showBefore = false;
+  var _keepMarks = false;
+
+  /// Follow along: the colours of its earlier turns, kept on the page as
+  /// the next ayahs are recited (a new recitation outside it clears them).
+  var _carried = const <WordRef, MushafWordMark>{};
+
+  /// [marks] with the earlier turns' colours ([_carried]) — except on the
+  /// words between [first] and [last], recited now.
+  Map<WordRef, MushafWordMark> _withCarried(
+    Map<WordRef, MushafWordMark> marks,
+    WordRef first,
+    WordRef last,
+  ) => _carried.isEmpty
+      ? marks
+      : {
+          for (final e in _carried.entries)
+            if (compareWordRefs(e.key, first) < 0 ||
+                compareWordRefs(e.key, last) > 0)
+              e.key: e.value,
+          ...marks,
+        };
 
   /// The pass being recited: one more each time a loop starts again (see
   /// [recitationPassProvider]).
@@ -861,6 +890,7 @@ class HifzController extends Notifier<HifzState> {
     _locating = false;
     // A loop lasts one session.
     _showBefore = false;
+    _keepMarks = false;
     state = HifzState(
       range: state.loop != null ? _rangeBeforeLoop : state.range,
     );
@@ -928,7 +958,11 @@ class HifzController extends Notifier<HifzState> {
             // Looping ayah by ayah: the ayahs still to come stay hidden too.
             last: _loopEnd ?? s.last!,
             revealed: {..._loopDone, ...s.revealed}.difference(held),
-            marks: _withSettings(marks, settings),
+            marks: _withCarried(
+              _withSettings(marks, settings),
+              s.first!,
+              _loopEnd ?? s.last!,
+            ),
             hideUnrevealed: ref.read(mushafHideModeProvider).enabled,
             showBefore: _showBefore,
             heard: Map.of(_heardAt),
@@ -964,6 +998,13 @@ class HifzController extends Notifier<HifzState> {
             if (!_mistakeMarks.contains(e.value)) e.key: e.value,
         };
 
+  /// Marks of the moment, not of a word's result: not carried over.
+  static const _bandMarks = {
+    MushafWordMark.current,
+    MushafWordMark.mistake,
+    MushafWordMark.checking,
+  };
+
   static const _mistakeMarks = {
     MushafWordMark.mistake,
     MushafWordMark.skipped,
@@ -987,19 +1028,23 @@ class HifzController extends Notifier<HifzState> {
           MushafWordOverlay(
             first: corpus.words[judge.start].ref,
             last: corpus.words[judge.end].ref,
-            marks: _withSettings({
-              for (final p in judge.revealed)
-                if (!judge.given.contains(p))
-                  corpus.words[p].ref: switch (judge.marked[p]) {
-                    HifzVerdict.skipped => MushafWordMark.skipped,
-                    HifzVerdict.wrong ||
-                    HifzVerdict.selfCorrected => MushafWordMark.wrong,
-                    _ => _pronunciationMark(
-                      acoustic[corpus.words[p].ref],
-                      _pass,
-                    ),
-                  },
-            }, ref.read(hifzSettingsProvider)),
+            marks: _withCarried(
+              _withSettings({
+                for (final p in judge.revealed)
+                  if (!judge.given.contains(p))
+                    corpus.words[p].ref: switch (judge.marked[p]) {
+                      HifzVerdict.skipped => MushafWordMark.skipped,
+                      HifzVerdict.wrong ||
+                      HifzVerdict.selfCorrected => MushafWordMark.wrong,
+                      _ => _pronunciationMark(
+                        acoustic[corpus.words[p].ref],
+                        _pass,
+                      ),
+                    },
+              }, ref.read(hifzSettingsProvider)),
+              corpus.words[judge.start].ref,
+              corpus.words[judge.end].ref,
+            ),
             hideUnrevealed: false,
             followHideMode: true,
             heard: Map.of(_heardAt),
@@ -1046,6 +1091,15 @@ class HifzController extends Notifier<HifzState> {
     _alerted.clear();
     _heardAt.clear();
     _correctedAt.clear();
+    // Follow along's next turn: the colours so far stay (not the bands of
+    // a next word or a pending mistake); any other recitation starts clean.
+    final shown = ref.read(mushafWordOverlayProvider);
+    _carried = _keepMarks && shown != null
+        ? {
+            for (final e in shown.marks.entries)
+              if (!_bandMarks.contains(e.value)) e.key: e.value,
+          }
+        : const {};
     // A new recitation: the last one's colours go.
     if (_results) {
       _results = false;

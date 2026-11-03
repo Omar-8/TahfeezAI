@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 // Web-only file (imports `dart:js_interop` and `package:web`) — never
 // imported from platform-shared code; only `quran_engine_web_backend.dart`
 // (itself only constructed on Web, see
@@ -143,7 +144,59 @@ class QuranEngineWebPage {
           // Tahfeez modal sheet is active, plus a short cooldown after it
           // closes (`TahfeezModalSheetActivity`).
           if (TahfeezModalSheetActivity.isActive) return;
+          // (The end of a long press: its ayah opened, not the word too.)
+          if (_longPressed) {
+            _longPressed = false;
+            return;
+          }
           _onTap?.call(event.offsetX.toDouble(), event.offsetY.toDouble());
+        }.toJS,
+      );
+      // A long press, as on the phones (the word's ayah): a right-click or
+      // a long touch (the browser's "contextmenu"; its own menu not shown),
+      // or the mouse held down half a second.
+      void longPress(double x, double y) {
+        if (TahfeezModalSheetActivity.isActive) return;
+        _longPressed = true;
+        _onLongPress?.call(x, y);
+      }
+
+      canvas.addEventListener(
+        'contextmenu',
+        (web.MouseEvent event) {
+          event.preventDefault();
+          _holdTimer?.cancel();
+          if (_longPressed) return;
+          longPress(event.offsetX.toDouble(), event.offsetY.toDouble());
+          // (A right-click has no click after it.)
+          _longPressed = false;
+        }.toJS,
+      );
+      canvas.addEventListener(
+        'pointerdown',
+        (web.PointerEvent event) {
+          _longPressed = false;
+          _holdTimer?.cancel();
+          if (event.pointerType != 'mouse' || event.button != 0) return;
+          final x = event.offsetX.toDouble(), y = event.offsetY.toDouble();
+          _holdAt = (x, y);
+          _holdTimer = Timer(
+            const Duration(milliseconds: 500),
+            () => longPress(x, y),
+          );
+        }.toJS,
+      );
+      void endHold(web.PointerEvent event) => _holdTimer?.cancel();
+      canvas.addEventListener('pointerup', endHold.toJS);
+      canvas.addEventListener('pointerleave', endHold.toJS);
+      canvas.addEventListener(
+        'pointermove',
+        (web.PointerEvent event) {
+          final at = _holdAt;
+          if (at == null || _holdTimer?.isActive != true) return;
+          final dx = event.offsetX - at.$1, dy = event.offsetY - at.$2;
+          // Moved (a drag, a page turn): not a long press.
+          if (dx * dx + dy * dy > 64) _holdTimer?.cancel();
         }.toJS,
       );
       // Real production testing (not the POC's simpler standalone screen)
@@ -169,10 +222,17 @@ class QuranEngineWebPage {
   late final String _viewType;
   web.HTMLCanvasElement? _canvas;
   void Function(double x, double y)? _onTap;
+  void Function(double x, double y)? _onLongPress;
+  Timer? _holdTimer;
+  (double, double)? _holdAt;
+  bool _longPressed = false;
   String? _paperColorCss;
   void Function()? _pendingRender;
 
   set onTap(void Function(double x, double y)? handler) => _onTap = handler;
+
+  set onLongPress(void Function(double x, double y)? handler) =>
+      _onLongPress = handler;
 
   /// Sets the canvas element's own CSS background — the "paper" behind
   /// the engine's ink, since `CanvasRenderer.draw` itself never fills a
@@ -261,6 +321,189 @@ class QuranEngineWebPage {
       ..setProperty('ox'.toJS, ox.toJS)
       ..setProperty('oy'.toJS, oy.toJS);
     renderer.callMethod('draw'.toJS, _page, viewObj, devicePixelRatio.toJS);
+    _renderer = renderer;
+    _view = viewObj;
+    _dpr = devicePixelRatio;
+    _paintEffects(web.window.performance.now());
+  }
+
+  // ── Word effects (the phones' qvp_flutter ones, drawn over the canvas) ──
+
+  JSObject? _renderer, _view;
+  double _dpr = 1;
+  final _effects = <_WordEffect>[];
+  var _animating = false;
+
+  /// Each word's ink boxes (page units, one per line it spans).
+  late final Map<
+    int,
+    List<({int line, double x0, double y0, double x1, double y1})>
+  >
+  _wordBoxes = () {
+    final out =
+        <int, List<({int line, double x0, double y0, double x1, double y1})>>{};
+    final boxes =
+        (_page.callMethod('hitBoxes'.toJS) as JSArray<JSObject>).toDart;
+    double n(JSObject b, String k) =>
+        (b.getProperty<JSNumber>(k.toJS)).toDartDouble;
+    for (final b in boxes) {
+      (out[n(b, 'word').toInt()] ??= []).add((
+        line: n(b, 'line').toInt(),
+        x0: n(b, 'inkX0'),
+        y0: n(b, 'inkY0'),
+        x1: n(b, 'inkX1'),
+        y1: n(b, 'inkY1'),
+      ));
+    }
+    return out;
+  }();
+
+  /// Plays [kind] (`bloom`, `shake`, `inkIn`, `inkOut`) on page word
+  /// [wordIndex] in [rgba] (0xRRGGBBAA), after [delayMs].
+  void playEffect(String kind, int wordIndex, int rgba, double delayMs) {
+    final start = web.window.performance.now() + delayMs;
+    _effects
+      ..removeWhere((e) => e.word == wordIndex && e.kind == kind)
+      ..add(_WordEffect(kind, wordIndex, rgba, start));
+    if (_animating) return;
+    _animating = true;
+    void frame(JSNumber _) {
+      final now = web.window.performance.now();
+      _effects.removeWhere((e) => now > e.start + e.duration);
+      _drawFrame(now);
+      if (_effects.isEmpty) {
+        _animating = false;
+        return;
+      }
+      web.window.requestAnimationFrame(frame.toJS);
+    }
+
+    web.window.requestAnimationFrame(frame.toJS);
+  }
+
+  void _drawFrame(double now) {
+    final renderer = _renderer, view = _view;
+    if (renderer == null || view == null || _canvas == null) return;
+    renderer.callMethod('draw'.toJS, _page, view, _dpr.toJS);
+    _paintEffects(now);
+  }
+
+  void _paintEffects(double now) {
+    final canvas = _canvas, renderer = _renderer, view = _view;
+    if (_effects.isEmpty || canvas == null || renderer == null) return;
+    final c = canvas.getContext('2d') as web.CanvasRenderingContext2D;
+    c.save();
+    c.setTransform(1.toJS, 0, 0, 1, 0, 0);
+    for (final e in _effects) {
+      final t = (now - e.start) / e.duration;
+      if (t < 0) {
+        // Not started: a word about to fade in stays covered.
+        if (e.kind == 'inkIn') _cover(c, renderer, view!, e.word, 1);
+        continue;
+      }
+      final k = t.clamp(0.0, 1.0);
+      switch (e.kind) {
+        case 'inkIn':
+          _cover(c, renderer, view!, e.word, 1 - _ease(k));
+        case 'inkOut':
+          // To the paper in 400 of its 460 ms, then held.
+          _cover(
+            c,
+            renderer,
+            view!,
+            e.word,
+            _ease((k * 460 / 400).clamp(0, 1)),
+          );
+        case 'bloom':
+          _band(c, renderer, view!, e, 0.45 * (1 - k), 2 + 6 * k);
+        case 'shake':
+          _band(
+            c,
+            renderer,
+            view!,
+            e,
+            0.4 * (1 - k) * (0.6 + 0.4 * math.sin(k * math.pi * 6).abs()),
+            2,
+          );
+      }
+    }
+    c.restore();
+  }
+
+  static double _ease(double t) => t * t * (3 - 2 * t);
+
+  /// The word's boxes in canvas pixels, grown by [pad] CSS pixels.
+  Iterable<({double x, double y, double w, double h})> _rects(
+    JSObject renderer,
+    JSObject view,
+    int word,
+    double pad,
+  ) sync* {
+    for (final b
+        in _wordBoxes[word] ??
+            const <
+              ({int line, double x0, double y0, double x1, double y1})
+            >[]) {
+      final tf = (renderer.callMethod(
+        'lineTransform'.toJS,
+        _page,
+        view,
+        b.line.toJS,
+        _dpr.toJS,
+      ) as JSArray<JSNumber>).toDart;
+      final scale = tf[0].toDartDouble, tx = tf[1].toDartDouble;
+      final ty = tf[2].toDartDouble, p = pad * _dpr;
+      yield (
+        x: tx + b.x0 * scale - p,
+        y: ty + b.y0 * scale - p,
+        w: (b.x1 - b.x0) * scale + 2 * p,
+        h: (b.y1 - b.y0) * scale + 2 * p,
+      );
+    }
+  }
+
+  /// The paper over the word's ink, [alpha] opaque.
+  void _cover(
+    web.CanvasRenderingContext2D c,
+    JSObject renderer,
+    JSObject view,
+    int word,
+    double alpha,
+  ) {
+    if (alpha <= 0) return;
+    c.globalAlpha = alpha;
+    c.globalCompositeOperation = 'source-over';
+    c.fillStyle = (_paperColorCss ?? '#ffffff').toJS;
+    for (final r in _rects(renderer, view, word, 1.5)) {
+      c.fillRect(r.x, r.y, r.w, r.h);
+    }
+    c.globalAlpha = 1;
+  }
+
+  /// A soft band of the effect's colour behind the word's ink.
+  void _band(
+    web.CanvasRenderingContext2D c,
+    JSObject renderer,
+    JSObject view,
+    _WordEffect e,
+    double alpha,
+    double pad,
+  ) {
+    if (alpha <= 0) return;
+    final rgba = e.rgba;
+    c.globalAlpha = alpha;
+    // Behind what is drawn: the ink stays on top.
+    c.globalCompositeOperation = 'destination-over';
+    c.fillStyle =
+        'rgb(${(rgba >> 24) & 0xff}, ${(rgba >> 16) & 0xff}, ${(rgba >> 8) & 0xff})'
+            .toJS;
+    for (final r in _rects(renderer, view, e.word, pad)) {
+      c.beginPath();
+      c.roundRect(r.x, r.y, r.w, r.h, (4 * _dpr).toJS);
+      c.fill();
+    }
+    c.globalAlpha = 1;
+    c.globalCompositeOperation = 'source-over';
   }
 
   /// Extra uniform scale applied to the printed text only (not the frame)
@@ -344,11 +587,15 @@ class QuranEngineWebPage {
 
   int _highlight(JSObject target, String mode) {
     final style = JSObject()..setProperty('mode'.toJS, mode.toJS);
-    return (_page.callMethod(
+    final handle = (_page.callMethod(
       'highlight'.toJS,
       target,
       style,
     ) as JSNumber).toDartInt;
+    // Painted now (the ayah playing, a long-pressed ayah), not at the next
+    // render something else happens to cause.
+    _redraw();
+    return handle;
   }
 
   void clearHighlights() {
@@ -526,4 +773,21 @@ class QuranEngineWebPage {
   void dispose() {
     _page.callMethod('free'.toJS);
   }
+}
+
+/// A word effect under way ([QuranEngineWebPage.playEffect]).
+class _WordEffect {
+  _WordEffect(this.kind, this.word, this.rgba, this.start);
+
+  final String kind;
+  final int word, rgba;
+  final double start;
+
+  /// As the phones' (qvp_flutter's QvpWordEffectKind).
+  double get duration => switch (kind) {
+    'bloom' => 650,
+    'shake' => 420,
+    'inkIn' => 400,
+    _ => 460,
+  };
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../../../core/core_providers.dart';
 import '../../../core/ui/bar_space.dart';
 
 import 'package:flutter/material.dart';
@@ -24,6 +25,7 @@ class AboutScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final web = ref.watch(platformCapabilitiesProvider).isWeb;
     final version = ref.watch(appVersionProvider).value ?? '';
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
@@ -71,13 +73,26 @@ class AboutScreen extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               spacing: TahfeezSpacing.sm,
               children: [
-                for (final (icon, text) in [
-                  (Icons.mic_none_rounded, l10n.privacyRecitation),
-                  (Icons.phone_android_rounded, l10n.privacyLocal),
-                  (Icons.cloud_outlined, l10n.privacyNetwork),
-                  (Icons.block_rounded, l10n.privacyNoTracking),
-                  (Icons.delete_outline_rounded, l10n.privacyDelete),
-                ])
+                // In a browser: on the device, in the browser — not a phone.
+                for (final (icon, text)
+                    in web
+                        ? [
+                            (Icons.mic_none_rounded, l10n.privacyRecitationWeb),
+                            (Icons.devices_rounded, l10n.privacyLocalWeb),
+                            (Icons.cloud_outlined, l10n.privacyNetworkWeb),
+                            (Icons.block_rounded, l10n.privacyNoTracking),
+                            (
+                              Icons.delete_outline_rounded,
+                              l10n.privacyDeleteWeb,
+                            ),
+                          ]
+                        : [
+                            (Icons.mic_none_rounded, l10n.privacyRecitation),
+                            (Icons.phone_android_rounded, l10n.privacyLocal),
+                            (Icons.cloud_outlined, l10n.privacyNetwork),
+                            (Icons.block_rounded, l10n.privacyNoTracking),
+                            (Icons.delete_outline_rounded, l10n.privacyDelete),
+                          ])
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     spacing: TahfeezSpacing.smPlus,

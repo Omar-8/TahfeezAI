@@ -618,5 +618,12 @@
   "tipTajweedOff": "Son okuyuşunuzda birçok tecvit kuralı işaretlendi. Tecvidi hâlâ öğreniyorsanız Hıfz ayarlarından tecvit kontrolünü kapatabilirsiniz: o zaman yalnızca harfler ve harekeler kontrol edilir.",
   "tipLenient": "Son okuyuşunuzda birçok hareke işaretlendi. Bu size fazla geldiyse Hıfz ayarlarından telaffuz kontrolünü hoşgörülü yapabilirsiniz: o zaman yalnızca daha belirgin hatalar işaretlenir.",
   "recModelDownloading": "Okuyuş kontrolü hazırlanıyor: %{percent} (yalnızca bir kez)",
-  "recWebUnsupported": "Bu tarayıcı okuyuş kontrolünü çalıştıramıyor. Güncel bir Chrome, Edge, Firefox veya Safari deneyin."
+  "recWebUnsupported": "Bu tarayıcı okuyuş kontrolünü çalıştıramıyor. Güncel bir Chrome, Edge, Firefox veya Safari deneyin.",
+  "privacyRecitationWeb": "Okuyuşunuz cihazınızda, tarayıcıda kontrol edilir. Ses hiçbir yere gönderilmez ve kaydedilmez.",
+  "privacyLocalWeb": "Ezber ilerlemeniz, planlarınız, yer işaretleriniz ve ayarlarınız cihazınızda, bu tarayıcıda kalır. Hesap yoktur.",
+  "privacyNetworkWeb": "İnternet, uygulamayı ve okuyuş modelini yüklemek, okuyuş seslerini çalmak ve Google Fonts yazı tipleri için kullanılır; bu istekler yalnızca dosyanın adını taşır.",
+  "privacyDeleteWeb": "Ayarlar → Tüm verileri sıfırla her şeyi siler; tarayıcınızda bu sitenin verilerini temizlemek de.",
+  "getAppTitle": "TahfeezAI telefonunuz için yapıldı",
+  "getAppBody": "Uygulama daha hızlıdır, çevrimdışı çalışır ve okuyuşunuzu telefonun kendisinde kontrol eder. {store} üzerinden ücretsiz edinin.",
+  "getAppOpen": "{store} üzerinden edinin"
 }

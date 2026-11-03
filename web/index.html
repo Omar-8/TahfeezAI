@@ -30,6 +30,12 @@
   <link rel="icon" type="image/png" href="favicon.png"/>
 
   <title>TahfeezAI</title>
+  <!-- The app draws everything; the page itself never scrolls (a page's
+       canvas sliding past the window as Mushaf pages are swiped would
+       otherwise flash the browser's own scrollbar). -->
+  <style>
+    html, body { margin: 0; height: 100%; overflow: hidden; overscroll-behavior: none; }
+  </style>
   <link rel="manifest" href="manifest.json">
 </head>
 <body>
