@@ -1,0 +1,120 @@
+<en-US>
+• Follow along keeps the colours of the verses already recited, and shows the run's results at the end
+• In Ayah mode, playing a hidden ayah reveals it
+• The Daily Ayah opens at its place with the ayahs hidden
+• Al-Baqarah in Featured Reading
+</en-US>
+<ar>
+• المتابعة تُبقي ألوان الآيات المتلوّة، وتعرض نتائج الجلسة في نهايتها
+• في وضع الآيات، تشغيل آية مخفية يُظهرها
+• آية اليوم تُفتح في موضعها والآيات مخفية
+• سورة البقرة في القراءة المختارة
+</ar>
+<bn-BD>
+• সাথে সাথে তিলাওয়াতে আগের আয়াতগুলোর রং থেকে যায়, শেষে সেশনের ফলাফল দেখায়
+• আয়াত মোডে লুকানো আয়াত বাজালে তা দেখা যায়
+• আয়াত লুকানো থাকলেও দিনের আয়াত সঠিক জায়গায় খোলে
+• নির্বাচিত পাঠে সূরা আল-বাকারাহ
+</bn-BD>
+<da-DK>
+• Følg med beholder farverne på de reciterede vers og viser resultaterne til sidst
+• I vers-tilstand vises et skjult vers, når det afspilles
+• Dagens vers åbner på sin plads, også med skjulte vers
+• Al-Baqarah under Udvalgt læsning
+</da-DK>
+<de-DE>
+• Mitlesen behält die Farben der schon rezitierten Verse und zeigt am Ende die Ergebnisse
+• Im Vers-Modus wird ein verborgener Vers beim Abspielen aufgedeckt
+• Der Vers des Tages öffnet an seiner Stelle, auch bei verborgenen Versen
+• Al-Baqara unter Empfohlene Lesung
+</de-DE>
+<el-GR>
+• Η παρακολούθηση κρατά τα χρώματα των στίχων που απαγγέλθηκαν και δείχνει τα αποτελέσματα στο τέλος
+• Στη λειτουργία στίχων, ένας κρυμμένος στίχος εμφανίζεται όταν αναπαράγεται
+• Ο στίχος της ημέρας ανοίγει στη θέση του, ακόμη και με κρυμμένους στίχους
+• Η Αλ-Μπάκαρα στις προτεινόμενες αναγνώσεις
+</el-GR>
+<es-ES>
+• Seguir conserva los colores de las aleyas ya recitadas y muestra los resultados al final
+• En el modo aleya, reproducir una aleya oculta la muestra
+• La aleya del día se abre en su sitio, también con las aleyas ocultas
+• Al-Baqara en Lectura destacada
+</es-ES>
+<fa>
+• همراهی رنگ آیه‌های تلاوت‌شده را نگه می‌دارد و در پایان نتایج را نشان می‌دهد
+• در حالت آیه، پخش آیهٔ پنهان آن را آشکار می‌کند
+• آیهٔ روز در جای خود باز می‌شود، حتی با آیه‌های پنهان
+• سورهٔ بقره در خواندنی‌های برگزیده
+</fa>
+<fr-FR>
+• Suivre garde les couleurs des versets déjà récités et affiche les résultats à la fin
+• En mode verset, lire un verset masqué le dévoile
+• Le verset du jour s'ouvre à sa place, même versets masqués
+• Al-Baqara dans Lecture à la une
+</fr-FR>
+<id>
+• Ikuti bacaan mempertahankan warna ayat yang sudah dibaca dan menampilkan hasilnya di akhir
+• Di mode ayat, memutar ayat yang tersembunyi akan menampilkannya
+• Ayat hari ini terbuka di tempatnya, juga saat ayat disembunyikan
+• Al-Baqarah di Bacaan Pilihan
+</id>
+<ja-JP>
+• 一緒に読誦で、読み終えた節の色が残り、最後に結果が表示されます
+• 節モードで、隠れた節を再生すると表示されます
+• 今日の節が、節を隠していても正しい位置で開きます
+• おすすめにアル・バカラを追加
+</ja-JP>
+<kk>
+• Бірге оқу оқылған аяттардың түсін сақтап, соңында нәтижелерін көрсетеді
+• Аят режимінде жасырын аятты ойнатқанда ол ашылады
+• Күннің аяты аяттар жасырын болса да өз орнында ашылады
+• Таңдаулы оқуда Әл-Бақара сүресі
+</kk>
+<ko-KR>
+• 따라 읽기가 이미 낭송한 구절의 색을 유지하고 끝에 결과를 보여 줍니다
+• 구절 모드에서 숨긴 구절을 재생하면 드러납니다
+• 구절이 숨겨져 있어도 오늘의 구절이 제자리에서 열립니다
+• 추천 읽기에 알바카라 추가
+</ko-KR>
+<ms>
+• Ikut bacaan mengekalkan warna ayat yang telah dibaca dan memaparkan keputusan pada akhirnya
+• Dalam mod ayat, memainkan ayat tersembunyi akan mendedahkannya
+• Ayat hari ini dibuka di tempatnya walaupun ayat disembunyikan
+• Al-Baqarah dalam Bacaan Pilihan
+</ms>
+<nl-NL>
+• Meelezen houdt de kleuren van de al gereciteerde verzen en toont aan het eind de resultaten
+• In versmodus wordt een verborgen vers zichtbaar als het wordt afgespeeld
+• Het vers van de dag opent op zijn plek, ook met verborgen verzen
+• Al-Baqara bij Uitgelicht lezen
+</nl-NL>
+<pt-BR>
+• Acompanhar mantém as cores dos versículos já recitados e mostra os resultados no final
+• No modo versículo, tocar um versículo oculto o revela
+• O versículo do dia abre no lugar certo, mesmo com versículos ocultos
+• Al-Baqara em Leitura em destaque
+</pt-BR>
+<ru-RU>
+• Следование сохраняет цвета прочитанных аятов и показывает итоги в конце
+• В режиме аятов воспроизведение скрытого аята открывает его
+• Аят дня открывается на своём месте, даже если аяты скрыты
+• Аль-Бакара в рекомендуемом чтении
+</ru-RU>
+<sw>
+• Kufuatana kunabaki na rangi za aya zilizokwisha somwa na kuonyesha matokeo mwishoni
+• Katika hali ya aya, kucheza aya iliyofichwa huionyesha
+• Aya ya leo hufunguka mahali pake hata aya zikiwa zimefichwa
+• Al-Baqarah katika Usomaji Uliochaguliwa
+</sw>
+<tr-TR>
+• Birlikte okuma, okunan ayetlerin renklerini korur ve sonunda sonuçları gösterir
+• Ayet modunda gizli bir ayeti çalmak onu açar
+• Günün ayeti, ayetler gizliyken de yerinde açılır
+• Öne çıkan okumalarda Bakara suresi
+</tr-TR>
+<ur>
+• ساتھ پڑھنا پہلے پڑھی گئی آیات کے رنگ برقرار رکھتا ہے اور آخر میں نتائج دکھاتا ہے
+• آیت موڈ میں چھپی ہوئی آیت چلانے پر وہ ظاہر ہو جاتی ہے
+• آیات چھپی ہوں تب بھی آج کی آیت اپنی جگہ پر کھلتی ہے
+• منتخب مطالعہ میں سورۃ البقرہ
+</ur>
