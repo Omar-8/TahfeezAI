@@ -1,0 +1,80 @@
+<en-US>
+• Opening an ayah in Ayah mode with the ayahs hidden starts there: the ayahs before it shown, each reveal its next word, kept in view
+• Featured Reading in a fixed order, Al-Faatiha first
+</en-US>
+<ar>
+• فتح آية في وضع الآيات والآيات مخفية يبدأ منها: تظهر الآيات قبلها، وكل كشف يُظهر كلمتها التالية مع بقائها في العرض
+• القراءة المختارة بترتيب ثابت، تبدأ بالفاتحة
+</ar>
+<bn-BD>
+• আয়াত লুকানো অবস্থায় আয়াত মোডে কোনো আয়াত খুললে সেখান থেকেই শুরু হয়: আগের আয়াতগুলো দেখা যায়, প্রতিটি প্রকাশে পরের শব্দ, দৃশ্যে থেকে
+• নির্বাচিত পাঠ নির্দিষ্ট ক্রমে, প্রথমে আল-ফাতিহা
+</bn-BD>
+<da-DK>
+• Åbnes et vers i vers-tilstand med skjulte vers, starter det der: versene før vises, hver afsløring dets næste ord, i syne
+• Udvalgt læsning i fast rækkefølge, Al-Fatiha først
+</da-DK>
+<de-DE>
+• Ein Vers im Vers-Modus bei verborgenen Versen geöffnet beginnt dort: die Verse davor sichtbar, jedes Aufdecken sein nächstes Wort, im Blick
+• Empfohlene Lesung in fester Reihenfolge, Al-Fatiha zuerst
+</de-DE>
+<el-GR>
+• Ένας στίχος που ανοίγει στη λειτουργία στίχων με κρυμμένους στίχους ξεκινά από εκεί: οι προηγούμενοι φαίνονται, κάθε αποκάλυψη η επόμενη λέξη του, ορατή
+• Προτεινόμενες αναγνώσεις σε σταθερή σειρά, πρώτη η Αλ-Φάτιχα
+</el-GR>
+<es-ES>
+• Abrir una aleya en el modo aleya con las aleyas ocultas empieza ahí: las anteriores visibles, cada revelación su siguiente palabra, a la vista
+• Lectura destacada en orden fijo, Al-Fátiha primero
+</es-ES>
+<fa>
+• باز کردن آیه در حالت آیه با آیه‌های پنهان از همان‌جا شروع می‌شود: آیه‌های پیش از آن نمایان، هر آشکارسازی واژهٔ بعدی‌اش، در دید
+• خواندنی‌های برگزیده با ترتیب ثابت، نخست فاتحه
+</fa>
+<fr-FR>
+• Ouvrir un verset en mode verset, versets masqués, commence là : les versets d'avant visibles, chaque dévoilement son mot suivant, en vue
+• Lecture à la une dans un ordre fixe, Al-Fatiha en premier
+</fr-FR>
+<id>
+• Membuka ayat di mode ayat saat ayat tersembunyi dimulai dari sana: ayat sebelumnya tampil, tiap buka kata berikutnya, tetap terlihat
+• Bacaan Pilihan dalam urutan tetap, Al-Fatihah pertama
+</id>
+<ja-JP>
+• 節を隠した状態で節モードの節を開くと、そこから始まります：前の節は表示され、表示するたびに次の語が見えたままに
+• おすすめは固定順、最初はアル・ファーティハ
+</ja-JP>
+<kk>
+• Аяттар жасырын кезде аят режимінде ашылған аят сол жерден басталады: алдыңғы аяттар көрінеді, әр ашу келесі сөзін көрсетеді
+• Таңдаулы оқу тұрақты ретпен, алдымен Фатиха
+</kk>
+<ko-KR>
+• 구절을 숨긴 채 구절 모드에서 구절을 열면 거기서 시작합니다: 앞 구절은 보이고, 드러낼 때마다 다음 단어가 화면에 남습니다
+• 추천 읽기는 고정 순서, 알파티하가 처음
+</ko-KR>
+<ms>
+• Membuka ayat dalam mod ayat ketika ayat tersembunyi bermula di situ: ayat sebelumnya ditunjukkan, setiap dedah perkataan seterusnya, kekal kelihatan
+• Bacaan Pilihan dalam susunan tetap, Al-Fatihah dahulu
+</ms>
+<nl-NL>
+• Een vers in versmodus openen met verborgen verzen begint daar: de verzen ervoor zichtbaar, elke onthulling het volgende woord, in beeld
+• Uitgelicht lezen in vaste volgorde, Al-Fatiha eerst
+</nl-NL>
+<pt-BR>
+• Abrir um versículo no modo versículo com os versículos ocultos começa ali: os anteriores visíveis, cada revelação sua próxima palavra, à vista
+• Leitura em destaque em ordem fixa, Al-Fatiha primeiro
+</pt-BR>
+<ru-RU>
+• Аят, открытый в режиме аятов при скрытых аятах, начинается с него: предыдущие видны, каждое открытие — его следующее слово, в поле зрения
+• Рекомендуемое чтение в постоянном порядке, первой — Аль-Фатиха
+</ru-RU>
+<sw>
+• Kufungua aya katika hali ya aya zikiwa zimefichwa huanzia hapo: aya za kabla zinaonyeshwa, kila ufunuo neno lake linalofuata, likionekana
+• Usomaji Uliochaguliwa kwa mpangilio thabiti, Al-Fatiha kwanza
+</sw>
+<tr-TR>
+• Ayetler gizliyken ayet modunda bir ayet açmak oradan başlar: önceki ayetler görünür, her açma sonraki kelimesini gösterir, görünür kalır
+• Öne çıkan okumalar sabit sırada, önce Fatiha
+</tr-TR>
+<ur>
+• آیات چھپی ہوں تو آیت موڈ میں کھولی گئی آیت وہیں سے شروع ہوتی ہے: پہلے کی آیات ظاہر، ہر ظاہر کرنا اگلا لفظ، نظر میں رہتے ہوئے
+• منتخب مطالعہ مقررہ ترتیب میں، پہلے الفاتحہ
+</ur>
