@@ -269,6 +269,25 @@ class MushafHideModeController extends Notifier<MushafHideModeState> {
     );
   }
 
+  /// Sets the words uncovered on each page in [shown]: from its word
+  /// `start` (the words before it stay covered) to before its word `end` —
+  /// a recitation test begun mid-page carried back into hide mode.
+  void setShown(Map<int, ({int start, int end})> shown) {
+    state = state.copyWith(
+      revealed: {
+        ...state.revealed,
+        for (final MapEntry(key: page, value: run) in shown.entries)
+          page: run.end,
+      },
+      startOn: {
+        for (final MapEntry(key: page, value: start) in state.startOn.entries)
+          if (!shown.containsKey(page)) page: start,
+        for (final MapEntry(key: page, value: run) in shown.entries)
+          if (run.start > 0 && run.end > run.start) page: run.start,
+      },
+    );
+  }
+
   /// Stand-in for "every word" before a page has reported its count.
   static const _allWords = 1 << 20;
 

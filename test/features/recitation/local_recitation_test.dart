@@ -862,7 +862,7 @@ void main() {
 
     test(
       'hide mode: a reciter starting further down the page is picked up '
-      'there, the ayahs before given — not skipped, not revealed by hand',
+      'there, the ayahs before left hidden — not skipped, not revealed',
       () async {
         // Ya-Sin 36:1–36:12 on screen, hidden; the reciter begins at 36:9
         // (as Al-Hadid after Al-Waqi'a's last ayahs).
@@ -878,9 +878,19 @@ void main() {
         expect(hifz().counts[HifzVerdict.correct] ?? 0, greaterThan(20));
         final s9 = corpus.verseStartPosition((chapterNo: 36, verseNo: 9))!;
         expect(hifz().revealed, contains(corpus.words[s9].ref));
-        // 36:1–36:8 shown (given), not tested.
-        expect(hifz().revealed, contains(corpus.words[s9 - 1].ref));
+        // 36:1–36:8 still hidden, not tested (owner, 2026-11-03).
+        expect(hifz().revealed, isNot(contains(corpus.words[s9 - 1].ref)));
         expect(hifz().marked[corpus.words[s9 - 1].ref], isNull);
+        // Stopped: hide mode shows the page from 36:9 on, 36:1–36:8 hidden.
+        await container
+            .read(recitationSessionControllerProvider.notifier)
+            .stop();
+        await pumpEventQueue();
+        final hide = container.read(mushafHideModeProvider);
+        final first = corpus.verseStartPosition((chapterNo: 36, verseNo: 1))!;
+        expect(hide.startOf(440), s9 - first);
+        expect(hide.isWordHidden(440, s9 - first - 1), isTrue);
+        expect(hide.isWordHidden(440, s9 - first), isFalse);
       },
     );
 

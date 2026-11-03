@@ -1334,14 +1334,16 @@ class HifzController extends Notifier<HifzState> {
   /// reciter may begin further down than the first hidden word (a surah
   /// starting mid-page: Al-Hadid after Al-Waqi'a's last ayahs); the tracker
   /// finds them there, and the test starts again at that word — the words
-  /// before it given (shown, never graded), not revealed by hand and marked
-  /// for revision. Settled once a few words in a row are accepted.
+  /// before it left hidden, as they were (owner, 2026-11-03). (Words
+  /// uncovered by hand before the test: those up to it given — shown, never
+  /// graded — so what is shown stays one run.) Settled once a few words in
+  /// a row are accepted.
   ({int pageStart, int pageEnd, int uncovered})? _startWindow;
 
   /// A browser's two-page spread: both pages in view, the reciter may go on
   /// to the other one without turning a page. Found there (relocated), the
   /// test moves there as a page turn moves it on a phone — the words before
-  /// on that page given, nothing between judged (owner, 2026-11-03).
+  /// left hidden, nothing between judged (owner, 2026-11-03).
   void _followAcrossSpread(HifzJudge judge, List<QuranMatchEvent> out) {
     if (!kIsWeb || !out.any((e) => e is MatchRelocated)) return;
     final pages = _visiblePages();
@@ -1365,16 +1367,9 @@ class HifzController extends Notifier<HifzState> {
 
     final from = onPage(expected), to = onPage(at);
     if (from == null || to == null || from == to) return;
-    final corpus = judge.corpus;
-    final position = corpus.positionOf(at);
-    final pageStart = corpus.positionOf(ranges[to]!.first);
+    final position = judge.corpus.positionOf(at);
     // Back on the earlier page is going over it again (a review).
-    if (position == null || pageStart == null || position <= judge.expected) {
-      return;
-    }
-    for (var p = pageStart; p < position; p++) {
-      if (judge.revealed.add(p)) judge.given.add(p);
-    }
+    if (position == null || position <= judge.expected) return;
     judge.jumpTo(position);
   }
 
@@ -1407,13 +1402,21 @@ class HifzController extends Notifier<HifzState> {
           : judge.corpus.positionOf(heard.first.ref!);
       if (at != null && at > judge.expected && at <= window.pageEnd) {
         // Further down the page than expected: the test starts again
-        // there, clean — the shaky first seconds' marks dropped.
-        final fresh = HifzJudge(
-          judge.corpus,
-          start: window.pageStart,
-          end: judge.end,
-          config: judge.config,
-        )..preReveal(math.max(window.uncovered, at - window.pageStart));
+        // there, clean — the shaky first seconds' marks dropped, the words
+        // before left hidden (see _startWindow).
+        final fresh = window.uncovered == 0
+            ? HifzJudge(
+                judge.corpus,
+                start: at,
+                end: judge.end,
+                config: judge.config,
+              )
+            : (HifzJudge(
+                judge.corpus,
+                start: window.pageStart,
+                end: judge.end,
+                config: judge.config,
+              )..preReveal(math.max(window.uncovered, at - window.pageStart)));
         _judge = fresh;
         _judgeAll(out);
         return;
@@ -1980,12 +1983,15 @@ class HifzController extends Notifier<HifzState> {
   }
 
   /// Carries the test's progress into hide mode: on each rendered page,
-  /// how many words from its start are revealed.
+  /// the words shown — from the first (words before the test as hide mode
+  /// had them; a test begun mid-page leaves those before it hidden) to the
+  /// first hidden one after.
   void _syncToHideMode() {
     final judge = _judge;
-    if (judge == null || !ref.read(mushafHideModeProvider).enabled) return;
+    final hide = ref.read(mushafHideModeProvider);
+    if (judge == null || !hide.enabled) return;
     final corpus = judge.corpus;
-    final revealed = <int, int>{};
+    final shown = <int, ({int start, int end})>{};
     for (final MapEntry(key: page, value: range)
         in ref.read(mushafPageWordRangesProvider).entries) {
       final from = corpus.positionOf(range.first);
@@ -1993,14 +1999,22 @@ class HifzController extends Notifier<HifzState> {
       if (from == null || to == null || to < judge.start || from > judge.end) {
         continue;
       }
-      var count = 0;
-      for (var q = from; q <= to; q++) {
-        if (q >= judge.start && !judge.revealed.contains(q)) break;
-        count++;
+      bool isShown(int q) => q < judge.start
+          ? !hide.isWordHidden(page, q - from)
+          : judge.revealed.contains(q);
+      var start = from;
+      while (start <= to && !isShown(start)) {
+        start++;
       }
-      revealed[page] = count;
+      var end = start;
+      while (end <= to && isShown(end)) {
+        end++;
+      }
+      shown[page] = start > to
+          ? (start: 0, end: 0)
+          : (start: start - from, end: end - from);
     }
-    ref.read(mushafHideModeProvider.notifier).setRevealed(revealed);
+    ref.read(mushafHideModeProvider.notifier).setShown(shown);
   }
 }
 

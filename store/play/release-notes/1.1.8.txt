@@ -1,0 +1,80 @@
+<en-US>
+• Reciting with the ayahs hidden, starting further down the page or on the facing page: the test starts where you begin, and the ayahs before stay hidden
+• Switching between Mushaf and Ayah mode while reciting keeps your place
+</en-US>
+<ar>
+• التسميع والآيات مخفية بدءًا من أسفل الصفحة أو من الصفحة المقابلة: يبدأ الاختبار من حيث تبدأ، وتبقى الآيات قبله مخفية
+• التبديل بين وضع المصحف ووضع الآيات أثناء التسميع يحافظ على موضعك
+</ar>
+<bn-BD>
+• আয়াত লুকানো অবস্থায় পৃষ্ঠার নিচ থেকে বা পাশের পৃষ্ঠা থেকে তিলাওয়াত শুরু করলে: আপনি যেখান থেকে শুরু করেন পরীক্ষা সেখান থেকেই শুরু হয়, আগের আয়াতগুলো লুকানোই থাকে
+• তিলাওয়াতের সময় মুসহাফ ও আয়াত মোডের মধ্যে বদল করলে আপনার জায়গা ঠিক থাকে
+</bn-BD>
+<da-DK>
+• Recitation med skjulte vers, begyndt længere nede på siden eller på modstående side: testen starter, hvor du begynder, og versene før forbliver skjulte
+• Skift mellem Mushaf- og vers-tilstand under recitation bevarer din plads
+</da-DK>
+<de-DE>
+• Rezitieren bei verborgenen Versen, weiter unten auf der Seite oder auf der gegenüberliegenden Seite begonnen: Der Test beginnt dort, wo du anfängst, die Verse davor bleiben verborgen
+• Der Wechsel zwischen Mushaf- und Vers-Modus beim Rezitieren behält deine Stelle
+</de-DE>
+<el-GR>
+• Απαγγελία με κρυμμένους στίχους, ξεκινώντας πιο κάτω στη σελίδα ή στην απέναντι σελίδα: το τεστ ξεκινά από εκεί που αρχίζεις και οι προηγούμενοι στίχοι μένουν κρυμμένοι
+• Η εναλλαγή μεταξύ λειτουργίας Μουσχάφ και στίχων κατά την απαγγελία κρατά τη θέση σου
+</el-GR>
+<es-ES>
+• Recitar con las aleyas ocultas empezando más abajo en la página o en la página de enfrente: la prueba empieza donde empiezas y las aleyas anteriores siguen ocultas
+• Cambiar entre el modo Mushaf y el modo aleya mientras recitas mantiene tu lugar
+</es-ES>
+<fa>
+• تلاوت با آیه‌های پنهان، با شروع از پایین‌تر در صفحه یا از صفحهٔ روبه‌رو: آزمون از همان‌جا که شروع می‌کنید آغاز می‌شود و آیه‌های پیش از آن پنهان می‌مانند
+• جابه‌جایی میان حالت مصحف و حالت آیه هنگام تلاوت جای شما را نگه می‌دارد
+</fa>
+<fr-FR>
+• Réciter avec les versets masqués en commençant plus bas sur la page ou sur la page en vis-à-vis : le test commence là où vous commencez, les versets précédents restent masqués
+• Passer du mode Mushaf au mode verset pendant la récitation garde votre place
+</fr-FR>
+<id>
+• Membaca dengan ayat tersembunyi, mulai dari bagian bawah halaman atau dari halaman seberang: tes dimulai dari tempat Anda mulai, dan ayat-ayat sebelumnya tetap tersembunyi
+• Beralih antara mode Mushaf dan mode ayat saat membaca menjaga posisi Anda
+</id>
+<ja-JP>
+• 節を隠した状態でページの途中や向かいのページから読誦を始めると、始めた所からテストが始まり、それより前の節は隠れたままになります
+• 読誦中にムスハフモードと節モードを切り替えても位置が保たれます
+</ja-JP>
+<kk>
+• Аяттар жасырылған кезде беттің төменгі жағынан немесе қарсы беттен оқи бастасаңыз: тест сіз бастаған жерден басталады, алдындағы аяттар жасырын қалады
+• Оқу кезінде Мусхаф және аят режимдері арасында ауысу орныңызды сақтайды
+</kk>
+<ko-KR>
+• 아야를 숨긴 채 페이지 아래쪽이나 맞은편 페이지에서 낭송을 시작하면, 시작한 곳에서 테스트가 시작되고 그 앞의 아야는 숨겨진 채로 남습니다
+• 낭송 중 무스하프 모드와 아야 모드를 전환해도 위치가 유지됩니다
+</ko-KR>
+<ms>
+• Membaca dengan ayat tersembunyi, bermula lebih bawah di halaman atau di halaman bertentangan: ujian bermula di tempat anda mula, dan ayat-ayat sebelumnya kekal tersembunyi
+• Bertukar antara mod Mushaf dan mod ayat semasa membaca mengekalkan kedudukan anda
+</ms>
+<nl-NL>
+• Reciteren met verborgen verzen, verder op de pagina of op de tegenoverliggende pagina begonnen: de test begint waar jij begint en de verzen ervoor blijven verborgen
+• Wisselen tussen Mushaf- en versmodus tijdens het reciteren behoudt je plek
+</nl-NL>
+<pt-BR>
+• Recitar com os versículos ocultos começando mais abaixo na página ou na página ao lado: o teste começa onde você começa e os versículos anteriores continuam ocultos
+• Alternar entre o modo Mushaf e o modo versículo durante a recitação mantém o seu lugar
+</pt-BR>
+<ru-RU>
+• Чтение со скрытыми аятами, начатое ниже на странице или на соседней странице: проверка начинается там, где вы начали, а аяты до этого остаются скрытыми
+• Переключение между режимами Мусхафа и аятов во время чтения сохраняет ваше место
+</ru-RU>
+<sw>
+• Kusoma aya zikiwa zimefichwa, ukianzia chini zaidi kwenye ukurasa au kwenye ukurasa wa pili: jaribio huanzia pale unapoanza, na aya zilizotangulia hubaki zimefichwa
+• Kubadilisha kati ya hali ya Mushaf na hali ya aya wakati wa kusoma huhifadhi mahali ulipo
+</sw>
+<tr-TR>
+• Ayetler gizliyken sayfanın daha aşağısından ya da karşı sayfadan okumaya başlamak: test başladığınız yerden başlar, öncesindeki ayetler gizli kalır
+• Okurken Mushaf ve ayet modu arasında geçiş yapmak yerinizi korur
+</tr-TR>
+<ur>
+• آیات چھپی ہونے کی حالت میں صفحے کے نیچے سے یا سامنے والے صفحے سے تلاوت شروع کرنے پر: ٹیسٹ وہیں سے شروع ہوتا ہے جہاں سے آپ شروع کریں، اور اس سے پہلے کی آیات چھپی رہتی ہیں
+• تلاوت کے دوران مصحف اور آیت موڈ کے درمیان تبدیلی آپ کی جگہ برقرار رکھتی ہے
+</ur>
