@@ -1,0 +1,100 @@
+<en-US>
+• Tips never interrupt a recitation or listening: the translation tip comes before playback, the tajweed tips with your session results
+• "Don't show tips again" on every tip
+• The guide closes when you leave the Mushaf
+</en-US>
+<ar>
+• لا تقاطع النصائح التلاوة ولا الاستماع: نصيحة الترجمة قبل التشغيل، ونصائح التجويد مع نتائج الجلسة
+• «لا تُظهر النصائح مرة أخرى» في كل نصيحة
+• يُغلق الدليل عند مغادرة المصحف
+</ar>
+<bn-BD>
+• টিপস আর তিলাওয়াত বা শোনায় বাধা দেয় না: অনুবাদের টিপ বাজানোর আগে, তাজবিদের টিপ সেশনের ফলাফলের সঙ্গে
+• প্রতিটি টিপে "আর টিপস দেখাবেন না"
+• মুসহাফ ছাড়লে গাইড বন্ধ হয়
+</bn-BD>
+<da-DK>
+• Tips afbryder aldrig recitation eller lytning: oversættelsestippet før afspilning, tajweed-tips med sessionens resultater
+• "Vis ikke tips igen" på hvert tip
+• Guiden lukker, når du forlader Mushaf
+</da-DK>
+<de-DE>
+• Tipps unterbrechen nie Rezitation oder Zuhören: der Übersetzungstipp vor der Wiedergabe, Tajweed-Tipps mit den Sitzungsergebnissen
+• „Keine Tipps mehr anzeigen“ bei jedem Tipp
+• Die Anleitung schließt sich beim Verlassen des Mushaf
+</de-DE>
+<el-GR>
+• Οι συμβουλές δεν διακόπτουν απαγγελία ή ακρόαση: η συμβουλή μετάφρασης πριν την αναπαραγωγή, του ταζουίντ με τα αποτελέσματα
+• «Να μην εμφανίζονται ξανά συμβουλές» σε κάθε συμβουλή
+• Ο οδηγός κλείνει όταν φεύγετε από το Μουσχάφ
+</el-GR>
+<es-ES>
+• Los consejos ya no interrumpen la recitación ni la escucha: el de traducción antes de reproducir, los de tajwid con los resultados
+• «No volver a mostrar consejos» en cada consejo
+• La guía se cierra al salir del Mushaf
+</es-ES>
+<fa>
+• نکته‌ها دیگر تلاوت یا شنیدن را قطع نمی‌کنند: نکتهٔ ترجمه پیش از پخش، نکته‌های تجوید با نتایج جلسه
+• «دیگر نکته‌ها را نشان نده» در هر نکته
+• راهنما با ترک مصحف بسته می‌شود
+</fa>
+<fr-FR>
+• Les conseils n'interrompent plus la récitation ni l'écoute : celui de la traduction avant la lecture, ceux du tajwid avec les résultats
+• « Ne plus afficher de conseils » sur chaque conseil
+• Le guide se ferme quand vous quittez le Mushaf
+</fr-FR>
+<id>
+• Tips tidak lagi menyela bacaan atau saat mendengarkan: tips terjemahan sebelum diputar, tips tajwid bersama hasil sesi
+• "Jangan tampilkan tips lagi" di setiap tips
+• Panduan tertutup saat Anda meninggalkan Mushaf
+</id>
+<ja-JP>
+• ヒントが読誦や再生を中断しなくなりました：翻訳のヒントは再生前に、タジュウィードのヒントは結果と一緒に
+• すべてのヒントに「今後ヒントを表示しない」
+• ムスハフを離れるとガイドが閉じます
+</ja-JP>
+<kk>
+• Кеңестер енді оқуды не тыңдауды бөлмейді: аударма кеңесі ойнатудан бұрын, тәжуид кеңестері нәтижелермен бірге
+• Әр кеңесте «Кеңестерді енді көрсетпеу»
+• Мұсхафтан шыққанда нұсқаулық жабылады
+</kk>
+<ko-KR>
+• 팁이 더 이상 낭송이나 듣기를 방해하지 않습니다: 번역 팁은 재생 전에, 타즈위드 팁은 결과와 함께
+• 모든 팁에 '팁 다시 보지 않기'
+• 무스하프를 나가면 안내가 닫힙니다
+</ko-KR>
+<ms>
+• Petua tidak lagi mengganggu bacaan atau pendengaran: petua terjemahan sebelum dimainkan, petua tajwid bersama keputusan sesi
+• "Jangan tunjukkan petua lagi" pada setiap petua
+• Panduan ditutup apabila anda meninggalkan Mushaf
+</ms>
+<nl-NL>
+• Tips onderbreken nooit meer recitatie of luisteren: de vertaaltip vóór het afspelen, tajweedtips bij de resultaten
+• ‘Geen tips meer tonen’ bij elke tip
+• De gids sluit als je de Mushaf verlaat
+</nl-NL>
+<pt-BR>
+• As dicas não interrompem mais a recitação nem a escuta: a da tradução antes de tocar, as de tajweed com os resultados
+• "Não mostrar mais dicas" em cada dica
+• O guia fecha ao sair do Mushaf
+</pt-BR>
+<ru-RU>
+• Советы больше не прерывают чтение и прослушивание: совет о переводе — до воспроизведения, о таджвиде — с результатами
+• «Больше не показывать советы» в каждом совете
+• Гид закрывается, когда вы покидаете мусхаф
+</ru-RU>
+<sw>
+• Vidokezo havikatizi tena usomaji wala usikilizaji: kidokezo cha tafsiri kabla ya kucheza, vya tajwidi pamoja na matokeo
+• "Usionyeshe vidokezo tena" kwenye kila kidokezo
+• Mwongozo hufungwa unapotoka kwenye Msahafu
+</sw>
+<tr-TR>
+• İpuçları artık okuyuşu ya da dinlemeyi bölmüyor: çeviri ipucu çalmadan önce, tecvit ipuçları oturum sonuçlarıyla
+• Her ipucunda "İpuçlarını bir daha gösterme"
+• Mushaf'tan çıkınca rehber kapanır
+</tr-TR>
+<ur>
+• تجاویز اب تلاوت یا سننے میں خلل نہیں ڈالتیں: ترجمے کی تجویز چلانے سے پہلے، تجوید کی تجاویز نتائج کے ساتھ
+• ہر تجویز پر «تجاویز دوبارہ نہ دکھائیں»
+• مصحف چھوڑنے پر رہنما بند ہو جاتا ہے
+</ur>
