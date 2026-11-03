@@ -51,6 +51,11 @@
     #splash .bar::after { content: ""; position: absolute; top: 0; bottom: 0; width: 40%; border-radius: 2px;
       background: #68C6A8; animation: splash-bar 1.2s ease-in-out infinite; }
     @keyframes splash-bar { from { left: -40%; } to { left: 100%; } }
+    #splash .unsupported { display: none; position: absolute; top: calc(50% + 160px); left: 50%; transform: translateX(-50%);
+      width: min(88vw, 420px); text-align: center; color: #E8F2EC; font: 15px/1.55 "Noto Sans", system-ui, sans-serif; }
+    #splash .unsupported p { margin: 0 0 10px; }
+    #splash.no-wasm .bar { display: none; }
+    #splash.no-wasm .unsupported { display: block; }
   </style>
   <link rel="manifest" href="manifest.json">
 </head>
@@ -67,6 +72,13 @@
     <img src="assets/assets/branding/splash_emblem.png" alt="">
     <div class="name">Tahfeez<b>AI</b></div>
     <div class="bar"></div>
+    <!-- Shown by flutter_bootstrap.js where the app cannot run: a browser
+         with WebAssembly turned off (some hardened ones turn it off with the
+         JavaScript JIT). -->
+    <div class="unsupported">
+      <p>This browser has WebAssembly turned off, and TahfeezAI needs it. Turn it on in the browser's settings (often "JavaScript JIT"), or open TahfeezAI in Chrome, Firefox, Edge or Safari.</p>
+      <p dir="rtl" lang="ar">هذا المتصفح أوقف WebAssembly، وتحفيظ AI يحتاج إليه. فعّله من إعدادات المتصفح (غالبًا «JavaScript JIT»)، أو افتح تحفيظ AI في Chrome أو Firefox أو Edge أو Safari.</p>
+    </div>
   </div>
   <script>
     window.addEventListener('flutter-first-frame', () => {
@@ -76,6 +88,18 @@
       setTimeout(() => splash.remove(), 300);
     });
   </script>
-  <script src="flutter_bootstrap.js" async></script>
+  <script>
+    // No WebAssembly (turned off — some hardened browsers do, with the
+    // JavaScript JIT): the app cannot run (Flutter's loader would fail
+    // silently: a blank page); the splash says so instead.
+    if (typeof WebAssembly === 'undefined') {
+      document.getElementById('splash').classList.add('no-wasm');
+    } else {
+      const script = document.createElement('script');
+      script.src = 'flutter_bootstrap.js';
+      script.async = true;
+      document.body.appendChild(script);
+    }
+  </script>
 </body>
 </html>
