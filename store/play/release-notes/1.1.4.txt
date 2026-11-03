@@ -1,0 +1,100 @@
+<en-US>
+• Recitation starts following at once after the isti'adha and basmala said together
+• Joining two verses where a tanween merges into the next no longer marks a mistake
+• Occasional tips on features, and a tidier surah sheet
+</en-US>
+<ar>
+• تبدأ المتابعة فورًا بعد قول الاستعاذة والبسملة معًا
+• وصل آيتين يُخفى فيه التنوين أو يُدغم في التالية لم يعد يُعدّ خطأ
+• نصائح عرضية عن الميزات، وبطاقة سورة أكثر ترتيبًا
+</ar>
+<bn-BD>
+• ইস্তিআযা ও বিসমিল্লাহ একসাথে বলার পর তিলাওয়াত সঙ্গে সঙ্গে অনুসরণ শুরু করে
+• দুটি আয়াত মেলানোর সময় তানউইন পরেরটিতে মিশে গেলে আর ভুল ধরা হয় না
+• মাঝে মাঝে বৈশিষ্ট্য নিয়ে পরামর্শ, আর আরও গোছানো সূরা পাতা
+</bn-BD>
+<da-DK>
+• Recitationen følger med med det samme efter isti'adha og basmala sagt i ét
+• At forbinde to vers, hvor en tanwin smelter ind i det næste, markeres ikke længere som fejl
+• Tips om funktioner en gang imellem og et pænere surah-ark
+</da-DK>
+<de-DE>
+• Die Rezitation folgt sofort, auch wenn Isti'adha und Basmala zusammen gesprochen werden
+• Zwei Verse verbinden, wobei ein Tanwin in den nächsten übergeht, gilt nicht mehr als Fehler
+• Gelegentliche Tipps zu Funktionen und ein aufgeräumteres Surenblatt
+</de-DE>
+<el-GR>
+• Η απαγγελία ακολουθείται αμέσως μετά την ιστιάζα και τη μπασμάλα ειπωμένες μαζί
+• Η ένωση δύο στίχων όπου ένα τανουίν συγχωνεύεται στον επόμενο δεν μετράει πια ως λάθος
+• Περιστασιακές συμβουλές για λειτουργίες και πιο τακτοποιημένη καρτέλα σούρας
+</el-GR>
+<es-ES>
+• La recitación se sigue al instante tras decir juntas la isti'adha y la basmala
+• Unir dos aleyas cuando un tanwín se funde con la siguiente ya no se marca como error
+• Consejos ocasionales sobre funciones y una ficha de sura más ordenada
+</es-ES>
+<fa>
+• پس از گفتن استعاذه و بسمله با هم، دنبال‌کردن تلاوت فوراً آغاز می‌شود
+• وصل دو آیه که تنوین در آیهٔ بعد ادغام یا اخفا می‌شود دیگر خطا شمرده نمی‌شود
+• نکته‌هایی گاه‌به‌گاه دربارهٔ امکانات، و برگهٔ سورهٔ مرتب‌تر
+</fa>
+<fr-FR>
+• La récitation est suivie aussitôt après l'isti'adha et la basmala dites d'un trait
+• Enchaîner deux versets où un tanwin se fond dans le suivant n'est plus compté comme une faute
+• Des conseils occasionnels sur les fonctions et une fiche de sourate plus nette
+</fr-FR>
+<id>
+• Bacaan langsung diikuti setelah isti'adzah dan basmalah dibaca bersambung
+• Menyambung dua ayat yang tanwinnya melebur ke ayat berikutnya tidak lagi dianggap salah
+• Tips sesekali tentang fitur, dan lembar surah yang lebih rapi
+</id>
+<ja-JP>
+• イスティアーザとバスマラを続けて唱えたあとも、すぐに読誦を追跡します
+• タンウィーンが次の節に溶け込む形で二つの節をつなげても、誤りとされなくなりました
+• 機能についてのときどきのヒントと、整ったスーラ情報
+</ja-JP>
+<kk>
+• Истиаза мен басмала бірге айтылғаннан кейін оқу бірден бақыланады
+• Тәнуин келесі аятқа қосылатын екі аятты жалғау енді қате деп белгіленбейді
+• Мүмкіндіктер туралы кейде кеңестер және ұқыпты сүре парағы
+</kk>
+<ko-KR>
+• 이스티아다와 바스말라를 이어서 말한 뒤에도 낭송을 바로 따라갑니다
+• 탄윈이 다음 구절에 녹아드는 방식으로 두 구절을 이어 읽어도 더 이상 실수로 표시되지 않습니다
+• 가끔 보이는 기능 도움말과 더 깔끔해진 수라 정보
+</ko-KR>
+<ms>
+• Bacaan terus diikuti selepas isti'azah dan basmalah dibaca bersambung
+• Menyambung dua ayat yang tanwinnya lebur ke ayat seterusnya tidak lagi dikira salah
+• Petua sekali-sekala tentang ciri, dan helaian surah yang lebih kemas
+</ms>
+<nl-NL>
+• De recitatie wordt meteen gevolgd na isti'adha en basmala in één adem
+• Twee verzen verbinden waarbij een tanwin in het volgende opgaat, telt niet meer als fout
+• Af en toe tips over functies en een overzichtelijker soera-blad
+</nl-NL>
+<pt-BR>
+• A recitação é acompanhada na hora após a isti'adha e a basmala ditas juntas
+• Unir dois versículos em que um tanwin se funde ao seguinte não é mais marcado como erro
+• Dicas ocasionais sobre recursos e uma ficha de surata mais organizada
+</pt-BR>
+<ru-RU>
+• Чтение отслеживается сразу после истиазы и басмалы, сказанных слитно
+• Соединение двух аятов, когда танвин сливается со следующим, больше не считается ошибкой
+• Иногда подсказки о функциях и более аккуратная карточка суры
+</ru-RU>
+<sw>
+• Usomaji unafuatiliwa mara moja baada ya isti'adha na basmala kusemwa pamoja
+• Kuunganisha aya mbili ambapo tanwin inaungana na inayofuata hakuhesabiwi tena kuwa kosa
+• Vidokezo vya mara kwa mara kuhusu vipengele, na ukurasa wa sura ulio nadhifu zaidi
+</sw>
+<tr-TR>
+• İstiaze ve besmele birlikte okunduktan sonra okuma hemen takip edilir
+• Tenvinin sonraki ayete kaynaştığı iki ayeti birleştirmek artık hata sayılmaz
+• Özellikler hakkında ara sıra ipuçları ve daha düzenli sure kartı
+</tr-TR>
+<ur>
+• تعوذ اور بسم اللہ ملا کر پڑھنے کے بعد تلاوت فوراً فالو ہوتی ہے
+• دو آیات ملاتے ہوئے تنوین اگلی آیت میں مدغم یا مخفی ہو تو اب غلطی شمار نہیں ہوتی
+• فیچرز کے بارے میں کبھی کبھار مشورے، اور بہتر ترتیب والی سورت شیٹ
+</ur>
