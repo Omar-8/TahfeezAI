@@ -35,6 +35,22 @@
        otherwise flash the browser's own scrollbar). -->
   <style>
     html, body { margin: 0; height: 100%; overflow: hidden; overscroll-behavior: none; }
+    /* The app's splash at once, while the app downloads (the first visit:
+       a few seconds) — not a blank page. Gone at Flutter's first frame,
+       which draws the same splash. */
+    body { background: #03100C; }
+    #splash { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+      background: radial-gradient(120% 80% at 70% 15%, #2c3a31 0%, #0d1e17 55%, #03100C 100%);
+      transition: opacity .25s ease; z-index: 1; }
+    #splash img { width: 288px; height: 288px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+    #splash .name { position: absolute; top: calc(50% + 120px); left: 50%; transform: translate(-50%, -50%);
+      font: 700 30px/1 "Noto Sans", system-ui, sans-serif; letter-spacing: .5px; color: #E8F2EC; white-space: nowrap; }
+    #splash .name b { color: #68C6A8; }
+    #splash .bar { position: absolute; top: calc(50% + 172px); left: 50%; width: 120px; height: 3px; margin-left: -60px;
+      border-radius: 2px; background: #E8F2EC33; overflow: hidden; }
+    #splash .bar::after { content: ""; position: absolute; top: 0; bottom: 0; width: 40%; border-radius: 2px;
+      background: #68C6A8; animation: splash-bar 1.2s ease-in-out infinite; }
+    @keyframes splash-bar { from { left: -40%; } to { left: 100%; } }
   </style>
   <link rel="manifest" href="manifest.json">
 </head>
@@ -47,6 +63,19 @@
     For more details:
     * https://docs.flutter.dev/platform-integration/web/initialization
   -->
+  <div id="splash" aria-label="TahfeezAI is loading">
+    <img src="assets/assets/branding/splash_emblem.png" alt="">
+    <div class="name">Tahfeez<b>AI</b></div>
+    <div class="bar"></div>
+  </div>
+  <script>
+    window.addEventListener('flutter-first-frame', () => {
+      const splash = document.getElementById('splash');
+      if (!splash) return;
+      splash.style.opacity = '0';
+      setTimeout(() => splash.remove(), 300);
+    });
+  </script>
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

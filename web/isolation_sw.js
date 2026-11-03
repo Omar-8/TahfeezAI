@@ -16,6 +16,11 @@ self.addEventListener('fetch', (event) => {
     fetch(request).then((response) => {
       if (response.status === 0 || response.type === 'opaque') return response;
       const headers = new Headers(response.headers);
+      // The body comes here already decoded: the encoding and the
+      // (compressed) length no longer describe it — kept, Chrome waits for
+      // bytes that never come (GitHub Pages gzips main.dart.wasm).
+      headers.delete('Content-Encoding');
+      headers.delete('Content-Length');
       headers.set('Cross-Origin-Opener-Policy', 'same-origin');
       headers.set('Cross-Origin-Embedder-Policy', 'credentialless');
       return new Response(response.body, {
