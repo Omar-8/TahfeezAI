@@ -604,11 +604,6 @@
   "guideListenTranslation": "Saurari fassara da ake karantawa da murya bayan kowace aya. Ana yaɗa ta kai tsaye, don haka tana buƙatar intanet.",
   "guideListenSleep": "Agogon barci yana dakatar da karatun bayan ɗan lokaci, ko a ƙarshen ayar — don sauraro da dare.",
   "recHintTitle": "Shawara",
-  "recHintTajweed": "An yi alama a kan dokokin tajwidi da yawa a wannan karatun. Idan har yanzu kana koyon tajwidi, za ka iya kashe duba tajwidi a yanzu: haruffa da wasula kawai za a duba. Ka sake kunna shi kowane lokaci a saitunan hifzi.",
-  "recHintTajweedAction": "Kashe duba tajwidi",
-  "recHintLenient": "An yi alama a kan wasula da yawa a wannan karatun. Idan hakan ya yi yawa, ka sassauta duba lafazi: kurakurai mafi bayyana kawai za a yi wa alama. Za ka iya canza shi kowane lokaci a saitunan hifzi.",
-  "recHintLenientAction": "Sassauta shi",
-  "recHintLater": "Ba yanzu ba",
   "recFeedbackListen": "Saurari karatun daidai",
   "recFeedbackListenAlone": "Babu lokutan kalmomi ga makarancinka, don haka kalmar kaɗai za a kunna — ba tare da haɗinta da kalma ta gaba ko wasalin ƙarshe ba.",
   "milestoneSurahs": "An haddace surorin {surahs}",
@@ -617,8 +612,11 @@
   "tipListenTranslation": "Ka sani? Yayin da kake saurare, ana iya karanta fassara da babbar murya bayan kowace aya, a harshenka.",
   "tipPageTheme": "Ka sani? Shafin Mushaf yana da launuka da dama, daga haske zuwa duhu. Zaɓi wanda ya fi sauƙi ga idanunka.",
   "tipShowMe": "Nuna min",
-  "tipDontShowAgain": "Kada a sake nuna wannan",
+  "tipDontShowAgain": "Kada a sake nuna shawarwari",
   "tipClose": "Rufe",
-  "guideTipTranslation": "Zaɓi fassara a nan, sannan danna Kunna. Ana yaɗa ta kai tsaye, don haka tana buƙatar intanet.",
-  "guideTipPageTheme": "Taɓa wani launi don canza launukan shafin."
+  "guideTipPageTheme": "Taɓa wani launi don canza launukan shafin.",
+  "tipTajweedOff": "An yi alama a kan dokokin tajwidi da yawa a karatunka na ƙarshe. Idan har yanzu kana koyon tajwidi, za ka iya kashe duba tajwidi a saitunan hifzi: haruffa da wasula kawai za a duba.",
+  "tipLenient": "An yi alama a kan wasula da yawa a karatunka na ƙarshe. Idan hakan ya yi yawa, za ka iya sassauta duba lafazi a saitunan hifzi: kurakurai mafi bayyana kawai za a yi wa alama.",
+  "recModelDownloading": "Ana shirya duba karatu: {percent}% (sau ɗaya kawai)",
+  "recWebUnsupported": "Wannan burauzar ba za ta iya gudanar da duba karatu ba. Gwada sabon Chrome, Edge, Firefox ko Safari."
 }

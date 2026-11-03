@@ -1,6 +1,6 @@
 # TahfeezAI — Privacy Policy
 
-_Last updated: 2 November 2026_
+_Last updated: 3 November 2026_
 
 TahfeezAI helps you read and memorize the Quran. It is built to keep your data on your phone. There are no accounts, no ads, no analytics and no tracking.
 
@@ -24,6 +24,14 @@ Only to play recitation audio, and only when you ask for it:
 These requests contain only the name of the audio file (which reciter and which ayah or word). Like any internet request, they also reveal your device's IP address to that service, which is governed by its own privacy terms. No other information about you is sent. Everything else — the Quran text, translations, tafsir and word meanings — is part of the app and works without internet.
 
 On Android the app also asks Google Play, on your phone, whether an update is available, and may show Google Play's own rating box now and then; both are handled by Google Play under its terms, and the app sends nothing of its own. On iPhone and iPad the app asks the App Store (`itunes.apple.com`) for the version number of the app's listing, to know whether an update is available; that request names only the app, not you, and like any request reveals your IP address to Apple. Sharing the app hands a short text with its store link to the app you choose.
+
+## In a web browser
+
+The web version works the same way: your recitation is checked inside your browser and never sent anywhere, and your memorization data, bookmarks and settings are kept in your browser's storage on your device. Clearing the site's data in your browser deletes them. In addition:
+
+- **The app's files and its recitation model** (about 91 MB, fetched the first time you open a Mushaf page, then kept by your browser) come from the website that hosts the app. Like any website, its host receives these requests, including your IP address, under its own terms.
+- **Fonts.** The engine the app is built with (Flutter) loads its default font and, where the app's own fonts lack a character (for example Japanese or Korean translations), a matching font from Google Fonts (`fonts.gstatic.com`). These requests name only the font; like any request, they reveal your IP address to Google.
+- Downloading reciters for offline listening and the daily reminder are not available in the browser.
 
 ## Backups
 

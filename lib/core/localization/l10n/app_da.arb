@@ -604,11 +604,6 @@
   "guideListenTranslation": "Hør en oversættelse læst op efter hvert vers. Den streames, så den kræver internet.",
   "guideListenSleep": "Sleeptimeren sætter recitationen på pause efter et stykke tid eller ved versets slutning — til lytning om aftenen.",
   "recHintTitle": "Et tip",
-  "recHintTajweed": "Mange tajweedregler blev markeret i denne recitation. Hvis du stadig er ved at lære tajweed, kan du slå tajweedkontrollen fra indtil videre: kun bogstaver og vokaler kontrolleres. Slå den til igen når som helst i Hifz-indstillingerne.",
-  "recHintTajweedAction": "Slå tajweedkontrol fra",
-  "recHintLenient": "Mange vokaler blev markeret i denne recitation. Hvis det virker af meget, så gør udtalekontrollen mild: kun tydeligere fejl markeres. Du kan ændre det når som helst i Hifz-indstillingerne.",
-  "recHintLenientAction": "Gør den mild",
-  "recHintLater": "Ikke nu",
   "recFeedbackListen": "Lyt til rettelsen",
   "recFeedbackListenAlone": "Din recitator har ingen ordtider, så kun ordet alene afspilles — uden forbindelsen til næste ord eller den sidste vokal.",
   "milestoneSurahs": "Surerne {surahs} lært udenad",
@@ -617,8 +612,11 @@
   "tipListenTranslation": "Vidste du det? Mens du lytter, kan en oversættelse læses højt efter hvert vers, på dit sprog.",
   "tipPageTheme": "Vidste du det? Mushaf-siden findes i flere farvetemaer, fra lyst til mørkt. Vælg det, der er mest behageligt for øjnene.",
   "tipShowMe": "Vis mig",
-  "tipDontShowAgain": "Vis ikke dette igen",
+  "tipDontShowAgain": "Vis ikke tips igen",
   "tipClose": "Luk",
-  "guideTipTranslation": "Vælg en oversættelse her, og tryk så på Afspil. Den streames, så den kræver internet.",
-  "guideTipPageTheme": "Tryk på et tema for at ændre sidens farver."
+  "guideTipPageTheme": "Tryk på et tema for at ændre sidens farver.",
+  "tipTajweedOff": "Din seneste recitation fik mange tajweedregler markeret. Hvis du stadig er ved at lære tajweed, kan du slå tajweedkontrollen fra i Hifz-indstillingerne: så kontrolleres kun bogstaver og vokaler.",
+  "tipLenient": "Din seneste recitation fik mange vokaler markeret. Hvis det virkede af meget, kan du gøre udtalekontrollen mild i Hifz-indstillingerne: så markeres kun tydeligere fejl.",
+  "recModelDownloading": "Gør recitationskontrollen klar: {percent} % (kun én gang)",
+  "recWebUnsupported": "Denne browser kan ikke køre recitationskontrollen. Prøv en nyere Chrome, Edge, Firefox eller Safari."
 }

@@ -5,38 +5,34 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/localization/generated/app_localizations.dart';
 import '../../core/storage/storage_providers.dart';
-import '../../core/ui/first_run.dart';
 import '../listen/application/follow_along_controller.dart';
 import '../listen/application/quran_audio_player.dart';
-import '../listen/presentation/listen_sheet.dart';
 import '../mushaf/presentation/mushaf_appearance_sheet.dart';
 import '../recitation/application/recitation_session_controller.dart';
 import 'app_tips.dart';
 import 'guide.dart';
 
-/// In the reader's top bar, nothing to see: offers the reader's tips (see
-/// [AppTip]) when they fit — the page themes a while after the reader
-/// opens, nothing playing; a translation read aloud a while into
-/// listening, none chosen. One at most each time the reader is open.
+/// In the reader's top bar, nothing to see: the page themes' tip (see
+/// [AppTip]) a while after the reader opens — nothing playing, nothing
+/// recited. The modes' tips come as they are started (Listen's Play,
+/// Recite, the loop, Follow along), never while they run.
 class AppTipsHost extends ConsumerStatefulWidget {
   const AppTipsHost({super.key});
 
-  /// How long the reader is open, or the reciter heard, before a tip.
+  /// How long the reader is open before the tip.
   static const readingDelay = Duration(seconds: 20);
-  static const listeningDelay = Duration(seconds: 30);
 
   @override
   ConsumerState<AppTipsHost> createState() => _AppTipsHostState();
 }
 
 class _AppTipsHostState extends ConsumerState<AppTipsHost> {
-  Timer? _reading, _listening;
-  bool _offered = false;
+  Timer? _reading;
 
   @override
   void initState() {
     super.initState();
-    if (!ref.read(firstRunPromptsProvider)) return;
+    if (!ref.read(appTipsEnabledProvider)) return;
     unawaited(
       appTipsStart(
         ref.read(browserStorageProvider),
@@ -44,94 +40,72 @@ class _AppTipsHostState extends ConsumerState<AppTipsHost> {
       ),
     );
     _reading = Timer(AppTipsHost.readingDelay, () {
-      if (_busy() || _playing()) return;
-      unawaited(_offer(AppTip.pageTheme));
+      if (_busy()) return;
+      unawaited(_offer());
     });
   }
 
   @override
   void dispose() {
     _reading?.cancel();
-    _listening?.cancel();
     super.dispose();
   }
 
-  /// The reciter heard (ayahs, not a word).
-  bool _playing() {
-    final now = ref.read(quranAudioPlayerProvider);
-    return now != null && !now.isWord;
+  /// Something else on: the guide, a recitation, Follow along, the
+  /// reciter heard, or another screen or sheet over the reader.
+  bool _busy() {
+    if (!mounted) return true;
+    final playing = ref.read(quranAudioPlayerProvider);
+    return ref.read(guideProvider) != null ||
+        (playing != null && !playing.isWord) ||
+        (ref.exists(recitationSessionControllerProvider) &&
+            ref.read(recitationSessionControllerProvider).isActive) ||
+        (ref.exists(followAlongControllerProvider) &&
+            ref.read(followAlongControllerProvider) != null) ||
+        !(ModalRoute.of(context)?.isCurrent ?? true);
   }
 
-  /// Something else on: the guide, a recitation, Follow along, or another
-  /// screen or sheet over the reader.
-  bool _busy() =>
-      _offered ||
-      !mounted ||
-      ref.read(guideProvider) != null ||
-      (ref.exists(recitationSessionControllerProvider) &&
-          ref.read(recitationSessionControllerProvider).isActive) ||
-      (ref.exists(followAlongControllerProvider) &&
-          ref.read(followAlongControllerProvider) != null) ||
-      !(ModalRoute.of(context)?.isCurrent ?? true);
-
-  void _listen(NowPlaying? previous, NowPlaying? next) {
-    final playing = next != null && !next.isWord;
-    if (!playing) {
-      _listening?.cancel();
-      _listening = null;
-      return;
-    }
-    if (_listening != null || !ref.read(firstRunPromptsProvider)) return;
-    _listening = Timer(AppTipsHost.listeningDelay, () {
-      final now = ref.read(quranAudioPlayerProvider);
-      if (_busy() || now == null || now.isWord) return;
-      if (now.options.translationVoice.isNotEmpty) return;
-      unawaited(_offer(AppTip.listenTranslation));
-    });
-  }
-
-  Future<void> _offer(AppTip tip) async {
-    final storage = ref.read(browserStorageProvider);
+  Future<void> _offer() async {
     final due = await appTipDue(
-      storage,
-      tip,
+      ref.read(browserStorageProvider),
+      AppTip.pageTheme,
       now: ref.read(appTipsClockProvider)(),
       random: ref.read(appTipsRandomProvider),
     );
-    if (!due || _busy() || !mounted) return;
-    _offered = true;
-    final answer = await showAppTip(context, tip);
-    if (answer == null) return;
-    if (answer.never || answer.showMe) await appTipOff(storage, tip);
-    if (!answer.showMe || !mounted) return;
-    switch (tip) {
-      case AppTip.listenTranslation:
-        // From the ayah playing: Play goes on with the translation.
-        final ayah = ref.read(quranAudioPlayerProvider)?.ayahId;
-        unawaited(
-          showListenSheet(
-            context,
-            from: ayah == null
-                ? null
-                : (chapterNo: ayah ~/ 1000, verseNo: ayah % 1000),
-          ),
-        );
-        ref.read(guideProvider.notifier).start(GuideTour.tipTranslation);
-      case AppTip.pageTheme:
-        showMushafAppearanceSheet(context);
-        ref.read(guideProvider.notifier).start(GuideTour.tipPageTheme);
+    if (!due || !mounted || _busy()) return;
+    if (!await answerAppTip(context, ref, AppTip.pageTheme) || !mounted) {
+      return;
     }
+    showMushafAppearanceSheet(context);
+    ref.read(guideProvider.notifier).start(GuideTour.tipPageTheme);
   }
 
   @override
-  Widget build(BuildContext context) {
-    ref.listen<NowPlaying?>(quranAudioPlayerProvider, _listen);
-    return const SizedBox.shrink();
-  }
+  Widget build(BuildContext context) => const SizedBox.shrink();
 }
 
-/// A tip: "Show me" or Close, and "Don't show this again". `null`:
-/// dismissed (back, or a tap outside).
+/// Whether tips may come now: on ([appTipsEnabledProvider]), not in the
+/// guide.
+bool appTipsAllowed(WidgetRef ref) =>
+    ref.read(appTipsEnabledProvider) && ref.read(guideProvider) == null;
+
+/// Shows [tip] and keeps its answer: "Don't show tips again" ends them all;
+/// "Show me" (returned `true`) — the tip is known, not shown again.
+Future<bool> answerAppTip(
+  BuildContext context,
+  WidgetRef ref,
+  AppTip tip,
+) async {
+  final storage = ref.read(browserStorageProvider);
+  final answer = await showAppTip(context, tip);
+  if (answer == null) return false;
+  if (answer.never) await appTipsAllOff(storage);
+  if (answer.showMe) await appTipOff(storage, tip);
+  return answer.showMe;
+}
+
+/// A tip: "Show me" or Close, and "Don't show tips again". `null`:
+/// dismissed (back, or a tap outside) — as Close.
 Future<({bool showMe, bool never})?> showAppTip(
   BuildContext context,
   AppTip tip,
@@ -154,6 +128,8 @@ Future<({bool showMe, bool never})?> showAppTip(
               Text(switch (tip) {
                 AppTip.listenTranslation => l10n.tipListenTranslation,
                 AppTip.pageTheme => l10n.tipPageTheme,
+                AppTip.tajweedOff => l10n.tipTajweedOff,
+                AppTip.lenient => l10n.tipLenient,
               }),
               const SizedBox(height: 8),
               CheckboxListTile(

@@ -604,11 +604,6 @@
   "guideListenTranslation": "Dengar terjemahan yang dibacakan selepas setiap ayat. Ia distrim, jadi memerlukan internet.",
   "guideListenSleep": "Pemasa tidur menjeda bacaan selepas seketika, atau di hujung ayat — untuk mendengar pada waktu malam.",
   "recHintTitle": "Satu petua",
-  "recHintTajweed": "Banyak hukum tajwid ditanda dalam bacaan ini. Jika anda masih belajar tajwid, anda boleh mematikan semakan tajwid buat masa ini: hanya huruf dan baris disemak. Hidupkan semula bila-bila masa dalam tetapan hafazan.",
-  "recHintTajweedAction": "Matikan semakan tajwid",
-  "recHintLenient": "Banyak baris ditanda dalam bacaan ini. Jika terasa terlalu banyak, jadikan semakan sebutan longgar: hanya kesilapan yang lebih jelas ditanda. Anda boleh mengubahnya bila-bila masa dalam tetapan hafazan.",
-  "recHintLenientAction": "Jadikan longgar",
-  "recHintLater": "Bukan sekarang",
   "recFeedbackListen": "Dengar bacaan yang betul",
   "recFeedbackListenAlone": "Qari anda tiada masa bagi setiap kata, jadi hanya kata itu dimainkan — tanpa sambungan ke kata seterusnya atau baris akhirnya.",
   "milestoneSurahs": "Surah {surahs} telah dihafaz",
@@ -617,8 +612,11 @@
   "tipListenTranslation": "Tahukah anda? Semasa mendengar, terjemahan dalam bahasa anda boleh dibacakan selepas setiap ayat.",
   "tipPageTheme": "Tahukah anda? Halaman Mushaf mempunyai beberapa tema warna, dari cerah hingga gelap. Pilih yang paling selesa untuk mata anda.",
   "tipShowMe": "Tunjukkan",
-  "tipDontShowAgain": "Jangan tunjukkan lagi",
+  "tipDontShowAgain": "Jangan tunjukkan petua lagi",
   "tipClose": "Tutup",
-  "guideTipTranslation": "Pilih terjemahan di sini, kemudian tekan Main. Ia distrim, jadi memerlukan internet.",
-  "guideTipPageTheme": "Ketik satu tema untuk menukar warna halaman."
+  "guideTipPageTheme": "Ketik satu tema untuk menukar warna halaman.",
+  "tipTajweedOff": "Banyak hukum tajwid ditanda dalam bacaan terakhir anda. Jika anda masih belajar tajwid, anda boleh mematikan semakan tajwid dalam tetapan hafazan: hanya huruf dan baris akan disemak.",
+  "tipLenient": "Banyak baris ditanda dalam bacaan terakhir anda. Jika terasa terlalu banyak, anda boleh menjadikan semakan sebutan longgar dalam tetapan hafazan: hanya kesilapan yang lebih jelas akan ditanda.",
+  "recModelDownloading": "Menyediakan semakan bacaan: {percent}% (sekali sahaja)",
+  "recWebUnsupported": "Pelayar ini tidak dapat menjalankan semakan bacaan. Cuba Chrome, Edge, Firefox atau Safari versi terkini."
 }

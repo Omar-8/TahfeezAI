@@ -604,11 +604,6 @@
   "guideListenTranslation": "Dhageyso tarjumad cod dheer loo akhriyo aayad kasta kadib. Waa la tebiyaa, markaa waxay u baahan tahay internet.",
   "guideListenSleep": "Saacadda hurdadu waxay hakisaa akhriska wakhti kadib, ama dhammaadka aayadda — si habeenkii loo dhageysto.",
   "recHintTitle": "Talo",
-  "recHintTajweed": "Akhriskan waxaa lagu calaameeyay xeerar badan oo tajwiid ah. Haddii aad weli baranayso tajwiidka, hadda waad dami kartaa hubinta tajwiidka: xarfaha iyo shaklalka oo keliya ayaa la hubinayaa. Mar kasta dib ugu shid dejinta xifdiga.",
-  "recHintTajweedAction": "Dami hubinta tajwiidka",
-  "recHintLenient": "Akhriskan waxaa lagu calaameeyay shaklal badan. Haddii ay kuu muuqato in ay badan tahay, ka dhig hubinta dhawaaqa mid dabacsan: khaladaadka cad-cad oo keliya ayaa la calaamadinayaa. Mar kasta waad ka beddeli kartaa dejinta xifdiga.",
-  "recHintLenientAction": "Ka dhig dabacsan",
-  "recHintLater": "Hadda maya",
   "recFeedbackListen": "Dhageyso akhriska saxda ah",
   "recFeedbackListenAlone": "Akhristahaagu ma laha waqtiyada erayada, sidaa darteed erayga keligii ayaa la shidayaa — iyadoo aan lagu xirin erayga xiga ama shaqalkiisa ugu dambeeya.",
   "milestoneSurahs": "Suuradaha {surahs} waa la xifdiyay",
@@ -617,8 +612,11 @@
   "tipListenTranslation": "Ma ogtahay? Inta aad dhegaysanayso, tarjumad ayaa lagu akhriyi karaa cod dheer aayad kasta kadib, luqaddaada.",
   "tipPageTheme": "Ma ogtahay? Bogga Mushafka wuxuu leeyahay dhowr midab, laga bilaabo iftiin ilaa mugdi. Dooro kan indhahaaga ugu raaxada badan.",
   "tipShowMe": "I tus",
-  "tipDontShowAgain": "Mar dambe ha tusin",
+  "tipDontShowAgain": "Talooyin mar dambe ha i tusin",
   "tipClose": "Xir",
-  "guideTipTranslation": "Halkan ka dooro tarjumad, kadibna riix Daar. Waa toos, sidaa darteed waxay u baahan tahay internet.",
-  "guideTipPageTheme": "Taabo midab si aad u beddesho midabada bogga."
+  "guideTipPageTheme": "Taabo midab si aad u beddesho midabada bogga.",
+  "tipTajweedOff": "Akhriskaagii ugu dambeeyay waxaa lagu calaameeyay xeerar badan oo tajwiid ah. Haddii aad weli baranayso tajwiidka, waxaad ka dami kartaa hubinta tajwiidka dejinta xifdiga: markaas xarfaha iyo shaklalka oo keliya ayaa la hubinayaa.",
+  "tipLenient": "Akhriskaagii ugu dambeeyay waxaa lagu calaameeyay shaklal badan. Haddii ay kuu muuqatay in ay badan tahay, waxaad ka dhigi kartaa hubinta dhawaaqa mid dabacsan dejinta xifdiga: markaas khaladaadka cad-cad oo keliya ayaa la calaamadinayaa.",
+  "recModelDownloading": "Diyaarinta hubinta akhriska: {percent}% (hal mar oo keliya)",
+  "recWebUnsupported": "Biraawsarkan ma socodsiin karo hubinta akhriska. Isku day Chrome, Edge, Firefox ama Safari cusub."
 }

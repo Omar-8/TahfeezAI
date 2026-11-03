@@ -260,9 +260,20 @@ Two distinct mechanisms, matching two distinct data shapes:
   a plain static file server; this is the responsibility of whatever hosts the built web app, not
   of the Flutter app itself.
 
-  Large downloaded resources (audio, fonts, atlas bundles) have no web storage strategy yet;
-  `FileStorage`'s doc comment flags this explicitly as a gap for the Resource Manager milestone
-  (13) to close, likely via the Origin Private File System API or IndexedDB-backed blob storage.
+  **The ready-made Quran databases on the web** (2026-11-03): the four the phones unpack
+  (`quran`, `translations`, `tafsirs`, `wbw_resources`; `assets/quran/db/`) open on the web from
+  the same bundled copies (`core/database/bundled_web_database.dart`). Each opens under its
+  bundle's version (`quran_<version>`); the first open fills it from the zlib asset, inflated by
+  the browser (`DecompressionStream`) and checked against its SHA-256. Nothing is imported row
+  by row: the first visit downloads 7.4 MB of databases instead of ~200 MB of JSON, and every
+  later start opens them directly. Earlier versions' copies are deleted 10 s after the start.
+  Translations, tafsir and word meanings beyond the built-in English and Arabic ones follow the
+  phones' meaning packs (`MeaningPacksController`): the web's `ImportingMeaningPackStore` puts a
+  chosen pack on by importing its JSON asset (`BundledDatasetSeeder.importPack`), the text the
+  pack holds. `BundledDatasetSeeder.seedIfNeeded` is left for desktop development builds.
+
+  Large downloaded resources: the acoustic model is kept in Cache Storage by its worker (§32,
+  Web). Reciter audio downloads remain phone-only.
 
 ## 8. Audio architecture
 
@@ -2474,12 +2485,43 @@ exactly as the app does: frames are stored; the audio is not.
 
 ### Web
 
-There is no on-device model on the web yet. 386 MB is not deliverable to a browser, and ONNX
-Runtime Web ran 8 s of audio in 6.7–23.7 s on a laptop (§31). The web keeps Web Speech + the
-remote development server; **offline AI on the web is pending**. Nothing in the pipeline is
-Android-specific except `LocalQuranAcousticModel`'s channel: a future `LocalQuranAcousticModelWeb`
-(ONNX Runtime Web / WebGPU with a distilled student) implements the same interface. The tracker,
-index, windowing and verifier are pure Dart and already compile for the web.
+Since 2026-11-03 the web runs the same model as the phones, in the browser: ONNX Runtime Web
+1.30.0 (WebAssembly, SIMD) in a module worker (`web/acoustic/acoustic_worker.js`). Dart talks
+to it through the phones' own channel, `tahfeez/quran_acoustic_model`, answered on the web by
+`core/platform/web_channels.dart` (registered at start), so `LocalQuranAcousticModel`, the
+tracker and the verifier are unchanged. The worker:
+
+- fetches the model (91 MB, `assets/models/quran_acoustic.onnx`) the first time — the
+  recitation bar shows how far (`acousticModelDownload`) — checks its SHA-256 against the
+  manifest and keeps it in Cache Storage, keyed by that hash; later loads read it from there,
+  offline too;
+- holds the streaming state (`sums`, `count`, `kv`, `conv`, `akv`, `aconv`, `valid`) as the
+  Android channel does, and runs one call at a time, in order.
+
+Speed (1.28 s chunks of the owner's recitation, Node 22 on a 16-thread desktop): 4 threads
+~0.31–0.45 s a chunk (RTF ~0.3); 1 thread 0.8–2.0 s (slower than real time once the 5.12 s
+of left context fills). Threads need a cross-origin-isolated page: hosts that cannot set
+COOP/COEP headers get them from `web/isolation_sw.js` (registered by `web/flutter_bootstrap.js`,
+one reload at the first visit). COEP is `credentialless`, so reciters' audio from other hosts
+still plays; Safari has no `credentialless` and runs single-threaded.
+
+Numerics: WebAssembly computes `MatMulNBits` in full precision, while the phones' accuracy
+level 4 quantizes activations to int8. The web's frames equal Python's with the model's
+`accuracy_level` set to 0 (to 1e-6) and differ from the phones' by up to ~1 nat on likely
+classes. On the test packs (tag `v37fp`, `model_work/eval/snapshot.sh` QUICK, against v3.7
+`g19a`): false letter flags owner 29→32, Tarteel-200 180→187, Juz 30 unseen 1,559→1,603, TLOG
+held-out 447→467; QuranMB mistakes caught 66.4% both; the speaker bootstrap's intervals
+overlap on every measure. The web uses the model as it is.
+
+End to end (2026-11-03): the owner's Al-Bayyinah recording as Chromium's microphone, the
+release build served by a plain static server: cross-origin isolated through the worker,
+skwasm, ayahs followed and checked as recited. Startup (profile build, headless Chromium):
+first visit 2.1 s to the first frame (was 47 s, importing ~200 MB of JSON), later starts
+1.3 s (was 25 s); the first visit loads 25 MB (uncompressed), the model 91 MB more when a
+Mushaf page first opens.
+
+The vibration and beep for a mistake (`tahfeez/alert`) are the browser's
+(`navigator.vibrate`, Web Audio).
 
 ### Device acceptance (airplane mode) and measurements
 

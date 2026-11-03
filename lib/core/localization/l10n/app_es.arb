@@ -604,11 +604,6 @@
   "guideListenTranslation": "Escucha una traducción leída en voz alta después de cada aleya. Se transmite en línea, así que necesita internet.",
   "guideListenSleep": "El temporizador de sueño pausa la recitación tras un rato, o al final de la aleya — para escuchar por la noche.",
   "recHintTitle": "Un consejo",
-  "recHintTajweed": "En esta recitación se marcaron muchas reglas de tajwid. Si aún estás aprendiendo tajwid, puedes desactivar su comprobación por ahora: solo se comprueban las letras y las vocales. Vuelve a activarla cuando quieras en los ajustes de Hifz.",
-  "recHintTajweedAction": "Desactivar la comprobación de tajwid",
-  "recHintLenient": "En esta recitación se marcaron muchas vocales. Si te parece demasiado, haz la comprobación de la pronunciación tolerante: solo se marcan los errores más claros. Puedes cambiarlo cuando quieras en los ajustes de Hifz.",
-  "recHintLenientAction": "Hacerla tolerante",
-  "recHintLater": "Ahora no",
   "recFeedbackListen": "Escuchar la corrección",
   "recFeedbackListenAlone": "Tu recitador no tiene tiempos por palabra, así que suena solo la palabra, sin su enlace con la siguiente ni su última vocal.",
   "milestoneSurahs": "Suras {surahs} memorizadas",
@@ -617,8 +612,11 @@
   "tipListenTranslation": "¿Sabías que? Mientras escuchas, se puede leer en voz alta una traducción después de cada aleya, en tu idioma.",
   "tipPageTheme": "¿Sabías que? La página del Mushaf tiene varios temas de color, de claro a oscuro. Elige el más cómodo para tus ojos.",
   "tipShowMe": "Muéstrame",
-  "tipDontShowAgain": "No volver a mostrar",
+  "tipDontShowAgain": "No volver a mostrar consejos",
   "tipClose": "Cerrar",
-  "guideTipTranslation": "Elige aquí una traducción y pulsa Reproducir. Se transmite en línea, así que necesita internet.",
-  "guideTipPageTheme": "Toca un tema para cambiar los colores de la página."
+  "guideTipPageTheme": "Toca un tema para cambiar los colores de la página.",
+  "tipTajweedOff": "En tu última recitación se marcaron muchas reglas de tajwid. Si aún estás aprendiendo tajwid, puedes desactivar su comprobación en los ajustes de Hifz: entonces solo se comprueban las letras y las vocales.",
+  "tipLenient": "En tu última recitación se marcaron muchas vocales. Si te pareció demasiado, puedes hacer tolerante la comprobación de la pronunciación en los ajustes de Hifz: entonces solo se marcan los errores más claros.",
+  "recModelDownloading": "Preparando la comprobación de la recitación: {percent} % (solo una vez)",
+  "recWebUnsupported": "Este navegador no puede ejecutar la comprobación de la recitación. Prueba un Chrome, Edge, Firefox o Safari reciente."
 }

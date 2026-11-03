@@ -13,13 +13,16 @@ import 'recitation_ai_config.dart';
 import 'recitation_providers.dart';
 import 'recitation_session_controller.dart';
 
-/// Whether live recognition runs during a session at all: always on
-/// Android and iOS (on the device, every build alike); on the web only in
-/// development builds, whose engine sends audio to a cloud service — a
-/// release must not (recitation stays on the device).
+/// Whether live recognition runs during a session at all: on Android, iOS
+/// and the web (the on-device model; in the browser, ONNX Runtime Web),
+/// every build alike. Elsewhere (desktop development) only in development
+/// builds.
 final liveRecognitionEnabledProvider = Provider<bool>((ref) {
   final capabilities = ref.watch(platformCapabilitiesProvider);
-  return capabilities.isAndroid || capabilities.isIOS || !kReleaseMode;
+  return capabilities.isAndroid ||
+      capabilities.isIOS ||
+      capabilities.isWeb ||
+      !kReleaseMode;
 });
 
 /// Whether to show the recognition diagnostics panel: only in development

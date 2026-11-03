@@ -604,11 +604,6 @@
   "guideListenTranslation": "Ouça uma tradução lida em voz alta depois de cada versículo. Ela é transmitida, então precisa de internet.",
   "guideListenSleep": "O timer para dormir pausa a recitação depois de um tempo, ou no fim do versículo — para ouvir à noite.",
   "recHintTitle": "Uma dica",
-  "recHintTajweed": "Muitas regras de tajweed foram marcadas nesta recitação. Se você ainda está aprendendo tajweed, pode desligar a verificação de tajweed por enquanto: só letras e vogais são verificadas. Ligue de novo quando quiser nos ajustes de hifz.",
-  "recHintTajweedAction": "Desligar a verificação de tajweed",
-  "recHintLenient": "Muitas vogais foram marcadas nesta recitação. Se parecer demais, deixe a verificação da pronúncia tolerante: só os erros mais claros são marcados. Você pode mudar isso quando quiser nos ajustes de hifz.",
-  "recHintLenientAction": "Deixar tolerante",
-  "recHintLater": "Agora não",
   "recFeedbackListen": "Ouvir a correção",
   "recFeedbackListenAlone": "Seu recitador não tem tempos por palavra, então toca só a palavra — sem a ligação com a próxima nem a última vogal.",
   "milestoneSurahs": "Suratas {surahs} memorizadas",
@@ -617,8 +612,11 @@
   "tipListenTranslation": "Você sabia? Enquanto ouve, uma tradução pode ser lida em voz alta após cada versículo, no seu idioma.",
   "tipPageTheme": "Você sabia? A página do Mushaf tem vários temas de cor, do claro ao escuro. Escolha o mais confortável para os seus olhos.",
   "tipShowMe": "Mostre-me",
-  "tipDontShowAgain": "Não mostrar novamente",
+  "tipDontShowAgain": "Não mostrar mais dicas",
   "tipClose": "Fechar",
-  "guideTipTranslation": "Escolha uma tradução aqui e toque em Reproduzir. Ela é transmitida online, então precisa de internet.",
-  "guideTipPageTheme": "Toque em um tema para mudar as cores da página."
+  "guideTipPageTheme": "Toque em um tema para mudar as cores da página.",
+  "tipTajweedOff": "Muitas regras de tajweed foram marcadas na sua última recitação. Se você ainda está aprendendo tajweed, pode desligar a verificação de tajweed nos ajustes de hifz: aí só letras e vogais são verificadas.",
+  "tipLenient": "Muitas vogais foram marcadas na sua última recitação. Se pareceu demais, você pode deixar a verificação da pronúncia tolerante nos ajustes de hifz: aí só os erros mais claros são marcados.",
+  "recModelDownloading": "Preparando a verificação da recitação: {percent}% (só uma vez)",
+  "recWebUnsupported": "Este navegador não consegue executar a verificação da recitação. Experimente um Chrome, Edge, Firefox ou Safari recente."
 }

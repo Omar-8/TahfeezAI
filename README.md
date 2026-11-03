@@ -13,11 +13,12 @@
 [![Downloads](https://img.shields.io/github/downloads/Omar-8/TahfeezAI/total?color=218A73)](https://github.com/Omar-8/TahfeezAI/releases)
 ![Android](https://img.shields.io/badge/Android-✓-68C6A8?logo=android&logoColor=white)
 ![iOS](https://img.shields.io/badge/iOS-✓-68C6A8?logo=apple&logoColor=white)
+![Web](https://img.shields.io/badge/Web-✓-68C6A8?logo=googlechrome&logoColor=white)
 [![Flutter](https://img.shields.io/badge/Flutter-3.47-02569B?logo=flutter)](https://flutter.dev)
 ![No ads](https://img.shields.io/badge/ads-none-176B5B)
 ![Offline](https://img.shields.io/badge/works-offline-176B5B)
 
-[**Website**](https://omar-8.github.io/TahfeezAI/) · [Features](#features) · [Tajweed](#tajweed-feedback) · [Screenshots](#screenshots) · [Build it](#build-and-run)
+[**Website**](https://omar-8.github.io/TahfeezAI/) · [**Open in your browser**](https://omar-8.github.io/TahfeezAI/app/) · [Features](#features) · [Tajweed](#tajweed-feedback) · [Screenshots](#screenshots) · [Build it](#build-and-run)
 
 <img src="site/images/screens/06b-pronunciation-dark.webp" width="24%" alt="Hears the vowel you said"> <img src="site/images/screens/10b-hide-recite-dark.webp" width="24%" alt="Recite it from memory"> <img src="site/images/screens/01-home-light.webp" width="24%" alt="Home under a time-of-day sky"> <img src="site/images/screens/02-mushaf-light.webp" width="24%" alt="The Madinah Mushaf">
 
@@ -147,9 +148,11 @@ Each word is coloured as you go — right, wrong, skipped or mispronounced — w
 ## Privacy
 
 - **No account**, no sign-in, no advertising ID, **no analytics or crash-reporting SDK**.
-- **Your recitation stays on your phone.** The audio is checked by the on-device model and discarded; release builds keep no recordings.
+- **Your recitation stays on your device.** The audio is checked by the on-device model — in the browser, inside the browser — and discarded; release builds keep no recordings.
 - Memorization progress, bookmarks and settings live only on your device. Export a backup file wherever you choose; *Settings → Your data → Reset all data* erases everything.
 - The only network requests are the reciters' audio files (when you listen without having downloaded a reciter), and app updates and reviews through the store.
+
+In the browser, the app's engine also loads fonts from Google Fonts (its default font, and characters the app's fonts lack).
 
 See the [privacy policy](docs/PRIVACY_POLICY.md) and the [Play data-safety answers](docs/PLAY_DATA_SAFETY.md).
 
@@ -157,13 +160,15 @@ See the [privacy policy](docs/PRIVACY_POLICY.md) and the [Play data-safety answe
 
 1. **Where are you?** As you recite, the app follows your position in the Quran from the words it hears — so you can start anywhere on the page.
 2. **Was it right?** For each word, an **acoustic model** compares what you said with the expected Ḥafṣ pronunciation of that word: it aligns your audio to the word's expected sounds and scores every sound against its likely alternatives (a heavy letter against its light twin, a held madd against a short one…). A mistake is reported only on clear evidence; when it is unsure, it says nothing.
-3. **On the phone.** The model (~93 MB, ONNX) is bundled in the app and runs with ONNX Runtime — on Android and iOS, offline. It is a streaming student model trained from the open [Muaalem](https://huggingface.co/obadx/muaalem-model-v3_2) model (MIT) on public recitation data; see [Credits](#credits).
+3. **On your device.** The model (~93 MB, ONNX) is bundled in the app and runs with ONNX Runtime — on Android and iOS, offline. In the browser the same model runs with ONNX Runtime Web (WebAssembly, in a worker): downloaded once, the first time a Mushaf page opens, then kept. It is a streaming student model trained from the open [Muaalem](https://huggingface.co/obadx/muaalem-model-v3_2) model (MIT) on public recitation data; see [Credits](#credits).
 
 ## Download
 
-| Android | iOS |
-|:-:|:-:|
-| *Google Play — coming soon* | *App Store — coming soon* |
+| Android | iOS | Web |
+|:-:|:-:|:-:|
+| *Google Play — coming soon* | *App Store — coming soon* | [**Open in your browser**](https://omar-8.github.io/TahfeezAI/app/) |
+
+The web app is the same app — the Mushaf, translations, memorization and recitation checking on your own computer — with a layout for wide windows. Best in a recent Chrome, Edge or Firefox; Safari works, but checks recitation more slowly (no threads there). Reciter downloads for offline listening and the daily reminder are phone-only.
 
 Until then, builds are on the [releases page](https://github.com/Omar-8/TahfeezAI/releases), or [build it yourself](#build-and-run).
 
@@ -219,6 +224,15 @@ flutter run                                                 # a simulator or an 
 ```
 
 More detail: [docs/IOS.md](docs/IOS.md). The `iOS` GitHub workflow builds all of this on a Mac runner.
+
+**Web:**
+
+```sh
+bash tool/quran_engine/fetch_web_runtime.sh   # the Mushaf engine for WebAssembly (needs rustup's wasm32 target)
+tool/build_web.sh                             # build/web: serve it over HTTPS (or localhost)
+```
+
+The `Web app` GitHub workflow builds it and publishes it under the website at `/app/`.
 
 ### 5. Tests
 

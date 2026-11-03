@@ -604,11 +604,6 @@
   "guideListenTranslation": "각 아야 뒤에 번역 낭독을 들을 수 있습니다. 스트리밍이라 인터넷이 필요합니다.",
   "guideListenSleep": "취침 타이머는 일정 시간 뒤나 아야가 끝날 때 낭송을 일시정지합니다 — 밤에 들을 때 좋습니다.",
   "recHintTitle": "도움말",
-  "recHintTajweed": "이번 낭송에서 타즈위드 규칙이 많이 표시되었습니다. 아직 타즈위드를 배우는 중이라면 당분간 타즈위드 확인을 끌 수 있습니다: 글자와 모음만 확인합니다. 히프즈 설정에서 언제든 다시 켤 수 있습니다.",
-  "recHintTajweedAction": "타즈위드 확인 끄기",
-  "recHintLenient": "이번 낭송에서 모음이 많이 표시되었습니다. 너무 많다고 느껴지면 발음 확인을 너그럽게로 바꾸세요: 더 분명한 실수만 표시됩니다. 히프즈 설정에서 언제든 바꿀 수 있습니다.",
-  "recHintLenientAction": "너그럽게 바꾸기",
-  "recHintLater": "나중에",
   "recFeedbackListen": "올바른 낭송 듣기",
   "recFeedbackListenAlone": "선택한 낭송자는 단어별 시간 정보가 없어 단어만 재생됩니다 — 다음 단어와의 연결이나 마지막 모음은 들리지 않습니다.",
   "milestoneSurahs": "{surahs} 암기 완료",
@@ -617,8 +612,11 @@
   "tipListenTranslation": "알고 계셨나요? 듣는 동안 각 구절 뒤에 번역을 내 언어로 소리 내어 읽어 줄 수 있습니다.",
   "tipPageTheme": "알고 계셨나요? 무스하프 페이지에는 밝은 것부터 어두운 것까지 여러 색상 테마가 있습니다. 눈이 가장 편한 것을 고르세요.",
   "tipShowMe": "보여 주세요",
-  "tipDontShowAgain": "다시 표시하지 않기",
+  "tipDontShowAgain": "팁 다시 보지 않기",
   "tipClose": "닫기",
-  "guideTipTranslation": "여기서 번역을 고른 뒤 재생을 누르세요. 스트리밍되므로 인터넷이 필요합니다.",
-  "guideTipPageTheme": "테마를 탭하면 페이지 색상이 바뀝니다."
+  "guideTipPageTheme": "테마를 탭하면 페이지 색상이 바뀝니다.",
+  "tipTajweedOff": "지난 낭송에서 타즈위드 규칙이 많이 표시되었습니다. 아직 타즈위드를 배우는 중이라면 히프즈 설정에서 타즈위드 확인을 끌 수 있습니다: 그러면 글자와 모음만 확인합니다.",
+  "tipLenient": "지난 낭송에서 모음이 많이 표시되었습니다. 너무 많다고 느꼈다면 히프즈 설정에서 발음 확인을 너그럽게로 바꿀 수 있습니다: 그러면 더 분명한 실수만 표시됩니다.",
+  "recModelDownloading": "낭송 확인 준비 중: {percent}% (한 번만)",
+  "recWebUnsupported": "이 브라우저에서는 낭송 확인을 실행할 수 없습니다. 최신 Chrome, Edge, Firefox 또는 Safari를 사용해 보세요."
 }

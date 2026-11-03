@@ -604,11 +604,6 @@
   "guideListenTranslation": "Her ayetten sonra sesli okunan bir meal dinleyin. Akış olarak gelir, bu yüzden internet gerekir.",
   "guideListenSleep": "Uyku zamanlayıcısı okumayı bir süre sonra ya da ayetin sonunda duraklatır — gece dinlemek için.",
   "recHintTitle": "Bir ipucu",
-  "recHintTajweed": "Bu okuyuşta birçok tecvit kuralı işaretlendi. Tecvidi hâlâ öğreniyorsanız tecvit kontrolünü şimdilik kapatabilirsiniz: yalnızca harfler ve harekeler kontrol edilir. Hıfz ayarlarından istediğiniz zaman yeniden açın.",
-  "recHintTajweedAction": "Tecvit kontrolünü kapat",
-  "recHintLenient": "Bu okuyuşta birçok hareke işaretlendi. Bu size fazla geliyorsa telaffuz kontrolünü hoşgörülü yapın: yalnızca daha belirgin hatalar işaretlenir. Hıfz ayarlarından istediğiniz zaman değiştirebilirsiniz.",
-  "recHintLenientAction": "Hoşgörülü yap",
-  "recHintLater": "Şimdi değil",
   "recFeedbackListen": "Doğrusunu dinle",
   "recFeedbackListenAlone": "Kârinizin kelime zamanlamaları yok; bu yüzden kelime tek başına çalınır — sonraki kelimeye bağlanışı ve son harekesi olmadan.",
   "milestoneSurahs": "{surahs} sureleri ezberlendi",
@@ -617,8 +612,11 @@
   "tipListenTranslation": "Biliyor muydunuz? Dinlerken her ayetten sonra kendi dilinizde bir meal sesli okunabilir.",
   "tipPageTheme": "Biliyor muydunuz? Mushaf sayfasının açıktan koyuya birkaç renk teması var. Gözünüzü en az yoranı seçin.",
   "tipShowMe": "Göster",
-  "tipDontShowAgain": "Bunu bir daha gösterme",
+  "tipDontShowAgain": "İpuçlarını bir daha gösterme",
   "tipClose": "Kapat",
-  "guideTipTranslation": "Buradan bir meal seçin, sonra Çal'a basın. Akış olarak gelir, bu yüzden internet gerekir.",
-  "guideTipPageTheme": "Sayfanın renklerini değiştirmek için bir temaya dokunun."
+  "guideTipPageTheme": "Sayfanın renklerini değiştirmek için bir temaya dokunun.",
+  "tipTajweedOff": "Son okuyuşunuzda birçok tecvit kuralı işaretlendi. Tecvidi hâlâ öğreniyorsanız Hıfz ayarlarından tecvit kontrolünü kapatabilirsiniz: o zaman yalnızca harfler ve harekeler kontrol edilir.",
+  "tipLenient": "Son okuyuşunuzda birçok hareke işaretlendi. Bu size fazla geldiyse Hıfz ayarlarından telaffuz kontrolünü hoşgörülü yapabilirsiniz: o zaman yalnızca daha belirgin hatalar işaretlenir.",
+  "recModelDownloading": "Okuyuş kontrolü hazırlanıyor: %{percent} (yalnızca bir kez)",
+  "recWebUnsupported": "Bu tarayıcı okuyuş kontrolünü çalıştıramıyor. Güncel bir Chrome, Edge, Firefox veya Safari deneyin."
 }

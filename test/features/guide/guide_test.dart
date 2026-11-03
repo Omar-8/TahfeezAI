@@ -4,9 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tahfeez_ai/core/localization/generated/app_localizations.dart';
+import 'package:tahfeez_ai/core/core_providers.dart';
 import 'package:tahfeez_ai/core/theme/components/tahfeez_bottom_sheet.dart';
+import 'package:tahfeez_ai/core/ui/first_run.dart';
 import 'package:tahfeez_ai/features/guide/guide.dart';
 import 'package:tahfeez_ai/features/mushaf/application/mushaf_hide_mode.dart';
+
+import '../../test_helpers/web_platform.dart';
 
 void main() {
   late ProviderContainer container;
@@ -234,4 +238,54 @@ void main() {
     guide.tapped('eye');
     expect(c.read(guideProvider), (tour: GuideTour.hide, index: 1));
   });
+
+  for (final web in [false, true]) {
+    testWidgets(
+      '${web ? 'in a browser' : 'on a phone'}: the reader left (back, '
+      'another screen): the guide ends; the other reader taking its place: '
+      'it goes on',
+      (tester) async {
+        final screen = ValueNotifier('mushaf');
+        final container = ProviderContainer(
+          overrides: [
+            firstRunPromptsProvider.overrideWithValue(false),
+            if (web)
+              platformCapabilitiesProvider.overrideWithValue(
+                const WebPlatform(),
+              ),
+          ],
+        );
+        addTearDown(container.dispose);
+        await tester.pumpWidget(
+          UncontrolledProviderScope(
+            container: container,
+            child: MaterialApp(
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              builder: (context, child) => GuideLayer(child: child!),
+              home: ValueListenableBuilder(
+                valueListenable: screen,
+                builder: (context, name, _) => Scaffold(
+                  key: ValueKey(name),
+                  appBar: AppBar(
+                    actions: [if (name != 'memorize') const GuideButton()],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        container.read(guideProvider.notifier).start();
+        await tester.pumpAndSettle();
+        // Mushaf to Ayah mode: one reader for another.
+        screen.value = 'ayah';
+        await tester.pumpAndSettle();
+        expect(container.read(guideProvider), isNotNull);
+        screen.value = 'memorize';
+        await tester.pumpAndSettle();
+        expect(container.read(guideProvider), isNull);
+        expect(find.byKey(const ValueKey('guide-card')), findsNothing);
+      },
+    );
+  }
 }

@@ -1,3 +1,6 @@
+import '../../../core/storage/storage_providers.dart';
+import '../../guide/app_tips.dart';
+import '../../guide/app_tips_host.dart';
 import '../../guide/guide.dart';
 
 import 'dart:async';
@@ -36,6 +39,47 @@ Future<void> showListenSheet(BuildContext context, {VerseRef? from}) =>
       title: AppLocalizations.of(context).listenMenuTitle,
       builder: (context) => _ListenSheet(from: from),
     );
+
+/// The translations that can be read aloud after each ayah, to pick one
+/// (`''`: none); `null`: closed without a choice.
+Future<String?> showTranslationVoiceSheet(
+  BuildContext context,
+  String current,
+) => showTahfeezModalBottomSheet<String>(
+  context: context,
+  title: AppLocalizations.of(context).listenTranslationAudio,
+  builder: (context) {
+    final l10n = AppLocalizations.of(context);
+    final chosen = translationVoiceFor(current)?.edition ?? '';
+    Widget choice(String edition, String label) => ListTile(
+      key: ValueKey('translation-voice-$edition'),
+      title: Text(label, overflow: TextOverflow.ellipsis),
+      trailing: edition == chosen ? const Icon(Icons.check_rounded) : null,
+      selected: edition == chosen,
+      onTap: () => Navigator.of(context).pop(edition),
+    );
+    return ListView(
+      shrinkWrap: true,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: TahfeezSpacing.lg,
+            vertical: TahfeezSpacing.sm,
+          ),
+          child: Text(
+            l10n.listenTranslationAudioSub,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ),
+        choice('', l10n.listenTranslationNone),
+        for (final v in translationVoices)
+          choice(v.edition, '${nativeLanguageName(v.language)} · ${v.reader}'),
+      ],
+    );
+  },
+);
 
 /// The reciters, to pick one (Settings, the Listen and Follow along
 /// menus), with a search box over their English and Arabic names.
@@ -203,6 +247,29 @@ class _ListenSheetState extends ConsumerState<_ListenSheet> {
   Future<void> _play() async {
     final l10n = AppLocalizations.of(context);
     final messenger = ScaffoldMessenger.of(context);
+    // No translation read aloud: its tip, at random, before playing. "Show
+    // me": the translations to pick from; playing starts once they close.
+    if (_options.translationVoice.isEmpty && appTipsAllowed(ref)) {
+      final due = await appTipDue(
+        ref.read(browserStorageProvider),
+        AppTip.listenTranslation,
+        now: ref.read(appTipsClockProvider)(),
+        random: ref.read(appTipsRandomProvider),
+      );
+      if (!mounted) return;
+      if (due && await answerAppTip(context, ref, AppTip.listenTranslation)) {
+        if (!mounted) return;
+        final voice = await showTranslationVoiceSheet(
+          context,
+          _options.translationVoice,
+        );
+        if (!mounted) return;
+        if (voice != null) {
+          setState(() => _options = _options.copyWith(translationVoice: voice));
+        }
+      }
+      if (!mounted) return;
+    }
     ref.read(listenOptionsProvider.notifier).set(_options);
     Navigator.of(context).pop();
     final played = await ref
@@ -481,7 +548,8 @@ class _ReciterRow extends ConsumerWidget {
     final d = ref.watch(
       reciterDownloadsProvider.select((all) => all[reciter.edition]),
     );
-    final size = reciterDownloadSize(reciter);
+    // (No downloads in the browser: nor their size.)
+    final size = downloads.supported ? reciterDownloadSize(reciter) : null;
     final status = switch (d) {
       _ when !downloads.supported => null,
       ReciterDownload(complete: true) => l10n.listenDownloaded,

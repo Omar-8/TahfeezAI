@@ -11,7 +11,6 @@ import 'package:tahfeez_ai/core/ui/first_run.dart';
 import 'package:tahfeez_ai/features/guide/app_tips.dart';
 import 'package:tahfeez_ai/features/guide/app_tips_host.dart';
 import 'package:tahfeez_ai/features/guide/guide.dart';
-import 'package:tahfeez_ai/features/listen/application/listen_options.dart';
 import 'package:tahfeez_ai/features/listen/application/quran_audio_player.dart';
 
 class _Memory implements BrowserStorage {
@@ -59,7 +58,8 @@ class _Player extends QuranAudioPlayer {
 }
 
 /// "Did you know" tips: none on the first day, then at most one every two
-/// days, at random moments; each can be turned off for good.
+/// days, at random; never while reciting or listening; "Don't show tips
+/// again" ends them all.
 void main() {
   final day0 = DateTime(2026, 11, 3, 10);
 
@@ -135,6 +135,29 @@ void main() {
     });
   });
 
+  group('"Don\'t show tips again"', () {
+    test('none of them, ever — the checking\'s neither', () async {
+      final storage = _Memory();
+      await appTipsStart(storage, day0);
+      await appTipsAllOff(storage);
+      final later = day0.add(const Duration(days: 30));
+      for (final tip in [AppTip.listenTranslation, AppTip.pageTheme]) {
+        expect(
+          await appTipDue(storage, tip, now: later, random: _Coin(0)),
+          isFalse,
+        );
+      }
+      expect(await appTipOn(storage, AppTip.tajweedOff), isFalse);
+    });
+
+    test('one shown with Show me: off; the others on', () async {
+      final storage = _Memory();
+      await appTipOff(storage, AppTip.lenient);
+      expect(await appTipOn(storage, AppTip.lenient), isFalse);
+      expect(await appTipOn(storage, AppTip.tajweedOff), isTrue);
+    });
+  });
+
   group('in the reader', () {
     late _Memory storage;
     late ProviderContainer container;
@@ -174,14 +197,9 @@ void main() {
       );
     }
 
-    void play({String translationVoice = ''}) =>
+    void play() =>
         (container.read(quranAudioPlayerProvider.notifier) as _Player).set(
-          NowPlaying.ayahs(
-            const [1001, 1002, 1003],
-            0,
-            null,
-            options: ListenOptions(translationVoice: translationVoice),
-          ),
+          NowPlaying.ayahs(const [1001, 1002, 1003], 0, null),
         );
 
     testWidgets('a while into reading: the page themes; Show me opens them, '
@@ -193,7 +211,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byKey(const ValueKey('app-tip-pageTheme')), findsOneWidget);
       expect(find.text('Show me'), findsOneWidget);
-      expect(find.text("Don't show this again"), findsOneWidget);
+      expect(find.text("Don't show tips again"), findsOneWidget);
       await tester.tap(find.byKey(const ValueKey('app-tip-show')));
       await tester.pumpAndSettle();
       expect(find.byKey(const ValueKey('mushaf-page-theme')), findsOneWidget);
@@ -208,49 +226,36 @@ void main() {
       expect(container.read(guideProvider), isNull);
     });
 
-    testWidgets('listening without a translation: its tip; "Don\'t show '
-        'this again" and Close: off for good', (tester) async {
+    testWidgets('"Don\'t show tips again" and Close: no tip any more', (
+      tester,
+    ) async {
       await open(tester);
-      play();
       await tester.pump(AppTipsHost.readingDelay);
-      expect(
-        find.byKey(const ValueKey('app-tip-pageTheme')),
-        findsNothing,
-        reason: 'not the page themes while listening',
-      );
-      await tester.pump(AppTipsHost.listeningDelay);
       await tester.pumpAndSettle();
-      expect(
-        find.byKey(const ValueKey('app-tip-listenTranslation')),
-        findsOneWidget,
-      );
       await tester.tap(find.byKey(const ValueKey('app-tip-never')));
       await tester.pump();
       await tester.tap(find.byKey(const ValueKey('app-tip-close')));
       await tester.pumpAndSettle();
-      expect(
-        find.byKey(const ValueKey('app-tip-listenTranslation')),
-        findsNothing,
-      );
-      expect(storage.values['appTips.off.listenTranslation'], isTrue);
+      expect(find.byType(AlertDialog), findsNothing);
+      expect(storage.values['appTips.allOff'], isTrue);
       expect(container.read(guideProvider), isNull);
     });
 
     testWidgets('Close alone: it may come again another day', (tester) async {
       await open(tester);
-      play();
-      await tester.pump(AppTipsHost.listeningDelay);
+      await tester.pump(AppTipsHost.readingDelay);
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey('app-tip-close')));
       await tester.pumpAndSettle();
-      expect(storage.values['appTips.off.listenTranslation'], isNull);
+      expect(storage.values['appTips.off.pageTheme'], isNull);
+      expect(storage.values['appTips.allOff'], isNull);
       expect(storage.values['appTips.lastShown'], day0.toIso8601String());
     });
 
-    testWidgets('listening with a translation already: no tip', (tester) async {
+    testWidgets('never while the reciter is heard', (tester) async {
       await open(tester);
-      play(translationVoice: 'en.walk');
-      await tester.pump(AppTipsHost.listeningDelay * 2);
+      play();
+      await tester.pump(AppTipsHost.readingDelay * 3);
       await tester.pumpAndSettle();
       expect(find.byType(AlertDialog), findsNothing);
     });

@@ -604,11 +604,6 @@
   "guideListenTranslation": "Höre nach jedem Vers eine vorgelesene Übersetzung. Sie wird gestreamt und braucht daher Internet.",
   "guideListenSleep": "Der Schlaf-Timer pausiert die Rezitation nach einer Weile oder am Ende des Verses — zum Hören am Abend.",
   "recHintTitle": "Ein Tipp",
-  "recHintTajweed": "In dieser Rezitation wurden viele Tajweed-Regeln markiert. Wenn du Tajweed noch lernst, kannst du die Tajweed-Prüfung vorerst ausschalten: Dann werden nur Buchstaben und Vokale geprüft. In den Hifz-Einstellungen jederzeit wieder einschaltbar.",
-  "recHintTajweedAction": "Tajweed-Prüfung ausschalten",
-  "recHintLenient": "In dieser Rezitation wurden viele Vokale markiert. Wenn dir das zu viel erscheint, stelle die Aussprache-Prüfung auf nachsichtig: Dann werden nur deutlichere Fehler markiert. In den Hifz-Einstellungen jederzeit änderbar.",
-  "recHintLenientAction": "Auf nachsichtig stellen",
-  "recHintLater": "Nicht jetzt",
   "recFeedbackListen": "Korrektur anhören",
   "recFeedbackListenAlone": "Für Ihren Rezitator gibt es keine Wortzeiten, daher erklingt nur das Wort allein – ohne Verbindung zum nächsten Wort und ohne seinen letzten Vokal.",
   "milestoneSurahs": "Suren {surahs} auswendig gelernt",
@@ -617,8 +612,11 @@
   "tipListenTranslation": "Schon gewusst? Beim Zuhören kann nach jedem Vers eine Übersetzung in deiner Sprache vorgelesen werden.",
   "tipPageTheme": "Schon gewusst? Die Mushaf-Seite gibt es in mehreren Farbthemen, von hell bis dunkel. Wähle das, das für deine Augen am angenehmsten ist.",
   "tipShowMe": "Zeig es mir",
-  "tipDontShowAgain": "Nicht mehr anzeigen",
+  "tipDontShowAgain": "Keine Tipps mehr anzeigen",
   "tipClose": "Schließen",
-  "guideTipTranslation": "Wähle hier eine Übersetzung und tippe dann auf Abspielen. Sie wird gestreamt und braucht daher Internet.",
-  "guideTipPageTheme": "Tippe auf ein Thema, um die Farben der Seite zu ändern."
+  "guideTipPageTheme": "Tippe auf ein Thema, um die Farben der Seite zu ändern.",
+  "tipTajweedOff": "In deiner letzten Rezitation wurden viele Tajweed-Regeln markiert. Wenn du Tajweed noch lernst, kannst du die Tajweed-Prüfung in den Hifz-Einstellungen ausschalten: Dann werden nur Buchstaben und Vokale geprüft.",
+  "tipLenient": "In deiner letzten Rezitation wurden viele Vokale markiert. Wenn dir das zu viel war, kannst du die Aussprache-Prüfung in den Hifz-Einstellungen auf nachsichtig stellen: Dann werden nur deutlichere Fehler markiert.",
+  "recModelDownloading": "Rezitationsprüfung wird vorbereitet: {percent} % (nur einmal)",
+  "recWebUnsupported": "Dieser Browser kann die Rezitationsprüfung nicht ausführen. Versuche ein aktuelles Chrome, Edge, Firefox oder Safari."
 }

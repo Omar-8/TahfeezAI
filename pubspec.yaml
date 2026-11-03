@@ -55,6 +55,10 @@ dependencies:
   intl: ^0.20.3
   flutter_localizations:
     sdk: flutter
+  # The web's answers to the phones' platform channels (the acoustic
+  # model, vibration and beeps: lib/core/platform/web_channels.dart).
+  flutter_web_plugins:
+    sdk: flutter
   dynamic_color: ^1.9.0
   # Overridden below (dependency_overrides) to a local, patched copy —
   # this version constraint is kept in sync with that copy's own

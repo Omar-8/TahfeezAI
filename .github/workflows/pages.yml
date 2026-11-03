@@ -1,9 +1,12 @@
-# The website (site/) on GitHub Pages, published whenever it changes.
+# The website (site/) on GitHub Pages, published whenever it changes, with
+# the web app under /app/: the last one web-app.yml built (the release
+# "web-app"), so a change to the site never publishes unreleased app code.
 # Pages must be set to "GitHub Actions" (Settings → Pages → Source) once.
 name: Website
 
 on:
   workflow_dispatch:
+  workflow_call:
   push:
     branches: [main]
     paths:
@@ -27,6 +30,16 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
+      - name: The web app (if built)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release download web-app --pattern web-app.tar.gz --dir /tmp 2>/dev/null; then
+            mkdir -p site/app && tar xzf /tmp/web-app.tar.gz -C site/app
+            du -sh site/app
+          else
+            echo "No web app built yet: the site alone."
+          fi
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

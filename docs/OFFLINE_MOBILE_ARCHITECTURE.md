@@ -106,10 +106,10 @@ resource-register entry: `docs/THIRD_PARTY_RESOURCES.md`.
 
 ## 6. Web
 
-Web has no hard offline requirement (`docs/PROJECT_BRIEF.md`). The same
-`BundledDatasetSeeder`/repository interfaces are used — no separate web-specific data
-path exists — so web behavior is identical in kind, just without the same offline
-guarantee if a resource is missing. Unlike every other gated Mushaf resource, the Quran
+Web has no hard offline requirement (`docs/PROJECT_BRIEF.md`). Since 2026-11-03 the web
+opens the phones' ready-made databases from their bundled copies and keeps meaning packs as
+the phones do (`docs/ARCHITECTURE.md` §7), and runs the recitation model in the browser
+(§32, Web) — the same data and the same model, kept in the browser after the first visit. Unlike every other gated Mushaf resource, the Quran
 Engine page corpus is now bundled into the Web build too (§4) — Web Mushaf rendering
 "just works" from the same-origin bundled assets, with no separate hosting/CDN required
 and no configuration.

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:ui' show Locale;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -40,12 +39,7 @@ class _Memory implements BrowserStorage {
 /// The packs on the phone, as sets — English's and Arabic's from the start.
 class _Store extends MeaningPackStore {
   _Store()
-    : super(
-        databases: const {},
-        temp: Directory.systemTemp,
-        loadString: (_) async => '',
-        unpack: (_, _) async => '',
-      );
+    : super(databases: const {}, loadString: (_) async => '');
 
   final on = {
     for (final kind in MeaningPackKind.values) kind: {...kind.builtIn},

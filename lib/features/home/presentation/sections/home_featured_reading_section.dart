@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/core_providers.dart';
 import '../../../../core/localization/generated/app_localizations.dart';
 import '../../../../core/routing/quran_location_routing.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -38,48 +39,68 @@ class HomeFeaturedReadingSection extends ConsumerWidget {
                 ),
               );
             }
-            // As tall as a card's content (a number badge, the name and a
-            // line under it), growing with the text size.
             final textScale = MediaQuery.textScalerOf(context).scale(1);
-            return SizedBox(
-              height: 44 + 40 * textScale,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: list.length,
-                separatorBuilder: (_, _) =>
-                    const SizedBox(width: TahfeezSpacing.sm),
-                itemBuilder: (context, index) {
-                  final chapter = list[index];
-                  final count = l10n.homeFeaturedAyahCount(
-                    chapter.surah.ayahCount,
+            final web = ref.watch(platformCapabilitiesProvider).isWeb;
+            Widget card(FeaturedChapterRef chapter) {
+              final count = l10n.homeFeaturedAyahCount(chapter.surah.ayahCount);
+              final occasion = switch (chapter.occasion) {
+                FeaturedOccasion.friday => l10n.homeFeaturedFriday,
+                FeaturedOccasion.night => l10n.homeFeaturedNight,
+                null => null,
+              };
+              return TahfeezQuranSectionCard(
+                singleLine: true,
+                number: chapter.surah.surahNo,
+                title:
+                    chapter.name ??
+                    l10n.homeContinueReadingSurah(chapter.surah.surahNo),
+                subtitle: occasion == null ? count : '$occasion · $count',
+                onTap: () => goToQuranLocation(
+                  context,
+                  QuranLocation.surah(chapter.surah.surahNo),
+                ),
+              );
+            }
+
+            return LayoutBuilder(
+              builder: (context, constraints) {
+                // A browser window with room for two across: all of them
+                // in view, two to a row — no rail running off the edge,
+                // which a mouse can't drag. (The phones and tablets keep
+                // the rail.)
+                if (web && constraints.maxWidth >= _gridFrom * textScale) {
+                  final width = (constraints.maxWidth - TahfeezSpacing.sm) / 2;
+                  return Wrap(
+                    spacing: TahfeezSpacing.sm,
+                    runSpacing: TahfeezSpacing.sm,
+                    children: [
+                      for (final chapter in list)
+                        SizedBox(width: width, child: card(chapter)),
+                    ],
                   );
-                  final occasion = switch (chapter.occasion) {
-                    FeaturedOccasion.friday => l10n.homeFeaturedFriday,
-                    FeaturedOccasion.night => l10n.homeFeaturedNight,
-                    null => null,
-                  };
-                  // Wider with larger text, never wider than most of the
-                  // screen; its lines shortened to fit (one line each).
-                  return SizedBox(
-                    width: (240 * textScale.clamp(1.0, 1.4)).clamp(
-                      0,
-                      MediaQuery.sizeOf(context).width * 0.85,
-                    ),
-                    child: TahfeezQuranSectionCard(
-                      singleLine: true,
-                      number: chapter.surah.surahNo,
-                      title:
-                          chapter.name ??
-                          l10n.homeContinueReadingSurah(chapter.surah.surahNo),
-                      subtitle: occasion == null ? count : '$occasion · $count',
-                      onTap: () => goToQuranLocation(
-                        context,
-                        QuranLocation.surah(chapter.surah.surahNo),
+                }
+                // A phone: a rail, as tall as a card's content (a number
+                // badge, the name and a line under it), growing with the
+                // text size.
+                return SizedBox(
+                  height: 44 + 40 * textScale,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: list.length,
+                    separatorBuilder: (_, _) =>
+                        const SizedBox(width: TahfeezSpacing.sm),
+                    // Wider with larger text, never wider than most of the
+                    // screen; its lines shortened to fit (one line each).
+                    itemBuilder: (context, index) => SizedBox(
+                      width: (240 * textScale.clamp(1.0, 1.4)).clamp(
+                        0,
+                        MediaQuery.sizeOf(context).width * 0.85,
                       ),
+                      child: card(list[index]),
                     ),
-                  );
-                },
-              ),
+                  ),
+                );
+              },
             );
           },
           loading: () => const TahfeezCard(child: TahfeezLoadingView()),
@@ -94,3 +115,6 @@ class HomeFeaturedReadingSection extends ConsumerWidget {
     );
   }
 }
+
+/// The section's width from which its cards sit two to a row.
+const _gridFrom = 520.0;

@@ -604,11 +604,6 @@
   "guideListenTranslation": "Écoutez une traduction lue à voix haute après chaque verset. Elle est diffusée en ligne : il faut internet.",
   "guideListenSleep": "La minuterie de sommeil met la récitation en pause après un moment, ou à la fin du verset — pour écouter le soir.",
   "recHintTitle": "Un conseil",
-  "recHintTajweed": "De nombreuses règles de tajwid ont été signalées dans cette récitation. Si vous apprenez encore le tajwid, vous pouvez désactiver sa vérification pour l'instant : seules les lettres et les voyelles sont vérifiées. Réactivez-la quand vous voulez dans les réglages Hifz.",
-  "recHintTajweedAction": "Désactiver la vérification du tajwid",
-  "recHintLenient": "De nombreuses voyelles ont été signalées dans cette récitation. Si cela vous semble trop, rendez la vérification de la prononciation indulgente : seules les erreurs plus nettes sont signalées. Modifiable à tout moment dans les réglages Hifz.",
-  "recHintLenientAction": "Rendre indulgent",
-  "recHintLater": "Pas maintenant",
   "recFeedbackListen": "Écouter la correction",
   "recFeedbackListenAlone": "Votre récitateur n’a pas de minutage des mots : seul le mot est joué, sans sa liaison avec le suivant ni sa dernière voyelle.",
   "milestoneSurahs": "Sourates {surahs} mémorisées",
@@ -617,8 +612,11 @@
   "tipListenTranslation": "Le saviez-vous ? Pendant l'écoute, une traduction peut être lue à voix haute après chaque verset, dans votre langue.",
   "tipPageTheme": "Le saviez-vous ? La page du Mushaf existe en plusieurs thèmes de couleur, du clair au sombre. Choisissez le plus reposant pour vos yeux.",
   "tipShowMe": "Montrez-moi",
-  "tipDontShowAgain": "Ne plus afficher",
+  "tipDontShowAgain": "Ne plus afficher de conseils",
   "tipClose": "Fermer",
-  "guideTipTranslation": "Choisissez une traduction ici, puis appuyez sur Lecture. Elle est diffusée en ligne : il faut internet.",
-  "guideTipPageTheme": "Touchez un thème pour changer les couleurs de la page."
+  "guideTipPageTheme": "Touchez un thème pour changer les couleurs de la page.",
+  "tipTajweedOff": "Dans votre dernière récitation, de nombreuses règles de tajwid ont été signalées. Si vous apprenez encore le tajwid, vous pouvez désactiver sa vérification dans les réglages Hifz : seules les lettres et les voyelles sont alors vérifiées.",
+  "tipLenient": "Dans votre dernière récitation, de nombreuses voyelles ont été signalées. Si cela vous a semblé trop, vous pouvez rendre la vérification de la prononciation indulgente dans les réglages Hifz : seules les erreurs plus nettes sont alors signalées.",
+  "recModelDownloading": "Préparation de la vérification de la récitation : {percent} % (une seule fois)",
+  "recWebUnsupported": "Ce navigateur ne peut pas exécuter la vérification de la récitation. Essayez un Chrome, Edge, Firefox ou Safari récent."
 }

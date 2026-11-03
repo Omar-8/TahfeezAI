@@ -604,11 +604,6 @@
   "guideListenTranslation": "Dengarkan terjemahan yang dibacakan setelah setiap ayat. Diputar secara streaming, jadi perlu internet.",
   "guideListenSleep": "Pengatur waktu tidur menjeda bacaan setelah beberapa saat, atau di akhir ayat — untuk mendengarkan di malam hari.",
   "recHintTitle": "Tips",
-  "recHintTajweed": "Banyak hukum tajwid ditandai dalam bacaan ini. Jika Anda masih belajar tajwid, Anda bisa mematikan pemeriksaan tajwid untuk sementara: hanya huruf dan harakat yang diperiksa. Nyalakan lagi kapan saja di pengaturan hafalan.",
-  "recHintTajweedAction": "Matikan pemeriksaan tajwid",
-  "recHintLenient": "Banyak harakat ditandai dalam bacaan ini. Jika terasa terlalu banyak, buat pemeriksaan pelafalan longgar: hanya kesalahan yang lebih jelas yang ditandai. Anda bisa mengubahnya kapan saja di pengaturan hafalan.",
-  "recHintLenientAction": "Buat longgar",
-  "recHintLater": "Nanti saja",
   "recFeedbackListen": "Dengarkan bacaan yang benar",
   "recFeedbackListenAlone": "Qari Anda tidak memiliki waktu per kata, jadi yang diputar hanya katanya saja — tanpa sambungan ke kata berikutnya atau harakat terakhirnya.",
   "milestoneSurahs": "Surah {surahs} telah dihafal",
@@ -617,8 +612,11 @@
   "tipListenTranslation": "Tahukah Anda? Saat mendengarkan, terjemahan dalam bahasa Anda dapat dibacakan setelah setiap ayat.",
   "tipPageTheme": "Tahukah Anda? Halaman Mushaf punya beberapa tema warna, dari terang hingga gelap. Pilih yang paling nyaman di mata.",
   "tipShowMe": "Tunjukkan",
-  "tipDontShowAgain": "Jangan tampilkan lagi",
+  "tipDontShowAgain": "Jangan tampilkan tips lagi",
   "tipClose": "Tutup",
-  "guideTipTranslation": "Pilih terjemahan di sini, lalu tekan Putar. Diputar secara streaming, jadi perlu internet.",
-  "guideTipPageTheme": "Ketuk sebuah tema untuk mengubah warna halaman."
+  "guideTipPageTheme": "Ketuk sebuah tema untuk mengubah warna halaman.",
+  "tipTajweedOff": "Banyak hukum tajwid ditandai dalam bacaan terakhir Anda. Jika Anda masih belajar tajwid, Anda bisa mematikan pemeriksaan tajwid di pengaturan hafalan: lalu hanya huruf dan harakat yang diperiksa.",
+  "tipLenient": "Banyak harakat ditandai dalam bacaan terakhir Anda. Jika terasa terlalu banyak, Anda bisa membuat pemeriksaan pelafalan longgar di pengaturan hafalan: lalu hanya kesalahan yang lebih jelas yang ditandai.",
+  "recModelDownloading": "Menyiapkan pemeriksaan bacaan: {percent}% (sekali saja)",
+  "recWebUnsupported": "Browser ini tidak bisa menjalankan pemeriksaan bacaan. Coba Chrome, Edge, Firefox, atau Safari versi terbaru."
 }

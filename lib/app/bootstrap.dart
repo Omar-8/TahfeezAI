@@ -10,7 +10,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import 'package:path_provider/path_provider.dart';
 
+import 'package:drift/drift.dart' show GeneratedDatabase;
+
+import '../core/database/database_connection_web_cleanup.dart';
 import '../core/logging/error_reporting.dart';
+import '../core/platform/web_platform_channels.dart';
 import '../core/logging/logging_package_logger.dart';
 import '../core/storage/storage_providers.dart';
 import '../wbw/wbw_providers.dart';
@@ -49,6 +53,8 @@ Future<void> bootstrap() async {
   // The credited sources' notices on Flutter's licence page.
   registerCreditLicences();
   WidgetsFlutterBinding.ensureInitialized();
+  // The web's answers to the phones' channels (the acoustic model, alerts).
+  registerWebPlatformChannels();
   // The first frame is the app's own splash (bootstrap_gate.dart): the
   // system splash's icon, in place, with the app's name below it.
   // Recitation audio as a media session (background playback, the
@@ -97,12 +103,56 @@ Future<void> bootstrap() async {
     logger: logger,
     storage: container.read(browserStorageProvider),
   );
+  // The app's language's translations, tafsir and word meanings (English
+  // and Arabic's are built in), then whichever are chosen as they change.
+  Map<MeaningPackKind, GeneratedDatabase> meaningDatabases() => {
+    MeaningPackKind.translation: container.read(translationDatabaseProvider),
+    MeaningPackKind.tafsir: container.read(tafsirDatabaseProvider),
+    MeaningPackKind.wbw: container.read(wbwDatabaseProvider),
+  };
   // On Android and iOS the ready-made databases are unpacked into place;
-  // the web imports the datasets.
+  // on the web they open from their bundled copies (bundled_web_database
+  // .dart); elsewhere (desktop development) the datasets are imported.
   Future<String?> setUp() async {
-    if (kIsWeb ||
-        (defaultTargetPlatform != TargetPlatform.android &&
-            defaultTargetPlatform != TargetPlatform.iOS)) {
+    if (kIsWeb) {
+      try {
+        final metadata = await container
+            .read(quranRepositoryProvider)
+            .getDatasetMetadata();
+        if (metadata == null) return "The Qur'an database is empty";
+      } catch (e, st) {
+        logger.error(
+          'Could not open the bundled Quran databases.',
+          tag: 'bootstrap',
+          error: e,
+          stackTrace: st,
+        );
+        return '$e';
+      }
+      startupMark('databases');
+      await container
+          .read(meaningPacksProvider.notifier)
+          .attach(
+            ImportingMeaningPackStore(
+              databases: meaningDatabases(),
+              loadString: rootBundle.loadString,
+              import: seeder.importPack,
+            ),
+          );
+      startupMark('meaning packs');
+      // The earlier versions' copies, once the app is up.
+      unawaited(
+        Future<void>.delayed(
+          const Duration(seconds: 10),
+          deleteStaleBundledWebDatabases,
+        ).catchError((Object e) {
+          logger.warning('Stale databases not deleted: $e', tag: 'bootstrap');
+        }),
+      );
+      return null;
+    }
+    if (defaultTargetPlatform != TargetPlatform.android &&
+        defaultTargetPlatform != TargetPlatform.iOS) {
       return seeder.seedIfNeeded();
     }
     final installer = BundledDatabaseInstaller(
@@ -113,19 +163,11 @@ Future<void> bootstrap() async {
     final failure = await installer.installIfNeeded();
     startupMark('databases');
     if (failure != null) return failure;
-    // The app's language's translations, tafsir and word meanings (English
-    // and Arabic's are built in), then whichever are chosen as they change.
     await container
         .read(meaningPacksProvider.notifier)
         .attach(
-          MeaningPackStore(
-            databases: {
-              MeaningPackKind.translation: container.read(
-                translationDatabaseProvider,
-              ),
-              MeaningPackKind.tafsir: container.read(tafsirDatabaseProvider),
-              MeaningPackKind.wbw: container.read(wbwDatabaseProvider),
-            },
+          UnpackingMeaningPackStore(
+            databases: meaningDatabases(),
             temp: await getTemporaryDirectory(),
             loadString: rootBundle.loadString,
             unpack: BundledDatabaseInstaller.nativeUnpack,

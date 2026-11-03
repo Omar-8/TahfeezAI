@@ -36,29 +36,17 @@ enum MeaningPackKind {
 }
 
 /// The text of the translations, tafsirs and word meanings in use, put on
-/// the phone and taken off again — the rest stays packed in the app
-/// (assets/quran/db/packs/, xz: built by
-/// `tool/quran_db/build_databases_test.dart`), so the phone keeps ~20 MB of
-/// them rather than ~120. A pack is unpacked by Android's own code
-/// (BundledDatabaseInstaller's), checked against its hash, and copied in by
-/// SQLite itself (ATTACH, INSERT … SELECT): quick, and little memory.
-class MeaningPackStore {
-  MeaningPackStore({
-    required this.databases,
-    required this.temp,
-    required this.loadString,
-    required this.unpack,
-  });
+/// the device and taken off again — the rest stays packed in the app
+/// (assets/quran/db/packs/: built by `tool/quran_db/build_databases_test
+/// .dart`), so the phone keeps ~20 MB of them rather than ~120. How a pack
+/// goes on is the platform's: [UnpackingMeaningPackStore] on the phones,
+/// [ImportingMeaningPackStore] on the web.
+abstract class MeaningPackStore {
+  MeaningPackStore({required this.databases, required this.loadString});
 
   /// Each kind's database.
   final Map<MeaningPackKind, GeneratedDatabase> databases;
-
-  /// Where a pack is unpacked before it's copied in.
-  final Directory temp;
   final Future<String> Function(String asset) loadString;
-
-  /// (The platform's, in the app: BundledDatabaseInstaller.nativeUnpack.)
-  final DatabaseUnpacker unpack;
 
   Map<String, dynamic>? _manifest;
 
@@ -84,7 +72,38 @@ class MeaningPackStore {
     return {for (final r in rows) r.read<String>('id')};
   }
 
-  /// Puts [id]'s text on the phone.
+  /// Puts [id]'s text on the device.
+  Future<void> install(MeaningPackKind kind, String id);
+
+  /// Takes [id]'s text off the phone (the database shrinks: auto_vacuum);
+  /// never a built-in one.
+  Future<void> remove(MeaningPackKind kind, String id) async {
+    if (kind.builtIn.contains(id)) return;
+    await databases[kind]!.customStatement(
+      'DELETE FROM ${kind.table} WHERE ${kind.key} = ?',
+      [id],
+    );
+  }
+}
+
+/// The phones': a pack (xz) is unpacked by the platform's own code
+/// (BundledDatabaseInstaller's), checked against its hash, and copied in by
+/// SQLite itself (ATTACH, INSERT … SELECT): quick, and little memory.
+class UnpackingMeaningPackStore extends MeaningPackStore {
+  UnpackingMeaningPackStore({
+    required super.databases,
+    required this.temp,
+    required super.loadString,
+    required this.unpack,
+  });
+
+  /// Where a pack is unpacked before it's copied in.
+  final Directory temp;
+
+  /// (The platform's, in the app: BundledDatabaseInstaller.nativeUnpack.)
+  final DatabaseUnpacker unpack;
+
+  @override
   Future<void> install(MeaningPackKind kind, String id) async {
     final entry =
         ((await _packs())[kind.name] as Map?)?[id] as Map<String, dynamic>?;
@@ -122,14 +141,25 @@ class MeaningPackStore {
       if (file.existsSync()) file.deleteSync();
     }
   }
+}
 
-  /// Takes [id]'s text off the phone (the database shrinks: auto_vacuum);
-  /// never a built-in one.
-  Future<void> remove(MeaningPackKind kind, String id) async {
-    if (kind.builtIn.contains(id)) return;
-    await databases[kind]!.customStatement(
-      'DELETE FROM ${kind.table} WHERE ${kind.key} = ?',
-      [id],
-    );
+/// The web's: no file to attach, so a pack's text is imported from its
+/// JSON asset (the same text the pack holds; `BundledDatasetSeeder
+/// .importPack`).
+class ImportingMeaningPackStore extends MeaningPackStore {
+  ImportingMeaningPackStore({
+    required super.databases,
+    required super.loadString,
+    required this.import,
+  });
+
+  final Future<void> Function(MeaningPackKind kind, String id) import;
+
+  @override
+  Future<void> install(MeaningPackKind kind, String id) async {
+    if (!(await available(kind)).contains(id)) {
+      throw StateError('No ${kind.name} pack $id in the app');
+    }
+    await import(kind, id);
   }
 }

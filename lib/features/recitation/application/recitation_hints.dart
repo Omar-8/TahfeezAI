@@ -1,11 +1,10 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import '../../../core/storage/browser_storage.dart';
+import '../../guide/app_tips.dart';
 import 'hifz_controller.dart';
 
-/// A tip after one of the first recitations, when the check marked much
-/// of it: most likely the reciter is still learning tajweed, or the check
-/// is stricter than their recitation needs.
+/// A tip after one of the first recitations, over its results, when the
+/// check marked much of it: most likely the reciter is still learning
+/// tajweed, or the check is stricter than their recitation needs.
 enum RecitationHint {
   /// Many tajweed rules not kept: tajweed checking can be turned off.
   tajweedOff,
@@ -71,13 +70,8 @@ Future<RecitationHint?> recitationHintAfter(
 const _countKey = 'recitationHints.recitations';
 const _shownKey = 'recitationHints.shown';
 
-/// What the tip's button does: tajweed checking off, or lenient.
-void applyRecitationHint(WidgetRef ref, RecitationHint hint) {
-  final settings = ref.read(hifzSettingsProvider);
-  ref.read(hifzSettingsProvider.notifier).update(switch (hint) {
-    RecitationHint.tajweedOff => settings.copyWith(tajweed: false),
-    RecitationHint.lenient => settings.copyWith(
-      strictness: RecitationStrictness.lenient,
-    ),
-  });
-}
+/// The tip [hint] gives.
+AppTip appTipFor(RecitationHint hint) => switch (hint) {
+  RecitationHint.tajweedOff => AppTip.tajweedOff,
+  RecitationHint.lenient => AppTip.lenient,
+};

@@ -32,7 +32,9 @@ import '../application/mushaf_recitation_target.dart';
 import '../application/sajdah_reminder.dart';
 import '../application/recitation_hints.dart';
 import '../../../core/storage/storage_providers.dart';
-import '../../../core/ui/first_run.dart';
+import '../../../ai/acoustic/acoustic_model_download.dart';
+import '../../guide/app_tips.dart';
+import '../../guide/app_tips_host.dart';
 import '../../guide/guide.dart';
 import '../../../memorization/application/activity_stats.dart';
 import '../../../ai/hifz/hifz_judge.dart';
@@ -256,59 +258,53 @@ Future<void> showSajdahReminder(BuildContext context, WidgetRef ref) {
   );
 }
 
-/// After one of the first recitations: a tip when the check marked much of
-/// it — tajweed checking off, or lenient strictness (see
-/// [recitationHintAfter]). Not in the guide's practice, nor between
-/// Follow along's turns.
-Future<void> _offerRecitationHint(BuildContext context, WidgetRef ref) async {
-  if (!ref.read(firstRunPromptsProvider)) return;
-  if (!ref.read(liveRecognitionEnabledProvider)) return;
-  if (ref.read(guideProvider) != null) return;
+/// After one of the first recitations: the tip it calls for, if any, when
+/// the check marked much of it — tajweed checking off, or lenient
+/// strictness (see [recitationHintAfter]). Not the guide's practice, nor
+/// between Follow along's turns.
+Future<RecitationHint?> _recitationHint(
+  BuildContext context,
+  WidgetRef ref,
+) async {
+  if (!ref.read(appTipsEnabledProvider)) return null;
+  if (!ref.read(liveRecognitionEnabledProvider)) return null;
+  if (ref.read(guideProvider) != null) return null;
   if (ref.exists(followAlongControllerProvider) &&
       ref.read(followAlongControllerProvider) != null) {
-    return;
+    return null;
   }
+  final storage = ref.read(browserStorageProvider);
+  // (Tips turned off: none, and none counted as given.)
+  if (!await appTipOn(storage, AppTip.tajweedOff)) return null;
   // The last words' checks still arriving: a few seconds at most.
   for (var i = 0; i < 25; i++) {
     if (ref.read(acousticVerificationControllerProvider).pending == 0) break;
     await Future<void>.delayed(const Duration(milliseconds: 200));
-    if (!context.mounted) return;
+    if (!context.mounted) return null;
   }
-  final hint = await recitationHintAfter(
-    ref.read(browserStorageProvider),
+  return recitationHintAfter(
+    storage,
     ref.read(hifzSettingsProvider),
     ref.read(hifzControllerProvider.notifier).lastPronunciation(),
   );
+}
+
+/// The last session's tip ([_recitationHint]), worked out as it ended.
+Future<RecitationHint?>? _sessionHint;
+
+/// Over a session's results: its tip, if it called for one. Close: the
+/// results stay; "Show me": the Hifz settings over them.
+Future<void> _offerSessionTip(BuildContext context, WidgetRef ref) async {
+  final pending = _sessionHint;
+  _sessionHint = null;
+  final hint = await pending;
   if (hint == null || !context.mounted) return;
-  final l10n = AppLocalizations.of(context);
-  final apply = await showDialog<bool>(
-    context: context,
-    useRootNavigator: true,
-    builder: (context) => AlertDialog(
-      key: ValueKey('recitation-hint-${hint.name}'),
-      icon: const Icon(Icons.lightbulb_outline),
-      title: Text(l10n.recHintTitle),
-      content: Text(switch (hint) {
-        RecitationHint.tajweedOff => l10n.recHintTajweed,
-        RecitationHint.lenient => l10n.recHintLenient,
-      }),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(false),
-          child: Text(l10n.recHintLater),
-        ),
-        FilledButton(
-          key: const ValueKey('recitation-hint-apply'),
-          onPressed: () => Navigator.of(context).pop(true),
-          child: Text(switch (hint) {
-            RecitationHint.tajweedOff => l10n.recHintTajweedAction,
-            RecitationHint.lenient => l10n.recHintLenientAction,
-          }),
-        ),
-      ],
-    ),
-  );
-  if (apply == true) applyRecitationHint(ref, hint);
+  // The results up first.
+  await Future<void>.delayed(const Duration(milliseconds: 600));
+  if (!context.mounted || ref.read(guideProvider) != null) return;
+  if (await answerAppTip(context, ref, appTipFor(hint)) && context.mounted) {
+    await showHifzSettingsSheet(context);
+  }
 }
 
 class RecitationBottomBar extends ConsumerWidget {
@@ -341,10 +337,11 @@ class RecitationBottomBar extends ConsumerWidget {
       }
     });
 
-    // One of the first recitations over, much of it marked: a tip.
+    // One of the first recitations over, much of it marked: a tip, over
+    // its results.
     ref.listen(recitationSessionControllerProvider, (previous, next) {
       if (previous?.isActive != true || next.isActive) return;
-      unawaited(_offerRecitationHint(context, ref));
+      _sessionHint = _recitationHint(context, ref);
     });
 
     // A session over: its results (each ayah's grade and strength) — not
@@ -362,9 +359,12 @@ class RecitationBottomBar extends ConsumerWidget {
       final reminder = _sajdahPopup;
       if (reminder == null) {
         showTestSummarySheet(context, next);
+        unawaited(_offerSessionTip(context, ref));
       } else {
         reminder.whenComplete(() {
-          if (context.mounted) showTestSummarySheet(context, next);
+          if (!context.mounted) return;
+          showTestSummarySheet(context, next);
+          unawaited(_offerSessionTip(context, ref));
         });
       }
     });
@@ -449,6 +449,7 @@ class RecitationBottomBar extends ConsumerWidget {
                   ),
                 if (recognition != null)
                   _RecitationAiNotice(config: aiConfig, inference: inference),
+                if (inference != null) const _ModelDownload(),
                 ConstrainedBox(
                   constraints: const BoxConstraints(minHeight: 72),
                   child: Padding(
@@ -1875,8 +1876,9 @@ class _HifzSettingsSheetState extends ConsumerState<_HifzSettingsSheet>
     final settings = ref.watch(hifzSettingsProvider);
     final controller = ref.read(hifzSettingsProvider.notifier);
     final capabilities = ref.watch(platformCapabilitiesProvider);
-    // The mistake alert's vibration and beep: Android and iOS.
-    final alerts = capabilities.isAndroid || capabilities.isIOS;
+    // The mistake alert's vibration and beep: Android, iOS and the web.
+    final alerts =
+        capabilities.isAndroid || capabilities.isIOS || capabilities.isWeb;
     Widget toggle(
       String title,
       String subtitle,
@@ -2222,8 +2224,11 @@ class _RecitationAiNotice extends ConsumerWidget {
         : config.violation ??
               inference?.error ??
               (model?.state == LocalAcousticModelState.unsupported
-                  // A 32-bit phone: the model needs 64 (memory and speed).
-                  ? l10n.recNeeds64Bit
+                  // A 32-bit phone: the model needs 64 (memory and speed);
+                  // an old browser: WebAssembly SIMD.
+                  ? (ref.watch(platformCapabilitiesProvider).isWeb
+                        ? l10n.recWebUnsupported
+                        : l10n.recNeeds64Bit)
                   : model != null && !model.usable
                   ? '$model'
                   : null);
@@ -2249,6 +2254,17 @@ class _RecitationAiNotice extends ConsumerWidget {
             overflow: TextOverflow.ellipsis,
             style: style,
           ),
+          // The web's download failed (offline?): try again.
+          if (!crashed &&
+              inference?.error != null &&
+              ref.watch(platformCapabilitiesProvider).isWeb)
+            TextButton(
+              key: const ValueKey('recitation-ai-retry-download'),
+              onPressed: () => ref
+                  .read(localAcousticInferenceControllerProvider.notifier)
+                  .retryAfterCrash(),
+              child: Text(l10n.quranSetupRetry),
+            ),
           if (crashed)
             Wrap(
               spacing: TahfeezSpacing.xs,
@@ -2277,6 +2293,43 @@ class _RecitationAiNotice extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// The web's first download of the acoustic model (the phones have it in
+/// the app): how far it has come. Kept afterwards — once only.
+class _ModelDownload extends StatelessWidget {
+  const _ModelDownload();
+
+  @override
+  Widget build(BuildContext context) => ValueListenableBuilder<double?>(
+    valueListenable: acousticModelDownload,
+    builder: (context, progress, _) {
+      if (progress == null) return const SizedBox.shrink();
+      final theme = Theme.of(context);
+      return Padding(
+        key: const ValueKey('recitation-model-download'),
+        padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          spacing: 6,
+          children: [
+            Text(
+              AppLocalizations.of(context)
+                  .recModelDownloading((progress * 100).round()),
+              style: theme.textTheme.labelMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            LinearProgressIndicator(
+              value: progress,
+              borderRadius: BorderRadius.circular(TahfeezRadii.pill),
+            ),
+          ],
+        ),
+      );
+    },
+  );
 }
 
 class RecognitionDevPanel extends StatelessWidget {

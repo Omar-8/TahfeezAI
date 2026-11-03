@@ -72,10 +72,9 @@ enum GuideTour {
 
   /// A tip's "Show me" (app_tips.dart): its control lit in the sheet it
   /// opened; tapped, the guide is over.
-  tipTranslation,
   tipPageTheme;
 
-  bool get isTip => this == tipTranslation || this == tipPageTheme;
+  bool get isTip => this == tipPageTheme;
 }
 
 List<GuideStep> guideSteps(GuideTour tour) => switch (tour) {
@@ -161,13 +160,6 @@ List<GuideStep> guideSteps(GuideTour tour) => switch (tour) {
       card: false,
     ),
   ],
-  GuideTour.tipTranslation => [
-    GuideStep(
-      'listen-translation',
-      (l) => l.guideTipTranslation,
-      wait: GuideWait.tap,
-    ),
-  ],
   GuideTour.tipPageTheme => [
     GuideStep(
       'mushaf-page-theme',
@@ -247,6 +239,11 @@ class GuideController extends Notifier<GuideState?> {
 
   void close() => state = null;
 
+  /// The reader left: the guide ends (if the app is still there).
+  void readerLeft() {
+    if (ref.mounted && state != null) state = null;
+  }
+
   /// The practice run was not started (its explanation closed): back to the
   /// step that asks for its button.
   void notStarted() {
@@ -325,9 +322,27 @@ class GuideButton extends ConsumerStatefulWidget {
 }
 
 class _GuideButtonState extends ConsumerState<GuideButton> {
+  /// Readers on screen (each has the guide's button).
+  static var _mounted = 0;
+  late final GuideController _guide;
+
+  @override
+  void dispose() {
+    _mounted--;
+    // The reader left (back, another screen; in a browser, its back button
+    // or a typed address): the guide is the reader's, so it ends — unless
+    // another reader took its place (Mushaf ↔ Ayah mode).
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_mounted == 0) _guide.readerLeft();
+    });
+    super.dispose();
+  }
+
   @override
   void initState() {
     super.initState();
+    _mounted++;
+    _guide = ref.read(guideProvider.notifier);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted || !ref.read(liveRecognitionEnabledProvider)) return;
       if (!await firstRunDue(ref, 'guide')) return;

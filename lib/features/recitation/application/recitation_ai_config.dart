@@ -71,8 +71,9 @@ class RecitationAiConfig {
 
 /// From `--dart-define`s, with defaults per platform:
 /// - `TAHFEEZ_ACOUSTIC_BACKEND` = `local` | `remote` | `disabled`.
-///   Default: `local` on Android; on the web (no local model yet)
-///   `remote` in development builds, else `disabled`.
+///   Default: `local` on Android, iOS and the web (in the browser, ONNX
+///   Runtime Web: web_channels.dart); elsewhere `remote` in development
+///   builds, else `disabled`.
 /// - `TAHFEEZ_POSITION_SOURCE` = `acoustic` | `speech`. Default: `acoustic`
 ///   with the local backend, else `speech`.
 /// - `TAHFEEZ_SPEECH_COMPARATOR` = `true` runs the speech recognizer
@@ -88,7 +89,8 @@ final recitationAiConfigProvider = Provider<RecitationAiConfig>((ref) {
     positionName: positionName,
     comparator: comparator,
     offline: offline,
-    onDevice: capabilities.isAndroid || capabilities.isIOS,
+    onDevice:
+        capabilities.isAndroid || capabilities.isIOS || capabilities.isWeb,
     release: kReleaseMode,
   );
 });

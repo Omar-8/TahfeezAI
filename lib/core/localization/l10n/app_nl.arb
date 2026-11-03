@@ -604,11 +604,6 @@
   "guideListenTranslation": "Hoor na elk vers een vertaling die wordt voorgelezen. Die wordt gestreamd, dus er is internet nodig.",
   "guideListenSleep": "De slaaptimer pauzeert de recitatie na een tijdje, of aan het einde van het vers — om 's avonds te luisteren.",
   "recHintTitle": "Een tip",
-  "recHintTajweed": "In deze recitatie werden veel tajweedregels gemarkeerd. Ben je nog tajweed aan het leren, dan kun je de tajweedcontrole voorlopig uitzetten: alleen letters en klinkers worden dan gecontroleerd. Zet hem altijd weer aan in de Hifz-instellingen.",
-  "recHintTajweedAction": "Tajweedcontrole uitzetten",
-  "recHintLenient": "In deze recitatie werden veel klinkers gemarkeerd. Vind je dat te veel, zet de uitspraakcontrole dan op mild: alleen duidelijkere fouten worden gemarkeerd. Je kunt dit altijd wijzigen in de Hifz-instellingen.",
-  "recHintLenientAction": "Zet op mild",
-  "recHintLater": "Niet nu",
   "recFeedbackListen": "Luister naar de verbetering",
   "recFeedbackListenAlone": "Je recitator heeft geen woordtijden, dus je hoort alleen het woord zelf — zonder de verbinding met het volgende woord of de laatste klinker.",
   "milestoneSurahs": "Soera's {surahs} gememoriseerd",
@@ -617,8 +612,11 @@
   "tipListenTranslation": "Wist je dat? Tijdens het luisteren kan na elk vers een vertaling worden voorgelezen, in jouw taal.",
   "tipPageTheme": "Wist je dat? De Mushaf-pagina heeft meerdere kleurthema's, van licht tot donker. Kies het thema dat het prettigst is voor je ogen.",
   "tipShowMe": "Laat zien",
-  "tipDontShowAgain": "Niet meer tonen",
+  "tipDontShowAgain": "Geen tips meer tonen",
   "tipClose": "Sluiten",
-  "guideTipTranslation": "Kies hier een vertaling en tik dan op Afspelen. Die wordt gestreamd, dus er is internet nodig.",
-  "guideTipPageTheme": "Tik op een thema om de kleuren van de pagina te veranderen."
+  "guideTipPageTheme": "Tik op een thema om de kleuren van de pagina te veranderen.",
+  "tipTajweedOff": "In je laatste recitatie werden veel tajweedregels gemarkeerd. Ben je nog tajweed aan het leren, dan kun je de tajweedcontrole uitzetten in de Hifz-instellingen: dan worden alleen letters en klinkers gecontroleerd.",
+  "tipLenient": "In je laatste recitatie werden veel klinkers gemarkeerd. Vond je dat te veel, dan kun je de uitspraakcontrole op mild zetten in de Hifz-instellingen: dan worden alleen duidelijkere fouten gemarkeerd.",
+  "recModelDownloading": "Recitatiecontrole wordt klaargezet: {percent}% (eenmalig)",
+  "recWebUnsupported": "Deze browser kan de recitatiecontrole niet uitvoeren. Probeer een recente Chrome, Edge, Firefox of Safari."
 }

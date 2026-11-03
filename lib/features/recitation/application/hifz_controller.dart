@@ -335,10 +335,11 @@ final hifzSettingsProvider =
 /// Vibrates on a mistake; overridden in tests.
 /// A short vibration for a mistake (Android: the device's vibrator — the
 /// touch-feedback setting MIUI and others often turn down is not used;
-/// iOS: the haptic engine).
+/// iOS: the haptic engine; the web: the browser's, where it vibrates).
 final hifzHapticsProvider = Provider<void Function()>((ref) {
   final capabilities = ref.watch(platformCapabilitiesProvider);
-  final native = capabilities.isAndroid || capabilities.isIOS;
+  final native =
+      capabilities.isAndroid || capabilities.isIOS || capabilities.isWeb;
   const channel = MethodChannel('tahfeez/alert');
   return native
       ? () => unawaited(channel.invokeMethod<void>('vibrate', 120))
@@ -346,19 +347,20 @@ final hifzHapticsProvider = Provider<void Function()>((ref) {
 });
 
 /// A gentle double tap for a page recited to its end (Android: the
-/// device's vibrator, softly).
+/// device's vibrator, softly; the web: the browser's).
 final hifzPageDoneHapticsProvider = Provider<void Function()>((ref) {
   final capabilities = ref.watch(platformCapabilitiesProvider);
   const channel = MethodChannel('tahfeez/alert');
-  return capabilities.isAndroid
+  return capabilities.isAndroid || capabilities.isWeb
       ? () => unawaited(channel.invokeMethod<void>('pageDone'))
       : () {};
 });
 
-/// A short, soft beep for a mistake (Android and iOS).
+/// A short, soft beep for a mistake (Android, iOS; the web: Web Audio).
 final hifzBeepProvider = Provider<void Function()>((ref) {
   final capabilities = ref.watch(platformCapabilitiesProvider);
-  final native = capabilities.isAndroid || capabilities.isIOS;
+  final native =
+      capabilities.isAndroid || capabilities.isIOS || capabilities.isWeb;
   const channel = MethodChannel('tahfeez/alert');
   return native ? () => unawaited(channel.invokeMethod<void>('beep')) : () {};
 });

@@ -35,6 +35,7 @@ import '../../../core/app_store/store_prompts.dart';
 import '../../home/presentation/home_store_prompts.dart' show showUpdateOffer;
 import '../../../core/storage/storage_providers.dart';
 import '../../../memorization/memorization_providers.dart';
+import '../../listen/application/reciter_downloads.dart';
 import '../../listen/application/reciter_controller.dart';
 import '../../recitation/application/hifz_controller.dart';
 import '../../listen/domain/quran_audio_sources.dart';
@@ -254,7 +255,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const _ListenSettings(),
                 words: [
                   l10n.listenReciter,
-                  l10n.listenDownload,
+                  if (ref.read(reciterDownloadsProvider.notifier).supported)
+                    l10n.listenDownload,
                   l10n.listenSearchReciters,
                 ],
               );

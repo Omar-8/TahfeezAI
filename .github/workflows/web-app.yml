@@ -1,0 +1,91 @@
+# The web app (tool/build_web.sh), built on request and published under the
+# website at /app/: kept as the release "web-app" (web-app.tar.gz), which the
+# website's own deploys include (pages.yml). Run it when a version is
+# released — never on every push, so the site only ever serves a released
+# app.
+name: Web app
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: web-app
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      # The raw QUL sources (private; see ios.yml).
+      - uses: actions/checkout@v4
+        with:
+          repository: Omar-8/TahfeezAI-qul-sources
+          ssh-key: ${{ secrets.QUL_SOURCES_KEY }}
+          path: qul-sources
+      - name: QUL sources
+        run: mkdir -p tool/quran_data/sources && cp qul-sources/*.zip tool/quran_data/sources/ && rm -rf qul-sources
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.47.3
+          channel: stable
+          cache: true
+
+      - name: Rust (the Mushaf engine for WebAssembly)
+        run: rustup target add wasm32-unknown-unknown
+
+      - name: Dependencies and generated code
+        run: |
+          flutter pub get
+          dart run build_runner build --delete-conflicting-outputs
+          flutter gen-l10n
+
+      - name: Quran data cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            tool/quran_data/.cache
+            assets/quran/quran_engine
+          key: quran-data-${{ hashFiles('tool/quran_data/**/*.dart', 'tool/quran_engine/fetch_page_data.sh') }}
+
+      - name: Acoustic model
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download model-v3.7 --dir assets/models --clobber
+          python3 -c "import hashlib,json; m=json.load(open('assets/models/quran_acoustic.json')); h=hashlib.sha256(open('assets/models/quran_acoustic.onnx','rb').read()).hexdigest(); assert h==m['sha256'], h; print('model ok', m['id'])"
+
+      - name: Mushaf pages and layout; the engine's WebAssembly runtime
+        run: |
+          [ -f assets/quran/quran_engine/pages/604.qvp ] || bash tool/quran_engine/fetch_page_data.sh --all
+          [ -d tool/quran_data/.cache ] || dart run tool/quran_data/fetch_sources.dart
+          dart run tool/quran_data/build_production_data.dart
+          bash tool/quran_engine/fetch_web_runtime.sh
+
+      - name: Build
+        run: tool/build_web.sh --base-href /TahfeezAI/app/
+
+      - name: Keep it (release "web-app")
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tar czf web-app.tar.gz -C build/web .
+          gh release view web-app >/dev/null 2>&1 || gh release create web-app --title "Web app" --notes "The web app as published under the website (/app/), built by .github/workflows/web-app.yml." --prerelease
+          gh release upload web-app web-app.tar.gz --clobber
+
+  # The website with this app in it.
+  deploy:
+    needs: build
+    uses: ./.github/workflows/pages.yml
+    permissions:
+      contents: read
+      pages: write
+      id-token: write

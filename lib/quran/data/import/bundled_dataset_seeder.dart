@@ -18,6 +18,7 @@ import '../../../wbw/domain/repositories/wbw_repository.dart';
 import '../quran_database.dart';
 import 'dataset_json_codec.dart';
 import 'dataset_integrity_exception.dart';
+import 'meaning_pack_store.dart';
 import 'quran_dataset_importer.dart';
 
 /// Seeds Tahfeez's local databases from the bundled production dataset
@@ -187,6 +188,87 @@ class BundledDatasetSeeder {
       );
     }
     return failure;
+  }
+
+  /// The web's way of putting a meaning pack on ([ImportingMeaningPackStore]):
+  /// [id]'s text from its JSON asset (`de-rowwad`:
+  /// `assets/quran/translations/de_rowwad.json`), hash-verified, replacing
+  /// what is there. Throws when it cannot.
+  Future<void> importPack(MeaningPackKind kind, String id) async {
+    final dir = switch (kind) {
+      MeaningPackKind.translation => 'translations',
+      MeaningPackKind.tafsir => 'tafsir',
+      MeaningPackKind.wbw => 'wbw',
+    };
+    final hashKey = '$dir/${id.replaceAll('-', '_')}.json';
+    final hashes =
+        ((jsonDecode(await rootBundle.loadString(_manifestAsset))
+                    as Map<String, dynamic>)['packagedAssetHashes']
+                as Map)
+            .cast<String, dynamic>();
+    String? problem;
+    final bytes = await _loadVerified(
+      hashes,
+      'assets/quran/$hashKey',
+      hashKey,
+      resourceLabel: '${kind.name} pack $id',
+      onProblem: (p) => problem = p,
+    );
+    if (bytes == null) throw StateError(problem ?? 'Could not load $hashKey');
+    final json = await _decodeJson(bytes);
+    switch (kind) {
+      case MeaningPackKind.translation:
+        await translationRepository.installTranslation(
+          translationBookFromJson(json['book'] as Map<String, dynamic>),
+          [
+            for (final v
+                in (json['verses'] as List).cast<Map<String, dynamic>>())
+              translationVerseFromJson(v),
+          ],
+        );
+      case MeaningPackKind.tafsir:
+        await tafsirRepository.installTafsir(
+          tafsirWorkFromJson(json['work'] as Map<String, dynamic>),
+          [
+            for (final v
+                in (json['verses'] as List).cast<Map<String, dynamic>>())
+              tafsirVerseFromJson(v),
+          ],
+        );
+      case MeaningPackKind.wbw:
+        final (pack, words) = _wbwPack(json);
+        await wbwRepository!.installPack(pack, words);
+    }
+  }
+
+  static (WbwLanguagePack, List<WbwWordEntry>) _wbwPack(
+    Map<String, dynamic> json,
+  ) {
+    final p = json['pack'] as Map<String, dynamic>;
+    final pack = WbwLanguagePack(
+      id: p['id'] as String,
+      languageCode: p['languageCode'] as String,
+      displayName: p['displayName'] as String,
+      version: p['version'] as int,
+      checksum: p['checksum'] as String,
+      source: p['source'] as String,
+      license: p['license'] as String,
+      hasTranslation: p['hasTranslation'] as bool,
+      hasTransliteration: p['hasTransliteration'] as bool,
+    );
+    return (
+      pack,
+      [
+        for (final w in (json['words'] as List).cast<List>())
+          WbwWordEntry(
+            packId: pack.id,
+            ayahId: w[0] as int,
+            wordIndex: w[1] as int,
+            translation: w[2] as String?,
+            transliteration: w[3] as String?,
+          ),
+      ],
+    );
   }
 
   Future<Uint8List?> _loadVerified(
@@ -494,30 +576,9 @@ class BundledDatasetSeeder {
     if (bytes == null) return;
     try {
       final json = await _decodeJson(bytes);
-      final p = json['pack'] as Map<String, dynamic>;
-      final pack = WbwLanguagePack(
-        id: p['id'] as String,
-        languageCode: p['languageCode'] as String,
-        displayName: p['displayName'] as String,
-        version: p['version'] as int,
-        checksum: p['checksum'] as String,
-        source: p['source'] as String,
-        license: p['license'] as String,
-        hasTranslation: p['hasTranslation'] as bool,
-        hasTransliteration: p['hasTransliteration'] as bool,
-      );
+      final (pack, words) = _wbwPack(json);
       final existing = await repository.getInstalledPack(pack.id);
       if (existing != null && existing.checksum == pack.checksum) return;
-      final words = [
-        for (final w in (json['words'] as List).cast<List>())
-          WbwWordEntry(
-            packId: pack.id,
-            ayahId: w[0] as int,
-            wordIndex: w[1] as int,
-            translation: w[2] as String?,
-            transliteration: w[3] as String?,
-          ),
-      ];
       await repository.installPack(pack, words);
       logger.info(
         'Seeded word meanings "${pack.id}": ${words.length} words.',

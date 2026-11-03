@@ -3,18 +3,28 @@ import 'dart:math';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/storage/browser_storage.dart';
+import '../../core/ui/first_run.dart';
 
-/// "Did you know" tips about features easily missed, each at a moment it
-/// fits. Spaced out, and at random times: none on the first day, then at
-/// most one every [tipInterval], and at a moment one fits a coin decides
-/// ([tipChance]). Each tip can be turned off for good ("Don't show this
-/// again", or "Show me" — then it is known).
+/// "Did you know" tips about features easily missed. Never while reciting
+/// or listening: Listen's as Play is pressed, before it plays ("Show me"
+/// opens the translations, and it plays once they close; Close plays at
+/// once); the page themes' while reading — both spaced out and at random
+/// ([tipChance]); the checking's over a session's results, when the
+/// session called for it. "Don't show tips again" ends them all.
 enum AppTip {
-  /// While listening, without a translation read after each ayah.
+  /// Listen's Play, without a translation read after each ayah.
   listenTranslation,
 
   /// Reading the Mushaf: its page themes.
   pageTheme,
+
+  /// Over a session's results, when one of the first recitations marked
+  /// many tajweed rules: tajweed checking can be turned off.
+  tajweedOff,
+
+  /// Over a session's results, when one of the first recitations marked
+  /// many vowels: pronunciation checking can be made lenient.
+  lenient,
 }
 
 const tipFirstAfter = Duration(days: 1);
@@ -29,7 +39,7 @@ Future<bool> appTipDue(
   required DateTime now,
   required Random random,
 }) async {
-  if (await storage.getBool('$_offKey.${tip.name}') ?? false) return false;
+  if (await _off(storage, tip)) return false;
   final first = DateTime.tryParse(await storage.getString(_firstKey) ?? '');
   if (first == null) {
     await storage.setString(_firstKey, now.toIso8601String());
@@ -43,6 +53,10 @@ Future<bool> appTipDue(
   return true;
 }
 
+/// Whether [tip] may still be shown: not turned off, nor all tips.
+Future<bool> appTipOn(BrowserStorage storage, AppTip tip) async =>
+    !await _off(storage, tip);
+
 /// Starts the first day if not started (the reader opened).
 Future<void> appTipsStart(BrowserStorage storage, DateTime now) async {
   if (await storage.getString(_firstKey) == null) {
@@ -54,9 +68,24 @@ Future<void> appTipsStart(BrowserStorage storage, DateTime now) async {
 Future<void> appTipOff(BrowserStorage storage, AppTip tip) =>
     storage.setBool('$_offKey.${tip.name}', true);
 
+/// No tip shown again ("Don't show tips again").
+Future<void> appTipsAllOff(BrowserStorage storage) =>
+    storage.setBool(_allOffKey, true);
+
+Future<bool> _off(BrowserStorage storage, AppTip tip) async =>
+    (await storage.getBool(_allOffKey) ?? false) ||
+    (await storage.getBool('$_offKey.${tip.name}') ?? false);
+
 const _firstKey = 'appTips.firstSeen';
 const _lastKey = 'appTips.lastShown';
 const _offKey = 'appTips.off';
+const _allOffKey = 'appTips.allOff';
+
+/// Whether tips come at all: with the first-run prompts (off in tests that
+/// walk through the app, unless asked for).
+final appTipsEnabledProvider = Provider<bool>(
+  (ref) => ref.watch(firstRunPromptsProvider),
+);
 
 /// The tips' clock and coin (fixed in tests).
 final appTipsClockProvider = Provider<DateTime Function()>(

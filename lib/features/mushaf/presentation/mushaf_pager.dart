@@ -220,14 +220,19 @@ class _MushafPagerState extends ConsumerState<MushafPager> {
   /// right-to-left (`reverse: true`, matching a physical Mushaf: the
   /// lower-numbered/earlier page is on the right), so Left advances to the
   /// next index (visually moves left, forward in reading order) and Right
-  /// goes back — the same mapping an RTL PDF reader uses.
+  /// goes back — the same mapping an RTL PDF reader uses. Page Down / Page
+  /// Up (in a browser): the next / previous page, as in a desktop reader.
   KeyEventResult _handleKeyEvent(FocusNode node, KeyEvent event) {
     if (event is! KeyDownEvent) return KeyEventResult.ignored;
-    if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
+    final web = ref.read(platformCapabilitiesProvider).isWeb;
+    final key = event.logicalKey;
+    if (key == LogicalKeyboardKey.arrowLeft ||
+        (web && key == LogicalKeyboardKey.pageDown)) {
       _animateToAdjacentIndex(1);
       return KeyEventResult.handled;
     }
-    if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
+    if (key == LogicalKeyboardKey.arrowRight ||
+        (web && key == LogicalKeyboardKey.pageUp)) {
       _animateToAdjacentIndex(-1);
       return KeyEventResult.handled;
     }
