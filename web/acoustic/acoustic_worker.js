@@ -65,12 +65,23 @@ async function hex(buffer) {
 // The model's bytes: from Cache Storage, else fetched (reporting progress),
 // verified and kept.
 async function modelBytes(expected, size, progress) {
-  const cache = await caches.open(CACHE);
+  // Kept in Cache Storage where the browser allows it — not at all (a
+  // private window, a full disk) is no reason not to run it.
+  let cache = null;
+  try {
+    cache = await caches.open(CACHE);
+  } catch (e) {
+    cache = null;
+  }
   const key = `${MODEL}?sha256=${expected}`;
-  const cached = await cache.match(key);
-  if (cached) return { bytes: await cached.arrayBuffer(), downloaded: false };
-  // Earlier versions' copies.
-  for (const old of await cache.keys()) await cache.delete(old);
+  try {
+    const cached = cache && await cache.match(key);
+    if (cached) return { bytes: await cached.arrayBuffer(), downloaded: false };
+    // Earlier versions' copies (and a part kept from a full disk).
+    if (cache) for (const old of await cache.keys()) await cache.delete(old);
+  } catch (e) {
+    // A copy that cannot be read: downloaded again.
+  }
   const response = await fetch(MODEL, { cache: 'no-store' });
   if (!response.ok) throw new Error(`Model download failed (${response.status})`);
   const reader = response.body.getReader();
@@ -91,9 +102,16 @@ async function modelBytes(expected, size, progress) {
   if (at !== size) throw new Error(`Model is ${at} bytes, manifest says ${size}`);
   const hash = await hex(bytes.buffer);
   if (hash !== expected) throw new Error(`Model SHA-256 ${hash} does not match the manifest`);
-  await cache.put(key, new Response(bytes, {
-    headers: { 'Content-Type': 'application/octet-stream' },
-  }));
+  try {
+    if (cache) {
+      await cache.put(key, new Response(bytes, {
+        headers: { 'Content-Type': 'application/octet-stream' },
+      }));
+    }
+  } catch (e) {
+    // No room to keep it (QuotaExceededError): used from memory this time,
+    // downloaded again next time.
+  }
   return { bytes: bytes.buffer, downloaded: true };
 }
 

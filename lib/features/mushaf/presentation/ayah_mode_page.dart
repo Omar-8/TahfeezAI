@@ -226,6 +226,9 @@ class AyahModePageState extends ConsumerState<AyahModePage> {
   /// The ayah held is the one asked for ([ayahModeTargetProvider]).
   var _pinIsTarget = false;
 
+  /// Hide mode changed here, not by the reader (not followed).
+  var _ownReveal = false;
+
   void _unpin() {
     if (_pinIsTarget) {
       _pinIsTarget = false;
@@ -384,8 +387,27 @@ class AyahModePageState extends ConsumerState<AyahModePage> {
     if (!widget.isCurrentPage || _pinIsTarget) return;
     final active = _activeAyah();
     if (active != null && (_words?.any((w) => w.ayahId == active) ?? false)) {
+      // An ayah opened at (the Daily Ayah, Continue reading) — not the
+      // reciter's or a recitation's, which reveal as they go.
+      if (ref.read(quranAudioPlayerProvider) == null &&
+          !ref.read(hifzControllerProvider).running) {
+        _showBefore(active);
+      }
       _pin(active);
     }
+  }
+
+  /// Hide mode on: the ayahs before [ayahId] on this page shown — recited
+  /// from the ayah opened at, the next reveal its first word (kept in view).
+  void _showBefore(int ayahId) {
+    final first = _words?.indexWhere((w) => w.ayahId == ayahId) ?? -1;
+    if (first <= 0) return;
+    final hide = ref.read(mushafHideModeProvider);
+    if (!hide.enabled || hide.revealedOn(widget.pageNumber) >= first) return;
+    _ownReveal = true;
+    ref.read(mushafHideModeProvider.notifier).setRevealed({
+      widget.pageNumber: first,
+    });
   }
 
   /// The ayah whose turn it is: the reciter's, the recitation's, or the
@@ -413,6 +435,7 @@ class AyahModePageState extends ConsumerState<AyahModePage> {
     final words = _words;
     if (target == null || words == null || _pinned == target) return;
     if (!words.any((w) => w.ayahId == target)) return;
+    _showBefore(target);
     _pin(target);
     // Asked until shown and settled (or the reader takes over): a page
     // replaced meanwhile — the saved layout read back as the app starts —
@@ -492,10 +515,13 @@ class AyahModePageState extends ConsumerState<AyahModePage> {
       (previous, now) {
         if (now == null || previous == null || now == previous) return;
         if (now.start != previous.start && now.start > 0) return;
-        // An ayah opened at (Daily ayah, Continue reading) held in view
-        // as the page settles: hide mode's own updates (the page's words
-        // counted as it opens) don't move it away.
-        if (_pinIsTarget) return;
+        // The page's words counted as it opens (an "all of them" clamped
+        // to its count), or the ayahs before one opened at shown
+        // ([_bringTargetIntoView]): not a reveal to follow.
+        if (previous.revealed > words.length || _ownReveal) {
+          _ownReveal = false;
+          return;
+        }
         _scrollToWord((now.revealed - 1).clamp(0, words.length - 1));
       },
     );

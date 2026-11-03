@@ -28,22 +28,28 @@ void main() {
   });
 
   group('featuredOrderFor', () {
-    test('Al-Kahf first on a Friday', () {
+    List<int> numbers(List<(int, FeaturedOccasion?)> order) => [
+      for (final (n, _) in order) n,
+    ];
+
+    test('always the listed order, Al-Faatiha first; Al-Kahf marked on a '
+        'Friday', () {
       final order = featuredOrderFor(DateTime(2026, 10, 9, 12)); // a Friday
-      expect(order.first, (18, FeaturedOccasion.friday));
-      expect({
-        for (final (n, _) in order) n,
-      }, featuredReadingSurahNumbers.toSet());
+      expect(numbers(order), featuredReadingSurahNumbers);
+      expect(order.first.$1, 1);
+      expect(order.firstWhere((e) => e.$1 == 18).$2, FeaturedOccasion.friday);
     });
 
-    test('Al-Mulk first in the evening', () {
+    test('Al-Mulk marked in the evening, in its place', () {
       final order = featuredOrderFor(DateTime(2026, 10, 7, 21)); // Wednesday
-      expect(order.first, (67, FeaturedOccasion.night));
+      expect(numbers(order), featuredReadingSurahNumbers);
+      expect(order.firstWhere((e) => e.$1 == 67).$2, FeaturedOccasion.night);
     });
 
-    test('the listed order otherwise', () {
+    test('nothing marked otherwise', () {
       final order = featuredOrderFor(DateTime(2026, 10, 7, 10));
-      expect([for (final (n, _) in order) n], featuredReadingSurahNumbers);
+      expect(numbers(order), featuredReadingSurahNumbers);
+      expect(order.every((e) => e.$2 == null), isTrue);
     });
   });
 

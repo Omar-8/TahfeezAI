@@ -148,7 +148,7 @@ Future<DailyAyahReference?> dailyAyah(Ref ref) async {
 /// contents would list.
 const featuredReadingSurahNumbers = <int>[1, 2, 18, 36, 55, 67];
 
-/// Why a featured chapter is shown first today.
+/// Why a featured chapter is marked today.
 enum FeaturedOccasion { friday, night }
 
 /// One curated chapter, with its localized name resolved when the
@@ -159,26 +159,22 @@ class FeaturedChapterRef {
   final Surah surah;
   final String? name;
 
-  /// Set on the chapter brought to the front for today's occasion.
+  /// Set on the chapter marked for today's occasion.
   final FeaturedOccasion? occasion;
 }
 
-/// [featuredReadingSurahNumbers] in today's order: Al-Kahf first on a
-/// Friday, Al-Mulk first in the evening and at night (both customarily
-/// recited then), the others as listed.
+/// [featuredReadingSurahNumbers] in their order — always (Al-Faatiha
+/// first) — with today's occasion marked: Al-Kahf on a Friday, Al-Mulk in
+/// the evening and at night (both customarily recited then).
 List<(int, FeaturedOccasion?)> featuredOrderFor(DateTime now) {
   final occasion = now.weekday == DateTime.friday
       ? (18, FeaturedOccasion.friday)
       : now.hour >= 19 || now.hour < 4
       ? (67, FeaturedOccasion.night)
       : null;
-  if (occasion == null) {
-    return [for (final n in featuredReadingSurahNumbers) (n, null)];
-  }
   return [
-    occasion,
     for (final n in featuredReadingSurahNumbers)
-      if (n != occasion.$1) (n, null),
+      (n, n == occasion?.$1 ? occasion!.$2 : null),
   ];
 }
 
