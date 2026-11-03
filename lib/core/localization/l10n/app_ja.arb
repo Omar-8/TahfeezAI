@@ -30,6 +30,7 @@
   "homeDailyAyahOpen": "前後も読む",
   "homeContinueReadingAction": "続ける",
   "homeContinueReadingPage": "{page}ページ",
+  "readerSpreadPages": "{pages}ページ",
   "homeContinueReadingJuz": "第{juz}ジュズ",
   "homeContinueReadingHizb": "第{hizb}ヒズブ",
   "homeContinueReadingSurah": "第{surahNo}章",

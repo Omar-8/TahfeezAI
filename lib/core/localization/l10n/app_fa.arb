@@ -30,6 +30,7 @@
   "homeDailyAyahOpen": "خواندن در متن",
   "homeContinueReadingAction": "ادامه",
   "homeContinueReadingPage": "صفحهٔ {page}",
+  "readerSpreadPages": "صفحهٔ {pages}",
   "homeContinueReadingJuz": "جزء {juz}",
   "homeContinueReadingHizb": "حزب {hizb}",
   "homeContinueReadingSurah": "سورهٔ {surahNo}",

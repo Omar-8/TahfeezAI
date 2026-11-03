@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart' show ScrollCacheExtent;
+import 'package:flutter/rendering.dart' show ScrollCacheExtent, ScrollDirection;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../application/mushaf_appearance_controller.dart';
@@ -146,7 +146,13 @@ class _AyahModeContinuousState extends ConsumerState<AyahModeContinuous> {
       child: NotificationListener<ScrollNotification>(
         onNotification: (n) {
           if (n.depth != 0) return false;
-          if (n is ScrollStartNotification && n.dragDetails != null) {
+          // A drag, or a mouse wheel's notch (no drag details): the
+          // reader's own scrolling. The app's scrolls set no direction.
+          final byReader =
+              (n is ScrollStartNotification && n.dragDetails != null) ||
+              (n is UserScrollNotification &&
+                  n.direction != ScrollDirection.idle);
+          if (byReader) {
             _userScrolling = true;
             for (final key in _pageKeys.values) {
               key.currentState?.releasePin();

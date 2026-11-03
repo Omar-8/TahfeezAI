@@ -30,6 +30,7 @@
   "homeDailyAyahOpen": "Διάβασε στο πλαίσιό του",
   "homeContinueReadingAction": "Συνέχεια",
   "homeContinueReadingPage": "Σελίδα {page}",
+  "readerSpreadPages": "Σελίδα {pages}",
   "homeContinueReadingJuz": "Τζουζ {juz}",
   "homeContinueReadingHizb": "Χιζμπ {hizb}",
   "homeContinueReadingSurah": "Σούρα {surahNo}",

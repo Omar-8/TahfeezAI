@@ -30,6 +30,7 @@
   "homeDailyAyahOpen": "Ku akhri macnaheeda",
   "homeContinueReadingAction": "Sii wad",
   "homeContinueReadingPage": "Bog {page}",
+  "readerSpreadPages": "Bog {pages}",
   "homeContinueReadingJuz": "Juz {juz}",
   "homeContinueReadingHizb": "Xisbi {hizb}",
   "homeContinueReadingSurah": "Suurad {surahNo}",

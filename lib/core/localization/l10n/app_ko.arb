@@ -30,6 +30,7 @@
   "homeDailyAyahOpen": "앞뒤 문맥과 함께 읽기",
   "homeContinueReadingAction": "계속",
   "homeContinueReadingPage": "{page}쪽",
+  "readerSpreadPages": "{pages}쪽",
   "homeContinueReadingJuz": "주즈 {juz}",
   "homeContinueReadingHizb": "히즈브 {hizb}",
   "homeContinueReadingSurah": "수라 {surahNo}",

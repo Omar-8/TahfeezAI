@@ -30,6 +30,7 @@
   "homeDailyAyahOpen": "Læs i sammenhæng",
   "homeContinueReadingAction": "Fortsæt",
   "homeContinueReadingPage": "Side {page}",
+  "readerSpreadPages": "Side {pages}",
   "homeContinueReadingJuz": "Juz {juz}",
   "homeContinueReadingHizb": "Hizb {hizb}",
   "homeContinueReadingSurah": "Sura {surahNo}",

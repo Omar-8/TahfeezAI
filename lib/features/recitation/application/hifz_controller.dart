@@ -1246,6 +1246,7 @@ class HifzController extends Notifier<HifzState> {
     final ranges = ref.read(mushafPageWordRangesProvider);
     final first = ranges[pages.$1], last = ranges[pages.$2];
     if (first == null || last == null) return; // wait for the pages to load
+    final before = _seenPages;
     _seenPages = pages;
     final corpus = judge.corpus;
     final from = corpus.positionOf(first.first);
@@ -1254,6 +1255,16 @@ class HifzController extends Notifier<HifzState> {
     // Lost and found again only on the pages on screen.
     _matcher?.setFocus(from, to, only: true);
     if (judge.current >= from && judge.current <= to + 1) return;
+    // The same pages laid out anew — a two-page spread narrowed to one
+    // (Mushaf mode to Ayah mode mid-recitation): not a page turned by the
+    // reciter. Their page is shown again; the test stays where it is.
+    if (before != null &&
+        pages.$1 <= before.$2 &&
+        pages.$2 >= before.$1 &&
+        !judge.completed) {
+      _showWord(corpus.words[judge.current].ref);
+      return;
+    }
     _turnedFor = null;
     final hideOn = ref.read(mushafHideModeProvider).enabled;
     if (hideOn) {
@@ -1327,6 +1338,46 @@ class HifzController extends Notifier<HifzState> {
   /// for revision. Settled once a few words in a row are accepted.
   ({int pageStart, int pageEnd, int uncovered})? _startWindow;
 
+  /// A browser's two-page spread: both pages in view, the reciter may go on
+  /// to the other one without turning a page. Found there (relocated), the
+  /// test moves there as a page turn moves it on a phone — the words before
+  /// on that page given, nothing between judged (owner, 2026-11-03).
+  void _followAcrossSpread(HifzJudge judge, List<QuranMatchEvent> out) {
+    if (!kIsWeb || !out.any((e) => e is MatchRelocated)) return;
+    final pages = _visiblePages();
+    final expected = judge.expectedRef;
+    if (pages == null || pages.$1 == pages.$2 || expected == null) return;
+    final heard = out.whereType<WordHeard>().where((h) => h.ref != null);
+    if (heard.isEmpty) return;
+    final ranges = ref.read(mushafPageWordRangesProvider);
+    final at = heard.first.ref!;
+    int? onPage(WordRef word) {
+      for (final page in [pages.$1, pages.$2]) {
+        final range = ranges[page];
+        if (range != null &&
+            compareWordRefs(word, range.first) >= 0 &&
+            compareWordRefs(word, range.last) <= 0) {
+          return page;
+        }
+      }
+      return null;
+    }
+
+    final from = onPage(expected), to = onPage(at);
+    if (from == null || to == null || from == to) return;
+    final corpus = judge.corpus;
+    final position = corpus.positionOf(at);
+    final pageStart = corpus.positionOf(ranges[to]!.first);
+    // Back on the earlier page is going over it again (a review).
+    if (position == null || pageStart == null || position <= judge.expected) {
+      return;
+    }
+    for (var p = pageStart; p < position; p++) {
+      if (judge.revealed.add(p)) judge.given.add(p);
+    }
+    judge.jumpTo(position);
+  }
+
   /// Words accepted in a row: past this the reciter is settled.
   static const _settledWords = 3;
 
@@ -1377,6 +1428,7 @@ class HifzController extends Notifier<HifzState> {
       judge.jumpTo(at);
       _relocating = false;
     }
+    _followAcrossSpread(judge, out);
     final reviewBefore = judge.reviewing;
     final events = [
       for (final heard in out.whereType<WordHeard>()) ...judge.onHeard(heard),

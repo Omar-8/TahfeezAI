@@ -36,7 +36,7 @@ import '../../../core/storage/storage_providers.dart';
 import '../../../ai/acoustic/acoustic_model_download.dart';
 import '../../guide/app_tips.dart';
 import '../../mushaf/presentation/mushaf_pager.dart'
-    show webSpreadPages, webSpreadWidth;
+    show ayahModeIsContinuous, webSpreadPages, webSpreadWidth;
 import '../../guide/app_tips_host.dart';
 import '../../guide/guide.dart';
 import '../../../memorization/application/activity_stats.dart';
@@ -1355,7 +1355,13 @@ class MushafHideControls extends ConsumerWidget {
     final hide = ref.watch(mushafHideModeProvider);
     final spread = ref.watch(fullBleedContentProvider);
     final notifier = ref.read(mushafHideModeProvider.notifier);
-    final page = firstVisiblePage(location.pageNumber, spread: spread);
+    final onScreen = firstVisiblePage(location.pageNumber, spread: spread);
+    // Ayah mode's continuous list, scrolled on past the page being
+    // uncovered: the buttons go on there (brought back into view), not on
+    // the page scrolled to.
+    final continuous = ayahModeIsContinuous(context, ref);
+    final underWay = continuous ? hide.revealUnderWay(onScreen) : null;
+    final page = underWay ?? onScreen;
     final canReveal = hide.nextRevealPage(page, spread: spread) != null;
     final canHide = hide.previousHidePage(page, spread: spread) != null;
     final turns = ref.read(mushafPageTurnRequestsProvider.notifier);
@@ -1429,20 +1435,38 @@ class MushafHideControls extends ConsumerWidget {
     final testCanHide =
         testing &&
         (hifz.completed || compareWordRefs(hifz.expected!, hifz.first!) > 0);
+    // On the page under way but scrolled away from: back to it first (built
+    // and in view), then the step — its scroll follows the words.
+    VoidCallback? backThere(VoidCallback? step) {
+      if (step == null || page == onScreen) return step;
+      return () {
+        turns.toPage(page);
+        Future<void>.delayed(const Duration(milliseconds: 350), step);
+      };
+    }
+
     final onRevealAyah = testing
         ? (hifz.completed
               ? null
               : () => hifzController!.revealNext(wholeAyah: true))
-        : revealOrTurn(() => notifier.revealNextAyah(page, spread: spread));
+        : backThere(
+            revealOrTurn(() => notifier.revealNextAyah(page, spread: spread)),
+          );
     final onRevealWord = testing
         ? (hifz.completed ? null : () => hifzController!.revealNext())
-        : revealOrTurn(() => notifier.revealNextWord(page, spread: spread));
+        : backThere(
+            revealOrTurn(() => notifier.revealNextWord(page, spread: spread)),
+          );
     final onHideWord = testing
         ? (testCanHide ? () => hifzController!.hideBack() : null)
-        : hideOrTurnBack(() => notifier.hideLastWord(page, spread: spread));
+        : backThere(
+            hideOrTurnBack(() => notifier.hideLastWord(page, spread: spread)),
+          );
     final onHideAyah = testing
         ? (testCanHide ? () => hifzController!.hideBack(wholeAyah: true) : null)
-        : hideOrTurnBack(() => notifier.hideLastAyah(page, spread: spread));
+        : backThere(
+            hideOrTurnBack(() => notifier.hideLastAyah(page, spread: spread)),
+          );
 
     // Forward on the left, backward on the right — reading runs right to
     // left, so "next" points left — and the eye at the end: turning hide

@@ -30,6 +30,7 @@
   "homeDailyAyahOpen": "Bağlamında oku",
   "homeContinueReadingAction": "Devam et",
   "homeContinueReadingPage": "Sayfa {page}",
+  "readerSpreadPages": "Sayfa {pages}",
   "homeContinueReadingJuz": "Cüz {juz}",
   "homeContinueReadingHizb": "Hizb {hizb}",
   "homeContinueReadingSurah": "Sure {surahNo}",

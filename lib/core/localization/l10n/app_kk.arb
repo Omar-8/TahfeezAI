@@ -30,6 +30,7 @@
   "homeDailyAyahOpen": "Мәтінмен бірге оқу",
   "homeContinueReadingAction": "Жалғастыру",
   "homeContinueReadingPage": "{page}-бет",
+  "readerSpreadPages": "{pages}-бет",
   "homeContinueReadingJuz": "{juz}-пара",
   "homeContinueReadingHizb": "{hizb}-хизб",
   "homeContinueReadingSurah": "{surahNo}-сүре",

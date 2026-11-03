@@ -86,6 +86,14 @@ class _MushafWebScrollBehavior extends MaterialScrollBehavior {
 double webSpreadWidth(Size size) =>
     math.min(size.width - 32, 2 * 0.68 * (size.height - 170) + 20);
 
+/// Whether Ayah mode shows its continuous list (chosen, or a wide browser
+/// window: always — no two-page view of ayahs).
+bool ayahModeIsContinuous(BuildContext context, WidgetRef ref) =>
+    ref.watch(readerModeProvider) == ReaderMode.ayah &&
+    (isWideWebWindow(context) ||
+        ref.watch(ayahViewPreferencesProvider.select((v) => v.layout)) ==
+            AyahLayout.continuous);
+
 final ValueNotifier<({double pageWidth, double gutter})?> webSpreadPages =
     ValueNotifier(null);
 
@@ -431,7 +439,9 @@ class _MushafPagerState extends ConsumerState<MushafPager> {
         final labelBoxHeight = label == null
             ? 0.0
             : labelFontSize * _webPageNumberStripFactor;
-        if (inSpread) {
+        // (Once the page's shape is known: before, its frame spans the
+        // half — the bar would widen for a moment as pages are swiped.)
+        if (inSpread && aspectRatio != null) {
           final frame = pageWidth + borderChrome + _webPagePadding.horizontal;
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted && _twoPageSpread == true) {
@@ -533,12 +543,7 @@ class _MushafPagerState extends ConsumerState<MushafPager> {
     final size = MediaQuery.sizeOf(context);
     final isLandscape = size.width > size.height;
     // Ayah mode's continuous layout: one scroll, no pages to swipe.
-    // (A wide browser window: always — no two-page view of ayahs.)
-    final continuous =
-        ref.watch(readerModeProvider) == ReaderMode.ayah &&
-        (isWideWebWindow(context) ||
-            ref.watch(ayahViewPreferencesProvider.select((v) => v.layout)) ==
-                AyahLayout.continuous);
+    final continuous = ayahModeIsContinuous(context, ref);
     final useTwoPageSpread =
         !continuous &&
         breakpoint.isAtLeastTablet &&

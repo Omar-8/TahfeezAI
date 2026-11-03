@@ -30,6 +30,7 @@
   "homeDailyAyahOpen": "Lees in context",
   "homeContinueReadingAction": "Verder",
   "homeContinueReadingPage": "Pagina {page}",
+  "readerSpreadPages": "Pagina {pages}",
   "homeContinueReadingJuz": "Juz {juz}",
   "homeContinueReadingHizb": "Hizb {hizb}",
   "homeContinueReadingSurah": "Soera {surahNo}",

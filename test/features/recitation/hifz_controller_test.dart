@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tahfeez_ai/ai/acoustic/quran_acoustic_verifier.dart';
+import 'package:tahfeez_ai/core/ui/full_bleed_content.dart';
 import 'package:tahfeez_ai/features/recitation/application/acoustic_verification_controller.dart';
 import 'package:tahfeez_ai/quran/domain/models/quran_refs.dart';
 import 'package:tahfeez_ai/ai/hifz/hifz_judge.dart';
@@ -720,6 +721,31 @@ void main() {
     await Future<void>.delayed(const Duration(milliseconds: 600));
     expect(container.read(mushafPageTurnRequestsProvider)?.direction, 1);
     expect(hifz().expected!.ayahId, 2257);
+  });
+
+  test('a two-page spread narrowed to one page (Mushaf mode to Ayah mode '
+      'mid-recitation): the test stays, its page shown again', () async {
+    await setUpHifz();
+    // Pages 41–42 as a spread, the reader on its first page.
+    container.read(mushafPageWordRangesProvider.notifier).report(41, (
+      first: corpus
+          .words[corpus.verseStartPosition((chapterNo: 2, verseNo: 246))!]
+          .ref,
+      last: corpus.words[page42First - 1].ref,
+    ));
+    container
+        .read(mushafRecitationTargetProvider.notifier)
+        .show('screen', const QuranLocation.page(1, 41));
+    container.read(fullBleedContentProvider.notifier).request();
+    await pumpEventQueue();
+    await recite(spoken(2, 253));
+    final expected = hifz().expected;
+    expect(expected!.ayahId, 2254);
+    // Ayah mode: page 41 alone.
+    container.read(fullBleedContentProvider.notifier).release();
+    await pumpEventQueue();
+    expect(hifz().expected, expected, reason: 'not moved to page 41');
+    expect(container.read(mushafPageTurnRequestsProvider)?.page, 42);
   });
 
   test('after the session the recited words keep their colours, until hide '

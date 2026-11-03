@@ -30,6 +30,7 @@
   "homeDailyAyahOpen": "প্রসঙ্গসহ পড়ুন",
   "homeContinueReadingAction": "চালিয়ে যান",
   "homeContinueReadingPage": "পৃষ্ঠা {page}",
+  "readerSpreadPages": "পৃষ্ঠা {pages}",
   "homeContinueReadingJuz": "পারা {juz}",
   "homeContinueReadingHizb": "হিযব {hizb}",
   "homeContinueReadingSurah": "সূরা {surahNo}",

@@ -5,8 +5,12 @@ import '../../../core/localization/generated/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/localization/locale_controller.dart';
+import '../../../core/theme/components/tahfeez_bottom_sheet.dart'
+    show isWideWebWindow;
+import '../../../core/ui/full_bleed_content.dart';
 import '../../../quran/application/quran_chapter_localization.dart';
 import '../../../quran/domain/models/mushaf_token_models.dart';
+import '../application/mushaf_hide_mode.dart' show firstVisiblePage;
 import '../application/mushaf_page_providers.dart';
 import '../application/reading_surah.dart';
 import 'reader_jump_sheet.dart';
@@ -80,7 +84,7 @@ class _MushafPageTitleState extends ConsumerState<MushafPageTitle> {
         context,
         name,
         [
-          AppLocalizations.of(context).homeContinueReadingPage(pageNumber),
+          _pages(context),
           if (_lastJuz != null)
             AppLocalizations.of(context).homeContinueReadingJuz(_lastJuz!),
         ],
@@ -123,12 +127,31 @@ class _MushafPageTitleState extends ConsumerState<MushafPageTitle> {
     _lastJuz = bundle.juzNo;
     _lastSurah = surahNo;
     final subtitleParts = <String>[
-      AppLocalizations.of(context).homeContinueReadingPage(pageNumber),
+      _pages(context),
       if (bundle.juzNo != null)
         AppLocalizations.of(context).homeContinueReadingJuz(bundle.juzNo!),
     ];
 
     return _title(context, name, subtitleParts, baseColor, surahNo);
+  }
+
+  /// "Page N" — in a wide browser window's two-page spread, both pages,
+  /// in the order they are laid out ("Page 598 – 597").
+  String _pages(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final spread =
+        isWideWebWindow(context) && ref.watch(fullBleedContentProvider);
+    final first = firstVisiblePage(pageNumber, spread: spread);
+    final pageCount = ref.watch(mushafByIdProvider(mushafId)).value?.pageCount;
+    if (!spread || (pageCount != null && first + 1 > pageCount)) {
+      return l10n.homeContinueReadingPage(pageNumber);
+    }
+    final second = first + 1;
+    return l10n.readerSpreadPages(
+      Directionality.of(context) == TextDirection.rtl
+          ? '$first – $second'
+          : '$second – $first',
+    );
   }
 
   // Two lines (Surah name, then page/Juz), not one long joined string:

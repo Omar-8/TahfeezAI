@@ -85,6 +85,15 @@
       }
     }
   },
+  "readerSpreadPages": "Page {pages}",
+  "@readerSpreadPages": {
+    "description": "A browser's two-page spread: both page numbers, as laid out (e.g. 598 – 597).",
+    "placeholders": {
+      "pages": {
+        "type": "String"
+      }
+    }
+  },
   "homeContinueReadingJuz": "Juz {juz}",
   "@homeContinueReadingJuz": {
     "placeholders": {

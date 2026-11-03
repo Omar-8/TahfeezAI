@@ -30,6 +30,7 @@
   "homeDailyAyahOpen": "سیاق میں پڑھیں",
   "homeContinueReadingAction": "جاری رکھیں",
   "homeContinueReadingPage": "صفحہ {page}",
+  "readerSpreadPages": "صفحہ {pages}",
   "homeContinueReadingJuz": "پارہ {juz}",
   "homeContinueReadingHizb": "حزب {hizb}",
   "homeContinueReadingSurah": "سورت {surahNo}",

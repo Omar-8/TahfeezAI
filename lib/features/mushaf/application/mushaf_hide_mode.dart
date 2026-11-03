@@ -48,6 +48,20 @@ class MushafHideModeState {
 
   /// Whether the page's word at [wordIndex] (reading order, from 0) is
   /// currently hidden.
+  /// The page nearest [page] uncovered in part — a reveal under way there
+  /// (some of its words shown, not all); `null` when none is.
+  int? revealUnderWay(int page) {
+    int? nearest;
+    for (final MapEntry(key: p, value: shown) in revealed.entries) {
+      final total = wordCounts[p];
+      if (shown <= 0 || total == null || shown >= total) continue;
+      if (nearest == null || (p - page).abs() < (nearest - page).abs()) {
+        nearest = p;
+      }
+    }
+    return nearest;
+  }
+
   bool isWordHidden(int pageNumber, int wordIndex) =>
       enabled &&
       (wordIndex >= revealedOn(pageNumber) || wordIndex < startOf(pageNumber));

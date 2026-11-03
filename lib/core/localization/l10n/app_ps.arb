@@ -30,6 +30,7 @@
   "homeDailyAyahOpen": "په سیاق کې یې ولولئ",
   "homeContinueReadingAction": "دوام ورکړئ",
   "homeContinueReadingPage": "مخ {page}",
+  "readerSpreadPages": "مخ {pages}",
   "homeContinueReadingJuz": "سیپاره {juz}",
   "homeContinueReadingHizb": "حزب {hizb}",
   "homeContinueReadingSurah": "سورت {surahNo}",

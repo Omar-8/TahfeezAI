@@ -30,6 +30,7 @@
   "homeDailyAyahOpen": "لە چوارچێوەکەیدا بیخوێنەوە",
   "homeContinueReadingAction": "بەردەوامبە",
   "homeContinueReadingPage": "لاپەڕەی {page}",
+  "readerSpreadPages": "لاپەڕەی {pages}",
   "homeContinueReadingJuz": "جوزئی {juz}",
   "homeContinueReadingHizb": "حیزبی {hizb}",
   "homeContinueReadingSurah": "سوورەتی {surahNo}",

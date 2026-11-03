@@ -30,6 +30,7 @@
   "homeDailyAyahOpen": "Soma katika muktadha",
   "homeContinueReadingAction": "Endelea",
   "homeContinueReadingPage": "Ukurasa {page}",
+  "readerSpreadPages": "Ukurasa {pages}",
   "homeContinueReadingJuz": "Juzuu {juz}",
   "homeContinueReadingHizb": "Hizb {hizb}",
   "homeContinueReadingSurah": "Sura {surahNo}",

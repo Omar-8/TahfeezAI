@@ -30,6 +30,7 @@
   "homeDailyAyahOpen": "Читать в контексте",
   "homeContinueReadingAction": "Продолжить",
   "homeContinueReadingPage": "Страница {page}",
+  "readerSpreadPages": "Страница {pages}",
   "homeContinueReadingJuz": "Джуз {juz}",
   "homeContinueReadingHizb": "Хизб {hizb}",
   "homeContinueReadingSurah": "Сура {surahNo}",

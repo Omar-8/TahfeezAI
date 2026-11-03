@@ -588,6 +588,24 @@ void main() {
     expect(p41.hiddenCalls.last, isEmpty);
     expect(p41.highlights, isEmpty);
   });
+
+  test('the reveal under way nearest a page: one uncovered in part', () {
+    const state = MushafHideModeState(
+      enabled: true,
+      revealed: {23: 40, 24: 150, 30: 0, 31: 12},
+      wordCounts: {23: 150, 24: 150, 30: 140, 31: 140},
+    );
+    // 24 fully shown and 30 fully hidden are not under way.
+    expect(state.revealUnderWay(28), 31);
+    expect(state.revealUnderWay(25), 23);
+    expect(
+      const MushafHideModeState(
+        revealed: {5: 200},
+        wordCounts: {5: 200},
+      ).revealUnderWay(5),
+      isNull,
+    );
+  });
 }
 
 class _PassagesOn extends MushafPassagesController {

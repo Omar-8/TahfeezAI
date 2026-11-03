@@ -30,6 +30,7 @@
   "homeDailyAyahOpen": "Kontekstda oʻqish",
   "homeContinueReadingAction": "Davom ettirish",
   "homeContinueReadingPage": "{page}-sahifa",
+  "readerSpreadPages": "{pages}-sahifa",
   "homeContinueReadingJuz": "{juz}-pora",
   "homeContinueReadingHizb": "{hizb}-hizb",
   "homeContinueReadingSurah": "{surahNo}-sura",
