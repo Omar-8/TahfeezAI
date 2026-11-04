@@ -618,7 +618,7 @@
   "guideTipPageTheme": "Tippe auf ein Thema, um die Farben der Seite zu ändern.",
   "tipTajweedOff": "In deiner letzten Rezitation wurden viele Tajweed-Regeln markiert. Wenn du Tajweed noch lernst, kannst du die Tajweed-Prüfung in den Hifz-Einstellungen ausschalten: Dann werden nur Buchstaben und Vokale geprüft.",
   "tipLenient": "In deiner letzten Rezitation wurden viele Vokale markiert. Wenn dir das zu viel war, kannst du die Aussprache-Prüfung in den Hifz-Einstellungen auf nachsichtig stellen: Dann werden nur deutlichere Fehler markiert.",
-  "recModelDownloading": "Rezitationsprüfung wird vorbereitet: {percent} % (nur einmal)",
+  "recModelDownloading": "Das Rezitationsmodell wird in deinen Browser geladen: {percent} % (nur einmal). Deine Rezitation wird dann direkt hier geprüft und nie an einen Server gesendet.",
   "recWebUnsupported": "Dieser Browser kann die Rezitationsprüfung nicht ausführen. Versuche ein aktuelles Chrome, Edge, Firefox oder Safari.",
   "privacyRecitationWeb": "Deine Rezitation wird auf deinem Gerät geprüft, im Browser. Der Ton wird nirgendwohin gesendet und nicht gespeichert.",
   "privacyLocalWeb": "Dein Lernfortschritt, deine Pläne, Lesezeichen und Einstellungen bleiben auf deinem Gerät, in diesem Browser. Es gibt keine Konten.",

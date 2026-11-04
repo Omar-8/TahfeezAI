@@ -618,7 +618,7 @@
   "guideTipPageTheme": "Toca un tema para cambiar los colores de la página.",
   "tipTajweedOff": "En tu última recitación se marcaron muchas reglas de tajwid. Si aún estás aprendiendo tajwid, puedes desactivar su comprobación en los ajustes de Hifz: entonces solo se comprueban las letras y las vocales.",
   "tipLenient": "En tu última recitación se marcaron muchas vocales. Si te pareció demasiado, puedes hacer tolerante la comprobación de la pronunciación en los ajustes de Hifz: entonces solo se marcan los errores más claros.",
-  "recModelDownloading": "Preparando la comprobación de la recitación: {percent} % (solo una vez)",
+  "recModelDownloading": "Descargando el modelo de recitación en tu navegador: {percent} % (solo una vez). Tu recitación se comprueba aquí mismo, así que nunca se envía a un servidor.",
   "recWebUnsupported": "Este navegador no puede ejecutar la comprobación de la recitación. Prueba un Chrome, Edge, Firefox o Safari reciente.",
   "privacyRecitationWeb": "Tu recitación se comprueba en tu dispositivo, en el navegador. El audio nunca se envía a ningún sitio ni se guarda.",
   "privacyLocalWeb": "Tu progreso, planes, marcadores y ajustes se quedan en tu dispositivo, en este navegador. No hay cuentas.",

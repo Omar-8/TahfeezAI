@@ -618,7 +618,7 @@
   "guideTipPageTheme": "Sayfanın renklerini değiştirmek için bir temaya dokunun.",
   "tipTajweedOff": "Son okuyuşunuzda birçok tecvit kuralı işaretlendi. Tecvidi hâlâ öğreniyorsanız Hıfz ayarlarından tecvit kontrolünü kapatabilirsiniz: o zaman yalnızca harfler ve harekeler kontrol edilir.",
   "tipLenient": "Son okuyuşunuzda birçok hareke işaretlendi. Bu size fazla geldiyse Hıfz ayarlarından telaffuz kontrolünü hoşgörülü yapabilirsiniz: o zaman yalnızca daha belirgin hatalar işaretlenir.",
-  "recModelDownloading": "Okuyuş kontrolü hazırlanıyor: %{percent} (yalnızca bir kez)",
+  "recModelDownloading": "Okuyuş modeli tarayıcınıza indiriliyor: %{percent} (yalnızca bir kez). Okuyuşunuz bundan sonra burada kontrol edilir, bu yüzden hiçbir sunucuya gönderilmez.",
   "recWebUnsupported": "Bu tarayıcı okuyuş kontrolünü çalıştıramıyor. Güncel bir Chrome, Edge, Firefox veya Safari deneyin.",
   "privacyRecitationWeb": "Okuyuşunuz cihazınızda, tarayıcıda kontrol edilir. Ses hiçbir yere gönderilmez ve kaydedilmez.",
   "privacyLocalWeb": "Ezber ilerlemeniz, planlarınız, yer işaretleriniz ve ayarlarınız cihazınızda, bu tarayıcıda kalır. Hesap yoktur.",

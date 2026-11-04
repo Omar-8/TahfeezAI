@@ -149,12 +149,19 @@ function streamReset() {
 async function load(progress) {
   if (session) return { provider: 'cpu', loadMs: 0, cached: true };
   const started = performance.now();
+  // ONNX Runtime's own WebAssembly (14 MB) fetched alongside the model,
+  // not after it (its own fetch would wait for the session).
+  const engine = fetch(new URL('./ort/ort-wasm-simd-threaded.wasm', import.meta.url))
+    .then((r) => (r.ok ? r.arrayBuffer() : null))
+    .catch(() => null);
   const config = JSON.parse(await readManifest());
   const { bytes, downloaded } = await modelBytes(config.sha256.toLowerCase(), config.bytes, progress);
   const sessionStarted = performance.now();
   const threads = self.crossOriginIsolated
     ? Math.max(1, Math.min(4, (navigator.hardwareConcurrency || 2) - 1)) : 1;
   ort.env.wasm.numThreads = threads;
+  const wasm = await engine;
+  if (wasm) ort.env.wasm.wasmBinary = wasm;
   session = await ort.InferenceSession.create(new Uint8Array(bytes), {
     executionProviders: ['wasm'],
     graphOptimizationLevel: 'all',

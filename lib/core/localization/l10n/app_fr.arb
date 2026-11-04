@@ -618,7 +618,7 @@
   "guideTipPageTheme": "Touchez un thème pour changer les couleurs de la page.",
   "tipTajweedOff": "Dans votre dernière récitation, de nombreuses règles de tajwid ont été signalées. Si vous apprenez encore le tajwid, vous pouvez désactiver sa vérification dans les réglages Hifz : seules les lettres et les voyelles sont alors vérifiées.",
   "tipLenient": "Dans votre dernière récitation, de nombreuses voyelles ont été signalées. Si cela vous a semblé trop, vous pouvez rendre la vérification de la prononciation indulgente dans les réglages Hifz : seules les erreurs plus nettes sont alors signalées.",
-  "recModelDownloading": "Préparation de la vérification de la récitation : {percent} % (une seule fois)",
+  "recModelDownloading": "Téléchargement du modèle de récitation dans votre navigateur : {percent} % (une seule fois). Votre récitation est ensuite vérifiée ici même : elle n’est jamais envoyée à un serveur.",
   "recWebUnsupported": "Ce navigateur ne peut pas exécuter la vérification de la récitation. Essayez un Chrome, Edge, Firefox ou Safari récent.",
   "privacyRecitationWeb": "Votre récitation est vérifiée sur votre appareil, dans le navigateur. L'audio n'est jamais envoyé nulle part ni enregistré.",
   "privacyLocalWeb": "Votre progression, vos plans, signets et réglages restent sur votre appareil, dans ce navigateur. Il n'y a pas de compte.",

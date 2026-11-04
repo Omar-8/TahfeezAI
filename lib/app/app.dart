@@ -1,6 +1,7 @@
 import '../core/localization/fallback_localizations.dart';
 import '../features/guide/guide.dart';
 import 'get_the_app_prompt.dart';
+import '../features/recitation/presentation/web_model_preload.dart';
 import '../features/memorize/presentation/milestone_banner.dart';
 
 import 'package:dynamic_color/dynamic_color.dart';
@@ -96,10 +97,15 @@ class TahfeezApp extends ConsumerWidget {
           builder: (context, child) => _WebSheetWidth(
             // (In a phone's browser: where to get the app.)
             child: GetTheAppPrompt(
-              child: AnimationsOff(
-                child: MilestoneLayer(
-                  child: MeaningPacksLayer(
-                    child: GuideLayer(child: child ?? const SizedBox.shrink()),
+              // (In a browser: the recitation model, fetched meanwhile.)
+              child: WebModelPreload(
+                child: AnimationsOff(
+                  child: MilestoneLayer(
+                    child: MeaningPacksLayer(
+                      child: GuideLayer(
+                        child: child ?? const SizedBox.shrink(),
+                      ),
+                    ),
                   ),
                 ),
               ),

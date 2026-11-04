@@ -160,7 +160,7 @@ See the [privacy policy](docs/PRIVACY_POLICY.md) and the [Play data-safety answe
 
 1. **Where are you?** As you recite, the app follows your position in the Quran from the words it hears — so you can start anywhere on the page.
 2. **Was it right?** For each word, an **acoustic model** compares what you said with the expected Ḥafṣ pronunciation of that word: it aligns your audio to the word's expected sounds and scores every sound against its likely alternatives (a heavy letter against its light twin, a held madd against a short one…). A mistake is reported only on clear evidence; when it is unsure, it says nothing.
-3. **On your device.** The model (~93 MB, ONNX) is bundled in the app and runs with ONNX Runtime — on Android and iOS, offline. In the browser the same model runs with ONNX Runtime Web (WebAssembly, in a worker): downloaded once, the first time a Mushaf page opens, then kept. It is a streaming student model trained from the open [Muaalem](https://huggingface.co/obadx/muaalem-model-v3_2) model (MIT) on public recitation data; see [Credits](#credits).
+3. **On your device.** The model (~93 MB, ONNX) is bundled in the app and runs with ONNX Runtime — on Android and iOS, offline. In the browser the same model runs with ONNX Runtime Web (WebAssembly, in a worker): downloaded once, in the background soon after the web app first opens (not with the browser's data saver on: then when a Mushaf page opens), then kept. It is a streaming student model trained from the open [Muaalem](https://huggingface.co/obadx/muaalem-model-v3_2) model (MIT) on public recitation data; see [Credits](#credits).
 
 ## Download
 

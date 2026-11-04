@@ -1216,7 +1216,7 @@
   "@tipTajweedOff": {"description": "A tip before a recitation starts, after one marked many tajweed rules: tajweed checking can be turned off in Hifz settings."},
   "tipLenient": "Your last recitation had many vowels marked. If that seemed too much, you can make pronunciation checking lenient in Hifz settings: then only clearer mistakes are marked.",
   "@tipLenient": {"description": "A tip before a recitation starts, after one marked many vowels: pronunciation checking can be made lenient in Hifz settings."},
-  "recModelDownloading": "Getting recitation checking ready: {percent}% (once only)",
+  "recModelDownloading": "Downloading the recitation model into your browser: {percent}% (once only). Your recitation is then checked right here, so it is never sent to a server.",
   "@recModelDownloading": {"description": "Web, over the recitation bar: the recitation model's first download (kept afterwards).", "placeholders": {"percent": {"type": "int"}}},
   "recWebUnsupported": "This browser can't run recitation checking. Try a recent Chrome, Edge, Firefox or Safari.",
   "@recWebUnsupported": {"description": "Web: the browser cannot run the recitation model (no WebAssembly SIMD)."},

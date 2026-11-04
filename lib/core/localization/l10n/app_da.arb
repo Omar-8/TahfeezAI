@@ -618,7 +618,7 @@
   "guideTipPageTheme": "Tryk på et tema for at ændre sidens farver.",
   "tipTajweedOff": "Din seneste recitation fik mange tajweedregler markeret. Hvis du stadig er ved at lære tajweed, kan du slå tajweedkontrollen fra i Hifz-indstillingerne: så kontrolleres kun bogstaver og vokaler.",
   "tipLenient": "Din seneste recitation fik mange vokaler markeret. Hvis det virkede af meget, kan du gøre udtalekontrollen mild i Hifz-indstillingerne: så markeres kun tydeligere fejl.",
-  "recModelDownloading": "Gør recitationskontrollen klar: {percent} % (kun én gang)",
+  "recModelDownloading": "Henter recitationsmodellen ind i din browser: {percent} % (kun én gang). Din recitation kontrolleres derefter lige her, så den aldrig sendes til en server.",
   "recWebUnsupported": "Denne browser kan ikke køre recitationskontrollen. Prøv en nyere Chrome, Edge, Firefox eller Safari.",
   "privacyRecitationWeb": "Din recitation kontrolleres på din enhed, i browseren. Lyden sendes aldrig nogen steder hen og gemmes ikke.",
   "privacyLocalWeb": "Dine fremskridt, planer, bogmærker og indstillinger bliver på din enhed, i denne browser. Der er ingen konti.",

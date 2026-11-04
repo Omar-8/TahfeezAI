@@ -618,7 +618,7 @@
   "guideTipPageTheme": "Gusa mandhari ili kubadilisha rangi za ukurasa.",
   "tipTajweedOff": "Kanuni nyingi za tajwidi ziliwekwa alama katika usomaji wako wa mwisho. Ikiwa bado unajifunza tajwidi, unaweza kuzima ukaguzi wa tajwidi katika mipangilio ya hifdhi: kisha herufi na irabu pekee ndizo zitakaguliwa.",
   "tipLenient": "Irabu nyingi ziliwekwa alama katika usomaji wako wa mwisho. Ikiwa hilo lilionekana kuwa nyingi mno, unaweza kufanya ukaguzi wa matamshi uwe mpole katika mipangilio ya hifdhi: kisha makosa yaliyo wazi zaidi pekee ndiyo yatawekwa alama.",
-  "recModelDownloading": "Kuandaa ukaguzi wa usomaji: {percent}% (mara moja tu)",
+  "recModelDownloading": "Inapakua modeli ya ukaguzi wa usomaji kwenye kivinjari chako: {percent}% (mara moja tu). Kisha usomaji wako hukaguliwa hapa hapa, kwa hivyo hautumwi kamwe kwa seva.",
   "recWebUnsupported": "Kivinjari hiki hakiwezi kuendesha ukaguzi wa usomaji. Jaribu toleo jipya la Chrome, Edge, Firefox au Safari.",
   "privacyRecitationWeb": "Usomaji wako hukaguliwa kwenye kifaa chako, ndani ya kivinjari. Sauti haitumwi popote wala haihifadhiwi.",
   "privacyLocalWeb": "Maendeleo ya hifdhi, mipango, alamisho na mipangilio yako hubaki kwenye kifaa chako, katika kivinjari hiki. Hakuna akaunti.",
