@@ -623,6 +623,7 @@ void main() {
       // 2:253–2:256); and hide mode.
       (int, int, int)? page,
       bool hidden = false,
+      bool strict = false,
     }) async {
       inference = recorded ?? _ReplayInference();
       container = ProviderContainer(
@@ -683,6 +684,13 @@ void main() {
       container.listen(acousticVerificationControllerProvider, (_, _) {});
       await container.read(quranWordCorpusProvider.future);
       await container.read(quranPhonemeResourcesProvider.future);
+      if (strict) {
+        container
+            .read(hifzSettingsProvider.notifier)
+            .update(
+              container.read(hifzSettingsProvider).copyWith(strict: true),
+            );
+      }
       if (range) {
         final chosen = (
           from: (chapterNo: 36, verseNo: 1),
@@ -719,7 +727,8 @@ void main() {
     }
 
     test('a range test: false start, self-correction, completion', () async {
-      await setUpHifz();
+      // Strict (off until chosen): a mistake waits to be corrected.
+      await setUpHifz(strict: true);
       expect(
         container.read(liveRecognitionControllerProvider).recognizerName,
         'None',

@@ -181,6 +181,7 @@ class QuranEngineWebPageAdapter
     ValueChanged<MushafTokenHitRect>? onDecorationHit,
     VoidCallback? onEmptyHit,
     ValueChanged<MushafTokenHitRect>? onWordLongHit,
+    String? Function(WordRef word)? hoverHint,
   }) {
     page.paperColorCss = _cssHex(paper);
     return _QuranEngineWebPageView(
@@ -188,6 +189,7 @@ class QuranEngineWebPageAdapter
       ink: ink,
       onWordHit: onWordHit,
       onWordLongHit: onWordLongHit,
+      hoverHint: hoverHint,
       onDecorationHit: onDecorationHit,
       onEmptyHit: onEmptyHit,
     );
@@ -344,9 +346,11 @@ class _QuranEngineWebPageView extends StatefulWidget {
     required this.onWordLongHit,
     required this.onDecorationHit,
     required this.onEmptyHit,
+    this.hoverHint,
   });
 
   final QuranEngineWebPage page;
+  final String? Function(WordRef word)? hoverHint;
   final Color ink;
   final ValueChanged<MushafTokenHitRect>? onWordHit;
   final ValueChanged<MushafTokenHitRect>? onWordLongHit;
@@ -364,12 +368,14 @@ class _QuranEngineWebPageViewState extends State<_QuranEngineWebPageView> {
     super.initState();
     widget.page.onTap = _handleTap;
     widget.page.onLongPress = _handleLongPress;
+    widget.page.onHover = _handleHover;
   }
 
   @override
   void dispose() {
     widget.page.onTap = null;
     widget.page.onLongPress = null;
+    widget.page.onHover = null;
     super.dispose();
   }
 
@@ -391,6 +397,21 @@ class _QuranEngineWebPageViewState extends State<_QuranEngineWebPageView> {
         return HtmlElementView(viewType: widget.page.viewType);
       },
     );
+  }
+
+  /// The mouse over the page (`null`: off it): the word under it, if it
+  /// has a [hoverHint], the hand pointer and that tooltip.
+  void _handleHover(double? localX, double? localY) {
+    final hint = widget.hoverHint;
+    String? tip;
+    if (hint != null && localX != null && localY != null) {
+      final hit = widget.page.hitTest(localX, localY);
+      final key = hit == null || hit.word < 0 ? null : hit.wordKey;
+      if (key != null) {
+        tip = hint(QuranEngineRefAdapter.wordRefFromEngineKey(key));
+      }
+    }
+    widget.page.setHoverHint(tip);
   }
 
   /// A long press on a word: its ayah ([onWordLongHit]).

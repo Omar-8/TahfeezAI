@@ -86,6 +86,7 @@ class _MaskRecordingPage implements QuranEngineMushafPage {
     ValueChanged<MushafTokenHitRect>? onDecorationHit,
     VoidCallback? onEmptyHit,
     ValueChanged<MushafTokenHitRect>? onWordLongHit,
+    String? Function(WordRef word)? hoverHint,
   }) {
     this.onWordHit = onWordHit;
     this.onWordLongHit = onWordLongHit;

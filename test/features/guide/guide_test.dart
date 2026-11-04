@@ -69,7 +69,7 @@ void main() {
     container.read(guideProvider.notifier).start();
     await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('guide-card')), findsOneWidget);
-    expect(find.text('1/10'), findsOneWidget);
+    expect(find.text('1/11'), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('guide-next')));
     await tester.pumpAndSettle();

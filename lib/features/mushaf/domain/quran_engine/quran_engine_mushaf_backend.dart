@@ -64,7 +64,9 @@ abstract class QuranEngineMushafPage {
   /// `../../presentation/quran_engine_mushaf_page_content.dart`).
   /// [onWordHit]/[onDecorationHit] fire with [MushafTokenHitRect];
   /// [onWordLongHit] on a long press on a word (in a browser: a right-click,
-  /// a long touch, or the mouse held down).
+  /// a long touch, or the mouse held down). [hoverHint]: in a browser, the
+  /// tooltip of the word under the mouse (a click on it opens something):
+  /// the hand pointer over it; `null`, none.
   Widget buildView({
     required Color ink,
     required Color paper,
@@ -72,6 +74,7 @@ abstract class QuranEngineMushafPage {
     ValueChanged<MushafTokenHitRect>? onDecorationHit,
     VoidCallback? onEmptyHit,
     ValueChanged<MushafTokenHitRect>? onWordLongHit,
+    String? Function(WordRef word)? hoverHint,
   });
 
   /// Highlights [target] (a [WordRef] or [VerseRef]) — 'band' is the only

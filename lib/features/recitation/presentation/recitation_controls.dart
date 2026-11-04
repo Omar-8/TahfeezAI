@@ -13,7 +13,6 @@ import '../../../core/audio/audio_models.dart';
 import '../../listen/presentation/sleep_timer_choices.dart';
 import '../../listen/application/follow_along_controller.dart';
 import '../../listen/presentation/follow_along_sheet.dart';
-import '../../listen/presentation/listen_sheet.dart';
 import '../../listen/application/quran_audio_player.dart';
 
 import '../../../core/app_store/app_store_service.dart';
@@ -41,7 +40,9 @@ import '../../guide/app_tips_host.dart';
 import '../../guide/guide.dart';
 import '../../../memorization/application/activity_stats.dart';
 import '../../../ai/hifz/hifz_judge.dart';
+import '../../mushaf/application/mushaf_page_verses.dart';
 import '../../mushaf/application/mushaf_word_overlay.dart';
+import '../../../wbw/presentation/word_detail_sheet.dart';
 import '../../../ai/acoustic/quran_acoustic_verifier.dart';
 import '../application/acoustic_verification_controller.dart';
 import '../application/hifz_controller.dart';
@@ -50,6 +51,8 @@ import '../application/mic_level.dart';
 import '../application/recitation_ai_config.dart';
 import '../application/quran_match_controller.dart';
 import '../application/recitation_session_controller.dart';
+import '../../listen/presentation/listen_sheet.dart';
+import 'quick_start.dart';
 import 'recitation_loop_sheet.dart';
 import '../../mushaf/presentation/mushaf_appearance_sheet.dart';
 import '../../../memorization/application/memorization_today.dart';
@@ -169,12 +172,15 @@ class BarButtonGroup extends StatelessWidget {
     required this.children,
     this.groupHeight = height,
     this.expand = false,
+    this.flex,
   });
 
   final List<Widget> children;
 
-  /// Fills the width it is given, the buttons sharing it evenly.
+  /// Fills the width it is given, the buttons sharing it evenly — or by
+  /// [flex], a share each.
   final bool expand;
+  final List<int>? flex;
 
   /// Its height ([height]; [labelledHeight] with labels under the icons).
   final double groupHeight;
@@ -213,7 +219,10 @@ class BarButtonGroup extends StatelessWidget {
                 endIndent: 10,
                 color: scheme.outlineVariant,
               ),
-            if (expand) Expanded(child: children[i]) else children[i],
+            if (expand)
+              Expanded(flex: flex?[i] ?? 1, child: children[i])
+            else
+              children[i],
           ],
         ],
       ),
@@ -304,13 +313,33 @@ Future<void> _offerSessionTip(BuildContext context, WidgetRef ref) async {
   final pending = _sessionHint;
   _sessionHint = null;
   final hint = await pending;
-  if (hint == null || !context.mounted) return;
+  if (!context.mounted) return;
+  if (hint == null) return _offerMistakeTip(context, ref);
   // The results up first.
   await Future<void>.delayed(const Duration(milliseconds: 600));
   if (!context.mounted || ref.read(guideProvider) != null) return;
   if (await answerAppTip(context, ref, appTipFor(hint)) && context.mounted) {
     await showHifzSettingsSheet(context);
   }
+}
+
+/// Once, over the results of the first session with mistakes: a marked
+/// word opens its sheet. "Show me": the first mistake's sheet over the
+/// results (closed, back to them).
+Future<void> _offerMistakeTip(BuildContext context, WidgetRef ref) async {
+  if (!appTipsAllowed(ref)) return;
+  final first = firstMarkedMistake(ref.read(mushafWordOverlayProvider));
+  if (first == null) return;
+  final storage = ref.read(browserStorageProvider);
+  if (!await appTipOn(storage, AppTip.tapMistake)) return;
+  // The results up first.
+  await Future<void>.delayed(const Duration(milliseconds: 600));
+  if (!context.mounted || !appTipsAllowed(ref)) return;
+  final showMe = await answerAppTip(context, ref, AppTip.tapMistake);
+  // Once, whatever the answer.
+  await appTipOff(storage, AppTip.tapMistake);
+  if (!showMe || !context.mounted) return;
+  showWordDetailSheet(context, wordRef: first);
 }
 
 class RecitationBottomBar extends ConsumerWidget {
@@ -355,6 +384,8 @@ class RecitationBottomBar extends ConsumerWidget {
     ref.listen(testSummaryProvider, (previous, next) {
       if (next == null || identical(previous, next)) return;
       if (ref.read(recitationSessionControllerProvider).isActive) return;
+      // Started again with new settings: not the cut-short run's.
+      if (restartedJustNow) return;
       // Not while the guide runs: practice ends back at its choice of modes.
       if (ref.read(guideProvider) != null) return;
       if (ref.exists(followAlongControllerProvider) &&
@@ -389,6 +420,8 @@ class RecitationBottomBar extends ConsumerWidget {
             summary == null ||
             summary.rows.isEmpty ||
             identical(summary, _shownSummary) ||
+            restartedJustNow ||
+            ref.read(followAlongControllerProvider) != null ||
             ref.read(recitationSessionControllerProvider).isActive ||
             ref.read(guideProvider) != null) {
           return;
@@ -546,16 +579,85 @@ class RecitationBottomBar extends ConsumerWidget {
               top: -FollowAlongHint.height / 2 + 4,
               left: 16,
               right: 16,
-              child: IgnorePointer(
-                child: Center(
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [FollowAlongHint(), _LoopReviewHint()],
-                  ),
-                ),
-              ),
+              child: _BarHints(),
             ),
         ],
+      ),
+    );
+  }
+}
+
+/// Follow along's hint and a strict loop's, on the bar's top border: taps
+/// go through them — but "Mistakes found" opens the first mistake's word
+/// sheet (what was expected, what was heard; on from it to the others).
+/// It shows too after a recitation, while its mistakes are on the page in
+/// view (nothing recording, following or playing).
+class _BarHints extends ConsumerWidget {
+  const _BarHints();
+
+  /// The mistakes marked on the page(s) in view, in reading order.
+  static List<WordRef> _onScreen(WidgetRef ref) {
+    final location = ref.watch(mushafRecitationTargetProvider)?.location;
+    if (location is! QuranLocationPage) return const [];
+    final spread = ref.watch(fullBleedContentProvider);
+    final first = firstVisiblePage(location.pageNumber, spread: spread);
+    final ranges = ref.watch(mushafPageWordRangesProvider);
+    final shown = [
+      for (final page in [first, if (spread) first + 1]) ?ranges[page],
+    ];
+    return [
+      for (final word in markedMistakes(ref.watch(mushafWordOverlayProvider)))
+        if (shown.any(
+          (r) =>
+              compareWordRefs(r.first, word) <= 0 &&
+              compareWordRefs(r.last, word) >= 0,
+        ))
+          word,
+    ];
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final follow = ref.watch(followAlongControllerProvider);
+    final review =
+        follow?.phase == FollowAlongPhase.review ||
+        ref.watch(hifzControllerProvider.select((h) => h.loopReview));
+    final idle =
+        !review &&
+        follow == null &&
+        !ref.watch(recitationSessionControllerProvider).isActive &&
+        ref.watch(quranAudioPlayerProvider) == null &&
+        ref.watch(guideProvider) == null;
+    final onScreen = idle ? _onScreen(ref) : const <WordRef>[];
+    if (!review && onScreen.isEmpty) {
+      return const IgnorePointer(
+        child: Center(
+          child: Stack(
+            alignment: Alignment.center,
+            children: [FollowAlongHint(), _LoopReviewHint()],
+          ),
+        ),
+      );
+    }
+    return Center(
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: GestureDetector(
+          key: const ValueKey('mistakes-hint'),
+          behavior: HitTestBehavior.opaque,
+          onTap: () {
+            final word = onScreen.isNotEmpty
+                ? onScreen.first
+                : firstMarkedMistake(ref.read(mushafWordOverlayProvider));
+            if (word != null) showWordDetailSheet(context, wordRef: word);
+          },
+          child: review
+              ? const Stack(
+                  alignment: Alignment.center,
+                  children: [FollowAlongHint(), _LoopReviewHint()],
+                )
+              : const _MistakesPill(key: ValueKey('mistakes-found-hint')),
+        ),
       ),
     );
   }
@@ -571,6 +673,16 @@ class _LoopReviewHint extends ConsumerWidget {
     if (!ref.watch(hifzControllerProvider.select((h) => h.loopReview))) {
       return const SizedBox.shrink();
     }
+    return const _MistakesPill(key: ValueKey('loop-review-hint'));
+  }
+}
+
+/// "Mistakes found — tap to see them", as a pill on the bar's top border.
+class _MistakesPill extends StatelessWidget {
+  const _MistakesPill({super.key});
+
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final style = theme.textTheme.labelMedium?.copyWith(
@@ -578,7 +690,6 @@ class _LoopReviewHint extends ConsumerWidget {
       fontWeight: FontWeight.w600,
     );
     return Container(
-      key: const ValueKey('loop-review-hint'),
       height: FollowAlongHint.height,
       padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
@@ -786,12 +897,15 @@ class _ModeButtons extends ConsumerWidget {
     final scheme = Theme.of(context).colorScheme;
     final location = this.location;
     final controller = ref.read(recitationSessionControllerProvider.notifier);
+    // In the guide a tap opens a mode's menu: its tours go through it.
+    final guided = ref.watch(guideProvider) != null;
     final modes = [
       (
         key: 'recite',
         icon: Icons.mic_rounded,
         label: l10n.recStart,
         short: l10n.modeRecite,
+        settings: null,
         onPressed: location == null || starting
             ? null
             : () async {
@@ -812,16 +926,27 @@ class _ModeButtons extends ConsumerWidget {
           icon: Icons.repeat_rounded,
           label: l10n.recLoop,
           short: l10n.modeLoop,
-          onPressed: location == null
+          // A tap starts it as last set; its ⋮ (or a long press) sets it.
+          settings: location == null
               ? null
               : () => showRecitationLoopSheet(context),
+          onPressed: location == null
+              ? null
+              : guided
+              ? () => showRecitationLoopSheet(context)
+              : () => quickLoop(context, ref),
         ),
       (
         key: 'listen-open',
         icon: Icons.headphones_rounded,
         label: l10n.listenMenuTitle,
         short: l10n.modeListen,
-        onPressed: location == null ? null : () => showListenSheet(context),
+        settings: location == null ? null : () => showListenSheet(context),
+        onPressed: location == null
+            ? null
+            : guided
+            ? () => showListenSheet(context)
+            : () => quickListen(context, ref),
       ),
       if (recognition)
         (
@@ -829,11 +954,18 @@ class _ModeButtons extends ConsumerWidget {
           icon: Icons.record_voice_over_rounded,
           label: l10n.followTitle,
           short: l10n.modeFollow,
-          onPressed: location == null
+          settings: location == null
               ? null
               : () => showFollowAlongSheet(context),
+          onPressed: location == null
+              ? null
+              : guided
+              ? () => showFollowAlongSheet(context)
+              : () => quickFollow(context, ref),
         ),
     ];
+    // A small phone: the ⋮ narrower, closer.
+    final compact = MediaQuery.sizeOf(context).width < 420;
     final Widget child;
     if (collapsed) {
       child = BarButtonGroup(
@@ -851,6 +983,21 @@ class _ModeButtons extends ConsumerWidget {
                     m.icon,
                     color: m.key == 'recite' ? scheme.primary : null,
                   ),
+                  // Its settings, at the item's end (the menu closed first).
+                  trailingIcon: m.settings == null
+                      ? null
+                      : Builder(
+                          builder: (context) => IconButton(
+                            key: ValueKey('modes-menu-${m.key}-settings'),
+                            visualDensity: VisualDensity.compact,
+                            icon: const Icon(Icons.more_vert_rounded),
+                            tooltip: l10n.recModeSettings(m.label),
+                            onPressed: () {
+                              MenuController.maybeOf(context)?.close();
+                              m.settings!();
+                            },
+                          ),
+                        ),
                   onPressed: m.onPressed,
                   child: Text(m.label),
                 ),
@@ -884,24 +1031,45 @@ class _ModeButtons extends ConsumerWidget {
           key: const ValueKey('modes-group'),
           groupHeight: BarButtonGroup.labelledHeight,
           expand: expand,
+          // Recite (no ⋮) a smaller share: the room to the modes with one.
+          flex: [for (final m in modes) m.settings == null ? 3 : 4],
           children: [
             for (final m in modes)
-              GuideTarget(
-                id:
-                    'mode-${m.key == 'recite'
-                        ? 'recite'
-                        : m.key == 'hifz-loop'
-                        ? 'loop'
-                        : m.key == 'listen-open'
-                        ? 'listen'
-                        : 'follow'}',
-                child: _LabelledModeButton(
-                  key: m.key == 'recite' ? null : ValueKey(m.key),
-                  icon: m.icon,
-                  label: m.short,
-                  tooltip: m.label,
-                  color: m.key == 'recite' ? scheme.primary : null,
-                  onPressed: m.onPressed,
+              _withSettings(
+                expand: expand,
+                compact: compact,
+                settings: m.settings == null
+                    ? null
+                    : GuideTarget(
+                        // (The guide shows the first, Loop's or Listen's.)
+                        id: m == modes[1]
+                            ? 'mode-settings'
+                            : 'settings-${m.key}',
+                        child: _ModeSettingsButton(
+                          compact: compact,
+                          key: ValueKey('${m.key}-settings'),
+                          tooltip: l10n.recModeSettings(m.label),
+                          onPressed: m.settings!,
+                        ),
+                      ),
+                button: GuideTarget(
+                  id:
+                      'mode-${m.key == 'recite'
+                          ? 'recite'
+                          : m.key == 'hifz-loop'
+                          ? 'loop'
+                          : m.key == 'listen-open'
+                          ? 'listen'
+                          : 'follow'}',
+                  child: _LabelledModeButton(
+                    key: m.key == 'recite' ? null : ValueKey(m.key),
+                    icon: m.icon,
+                    label: m.short,
+                    tooltip: m.label,
+                    color: m.key == 'recite' ? scheme.primary : null,
+                    onPressed: m.onPressed,
+                    onLongPress: m.settings,
+                  ),
                 ),
               ),
           ],
@@ -912,6 +1080,67 @@ class _ModeButtons extends ConsumerWidget {
     // (and full size) from the start; the new group fades and grows in.
     return FadeScaleIn(key: ValueKey(collapsed), child: child);
   }
+}
+
+/// A running mode's slim ⋮ (its settings), in the session's group.
+final _runningSettingsStyle = BarButtonGroup.buttonStyle.copyWith(
+  fixedSize: const WidgetStatePropertyAll(Size(28, BarButtonGroup.height)),
+  minimumSize: const WidgetStatePropertyAll(Size(28, BarButtonGroup.height)),
+  iconSize: const WidgetStatePropertyAll(18),
+);
+
+/// A mode's button with its [settings] button (a slim ⋮) right after it,
+/// one item of the group (no divider between them).
+Widget _withSettings({
+  required bool expand,
+  required Widget button,
+  required Widget? settings,
+  bool compact = false,
+}) {
+  if (settings == null) return button;
+  return Row(
+    mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
+    children: [
+      if (expand) Expanded(child: button) else button,
+      SizedBox(width: compact ? 2 : 4),
+      settings,
+    ],
+  );
+}
+
+/// A mode's settings in the bar: a slim ⋮ beside it (a tap on the mode
+/// starts it as last set).
+class _ModeSettingsButton extends StatelessWidget {
+  const _ModeSettingsButton({
+    super.key,
+    required this.tooltip,
+    required this.onPressed,
+    this.compact = false,
+  });
+
+  final String tooltip;
+  final VoidCallback onPressed;
+
+  /// Narrower on a small phone: the modes' labels the room.
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) => Tooltip(
+    message: tooltip,
+    child: InkWell(
+      onTap: onPressed,
+      customBorder: const StadiumBorder(),
+      child: SizedBox(
+        width: compact ? 20 : 26,
+        height: BarButtonGroup.labelledHeight,
+        child: Icon(
+          Icons.more_vert_rounded,
+          size: 20,
+          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        ),
+      ),
+    ),
+  );
 }
 
 /// Fades and scales [child] in when first shown (a new key shows it anew).
@@ -941,12 +1170,16 @@ class _LabelledModeButton extends StatelessWidget {
     required this.label,
     required this.tooltip,
     required this.onPressed,
+    this.onLongPress,
     this.color,
   });
 
   final IconData icon;
   final String label, tooltip;
   final VoidCallback? onPressed;
+
+  /// Also on a right-click (a browser's long press).
+  final VoidCallback? onLongPress;
   final Color? color;
 
   @override
@@ -960,6 +1193,8 @@ class _LabelledModeButton extends StatelessWidget {
       message: tooltip,
       child: InkWell(
         onTap: onPressed,
+        onLongPress: onLongPress,
+        onSecondaryTap: onLongPress,
         customBorder: const StadiumBorder(),
         child: ConstrainedBox(
           constraints: const BoxConstraints(
@@ -1018,6 +1253,9 @@ class _SessionControls extends ConsumerWidget {
     final follow = ref.watch(followAlongControllerProvider);
     final loopReview = ref.watch(
       hifzControllerProvider.select((h) => h.loopReview),
+    );
+    final looping = ref.watch(
+      hifzControllerProvider.select((h) => h.loop != null),
     );
     if (follow?.phase == FollowAlongPhase.review || loopReview) {
       final run = ref.read(followAlongControllerProvider.notifier);
@@ -1099,6 +1337,20 @@ class _SessionControls extends ConsumerWidget {
             icon: const Icon(Icons.pause_rounded),
             tooltip: l10n.recPause,
             onPressed: canControl ? controller.pause : null,
+          ),
+        // A loop's or Follow along's settings, to change as it runs
+        // (started again so).
+        if (follow != null || looping)
+          IconButton(
+            key: const ValueKey('session-settings'),
+            style: _runningSettingsStyle,
+            icon: const Icon(Icons.more_vert_rounded),
+            tooltip: l10n.recModeSettings(
+              follow != null ? l10n.followTitle : l10n.recLoop,
+            ),
+            onPressed: () => follow != null
+                ? showFollowAlongSheet(context)
+                : showRecitationLoopSheet(context),
           ),
       ],
     );
@@ -1205,6 +1457,18 @@ class _ListenControls extends ConsumerWidget {
               ),
               if (!following)
                 SleepTimerButton(style: BarButtonGroup.buttonStyle),
+              // Its settings, to change as it plays (started again so).
+              IconButton(
+                key: const ValueKey('listen-settings'),
+                style: _runningSettingsStyle,
+                icon: const Icon(Icons.more_vert_rounded),
+                tooltip: l10n.recModeSettings(
+                  following ? l10n.followTitle : l10n.listenMenuTitle,
+                ),
+                onPressed: () => following
+                    ? showFollowAlongSheet(context)
+                    : showListenSheet(context),
+              ),
             ],
           ),
         );

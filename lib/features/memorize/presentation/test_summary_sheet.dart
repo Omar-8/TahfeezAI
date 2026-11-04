@@ -10,6 +10,12 @@ import '../../../core/theme/components/components.dart';
 import '../../../memorization/application/memorization_today.dart';
 import '../../../memorization/domain/models/memorization_models.dart';
 import '../../../memorization/domain/recitation_score.dart';
+import '../../../quran/domain/models/quran_location.dart';
+import '../../../quran/quran_providers.dart';
+import '../../../wbw/presentation/word_detail_sheet.dart';
+import '../../mushaf/application/mushaf_page_turn.dart';
+import '../../mushaf/application/mushaf_page_verses.dart';
+import '../../mushaf/application/mushaf_word_overlay.dart';
 import '../../recitation/application/hifz_controller.dart';
 import '../../recitation/application/mushaf_recitation_target.dart';
 import '../../recitation/application/recitation_session_controller.dart';
@@ -69,6 +75,31 @@ class _TestSummarySheet extends ConsumerWidget {
       ref
           .read(recitationSessionControllerProvider.notifier)
           .start(startLocation: location);
+    }
+
+    // An ayah to review, tapped: its page shown (turned to behind the
+    // results if not on screen) and its first mistake's word sheet over the
+    // results — closed, back to them.
+    Future<void> openAyah(int ayahId) async {
+      final location = ref.read(mushafRecitationTargetProvider)?.location;
+      final word = firstMarkedMistake(
+        ref.read(mushafWordOverlayProvider),
+        ayahId: ayahId,
+      );
+      final shown = ref
+          .read(mushafPageWordRangesProvider)
+          .values
+          .any((r) => r.first.ayahId <= ayahId && r.last.ayahId >= ayahId);
+      if (!shown && location is QuranLocationPage) {
+        final turns = ref.read(mushafPageTurnRequestsProvider.notifier);
+        final page = await ref
+            .read(quranRepositoryProvider)
+            .getPageForAyah(mushafId: location.mushafId, ayahId: ayahId);
+        if (page != null) turns.toPage(page);
+      }
+      if (word != null && context.mounted) {
+        showWordDetailSheet(context, wordRef: word);
+      }
     }
 
     return SingleChildScrollView(
@@ -145,12 +176,18 @@ class _TestSummarySheet extends ConsumerWidget {
             Text(l10n.memAllGood, style: theme.textTheme.bodyMedium)
           else ...[
             Text(l10n.memToReview, style: theme.textTheme.titleSmall),
+            Text(
+              l10n.memToReviewTap,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
+            ),
             Wrap(
               spacing: TahfeezSpacing.sm,
               runSpacing: TahfeezSpacing.sm,
               children: [
                 for (final (id, g) in weak)
-                  Chip(
+                  ActionChip(
                     key: ValueKey('mem-weak-$id'),
                     visualDensity: VisualDensity.compact,
                     side: BorderSide(
@@ -159,6 +196,7 @@ class _TestSummarySheet extends ConsumerWidget {
                           : scheme.tertiary,
                     ),
                     label: Text(ayahRangeLabel(id, id, names)),
+                    onPressed: () => openAyah(id),
                   ),
               ],
             ),

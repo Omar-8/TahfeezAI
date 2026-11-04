@@ -29,6 +29,7 @@ import '../application/reciter_controller.dart';
 import '../application/reciter_downloads.dart';
 import '../domain/quran_audio_sources.dart';
 import '../../../core/ui/sheet_actions.dart';
+import '../../recitation/presentation/quick_start.dart' show quickStartFrom;
 
 /// The Mushaf's Listen menu: what to play (a range, from [from] if given,
 /// else from the page on screen to its surah's end), how often, by which
@@ -39,6 +40,37 @@ Future<void> showListenSheet(BuildContext context, {VerseRef? from}) =>
       title: AppLocalizations.of(context).listenMenuTitle,
       builder: (context) => _ListenSheet(from: from),
     );
+
+/// Before playing, with no translation read aloud: its tip, at random.
+/// "Show me": the translations to pick from (the choice saved); playing
+/// starts once they close.
+Future<void> offerListenTranslationTip(
+  BuildContext context,
+  WidgetRef ref,
+) async {
+  final options = ref.read(listenOptionsProvider);
+  if (options.translationVoice.isNotEmpty || !appTipsAllowed(ref)) return;
+  final due = await appTipDue(
+    ref.read(browserStorageProvider),
+    AppTip.listenTranslation,
+    now: ref.read(appTipsClockProvider)(),
+    random: ref.read(appTipsRandomProvider),
+  );
+  if (!context.mounted || !due) return;
+  if (!await answerAppTip(context, ref, AppTip.listenTranslation) ||
+      !context.mounted) {
+    return;
+  }
+  final voice = await showTranslationVoiceSheet(
+    context,
+    options.translationVoice,
+  );
+  if (voice != null && context.mounted) {
+    ref
+        .read(listenOptionsProvider.notifier)
+        .set(ref.read(listenOptionsProvider).copyWith(translationVoice: voice));
+  }
+}
 
 /// The translations that can be read aloud after each ayah, to pick one
 /// (`''`: none); `null`: closed without a choice.
@@ -221,7 +253,9 @@ class _ListenSheetState extends ConsumerState<_ListenSheet> {
               spread: ref.read(fullBleedContentProvider),
             )
           : null;
+      // Where a tap on Listen would begin, else the page's first ayah.
       first =
+          quickStartFrom(ref) ??
           ref.read(mushafPageVersesProvider)[page]?.first ??
           (chapterNo: 1, verseNo: 1);
     }
@@ -247,29 +281,8 @@ class _ListenSheetState extends ConsumerState<_ListenSheet> {
   Future<void> _play() async {
     final l10n = AppLocalizations.of(context);
     final messenger = ScaffoldMessenger.of(context);
-    // No translation read aloud: its tip, at random, before playing. "Show
-    // me": the translations to pick from; playing starts once they close.
-    if (_options.translationVoice.isEmpty && appTipsAllowed(ref)) {
-      final due = await appTipDue(
-        ref.read(browserStorageProvider),
-        AppTip.listenTranslation,
-        now: ref.read(appTipsClockProvider)(),
-        random: ref.read(appTipsRandomProvider),
-      );
-      if (!mounted) return;
-      if (due && await answerAppTip(context, ref, AppTip.listenTranslation)) {
-        if (!mounted) return;
-        final voice = await showTranslationVoiceSheet(
-          context,
-          _options.translationVoice,
-        );
-        if (!mounted) return;
-        if (voice != null) {
-          setState(() => _options = _options.copyWith(translationVoice: voice));
-        }
-      }
-      if (!mounted) return;
-    }
+    await offerListenTranslationTip(context, ref);
+    if (!mounted) return;
     ref.read(listenOptionsProvider.notifier).set(_options);
     Navigator.of(context).pop();
     final played = await ref

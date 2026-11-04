@@ -41,6 +41,35 @@ enum MushafWordMark {
   uncertain,
 }
 
+/// The marks of a mistake (a word's sheet says what it was).
+const mushafMistakeMarks = {
+  MushafWordMark.mistake,
+  MushafWordMark.skipped,
+  MushafWordMark.wrong,
+  MushafWordMark.tashkeel,
+  MushafWordMark.tajweed,
+};
+
+/// Every word [overlay] marks with a mistake, in reading order.
+List<WordRef> markedMistakes(MushafWordOverlay? overlay) => [
+  for (final MapEntry(key: word, value: mark)
+      in (overlay?.marks ?? const <WordRef, MushafWordMark>{}).entries)
+    if (mushafMistakeMarks.contains(mark)) word,
+]..sort(compareWordRefs);
+
+/// The first word [overlay] marks with a mistake (in ayah [ayahId] only,
+/// if given); `null` without one.
+WordRef? firstMarkedMistake(MushafWordOverlay? overlay, {int? ayahId}) {
+  WordRef? first;
+  for (final MapEntry(key: word, value: mark)
+      in (overlay?.marks ?? const {}).entries) {
+    if (!mushafMistakeMarks.contains(mark)) continue;
+    if (ayahId != null && word.ayahId != ayahId) continue;
+    if (first == null || compareWordRefs(word, first) < 0) first = word;
+  }
+  return first;
+}
+
 /// Words hidden across a range of the Mushaf (except [revealed] ones), and
 /// marks drawn on individual words — set by a memorization test (Hifz
 /// mode) and applied by every rendered page. Takes precedence over hide

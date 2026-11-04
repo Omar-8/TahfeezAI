@@ -58,6 +58,11 @@ enum SoundGroup {
   /// A doubled letter heard single, or a single one doubled.
   shadda,
 
+  /// The doubled lām of «ٱلَّذِى», «ٱلَّذِينَ» (and «ٱلَّذَانِ»…) heard single:
+  /// learners say it right yet light, and it was the commonest false flag
+  /// users reported on these words (2026-11-04).
+  relativeLam,
+
   /// A short vowel inside a sound unit heard as reduced to nothing.
   reducedVowel,
 
@@ -112,7 +117,7 @@ enum SoundGroup {
     final t = ts[k];
     switch (type) {
       case RecitationErrorType.shaddaError:
-        return shadda;
+        return _relativeLam(ts, k) ? relativeLam : shadda;
       case RecitationErrorType.missingVowel
           when heard != null && heard == phoneticClassOf('ڇ'):
         return stopInFlow;
@@ -147,6 +152,23 @@ enum SoundGroup {
       default:
         return null;
     }
+  }
+
+  /// [ts]`[k]` the doubled lām of «ٱلَّذِى» / «ٱلَّذِينَ»: «ل» «ل», a vowel,
+  /// then «ذ» (either lām).
+  static bool _relativeLam(List<PhoneticToken> ts, int k) {
+    String at(int i) => i >= 0 && i < ts.length ? ts[i].symbol : '';
+    if (at(k) != 'ل') return false;
+    for (final first in [k - 1, k]) {
+      if (at(first) != 'ل' || at(first + 1) != 'ل') continue;
+      final vowel = first + 2;
+      if (vowel < ts.length &&
+          ts[vowel].kind == PhoneticTokenKind.vowel &&
+          at(vowel + 1) == 'ذ') {
+        return true;
+      }
+    }
+    return false;
   }
 
   static const _pairs = {'طت', 'صس', 'ضد', 'ظذ', 'قك', 'ضظ'};

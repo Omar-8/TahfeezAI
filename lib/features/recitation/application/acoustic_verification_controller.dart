@@ -433,8 +433,15 @@ class AcousticVerificationController
   /// unseen Juz 30 reciters 1,678 -> 1,576; real mistakes caught QuranMB 66.7
   /// -> 66.4%, Al-Ikhlas 12.7 -> 12.4%, sobolev's reviewed and the spliced
   /// pairs unchanged. (+4: Tarteel users' 180, QuranMB 66.2%.)
+  ///
+  /// The doubled lām of «ٱلَّذِى» / «ٱلَّذِينَ» ([SoundGroup.relativeLam]) at
+  /// +4: the commonest false flag users reported on these words (2026-11-04).
+  /// On correct recitation (`word_flags.dart`, v3.7 at the app's settings)
+  /// its flags on them 9 -> 3 (Tarteel users', unseen Juz 30 reciters',
+  /// amateurs', QuranMB's); +6 the same, +2 4. Every other shadda unchanged.
   static const learnerSounds = {
     SoundGroup.shadda: SoundMargins(uncertain: 2),
+    SoundGroup.relativeLam: SoundMargins(error: 4, uncertain: 2),
     SoundGroup.reducedVowel: SoundMargins(error: 0, uncertain: 2),
     SoundGroup.finalVowel: SoundMargins(error: 1, uncertain: 2),
     SoundGroup.qalqala: SoundMargins(error: 2, uncertain: 4),
@@ -453,6 +460,7 @@ class AcousticVerificationController
   /// at 2 more (an early mark only for a clear mistake).
   static const _quickSounds = {
     SoundGroup.shadda: SoundMargins(uncertain: 2),
+    SoundGroup.relativeLam: SoundMargins(error: 4, uncertain: 2),
     SoundGroup.reducedVowel: SoundMargins(error: 1, uncertain: 2),
     SoundGroup.finalVowel: SoundMargins(error: 2, uncertain: 2),
     SoundGroup.qalqala: SoundMargins(error: 2, uncertain: 4),

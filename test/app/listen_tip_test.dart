@@ -43,7 +43,8 @@ void main() {
         now.subtract(const Duration(days: 3)).toIso8601String(),
       );
     });
-    await tester.tap(find.byKey(const ValueKey('listen-open')));
+    // Its menu (a tap on Listen plays at once, as last set).
+    await tester.tap(find.byKey(const ValueKey('listen-open-settings')));
     await RealApp.settle(tester);
     return (container, player);
   }

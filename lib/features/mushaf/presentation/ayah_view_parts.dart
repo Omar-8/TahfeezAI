@@ -210,7 +210,7 @@ class _AyahWordViewState extends State<AyahWordView>
     final dx = _effect == _WordEffect.sway
         ? math.sin(t * math.pi * 6) * (1 - t) * 4
         : 0.0;
-    return GestureDetector(
+    final detector = GestureDetector(
       onTap: widget.onTap,
       onLongPress: widget.onLongPress,
       // In a browser, a right-click too (the mouse's long press).
@@ -246,6 +246,21 @@ class _AyahWordViewState extends State<AyahWordView>
               ),
             ),
         ],
+      ),
+    );
+    // In a browser, a word marked with a mistake says it opens: the hand
+    // pointer, and its tooltip.
+    if (!kIsWeb ||
+        !(_mistakes.contains(widget.mark) ||
+            widget.mark == MushafWordMark.mistake) ||
+        widget.onTap == null) {
+      return detector;
+    }
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: Tooltip(
+        message: AppLocalizations.of(context).mistakeHover,
+        child: detector,
       ),
     );
   }

@@ -189,6 +189,19 @@ class QuranEngineWebPage {
       void endHold(web.PointerEvent event) => _holdTimer?.cancel();
       canvas.addEventListener('pointerup', endHold.toJS);
       canvas.addEventListener('pointerleave', endHold.toJS);
+      // The mouse over the page: what is under it (a marked word's hand
+      // pointer and tooltip — `setHoverHint`); off it, nothing.
+      canvas.addEventListener(
+        'pointermove',
+        (web.PointerEvent event) {
+          if (event.pointerType != 'mouse' || event.buttons != 0) return;
+          _onHover?.call(event.offsetX.toDouble(), event.offsetY.toDouble());
+        }.toJS,
+      );
+      canvas.addEventListener(
+        'pointerleave',
+        ((web.PointerEvent event) => _onHover?.call(null, null)).toJS,
+      );
       canvas.addEventListener(
         'pointermove',
         (web.PointerEvent event) {
@@ -223,6 +236,8 @@ class QuranEngineWebPage {
   web.HTMLCanvasElement? _canvas;
   void Function(double x, double y)? _onTap;
   void Function(double x, double y)? _onLongPress;
+  void Function(double? x, double? y)? _onHover;
+  String? _hoverHint;
   Timer? _holdTimer;
   (double, double)? _holdAt;
   bool _longPressed = false;
@@ -233,6 +248,20 @@ class QuranEngineWebPage {
 
   set onLongPress(void Function(double x, double y)? handler) =>
       _onLongPress = handler;
+
+  /// The mouse moving over the page (`null, null`: it left).
+  set onHover(void Function(double? x, double? y)? handler) =>
+      _onHover = handler;
+
+  /// The hand pointer and [hint] as the page's tooltip (a word under the
+  /// mouse that opens something); `null`: the plain pointer, no tooltip.
+  void setHoverHint(String? hint) {
+    final canvas = _canvas;
+    if (canvas == null || hint == _hoverHint) return;
+    _hoverHint = hint;
+    canvas.style.cursor = hint == null ? '' : 'pointer';
+    canvas.title = hint ?? '';
+  }
 
   /// Sets the canvas element's own CSS background — the "paper" behind
   /// the engine's ink, since `CanvasRenderer.draw` itself never fills a

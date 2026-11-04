@@ -67,6 +67,7 @@ class _Page implements QuranEngineMushafPage {
     ValueChanged<MushafTokenHitRect>? onDecorationHit,
     VoidCallback? onEmptyHit,
     ValueChanged<MushafTokenHitRect>? onWordLongHit,
+    String? Function(WordRef word)? hoverHint,
   }) => const SizedBox.expand(key: ValueKey('printed-page'));
 
   @override

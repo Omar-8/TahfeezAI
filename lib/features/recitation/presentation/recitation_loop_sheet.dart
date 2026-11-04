@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import '../../guide/guide.dart';
 
 import 'package:flutter/material.dart';
@@ -18,11 +20,13 @@ import '../../mushaf/application/mushaf_page_providers.dart';
 import '../../mushaf/application/mushaf_page_verses.dart';
 import '../../quran/application/quran_index_providers.dart';
 import '../application/hifz_controller.dart';
+import '../application/loop_options.dart';
 import '../application/live_recognition_controller.dart';
 import '../application/mushaf_recitation_target.dart';
 import '../application/quran_match_controller.dart'
     show quranWordCorpusProvider;
 import '../application/recitation_session_controller.dart';
+import 'quick_start.dart' show markModeRestart, quickStartFrom;
 import 'recitation_controls.dart' show showRecitationIntro;
 import '../../../core/ui/sheet_actions.dart';
 
@@ -61,8 +65,7 @@ class _RecitationLoopSheetState extends ConsumerState<_RecitationLoopSheet> {
     final hifz = ref.read(hifzControllerProvider);
     // Strict is one setting, shared with Hifz settings and Follow along.
     _loop = ref
-        .read(hifzControllerProvider.notifier)
-        .lastLoop
+        .read(loopOptionsProvider)
         .copyWith(strict: ref.read(hifzSettingsProvider).strict);
     _from = hifz.range?.from;
     _to = hifz.range?.to;
@@ -84,7 +87,10 @@ class _RecitationLoopSheetState extends ConsumerState<_RecitationLoopSheet> {
             spread: ref.read(fullBleedContentProvider),
           )
         : null;
-    final first = spans[page]?.first ?? (chapterNo: 1, verseNo: 1);
+    // Where a tap on Loop would begin (the ayah being uncovered, the surah
+    // opened), else the page's first ayah.
+    final first =
+        quickStartFrom(ref) ?? spans[page]?.first ?? (chapterNo: 1, verseNo: 1);
     _from = first;
     _to = (
       chapterNo: first.chapterNo,
@@ -131,14 +137,23 @@ class _RecitationLoopSheetState extends ConsumerState<_RecitationLoopSheet> {
         !mounted) {
       return;
     }
+    // The next tap on Loop starts it so.
+    ref.read(loopOptionsProvider.notifier).set(_loop);
+    final session = ref.read(recitationSessionControllerProvider.notifier);
+    final navigator = Navigator.of(context);
+    // Changed while it runs: started again so (its cut-short run's results
+    // not shown).
+    if (ref.read(recitationSessionControllerProvider).isActive) {
+      markModeRestart();
+      await session.stop();
+      if (!mounted) return;
+    }
     ref.read(hifzControllerProvider.notifier).setLoop((
       from: _from!,
       to: _to!,
     ), _loop);
-    Navigator.of(context).pop();
-    ref
-        .read(recitationSessionControllerProvider.notifier)
-        .start(startLocation: location);
+    navigator.pop();
+    unawaited(session.start(startLocation: location));
   }
 
   @override
@@ -156,9 +171,9 @@ class _RecitationLoopSheetState extends ConsumerState<_RecitationLoopSheet> {
     final surahs = {for (final s in surahList) s.surah.surahNo: s};
     _defaults(surahs);
     final from = _from!, to = _to!;
+    // (While one runs: started again so — see _start.)
     final canStart =
-        ref.watch(mushafRecitationTargetProvider)?.location != null &&
-        !ref.watch(recitationSessionControllerProvider).isActive;
+        ref.watch(mushafRecitationTargetProvider)?.location != null;
     final eachAyah = _loop.mode == HifzLoopMode.eachAyah;
 
     Widget label(String text) => Padding(
@@ -958,6 +973,41 @@ double pageProgress(int done, {required int first, required int last}) =>
     value: (before * loop.count + done) / (ayahs * loop.count),
     segments: ayahs,
   );
+}
+
+/// A thin progress line in [segments], as the Mushaf's over its page:
+/// [value] (0–1) of it filled, from the reading side.
+class SegmentedProgressLine extends StatelessWidget {
+  const SegmentedProgressLine({
+    super.key,
+    required this.value,
+    this.segments = 1,
+    this.height = 3,
+  });
+
+  final double value;
+  final int segments;
+  final double height;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return TweenAnimationBuilder<double>(
+      tween: Tween(end: value),
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOut,
+      builder: (context, v, _) => CustomPaint(
+        size: Size.fromHeight(height),
+        painter: _ProgressPainter(
+          value: v,
+          segments: segments,
+          fill: scheme.primary,
+          track: scheme.primary.withValues(alpha: 0.18),
+          rtl: Directionality.of(context) == TextDirection.rtl,
+        ),
+      ),
+    );
+  }
 }
 
 class _ProgressPainter extends CustomPainter {

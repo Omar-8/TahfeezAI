@@ -25,6 +25,8 @@ import '../domain/quran_audio_sources.dart';
 import '../../recitation/presentation/recitation_controls.dart'
     show showRecitationIntro;
 import 'listen_sheet.dart';
+import '../../recitation/presentation/quick_start.dart'
+    show markModeRestart, quickStartFrom;
 import '../../../core/ui/sheet_actions.dart';
 
 /// Follow along's menu, laid out like the Listen menu: the reciter, the
@@ -74,7 +76,9 @@ class _FollowAlongSheetState extends ConsumerState<_FollowAlongSheet> {
             spread: ref.read(fullBleedContentProvider),
           )
         : null;
+    // Where a tap on Follow along would begin, else the page's first ayah.
     final first =
+        quickStartFrom(ref) ??
         ref.read(mushafPageVersesProvider)[page]?.first ??
         (chapterNo: 1, verseNo: 1);
     _from = first;
@@ -107,9 +111,14 @@ class _FollowAlongSheetState extends ConsumerState<_FollowAlongSheet> {
     }
     if (!context.mounted) return;
     Navigator.of(context).pop();
-    final started = await ref
-        .read(followAlongControllerProvider.notifier)
-        .start(_from!, _to!, _options);
+    final run = ref.read(followAlongControllerProvider.notifier);
+    // Changed while it runs: started again so (its cut-short run's results
+    // not shown).
+    if (ref.read(followAlongControllerProvider) != null) {
+      markModeRestart();
+      await run.stop();
+    }
+    final started = await run.start(_from!, _to!, _options);
     if (!started) showListenOffline(messenger, l10n.listenOffline);
   }
 

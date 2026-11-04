@@ -12,6 +12,14 @@ import '../../core/theme/quran_text_style.dart';
 import '../../features/listen/application/quran_audio_player.dart';
 import '../../features/mushaf/application/mushaf_appearance_controller.dart';
 import '../../features/mushaf/domain/mushaf_appearance.dart';
+import '../../features/mushaf/application/mushaf_page_turn.dart';
+import '../../features/mushaf/application/mushaf_page_verses.dart';
+import '../../features/mushaf/application/mushaf_word_overlay.dart';
+import '../../features/recitation/application/mushaf_recitation_target.dart';
+import '../../features/recitation/presentation/recitation_loop_sheet.dart'
+    show SegmentedProgressLine;
+import '../../quran/domain/models/quran_location.dart';
+import '../../quran/quran_providers.dart';
 import '../../features/recitation/presentation/recitation_word_feedback.dart';
 import '../../quran/application/canonical_ayah_word_text.dart';
 import '../../quran/domain/models/quran_refs.dart';
@@ -44,12 +52,113 @@ void showWordDetailSheet(BuildContext context, {required WordRef wordRef}) {
   showTahfeezModalBottomSheet(
     context: context,
     title: AppLocalizations.of(context).wordDetails,
-    builder: (context) => _WordDetailSheetBody(wordRef: wordRef),
+    builder: (context) => _WordDetailSheet(first: wordRef),
   );
 }
 
+/// The sheet, on [first] — a word the last recitation marked with a
+/// mistake: from it to the others (previous / next, how far along: "2 / 8",
+/// a line in as many segments), each on its page.
+class _WordDetailSheet extends ConsumerStatefulWidget {
+  const _WordDetailSheet({required this.first});
+
+  final WordRef first;
+
+  @override
+  ConsumerState<_WordDetailSheet> createState() => _WordDetailSheetState();
+}
+
+class _WordDetailSheetState extends ConsumerState<_WordDetailSheet> {
+  late WordRef _word = widget.first;
+
+  /// Shows [word] — its page turned to first when it is not on screen.
+  Future<void> _go(WordRef word) async {
+    setState(() => _word = word);
+    final location = ref.read(mushafRecitationTargetProvider)?.location;
+    if (location is! QuranLocationPage) return;
+    final shown = ref
+        .read(mushafPageWordRangesProvider)
+        .values
+        .any(
+          (r) =>
+              compareWordRefs(r.first, word) <= 0 &&
+              compareWordRefs(r.last, word) >= 0,
+        );
+    if (shown) return;
+    final turns = ref.read(mushafPageTurnRequestsProvider.notifier);
+    final page = await ref
+        .read(quranRepositoryProvider)
+        .getPageForAyah(mushafId: location.mushafId, ayahId: word.ayahId);
+    if (page != null) turns.toPage(page);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final mistakes = markedMistakes(ref.watch(mushafWordOverlayProvider));
+    final at = mistakes.indexOf(_word);
+    final body = _WordDetailSheetBody(key: ValueKey(_word), wordRef: _word);
+    if (at < 0) return body;
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: TahfeezSpacing.md),
+          child: Row(
+            spacing: TahfeezSpacing.sm,
+            children: [
+              IconButton(
+                key: const ValueKey('word-previous-mistake'),
+                visualDensity: VisualDensity.compact,
+                icon: const Icon(Icons.chevron_left_rounded),
+                tooltip: l10n.wordPreviousMistake,
+                onPressed: at > 0 ? () => _go(mistakes[at - 1]) : null,
+              ),
+              Expanded(
+                child: Semantics(
+                  label: l10n.wordMistakeOf(at + 1, mistakes.length),
+                  child: ExcludeSemantics(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      spacing: 6,
+                      children: [
+                        Text(
+                          '${at + 1} / ${mistakes.length}',
+                          key: const ValueKey('word-mistake-count'),
+                          style: theme.textTheme.labelLarge,
+                        ),
+                        SegmentedProgressLine(
+                          value: (at + 1) / mistakes.length,
+                          segments: mistakes.length,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              // Next: the button that moves on, labelled.
+              FilledButton.tonalIcon(
+                key: const ValueKey('word-next-mistake'),
+                iconAlignment: IconAlignment.end,
+                icon: const Icon(Icons.chevron_right_rounded),
+                label: Text(l10n.wordNextMistake),
+                onPressed: at + 1 < mistakes.length
+                    ? () => _go(mistakes[at + 1])
+                    : null,
+              ),
+            ],
+          ),
+        ),
+        Flexible(child: body),
+      ],
+    );
+  }
+}
+
 class _WordDetailSheetBody extends ConsumerWidget {
-  const _WordDetailSheetBody({required this.wordRef});
+  const _WordDetailSheetBody({super.key, required this.wordRef});
 
   final WordRef wordRef;
 

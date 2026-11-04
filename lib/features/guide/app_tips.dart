@@ -25,6 +25,10 @@ enum AppTip {
   /// Over a session's results, when one of the first recitations marked
   /// many vowels: pronunciation checking can be made lenient.
   lenient,
+
+  /// Once, over the results of the first session with mistakes: a marked
+  /// word opens its word sheet (what was expected, what was heard).
+  tapMistake,
 }
 
 const tipFirstAfter = Duration(days: 1);

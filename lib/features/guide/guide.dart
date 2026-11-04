@@ -87,6 +87,7 @@ List<GuideStep> guideSteps(GuideTour tour) => switch (tour) {
     GuideStep('mode-loop', (l) => l.guideLoop),
     GuideStep('mode-listen', (l) => l.guideListen),
     GuideStep('mode-follow', (l) => l.guideFollow),
+    GuideStep('mode-settings', (l) => l.guideModeSettings),
     GuideStep('eye', (l) => l.guideEye),
     GuideStep('hifz-settings', (l) => l.guideHifzSettings),
     GuideStep(

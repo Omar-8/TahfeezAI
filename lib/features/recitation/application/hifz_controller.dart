@@ -69,7 +69,9 @@ enum RecitationIntroMode { recite, loop, follow }
 /// Configurable Hifz feedback.
 class HifzSettings {
   const HifzSettings({
-    this.strict = true,
+    // Off until chosen (owner, 2026-11-04): a mistake is marked and the
+    // recitation goes on.
+    this.strict = false,
     this.highlightCurrent = true,
     this.showMistakes = true,
     this.alert = MistakeAlert.vibrate,
@@ -251,7 +253,7 @@ class HifzSettings {
         MistakeAlert.values.asNameMap()[json['alert']] ??
         (read('vibrate', true) ? MistakeAlert.vibrate : MistakeAlert.off);
     return HifzSettings(
-      strict: read('strict', true),
+      strict: read('strict', false),
       highlightCurrent: read('highlightCurrent', true),
       showMistakes: read('showMistakes', true),
       alert: alert,
@@ -746,9 +748,6 @@ class HifzController extends Notifier<HifzState> {
   /// The range chosen before a loop (restored when its session ends).
   HifzRange? _rangeBeforeLoop;
 
-  /// The loop last started, for the loop sheet to offer again.
-  HifzLoop lastLoop = const HifzLoop();
-
   /// Loops [range] in the next recitation session (started right after);
   /// the session's end ends the loop. [showBefore]: the words before the
   /// range stay shown in hide mode (Follow along).
@@ -765,7 +764,6 @@ class HifzController extends Notifier<HifzState> {
     if (state.loop == null) _rangeBeforeLoop = state.range;
     _showBefore = showBefore;
     _keepMarks = keepMarks;
-    lastLoop = loop;
     state = state.copyWith(range: () => range, loop: () => loop);
   }
 

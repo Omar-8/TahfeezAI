@@ -38,32 +38,33 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    expect(strict(), isTrue);
-
-    // Loop: shows it, and turns it off for all.
-    await open((c) => showRecitationLoopSheet(c));
-    expect(shown('loop-strict'), isTrue);
-    await flip('loop-strict');
+    // Off until chosen.
     expect(strict(), isFalse);
+
+    // Loop: shows it, and turns it on for all.
+    await open((c) => showRecitationLoopSheet(c));
+    expect(shown('loop-strict'), isFalse);
+    await flip('loop-strict');
+    expect(strict(), isTrue);
     await close('loop-strict');
 
-    // Follow along: off too, and turns it back on for all.
+    // Follow along: on too, and turns it back off for all.
     await open((c) => showFollowAlongSheet(c));
-    expect(shown('follow-strict'), isFalse);
+    expect(shown('follow-strict'), isTrue);
     await flip('follow-strict');
-    expect(strict(), isTrue);
+    expect(strict(), isFalse);
     await close('follow-strict');
 
     await open((c) => showRecitationLoopSheet(c));
-    expect(shown('loop-strict'), isTrue);
+    expect(shown('loop-strict'), isFalse);
     await close('loop-strict');
 
     // Hifz settings' own switch, the same setting.
     container
         .read(hifzSettingsProvider.notifier)
-        .update(container.read(hifzSettingsProvider).copyWith(strict: false));
+        .update(container.read(hifzSettingsProvider).copyWith(strict: true));
     await open((c) => showFollowAlongSheet(c));
-    expect(shown('follow-strict'), isFalse);
+    expect(shown('follow-strict'), isTrue);
     await close('follow-strict');
 
     await RealApp.quit(tester);

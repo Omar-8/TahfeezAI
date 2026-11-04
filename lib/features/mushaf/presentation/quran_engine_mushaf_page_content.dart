@@ -2,7 +2,7 @@ import 'dart:async' show Timer, unawaited;
 
 import '../../../core/localization/generated/app_localizations.dart';
 
-import 'package:flutter/foundation.dart' show mapEquals, setEquals;
+import 'package:flutter/foundation.dart' show kIsWeb, mapEquals, setEquals;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -694,9 +694,22 @@ class _QuranEngineMushafPageContentState
                 .isWordHidden(widget.pageNumber, hit.sourceTokenId);
     }
 
+    // In a browser, a word marked with a mistake says it opens (its sheet
+    // says what the mistake was): the hand pointer and a tooltip.
+    final mistakeHint = kIsWeb
+        ? AppLocalizations.of(context).mistakeHover
+        : null;
     return page.buildView(
       ink: widget.colors.text,
       paper: widget.colors.background,
+      hoverHint: !kIsWeb || onWordTap == null
+          ? null
+          : (word) =>
+                mushafMistakeMarks.contains(
+                  ref.read(mushafWordOverlayProvider)?.marks[word],
+                )
+                ? mistakeHint
+                : null,
       // A word hidden on the page must not be revealed by its word sheet:
       // hidden as the page shows it — by a recitation's own reveals while
       // one runs (hide mode catches up only when it ends), else by hide mode.

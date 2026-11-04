@@ -390,6 +390,11 @@ void main() {
     expect(find.byKey(const ValueKey('mem-weak-112002')), findsOneWidget);
     expect(find.byKey(const ValueKey('mem-weak-112001')), findsNothing);
     expect(find.byKey(const ValueKey('mem-repeat-weak')), findsOneWidget);
+    // An ayah to review opens its mistakes over the results, which stay.
+    expect(find.text('Tap an ayah to see its mistakes.'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('mem-weak-112002')));
+    await tester.pumpAndSettle();
+    expect(find.text('Session results'), findsOneWidget);
   });
 
   testWidgets('no plan: how to make one; a plan saved from the sheet', (

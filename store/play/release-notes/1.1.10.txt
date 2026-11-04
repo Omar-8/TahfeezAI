@@ -1,0 +1,120 @@
+<en-US>
+• Loop, Listen and Follow along start at a tap, as you last set them, from where you are; the ⋮ beside each changes its settings
+• Mistakes: "Mistakes found — tap to see them"; the word sheet goes from one mistake to the next (2 / 8)
+• Strict is off by default
+• Fewer wrong flags on الَّذِينَ and الَّذِي
+</en-US>
+<ar>
+• التكرار والاستماع والتلاوة مع القارئ تبدأ بلمسة كما ضبطتها آخر مرة ومن حيث أنت؛ والنقاط ⋮ بجانب كل منها تغيّر إعداداته
+• الأخطاء: «وُجدت أخطاء — اضغط لرؤيتها»، ونافذة الكلمة تنتقل من خطأ إلى الذي يليه (2 / 8)
+• وضع الصارم مُعطّل افتراضيًا
+• تنبيهات خاطئة أقل على الَّذِينَ والَّذِي
+</ar>
+<bn-BD>
+• বারবার, শুনুন ও অনুসরণ এক চাপেই শুরু হয়, শেষবারের মতো সেটিংসে, আপনি যেখানে আছেন সেখান থেকে; পাশের ⋮ সেটিংস বদলায়
+• ভুল: «ভুল পাওয়া গেছে — দেখতে চাপুন»; শব্দের শিট এক ভুল থেকে পরেরটিতে যায় (2 / 8)
+• কঠোর মোড শুরুতে বন্ধ
+• الَّذِينَ ও الَّذِي-তে ভুল চিহ্ন কম
+</bn-BD>
+<da-DK>
+• Gentag, Lyt og Med starter med ét tryk, som du sidst indstillede dem, fra hvor du er; ⋮ ved siden af ændrer indstillingerne
+• Fejl: «Fejl fundet — tryk for at se dem»; ordarket går fra én fejl til den næste (2 / 8)
+• Streng er slået fra som standard
+• Færre forkerte markeringer på الَّذِينَ og الَّذِي
+</da-DK>
+<de-DE>
+• Schleife, Hören und Folgen starten mit einem Tippen, wie zuletzt eingestellt, ab deiner Stelle; das ⋮ daneben ändert die Einstellungen
+• Fehler: «Fehler gefunden — tippe, um sie zu sehen»; das Wortblatt geht von Fehler zu Fehler (2 / 8)
+• Streng ist standardmäßig aus
+• Weniger falsche Markierungen bei الَّذِينَ und الَّذِي
+</de-DE>
+<el-GR>
+• Λούπα, Άκου και Μαζί ξεκινούν με ένα πάτημα, όπως τα ρύθμισες τελευταία, από εκεί που είσαι· το ⋮ δίπλα αλλάζει τις ρυθμίσεις
+• Λάθη: «Βρέθηκαν λάθη — πάτα για να τα δεις»· το φύλλο της λέξης πηγαίνει από λάθος σε λάθος (2 / 8)
+• Το αυστηρό είναι απενεργοποιημένο από προεπιλογή
+• Λιγότερες λανθασμένες επισημάνσεις στα الَّذِينَ και الَّذِي
+</el-GR>
+<es-ES>
+• Bucle, Oír y Seguir empiezan con un toque, como los dejaste, desde donde estás; el ⋮ de al lado cambia sus ajustes
+• Errores: «Se encontraron errores — toca para verlos»; la hoja de la palabra pasa de un error al siguiente (2 / 8)
+• Estricto viene desactivado
+• Menos marcas erróneas en الَّذِينَ y الَّذِي
+</es-ES>
+<fa>
+• تکرار، شنیدن و همراهی با یک لمس، با آخرین تنظیمات و از همان‌جا که هستید شروع می‌شوند؛ ⋮ کنار هر کدام تنظیماتش را تغییر می‌دهد
+• خطاها: «خطا پیدا شد — برای دیدن بزنید»؛ برگهٔ واژه از یک خطا به خطای بعدی می‌رود (2 / 8)
+• حالت سخت‌گیرانه به‌طور پیش‌فرض خاموش است
+• علامت‌های نادرست کمتر روی الَّذِينَ و الَّذِي
+</fa>
+<fr-FR>
+• Boucle, Écouter et Suivre démarrent d’un toucher, comme vous les avez réglés, là où vous êtes ; le ⋮ à côté change leurs réglages
+• Erreurs : « Erreurs trouvées — touchez pour les voir » ; la fiche du mot passe d’une erreur à la suivante (2 / 8)
+• Strict est désactivé par défaut
+• Moins de fausses marques sur الَّذِينَ et الَّذِي
+</fr-FR>
+<id>
+• Ulang, Dengar dan Ikuti dimulai dengan sekali ketuk, seperti pengaturan terakhir, dari posisi Anda; ⋮ di sebelahnya mengubah pengaturannya
+• Kesalahan: «Ada kesalahan — ketuk untuk melihat»; lembar kata berpindah dari satu kesalahan ke berikutnya (2 / 8)
+• Mode ketat nonaktif secara bawaan
+• Lebih sedikit tanda keliru pada الَّذِينَ dan الَّذِي
+</id>
+<ja-JP>
+• 繰り返し・聴く・後追いはタップ一つで、前回の設定のまま今いる所から始まります。横の ⋮ で設定を変更できます
+• 間違い：「間違いがありました — タップして確認」。語のシートで次の間違いへ進めます（2 / 8）
+• 厳格モードは初期設定でオフ
+• الَّذِينَ と الَّذِي の誤った指摘を削減
+</ja-JP>
+<kk>
+• Қайта, Тыңдау және Ілесу бір түрткенде соңғы баптаулармен, тұрған жеріңізден басталады; жанындағы ⋮ баптауларын өзгертеді
+• Қателер: «Қателер табылды — көру үшін түртіңіз»; сөз парағы бір қатеден келесісіне өтеді (2 / 8)
+• Қатаң режим әдепкіде өшірулі
+• الَّذِينَ және الَّذِي сөздерінде қате белгілер азайды
+</kk>
+<ko-KR>
+• 반복·듣기·따라 하기는 한 번 탭으로 마지막 설정 그대로 지금 위치에서 시작합니다. 옆의 ⋮ 로 설정을 바꿉니다
+• 실수: "실수가 있습니다 — 탭하여 보기". 단어 시트에서 다음 실수로 이동합니다 (2 / 8)
+• 엄격 모드는 기본적으로 꺼져 있습니다
+• الَّذِينَ 과 الَّذِي 의 잘못된 표시 감소
+</ko-KR>
+<ms>
+• Ulang, Dengar dan Ikut bermula dengan satu ketikan, seperti tetapan terakhir, dari kedudukan anda; ⋮ di sebelahnya menukar tetapannya
+• Kesilapan: «Ada kesilapan — ketik untuk lihat»; helaian perkataan beralih dari satu kesilapan ke seterusnya (2 / 8)
+• Mod ketat dimatikan secara lalai
+• Kurang tanda salah pada الَّذِينَ dan الَّذِي
+</ms>
+<nl-NL>
+• Herhaal, Luister en Volgen starten met één tik, zoals je ze het laatst instelde, vanaf waar je bent; de ⋮ ernaast wijzigt de instellingen
+• Fouten: «Fouten gevonden — tik om ze te zien»; het woordblad gaat van fout naar fout (2 / 8)
+• Streng staat standaard uit
+• Minder onterechte markeringen bij الَّذِينَ en الَّذِي
+</nl-NL>
+<pt-BR>
+• Repetir, Ouvir e Junto começam com um toque, como você os ajustou, de onde você está; o ⋮ ao lado muda as configurações
+• Erros: «Erros encontrados — toque para ver»; a folha da palavra vai de um erro ao próximo (2 / 8)
+• O modo estrito vem desativado
+• Menos marcações erradas em الَّذِينَ e الَّذِي
+</pt-BR>
+<ru-RU>
+• Повтор, Слушать и Вслед запускаются одним нажатием, с последними настройками, с вашего места; ⋮ рядом меняет настройки
+• Ошибки: «Есть ошибки — нажмите, чтобы увидеть»; лист слова переходит от ошибки к ошибке (2 / 8)
+• Строгий режим по умолчанию выключен
+• Меньше ложных отметок на الَّذِينَ и الَّذِي
+</ru-RU>
+<sw>
+• Rudia, Sikiliza na Fuatisha huanza kwa mguso mmoja, kama ulivyoziweka mwisho, kutoka ulipo; ⋮ kando yake hubadilisha mipangilio
+• Makosa: «Makosa yamepatikana — gusa uyaone»; karatasi ya neno huenda kutoka kosa moja hadi jingine (2 / 8)
+• Hali kali imezimwa kwa chaguo-msingi
+• Alama chache zisizo sahihi kwenye الَّذِينَ na الَّذِي
+</sw>
+<tr-TR>
+• Tekrar, Dinle ve Takip tek dokunuşla, son ayarlarınızla, bulunduğunuz yerden başlar; yanındaki ⋮ ayarlarını değiştirir
+• Hatalar: «Hatalar bulundu — görmek için dokunun»; kelime sayfası bir hatadan sonrakine geçer (2 / 8)
+• Katı mod varsayılan olarak kapalı
+• الَّذِينَ ve الَّذِي üzerinde daha az yanlış işaret
+</tr-TR>
+<ur>
+• دہرائی، سنیں اور ساتھ ایک ٹیپ سے، آخری ترتیبات کے ساتھ، آپ کی جگہ سے شروع ہوتے ہیں؛ ساتھ والا ⋮ ترتیبات بدلتا ہے
+• غلطیاں: «غلطیاں ملیں — دیکھنے کے لیے ٹیپ کریں»؛ لفظ کی شیٹ ایک غلطی سے اگلی پر جاتی ہے (2 / 8)
+• سخت موڈ پہلے سے بند ہے
+• الَّذِينَ اور الَّذِي پر کم غلط نشان
+</ur>

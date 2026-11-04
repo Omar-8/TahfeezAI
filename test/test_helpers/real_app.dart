@@ -341,6 +341,7 @@ class FakePage implements QuranEngineMushafPage {
     ValueChanged<MushafTokenHitRect>? onDecorationHit,
     VoidCallback? onEmptyHit,
     ValueChanged<MushafTokenHitRect>? onWordLongHit,
+    String? Function(WordRef word)? hoverHint,
   }) => ColoredBox(
     key: const ValueKey('printed-page'),
     color: paper,

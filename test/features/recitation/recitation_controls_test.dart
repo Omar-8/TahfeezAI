@@ -1,5 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:tahfeez_ai/core/localization/fallback_localizations.dart';
 import 'package:tahfeez_ai/core/localization/generated/app_localizations.dart';
+import 'package:tahfeez_ai/core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -9,6 +14,7 @@ import 'package:tahfeez_ai/core/platform/platform_capabilities.dart';
 import 'package:tahfeez_ai/core/ui/full_bleed_content.dart';
 import 'package:tahfeez_ai/ai/hifz/hifz_judge.dart';
 import 'package:tahfeez_ai/features/mushaf/application/mushaf_hide_mode.dart';
+import 'package:tahfeez_ai/features/mushaf/application/mushaf_page_verses.dart';
 import 'package:tahfeez_ai/ai/matching/quran_word_corpus.dart';
 import 'package:tahfeez_ai/features/recitation/application/hifz_controller.dart';
 import 'package:tahfeez_ai/features/recitation/application/quran_match_controller.dart';
@@ -24,6 +30,7 @@ import 'package:tahfeez_ai/quran/domain/models/quran_location.dart';
 import 'package:tahfeez_ai/quran/domain/models/surah_models.dart';
 import 'package:tahfeez_ai/features/quran/application/quran_index_providers.dart';
 
+import '../../test_helpers/real_app.dart' show loadAppFonts;
 import 'live_recognition_controller_test.dart' show FakeRecognizer;
 import 'recitation_session_controller_test.dart'
     show FakeAudioSource, FakeRepository, FakeStore;
@@ -43,6 +50,7 @@ void main() {
     bool web = false,
     bool introSeen = true,
     Locale? locale,
+    bool appTheme = false,
   }) {
     return ProviderScope(
       overrides: [
@@ -98,8 +106,19 @@ void main() {
         ),
       ],
       child: MaterialApp(
+        // (The app's own type, its fonts loaded: text measured as it is.)
+        theme: appTheme
+            ? buildTahfeezTheme(ColorScheme.fromSeed(seedColor: Colors.teal))
+            : null,
         locale: locale,
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          // (As the app: Hausa, Kurdish and Somali, which Flutter lacks.)
+          ...kFallbackLocalizationsDelegates,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
         supportedLocales: AppLocalizations.supportedLocales,
         home: ValueListenableBuilder<bool>(
           valueListenable: mushafOpen,
@@ -564,7 +583,8 @@ void main() {
     final container = ProviderScope.containerOf(
       tester.element(find.text('Strict')),
     );
-    expect(container.read(hifzSettingsProvider).strict, isFalse);
+    // Off until chosen: tapped, on.
+    expect(container.read(hifzSettingsProvider).strict, isTrue);
   });
 
   testWidgets('pronunciation strictness is chosen in the Hifz settings', (
@@ -810,7 +830,7 @@ void main() {
     await tester.pumpWidget(app(devPanel: false));
     await tester.pumpAndSettle();
     final appBarBottom = tester.getBottomLeft(find.byType(AppBar)).dy;
-    for (final tip in ['Loop recitation', 'Hifz settings']) {
+    for (final tip in ['Loop recitation: settings', 'Hifz settings']) {
       await tester.tap(find.byTooltip(tip));
       await tester.pumpAndSettle();
       expect(
@@ -821,6 +841,86 @@ void main() {
       await tester.tapAt(const Offset(200, 10));
       await tester.pumpAndSettle();
       expect(find.byType(BottomSheet), findsNothing, reason: tip);
+    }
+  });
+
+  // The bar at every width, language and text size: never overflowing; its
+  // modes' labels, where they must shrink to fit, how far (reported).
+  // TAHFEEZ_BAR_ALL=1: every combination; otherwise a sample.
+  testWidgets('the recitation bar fits every width, language and text size', (
+    tester,
+  ) async {
+    final all = Platform.environment['TAHFEEZ_BAR_ALL'] == '1';
+    const widths = <double>[280, 320, 360, 390, 430, 600, 800, 1024, 1440];
+    const scales = [1.0, 1.5, 2.0];
+    final locales = AppLocalizations.supportedLocales;
+    addTearDown(tester.view.reset);
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    await tester.runAsync(loadAppFonts);
+    final shrunk = <String>[];
+    var runs = 0, i = 0;
+    for (final locale in locales) {
+      for (final width in widths) {
+        for (final scale in scales) {
+          for (final web in [false, true]) {
+            if (!all && i++ % 23 != 0) continue;
+            for (final hidden in [false, true]) {
+              tester.view.physicalSize = Size(width, 800);
+              tester.view.devicePixelRatio = 1;
+              tester.platformDispatcher.textScaleFactorTestValue = scale;
+              // Afresh each time (the web's overrides differ).
+              await tester.pumpWidget(const SizedBox());
+              await tester.pumpWidget(
+                app(devPanel: false, web: web, locale: locale, appTheme: true),
+              );
+              await tester.pumpAndSettle();
+              final container = ProviderScope.containerOf(
+                tester.element(find.text('mushaf body')),
+              );
+              final hide = container.read(mushafHideModeProvider);
+              if (hide.enabled != hidden) {
+                container.read(mushafHideModeProvider.notifier).toggle();
+                await tester.pumpAndSettle();
+              }
+              final where =
+                  '$locale ${width.toInt()} px ×$scale${web ? ' web' : ''}'
+                  '${hidden ? ' hidden' : ''}';
+              expect(tester.takeException(), isNull, reason: where);
+              runs++;
+              // The modes' labels: how far each had to shrink.
+              final group = find.byKey(const ValueKey('modes-group'));
+              if (group.evaluate().isEmpty) continue;
+              for (final element
+                  in find
+                      .descendant(of: group, matching: find.byType(FittedBox))
+                      .evaluate()) {
+                final box = element.renderObject! as RenderBox;
+                final text = find
+                    .descendant(
+                      of: find.byWidget(element.widget),
+                      matching: find.byType(Text),
+                    )
+                    .evaluate()
+                    .first;
+                final child = text.renderObject! as RenderBox;
+                final fit = box.size.width / child.size.width;
+                if (fit < 0.85) {
+                  shrunk.add(
+                    '$where: "${(text.widget as Text).data}" '
+                    'at ${(fit * 100).round()}%',
+                  );
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    // ignore: avoid_print
+    print('bar: $runs layouts; labels under 85%: ${shrunk.length}');
+    for (final line in shrunk) {
+      // ignore: avoid_print
+      print('  $line');
     }
   });
 
@@ -851,7 +951,8 @@ void main() {
       tester.element(find.text('mushaf body')),
     );
 
-    await tester.tap(find.byTooltip('Loop recitation'));
+    // Its settings first (its ⋮; a tap on Loop starts it as last set).
+    await tester.tap(find.byTooltip('Loop recitation: settings'));
     await tester.pumpAndSettle();
     // From the page's first ayah to the end of its surah (page 5 is not
     // reported here: Al-Fatiha).
@@ -883,9 +984,32 @@ void main() {
     expect(container.read(hifzControllerProvider).loop, isNull);
     expect(container.read(hifzControllerProvider).range, isNull);
     // The sheet offers the last loop again.
-    await tester.tap(find.byTooltip('Loop recitation'));
+    await tester.tap(find.byTooltip('Loop recitation: settings'));
     await tester.pumpAndSettle();
     expect(find.text('How many times to recite the range'), findsOneWidget);
+    await tester.tapAt(const Offset(200, 10));
+    await tester.pumpAndSettle();
+
+    // A tap on Loop starts it at once, as last set: from the page's first
+    // ayah to its last.
+    container.read(mushafPageVersesProvider.notifier).report(5, (
+      first: (chapterNo: 2, verseNo: 6),
+      last: (chapterNo: 2, verseNo: 16),
+    ));
+    await tester.tap(find.byTooltip('Loop recitation'));
+    await tester.pumpAndSettle();
+    expect(find.byType(BottomSheet), findsNothing);
+    final quick = container.read(hifzControllerProvider);
+    expect(quick.loop?.mode, HifzLoopMode.range);
+    expect(quick.loop?.count, 5);
+    expect(quick.range, (
+      from: (chapterNo: 2, verseNo: 6),
+      to: (chapterNo: 2, verseNo: 16),
+    ));
+    expect(find.byKey(const ValueKey('mic-level-ring')), findsOneWidget);
+    await tester.tap(find.byTooltip('Stop'));
+    await tester.runAsync(() => Future<void>.delayed(Duration.zero));
+    await tester.pumpAndSettle();
   });
 
   testWidgets('the first recitation explains the check first, once', (

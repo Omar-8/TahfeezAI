@@ -189,6 +189,8 @@ class QuranEngineAndroidPage
     ValueChanged<MushafTokenHitRect>? onDecorationHit,
     VoidCallback? onEmptyHit,
     ValueChanged<MushafTokenHitRect>? onWordLongHit,
+    // (No mouse on the phones.)
+    String? Function(WordRef word)? hoverHint,
   }) {
     final view = _buildQvpPageView(
       ink: ink,
