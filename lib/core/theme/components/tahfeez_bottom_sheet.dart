@@ -43,6 +43,33 @@ class TahfeezModalSheetActivity {
   }
 }
 
+/// Counts every sheet, dialog and menu on the navigator it observes (the
+/// app's root one, where they all open) for [TahfeezModalSheetActivity]
+/// — however each was opened, not only through
+/// [showTahfeezModalBottomSheet].
+class TahfeezPopupObserver extends NavigatorObserver {
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    if (route is PopupRoute) TahfeezModalSheetActivity._opened();
+  }
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    if (route is PopupRoute) TahfeezModalSheetActivity._closed();
+  }
+
+  @override
+  void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    if (route is PopupRoute) TahfeezModalSheetActivity._closed();
+  }
+
+  @override
+  void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
+    if (oldRoute is PopupRoute) TahfeezModalSheetActivity._closed();
+    if (newRoute is PopupRoute) TahfeezModalSheetActivity._opened();
+  }
+}
+
 /// How far from the screen's top a sheet opened now may reach at most:
 /// something kept in view above sheets while it is up (the guide's card on
 /// its steps to try on the page, whose sheets open below it). 0: nothing.
@@ -101,8 +128,8 @@ Future<T?> showTahfeezModalBottomSheet<T>({
   required WidgetBuilder builder,
   BoxConstraints? constraints,
 }) {
-  TahfeezModalSheetActivity._opened();
-  final result = showModalBottomSheet<T>(
+  // (Counted open by [TahfeezPopupObserver].)
+  return showModalBottomSheet<T>(
     context: context,
     isScrollControlled: true,
     // Over the whole app (a shell's bottom bar included), not inside the
@@ -152,26 +179,63 @@ Future<T?> showTahfeezModalBottomSheet<T>({
       ),
     ),
   );
-  result.whenComplete(TahfeezModalSheetActivity._closed);
-  return result;
 }
 
 /// A sheet's content as frosted glass: the screen behind it blurred under
 /// the sheet's see-through paper (`bottomSheetTheme`), clipped to its
-/// rounded top.
+/// rounded top. (In a browser: plain, opaque paper.)
+///
+/// [handle]: a drag handle on the glass, as the sheet's own would be
+/// (`showDragHandle`, which sits above its content: a strip of unblurred
+/// page there, and the glass's rounded corners showing under it).
 class GlassSheet extends StatelessWidget {
-  const GlassSheet({super.key, required this.child});
+  const GlassSheet({super.key, required this.child, this.handle = false});
 
   final Widget child;
+  final bool handle;
 
   @override
-  Widget build(BuildContext context) => ClipRRect(
-    borderRadius: const BorderRadius.vertical(
-      top: Radius.circular(TahfeezRadii.lg),
-    ),
-    child: BackdropFilter(
-      filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-      child: child,
-    ),
-  );
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final content = !handle
+        ? child
+        : Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Material's drag handle: 32 × 4 in a 48-high band.
+              SizedBox(
+                height: 48,
+                child: Center(
+                  child: Container(
+                    width: 32,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color:
+                          theme.bottomSheetTheme.dragHandleColor ??
+                          theme.colorScheme.onSurfaceVariant.withValues(
+                            alpha: 0.4,
+                          ),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                ),
+              ),
+              Flexible(child: child),
+            ],
+          );
+    return ClipRRect(
+      borderRadius: const BorderRadius.vertical(
+        top: Radius.circular(TahfeezRadii.lg),
+      ),
+      // In a browser, no blur: the Mushaf's pages there are the browser's
+      // own canvases, which it cannot blur — only the dim over them, its
+      // edges darkened. The sheet is opaque there instead (`app_theme`).
+      child: kIsWeb
+          ? content
+          : BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+              child: content,
+            ),
+    );
+  }
 }

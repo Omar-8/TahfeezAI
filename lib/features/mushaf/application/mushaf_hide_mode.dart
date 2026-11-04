@@ -21,6 +21,7 @@ class MushafHideModeState {
     this.wordCounts = const {},
     this.ayahBoundaries = const {},
     this.startOn = const {},
+    this.lastPage,
   });
 
   final bool enabled;
@@ -33,6 +34,11 @@ class MushafHideModeState {
   /// at its question). Absent: from the page's first word. Revealing goes
   /// on as usual; hiding past it covers the whole page again.
   final Map<int, int> startOn;
+
+  /// The page words were last uncovered or covered on by hand (the
+  /// buttons, or an ayah opened with those before it shown); `null` until
+  /// then — not kept across restarts.
+  final int? lastPage;
 
   /// The first word uncovered on [pageNumber] (see [startOn]).
   int startOf(int pageNumber) => startOn[pageNumber] ?? 0;
@@ -48,18 +54,16 @@ class MushafHideModeState {
 
   /// Whether the page's word at [wordIndex] (reading order, from 0) is
   /// currently hidden.
-  /// The page nearest [page] uncovered in part — a reveal under way there
-  /// (some of its words shown, not all); `null` when none is.
-  int? revealUnderWay(int page) {
-    int? nearest;
-    for (final MapEntry(key: p, value: shown) in revealed.entries) {
-      final total = wordCounts[p];
-      if (shown <= 0 || total == null || shown >= total) continue;
-      if (nearest == null || (p - page).abs() < (nearest - page).abs()) {
-        nearest = p;
-      }
-    }
-    return nearest;
+  /// The page a reveal is under way on: [lastPage], while uncovered in
+  /// part (some of its words shown, not all); else `null`. Never another
+  /// page left part-uncovered earlier (an older session's).
+  int? get revealUnderWay {
+    final page = lastPage;
+    if (page == null) return null;
+    final shown = revealedOn(page);
+    final total = wordCounts[page];
+    if (shown <= 0 || total == null || shown >= total) return null;
+    return page;
   }
 
   bool isWordHidden(int pageNumber, int wordIndex) =>
@@ -118,6 +122,7 @@ class MushafHideModeState {
     Map<int, int>? wordCounts,
     Map<int, List<int>>? ayahBoundaries,
     Map<int, int>? startOn,
+    int? lastPage,
   }) {
     return MushafHideModeState(
       enabled: enabled ?? this.enabled,
@@ -125,6 +130,7 @@ class MushafHideModeState {
       wordCounts: wordCounts ?? this.wordCounts,
       ayahBoundaries: ayahBoundaries ?? this.ayahBoundaries,
       startOn: startOn ?? this.startOn,
+      lastPage: lastPage ?? this.lastPage,
     );
   }
 }
@@ -181,6 +187,7 @@ class MushafHideModeController extends Notifier<MushafHideModeState> {
     if (page == null) return null;
     state = state.copyWith(
       revealed: {...state.revealed, page: state.revealedOn(page) + 1},
+      lastPage: page,
     );
     return page;
   }
@@ -197,7 +204,10 @@ class MushafHideModeController extends Notifier<MushafHideModeState> {
       (b) => b > shown,
       orElse: () => state.wordCounts[page] ?? shown + 1,
     );
-    state = state.copyWith(revealed: {...state.revealed, page: end});
+    state = state.copyWith(
+      revealed: {...state.revealed, page: end},
+      lastPage: page,
+    );
     return page;
   }
 
@@ -207,6 +217,7 @@ class MushafHideModeController extends Notifier<MushafHideModeState> {
     final page = state.previousHidePage(currentPage, spread: spread);
     if (page == null) return null;
     _hideTo(page, state._shownOn(page) - 1);
+    state = state.copyWith(lastPage: page);
     return page;
   }
 
@@ -220,6 +231,7 @@ class MushafHideModeController extends Notifier<MushafHideModeState> {
     final boundaries = state.ayahBoundaries[page] ?? const <int>[];
     final start = boundaries.lastWhere((b) => b < shown, orElse: () => 0);
     _hideTo(page, start);
+    state = state.copyWith(lastPage: page);
     return page;
   }
 
@@ -242,6 +254,7 @@ class MushafHideModeController extends Notifier<MushafHideModeState> {
     state = state.copyWith(
       revealed: {...state.revealed, page: start + count},
       startOn: {...state.startOn, page: start},
+      lastPage: page,
     );
   }
 
@@ -261,11 +274,20 @@ class MushafHideModeController extends Notifier<MushafHideModeState> {
   /// Sets how many words are uncovered on each page in [revealed] (from
   /// its first word) — used to carry a recitation test's progress back
   /// into hide mode.
-  void setRevealed(Map<int, int> revealed) {
+  /// Uncovering goes on at [page] (an ayah opened there): its
+  /// [MushafHideModeState.lastPage].
+  void goOnAt(int page) {
+    if (state.lastPage != page) state = state.copyWith(lastPage: page);
+  }
+
+  /// ([lastPage]: uncovered there by hand — see
+  /// [MushafHideModeState.lastPage].)
+  void setRevealed(Map<int, int> revealed, {int? lastPage}) {
     state = state.copyWith(
       revealed: {...state.revealed, ...revealed},
       startOn: {...state.startOn}
         ..removeWhere((p, _) => revealed.containsKey(p)),
+      lastPage: lastPage,
     );
   }
 

@@ -589,22 +589,40 @@ void main() {
     expect(p41.highlights, isEmpty);
   });
 
-  test('the reveal under way nearest a page: one uncovered in part', () {
-    const state = MushafHideModeState(
-      enabled: true,
-      revealed: {23: 40, 24: 150, 30: 0, 31: 12},
-      wordCounts: {23: 150, 24: 150, 30: 140, 31: 140},
-    );
-    // 24 fully shown and 30 fully hidden are not under way.
-    expect(state.revealUnderWay(28), 31);
-    expect(state.revealUnderWay(25), 23);
+  test('the reveal under way: the page last uncovered by hand, while in '
+      'part — never another left part-uncovered earlier', () {
+    const words = {1: 30, 23: 150, 24: 150};
+    // Al-Faatiha part-uncovered earlier; nothing by hand since.
     expect(
       const MushafHideModeState(
-        revealed: {5: 200},
-        wordCounts: {5: 200},
-      ).revealUnderWay(5),
+        enabled: true,
+        revealed: {1: 12},
+        wordCounts: words,
+      ).revealUnderWay,
       isNull,
     );
+    // An ayah opened on page 23 (those before it shown): there.
+    expect(
+      const MushafHideModeState(
+        enabled: true,
+        revealed: {1: 12, 23: 40},
+        wordCounts: words,
+        lastPage: 23,
+      ).revealUnderWay,
+      23,
+    );
+    // Its page fully shown, or none of it: not under way.
+    for (final shown in [0, 150]) {
+      expect(
+        MushafHideModeState(
+          enabled: true,
+          revealed: {1: 12, 24: shown},
+          wordCounts: words,
+          lastPage: 24,
+        ).revealUnderWay,
+        isNull,
+      );
+    }
   });
 }
 

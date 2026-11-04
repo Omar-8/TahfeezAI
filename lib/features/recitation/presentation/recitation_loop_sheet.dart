@@ -33,12 +33,13 @@ import '../../../core/ui/sheet_actions.dart';
 Future<void> showRecitationLoopSheet(BuildContext context) {
   return showModalBottomSheet<void>(
     context: context,
-    showDragHandle: true,
+    // (Its drag handle on the glass: GlassSheet.)
     isScrollControlled: true,
     useSafeArea: true,
     useRootNavigator: true,
     constraints: sheetBelowAppBar(context),
-    builder: (context) => GlassSheet(child: const _RecitationLoopSheet()),
+    builder: (context) =>
+        GlassSheet(handle: true, child: const _RecitationLoopSheet()),
   );
 }
 

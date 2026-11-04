@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
 import 'app_colors.dart';
@@ -49,9 +50,12 @@ ThemeData buildTahfeezTheme(
       ),
     ),
     // Glass: the paper a little see-through (each sheet blurs what is
-    // behind it — GlassSheet), a bright hairline along its top.
+    // behind it — GlassSheet), a bright hairline along its top. In a
+    // browser, which cannot blur the Mushaf's pages: opaque.
     bottomSheetTheme: BottomSheetThemeData(
-      backgroundColor: scheme.surface.withValues(alpha: 0.86),
+      backgroundColor: kIsWeb
+          ? scheme.surface
+          : scheme.surface.withValues(alpha: 0.86),
       shape: sheetShape.copyWith(
         side: BorderSide(
           color: scheme.brightness == Brightness.dark

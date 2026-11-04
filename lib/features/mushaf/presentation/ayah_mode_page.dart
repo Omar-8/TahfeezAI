@@ -401,13 +401,15 @@ class AyahModePageState extends ConsumerState<AyahModePage> {
   /// from the ayah opened at, the next reveal its first word (kept in view).
   void _showBefore(int ayahId) {
     final first = _words?.indexWhere((w) => w.ayahId == ayahId) ?? -1;
-    if (first <= 0) return;
     final hide = ref.read(mushafHideModeProvider);
-    if (!hide.enabled || hide.revealedOn(widget.pageNumber) >= first) return;
+    if (!hide.enabled || first < 0) return;
+    // Uncovering goes on here now, not on a page left part-uncovered before.
+    ref.read(mushafHideModeProvider.notifier).goOnAt(widget.pageNumber);
+    if (first == 0 || hide.revealedOn(widget.pageNumber) >= first) return;
     _ownReveal = true;
     ref.read(mushafHideModeProvider.notifier).setRevealed({
       widget.pageNumber: first,
-    });
+    }, lastPage: widget.pageNumber);
   }
 
   /// The ayah whose turn it is: the reciter's, the recitation's, or the
@@ -960,7 +962,9 @@ class _AyahBlock extends ConsumerWidget {
                         .read(mushafHideModeProvider)
                         .revealedOn(pageNumber);
                     if (shown <= lastWordOnPage) {
-                      hide.setRevealed({pageNumber: lastWordOnPage + 1});
+                      hide.setRevealed({
+                        pageNumber: lastWordOnPage + 1,
+                      }, lastPage: pageNumber);
                     }
                   }
                   final played = await ref

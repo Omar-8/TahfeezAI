@@ -1,0 +1,80 @@
+<en-US>
+• Revealing in Ayah mode goes on where you are: an ayah opened with the ayahs hidden (the Daily Ayah too) never jumps back to a page uncovered earlier
+• The recitation settings, Loop and start sheets: their drag handle on the frosted glass
+</en-US>
+<ar>
+• الكشف في وضع الآيات يستمر حيث أنت: الآية المفتوحة والآيات مخفية (ومنها آية اليوم) لا تعود أبدًا إلى صفحة كُشفت سابقًا
+• نوافذ إعدادات التسميع والتكرار والبدء: مقبض السحب على الزجاج المصنفر
+</ar>
+<bn-BD>
+• আয়াত মোডে প্রকাশ আপনি যেখানে আছেন সেখানেই চলে: আয়াত লুকানো অবস্থায় খোলা আয়াত (দৈনিক আয়াতও) আর আগে প্রকাশিত কোনো পৃষ্ঠায় ফিরে যায় না
+• তিলাওয়াত সেটিংস, লুপ ও শুরুর শিট: টানার হাতল ঝাপসা কাচের ওপর
+</bn-BD>
+<da-DK>
+• Afsløring i vers-tilstand fortsætter, hvor du er: et vers åbnet med skjulte vers (også dagens vers) springer aldrig tilbage til en side afsløret tidligere
+• Arkene for recitationsindstillinger, gentagelse og start: trækhåndtaget på det matte glas
+</da-DK>
+<de-DE>
+• Aufdecken im Vers-Modus geht dort weiter, wo du bist: Ein bei verborgenen Versen geöffneter Vers (auch der Vers des Tages) springt nie zu einer früher aufgedeckten Seite zurück
+• Die Blätter für Rezitationseinstellungen, Wiederholung und Start: ihr Ziehgriff auf dem Milchglas
+</de-DE>
+<el-GR>
+• Η αποκάλυψη στη λειτουργία στίχων συνεχίζει εκεί που είστε: ένας στίχος που ανοίγει με κρυμμένους στίχους (και ο στίχος της ημέρας) δεν γυρίζει ποτέ σε σελίδα που αποκαλύφθηκε νωρίτερα
+• Τα φύλλα ρυθμίσεων απαγγελίας, επανάληψης και έναρξης: η λαβή τους πάνω στο θαμπό γυαλί
+</el-GR>
+<es-ES>
+• Revelar en el modo aleya sigue donde estás: una aleya abierta con las aleyas ocultas (también la aleya del día) nunca vuelve a una página revelada antes
+• Las hojas de ajustes de recitación, repetición e inicio: su asa sobre el cristal esmerilado
+</es-ES>
+<fa>
+• آشکارسازی در حالت آیه همان‌جا که هستید ادامه می‌یابد: آیه‌ای که با آیه‌های پنهان باز می‌شود (آیهٔ روز هم) هرگز به صفحه‌ای که پیش‌تر آشکار شده برنمی‌گردد
+• برگه‌های تنظیمات تلاوت، تکرار و شروع: دستگیرهٔ کشیدن روی شیشهٔ مات
+</fa>
+<fr-FR>
+• Dévoiler en mode verset continue là où vous êtes : un verset ouvert avec les versets masqués (le verset du jour aussi) ne revient jamais à une page dévoilée plus tôt
+• Les feuilles des réglages de récitation, de répétition et de démarrage : leur poignée sur le verre dépoli
+</fr-FR>
+<id>
+• Membuka dalam mode ayat berlanjut di tempat Anda berada: ayat yang dibuka dengan ayat tersembunyi (termasuk ayat harian) tidak pernah melompat kembali ke halaman yang dibuka sebelumnya
+• Lembar pengaturan bacaan, pengulangan, dan mulai: pegangan seretnya di atas kaca buram
+</id>
+<ja-JP>
+• 節モードでの表示はいる場所から続きます：節を隠したまま開いた節（今日の節も）が、以前に表示したページへ戻ることはありません
+• 読誦設定・繰り返し・開始のシート：ドラッグハンドルがすりガラスの上に
+</ja-JP>
+<kk>
+• Аят режиміндегі ашу сіз тұрған жерден жалғасады: аяттар жасырылған кезде ашылған аят (күн аяты да) бұрын ашылған бетке ешқашан қайтпайды
+• Оқу баптаулары, қайталау және бастау парақтары: сүйреу тұтқасы күңгірт әйнектің үстінде
+</kk>
+<ko-KR>
+• 아야 모드의 공개가 지금 있는 곳에서 이어집니다: 아야를 숨긴 채 연 아야(오늘의 아야 포함)가 이전에 공개한 페이지로 되돌아가지 않습니다
+• 낭송 설정, 반복, 시작 시트: 끌기 핸들이 반투명 유리 위에
+</ko-KR>
+<ms>
+• Mendedahkan dalam mod ayat diteruskan di tempat anda berada: ayat yang dibuka dengan ayat tersembunyi (termasuk ayat harian) tidak lagi melompat ke halaman yang didedahkan sebelumnya
+• Helaian tetapan bacaan, ulangan dan mula: pemegang seretnya di atas kaca kabur
+</ms>
+<nl-NL>
+• Onthullen in versmodus gaat verder waar je bent: een vers dat met verborgen verzen wordt geopend (ook het vers van de dag) springt nooit terug naar een eerder onthulde pagina
+• De bladen voor recitatie-instellingen, herhaling en start: hun sleepgreep op het matglas
+</nl-NL>
+<pt-BR>
+• Revelar no modo versículo continua onde você está: um versículo aberto com os versículos ocultos (o versículo do dia também) nunca volta a uma página revelada antes
+• As folhas de ajustes de recitação, repetição e início: a alça sobre o vidro fosco
+</pt-BR>
+<ru-RU>
+• Открытие слов в режиме аятов продолжается там, где вы находитесь: аят, открытый со скрытыми аятами (и аят дня), больше не перескакивает на страницу, открытую раньше
+• Листы настроек чтения, повтора и начала: ручка перетаскивания на матовом стекле
+</ru-RU>
+<sw>
+• Kufunua katika hali ya aya kunaendelea pale ulipo: aya iliyofunguliwa aya zikiwa zimefichwa (pamoja na aya ya siku) hairudi tena kwenye ukurasa uliofunuliwa awali
+• Karatasi za mipangilio ya usomaji, kurudia na kuanza: kishikio chake juu ya kioo chenye ukungu
+</sw>
+<tr-TR>
+• Ayet modunda açma bulunduğunuz yerden devam eder: ayetler gizliyken açılan bir ayet (günün ayeti de) daha önce açılmış bir sayfaya asla geri atlamaz
+• Okuyuş ayarları, tekrar ve başlatma sayfaları: sürükleme tutamacı buzlu camın üzerinde
+</tr-TR>
+<ur>
+• آیت موڈ میں ظاہر کرنا وہیں جاری رہتا ہے جہاں آپ ہیں: آیات چھپی ہونے کی حالت میں کھولی گئی آیت (آج کی آیت بھی) کبھی پہلے ظاہر کیے گئے صفحے پر واپس نہیں جاتی
+• تلاوت کی ترتیبات، دہرانے اور شروع کرنے کی شیٹس: کھینچنے کا دستہ دھندلے شیشے پر
+</ur>

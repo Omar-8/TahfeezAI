@@ -1360,7 +1360,7 @@ class MushafHideControls extends ConsumerWidget {
     // uncovered: the buttons go on there (brought back into view), not on
     // the page scrolled to.
     final continuous = ayahModeIsContinuous(context, ref);
-    final underWay = continuous ? hide.revealUnderWay(onScreen) : null;
+    final underWay = continuous ? hide.revealUnderWay : null;
     final page = underWay ?? onScreen;
     final canReveal = hide.nextRevealPage(page, spread: spread) != null;
     final canHide = hide.previousHidePage(page, spread: spread) != null;
@@ -1761,12 +1761,13 @@ Future<bool> showRecitationIntro(
   }
   final start = await showModalBottomSheet<bool>(
     context: context,
-    showDragHandle: true,
+    // (Its drag handle on the glass: GlassSheet.)
     isScrollControlled: true,
     useSafeArea: true,
     useRootNavigator: true,
     constraints: sheetBelowAppBar(context),
-    builder: (context) => GlassSheet(child: _RecitationIntroSheet(mode)),
+    builder: (context) =>
+        GlassSheet(handle: true, child: _RecitationIntroSheet(mode)),
   );
   // (The guide's showings don't count: a reader who skipped the guide
   // still gets it once.)
@@ -1933,14 +1934,15 @@ class _RecitationIntroSheet extends ConsumerWidget {
 Future<void> showHifzSettingsSheet(BuildContext context) {
   return showModalBottomSheet<void>(
     context: context,
-    showDragHandle: true,
+    // (Its drag handle on the glass: GlassSheet.)
     // As tall as its settings (not capped at half the screen), below the
     // app bar.
     isScrollControlled: true,
     useSafeArea: true,
     useRootNavigator: true,
     constraints: sheetBelowAppBar(context),
-    builder: (context) => GlassSheet(child: const _HifzSettingsSheet()),
+    builder: (context) =>
+        GlassSheet(handle: true, child: const _HifzSettingsSheet()),
   );
 }
 

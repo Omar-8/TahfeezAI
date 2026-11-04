@@ -11,6 +11,8 @@ import '../../features/quran/presentation/quran_index_screen.dart';
 import '../../features/search/presentation/search_screen.dart';
 import '../../features/settings/presentation/about_screen.dart';
 import '../../features/settings/presentation/settings_screen.dart';
+import '../theme/components/tahfeez_bottom_sheet.dart'
+    show TahfeezPopupObserver;
 import '../theme/gallery/component_gallery_screen.dart';
 import 'app_routes.dart';
 import 'quran_location_routing.dart';
@@ -23,6 +25,8 @@ part 'app_router.g.dart';
 GoRouter appRouter(Ref ref) {
   final router = GoRouter(
     navigatorKey: rootNavigatorKey,
+    // Sheets and dialogs over the page: see TahfeezModalSheetActivity.
+    observers: [TahfeezPopupObserver()],
     initialLocation: AppRoutes.home,
     routes: [
       StatefulShellRoute(
@@ -44,6 +48,8 @@ GoRouter appRouter(Ref ref) {
         ),
         branches: [
           StatefulShellBranch(
+            // (Menus open in a tab's own navigator.)
+            observers: [TahfeezPopupObserver()],
             routes: [
               GoRoute(
                 path: AppRoutes.home,
@@ -54,6 +60,8 @@ GoRouter appRouter(Ref ref) {
             ],
           ),
           StatefulShellBranch(
+            // (Menus open in a tab's own navigator.)
+            observers: [TahfeezPopupObserver()],
             routes: [
               GoRoute(
                 path: AppRoutes.quran,
@@ -73,6 +81,8 @@ GoRouter appRouter(Ref ref) {
             ],
           ),
           StatefulShellBranch(
+            // (Menus open in a tab's own navigator.)
+            observers: [TahfeezPopupObserver()],
             routes: [
               GoRoute(
                 path: AppRoutes.memorize,
@@ -94,6 +104,8 @@ GoRouter appRouter(Ref ref) {
             ],
           ),
           StatefulShellBranch(
+            // (Menus open in a tab's own navigator.)
+            observers: [TahfeezPopupObserver()],
             routes: [
               GoRoute(
                 path: AppRoutes.settings,
