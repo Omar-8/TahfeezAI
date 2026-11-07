@@ -77,19 +77,23 @@ class _TestSummarySheet extends ConsumerWidget {
           .start(startLocation: location);
     }
 
-    // An ayah to review, tapped: its page shown (turned to behind the
-    // results if not on screen) and its first mistake's word sheet over the
-    // results — closed, back to them.
-    Future<void> openAyah(int ayahId) async {
+    // An ayah to review, tapped (or "Check my mistakes": the first of all):
+    // its page shown (turned to behind the results if not on screen) and
+    // its first mistake's word sheet over the results — on from it to the
+    // others; closed, back to the results. (Looked at, the bar's "Mistakes
+    // found" goes.)
+    Future<void> openAyah(int? ayahId) async {
       final location = ref.read(mushafRecitationTargetProvider)?.location;
       final word = firstMarkedMistake(
         ref.read(mushafWordOverlayProvider),
         ayahId: ayahId,
       );
+      ayahId ??= word?.ayahId;
+      if (ayahId == null) return;
       final shown = ref
           .read(mushafPageWordRangesProvider)
           .values
-          .any((r) => r.first.ayahId <= ayahId && r.last.ayahId >= ayahId);
+          .any((r) => r.first.ayahId <= ayahId! && r.last.ayahId >= ayahId);
       if (!shown && location is QuranLocationPage) {
         final turns = ref.read(mushafPageTurnRequestsProvider.notifier);
         final page = await ref
@@ -201,6 +205,13 @@ class _TestSummarySheet extends ConsumerWidget {
               ],
             ),
           ],
+          if (firstMarkedMistake(ref.watch(mushafWordOverlayProvider)) != null)
+            OutlinedButton.icon(
+              key: const ValueKey('mem-check-mistakes'),
+              icon: const Icon(Icons.error_outline_rounded),
+              label: Text(l10n.memCheckMistakes),
+              onPressed: () => openAyah(null),
+            ),
           Row(
             spacing: TahfeezSpacing.sm,
             children: [

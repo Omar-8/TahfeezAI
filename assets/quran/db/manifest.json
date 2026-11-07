@@ -1,5 +1,5 @@
 {
-  "version": "cc285d4d5deb5093",
+  "version": "a291e920e2998694",
   "databases": {
     "quran": {
       "sha256": "2846cbd56153e37a79c1072f293203ae968488a30e42cce8d96299196b970d94",
@@ -7,7 +7,7 @@
       "asset": "quran.sqlite.zlib"
     },
     "translations": {
-      "sha256": "110f0031359732c41ef0ed8318d9171958af0776cc9e57c677793ba6d79538f4",
+      "sha256": "caa0bced66132731f0bae2207fe9dc7139eafb3bb80212d7cadcef745780949d",
       "bytes": 1519616,
       "asset": "translations.sqlite.zlib"
     },
@@ -111,6 +111,14 @@
       "uz-rowwad": {
         "sha256": "575141a87017c6eab4ca7a846b96db59ce25e5ac64c5181b6b2ca1e9e838ff24",
         "asset": "packs/translation-uz-rowwad.sqlite.xz"
+      },
+      "zh-makin": {
+        "sha256": "14b7b11d1c804966a1bec41775f8cc42a9180d6e483d30abe9808ddafc75855b",
+        "asset": "packs/translation-zh-makin.sqlite.xz"
+      },
+      "zh-suliman": {
+        "sha256": "a992f7ff18f693caf91ceb929a75bffd760272b2463513f1e915b87603261e1f",
+        "asset": "packs/translation-zh-suliman.sqlite.xz"
       }
     },
     "tafsir": {

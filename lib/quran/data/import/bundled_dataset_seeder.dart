@@ -153,6 +153,9 @@ class BundledDatasetSeeder {
       'ja_sato',
       'el_rowwad',
       'pt_nasr',
+      // Added 2026-11-07.
+      'zh_suliman',
+      'zh_makin',
     ]) {
       await _seedTranslation(
         hashes,

@@ -1,0 +1,168 @@
+<en-US>
+• Chinese: the app in Simplified Chinese, two Chinese translations and a Chinese reading after each ayah
+• The notification and lock screen show the whole surah, with its real length
+• Al-Husary's Bismillah before each surah for reciters who leave it out
+• Banners: "Listening — start reciting", and mistakes to tap after every recitation
+• The app opens where you left it
+• The recitation check stays on the page in view; Al-Fatiha's Bismillah is found after the isti'adha
+</en-US>
+<ar>
+• الصينية: التطبيق بالصينية المبسطة، وترجمتان صينيتان، وقراءة صينية بعد كل آية
+• الإشعار وشاشة القفل يعرضان السورة كاملة بمدتها الحقيقية
+• بسملة الحصري قبل كل سورة للقرّاء الذين لا يقرؤونها
+• تنبيهات: «أستمع — ابدأ التلاوة»، والأخطاء للضغط عليها بعد كل تلاوة
+• يفتح التطبيق حيث تركته
+• فحص التلاوة يبقى على الصفحة المعروضة؛ وبسملة الفاتحة تُلتقط بعد الاستعاذة
+</ar>
+<bn-BD>
+• চীনা: অ্যাপ সরলীকৃত চীনা ভাষায়, দুটি চীনা অনুবাদ ও প্রতিটি আয়াতের পর চীনা পাঠ
+• নোটিফিকেশন ও লক স্ক্রিনে পুরো সূরা, তার আসল দৈর্ঘ্যসহ
+• যেসব ক্বারী বিসমিল্লাহ পড়েন না, তাঁদের সূরার আগে আল-হুসারির বিসমিল্লাহ
+• ব্যানার: «শুনছি — তিলাওয়াত শুরু করুন», আর প্রতিটি তিলাওয়াতের পর ভুল দেখতে চাপুন
+• অ্যাপ যেখানে রেখেছিলেন সেখানেই খোলে
+• তিলাওয়াত যাচাই দেখানো পাতায় থাকে; আউযুবিল্লাহর পর ফাতিহার বিসমিল্লাহ ধরা পড়ে
+</bn-BD>
+<da-DK>
+• Kinesisk: appen på forenklet kinesisk, to kinesiske oversættelser og en kinesisk oplæsning efter hvert vers
+• Notifikationen og låseskærmen viser hele suraen med dens rigtige længde
+• Al-Husarys Bismillah før hver sura for recitatorer, der udelader den
+• Bannere: «Lytter — begynd at recitere», og fejl at trykke på efter hver recitation
+• Appen åbner, hvor du slap
+• Recitationstjekket bliver på den viste side; Al-Fatihas Bismillah findes efter isti'adha
+</da-DK>
+<de-DE>
+• Chinesisch: die App auf Chinesisch, zwei chinesische Übersetzungen, eine chinesische Lesung nach jedem Vers
+• Benachrichtigung und Sperrbildschirm zeigen die ganze Sure mit ihrer wahren Länge
+• Al-Husarys Bismillah vor jeder Sure, wo der Rezitator sie auslässt
+• Banner: «Ich höre zu — beginne zu rezitieren», Fehler zum Antippen nach jeder Rezitation
+• Die App öffnet sich dort, wo du aufgehört hast
+• Die Prüfung bleibt auf der sichtbaren Seite; Al-Fatihas Bismillah nach der Isti'adha erkannt
+</de-DE>
+<el-GR>
+• Κινεζικά: η εφαρμογή στα κινεζικά, δύο κινεζικές μεταφράσεις, κινεζική ανάγνωση μετά από κάθε εδάφιο
+• Η ειδοποίηση και η οθόνη κλειδώματος δείχνουν όλη τη σούρα με την πραγματική της διάρκεια
+• Η Μπασμάλα του Al-Husary πριν από κάθε σούρα, όπου λείπει
+• Ειδοποιήσεις: «Ακούω — ξεκινήστε την απαγγελία» και λάθη για πάτημα μετά από κάθε απαγγελία
+• Η εφαρμογή ανοίγει εκεί που την αφήσατε
+• Ο έλεγχος μένει στη σελίδα που φαίνεται· η Μπασμάλα της Al-Fatiha βρίσκεται μετά την isti'adha
+</el-GR>
+<es-ES>
+• Chino: la app en chino simplificado, dos traducciones al chino y una lectura en chino tras cada aleya
+• La notificación y la pantalla de bloqueo muestran la sura entera, con su duración real
+• La Basmala de al-Husary antes de cada sura para los recitadores que la omiten
+• Avisos: «Escuchando — empieza a recitar», y errores para tocar tras cada recitación
+• La app se abre donde la dejaste
+• La comprobación se queda en la página visible; la Basmala de al-Fátiha se detecta tras la isti'adha
+</es-ES>
+<fa>
+• چینی: برنامه به چینی ساده‌شده، دو ترجمهٔ چینی و خوانش چینی پس از هر آیه
+• اعلان و صفحهٔ قفل کل سوره را با مدت واقعی آن نشان می‌دهند
+• بسملهٔ الحصری پیش از هر سوره برای قاریانی که آن را نمی‌خوانند
+• نوارها: «در حال شنیدن — تلاوت را شروع کنید» و خطاها برای لمس پس از هر تلاوت
+• برنامه همان جایی باز می‌شود که رها کرده بودید
+• بررسی تلاوت روی صفحهٔ نمایان می‌ماند؛ بسملهٔ فاتحه پس از استعاذه تشخیص داده می‌شود
+</fa>
+<fr-FR>
+• Chinois : l'appli en chinois, deux traductions chinoises et une lecture en chinois après chaque verset
+• La notification et l'écran verrouillé montrent la sourate entière, avec sa vraie durée
+• La Basmala d'al-Husary avant chaque sourate, là où elle manque
+• Bandeaux : « J'écoute — commencez à réciter », erreurs à toucher après chaque récitation
+• L'appli s'ouvre là où vous l'avez laissée
+• La vérification reste sur la page affichée ; la Basmala d'al-Fatiha reconnue après l'isti'adha
+</fr-FR>
+<id>
+• Mandarin: aplikasi dalam Mandarin, dua terjemahan Mandarin, dan bacaan Mandarin setelah tiap ayat
+• Notifikasi dan layar kunci menampilkan seluruh surah dengan durasi sebenarnya
+• Basmalah al-Husary sebelum tiap surah untuk qari yang tidak membacanya
+• Spanduk: «Mendengarkan — mulai membaca», dan kesalahan untuk diketuk setelah tiap bacaan
+• Aplikasi terbuka di tempat Anda meninggalkannya
+• Pemeriksaan bacaan tetap di halaman yang tampak; Basmalah al-Fatihah dikenali setelah isti'adzah
+</id>
+<ja-JP>
+• 中国語：簡体字中国語の画面、2つの中国語訳、各節の後の中国語朗読
+• 通知とロック画面にスーラ全体と実際の長さを表示
+• バスマラを読まない朗唱者には、各スーラの前にアル＝フサリーのバスマラ
+• バナー：「聞いています — 朗唱を始めてください」、朗唱ごとにタップで見られる間違い
+• アプリは前回の場所から開きます
+• 朗唱チェックは表示中のページにとどまり、イスティアーザの後のファーティハのバスマラも認識
+</ja-JP>
+<kk>
+• Қытай тілі: қолданба жеңілдетілген қытай тілінде, екі қытайша аударма және әр аяттан кейін қытайша оқу
+• Хабарландыру мен құлып экраны бүкіл сүрені нақты ұзақтығымен көрсетеді
+• Бисмиллаһты оқымайтын қарилер үшін әр сүре алдында әл-Хусаридің Бисмиллаһы
+• Баннерлер: «Тыңдап тұрмын — оқуды бастаңыз», әр оқудан кейін басып көретін қателер
+• Қолданба сіз қалдырған жерден ашылады
+• Тексеру көрініп тұрған бетте қалады; истиазадан кейін Фатиханың Бисмиллаһы табылады
+</kk>
+<ko-KR>
+• 중국어: 간체 중국어 화면, 중국어 번역 2종, 각 절 뒤 중국어 낭독
+• 알림과 잠금 화면에 수라 전체와 실제 길이 표시
+• 바스말라를 읽지 않는 낭송자를 위해 각 수라 앞에 알후사리의 바스말라
+• 배너: "듣고 있어요 — 낭송을 시작하세요", 낭송마다 눌러서 보는 실수
+• 앱이 마지막으로 있던 곳에서 열립니다
+• 낭송 확인은 보이는 페이지에 머물고, 이스티아자 뒤 알파티하의 바스말라도 인식합니다
+</ko-KR>
+<ms>
+• Bahasa Cina: aplikasi dalam Cina Ringkas, dua terjemahan Cina dan bacaan Cina selepas setiap ayat
+• Pemberitahuan dan skrin kunci menunjukkan seluruh surah dengan tempoh sebenar
+• Basmalah al-Husary sebelum setiap surah bagi qari yang tidak membacanya
+• Sepanduk: «Mendengar — mula membaca», dan kesilapan untuk diketik selepas setiap bacaan
+• Aplikasi dibuka di tempat anda tinggalkan
+• Semakan bacaan kekal di halaman yang dipaparkan; Basmalah al-Fatihah dikesan selepas isti'azah
+</ms>
+<nl-NL>
+• Chinees: de app in vereenvoudigd Chinees, twee Chinese vertalingen en een Chinese voordracht na elk vers
+• Melding en vergrendelscherm tonen de hele soera, met de echte lengte
+• Al-Husary's Bismillah vóór elke soera voor reciteurs die hem weglaten
+• Banners: «Ik luister — begin met reciteren», en fouten om op te tikken na elke recitatie
+• De app opent waar je was gebleven
+• De controle blijft op de zichtbare pagina; de Bismillah van al-Fatiha wordt herkend na de isti'adha
+</nl-NL>
+<pt-BR>
+• Chinês: o app em chinês simplificado, duas traduções em chinês e uma leitura em chinês após cada versículo
+• A notificação e a tela de bloqueio mostram a surata inteira, com a duração real
+• A Basmala de al-Husary antes de cada surata para recitadores que a omitem
+• Avisos: «Ouvindo — comece a recitar», e erros para tocar após cada recitação
+• O app abre onde você parou
+• A verificação fica na página visível; a Basmala de al-Fátiha é reconhecida após a isti'adha
+</pt-BR>
+<ru-RU>
+• Китайский: приложение на упрощённом китайском, два китайских перевода и чтение на китайском после каждого аята
+• Уведомление и экран блокировки показывают всю суру с её настоящей длительностью
+• Басмала аль-Хусари перед каждой сурой у чтецов, которые её не читают
+• Баннеры: «Слушаю — начните чтение» и ошибки, которые можно нажать после каждого чтения
+• Приложение открывается там, где вы остановились
+• Проверка остаётся на видимой странице; басмала аль-Фатихи распознаётся после истиазы
+</ru-RU>
+<sw>
+• Kichina: programu kwa Kichina Kilichorahisishwa, tafsiri mbili za Kichina na usomaji wa Kichina baada ya kila aya
+• Arifa na skrini ya kufunga zinaonyesha sura nzima, kwa urefu wake halisi
+• Bismillah ya al-Husary kabla ya kila sura kwa wasomaji wasioisoma
+• Mabango: «Ninasikiliza — anza kusoma», na makosa ya kugusa baada ya kila usomaji
+• Programu inafunguka pale ulipoiacha
+• Ukaguzi unabaki kwenye ukurasa unaoonekana; Bismillah ya al-Fatiha inatambuliwa baada ya isti'adha
+</sw>
+<tr-TR>
+• Çince: uygulama Basitleştirilmiş Çince, iki Çince meal ve her ayetten sonra Çince okuma
+• Bildirim ve kilit ekranı surenin tamamını gerçek süresiyle gösterir
+• Besmeleyi okumayan kurrâlar için her sureden önce el-Husarî'nin besmelesi
+• Bantlar: «Dinliyorum — okumaya başlayın» ve her okumadan sonra dokunulacak hatalar
+• Uygulama bıraktığınız yerden açılır
+• Kontrol görünen sayfada kalır; istiâzeden sonra Fâtiha'nın besmelesi tanınır
+</tr-TR>
+<ur>
+• چینی: ایپ آسان چینی میں، دو چینی تراجم اور ہر آیت کے بعد چینی تلاوتِ ترجمہ
+• اطلاع اور لاک اسکرین پوری سورت کو اس کی اصل مدت کے ساتھ دکھاتے ہیں
+• جو قاری بسم اللہ نہیں پڑھتے، ان کے لیے ہر سورت سے پہلے الحصری کی بسم اللہ
+• بینر: «سن رہا ہوں — تلاوت شروع کریں»، اور ہر تلاوت کے بعد دبا کر دیکھنے والی غلطیاں
+• ایپ وہیں کھلتی ہے جہاں آپ نے چھوڑی تھی
+• تلاوت کی جانچ دکھائے گئے صفحے پر رہتی ہے؛ استعاذہ کے بعد فاتحہ کی بسم اللہ پہچانی جاتی ہے
+</ur>
+<zh-CN>
+• 中文：简体中文界面、两部中文译本，以及每节之后的中文朗读
+• 通知和锁屏显示整章及其真实时长
+• 对于不读太斯米的诵读者，每章前播放胡萨里的太斯米
+• 提示条：“正在聆听——开始诵读吧”，每次诵读后可点按查看错误
+• 应用会在你离开的地方打开
+• 诵读检查停留在当前显示的页面；求护词之后也能识别开端章的太斯米
+</zh-CN>

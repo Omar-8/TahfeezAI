@@ -123,8 +123,14 @@ void main() {
           const FollowAlongOptions(reciterTimes: 2),
         );
     expect(started, isTrue);
-    expect(audio.queue, hasLength(2), reason: '112:1 twice');
-    expect(container.read(quranAudioPlayerProvider)?.ayahIds, [112001, 112001]);
+    // (The Bismillah first: a surah's start.)
+    expect(audio.queue, hasLength(3), reason: 'the Bismillah, 112:1 twice');
+    expect(container.read(quranAudioPlayerProvider)?.ayahIds, [
+      112001,
+      112001,
+      112001,
+    ]);
+    expect(container.read(quranAudioPlayerProvider)?.basmalas, {0});
     expect(run()!.phase, FollowAlongPhase.reciter);
 
     audio.finish();
@@ -226,7 +232,7 @@ void main() {
           const FollowAlongOptions(unit: FollowAlongUnit.range, userTimes: 3),
         );
     expect(run()!.parts, hasLength(1));
-    expect(audio.queue, hasLength(4));
+    expect(audio.queue, hasLength(5), reason: 'the Bismillah, 112:1–4');
     audio.finish();
     await Future<void>.delayed(Duration.zero);
     expect(hifz.loopRange!.to, (chapterNo: 112, verseNo: 4));
@@ -245,7 +251,9 @@ void main() {
     for (final round in [1, 2]) {
       expect(run()!.round, round);
       expect(run()!.phase, FollowAlongPhase.reciter);
+      // (Each round from the surah's start: the Bismillah first.)
       expect(container.read(quranAudioPlayerProvider)?.ayahIds, [
+        112001,
         112001,
         112002,
       ]);

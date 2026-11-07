@@ -693,6 +693,84 @@ void main() {
           [for (var w = 1; w <= 4; w++) pos(1, 1, w)],
         );
       });
+
+      test('the isti\'adha said close before Al-Fatiha\'s basmala: 1:1 still '
+          'placed, however its audio falls into the chunks', () {
+        // The pause between them shortened (its frames only), the chunks'
+        // edges shifted: «…ٱلرَّجِيمِ» and «بِسْمِ» blur, and «بِسْمِ» was
+        // refused as a squeezed start — 1:1 left unmarked (owner,
+        // 2026-11-07).
+        final fatiha = scenarios['restart']!.frames();
+        for (final gap in [0, 8, 16, 24, 30]) {
+          for (final shift in [0, 8, 16, 24]) {
+            for (final trusted in [false, true]) {
+              final frames = joinFrames([
+                (fatiha, 0, 117 - gap ~/ 2),
+                (fatiha, 118 + gap - gap ~/ 2, 560),
+              ]);
+              final r = replay(
+                PositionScenario('restart', {
+                  'note': '',
+                  'chunk_ends': [
+                    for (var e = 32 - shift; e < frames.frames; e += 32)
+                      if (e > 0) e,
+                    frames.frames,
+                  ],
+                  'focus': [1001, 1007],
+                  'anchor': 1001,
+                  'trust_anchor': trusted,
+                  'focus_only': true,
+                  'recited': <int>[],
+                }),
+                frames: frames,
+              );
+              expect(
+                [for (final p in r.placed.take(4)) p.$1],
+                [for (var w = 1; w <= 4; w++) pos(1, 1, w)],
+                reason:
+                    'pause shortened $gap, chunks shifted $shift, '
+                    'trusted $trusted: ${r.log.take(6).join(' / ')}',
+              );
+            }
+          }
+        }
+      });
+
+      test('Al-Fatiha after the isti\'adha: the isti\'adha passed over, the '
+          'basmala its first ayah, placed', () {
+        // Said as one before «ٱلْحَمْدُ»: the basmala was set aside with
+        // the isti'adha, 1:1 left unmarked (owner, 2026-11-07).
+        final fatiha = scenarios['restart']!.frames();
+        final frames = joinFrames([(fatiha, 0, 560)]);
+        for (final trusted in [false, true]) {
+          final r = replay(
+            PositionScenario('restart', {
+              'note': '',
+              'chunk_ends': [
+                for (var e = 32; e < frames.frames; e += 32) e,
+                frames.frames,
+              ],
+              'focus': [1001, 1007],
+              'anchor': 1001,
+              'trust_anchor': trusted,
+              'focus_only': true,
+              'recited': <int>[],
+            }),
+            frames: frames,
+          );
+          final log = r.log.join(' / ');
+          expect(
+            r.log,
+            contains(startsWith('passed over 16:98:5')),
+            reason: log,
+          );
+          expect(
+            [for (final p in r.placed.take(4)) p.$1],
+            [for (var w = 1; w <= 4; w++) pos(1, 1, w)],
+            reason: 'trusted $trusted: $log',
+          );
+        }
+      });
     });
 
     test('searching the page on screen, nothing off it is placed', () {

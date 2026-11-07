@@ -96,10 +96,33 @@ void main() {
           112002,
           options: const ListenOptions(ayahRepeats: 2, rangeRepeats: 2),
         );
-    expect(container.read(quranAudioPlayerProvider)?.ayahIds, [
-      112001, 112001, 112002, 112002, //
-      112001, 112001, 112002, 112002,
+    // Each pass from the surah's start: Al-Husary's Bismillah first (once,
+    // not before the first ayah's repetition).
+    final playing = container.read(quranAudioPlayerProvider)!;
+    expect(playing.ayahIds, [
+      112001, 112001, 112001, 112002, 112002, //
+      112001, 112001, 112001, 112002, 112002,
     ]);
+    expect(playing.basmalas, {0, 5});
+    expect(audio.queue.first, contains('ar.husary/1.mp3'));
+  });
+
+  test('no Bismillah added for a reciter whose first ayahs have it, nor '
+      'before Al-Fātiḥah or At-Tawbah', () async {
+    expect(reciterRecitesBasmala, contains('ar.ahmedajamy'));
+    final audio = FakeAudioController();
+    final container = ProviderContainer(
+      overrides: [
+        audioControllerProvider.overrideWithValue(audio),
+        defaultMushafProvider.overrideWith((ref) async => null),
+      ],
+    );
+    addTearDown(container.dispose);
+    final player = container.read(quranAudioPlayerProvider.notifier);
+    for (final from in [1001, 9001]) {
+      await player.playRange(from, from + 1);
+      expect(container.read(quranAudioPlayerProvider)?.basmalas, isEmpty);
+    }
   });
 
   test('a range runs across surah ends', () {
@@ -146,6 +169,11 @@ void main() {
     // The player still says "completed" as the run starts.
     await player.playFrom(112001);
     audio.advanceTo(0);
+    await Future<void>.delayed(Duration.zero);
+    // The Bismillah first: the run on, nothing highlighted yet.
+    expect(container.read(quranAudioPlayerProvider)?.isBasmala, isTrue);
+    expect(container.read(mushafFocusAyahProvider), isNull);
+    audio.advanceTo(1);
     await Future<void>.delayed(Duration.zero);
     expect(container.read(quranAudioPlayerProvider)?.ayahId, 112001);
     expect(container.read(mushafFocusAyahProvider)?.ayahId, 112001);

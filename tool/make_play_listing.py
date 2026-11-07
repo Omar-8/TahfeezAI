@@ -48,7 +48,28 @@ def font(size, weight=700):
     return f
 
 
-def feature_graphic(path):
+# The feature graphic's text in a listing language (Play shows a translated
+# one in that language's listing): the name, the line in two parts, the tags.
+FEATURE_TEXT = {
+    "en-US": ("Tahfeez AI", ("Memorize the Quran with a", "listener in your pocket"),
+              "Free · Offline · No ads · No account"),
+    "zh-CN": ("Tahfeez AI", ("把一位聆听者装进口袋，", "陪你背记古兰经"),
+              "免费 · 离线 · 无广告 · 无需账户"),
+}
+
+# Chinese in the system's Noto Sans CJK (its SC face; the bundled Noto Sans
+# has no Han characters).
+CJK_SC = Path("/usr/share/fonts/opentype/noto")
+
+
+def text_font(lang, size, weight):
+    if lang.startswith("zh"):
+        bold = "Bold" if weight >= 600 else "Regular"
+        return ImageFont.truetype(str(CJK_SC / f"NotoSansCJK-{bold}.ttc"), size, index=2)
+    return font(size, weight)
+
+
+def feature_graphic(path, lang="en-US"):
     w, h = 1024, 500
     # A soft diagonal from the night green (top left) into emerald.
     grad = Image.new("L", (w, h))
@@ -60,10 +81,11 @@ def feature_graphic(path):
     img.paste(icon, (70, (h - 300) // 2), mask)
     d = ImageDraw.Draw(img)
     x = 420
-    d.text((x, 118), "Tahfeez AI", font=font(84, 800), fill=CREAM)
-    d.text((x, 228), "Memorize the Quran with a", font=font(36, 500), fill=CREAM)
-    d.text((x, 274), "listener in your pocket", font=font(36, 500), fill=CREAM)
-    d.text((x, 350), "Free · Offline · No ads · No account", font=font(26, 600), fill=MINT)
+    name, (line1, line2), tags = FEATURE_TEXT[lang]
+    d.text((x, 118), name, font=font(84, 800), fill=CREAM)
+    d.text((x, 228), line1, font=text_font(lang, 36, 500), fill=CREAM)
+    d.text((x, 274), line2, font=text_font(lang, 36, 500), fill=CREAM)
+    d.text((x, 350), tags, font=text_font(lang, 26, 600), fill=MINT)
     d.line((x, 334, x + 120, 334), fill=GOLD, width=3)
     img.save(path, optimize=True)
 
@@ -78,6 +100,9 @@ def main():
         Image.open(SCREENS / f"{name}.webp").convert("RGB").save(phone / f"{i:02d}-{name}.png", optimize=True)
     Image.open(ROOT / "site/images/icon-512.png").convert("RGBA").save(OUT / "icon.png", optimize=True)
     feature_graphic(OUT / "featureGraphic.png")
+    for lang in FEATURE_TEXT.keys() - {"en-US"}:
+        (OUT / lang).mkdir(exist_ok=True)
+        feature_graphic(OUT / lang / "featureGraphic.png", lang)
     for f in sorted(OUT.rglob("*.png")):
         im = Image.open(f)
         print(f.relative_to(ROOT), im.size, im.mode, f"{f.stat().st_size // 1024} KB")

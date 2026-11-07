@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tahfeez_ai/features/mushaf/application/mushaf_word_overlay.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tahfeez_ai/core/localization/generated/app_localizations.dart';
 import 'package:tahfeez_ai/features/mushaf/application/reader_mode.dart';
@@ -378,9 +379,21 @@ void main() {
         ),
       ),
     );
+    // The recitation's marks on the page: one mistake.
+    ProviderScope.containerOf(tester.element(find.text('open')))
+        .read(mushafWordOverlayProvider.notifier)
+        .set(
+          const MushafWordOverlay(
+            first: (ayahId: 112001, wordIndex: 0),
+            last: (ayahId: 112002, wordIndex: 1),
+            marks: {(ayahId: 112002, wordIndex: 1): MushafWordMark.wrong},
+          ),
+        );
     await tester.tap(find.text('open'));
     await tester.pumpAndSettle();
     expect(find.text('Session results'), findsOneWidget);
+    // Its mistakes to check, as the bar's "Mistakes found".
+    expect(find.byKey(const ValueKey('mem-check-mistakes')), findsOneWidget);
     expect(
       find.text('2 ayahs · 1 good · 0 hesitant · 1 missed'),
       findsOneWidget,
@@ -393,7 +406,10 @@ void main() {
     // An ayah to review opens its mistakes over the results, which stay.
     expect(find.text('Tap an ayah to see its mistakes.'), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('mem-weak-112002')));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+    expect(find.byKey(const ValueKey('word-mistake-count')), findsOneWidget);
+    expect(find.text('1 / 1'), findsOneWidget);
     expect(find.text('Session results'), findsOneWidget);
   });
 

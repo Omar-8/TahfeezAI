@@ -1,11 +1,14 @@
 import 'dart:async';
 
+import 'package:audio_service/audio_service.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:just_audio/just_audio.dart';
-import 'package:just_audio_background/just_audio_background.dart';
 
 import 'audio_controller.dart';
 import 'audio_models.dart';
+import 'file_length.dart';
+import 'media_session.dart';
 
 /// Minimal [AudioController] implementation backed directly by
 /// `package:just_audio`, with no background session of its own yet.
@@ -16,14 +19,30 @@ import 'audio_models.dart';
 /// notification channel, lock-screen controls) that belongs to the Audio
 /// milestone. Swapping this out for an `audio_service`-backed
 /// implementation later requires no changes outside `lib/core/audio/`.
-class JustAudioController implements AudioController {
-  JustAudioController({AudioPlayer? player})
+class JustAudioController implements AudioController, MediaSessionTarget {
+  JustAudioController({AudioPlayer? player, TahfeezMediaSession? session})
     : _player = player ?? AudioPlayer(),
-      _fresh = player == null && kIsWeb {
+      _fresh = player == null && kIsWeb,
+      _session = session ?? TahfeezMediaSession.instance {
     _stateController = StreamController<AudioPlaybackState>.broadcast();
     _current = const AudioPlaybackState();
+    _session?.target = this;
     _listen();
   }
+
+  /// The system's media session (the phones'; `null` in a browser).
+  final TahfeezMediaSession? _session;
+
+  /// What is playing, for the media session: each item's info and URL, its
+  /// length as measured from its file (size at its bitrate) and as loaded.
+  var _items = <AudioItemInfo?>[];
+  var _urls = <String>[];
+  var _measured = <int?>[];
+  var _loaded = <int?>[];
+
+  /// Counts the runs: a measuring for an older one stops.
+  var _run = 0;
+  DateTime _published = DateTime(0);
 
   AudioPlayer _player;
 
@@ -45,9 +64,11 @@ class JustAudioController implements AudioController {
       _player.positionStream.listen(
         (pos) => _update((s) => s.copyWith(positionMs: pos.inMilliseconds)),
       ),
-      _player.durationStream.listen(
-        (d) => _update((s) => s.copyWith(durationMs: d?.inMilliseconds)),
-      ),
+      _player.durationStream.listen((d) {
+        final i = _player.currentIndex ?? 0;
+        if (d != null && i < _loaded.length) _loaded[i] = d.inMilliseconds;
+        _update((s) => s.copyWith(durationMs: d?.inMilliseconds));
+      }),
       _player.speedStream.listen(
         (speed) => _update((s) => s.copyWith(speed: speed)),
       ),
@@ -97,8 +118,152 @@ class JustAudioController implements AudioController {
   }
 
   void _update(AudioPlaybackState Function(AudioPlaybackState) transform) {
+    final before = _current;
     _current = transform(_current);
     _stateController.add(_current);
+    // The media session: at once for a change of state, at most every
+    // second for the position alone (the system moves it along itself).
+    final moved =
+        before.isPlaying == _current.isPlaying &&
+        before.durationMs == _current.durationMs &&
+        before.speed == _current.speed &&
+        before.currentIndex == _current.currentIndex &&
+        before.completed == _current.completed &&
+        before.stopped == _current.stopped;
+    if (!moved ||
+        DateTime.now().difference(_published) >
+            const Duration(milliseconds: 1000)) {
+      _publish();
+    }
+  }
+
+  List<int> _lengths() => timelineLengths(_loaded, _measured);
+
+  /// Where [index] starts on the run's timeline.
+  int _offsetOf(int index, List<int> lengths) {
+    var offset = 0;
+    for (var i = 0; i < index && i < lengths.length; i++) {
+      offset += lengths[i];
+    }
+    return offset;
+  }
+
+  /// Shows what plays in the media session, the run as one item.
+  void _publish() {
+    final session = _session;
+    if (session == null || _items.isEmpty) return;
+    _published = DateTime.now();
+    // Stopped, or played to its end: the notification goes (as the app's
+    // own player bar), not left "playing" on.
+    if (_current.stopped || _current.completed) {
+      session.clear();
+      return;
+    }
+    final index = (_current.currentIndex ?? 0).clamp(0, _items.length - 1);
+    final lengths = _lengths();
+    final info = _items[index];
+    session.show(
+      MediaItem(
+        id: 'run-$_run',
+        title: info?.group ?? info?.title ?? 'TahfeezAI',
+        artist: [
+          ?info?.subtitle,
+          if (info?.group != null) ?info?.part,
+        ].join(' · '),
+        album: 'TahfeezAI',
+        duration: Duration(milliseconds: lengths.fold(0, (a, b) => a + b)),
+      ),
+    );
+    session.update(
+      playing: _current.isPlaying,
+      processing: _current.completed
+          ? AudioProcessingState.completed
+          : AudioProcessingState.ready,
+      // (The player's own position: the stream's can still be the last
+      // ayah's for a moment as the next one starts — a jump.)
+      position: Duration(
+        milliseconds:
+            _offsetOf(index, lengths) +
+            _player.position.inMilliseconds.clamp(0, lengths[index]),
+      ),
+      speed: _current.speed,
+      index: index,
+      count: _items.length,
+    );
+  }
+
+  /// A new run: its items, their lengths measured in the background — a
+  /// downloaded file's from its size, a streamed one's from the size the
+  /// server gives (constant-bitrate recitation files), a few at a time.
+  void _begin(List<String> urls, List<AudioItemInfo?> items) {
+    final run = ++_run;
+    _urls = urls;
+    _items = items;
+    _measured = List<int?>.filled(urls.length, null);
+    _loaded = List<int?>.filled(urls.length, null);
+    if (_session == null || urls.length < 2) return;
+    unawaited(_measure(run));
+  }
+
+  Future<void> _measure(int run) async {
+    final dio = Dio(
+      BaseOptions(
+        connectTimeout: const Duration(seconds: 8),
+        receiveTimeout: const Duration(seconds: 8),
+      ),
+    );
+    var next = 0;
+    Future<void> worker() async {
+      while (run == _run && next < _urls.length) {
+        final i = next++;
+        final kbps = _items[i]?.kbps;
+        if (kbps == null) continue;
+        final url = _urls[i];
+        int? bytes;
+        if (url.startsWith('file:')) {
+          bytes = await localFileLength(Uri.parse(url).toFilePath());
+        } else {
+          try {
+            final head = await dio.head<void>(url);
+            bytes = int.tryParse(
+              head.headers.value(Headers.contentLengthHeader) ?? '',
+            );
+          } catch (_) {
+            bytes = null;
+          }
+        }
+        if (run != _run || bytes == null) continue;
+        _measured[i] = bytes * 8 ~/ kbps;
+        // (Shown as they come: every few, and the last.)
+        if (i % 8 == 0 || i == _urls.length - 1) _publish();
+      }
+    }
+
+    await Future.wait([for (var k = 0; k < 6; k++) worker()]);
+    dio.close();
+    if (run == _run) _publish();
+  }
+
+  @override
+  Future<void> play() => resume();
+
+  @override
+  Future<void> seekTimeline(Duration position) async {
+    final at = timelinePlace(_lengths(), position.inMilliseconds);
+    if (at == null) return;
+    await _player.seek(Duration(milliseconds: at.offsetMs), index: at.index);
+  }
+
+  @override
+  Future<void> skipToNext() => _player.seekToNext();
+
+  @override
+  Future<void> skipToPrevious() async {
+    // Some way in: back to the ayah's start (as a music player).
+    if (_player.position > const Duration(seconds: 3)) {
+      return _player.seek(Duration.zero);
+    }
+    return _player.seekToPrevious();
   }
 
   @override
@@ -106,6 +271,7 @@ class JustAudioController implements AudioController {
 
   @override
   Future<void> playUrl(String url, {AudioItemInfo? info}) async {
+    _begin([url], [info]);
     final player = await _playerForNewSource();
     await player.setAudioSource(_source(url, info));
     _listenIfNew();
@@ -119,6 +285,7 @@ class JustAudioController implements AudioController {
     Duration end, {
     AudioItemInfo? info,
   }) async {
+    _begin([url], [info]);
     final child = _source(url, info);
     final player = await _playerForNewSource();
     await player.setAudioSource(
@@ -141,24 +308,19 @@ class JustAudioController implements AudioController {
     ),
   );
 
-  /// [url] tagged for the media session (notification, lock screen).
+  /// [url] tagged with its [info] (the media session shows the run).
   static ProgressiveAudioSource _source(String url, AudioItemInfo? info) =>
-      ProgressiveAudioSource(
-        Uri.parse(url),
-        options: _options,
-        tag: MediaItem(
-          id: url,
-          title: info?.title ?? 'TahfeezAI',
-          artist: info?.subtitle,
-          album: 'TahfeezAI',
-        ),
-      );
+      ProgressiveAudioSource(Uri.parse(url), options: _options, tag: info);
 
   @override
   Future<void> playQueue(
     List<String> urls, {
     List<AudioItemInfo>? items,
   }) async {
+    _begin(urls, [
+      for (var i = 0; i < urls.length; i++)
+        items != null && i < items.length ? items[i] : null,
+    ]);
     final player = await _playerForNewSource();
     await player.setAudioSources([
       for (var i = 0; i < urls.length; i++)
@@ -203,10 +365,47 @@ class JustAudioController implements AudioController {
 
   @override
   Future<void> dispose() async {
+    if (_session?.target == this) _session?.target = null;
     for (final sub in _subscriptions) {
       await sub.cancel();
     }
     await _stateController.close();
     await _player.dispose();
   }
+}
+
+/// A run's items' lengths in ms: each as loaded; else as measured from its
+/// file, scaled as the loaded ones came out against their measures (a
+/// file's bitrate a little off its nominal one: the times would jump as each
+/// loads); else the others' mean (10 s before any is known).
+List<int> timelineLengths(List<int?> loaded, List<int?> measured) {
+  final ratios = [
+    for (var i = 0; i < loaded.length; i++)
+      if (loaded[i] != null && (measured[i] ?? 0) > 0)
+        loaded[i]! / measured[i]!,
+  ]..sort();
+  final scale = ratios.isEmpty ? 1.0 : ratios[ratios.length ~/ 2];
+  final estimated = [
+    for (var i = 0; i < loaded.length; i++)
+      loaded[i] ??
+          (measured[i] == null ? null : (measured[i]! * scale).round()),
+  ];
+  final known = [for (final ms in estimated) ?ms];
+  final mean = known.isEmpty
+      ? 10000
+      : known.reduce((a, b) => a + b) ~/ known.length;
+  return [for (final ms in estimated) ms ?? mean];
+}
+
+/// Where [positionMs] on a run's timeline falls: its item and the place in
+/// it (past the end: the last item's end); `null` for an empty run.
+({int index, int offsetMs})? timelinePlace(List<int> lengths, int positionMs) {
+  var start = 0;
+  for (var i = 0; i < lengths.length; i++) {
+    if (positionMs < start + lengths[i] || i == lengths.length - 1) {
+      return (index: i, offsetMs: (positionMs - start).clamp(0, lengths[i]));
+    }
+    start += lengths[i];
+  }
+  return null;
 }

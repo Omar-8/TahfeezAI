@@ -119,14 +119,33 @@ def header():
     return img.convert("RGB")
 
 
-def search_results():
+# The search results image's text in each listing language that has one
+# (the header has none): two lines and the tags.
+SEARCH_TEXT = {
+    "en-US": ("Recite from memory.", "Every word checked.", "Free · Offline · No ads · No account"),
+    "zh-Hans": ("凭记忆诵读。", "每个词都经过检查。", "免费 · 离线 · 无广告 · 无需账户"),
+}
+
+# Chinese in the system's Noto Sans CJK (its SC face).
+CJK_SC = Path("/usr/share/fonts/opentype/noto")
+
+
+def text_font(lang, size, weight):
+    if lang.startswith("zh"):
+        bold = "Bold" if weight >= 600 else "Regular"
+        return ImageFont.truetype(str(CJK_SC / f"NotoSansCJK-{bold}.ttc"), size, index=2)
+    return font(size, weight)
+
+
+def search_results(lang="en-US"):
     w, h = 3840, 2560
     img = background(w, h)
     d = ImageDraw.Draw(img)
-    d.text((w // 2, 170), "Recite from memory.", font=font(190, 800), fill=CREAM, anchor="ma")
-    d.text((w // 2, 400), "Every word checked.", font=font(190, 800), fill=CREAM, anchor="ma")
+    line1, line2, tags = SEARCH_TEXT[lang]
+    d.text((w // 2, 170), line1, font=text_font(lang, 190, 800), fill=CREAM, anchor="ma")
+    d.text((w // 2, 400), line2, font=text_font(lang, 190, 800), fill=CREAM, anchor="ma")
     d.rounded_rectangle((w // 2 - 120, 700, w // 2 + 120, 712), 6, fill=GOLD)
-    d.text((w // 2, 770), "Free · Offline · No ads · No account", font=font(96, 600), fill=MINT, anchor="ma")
+    d.text((w // 2, 770), tags, font=text_font(lang, 96, 600), fill=MINT, anchor="ma")
     screens(img, top=980, centre_w=860, side_w=740, spread=930)
     return img.convert("RGB")
 
@@ -136,6 +155,12 @@ def main():
     for name, make in (("header", header), ("search_results", search_results)):
         img = make()
         path = OUT / f"{name}.png"
+        img.save(path, optimize=True)
+        print(path.relative_to(ROOT), img.size, img.mode, f"{path.stat().st_size // 1024} KB")
+    for lang in SEARCH_TEXT.keys() - {"en-US"}:
+        (OUT / lang).mkdir(exist_ok=True)
+        img = search_results(lang)
+        path = OUT / lang / "search_results.png"
         img.save(path, optimize=True)
         print(path.relative_to(ROOT), img.size, img.mode, f"{path.stat().st_size // 1024} KB")
 

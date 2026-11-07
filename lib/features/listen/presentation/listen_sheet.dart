@@ -72,6 +72,36 @@ Future<void> offerListenTranslationTip(
   }
 }
 
+/// Before playing from [ayahId], streamed (its reciter not downloaded, on
+/// a phone): the tip that downloading plays smoother, offline too — at
+/// random, as the others. "Show me": the reciters, where they download.
+Future<void> offerDownloadReciterTip(
+  BuildContext context,
+  WidgetRef ref,
+  int ayahId,
+) async {
+  final downloads = ref.read(reciterDownloadsProvider.notifier);
+  if (!downloads.supported || !appTipsAllowed(ref)) return;
+  final storage = ref.read(browserStorageProvider);
+  if (!await appTipOn(storage, AppTip.downloadReciter)) return;
+  // (What is downloaded not known yet: no tip — never holding playback
+  // up for it.)
+  if (!downloads.known) return;
+  final reciter = reciterFor(ref.read(reciterProvider));
+  if (downloads.localFile(ayahId, reciter) != null) return;
+  final due = await appTipDue(
+    storage,
+    AppTip.downloadReciter,
+    now: ref.read(appTipsClockProvider)(),
+    random: ref.read(appTipsRandomProvider),
+  );
+  if (!context.mounted || !due) return;
+  if (await answerAppTip(context, ref, AppTip.downloadReciter) &&
+      context.mounted) {
+    await showReciterSheet(context);
+  }
+}
+
 /// The translations that can be read aloud after each ayah, to pick one
 /// (`''`: none); `null`: closed without a choice.
 Future<String?> showTranslationVoiceSheet(
@@ -282,6 +312,8 @@ class _ListenSheetState extends ConsumerState<_ListenSheet> {
     final l10n = AppLocalizations.of(context);
     final messenger = ScaffoldMessenger.of(context);
     await offerListenTranslationTip(context, ref);
+    if (!mounted) return;
+    await offerDownloadReciterTip(context, ref, _id(_from!));
     if (!mounted) return;
     ref.read(listenOptionsProvider.notifier).set(_options);
     Navigator.of(context).pop();

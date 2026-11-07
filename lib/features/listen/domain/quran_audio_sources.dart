@@ -18,6 +18,7 @@ class Reciter {
     this.nameAr,
     this.kbps, {
     this.everyAyah,
+    this.fileKbps,
   });
 
   /// The CDN edition, e.g. `ar.alafasy` — the reciter's id in the app
@@ -29,8 +30,15 @@ class Reciter {
   final String? everyAyah;
   final String nameEn, nameAr;
 
-  /// The bitrate its ayah files are served at.
+  /// The bitrate its ayah files are served at (the CDN's folder for it).
   final int kbps;
+
+  /// The bitrate the files really have where it is not [kbps] (their
+  /// frames, read 2026-11-06): a run's length is worked out from it.
+  final int? fileKbps;
+
+  /// The files' real bitrate.
+  int get bitrate => fileKbps ?? kbps;
 }
 
 /// Ḥafṣ reciters, each checked to serve every ayah at [Reciter.kbps]
@@ -60,17 +68,35 @@ const reciters = [
     'عبد الرحمن السديس',
     64,
   ),
-  Reciter('ar.saoodshuraym', 'Saud Ash-Shuraym', 'سعود الشريم', 64),
+  Reciter(
+    'ar.saoodshuraym',
+    'Saud Ash-Shuraym',
+    'سعود الشريم',
+    64,
+    fileKbps: 128,
+  ),
   Reciter('ar.mahermuaiqly', 'Maher Al-Muaiqly', 'ماهر المعيقلي', 64),
   Reciter('ar.hudhaify', 'Ali Al-Hudhaify', 'علي الحذيفي', 64),
-  Reciter('ar.muhammadayyoub', 'Muhammad Ayyoub', 'محمد أيوب', 128),
+  Reciter(
+    'ar.muhammadayyoub',
+    'Muhammad Ayyoub',
+    'محمد أيوب',
+    128,
+    fileKbps: 64,
+  ),
   Reciter('ar.shaatree', 'Abu Bakr Ash-Shatri', 'أبو بكر الشاطري', 64),
   Reciter('ar.abdullahbasfar', 'Abdullah Basfar', 'عبد الله بصفر', 64),
   Reciter('ar.ahmedajamy', 'Ahmad al-Ajamy', 'أحمد بن علي العجمي', 64),
   Reciter('ar.hanirifai', 'Hani ar-Rifai', 'هاني الرفاعي', 64),
   Reciter('ar.aymanswoaid', 'Ayman Suwaid', 'أيمن سويد', 64),
   Reciter('ar.parhizgar', 'Shahriar Parhizgar', 'شهريار پرهيزگار', 48),
-  Reciter('ar.muhammadjibreel', 'Muhammad Jibreel', 'محمد جبريل', 128),
+  Reciter(
+    'ar.muhammadjibreel',
+    'Muhammad Jibreel',
+    'محمد جبريل',
+    128,
+    fileKbps: 64,
+  ),
   // The Islamic Network has him by whole surahs only (ar.mohamedtablawi);
   // everyayah.com by ayah — every ayah checked there, 2026-10-29.
   Reciter(
@@ -219,6 +245,9 @@ const translationVoices = [
     'Muhammad Sodik Muhammad Yusuf',
     128,
   ),
+  // Not named by the Islamic Network beyond "Chinese" (2026-11-07: every
+  // sampled file present, as above).
+  TranslationVoice('zh.chinese', 'zh', 'Chinese translation', 128),
 ];
 
 /// The voice for [edition]; `null` for none (or one no longer offered).
@@ -229,6 +258,17 @@ TranslationVoice? translationVoiceFor(String? edition) =>
 String translationAudioUrl(int ayahId, TranslationVoice voice) =>
     'https://cdn.islamic.network/quran/audio/${voice.kbps}/'
     '${voice.edition}/${globalAyahNumber(ayahId)}.mp3';
+
+/// The reciters whose first ayah of a surah starts with the Bismillah
+/// (their files are longer than the ayah by about a Bismillah — 112:1,
+/// 113:1, 114:1 against their surahs' other ayahs, from the files' sizes at
+/// their bitrate, 2026-11-06). Every other reciter's first ayahs start
+/// without it: theirs is played before them ([basmalaReciter]).
+const reciterRecitesBasmala = {'ar.ahmedajamy', 'ar.banna', 'ar.parhizgar'};
+
+/// The Bismillah played before a surah for the reciters without one: Al-
+/// Husary's (his 1:1, Al-Fātiḥah's first ayah).
+Reciter get basmalaReciter => reciterFor('ar.husary');
 
 Reciter reciterFor(String edition) => reciters.firstWhere(
   (r) => r.edition == edition,

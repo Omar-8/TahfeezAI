@@ -1199,16 +1199,38 @@ class HifzController extends Notifier<HifzState> {
     _publish(const [], running: true);
   }
 
-  RecitationPositionMatcher _newMatcher() => _acousticPosition
-      ? LocalQuranPositionTracker(
-          _corpus!,
-          () => _phonemes,
-          log: kReleaseMode ? null : (l) => debugPrint('Hifz (acoustic): $l'),
-        )
-      : QuranStreamMatcher(
-          _corpus!,
-          log: kReleaseMode ? null : (l) => debugPrint('Hifz: $l'),
-        );
+  /// A new matcher, found again (when lost) only on the page on screen —
+  /// both pages of a spread (a browser's, a tablet's) — never a like ayah
+  /// on the page before or after (owner, 2026-11-07: a word said as one on
+  /// the previous page took the test there). Its callers may narrow it.
+  RecitationPositionMatcher _newMatcher() {
+    final matcher = _acousticPosition
+        ? LocalQuranPositionTracker(
+            _corpus!,
+            () => _phonemes,
+            log: kReleaseMode ? null : (l) => debugPrint('Hifz (acoustic): $l'),
+          )
+        : QuranStreamMatcher(
+            _corpus!,
+            log: kReleaseMode ? null : (l) => debugPrint('Hifz: $l'),
+          );
+    final shown = _shownRange();
+    if (shown != null) matcher.setFocus(shown.$1, shown.$2, only: true);
+    return matcher;
+  }
+
+  /// The corpus positions of the page(s) on screen, first to last word.
+  (int, int)? _shownRange() {
+    final pages = _visiblePages();
+    final corpus = _corpus;
+    if (pages == null || corpus == null) return null;
+    final ranges = ref.read(mushafPageWordRangesProvider);
+    final first = ranges[pages.$1], last = ranges[pages.$2] ?? first;
+    if (first == null || last == null) return null;
+    final from = corpus.positionOf(first.first);
+    final to = corpus.positionOf(last.last);
+    return from == null || to == null ? null : (from, to);
+  }
 
   static const WordRef _noWord = (ayahId: 0, wordIndex: 0);
 

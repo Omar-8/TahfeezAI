@@ -983,11 +983,15 @@ class SegmentedProgressLine extends StatelessWidget {
     required this.value,
     this.segments = 1,
     this.height = 3,
+    this.rtl,
   });
 
   final double value;
   final int segments;
   final double height;
+
+  /// Filling from the right; `null`: from the reading side.
+  final bool? rtl;
 
   @override
   Widget build(BuildContext context) {
@@ -1003,7 +1007,7 @@ class SegmentedProgressLine extends StatelessWidget {
           segments: segments,
           fill: scheme.primary,
           track: scheme.primary.withValues(alpha: 0.18),
-          rtl: Directionality.of(context) == TextDirection.rtl,
+          rtl: rtl ?? Directionality.of(context) == TextDirection.rtl,
         ),
       ),
     );

@@ -1,4 +1,5 @@
-import 'package:flutter/foundation.dart' show immutable, mapEquals, setEquals;
+import 'package:flutter/foundation.dart'
+    show immutable, listEquals, mapEquals, setEquals;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/storage/storage_providers.dart';
@@ -49,6 +50,21 @@ const mushafMistakeMarks = {
   MushafWordMark.tashkeel,
   MushafWordMark.tajweed,
 };
+
+/// The mistakes last looked at (a word sheet opened on one of them): the
+/// bar's "Mistakes found" gone for them, back for a recitation's new ones.
+class MistakesSeen extends Notifier<List<WordRef>> {
+  @override
+  List<WordRef> build() => const [];
+
+  void seen(List<WordRef> mistakes) {
+    if (!listEquals(state, mistakes)) state = List.unmodifiable(mistakes);
+  }
+}
+
+final mistakesSeenProvider = NotifierProvider<MistakesSeen, List<WordRef>>(
+  MistakesSeen.new,
+);
 
 /// Every word [overlay] marks with a mistake, in reading order.
 List<WordRef> markedMistakes(MushafWordOverlay? overlay) => [

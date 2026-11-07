@@ -73,12 +73,16 @@ class ReciterDownloads extends Notifier<Map<String, ReciterDownload>> {
         t.cancel();
       }
     });
-    _scanned = _scan();
+    _scanned = _scan().whenComplete(() => _known = true);
     return const {};
   }
 
   /// Once the files on the device are known (for the player).
   Future<void> ready() => _scanned;
+
+  /// Whether the files on the device are known yet.
+  bool get known => _known;
+  var _known = false;
 
   /// `null` if there is no storage to download to (the web, or it cannot
   /// be found): then everything streams.

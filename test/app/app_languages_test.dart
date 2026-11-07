@@ -27,6 +27,7 @@ void main() {
     'ja',
     'ko',
     'pt',
+    'zh',
   ]) {
     testWidgets('$code: Home in its language and direction', (tester) async {
       await RealApp.launch(tester, locale: code);

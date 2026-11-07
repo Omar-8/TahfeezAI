@@ -5,7 +5,7 @@ import '../../../core/sharing/image_sharer.dart';
 import '../../../core/localization/generated/app_localizations.dart';
 import '../../../ai/acoustic/local_quran_acoustic_model.dart';
 
-import 'package:flutter/foundation.dart' show ValueListenable;
+import 'package:flutter/foundation.dart' show ValueListenable, listEquals;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -616,31 +616,60 @@ class _BarHints extends ConsumerWidget {
     ];
   }
 
+  /// The recitation whose listening hint has gone (its first words heard):
+  /// not back for its later passes.
+  static Object? _listenedIn;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final follow = ref.watch(followAlongControllerProvider);
     final review =
         follow?.phase == FollowAlongPhase.review ||
         ref.watch(hifzControllerProvider.select((h) => h.loopReview));
+    final session = ref.watch(recitationSessionControllerProvider);
+    // Recite or Loop listening: "Listening — start reciting", until two
+    // words are heard.
+    final heard = ref.watch(
+      hifzControllerProvider.select(
+        (h) => [
+          HifzVerdict.correct,
+          HifzVerdict.uncertain,
+          HifzVerdict.wrong,
+          HifzVerdict.selfCorrected,
+          HifzVerdict.repeated,
+        ].fold<int>(0, (n, v) => n + (h.counts[v] ?? 0)),
+      ),
+    );
+    final id = session.session?.id;
+    if (id != null && heard >= 2) _listenedIn = id;
+    final listening =
+        !review &&
+        follow == null &&
+        id != null &&
+        _listenedIn != id &&
+        session.phase == RecitationPhase.listening &&
+        ref.watch(guideProvider) == null;
+    // After a recitation, its mistakes on the page in view — until one of
+    // them has been looked at.
     final idle =
         !review &&
         follow == null &&
-        !ref.watch(recitationSessionControllerProvider).isActive &&
+        !session.isActive &&
         ref.watch(quranAudioPlayerProvider) == null &&
         ref.watch(guideProvider) == null;
-    final onScreen = idle ? _onScreen(ref) : const <WordRef>[];
-    if (!review && onScreen.isEmpty) {
-      return const IgnorePointer(
-        child: Center(
-          child: Stack(
-            alignment: Alignment.center,
-            children: [FollowAlongHint(), _LoopReviewHint()],
-          ),
-        ),
-      );
-    }
-    return Center(
-      child: MouseRegion(
+    final overlay = ref.watch(mushafWordOverlayProvider);
+    final onScreen =
+        idle &&
+            !listEquals(
+              ref.watch(mistakesSeenProvider),
+              markedMistakes(overlay),
+            )
+        ? _onScreen(ref)
+        : const <WordRef>[];
+    final Widget child;
+    if (review || onScreen.isNotEmpty) {
+      child = MouseRegion(
+        key: ValueKey(review ? 'mistakes-review' : 'mistakes-found'),
         cursor: SystemMouseCursors.click,
         child: GestureDetector(
           key: const ValueKey('mistakes-hint'),
@@ -658,6 +687,26 @@ class _BarHints extends ConsumerWidget {
                 )
               : const _MistakesPill(key: ValueKey('mistakes-found-hint')),
         ),
+      );
+    } else if (listening) {
+      child = const IgnorePointer(
+        key: ValueKey('listening'),
+        child: _HintPill.listening(key: ValueKey('listening-hint')),
+      );
+    } else {
+      child = const IgnorePointer(
+        key: ValueKey('hints'),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [FollowAlongHint(), _LoopReviewHint()],
+        ),
+      );
+    }
+    // Each comes and goes in a fade.
+    return Center(
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        child: child,
       ),
     );
   }
@@ -682,18 +731,32 @@ class _MistakesPill extends StatelessWidget {
   const _MistakesPill({super.key});
 
   @override
+  Widget build(BuildContext context) => const _HintPill.mistakes();
+}
+
+/// A hint as a pill on the bar's top border: mistakes found, or the
+/// microphone listening.
+class _HintPill extends StatelessWidget {
+  const _HintPill.mistakes() : mistakes = true;
+  const _HintPill.listening({super.key}) : mistakes = false;
+
+  final bool mistakes;
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final l10n = AppLocalizations.of(context);
+    final foreground = mistakes ? scheme.onErrorContainer : scheme.onPrimary;
     final style = theme.textTheme.labelMedium?.copyWith(
-      color: scheme.onErrorContainer,
+      color: foreground,
       fontWeight: FontWeight.w600,
     );
     return Container(
       height: FollowAlongHint.height,
       padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
-        color: scheme.errorContainer,
+        color: mistakes ? scheme.errorContainer : scheme.primary,
         borderRadius: BorderRadius.circular(TahfeezRadii.pill),
         boxShadow: [
           BoxShadow(
@@ -708,13 +771,13 @@ class _MistakesPill extends StatelessWidget {
         spacing: 6,
         children: [
           Icon(
-            Icons.error_outline_rounded,
-            color: scheme.onErrorContainer,
+            mistakes ? Icons.error_outline_rounded : Icons.mic_rounded,
+            color: foreground,
             size: 16,
           ),
           Flexible(
             child: Text(
-              AppLocalizations.of(context).followMistakesFound,
+              mistakes ? l10n.followMistakesFound : l10n.recListeningHint,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: style,
@@ -990,7 +1053,10 @@ class _ModeButtons extends ConsumerWidget {
                           builder: (context) => IconButton(
                             key: ValueKey('modes-menu-${m.key}-settings'),
                             visualDensity: VisualDensity.compact,
-                            icon: const Icon(Icons.more_vert_rounded),
+                            icon: Icon(
+                              Icons.arrow_drop_up_rounded,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
                             tooltip: l10n.recModeSettings(m.label),
                             onPressed: () {
                               MenuController.maybeOf(context)?.close();
@@ -1032,7 +1098,7 @@ class _ModeButtons extends ConsumerWidget {
           groupHeight: BarButtonGroup.labelledHeight,
           expand: expand,
           // Recite (no ⋮) a smaller share: the room to the modes with one.
-          flex: [for (final m in modes) m.settings == null ? 3 : 4],
+          flex: [for (final m in modes) m.settings == null ? 4 : 5],
           children: [
             for (final m in modes)
               _withSettings(
@@ -1083,10 +1149,11 @@ class _ModeButtons extends ConsumerWidget {
 }
 
 /// A running mode's slim ⋮ (its settings), in the session's group.
+/// (The modes' arrow as in the idle bar: its size, the green.)
 final _runningSettingsStyle = BarButtonGroup.buttonStyle.copyWith(
-  fixedSize: const WidgetStatePropertyAll(Size(28, BarButtonGroup.height)),
-  minimumSize: const WidgetStatePropertyAll(Size(28, BarButtonGroup.height)),
-  iconSize: const WidgetStatePropertyAll(18),
+  fixedSize: const WidgetStatePropertyAll(Size(32, BarButtonGroup.height)),
+  minimumSize: const WidgetStatePropertyAll(Size(32, BarButtonGroup.height)),
+  iconSize: const WidgetStatePropertyAll(_arrowBox),
 );
 
 /// A mode's button with its [settings] button (a slim ⋮) right after it,
@@ -1098,18 +1165,34 @@ Widget _withSettings({
   bool compact = false,
 }) {
   if (settings == null) return button;
-  return Row(
-    mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
-    children: [
-      if (expand) Expanded(child: button) else button,
-      SizedBox(width: compact ? 2 : 4),
-      settings,
-    ],
+  if (!expand) {
+    return Row(mainAxisSize: MainAxisSize.min, children: [button, settings]);
+  }
+  // The mode's share in thirds: the mode in the first two (its icon
+  // centred a third in), its arrow in the last, as far from the next
+  // divider as the icon is from the one before — the two evenly spaced.
+  return LayoutBuilder(
+    builder: (context, box) {
+      final zone = box.maxWidth / 3;
+      final inset = (box.maxWidth - zone) / 2 - _modeIconSize / 2;
+      return Row(
+        children: [
+          SizedBox(width: box.maxWidth - zone, child: button),
+          SizedBox(
+            width: zone,
+            child: _ArrowInset(
+              inset: inset.clamp(0, zone - _arrowGlyph),
+              child: settings,
+            ),
+          ),
+        ],
+      );
+    },
   );
 }
 
-/// A mode's settings in the bar: a slim ⋮ beside it (a tap on the mode
-/// starts it as last set).
+/// A mode's settings in the bar: a chevron up at its end, by the divider
+/// (a tap on the mode starts it as last set).
 class _ModeSettingsButton extends StatelessWidget {
   const _ModeSettingsButton({
     super.key,
@@ -1131,17 +1214,55 @@ class _ModeSettingsButton extends StatelessWidget {
       onTap: onPressed,
       customBorder: const StadiumBorder(),
       child: SizedBox(
-        width: compact ? 20 : 26,
+        width: _ArrowInset.of(context) == null ? 16 : double.infinity,
         height: BarButtonGroup.labelledHeight,
-        child: Icon(
-          Icons.more_vert_rounded,
-          size: 20,
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
+        // The arrow: centred, or its triangle [_ArrowInset] from the
+        // share's end (the icon's box wider than the triangle in it).
+        child: Align(
+          alignment: _ArrowInset.of(context) == null
+              ? Alignment.center
+              : AlignmentDirectional.centerEnd,
+          child: Padding(
+            padding: EdgeInsetsDirectional.only(
+              end: math.max(
+                0,
+                (_ArrowInset.of(context) ?? 0) - (_arrowBox - _arrowGlyph) / 2,
+              ),
+            ),
+            child: Icon(
+              Icons.arrow_drop_up_rounded,
+              size: _arrowBox,
+              // Recite's green: something more here (its settings), the
+              // modes themselves left plain beside Recite.
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
         ),
       ),
     ),
   );
 }
+
+/// The modes' icon size (their place in their share).
+const _modeIconSize = 20.0;
+
+/// How far the arrow's chevron stands from its share's end (the divider).
+class _ArrowInset extends InheritedWidget {
+  const _ArrowInset({required this.inset, required super.child});
+
+  final double inset;
+
+  static double? of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<_ArrowInset>()?.inset;
+
+  @override
+  bool updateShouldNotify(_ArrowInset old) => old.inset != inset;
+}
+
+/// The modes' arrow (Material's "arrow drop up"): its icon's size, and the
+/// width of the triangle drawn in it.
+const _arrowBox = 26.0;
+const _arrowGlyph = 12.0;
 
 /// Fades and scales [child] in when first shown (a new key shows it anew).
 class FadeScaleIn extends StatelessWidget {
@@ -1198,11 +1319,12 @@ class _LabelledModeButton extends StatelessWidget {
         customBorder: const StadiumBorder(),
         child: ConstrainedBox(
           constraints: const BoxConstraints(
-            minWidth: 46,
+            minWidth: 40,
             minHeight: BarButtonGroup.labelledHeight,
           ),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
+            // (Close to the dividers: the labels the room.)
+            padding: const EdgeInsets.symmetric(horizontal: 4),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
@@ -1344,7 +1466,10 @@ class _SessionControls extends ConsumerWidget {
           IconButton(
             key: const ValueKey('session-settings'),
             style: _runningSettingsStyle,
-            icon: const Icon(Icons.more_vert_rounded),
+            icon: Icon(
+              Icons.arrow_drop_up_rounded,
+              color: Theme.of(context).colorScheme.primary,
+            ),
             tooltip: l10n.recModeSettings(
               follow != null ? l10n.followTitle : l10n.recLoop,
             ),
@@ -1461,7 +1586,10 @@ class _ListenControls extends ConsumerWidget {
               IconButton(
                 key: const ValueKey('listen-settings'),
                 style: _runningSettingsStyle,
-                icon: const Icon(Icons.more_vert_rounded),
+                icon: Icon(
+                  Icons.arrow_drop_up_rounded,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
                 tooltip: l10n.recModeSettings(
                   following ? l10n.followTitle : l10n.listenMenuTitle,
                 ),

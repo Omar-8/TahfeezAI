@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -14,7 +16,11 @@ import '../../features/settings/presentation/settings_screen.dart';
 import '../theme/components/tahfeez_bottom_sheet.dart'
     show TahfeezPopupObserver;
 import '../theme/gallery/component_gallery_screen.dart';
+import '../../quran/application/recent_quran_location.dart';
+import '../../quran/domain/quran_location_path.dart';
+import '../storage/storage_providers.dart';
 import 'app_routes.dart';
+import 'last_screen.dart';
 import 'quran_location_routing.dart';
 
 export 'app_routes.dart';
@@ -27,7 +33,9 @@ GoRouter appRouter(Ref ref) {
     navigatorKey: rootNavigatorKey,
     // Sheets and dialogs over the page: see TahfeezModalSheetActivity.
     observers: [TahfeezPopupObserver()],
-    initialLocation: AppRoutes.home,
+    // Where the app was when it last closed (or was closed by the phone
+    // in the background), else Home.
+    initialLocation: ref.read(restoredScreenProvider) ?? AppRoutes.home,
     routes: [
       StatefulShellRoute(
         // The tabs cross-fade (as indexedStack's, each kept alive, the
@@ -136,8 +144,28 @@ GoRouter appRouter(Ref ref) {
   // screen is shown again (the Quran tab's search).
   void unfocus() => FocusManager.instance.primaryFocus?.unfocus();
   router.routerDelegate.addListener(unfocus);
+  // The screen saved as it changes (last_screen.dart) — in the reader, the
+  // place being read (its page, as the reader records it), not the place
+  // it was opened at.
+  final storage = ref.read(browserStorageProvider);
+  String? saved;
+  void save(String location) {
+    if (location == saved || !restorableScreen(location)) return;
+    saved = location;
+    unawaited(storage.setString(lastScreenKey, location).catchError((_) {}));
+  }
+
+  String current() => router.routerDelegate.currentConfiguration.uri.toString();
+  void screenChanged() => save(current());
+  router.routerDelegate.addListener(screenChanged);
+  ref.listen(recentQuranLocationControllerProvider, (_, place) {
+    final now = current();
+    if (place == null || !isQuranLocationPath(now)) return;
+    save('/${Uri.parse(now).pathSegments.first}/${quranLocationPath(place)}');
+  });
   ref.onDispose(() {
     router.routerDelegate.removeListener(unfocus);
+    router.routerDelegate.removeListener(screenChanged);
     // Released with its scope (the app keeps it for good; a test's scope
     // ends, and a router left registered with the binding would hold all
     // it reached).

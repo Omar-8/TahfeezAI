@@ -16,8 +16,14 @@ void main() {
           .where((f) => RegExp(r'app_\w+\.arb$').hasMatch(f.path))
           .toList()
         ..sort((a, b) => a.path.compareTo(b.path));
+  // iOS's code for the language: Simplified Chinese is zh-Hans there.
   String code(File arb) =>
-      RegExp(r'app_(\w+)\.arb$').firstMatch(arb.path)!.group(1)!;
+      switch (RegExp(r'app_(\w+)\.arb$').firstMatch(arb.path)!.group(1)!) {
+        'zh' => 'zh-Hans',
+        final c => c,
+      };
+  // In the Xcode project, a name with a hyphen is quoted.
+  String inProject(String c) => c.contains('-') ? '"$c"' : c;
   String text(File arb) =>
       (jsonDecode(arb.readAsStringSync()) as Map)['iosMicrophoneUsage']
           as String;
@@ -65,8 +71,13 @@ void main() {
 
   test('the Xcode project bundles every language\'s file', () {
     for (final arb in arbs) {
-      expect(project, contains('path = ${code(arb)}.lproj/InfoPlist.strings;'));
-      expect(project, contains('\t\t\t\t${code(arb)},\n'));
+      expect(
+        project,
+        contains(
+          'path = ${inProject('${code(arb)}.lproj/InfoPlist.strings')};',
+        ),
+      );
+      expect(project, contains('\t\t\t\t${inProject(code(arb))},\n'));
     }
     expect(project, contains('/* InfoPlist.strings in Resources */,'));
   });

@@ -868,6 +868,19 @@ void main() {
     expect(hifz().first?.ayahId, inInclusiveRange(2253, 2256), reason: 'on it');
   });
 
+  test('a range test is not taken to a like ayah off the page on screen '
+      '(the page before)', () async {
+    // Page 42 on screen, the test from 2:255; 2:250 (page 41) said.
+    await setUpHifz(
+      from: (chapterNo: 2, verseNo: 255),
+      to: (chapterNo: 2, verseNo: 256),
+    );
+    final expected = hifz().expected;
+    await recite(spoken(2, 250));
+    expect(hifz().expected, expected, reason: 'not moved off the page');
+    expect(hifz().counts[HifzVerdict.correct] ?? 0, 0);
+  });
+
   test('a test continues from one surah into the next', () async {
     // Al-Fātiḥah on the visible page, the page's words known.
     await setUpHifz(hideMode: false);

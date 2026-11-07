@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "buildDate": "2026-11-01T10:48:01.830083Z",
+  "buildDate": "2026-11-07T08:42:11.702209Z",
   "canonicalQuranSource": "Tanzil Project (tanzil.net)",
   "canonicalQuranVersion": "Uthmani, Version 1.1",
   "canonicalQuranHash": "bf4f57b968d03f4131c070b1e285da9be0e0a108a21c910e872801ca273312c8",
@@ -209,6 +209,22 @@
       "quranEncKey": "portuguese_nasr",
       "version": "1.4.1",
       "sourceHash": "90cc75b18c3c30f4900ea2f03777d7f82f909fc6f01bc02ba64e922017a20057",
+      "ayahCount": 6236
+    },
+    {
+      "slug": "zh-suliman",
+      "resourceId": "tahfeez.translation.zh.suliman",
+      "quranEncKey": "chinese_suliman",
+      "version": "1.0.8",
+      "sourceHash": "4f1b544720dde2babb845e1278b56678d2768ad830d9da491e328cb58c825fd7",
+      "ayahCount": 6236
+    },
+    {
+      "slug": "zh-makin",
+      "resourceId": "tahfeez.translation.zh.makin",
+      "quranEncKey": "chinese_makin",
+      "version": "1.0.2",
+      "sourceHash": "669bb611de8a5b96c8824c55bd9537e8cb30e1601127d3c72d9b9abeb4beea91",
       "ayahCount": 6236
     }
   ],
@@ -443,6 +459,8 @@
     "translations/ja_sato.json": "d9c7d827ede4f163f47d1faf688047cf6a3ed7f5416f454fc729e300f07d98a0",
     "translations/el_rowwad.json": "9cf6bb409a880861024c46582aa0c2ffaeeb8763930e031e00f69aa13cf5bdeb",
     "translations/pt_nasr.json": "3a0e748197a824024c5fedb890b93f912247168362b6abc4250b6a8a19699793",
+    "translations/zh_suliman.json": "db9741bb4d7562993b9544cbe1e6c0ecae463f386f2a9678143b32f78489fbca",
+    "translations/zh_makin.json": "6ffe82f24638d36e3b90a160d5cad313ecaaa132a54600cc428b973d15e2ffad",
     "tafsir/en_mukhtasar.json": "fa13bc9b62ab765e2bae5773c75f6c5937bf15a6aefafec74b6f1ef5b2188dd5",
     "tafsir/id_mukhtasar.json": "fe1f0c695678c21afbef804e4fe4fcf217a83007ecf7949c4e0b6e63f17625c1",
     "tafsir/tr_mukhtasar.json": "ec2d0086212638862e82cdf38282b369684234f28cc702b6342a39832f60787c",

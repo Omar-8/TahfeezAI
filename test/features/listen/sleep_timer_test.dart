@@ -102,7 +102,8 @@ void main() {
       container
           .read(quranAudioPlayerProvider.notifier)
           .playRange(
-            112001,
+            // (Not from 112:1: no Bismillah before it here.)
+            112002,
             112004,
             options: const ListenOptions(translationVoice: 'en.walk'),
           );

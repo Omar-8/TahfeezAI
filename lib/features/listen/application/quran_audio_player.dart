@@ -33,6 +33,7 @@ class NowPlaying {
     this.reciter, {
     this.options = const ListenOptions(highlight: false, followPages: false),
     this.translations = const {},
+    this.basmalas = const {},
   }) : word = null;
 
   const NowPlaying.word(int ayahId, int wordIndex)
@@ -41,6 +42,7 @@ class NowPlaying {
       reciter = null,
       options = const ListenOptions(),
       translations = const {},
+      basmalas = const {},
       word = (ayahId: ayahId, wordIndex: wordIndex);
 
   /// The ayahs in play order, repetitions included.
@@ -54,15 +56,24 @@ class NowPlaying {
   /// (read aloud after it), not recited.
   final Set<int> translations;
 
+  /// The places in [ayahIds] that are the Bismillah before the surah's
+  /// first ayah (the place's id): Al-Husary's, for the reciters whose first
+  /// ayahs start without it.
+  final Set<int> basmalas;
+
   bool get isWord => word != null;
+
+  /// The Bismillah before a surah is playing (its first ayah's id).
+  bool get isBasmala => basmalas.contains(index);
 
   /// Its ayah's translation is playing, not the ayah.
   bool get isTranslation => translations.contains(index);
 
-  /// Recited ayahs (not translations) from place [from] up to [to].
+  /// Recited ayahs (not translations, nor a Bismillah) from place [from]
+  /// up to [to].
   int recitedBetween(int from, int to) => [
     for (var k = from; k < to; k++)
-      if (!translations.contains(k)) k,
+      if (!translations.contains(k) && !basmalas.contains(k)) k,
   ].length;
   int? get ayahId => isWord ? null : ayahIds[index];
 
@@ -72,6 +83,7 @@ class NowPlaying {
     reciter,
     options: options,
     translations: translations,
+    basmalas: basmalas,
   );
 }
 
@@ -167,7 +179,10 @@ class QuranAudioPlayer extends Notifier<NowPlaying?> {
     final now = state;
     final ayahId = now?.ayahId;
     final focus = ref.read(mushafFocusAyahProvider.notifier);
-    if (ayahId == null || !now!.options.highlight) {
+    // The Bismillah before a surah: its page turned to, its first ayah
+    // neither highlighted nor uncovered yet.
+    final basmala = now?.isBasmala ?? false;
+    if (ayahId == null || !now!.options.highlight || basmala) {
       focus.clear(this);
     } else {
       focus.focus(this, ayahId);
@@ -191,7 +206,7 @@ class QuranAudioPlayer extends Notifier<NowPlaying?> {
         _turnedTo = page;
         ref.read(mushafPageTurnRequestsProvider.notifier).toPage(page);
       }
-      _reveal(page, ayahId);
+      if (!basmala) _reveal(page, ayahId);
     }());
   }
 
@@ -264,14 +279,29 @@ class QuranAudioPlayer extends Notifier<NowPlaying?> {
     final reciter = reciterFor(ref.read(reciterProvider));
     // A translation chosen: each ayah, then its translation read aloud.
     final voice = translationVoiceFor(options.translationVoice);
-    final queue = voice == null
-        ? ayahIds
-        : [
-            for (final a in ayahIds) ...[a, a],
-          ];
-    final translations = voice == null
-        ? const <int>{}
-        : {for (var k = 1; k < queue.length; k += 2) k};
+    // A surah's first ayah, as it starts (not its repetitions): the
+    // Bismillah first, Al-Husary's, for the reciters whose first ayahs
+    // start without it (all but three — measured 2026-11-06), except
+    // Al-Fātiḥah's (its first ayah is the Bismillah) and At-Tawbah.
+    final basmala = !reciterRecitesBasmala.contains(reciter.edition);
+    final queue = <int>[];
+    final translations = <int>{}, basmalas = <int>{};
+    for (final (k, a) in ayahIds.indexed) {
+      final surah = a ~/ 1000;
+      if (basmala &&
+          a % 1000 == 1 &&
+          surah != 1 &&
+          surah != 9 &&
+          (k == 0 || ayahIds[k - 1] != a)) {
+        basmalas.add(queue.length);
+        queue.add(a);
+      }
+      queue.add(a);
+      if (voice != null) {
+        translations.add(queue.length);
+        queue.add(a);
+      }
+    }
     _started = false;
     _played = false;
     state = NowPlaying.ayahs(
@@ -280,6 +310,7 @@ class QuranAudioPlayer extends Notifier<NowPlaying?> {
       reciter,
       options: options,
       translations: translations,
+      basmalas: basmalas,
     );
     _follow();
     try {
@@ -294,6 +325,11 @@ class QuranAudioPlayer extends Notifier<NowPlaying?> {
           for (final (k, a) in queue.indexed)
             if (translations.contains(k))
               translationAudioUrl(a, voice!)
+            else if (basmalas.contains(k))
+              switch (downloads.localFile(1001, basmalaReciter)) {
+                final path? => Uri.file(path).toString(),
+                null => ayahAudioUrl(1001, basmalaReciter),
+              }
             else
               switch (downloads.localFile(a, reciter)) {
                 final path? => Uri.file(path).toString(),
@@ -304,7 +340,7 @@ class QuranAudioPlayer extends Notifier<NowPlaying?> {
           for (final (k, a) in queue.indexed)
             _info(
               a,
-              reciter,
+              basmalas.contains(k) ? basmalaReciter : reciter,
               translation: translations.contains(k) ? voice : null,
             ),
         ],
@@ -340,6 +376,11 @@ class QuranAudioPlayer extends Notifier<NowPlaying?> {
           : language != null && usesArabicScript(language)
           ? reciter.nameAr
           : reciter.nameEn,
+      // The media session shows the run as its surah, the ayah playing,
+      // and the whole length (from the files' sizes at their bitrate).
+      group: '${surah ?? surahNo}',
+      part: '${ayahId % 1000}',
+      kbps: translation?.kbps ?? reciter.bitrate,
     );
   }
 

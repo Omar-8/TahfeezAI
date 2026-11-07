@@ -29,6 +29,10 @@ enum AppTip {
   /// Once, over the results of the first session with mistakes: a marked
   /// word opens its word sheet (what was expected, what was heard).
   tapMistake,
+
+  /// Before playback that streams a reciter not downloaded (the phones):
+  /// downloading plays smoother, offline too.
+  downloadReciter,
 }
 
 const tipFirstAfter = Duration(days: 1);

@@ -552,7 +552,14 @@ class QuranStreamMatcher implements RecitationPositionMatcher {
     final m = keys.length;
     final c = config;
     final reach = c.maxBack > c.maxRestart ? c.maxBack : c.maxRestart;
-    final lo = math.max(0, anchor - reach - 1);
+    // (Never back off the page(s) on screen; ahead, as ever.)
+    final lo = math.max(
+      0,
+      math.max(
+        anchor - reach - 1,
+        _hasFocus && _focusOnly ? math.min(anchor - 1, _focusStart - 1) : 0,
+      ),
+    );
     // Grown in steps, so consecutive partials share one window.
     final ahead = ((m * 2 + 20 + 63) ~/ 64) * 64;
     final hi = math.min(corpus.length, anchor + ahead);

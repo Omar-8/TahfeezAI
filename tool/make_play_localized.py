@@ -217,6 +217,16 @@ CAPTIONS = {
         ("Entenda cada palavra", "Significados, transliteração e tradução"),
         ("Veja seu progresso", "Cada página memorizada, num relance"),
     ],
+    "zh-CN": [
+        ("每个词都经过检查", "对照页面诵读：正确为绿色，错误为红色"),
+        ("连你读的元音都能听出", "在哈姆宰上：应为合口符，听到的是开口符"),
+        ("凭记忆诵读", "读对一个词，就显示一个词"),
+        ("你每天的古兰经伙伴", "每日一节、继续阅读、今日复习"),
+        ("每一章都如经本所书", "书法章名，玻璃卡片映着此刻的天空"),
+        ("麦地那经本", "每一页都与印刷版一致，在任何屏幕上都清晰"),
+        ("理解每一个词", "词义、音译和译文"),
+        ("一眼看清你的进度", "背记过的每一页，一目了然"),
+    ],
 }
 
 
@@ -230,11 +240,12 @@ def source(name):
 def use_font(lang, plain_font):
     """The captions' font for [lang]: Bengali, Cyrillic and Greek (the
     bundled Noto Sans has none) in the system's Noto, two static files each
-    (no weight axis); Japanese and Korean in the system's Noto Sans CJK (its
-    JP and KR faces in one collection); the rest in [plain_font]."""
+    (no weight axis); Japanese, Korean and Chinese in the system's Noto Sans
+    CJK (its JP, KR and SC faces in one collection); the rest in
+    [plain_font]."""
     family = {"bn-BD": "NotoSansBengali", "ru-RU": "NotoSans", "kk": "NotoSans",
               "el-GR": "NotoSans"}.get(lang)
-    cjk = {"ja-JP": 0, "ko-KR": 1}.get(lang)
+    cjk = {"ja-JP": 0, "ko-KR": 1, "zh-CN": 2}.get(lang)
     if cjk is not None:
         msi.font = lambda path, size, weight="Regular", index=cjk: ImageFont.truetype(
             str(CJK / f"NotoSansCJK-{'Bold' if weight == 'Bold' else 'Regular'}.ttc"),

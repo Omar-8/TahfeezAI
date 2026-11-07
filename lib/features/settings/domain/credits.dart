@@ -117,8 +117,8 @@ const credits = <Credit>[
         'Malay (Abdullah Basumayyah), Hausa (Abu Bakr Gumi), Kurdish Sorani '
         '(Muhammad Salih Bamoki), Kazakh (Khalifa Altai), Somali (Abdullah '
         'Hasan Yaqoub), Korean (Hamid Choi), Japanese (Saeed Sato) and '
-        'Portuguese (Helmi Nasr) '
-        'translations; Pashto, Swahili, Uzbek, Dutch and Greek (Rowwad); '
+        'Portuguese (Helmi Nasr), Chinese (Muhammad Suleiman, Muhammad '
+        'Makin) translations; Pashto, Swahili, Uzbek, Dutch and Greek (Rowwad); '
         'Al-Mukhtasar in Kurdish, Pashto, Uzbek and Japanese',
     owner: 'QuranEnc',
     licence: 'QuranEnc terms: unmodified, with attribution and version',
@@ -183,12 +183,13 @@ const credits = <Credit>[
         'A translation read after each ayah: Ibrahim Walk (English), '
         'Shamshad Ali Khan (Urdu), Youssouf Leclerc (French), Elmir Kuliev '
         '(Russian), Hedayatfar (Persian), Diyanet Vakfı (Turkish), Khalifah '
-        'Altai (Kazakh), Muhammad Sodik Muhammad Yusuf (Uzbek)',
+        'Altai (Kazakh), Muhammad Sodik Muhammad Yusuf (Uzbek), and a '
+        'Chinese reading',
     useAr:
         'ترجمة مسموعة بعد كل آية: إبراهيم ووك (الإنجليزية)، شمشاد علي خان '
         '(الأردية)، يوسف لوكلير (الفرنسية)، إلمير كولييف (الروسية)، هدايت‌فر '
         '(الفارسية)، وقف الديانة (التركية)، خليفة ألطاي (الكازاخية)، محمد '
-        'صادق محمد يوسف (الأوزبكية)',
+        'صادق محمد يوسف (الأوزبكية)، وقراءة صينية',
   ),
   Credit(
     group: CreditGroup.translations,

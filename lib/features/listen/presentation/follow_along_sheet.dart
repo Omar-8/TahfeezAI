@@ -109,6 +109,8 @@ class _FollowAlongSheetState extends ConsumerState<_FollowAlongSheet> {
         !mounted) {
       return;
     }
+    await offerDownloadReciterTip(context, ref, _id(_from!));
+    if (!mounted) return;
     if (!context.mounted) return;
     Navigator.of(context).pop();
     final run = ref.read(followAlongControllerProvider.notifier);

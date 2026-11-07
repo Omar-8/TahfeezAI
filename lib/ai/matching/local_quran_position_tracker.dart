@@ -183,6 +183,33 @@ class LocalQuranPositionTracker implements RecitationPositionMatcher {
   /// Quran text, so the speech before it may be that long ([_formulaLead]).
   final int? _istiadha;
 
+  /// Where the audio after a formula passed over is taken up: just after
+  /// its fit's end ([_formulaEndAt] kept, for [_locate] to look back from).
+  int _afterFormula(int from, int end) {
+    _afterFormulaPass = true;
+    _formulaEndAt = from + end + 1;
+    return math.max(_mark, _formulaEndAt!);
+  }
+
+  /// A formula's fit may take the next word's first sounds («…ٱلرَّجِيمِ»
+  /// and «بِسْمِ» said close: the «م» and «ب» blur), and what is left of
+  /// it fit badly — the passage then located from the word after it. That
+  /// many frames before the formula's end are looked at again for it (a
+  /// shift for every case was 1 of 40 cuts missed at 0, but other speech
+  /// uncovered «بِسْمِ» at 1–6; owner, 2026-11-07).
+  static const _formulaOverlap = 4;
+
+  /// The stream frame just after the last formula passed over, until the
+  /// recitation's first word is placed or refused.
+  int? _formulaEndAt;
+
+  /// A formula was just passed over: «…ٱلرَّجِيمِ» and «بِسْمِ» said close
+  /// blur (the «م» and «ب»), and the word after it — Al-Fatiha's «بِسْمِ»,
+  /// where the basmala is its first ayah — fits poorly alone, though its
+  /// passage fits well: not then refused as the recitation's start (1:1
+  /// left unmarked; owner, 2026-11-07).
+  var _afterFormulaPass = false;
+
   /// The speech a formula from [a] may follow: «أَعُوذُ» before the
   /// isti'adha's Quran words — 0.5 s said briskly, up to 1 s slowly (it
   /// was 12 frames, over [LocalPositionTrackerConfig.extraFrames], and
@@ -243,6 +270,8 @@ class LocalQuranPositionTracker implements RecitationPositionMatcher {
         ? _frames.end
         : from.clamp(_frames.start, _frames.end).toInt();
     _emittedMax = -1;
+    _afterFormulaPass = false;
+    _formulaEndAt = null;
     _current = null;
     _placedWords.clear();
     _tail = const {};
@@ -319,7 +348,10 @@ class LocalQuranPositionTracker implements RecitationPositionMatcher {
     _frames.dropBefore(
       math.max(
         _frames.end - config.maxPendingFrames,
-        math.min(_mark - 2, lastPlacedFrame ?? _mark),
+        math.min(
+          _mark - 2 - (_formulaEndAt == null ? 0 : _formulaOverlap),
+          lastPlacedFrame ?? _mark,
+        ),
       ),
     );
     return events;
@@ -556,13 +588,18 @@ class LocalQuranPositionTracker implements RecitationPositionMatcher {
     final previousAyah = corpus.verseStartPosition(
       corpus.words[math.max(0, thisAyah - 1)].verse,
     );
-    final first = math.max(
+    var first = math.max(
       0,
       math.min(
         next - config.lookBack,
         math.max(next - 40, previousAyah ?? next),
       ),
     );
+    // Never back off the page(s) on screen (a like word on the page
+    // before; owner, 2026-11-07) — ahead, on to the next page, as ever.
+    if (_hasFocus && _focusOnly) {
+      first = math.min(next, math.max(first, _focusStart));
+    }
     var near = _align(resources, window, first, last, flexible: true);
     near = _nearer(resources, window, near, next, last);
     // A skip ahead needs as much evidence as going back: a sound or two that
@@ -615,7 +652,7 @@ class LocalQuranPositionTracker implements RecitationPositionMatcher {
         }
         if (whole || partial) {
           _log('passed over ${_fmt(a)} formula');
-          _mark = from + f.alignedEnd + 1;
+          _mark = _afterFormula(from, f.alignedEnd);
           return const [];
         }
       }
@@ -822,7 +859,7 @@ class LocalQuranPositionTracker implements RecitationPositionMatcher {
           return const [];
         }
         _log('passed over ${_fmt(a)} formula');
-        _mark = from + f.alignedEnd + 1;
+        _mark = _afterFormula(from, f.alignedEnd);
         return const [];
       }
     }
@@ -917,7 +954,7 @@ class LocalQuranPositionTracker implements RecitationPositionMatcher {
         }
         if (end < 0) break;
         _log('passed over ${_fmt(a)} formula');
-        _mark = from + end + 1;
+        _mark = _afterFormula(from, end);
         return const [];
       }
     }
@@ -957,19 +994,50 @@ class LocalQuranPositionTracker implements RecitationPositionMatcher {
       );
       return const [];
     }
+    // Located one word on from where the recitation starts, just after a
+    // formula: that word's first sounds may be in the formula's fit
+    // ([_formulaOverlap]) — Al-Fatiha's «بِسْمِ» after the isti'adha. Fitted
+    // again from a little earlier, from that word.
+    var fit = best.alignment;
+    var at = from;
+    var startAt = bestFirst;
+    final endAt = _formulaEndAt;
+    if (endAt != null &&
+        _emittedMax < 0 &&
+        _anchor != null &&
+        bestFirst == _anchor! + 1) {
+      final back = math.max(_frames.start, endAt - 2 - _formulaOverlap);
+      if (back < from && from - back <= 2 * _formulaOverlap) {
+        final again = _align(
+          resources,
+          _frames.view(back, _frames.end),
+          _anchor!,
+          bestLast,
+          flexible: false,
+        );
+        if (again != null &&
+            again.firstWord == _anchor &&
+            again.cost <= config.followCost) {
+          _log('${_fmt(_anchor!)} taken back from the formula');
+          fit = again;
+          at = back;
+          startAt = _anchor!;
+        }
+      }
+    }
     final relocated = MatchRelocated(
       from: current,
-      to: corpus.words[bestFirst].ref,
+      to: corpus.words[startAt].ref,
       scope: best.scope,
     );
     _locked = true;
-    _startAt = bestFirst;
+    _startAt = startAt;
     _log(
-      'located ${_fmt(bestFirst)}..${_fmt(bestLast)} (${best.scope}, cost '
-      '${best.alignment.cost.toStringAsFixed(2)}'
+      'located ${_fmt(startAt)}..${_fmt(bestLast)} (${best.scope}, cost '
+      '${fit.cost.toStringAsFixed(2)}'
       '${rival == null ? '' : ', next ${rival.alignment.cost.toStringAsFixed(2)}'})',
     );
-    return [relocated, ..._emit(best.alignment, from, flush)];
+    return [relocated, ..._emit(fit, at, flush)];
   }
 
   // ---- alignment ----
@@ -1190,11 +1258,22 @@ class LocalQuranPositionTracker implements RecitationPositionMatcher {
     if (_emittedMax < 0) {
       final w = finished.first;
       final perSound = (w.end - w.start + 1) / math.max(1, w.sounds);
+      // Just after a formula, its expected start fitting with its passage:
+      // the word's own squeeze let pass ([_afterFormulaPass]).
+      final squeezed =
+          _afterFormulaPass &&
+          _startAt != null &&
+          w.words.first == _startAt &&
+          finished.length > 1 &&
+          finished.skip(1).every((n) => n.cost <= config.startCost);
+      _afterFormulaPass = false;
+      _formulaEndAt = null;
       // …and be where the recitation starts: a fit from there may leave
       // its first words empty and finish one further on («يَوْمِ» in
       // English, owner 2026-11-02).
-      if (w.cost > config.startCost ||
-          perSound > config.startFramesPerSound ||
+      if ((!squeezed &&
+              (w.cost > config.startCost ||
+                  perSound > config.startFramesPerSound)) ||
           (_startAt != null && w.words.first != _startAt)) {
         _log(
           'not a start: ${w.words.map(_fmt).join(' ')} '

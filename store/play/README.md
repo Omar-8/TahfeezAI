@@ -29,7 +29,7 @@ by `python3 tool/make_play_listing.py` from the landing page's media
 | Feature graphic (1,024 × 500) | `graphics/featureGraphic.png` |
 | Phone screenshots (8, 1,242 × 2,208) | `graphics/phoneScreenshots/` in their numbered order |
 | Translated screenshots (same 8, captions in the language) | `graphics/<Play language code>/phoneScreenshots/` — made by `python3 tool/make_play_localized.py`; Arabic's Home and Ayah mode show the app in Arabic |
-| Translations of the listing | `listings/<Play language code>/` — ar, de-DE, fr-FR, es-ES, ru-RU, tr-TR, id, ms, ur, fa, bn-BD, sw, kk, nl-NL, da-DK, el-GR, ja-JP, ko-KR, pt-BR (the last six added 2026-11-01, with Tajweed colours, Test me, the sleep timer, surah info, sharing as an image and translation audio in every language's description); all in one file: `listings/all_languages.csv` (for Play's "Import translations"). Hausa, Kurdish, Pashto, Somali and Uzbek: no Play store-listing language — their users see English |
+| Translations of the listing | `listings/<Play language code>/` — ar, de-DE, fr-FR, es-ES, ru-RU, tr-TR, id, ms, ur, fa, bn-BD, sw, kk, nl-NL, da-DK, el-GR, ja-JP, ko-KR, pt-BR (the last six added 2026-11-01, with Tajweed colours, Test me, the sleep timer, surah info, sharing as an image and translation audio in every language's description), zh-CN (added 2026-11-07, with its own feature graphic: `graphics/zh-CN/featureGraphic.png`); all in one file: `listings/all_languages.csv` (for Play's "Import translations"). Hausa, Kurdish, Pashto, Somali and Uzbek: no Play store-listing language — their users see English |
 
 ## Store settings
 

@@ -98,60 +98,89 @@ class _WordDetailSheetState extends ConsumerState<_WordDetailSheet> {
     final at = mistakes.indexOf(_word);
     final body = _WordDetailSheetBody(key: ValueKey(_word), wordRef: _word);
     if (at < 0) return body;
+    // A mistake looked at: the bar's "Mistakes found" has done its work.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) ref.read(mistakesSeenProvider.notifier).seen(mistakes);
+    });
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        // Which mistake this is: its count, and the line across the sheet
+        // in as many segments, filling from the right as the Mushaf reads.
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: TahfeezSpacing.md),
-          child: Row(
-            spacing: TahfeezSpacing.sm,
-            children: [
-              IconButton(
-                key: const ValueKey('word-previous-mistake'),
-                visualDensity: VisualDensity.compact,
-                icon: const Icon(Icons.chevron_left_rounded),
-                tooltip: l10n.wordPreviousMistake,
-                onPressed: at > 0 ? () => _go(mistakes[at - 1]) : null,
-              ),
-              Expanded(
-                child: Semantics(
-                  label: l10n.wordMistakeOf(at + 1, mistakes.length),
-                  child: ExcludeSemantics(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      spacing: 6,
-                      children: [
-                        Text(
-                          '${at + 1} / ${mistakes.length}',
-                          key: const ValueKey('word-mistake-count'),
-                          style: theme.textTheme.labelLarge,
-                        ),
-                        SegmentedProgressLine(
-                          value: (at + 1) / mistakes.length,
-                          segments: mistakes.length,
-                        ),
-                      ],
-                    ),
+          child: Semantics(
+            label: l10n.wordMistakeOf(at + 1, mistakes.length),
+            child: ExcludeSemantics(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                spacing: 6,
+                children: [
+                  Text(
+                    '${at + 1} / ${mistakes.length}',
+                    key: const ValueKey('word-mistake-count'),
+                    style: theme.textTheme.labelLarge,
                   ),
-                ),
+                  SegmentedProgressLine(
+                    value: (at + 1) / mistakes.length,
+                    segments: mistakes.length,
+                    rtl: true,
+                  ),
+                ],
               ),
-              // Next: the button that moves on, labelled.
-              FilledButton.tonalIcon(
-                key: const ValueKey('word-next-mistake'),
-                iconAlignment: IconAlignment.end,
-                icon: const Icon(Icons.chevron_right_rounded),
-                label: Text(l10n.wordNextMistake),
-                onPressed: at + 1 < mistakes.length
-                    ? () => _go(mistakes[at + 1])
-                    : null,
-              ),
-            ],
+            ),
           ),
         ),
         Flexible(child: body),
+        // At the bottom, always in reach: the next mistake to the left (its
+        // arrow pointing there), the previous one to the right — in every
+        // language.
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+            TahfeezSpacing.md,
+            TahfeezSpacing.sm,
+            TahfeezSpacing.md,
+            TahfeezSpacing.sm,
+          ),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Row(
+              spacing: TahfeezSpacing.sm,
+              children: [
+                Expanded(
+                  child: FilledButton.tonalIcon(
+                    key: const ValueKey('word-next-mistake'),
+                    icon: const Icon(Icons.chevron_left_rounded),
+                    label: Text(
+                      l10n.wordNextMistake,
+                      textDirection: Directionality.of(context),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    onPressed: at + 1 < mistakes.length
+                        ? () => _go(mistakes[at + 1])
+                        : null,
+                  ),
+                ),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    key: const ValueKey('word-previous-mistake'),
+                    iconAlignment: IconAlignment.end,
+                    icon: const Icon(Icons.chevron_right_rounded),
+                    label: Text(
+                      l10n.wordPreviousMistake,
+                      textDirection: Directionality.of(context),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    onPressed: at > 0 ? () => _go(mistakes[at - 1]) : null,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -206,13 +235,34 @@ class _WordDetailSheetBody extends ConsumerWidget {
             style: Theme.of(context).textTheme.labelMedium
                 ?.copyWith(color: scheme.onSurfaceVariant),
           ),
+          // The word, and on its line, far left, its audio.
           Directionality(
-            textDirection: TextDirection.rtl,
-            child: Text(
-              arabicTextAsync.value ?? '',
-              textAlign: TextAlign.right,
-              // No custom `fontFamily` -- see `VerseBlock`'s doc comment.
-              style: quranTextStyle(color: quranTextColor),
+            textDirection: TextDirection.ltr,
+            child: Row(
+              children: [
+                IconButton(
+                  key: const ValueKey('word-play'),
+                  icon: const Icon(Icons.volume_up_outlined),
+                  tooltip: AppLocalizations.of(context).wordPlayAudio,
+                  onPressed: () async {
+                    final messenger = ScaffoldMessenger.of(context);
+                    final offline = AppLocalizations.of(context).listenOffline;
+                    final played = await ref
+                        .read(quranAudioPlayerProvider.notifier)
+                        .playWord(wordRef.ayahId, wordRef.wordIndex);
+                    if (!played) showListenOffline(messenger, offline);
+                  },
+                ),
+                Expanded(
+                  child: Text(
+                    arabicTextAsync.value ?? '',
+                    textAlign: TextAlign.right,
+                    textDirection: TextDirection.rtl,
+                    // No custom `fontFamily` -- see `VerseBlock`'s doc comment.
+                    style: quranTextStyle(color: quranTextColor),
+                  ),
+                ),
+              ],
             ),
           ),
           // What the last recitation found wrong in this word, if anything.
@@ -248,22 +298,6 @@ class _WordDetailSheetBody extends ConsumerWidget {
               loading: () => const TahfeezLoadingView(),
               error: (_, _) => _noActivePackHint(context),
             ),
-          Row(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.volume_up_outlined),
-                tooltip: AppLocalizations.of(context).wordPlayAudio,
-                onPressed: () async {
-                  final messenger = ScaffoldMessenger.of(context);
-                  final offline = AppLocalizations.of(context).listenOffline;
-                  final played = await ref
-                      .read(quranAudioPlayerProvider.notifier)
-                      .playWord(wordRef.ayahId, wordRef.wordIndex);
-                  if (!played) showListenOffline(messenger, offline);
-                },
-              ),
-            ],
-          ),
         ],
       ),
     );

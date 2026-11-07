@@ -131,6 +131,7 @@ Future<({bool showMe, bool never})?> showAppTip(
                 AppTip.tajweedOff => l10n.tipTajweedOff,
                 AppTip.lenient => l10n.tipLenient,
                 AppTip.tapMistake => l10n.tipTapMistake,
+                AppTip.downloadReciter => l10n.tipDownloadReciter,
               }),
               const SizedBox(height: 8),
               CheckboxListTile(

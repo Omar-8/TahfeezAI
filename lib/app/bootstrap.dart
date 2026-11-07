@@ -7,7 +7,10 @@ import 'package:flutter/foundation.dart'
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:just_audio_background/just_audio_background.dart';
+
+import '../core/audio/media_session.dart';
+import '../core/routing/last_screen.dart';
+
 import 'package:path_provider/path_provider.dart';
 
 import 'package:drift/drift.dart' show GeneratedDatabase;
@@ -63,11 +66,7 @@ Future<void> bootstrap() async {
   // awaited here: it takes ~0.4 s, alongside the Qur'an's setup.
   final audioSession = kIsWeb
       ? Future<void>.value()
-      : JustAudioBackground.init(
-          androidNotificationChannelId: 'ai.tahfeez.tahfeez_ai.audio',
-          androidNotificationChannelName: 'Recitation audio',
-          androidNotificationOngoing: true,
-        ).then((_) => startupMark('audio session'));
+      : TahfeezMediaSession.start().then((_) => startupMark('audio session'));
   // Portrait only, phones and tablets (the Android manifest says so too).
   // These two system calls are not awaited: the first answer waits for the
   // platform to finish starting the screen (~0.35 s on a phone), and the
@@ -181,7 +180,12 @@ Future<void> bootstrap() async {
   runApp(
     UncontrolledProviderScope(
       container: container,
-      child: TahfeezBootstrapGate(seeding: seeding, audioSession: audioSession),
+      child: TahfeezBootstrapGate(
+        seeding: seeding,
+        audioSession: audioSession,
+        // The screen to come back to (read alongside the setup).
+        lastScreen: loadLastScreen(container),
+      ),
     ),
   );
 }

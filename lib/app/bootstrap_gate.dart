@@ -29,6 +29,7 @@ class TahfeezBootstrapGate extends StatefulWidget {
     super.key,
     required this.seeding,
     this.audioSession,
+    this.lastScreen,
   });
 
   final Future<void> seeding;
@@ -36,6 +37,9 @@ class TahfeezBootstrapGate extends StatefulWidget {
   /// The media session's setup (bootstrap's), which the app's audio players
   /// need first: waited for too.
   final Future<void>? audioSession;
+
+  /// The screen the app was last on, read (it opens there).
+  final Future<void>? lastScreen;
 
   @override
   State<TahfeezBootstrapGate> createState() => _TahfeezBootstrapGateState();
@@ -55,6 +59,7 @@ class _TahfeezBootstrapGateState extends State<TahfeezBootstrapGate> {
         debugPrint('The audio session could not be set up: $e');
       },
     ),
+    ?widget.lastScreen?.catchError((Object _) {}),
     Future<void>.delayed(_minimum),
   ]);
 

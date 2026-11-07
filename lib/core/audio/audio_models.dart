@@ -16,10 +16,24 @@ enum AudioEndBehaviour { stopPlayback, nextChapter, repeatChapter }
 /// Immutable snapshot of what the audio subsystem is doing right now.
 /// What is playing, as the media notification and lock screen show it.
 class AudioItemInfo {
-  const AudioItemInfo({required this.title, this.subtitle});
+  const AudioItemInfo({
+    required this.title,
+    this.subtitle,
+    this.group,
+    this.part,
+    this.kbps,
+  });
 
   final String title;
   final String? subtitle;
+
+  /// What a run of items is, shown as one in the media session (a surah);
+  /// [part] this item's place in it (an ayah's number). Without them, the
+  /// item alone ([title]).
+  final String? group, part;
+
+  /// The file's constant bitrate, if known: its length from its size.
+  final int? kbps;
 }
 
 class AudioPlaybackState {

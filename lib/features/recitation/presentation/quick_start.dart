@@ -11,7 +11,7 @@ import '../../listen/application/listen_options.dart';
 import '../../listen/application/quran_audio_player.dart';
 import '../../listen/presentation/follow_along_sheet.dart';
 import '../../listen/presentation/listen_sheet.dart'
-    show offerListenTranslationTip, showListenSheet;
+    show offerDownloadReciterTip, offerListenTranslationTip, showListenSheet;
 import '../../mushaf/application/mushaf_hide_mode.dart';
 import '../../mushaf/application/mushaf_page_verses.dart';
 import '../../mushaf/application/reading_surah.dart';
@@ -136,6 +136,8 @@ Future<void> quickListen(BuildContext context, WidgetRef ref) async {
   final messenger = ScaffoldMessenger.of(context);
   await offerListenTranslationTip(context, ref);
   if (!context.mounted) return;
+  await offerDownloadReciterTip(context, ref, _id(from));
+  if (!context.mounted) return;
   final played = await ref
       .read(quranAudioPlayerProvider.notifier)
       .playRange(
@@ -157,6 +159,8 @@ Future<void> quickFollow(BuildContext context, WidgetRef ref) async {
       !context.mounted) {
     return;
   }
+  await offerDownloadReciterTip(context, ref, _id(range.from));
+  if (!context.mounted) return;
   final started = await ref
       .read(followAlongControllerProvider.notifier)
       .start(

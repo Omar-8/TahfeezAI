@@ -234,6 +234,24 @@ const _launchTranslations = [
     version: '1.4.1',
     versionCode: 1401,
   ),
+  (
+    key: 'chinese_suliman',
+    slug: 'zh-suliman',
+    displayName: 'Chinese Translation - Muhammad Suleiman',
+    language: 'zh',
+    author: 'Muhammad Suleiman',
+    version: '1.0.8',
+    versionCode: 1008,
+  ),
+  (
+    key: 'chinese_makin',
+    slug: 'zh-makin',
+    displayName: 'Chinese Translation - Muhammad Makin',
+    language: 'zh',
+    author: 'Muhammad Makin',
+    version: '1.0.2',
+    versionCode: 1002,
+  ),
 ];
 
 const _mukhtasarAuthor = 'Tafsir Center for Quranic Studies';

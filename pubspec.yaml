@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.1.10+24
+version: 1.1.11+25
 
 environment:
   sdk: ^3.13.3
@@ -76,7 +76,6 @@ dependencies:
   in_app_review: ^2.0.12
   in_app_update: ^5.0.0
   package_info_plus: ^10.2.2
-  just_audio_background: ^0.0.1-beta.17
   # Tahfeez's own iOS platform channels (Android's are in android/app).
   tahfeez_ios:
     path: packages/tahfeez_ios
@@ -218,6 +217,9 @@ flutter:
     - assets/quran/translations/ja_sato.json
     - assets/quran/translations/el_rowwad.json
     - assets/quran/translations/pt_nasr.json
+    # Added 2026-11-07: Chinese.
+    - assets/quran/translations/zh_suliman.json
+    - assets/quran/translations/zh_makin.json
     - assets/quran/tafsir/ja_mukhtasar.json
     - assets/quran/tafsir/ar_mukhtasar.json
     - assets/quran/tafsir/ar_nafahat.json
