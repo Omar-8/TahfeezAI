@@ -1,0 +1,63 @@
+<en-US>
+• The player now shows in the notification bar, on the lock screen and in the island while you listen
+</en-US>
+<ar>
+• يظهر المشغّل الآن في شريط الإشعارات وعلى شاشة القفل وفي الجزيرة أثناء الاستماع
+</ar>
+<bn-BD>
+• শোনার সময় প্লেয়ার এখন নোটিফিকেশন বারে, লক স্ক্রিনে ও আইল্যান্ডে দেখা যায়
+</bn-BD>
+<da-DK>
+• Afspilleren vises nu i notifikationslinjen, på låseskærmen og i øen, mens du lytter
+</da-DK>
+<de-DE>
+• Der Player erscheint jetzt beim Hören in der Benachrichtigungsleiste, auf dem Sperrbildschirm und in der Insel
+</de-DE>
+<el-GR>
+• Η αναπαραγωγή εμφανίζεται πλέον στη γραμμή ειδοποιήσεων, στην οθόνη κλειδώματος και στο νησί όσο ακούτε
+</el-GR>
+<es-ES>
+• El reproductor ahora aparece en la barra de notificaciones, en la pantalla de bloqueo y en la isla mientras escuchas
+</es-ES>
+<fa>
+• پخش‌کننده اکنون هنگام شنیدن در نوار اعلان، صفحهٔ قفل و جزیره نمایش داده می‌شود
+</fa>
+<fr-FR>
+• Le lecteur s'affiche désormais dans la barre de notifications, sur l'écran verrouillé et dans l'île pendant l'écoute
+</fr-FR>
+<id>
+• Pemutar kini tampil di bilah notifikasi, layar kunci, dan pulau saat Anda mendengarkan
+</id>
+<ja-JP>
+• 再生中、プレーヤーが通知バー、ロック画面、アイランドに表示されるようになりました
+</ja-JP>
+<kk>
+• Тыңдаған кезде ойнатқыш енді хабарландыру жолағында, құлып экранында және аралда көрінеді
+</kk>
+<ko-KR>
+• 듣는 동안 플레이어가 알림 표시줄, 잠금 화면, 아일랜드에 표시됩니다
+</ko-KR>
+<ms>
+• Pemain kini dipaparkan di bar pemberitahuan, skrin kunci dan pulau semasa anda mendengar
+</ms>
+<nl-NL>
+• De speler verschijnt nu tijdens het luisteren in de meldingsbalk, op het vergrendelscherm en in het eiland
+</nl-NL>
+<pt-BR>
+• O player agora aparece na barra de notificações, na tela de bloqueio e na ilha enquanto você ouve
+</pt-BR>
+<ru-RU>
+• Плеер теперь отображается в панели уведомлений, на экране блокировки и в «острове» во время прослушивания
+</ru-RU>
+<sw>
+• Kicheza sasa kinaonekana kwenye upau wa arifa, skrini ya kufunga na kisiwa unaposikiliza
+</sw>
+<tr-TR>
+• Dinlerken oynatıcı artık bildirim çubuğunda, kilit ekranında ve adada görünüyor
+</tr-TR>
+<ur>
+• سنتے وقت پلیئر اب نوٹیفکیشن بار، لاک اسکرین اور آئی لینڈ میں دکھائی دیتا ہے
+</ur>
+<zh-CN>
+• 收听时，播放器现在会显示在通知栏、锁屏和灵动岛中
+</zh-CN>

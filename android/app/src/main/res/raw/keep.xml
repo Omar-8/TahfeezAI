@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Release builds shrink resources; audio_service finds its notification
+     buttons' icons by name at run time (getIdentifier), so the shrinker saw
+     them unused and removed them: every playback update then failed ("You
+     must specify an icon resource id to build a CustomAction") and no media
+     notification, lock-screen or island player ever showed (Play 1.1.11 on
+     a Poco F7, 2026-11-07). -->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@drawable/audio_service_*,@mipmap/ic_launcher" />

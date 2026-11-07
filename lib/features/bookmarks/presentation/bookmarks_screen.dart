@@ -121,7 +121,7 @@ class _AyahOpening extends ConsumerWidget {
       textDirection: TextDirection.rtl,
       style: quranTextStyle(
         color: Theme.of(context).colorScheme.onSurfaceVariant,
-        fontFamily: 'Scheherazade New',
+        fontFamily: QuranFont.scheherazade.family,
         fontSize: 18,
       ),
     );

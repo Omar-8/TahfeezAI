@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'lazy_fonts.dart';
+
 /// The verse-by-verse reader's own Arabic Quran font size when rendering
 /// through the QPC Hafs font (`VerseBlock`/`BismillahDivider`) — larger
 /// than [quranTextStyle]'s own default (26), because that Uthmani
@@ -25,10 +27,16 @@ enum QuranFont {
   /// SIL's Lateef: a light Naskh, open and easy to read.
   lateef('Lateef', 'لطيف');
 
-  const QuranFont(this.family, this.arabicName);
+  const QuranFont(this._family, this.arabicName);
 
-  /// The `pubspec.yaml` font family.
-  final String family;
+  final String _family;
+
+  /// The font family, its files loaded once asked for ([ensureFontFamily]:
+  /// Scheherazade New and Lateef are not loaded with the app).
+  String get family {
+    ensureFontFamily(_family);
+    return _family;
+  }
 
   /// Its name, in Arabic.
   final String arabicName;

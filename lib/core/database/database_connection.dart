@@ -16,8 +16,9 @@ import 'bundled_web_database_stub.dart'
 ///   from the `drift` package's own GitHub release so the web build has no
 ///   runtime dependency on an external CDN, consistent with this project's
 ///   offline-first requirement. The ready-made Quran databases (as the
-///   phones have them, `assets/quran/db/`) start from their bundled copy
-///   ([openBundledWebDatabase]).
+///   phones have them, `assets/quran/db/`) start from their bundled copy,
+///   and every database opens through one shared browser check
+///   ([openBundledWebDatabase], which on the web takes them all).
 ///
 /// Every future Drift database Tahfeez adds (the immutable Quran database in
 /// Milestone 2, the mutable user-data database in Milestone 11, and so on)

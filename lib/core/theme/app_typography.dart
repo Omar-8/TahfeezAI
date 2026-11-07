@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'lazy_fonts.dart';
+
 /// Tahfeez's chosen UI typeface family names, matching the `family:` entries
 /// registered in `pubspec.yaml`'s `flutter.fonts` section. See
 /// `docs/THIRD_PARTY_RESOURCES.md` for licensing (both are SIL Open Font
@@ -14,10 +16,16 @@ enum ArabicUiFont {
   almarai('Almarai', 'المراعي'),
   tajawal('Tajawal', 'تجوال');
 
-  const ArabicUiFont(this.family, this.arabicName);
+  const ArabicUiFont(this._family, this.arabicName);
 
-  /// The `pubspec.yaml` font family.
-  final String family;
+  final String _family;
+
+  /// The font family, its files loaded once asked for ([ensureFontFamily]:
+  /// Almarai and Tajawal are not loaded with the app).
+  String get family {
+    ensureFontFamily(_family);
+    return _family;
+  }
 
   /// Its name, in Arabic.
   final String arabicName;

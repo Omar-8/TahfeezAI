@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tahfeez_ai/core/theme/lazy_fonts.dart';
 import 'package:tahfeez_ai/app/app.dart';
 import 'package:tahfeez_ai/core/core_providers.dart';
 import 'package:tahfeez_ai/core/localization/locale_controller.dart';
@@ -244,7 +245,7 @@ class RealApp {
   }
 }
 
-/// Every font the app bundles (`pubspec.yaml`'s `fonts:`), so text is
+/// Every font the app bundles (`pubspec.yaml`'s `fonts:`, and the lazy ones), so text is
 /// measured in the real typefaces rather than the test font.
 Future<void> loadAppFonts() async {
   final lines = File('pubspec.yaml').readAsLinesSync();
@@ -258,6 +259,8 @@ Future<void> loadAppFonts() async {
       assets.putIfAbsent(family, () => []).add(a.group(1)!);
     }
   }
+  // And those loaded only when chosen (lib/core/theme/lazy_fonts.dart).
+  assets.addAll(lazyFontFamilies);
   for (final MapEntry(key: name, value: files) in assets.entries) {
     final loader = FontLoader(name);
     for (final file in files) {
