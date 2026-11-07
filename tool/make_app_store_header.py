@@ -122,8 +122,8 @@ def header():
 # The search results image's text in each listing language that has one
 # (the header has none): two lines and the tags.
 SEARCH_TEXT = {
-    "en-US": ("Recite from memory.", "Every word checked.", "Free · Offline · No ads · No account"),
-    "zh-Hans": ("凭记忆诵读。", "每个词都经过检查。", "免费 · 离线 · 无广告 · 无需账户"),
+    "en-US": ("Recite from memory.", "Every word checked.", "Offline · No ads · No account"),
+    "zh-Hans": ("凭记忆诵读。", "每个词都经过检查。", "离线 · 无广告 · 无需账户"),
 }
 
 # Chinese in the system's Noto Sans CJK (its SC face).
