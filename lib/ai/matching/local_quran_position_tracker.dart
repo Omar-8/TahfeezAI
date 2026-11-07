@@ -199,6 +199,10 @@ class LocalQuranPositionTracker implements RecitationPositionMatcher {
   /// uncovered «بِسْمِ» at 1–6; owner, 2026-11-07).
   static const _formulaOverlap = 4;
 
+  /// A formula seen fitting up to the window's edge (still being said):
+  /// where it ended then (a stream frame) and how far on it may finish.
+  ({int formula, int end, int more})? _formulaWaiting;
+
   /// The stream frame just after the last formula passed over, until the
   /// recitation's first word is placed or refused.
   int? _formulaEndAt;
@@ -217,6 +221,32 @@ class LocalQuranPositionTracker implements RecitationPositionMatcher {
   /// Al-Bayyinah was followed — owner, 2026-11-03).
   int _formulaLead(int a) =>
       a == _istiadha ? config.extraFrames + 18 : config.extraFrames;
+
+  /// Al-Fatiha on screen, its basmala the text here: [fit] of the
+  /// isti'adha over [window] fitting the basmala better, frame for frame —
+  /// «بِٱللَّهِ … ٱلرَّجِيمِ» and «بِسْمِ ٱللَّهِ … ٱلرَّحِيمِ» are alike, and
+  /// a basmala said alone was once passed over as the isti'adha (owner,
+  /// 2026-11-07).
+  bool _basmalaRather(
+    PhonemeResources resources,
+    AcousticFrames window,
+    int a,
+    _Fit fit,
+  ) {
+    if (a != _istiadha || _formulas.isEmpty) return false;
+    final (bs, be) = _formulas.first;
+    if (!(_hasFocus && _focusStart <= be && _focusEnd >= bs)) return false;
+    final basmala = _align(
+      resources,
+      window.slice(fit.start, fit.alignedEnd),
+      bs,
+      be,
+      flexible: true,
+    );
+    return basmala != null &&
+        basmala.coverage >= 0.7 &&
+        basmala.cost <= fit.cost;
+  }
 
   final _frames = _FrameBuffer();
 
@@ -272,6 +302,7 @@ class LocalQuranPositionTracker implements RecitationPositionMatcher {
     _emittedMax = -1;
     _afterFormulaPass = false;
     _formulaEndAt = null;
+    _formulaWaiting = null;
     _current = null;
     _placedWords.clear();
     _tail = const {};
@@ -848,16 +879,88 @@ class LocalQuranPositionTracker implements RecitationPositionMatcher {
           (_cursor != null && _cursor! >= a && _cursor! <= b + 1)) {
         continue; // it is the text here (Al-Fatiha)
       }
-      final f = _align(resources, window, a, b, flexible: true);
-      if (f != null &&
-          f.prefixSpeech <= _formulaLead(a) &&
-          f.coverage >= 0.7 &&
-          f.cost <= config.followCost) {
-        // Still being said: its last word may be cut off — wait, or the
-        // rest («ٱلرَّجِيمِ») spoils what comes next (a basmala).
-        if (!flush && window.frames - 1 - f.alignedEnd <= config.extraFrames) {
+      // Seen ending at the window's edge last time: judged now only up to
+      // a little past there — over all the audio since, its last word
+      // finds a later like one («ٱلرَّجِيمِ» as the basmala's «ٱلرَّحِيمِ»,
+      // or 1:3's) and takes everything said between, the basmala too: it
+      // then fitted too badly to be passed over, or ended past «بِسْمِ»
+      // (owner, Al-Fatiha after the isti'adha, 2026-11-07). Each end up to
+      // there is tried: the one covering the most of it at the least cost
+      // (frames of the next word taken in only cost more).
+      final waiting = _formulaWaiting;
+      _formulaWaiting = null;
+      if (waiting != null && waiting.formula == a) {
+        _Fit? best;
+        final last = math.min(
+          waiting.end - from + waiting.more,
+          window.frames - 2,
+        );
+        for (var end = waiting.end - from; end <= last; end++) {
+          if (end < 1) continue;
+          final g = _align(
+            resources,
+            window.slice(0, end),
+            a,
+            b,
+            flexible: true,
+          );
+          if (g == null ||
+              g.prefixSpeech > _formulaLead(a) ||
+              g.coverage < 0.7 ||
+              g.cost > config.followCost ||
+              _basmalaRather(resources, window, a, g)) {
+            continue;
+          }
+          if (best == null ||
+              g.coverage > best.coverage + 0.01 ||
+              (g.coverage >= best.coverage - 0.01 && g.cost < best.cost)) {
+            best = g;
+          }
+        }
+        // Its best end at the reach's edge, not all of it yet: still being
+        // said (a slow basmala) — waited for again from there.
+        if (best != null &&
+            !flush &&
+            best.coverage < 0.99 &&
+            best.alignedEnd >= last - 1) {
+          _formulaWaiting = (
+            formula: a,
+            end: from + best.alignedEnd,
+            more: waiting.more,
+          );
           return const [];
         }
+        if (best != null) {
+          _log('passed over ${_fmt(a)} formula');
+          _mark = _afterFormula(from, best.alignedEnd);
+          return const [];
+        }
+      }
+      final f = _align(resources, window, a, b, flexible: true);
+      if (f == null ||
+          f.prefixSpeech > _formulaLead(a) ||
+          f.cost > config.followCost ||
+          _basmalaRather(resources, window, a, f)) {
+        continue;
+      }
+      // Still being said: its last word may be cut off — wait, or the
+      // rest («ٱلرَّجِيمِ») spoils what comes next (a basmala). Begun
+      // clearly (half of it) counts too: its end kept for the next look.
+      final atEdge = window.frames - 1 - f.alignedEnd <= config.extraFrames;
+      if (!flush && atEdge && f.coverage >= 0.5) {
+        _log(
+          'waiting for ${_fmt(a)} formula (ends at ${from + f.alignedEnd}, '
+          'cost ${f.cost.toStringAsFixed(2)}, '
+          'coverage ${f.coverage.toStringAsFixed(2)})',
+        );
+        _formulaWaiting = (
+          formula: a,
+          end: from + f.alignedEnd,
+          more: f.coverage >= 0.9 ? config.extraFrames : 2 * config.extraFrames,
+        );
+        return const [];
+      }
+      if (f.coverage >= 0.7) {
         _log('passed over ${_fmt(a)} formula');
         _mark = _afterFormula(from, f.alignedEnd);
         return const [];

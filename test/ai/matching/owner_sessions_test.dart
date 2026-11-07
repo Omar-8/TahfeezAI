@@ -81,6 +81,22 @@ const _sessions = <_Session>[
     from: 97001,
     to: 98007,
   ),
+  (
+    tag: 'owner1107a_v37',
+    note:
+        '2026-11-07 14:58 the isti\'adha then Al-Fatiha (was: started at '
+        '«ٱللَّهِ», «بِسْمِ» left out)',
+    from: 1001,
+    to: 1007,
+  ),
+  (
+    tag: 'owner1107b_v37',
+    note:
+        '2026-11-07 14:59 the isti\'adha then Al-Fatiha (was: «بِسْمِ» a '
+        'sliver, or nothing located)',
+    from: 1001,
+    to: 1007,
+  ),
 ];
 
 AcousticFrames? _frames(String tag) {
@@ -353,6 +369,44 @@ void main() {
         isEmpty,
         reason: '$found',
       );
+    });
+
+    test('11-07: the isti\'adha then Al-Fatiha — «بِسْمِ» placed first, '
+        'on its own length, however the chunks fall', () {
+      // «ٱلرَّجِيمِ» is like «ٱلرَّحِيمِ»: judged over the audio after it,
+      // the isti'adha took in the basmala (passed over too late, or never).
+      for (final tag in ['owner1107a_v37', 'owner1107b_v37']) {
+        final frames = available[tag]!;
+        for (final shift in [0, 8, 16, 24]) {
+          final r = replay(
+            PositionScenario(tag, {
+              'note': '',
+              'chunk_ends': [
+                for (var e = 32 + shift; e < frames.frames; e += 32) e,
+                frames.frames,
+              ],
+              'focus': [1001, 1007],
+              'anchor': 1001,
+              'trust_anchor': false,
+              'focus_only': true,
+              'recited': <int>[],
+            }),
+            frames: frames,
+          );
+          final why = '$tag +$shift: ${r.log.take(8).join(' / ')}';
+          expect(r.placed, isNotEmpty, reason: why);
+          expect(r.placed.first.$1, pos(1, 1, 1), reason: why);
+          // Its own length (6–7 frames here), not a sliver.
+          final span = RegExp(
+            r'^placed 1:1:1 at (\d+)\.\.(\d+)',
+          ).firstMatch(r.log.firstWhere((l) => l.startsWith('placed 1:1:1')))!;
+          expect(
+            int.parse(span[2]!) - int.parse(span[1]!),
+            greaterThanOrEqualTo(4),
+            reason: why,
+          );
+        }
+      }
     });
   }, skip: skip);
 }
