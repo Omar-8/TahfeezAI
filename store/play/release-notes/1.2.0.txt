@@ -1,63 +1,84 @@
 <en-US>
 • The player now shows in the notification bar, on the lock screen and in the island while you listen
+• Al-Fatiha: the Bismillah is followed after the isti'adha
 </en-US>
 <ar>
 • يظهر المشغّل الآن في شريط الإشعارات وعلى شاشة القفل وفي الجزيرة أثناء الاستماع
+• الفاتحة: تُتابَع البسملة بعد الاستعاذة
 </ar>
 <bn-BD>
 • শোনার সময় প্লেয়ার এখন নোটিফিকেশন বারে, লক স্ক্রিনে ও আইল্যান্ডে দেখা যায়
+• আল-ফাতিহা: আউযুবিল্লাহর পর বিসমিল্লাহ অনুসরণ করা হয়
 </bn-BD>
 <da-DK>
 • Afspilleren vises nu i notifikationslinjen, på låseskærmen og i øen, mens du lytter
+• Al-Fatiha: Bismillah følges efter isti'adha
 </da-DK>
 <de-DE>
 • Der Player erscheint jetzt beim Hören in der Benachrichtigungsleiste, auf dem Sperrbildschirm und in der Insel
+• Al-Fatiha: die Bismillah wird nach der Isti'adha erkannt
 </de-DE>
 <el-GR>
 • Η αναπαραγωγή εμφανίζεται πλέον στη γραμμή ειδοποιήσεων, στην οθόνη κλειδώματος και στο νησί όσο ακούτε
+• Al-Fatiha: η Μπασμάλα αναγνωρίζεται μετά την isti'adha
 </el-GR>
 <es-ES>
 • El reproductor ahora aparece en la barra de notificaciones, en la pantalla de bloqueo y en la isla mientras escuchas
+• Al-Fátiha: la Basmala se sigue tras la isti'adha
 </es-ES>
 <fa>
 • پخش‌کننده اکنون هنگام شنیدن در نوار اعلان، صفحهٔ قفل و جزیره نمایش داده می‌شود
+• فاتحه: بسمله پس از استعاذه دنبال می‌شود
 </fa>
 <fr-FR>
 • Le lecteur s'affiche désormais dans la barre de notifications, sur l'écran verrouillé et dans l'île pendant l'écoute
+• Al-Fatiha : la Basmala est suivie après l'isti'adha
 </fr-FR>
 <id>
 • Pemutar kini tampil di bilah notifikasi, layar kunci, dan pulau saat Anda mendengarkan
+• Al-Fatihah: Basmalah diikuti setelah isti'adzah
 </id>
 <ja-JP>
 • 再生中、プレーヤーが通知バー、ロック画面、アイランドに表示されるようになりました
+• ファーティハ：イスティアーザの後のバスマラを追跡
 </ja-JP>
 <kk>
 • Тыңдаған кезде ойнатқыш енді хабарландыру жолағында, құлып экранында және аралда көрінеді
+• Фатиха: истиазадан кейін Бисмиллаһ қадағаланады
 </kk>
 <ko-KR>
 • 듣는 동안 플레이어가 알림 표시줄, 잠금 화면, 아일랜드에 표시됩니다
+• 알파티하: 이스티아자 뒤의 바스말라를 따라갑니다
 </ko-KR>
 <ms>
 • Pemain kini dipaparkan di bar pemberitahuan, skrin kunci dan pulau semasa anda mendengar
+• Al-Fatihah: Basmalah diikuti selepas isti'azah
 </ms>
 <nl-NL>
 • De speler verschijnt nu tijdens het luisteren in de meldingsbalk, op het vergrendelscherm en in het eiland
+• Al-Fatiha: de Bismillah wordt gevolgd na de isti'adha
 </nl-NL>
 <pt-BR>
 • O player agora aparece na barra de notificações, na tela de bloqueio e na ilha enquanto você ouve
+• Al-Fátiha: a Basmala é acompanhada após a isti'adha
 </pt-BR>
 <ru-RU>
 • Плеер теперь отображается в панели уведомлений, на экране блокировки и в «острове» во время прослушивания
+• Аль-Фатиха: басмала отслеживается после истиазы
 </ru-RU>
 <sw>
 • Kicheza sasa kinaonekana kwenye upau wa arifa, skrini ya kufunga na kisiwa unaposikiliza
+• Al-Fatiha: Bismillah inafuatiliwa baada ya isti'adha
 </sw>
 <tr-TR>
 • Dinlerken oynatıcı artık bildirim çubuğunda, kilit ekranında ve adada görünüyor
+• Fâtiha: istiâzeden sonra besmele takip edilir
 </tr-TR>
 <ur>
 • سنتے وقت پلیئر اب نوٹیفکیشن بار، لاک اسکرین اور آئی لینڈ میں دکھائی دیتا ہے
+• فاتحہ: استعاذہ کے بعد بسم اللہ کو پہچانا جاتا ہے
 </ur>
 <zh-CN>
 • 收听时，播放器现在会显示在通知栏、锁屏和灵动岛中
+• 开端章：求护词之后的太斯米能被跟随
 </zh-CN>
