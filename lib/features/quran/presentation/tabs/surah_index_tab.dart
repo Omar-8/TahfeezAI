@@ -204,6 +204,7 @@ class _SurahIndexTabState extends ConsumerState<SurahIndexTab> {
                   borderRadius: BorderRadius.circular(TahfeezRadii.pill),
                   child: TextField(
                     controller: _searchController,
+                    textAlignVertical: TextAlignVertical.center,
                     style: Theme.of(context).textTheme.bodyMedium,
                     decoration: InputDecoration(
                       hintText: AppLocalizations.of(context)
@@ -216,9 +217,11 @@ class _SurahIndexTabState extends ConsumerState<SurahIndexTab> {
                       constraints: const BoxConstraints(
                         minHeight: _searchBarHeight,
                       ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        vertical: TahfeezSpacing.smPlus,
-                      ),
+                      // No vertical padding: the text is centred in the
+                      // 48 by `textAlignVertical`, whatever the font's line
+                      // metrics (on the web they differ, and equal
+                      // paddings left it off-centre).
+                      contentPadding: EdgeInsets.zero,
                       prefixIcon: Icon(
                         Icons.search,
                         color: scheme.onSurfaceVariant,

@@ -488,6 +488,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           key: const ValueKey('settings-search'),
                           onChanged: _search,
                           textInputAction: TextInputAction.search,
+                          textAlignVertical: TextAlignVertical.center,
                           decoration: InputDecoration(
                             prefixIcon: const Icon(Icons.search_rounded),
                             hintText: l10n.settingsSearchHint,
@@ -495,9 +496,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             // 48 high: a tap target's least.
                             constraints: const BoxConstraints(minHeight: 48),
                             border: InputBorder.none,
-                            contentPadding: const EdgeInsets.symmetric(
-                              vertical: TahfeezSpacing.smPlus,
-                            ),
+                            // Centred by `textAlignVertical`, not by
+                            // paddings (the web's line metrics differ).
+                            contentPadding: EdgeInsets.zero,
                           ),
                         ),
                       ),
