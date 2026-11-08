@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import 'app_logger.dart';
+import 'recent_log.dart';
 
 /// Wires Flutter/Dart's global error hooks into an [AppLogger].
 ///
@@ -11,6 +12,10 @@ import 'app_logger.dart';
 void installGlobalErrorReporting(AppLogger logger) {
   final previousOnError = FlutterError.onError;
   FlutterError.onError = (FlutterErrorDetails details) {
+    RecentLog.instance.add(
+      'ERROR ${details.exceptionAsString()}\n'
+      '${_firstLines(details.stack)}',
+    );
     logger.error(
       details.summary.toString(),
       tag: 'FlutterError',
@@ -21,6 +26,7 @@ void installGlobalErrorReporting(AppLogger logger) {
   };
 
   PlatformDispatcher.instance.onError = (Object error, StackTrace stackTrace) {
+    RecentLog.instance.add('ERROR $error\n${_firstLines(stackTrace)}');
     logger.error(
       'Uncaught platform/async error',
       tag: 'PlatformDispatcher',
@@ -30,3 +36,7 @@ void installGlobalErrorReporting(AppLogger logger) {
     return true;
   };
 }
+
+/// A stack's top, for [RecentLog]: where it happened, not all of it.
+String _firstLines(StackTrace? stack, [int lines = 6]) =>
+    (stack?.toString() ?? '').split('\n').take(lines).join('\n');

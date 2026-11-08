@@ -48,6 +48,20 @@ class MainActivity : AudioServiceActivity() {
                         window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
                     }
                     result.success(null)
+                } else if (call.method == "appSettings") {
+                    // The microphone refused for good: the app's own page in
+                    // the system settings, where it can be allowed.
+                    try {
+                        startActivity(
+                            android.content.Intent(
+                                android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                                android.net.Uri.fromParts("package", packageName, null),
+                            ).addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK),
+                        )
+                        result.success(true)
+                    } catch (e: Exception) {
+                        result.success(false)
+                    }
                 } else {
                     result.notImplemented()
                 }

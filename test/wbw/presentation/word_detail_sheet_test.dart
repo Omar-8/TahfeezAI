@@ -57,6 +57,11 @@ void main() {
 
     expect(find.text('lafz'), findsOneWidget);
     expect(find.textContaining('Ayah 1:1'), findsOneWidget);
+    // Closed by the ✕ in its header, every tappable 48 × 48.
+    expect(find.byKey(const ValueKey('sheet-close')), findsOneWidget);
+    final semantics = tester.ensureSemantics();
+    await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+    semantics.dispose();
   });
 
   testWidgets('shows an install hint with no active word-by-word pack', (

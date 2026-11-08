@@ -22,7 +22,7 @@ enum _RevelationFilter { all, meccan, medinan }
 /// so the two can never drift apart by sizing independently to their own
 /// content (the search `TextField`'s natural height vs. an `IconButton`'s
 /// default Material tap target are not the same by default).
-const _searchBarHeight = 44.0;
+const _searchBarHeight = 48.0;
 
 /// The Surah navigator tab: every chapter, searchable by number/name and
 /// filterable by revelation place — `docs/reference/02_SCREEN_INVENTORY.md`
@@ -199,55 +199,45 @@ class _SurahIndexTabState extends ConsumerState<SurahIndexTab> {
               // button beside it, rather than each sizing independently to
               // its own content and drifting apart by a few pixels.
               Expanded(
-                child: SizedBox(
-                  height: _searchBarHeight,
-                  // Glass, as the cards below it.
-                  child: TahfeezGlassSurface(
-                    borderRadius: BorderRadius.circular(TahfeezRadii.pill),
-                    child: TextField(
-                      controller: _searchController,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                      // Without this, the hint text/input baseline sits
-                      // slightly above true center within the search bar's
-                      // now-fixed `_searchBarHeight` box (`TextField`'s
-                      // default vertical alignment accounts for its own
-                      // natural content height, not an ancestor-imposed
-                      // fixed height) -- while the prefix search icon,
-                      // constrained separately, already looked centered.
-                      textAlignVertical: TextAlignVertical.center,
-                      decoration: InputDecoration(
-                        hintText: AppLocalizations.of(context)
-                            .quranSearchChapters,
-                        border: InputBorder.none,
-                        isDense: true,
-                        contentPadding: const EdgeInsets.symmetric(
-                          vertical: TahfeezSpacing.sm,
-                        ),
-                        prefixIcon: Icon(
-                          Icons.search,
-                          color: scheme.onSurfaceVariant,
-                        ),
-                        prefixIconConstraints: const BoxConstraints(
-                          minWidth: 40,
-                          minHeight: 40,
-                        ),
-                        suffixIcon: _query.isEmpty
-                            ? null
-                            : IconButton(
-                                icon: Icon(
-                                  Icons.close,
-                                  color: scheme.onSurfaceVariant,
-                                ),
-                                tooltip: AppLocalizations.of(context)
-                                    .quranClear,
-                                onPressed: () {
-                                  _searchController.clear();
-                                  setState(() => _query = '');
-                                },
-                              ),
+                // Glass, as the cards below it.
+                child: TahfeezGlassSurface(
+                  borderRadius: BorderRadius.circular(TahfeezRadii.pill),
+                  child: TextField(
+                    controller: _searchController,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                    decoration: InputDecoration(
+                      hintText: AppLocalizations.of(context)
+                          .quranSearchChapters,
+                      border: InputBorder.none,
+                      isDense: true,
+                      // As Settings' search: its own height (no fixed
+                      // box around it), the text centred between equal
+                      // paddings — at least the buttons' 48 beside it.
+                      constraints: const BoxConstraints(
+                        minHeight: _searchBarHeight,
                       ),
-                      onChanged: (value) => setState(() => _query = value),
+                      contentPadding: const EdgeInsets.symmetric(
+                        vertical: TahfeezSpacing.smPlus,
+                      ),
+                      prefixIcon: Icon(
+                        Icons.search,
+                        color: scheme.onSurfaceVariant,
+                      ),
+                      suffixIcon: _query.isEmpty
+                          ? null
+                          : IconButton(
+                              icon: Icon(
+                                Icons.close,
+                                color: scheme.onSurfaceVariant,
+                              ),
+                              tooltip: AppLocalizations.of(context).quranClear,
+                              onPressed: () {
+                                _searchController.clear();
+                                setState(() => _query = '');
+                              },
+                            ),
                     ),
+                    onChanged: (value) => setState(() => _query = value),
                   ),
                 ),
               ),

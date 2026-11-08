@@ -17,6 +17,7 @@ import 'package:drift/drift.dart' show GeneratedDatabase;
 
 import '../core/database/database_connection_web_cleanup.dart';
 import '../core/logging/error_reporting.dart';
+import '../core/logging/recent_log.dart';
 import '../core/platform/web_platform_channels.dart';
 import '../core/logging/logging_package_logger.dart';
 import '../core/storage/storage_providers.dart';
@@ -89,6 +90,13 @@ Future<void> bootstrap() async {
   startupMark('system UI');
   final logger = LoggingPackageLogger();
   installGlobalErrorReporting(logger);
+  // The app's messages kept (in memory) for a problem report, and written
+  // as before.
+  final print = debugPrint;
+  debugPrint = (String? message, {int? wrapWidth}) {
+    RecentLog.instance.add(message);
+    print(message, wrapWidth: wrapWidth);
+  };
 
   final container = ProviderContainer();
   // Its failure kept (quranSetupProvider): the screens needing the Quran

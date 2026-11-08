@@ -70,10 +70,14 @@ final todayPlanProvider = FutureProvider<TodayPlan>((ref) async {
 
 /// One graded ayah of a session, with its strength before and after.
 class SummaryRow {
-  const SummaryRow(this.attempt, {this.before, this.after});
+  const SummaryRow(this.attempt, {this.before, this.after, this.previous});
 
   final AyahAttempt attempt;
   final double? before, after;
+
+  /// The ayah's latest test before this session's, if any: how it went
+  /// last time, to compare.
+  final AyahAttempt? previous;
 }
 
 /// The latest session's graded ayahs (every test of it: a loop's passes
@@ -108,6 +112,25 @@ class TestSummaryController extends Notifier<TestSummary?> {
     if (attempts.isEmpty) return;
     final repo = ref.read(memorizationRepositoryProvider);
     final at = attempts.first.at;
+    final sessionId = _run ?? attempts.first.sessionId;
+    final current = state?.sessionId == sessionId ? state : null;
+    // Each ayah's last test before this session (a run's turns, a loop's
+    // passes are this session too).
+    final ours = {
+      for (final r in current?.rows ?? const <SummaryRow>[])
+        r.attempt.sessionId,
+      for (final a in attempts) a.sessionId,
+    };
+    final previous = <int, AyahAttempt?>{
+      for (final r in current?.rows ?? const <SummaryRow>[])
+        r.attempt.ayahId: r.previous,
+    };
+    for (final id in {for (final a in attempts) a.ayahId}) {
+      if (previous.containsKey(id)) continue;
+      previous[id] = (await repo.attemptsFor(id))
+          .where((a) => !ours.contains(a.sessionId))
+          .lastOrNull;
+    }
     final before = await repo.watchMemories().first;
     await repo.recordTest(attempts);
     final after = await repo.watchMemories().first;
@@ -120,12 +143,12 @@ class TestSummaryController extends Notifier<TestSummary?> {
           a,
           before: strength(before[a.ayahId]),
           after: strength(after[a.ayahId]),
+          previous: previous[a.ayahId],
         ),
     ];
-    final sessionId = _run ?? attempts.first.sessionId;
-    final current = state;
+    final now = state;
     state = TestSummary(sessionId, [
-      if (current != null && current.sessionId == sessionId) ...current.rows,
+      if (now != null && now.sessionId == sessionId) ...now.rows,
       ...rows,
     ]);
   }

@@ -76,7 +76,10 @@ class _TafsirPacksSheetBody extends ConsumerWidget {
         );
       },
       loading: () => const TahfeezLoadingView(),
-      error: (_, _) => TahfeezErrorView(message: l10n.packsTafsirError),
+      error: (_, _) => TahfeezErrorView(
+        message: l10n.packsTafsirError,
+        onRetry: () => ref.invalidate(tafsirLibraryControllerProvider),
+      ),
     );
   }
 }

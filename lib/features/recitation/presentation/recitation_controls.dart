@@ -8,6 +8,9 @@ import '../../../ai/acoustic/local_quran_acoustic_model.dart';
 import 'package:flutter/foundation.dart'
     show ValueListenable, kReleaseMode, listEquals;
 import 'package:flutter/material.dart';
+
+import '../../../core/platform/app_settings_opener.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/audio/audio_models.dart';
@@ -365,9 +368,32 @@ class RecitationBottomBar extends ConsumerWidget {
         _ => null,
       };
       if (message == null) return;
+      final l10n = AppLocalizations.of(context);
+      final denied = next.phase == RecitationPhase.permissionDenied;
       messenger
         ..hideCurrentSnackBar()
-        ..showSnackBar(SnackBar(content: Text(message)));
+        ..showSnackBar(
+          SnackBar(
+            // Refused: how to allow it — the app's settings page, or (in a
+            // browser) the site's microphone setting.
+            content: Text(
+              denied && !AppSettingsOpener.supported
+                  ? '$message ${l10n.recMicAllowBrowser}'
+                  : message,
+            ),
+            duration: denied
+                ? const Duration(seconds: 8)
+                : const Duration(seconds: 4),
+            action: denied && AppSettingsOpener.supported
+                ? SnackBarAction(
+                    key: const ValueKey('mic-open-settings'),
+                    label: l10n.recMicOpenSettings,
+                    onPressed: () =>
+                        unawaited(const AppSettingsOpener().open()),
+                  )
+                : null,
+          ),
+        );
       if (next.phase == RecitationPhase.permissionDenied ||
           next.phase == RecitationPhase.error) {
         ref.read(recitationSessionControllerProvider.notifier).dismissError();
@@ -591,7 +617,8 @@ class RecitationBottomBar extends ConsumerWidget {
               ],
             ),
           ),
-          if (recognition != null || ref.watch(coloursOffNoticeProvider))
+          if (recognition != null ||
+              ref.watch(coloursOffNoticeProvider) != null)
             const Positioned(
               top: -FollowAlongHint.height / 2 + 4,
               left: 16,
@@ -622,31 +649,40 @@ final freshResultsProvider = NotifierProvider.autoDispose<FreshResults, bool>(
 /// colours are turned off (or until two words are heard). Turned off again
 /// while it shows, it is neither queued nor started over (owner,
 /// 2026-11-08).
-class ColoursOffNotice extends Notifier<bool> {
+///
+/// Each of the eye's states is said so (owner, 2026-11-08): colours shown,
+/// colours off, ayahs hidden — each its own 5 s: switched to another state
+/// while one shows, the new one replaces it and its 5 s start; the same
+/// one again is not started over.
+class ColoursOffNotice extends Notifier<EyeNotice?> {
   static const duration = Duration(seconds: 5);
 
   Timer? _timer;
 
   @override
-  bool build() {
+  EyeNotice? build() {
     ref.onDispose(() => _timer?.cancel());
-    return false;
+    return null;
   }
 
-  void show() {
-    if (state) return;
-    state = true;
+  void show([EyeNotice kind = EyeNotice.coloursOff]) {
+    if (state == kind) return;
+    state = kind;
+    _timer?.cancel();
     _timer = Timer(duration, hide);
   }
 
   void hide() {
     _timer?.cancel();
     _timer = null;
-    if (ref.mounted && state) state = false;
+    if (ref.mounted && state != null) state = null;
   }
 }
 
-final coloursOffNoticeProvider = NotifierProvider<ColoursOffNotice, bool>(
+/// What the eye was just set to, said on the bar.
+enum EyeNotice { colours, coloursOff, hidden }
+
+final coloursOffNoticeProvider = NotifierProvider<ColoursOffNotice, EyeNotice?>(
   ColoursOffNotice.new,
 );
 
@@ -733,8 +769,8 @@ class _BarHints extends ConsumerWidget {
         ? _onScreen(ref)
         : const <WordRef>[];
     // Colours just turned off: said for 5 s, or until two words are heard.
-    final coloursOff = ref.watch(coloursOffNoticeProvider);
-    if (coloursOff && id != null && heard >= 2) {
+    final eyeNotice = ref.watch(coloursOffNoticeProvider);
+    if (eyeNotice != null && id != null && heard >= 2) {
       WidgetsBinding.instance.addPostFrameCallback(
         (_) => ref.read(coloursOffNoticeProvider.notifier).hide(),
       );
@@ -746,10 +782,17 @@ class _BarHints extends ConsumerWidget {
           )
         : null;
     final Widget child;
-    if (coloursOff && !review) {
-      child = const IgnorePointer(
-        key: ValueKey('colours-off'),
-        child: _HintPill.coloursOff(key: ValueKey('colours-off-hint')),
+    if (eyeNotice != null && !review) {
+      child = IgnorePointer(
+        key: ValueKey('eye-notice-${eyeNotice.name}'),
+        child: _HintPill.eye(
+          eyeNotice,
+          key: ValueKey(
+            eyeNotice == EyeNotice.coloursOff
+                ? 'colours-off-hint'
+                : 'eye-notice-hint',
+          ),
+        ),
       );
     } else if (review || onScreen.isNotEmpty) {
       child = MouseRegion(
@@ -812,7 +855,7 @@ class _LoopReviewHint extends ConsumerWidget {
     if (!ref.watch(hifzControllerProvider.select((h) => h.loopReview))) {
       return const SizedBox.shrink();
     }
-    return const _MistakesPill(key: ValueKey('loop-review-hint'));
+    return const _HintPill.review(key: ValueKey('loop-review-hint'));
   }
 }
 
@@ -827,16 +870,31 @@ class _MistakesPill extends StatelessWidget {
 /// A hint as a pill on the bar's top border: mistakes found, or the
 /// microphone listening.
 class _HintPill extends StatelessWidget {
-  const _HintPill.mistakes() : kind = _Hint.mistakes, loopText = null;
+  const _HintPill.mistakes()
+    : kind = _Hint.mistakes,
+      loopText = null,
+      eye = null;
+
+  /// A loop's last time with mistakes: what Try again and Skip do.
+  const _HintPill.review({super.key})
+    : kind = _Hint.review,
+      loopText = null,
+      eye = null;
   const _HintPill.listening({super.key})
     : kind = _Hint.listening,
-      loopText = null;
-  const _HintPill.coloursOff({super.key})
+      loopText = null,
+      eye = null;
+  const _HintPill.eye(EyeNotice this.eye, {super.key})
     : kind = _Hint.coloursOff,
       loopText = null;
-  const _HintPill.loop(String this.loopText, {super.key}) : kind = _Hint.loop;
+  const _HintPill.loop(String this.loopText, {super.key})
+    : kind = _Hint.loop,
+      eye = null;
 
   final _Hint kind;
+
+  /// The eye's state just set.
+  final EyeNotice? eye;
 
   /// A loop's: the ayah, and how many times are left.
   final String? loopText;
@@ -847,7 +905,8 @@ class _HintPill extends StatelessWidget {
     final scheme = theme.colorScheme;
     final l10n = AppLocalizations.of(context);
     final (background, foreground) = switch (kind) {
-      _Hint.mistakes => (scheme.errorContainer, scheme.onErrorContainer),
+      _Hint.mistakes ||
+      _Hint.review => (scheme.errorContainer, scheme.onErrorContainer),
       _Hint.loop => (scheme.secondaryContainer, scheme.onSecondaryContainer),
       _ => (scheme.primary, scheme.onPrimary),
     };
@@ -856,7 +915,7 @@ class _HintPill extends StatelessWidget {
       fontWeight: FontWeight.w600,
     );
     // (Colours off: wrapped to two lines where one is too short.)
-    final wraps = kind == _Hint.coloursOff;
+    final wraps = kind == _Hint.coloursOff || kind == _Hint.review;
     return Container(
       height: wraps ? null : FollowAlongHint.height,
       constraints: const BoxConstraints(minHeight: FollowAlongHint.height),
@@ -878,8 +937,11 @@ class _HintPill extends StatelessWidget {
         children: [
           Icon(
             switch (kind) {
-              _Hint.mistakes => Icons.error_outline_rounded,
-              _Hint.coloursOff => Icons.visibility_outlined,
+              _Hint.mistakes || _Hint.review => Icons.error_outline_rounded,
+              _Hint.coloursOff => switch (eye) {
+                EyeNotice.hidden => Icons.visibility_off_outlined,
+                _ => Icons.visibility_outlined,
+              },
               _Hint.loop => Icons.repeat_rounded,
               _Hint.listening => Icons.mic_rounded,
             },
@@ -890,7 +952,12 @@ class _HintPill extends StatelessWidget {
             child: Text(
               switch (kind) {
                 _Hint.mistakes => l10n.followMistakesFound,
-                _Hint.coloursOff => l10n.recColoursOffHint,
+                _Hint.review => l10n.recReviewHint,
+                _Hint.coloursOff => switch (eye) {
+                  EyeNotice.colours => l10n.recColoursOnHint,
+                  EyeNotice.hidden => l10n.recAyahsHiddenHint,
+                  _ => l10n.recColoursOffHint,
+                },
                 _Hint.loop => loopText!,
                 _Hint.listening => l10n.recListeningHint,
               },
@@ -906,7 +973,7 @@ class _HintPill extends StatelessWidget {
   }
 }
 
-enum _Hint { mistakes, listening, coloursOff, loop }
+enum _Hint { mistakes, review, listening, coloursOff, loop }
 
 /// A running loop, in words for the bar: the ayah being recited and how
 /// many times are left of it, this one included (owner, 2026-11-08) — a
@@ -1552,7 +1619,10 @@ class _SessionControls extends ConsumerWidget {
           TextButton(
             key: const ValueKey('follow-skip'),
             onPressed: () => inFollow ? unawaited(run.skip()) : hifz.loopSkip(),
-            child: Text(l10n.followSkip),
+            child: Tooltip(
+              message: l10n.recSkipTip,
+              child: Text(l10n.followSkip),
+            ),
           ),
           const SizedBox(width: 4),
           FilledButton.icon(
@@ -1560,7 +1630,10 @@ class _SessionControls extends ConsumerWidget {
             onPressed: () =>
                 inFollow ? unawaited(run.tryAgain()) : hifz.loopTryAgain(),
             icon: const Icon(Icons.replay_rounded, size: 18),
-            label: Text(l10n.followTryAgain),
+            label: Tooltip(
+              message: l10n.recTryAgainTip,
+              child: Text(l10n.followTryAgain),
+            ),
           ),
           const SizedBox(width: 8),
           const MushafHideControls(part: MushafHideControlsPart.pinned),
@@ -1928,8 +2001,6 @@ class MushafHideControls extends ConsumerWidget {
       };
     }
 
-    // Compact, so the bar still fits a phone next to the recording controls.
-    const density = VisualDensity.compact;
     const gap = SizedBox(width: MushafHideControls._hideControlsGap);
     Widget step(String key, IconData icon, String tip, VoidCallback? onTap) =>
         GuideTarget(
@@ -2015,7 +2086,7 @@ class MushafHideControls extends ConsumerWidget {
       id: 'eye',
       child: IconButton(
         key: const ValueKey('mushaf-hide-toggle'),
-        visualDensity: density,
+        // 48 × 48 to tap, as every button on the bar.
         isSelected: hide.enabled,
         // (The Recite button's green.)
         icon: colours
@@ -2040,13 +2111,19 @@ class MushafHideControls extends ConsumerWidget {
             : null,
         onPressed: () {
           // (The guide's hide tour: straight to the ayahs hidden.)
-          if (hide.enabled || ref.read(guideProvider) != null) {
+          final guided = ref.read(guideProvider) != null;
+          final notice = ref.read(coloursOffNoticeProvider.notifier);
+          if (hide.enabled || guided) {
+            if (!guided) {
+              notice.show(hide.enabled ? EyeNotice.colours : EyeNotice.hidden);
+            }
             notifier.toggle();
           } else if (colours) {
             setColours(false);
-            ref.read(coloursOffNoticeProvider.notifier).show();
+            notice.show();
             return;
           } else {
+            notice.show(EyeNotice.hidden);
             notifier.toggle();
           }
           // Ayahs hidden or shown again: in colour.
@@ -2421,6 +2498,9 @@ class _RecitationIntroSheet extends ConsumerWidget {
                     ),
                   ),
                 ),
+                SheetCloseButton(
+                  onPressed: () => Navigator.of(context).maybePop(),
+                ),
               ],
             ),
             const SizedBox(height: TahfeezSpacing.sm),
@@ -2462,6 +2542,8 @@ class _RecitationIntroSheet extends ConsumerWidget {
             ),
             point(const Icon(Icons.school_outlined), l10n.recIntroLearning),
             point(const Icon(Icons.lock_outline), l10n.recIntroPrivate),
+            // Before the system's own question: why it will ask.
+            point(const Icon(Icons.mic_none_rounded), l10n.recIntroMicAsk),
             const SizedBox(height: TahfeezSpacing.md),
             Row(
               children: [
@@ -2502,8 +2584,11 @@ Future<void> showHifzSettingsSheet(BuildContext context) {
     useSafeArea: true,
     useRootNavigator: true,
     constraints: sheetBelowAppBar(context),
-    builder: (context) =>
-        GlassSheet(handle: true, child: const _HifzSettingsSheet()),
+    builder: (context) => GlassSheet(
+      handle: true,
+      closable: true,
+      child: const _HifzSettingsSheet(),
+    ),
   );
 }
 
@@ -2537,6 +2622,8 @@ class _HifzSettingsSheetState extends ConsumerState<_HifzSettingsSheet>
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // (Its ✕ on the drag handle's line: the tabs the full width, no
+          // row of its own.)
           TabBar(
             key: const ValueKey('hifz-settings-tabs'),
             controller: _tabs,
@@ -2832,6 +2919,33 @@ class _HifzSettingsSheetState extends ConsumerState<_HifzSettingsSheet>
                   selected: settings.tajweedColor,
                   onSelected: (c) =>
                       controller.update(settings.copyWith(tajweedColor: c)),
+                )
+              else if (settings.colorWords)
+                // Where its colour is chosen, while tajweed is not judged:
+                // said, with the way to turn it on (it once just vanished).
+                Row(
+                  key: const ValueKey('hifz-tajweed-colour-off'),
+                  spacing: TahfeezSpacing.sm,
+                  children: [
+                    Icon(
+                      Icons.info_outline_rounded,
+                      size: 18,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                    Expanded(
+                      child: Text(
+                        l10n.recTajweedColourOff,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () =>
+                          controller.update(settings.copyWith(tajweed: true)),
+                      child: Text(l10n.recTurnOn),
+                    ),
+                  ],
                 ),
               toggle(
                 AppLocalizations.of(context).recShowMistakes,

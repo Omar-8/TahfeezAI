@@ -85,8 +85,28 @@ class BookmarksScreen extends ConsumerWidget {
                         IconButton(
                           icon: const Icon(Icons.delete_outline_rounded),
                           tooltip: l10n.bookmarkRemove,
-                          onPressed: () =>
-                              ref.read(bookmarksProvider.notifier).remove(b),
+                          onPressed: () {
+                            final bookmarks = ref.read(
+                              bookmarksProvider.notifier,
+                            );
+                            final index = ref
+                                .read(bookmarksProvider)
+                                .indexOf(b);
+                            bookmarks.remove(b);
+                            // Removed by a slip: put back.
+                            ScaffoldMessenger.of(context)
+                              ..hideCurrentSnackBar()
+                              ..showSnackBar(
+                                SnackBar(
+                                  content: Text(l10n.bookmarkRemoved),
+                                  action: SnackBarAction(
+                                    label: l10n.commonUndo,
+                                    onPressed: () =>
+                                        bookmarks.restore(b, index),
+                                  ),
+                                ),
+                              );
+                          },
                         ),
                       ],
                     ),

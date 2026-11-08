@@ -70,6 +70,7 @@ void main() {
     MemorizationRepository? repo,
     List<Override> extra = const [],
     Map<int, AyahMemory> memories = const {},
+    TextDirection? direction,
   }) => ProviderScope(
     overrides: [
       ...extra,
@@ -86,6 +87,10 @@ void main() {
     child: MaterialApp(
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
+      builder: direction == null
+          ? null
+          : (context, child) =>
+                Directionality(textDirection: direction, child: child!),
       home: child ?? const MemorizeScreen(),
     ),
   );
@@ -403,6 +408,10 @@ void main() {
     expect(find.byKey(const ValueKey('mem-weak-112002')), findsOneWidget);
     expect(find.byKey(const ValueKey('mem-weak-112001')), findsNothing);
     expect(find.byKey(const ValueKey('mem-repeat-weak')), findsOneWidget);
+    // Every tappable at least 48 × 48.
+    final semantics = tester.ensureSemantics();
+    await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+    semantics.dispose();
     // An ayah to review opens its mistakes over the results, which stay.
     expect(find.text('Tap an ayah to see its mistakes.'), findsOneWidget);
     await tester.tap(find.byKey(const ValueKey('mem-weak-112002')));
@@ -412,6 +421,120 @@ void main() {
     expect(find.text('1 / 1'), findsOneWidget);
     expect(find.text('Session results'), findsOneWidget);
   });
+
+  testWidgets('a session\'s results: how long it took, against last time '
+      'on the same ayahs; the ayahs to review repeated as often as chosen', (
+    tester,
+  ) async {
+    // A session started at 10:00 (its id holds the time), its last ayah
+    // graded at 10:12.
+    final start = DateTime(2026, 11, 8, 10);
+    final id =
+        'rs-${start.toUtc().microsecondsSinceEpoch.toRadixString(36)}-abcdef';
+    AyahAttempt now(int ayah, {int wrong = 0}) => AyahAttempt(
+      ayahId: ayah,
+      sessionId: id,
+      at: start.add(const Duration(minutes: 12)),
+      grade: wrong > 0 ? AyahGrade.fail : AyahGrade.good,
+      words: 10,
+      wrong: wrong,
+    );
+    final summary = TestSummary(id, [
+      // Last time 6 of 10 and 10 of 10 right; now 10 and 7.
+      SummaryRow(now(112001), previous: attempt(112001, wrong: 4)),
+      SummaryRow(now(112002, wrong: 3), previous: attempt(112002)),
+    ]);
+    await tester.pumpWidget(
+      app(
+        const TodayPlan(),
+        child: Builder(
+          builder: (context) => TextButton(
+            onPressed: () => showTestSummarySheet(context, summary),
+            child: const Text('open'),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    expect(find.text('12 minutes'), findsOneWidget);
+    expect(find.text('Last time 80% → now 85%'), findsOneWidget);
+    // Three times each, or five, or seven.
+    ChoiceChip chip(int n) =>
+        tester.widget(find.byKey(ValueKey('mem-repeat-$n')));
+    expect(chip(3).selected, isTrue);
+    await tester.tap(find.byKey(const ValueKey('mem-repeat-5')));
+    await tester.pump();
+    expect(chip(5).selected, isTrue);
+    expect(chip(3).selected, isFalse);
+  });
+
+  for (final rtl in [false, true]) {
+    testWidgets('a wide landscape screen: the results beside the page, at its '
+        '${rtl ? 'left (RTL)' : 'right'}, not over it', (tester) async {
+      tester.view.physicalSize = const Size(1280, 800);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final summary = TestSummary('s', [SummaryRow(attempt(112001))]);
+      await tester.pumpWidget(
+        app(
+          const TodayPlan(),
+          direction: rtl ? TextDirection.rtl : TextDirection.ltr,
+          child: Builder(
+            builder: (context) => TextButton(
+              onPressed: () => showTestSummarySheet(context, summary),
+              child: const Text('open'),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+      final panel = find.byKey(const ValueKey('sheet-side-panel'));
+      expect(panel, findsOneWidget);
+      final rect = tester.getRect(panel);
+      expect(rect.width, lessThanOrEqualTo(440));
+      expect(rect.height, 800);
+      expect(rtl ? rect.left : rect.right, rtl ? 0 : 1280);
+      expect(find.text('Session results'), findsOneWidget);
+      await tester.tap(find.byKey(const ValueKey('mem-summary-close')));
+      await tester.pumpAndSettle();
+      expect(panel, findsNothing);
+    });
+  }
+
+  for (final rtl in [false, true]) {
+    testWidgets('a session\'s results close by the icon at the header\'s far '
+        'end (${rtl ? 'left in RTL' : 'right'}), no Close button below', (
+      tester,
+    ) async {
+      final summary = TestSummary('s', [SummaryRow(attempt(112001))]);
+      await tester.pumpWidget(
+        app(
+          const TodayPlan(),
+          direction: rtl ? TextDirection.rtl : TextDirection.ltr,
+          child: Builder(
+            builder: (context) => TextButton(
+              onPressed: () => showTestSummarySheet(context, summary),
+              child: const Text('open'),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+      final close = find.byKey(const ValueKey('mem-summary-close'));
+      expect(close, findsOneWidget);
+      expect(find.text('Close'), findsNothing);
+      final title = tester.getRect(find.text('Session results'));
+      final icon = tester.getRect(close);
+      expect((icon.center.dy - title.center.dy).abs(), lessThan(8));
+      expect(rtl ? icon.left < title.left : icon.left > title.right, isTrue);
+      await tester.tap(close);
+      await tester.pumpAndSettle();
+      expect(find.text('Session results'), findsNothing);
+    });
+  }
 
   testWidgets('no plan: how to make one; a plan saved from the sheet', (
     tester,
@@ -647,10 +770,13 @@ void main() {
               status: MemoryStatus.memorized,
             ),
           }),
-          child: Builder(
-            builder: (context) => TextButton(
-              onPressed: () => showMarkKnownSheet(context),
-              child: const Text('open'),
+          // (In a Scaffold, as in the app: its Undo snackbar.)
+          child: Scaffold(
+            body: Builder(
+              builder: (context) => TextButton(
+                onPressed: () => showMarkKnownSheet(context),
+                child: const Text('open'),
+              ),
             ),
           ),
         ),
@@ -670,6 +796,14 @@ void main() {
       await tester.pumpAndSettle();
       expect(repo.marked, {for (var a = 1; a <= 6; a++) 113000 + a});
       expect(repo.unmarked, {for (var a = 1; a <= 6; a++) 112000 + a});
+      // Undo: the surah newly marked unmarked again.
+      expect(find.text('Memorized surahs updated'), findsOneWidget);
+      await tester.tap(find.text('Undo'));
+      await tester.pumpAndSettle();
+      expect(
+        repo.unmarked,
+        containsAll([for (var a = 1; a <= 6; a++) 113000 + a]),
+      );
     });
   });
 }

@@ -122,12 +122,21 @@ const webWideFrom = 840.0;
 /// (`docs/reference/18_VISUAL_REFERENCE_NOTES.md` §4) — this is Tahfeez's
 /// own implementation of that pattern, used for verse options, filters,
 /// and any other secondary/contextual action sheet.
+///
+/// [besideOnWide]: on a wide landscape screen (a tablet's, a desktop
+/// window), a panel at the screen's end side instead, the page left in
+/// view beside it — for what is read with the page (a session's results,
+/// a word's mistakes).
 Future<T?> showTahfeezModalBottomSheet<T>({
   required BuildContext context,
   String? title,
   required WidgetBuilder builder,
   BoxConstraints? constraints,
+  bool besideOnWide = false,
 }) {
+  if (besideOnWide && sheetBesidePage(context)) {
+    return _showSidePanel<T>(context: context, title: title, builder: builder);
+  }
   // (Counted open by [TahfeezPopupObserver].)
   return showModalBottomSheet<T>(
     context: context,
@@ -161,14 +170,25 @@ Future<T?> showTahfeezModalBottomSheet<T>({
                 ),
                 if (title != null)
                   Padding(
-                    padding: const EdgeInsets.only(
-                      bottom: TahfeezSpacing.md,
-                      left: TahfeezSpacing.md,
-                      right: TahfeezSpacing.md,
+                    padding: const EdgeInsetsDirectional.only(
+                      bottom: TahfeezSpacing.sm,
+                      start: TahfeezSpacing.md,
+                      end: TahfeezSpacing.xs,
                     ),
-                    child: Text(
-                      title,
-                      style: Theme.of(context).textTheme.titleMedium,
+                    // Every titled sheet closes the same way: an ✕ at the
+                    // header's far end (right; left in RTL).
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            title,
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                        ),
+                        SheetCloseButton(
+                          onPressed: () => Navigator.of(context).maybePop(),
+                        ),
+                      ],
                     ),
                   ),
                 Flexible(child: builder(context)),
@@ -181,6 +201,115 @@ Future<T?> showTahfeezModalBottomSheet<T>({
   );
 }
 
+/// Whether a sheet shown now may sit beside the page: a landscape screen
+/// wide enough for the page and a panel side by side.
+bool sheetBesidePage(BuildContext context) {
+  final size = MediaQuery.sizeOf(context);
+  return size.width >= sidePanelFrom && size.width > size.height;
+}
+
+/// A window's width from which sheets may open beside the page.
+const sidePanelFrom = 960.0;
+
+/// A panel's width beside the page.
+double sidePanelWidth(BuildContext context) =>
+    math.min(440, MediaQuery.sizeOf(context).width * 0.4);
+
+/// The sheet as a panel at the screen's end side (right; left in RTL), as
+/// tall as the screen, sliding in — the rest of the screen in view, a tap
+/// there closes it.
+Future<T?> _showSidePanel<T>({
+  required BuildContext context,
+  String? title,
+  required WidgetBuilder builder,
+}) {
+  final rtl = Directionality.of(context) == TextDirection.rtl;
+  return showGeneralDialog<T>(
+    context: context,
+    useRootNavigator: true,
+    barrierDismissible: true,
+    barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+    barrierColor: Colors.black12,
+    transitionDuration: const Duration(milliseconds: 250),
+    pageBuilder: (context, _, _) {
+      final theme = Theme.of(context);
+      return Align(
+        alignment: AlignmentDirectional.centerEnd,
+        child: SizedBox(
+          key: const ValueKey('sheet-side-panel'),
+          width: sidePanelWidth(context),
+          height: double.infinity,
+          child: Material(
+            color:
+                theme.bottomSheetTheme.modalBackgroundColor ??
+                theme.colorScheme.surfaceContainerLow,
+            elevation: 3,
+            child: SafeArea(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (title != null)
+                    Padding(
+                      padding: const EdgeInsetsDirectional.only(
+                        top: TahfeezSpacing.sm,
+                        bottom: TahfeezSpacing.sm,
+                        start: TahfeezSpacing.md,
+                        end: TahfeezSpacing.xs,
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              title,
+                              style: theme.textTheme.titleMedium,
+                            ),
+                          ),
+                          SheetCloseButton(
+                            onPressed: () => Navigator.of(context).maybePop(),
+                          ),
+                        ],
+                      ),
+                    )
+                  else
+                    const SizedBox(height: TahfeezSpacing.md),
+                  Expanded(
+                    child: Align(
+                      alignment: Alignment.topCenter,
+                      child: builder(context),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    },
+    transitionBuilder: (context, animation, _, child) => SlideTransition(
+      position: Tween<Offset>(
+        begin: Offset(rtl ? -1 : 1, 0),
+        end: Offset.zero,
+      ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutCubic)),
+      child: child,
+    ),
+  );
+}
+
+/// A sheet's ✕, at the far end of its header row: 48 × 48 to tap.
+class SheetCloseButton extends StatelessWidget {
+  const SheetCloseButton({super.key, required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) => IconButton(
+    key: const ValueKey('sheet-close'),
+    tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+    icon: const Icon(Icons.close_rounded),
+    onPressed: onPressed,
+  );
+}
+
 /// A sheet's content as frosted glass: the screen behind it blurred under
 /// the sheet's see-through paper (`bottomSheetTheme`), clipped to its
 /// rounded top. (In a browser: plain, opaque paper.)
@@ -189,10 +318,19 @@ Future<T?> showTahfeezModalBottomSheet<T>({
 /// (`showDragHandle`, which sits above its content: a strip of unblurred
 /// page there, and the glass's rounded corners showing under it).
 class GlassSheet extends StatelessWidget {
-  const GlassSheet({super.key, required this.child, this.handle = false});
+  const GlassSheet({
+    super.key,
+    required this.child,
+    this.handle = false,
+    this.closable = false,
+  });
 
   final Widget child;
   final bool handle;
+
+  /// With [handle]: an ✕ in the handle's band, at its far end (right; left
+  /// in RTL) — on the handle's line, no row of its own.
+  final bool closable;
 
   @override
   Widget build(BuildContext context) {
@@ -205,19 +343,31 @@ class GlassSheet extends StatelessWidget {
               // Material's drag handle: 32 × 4 in a 48-high band.
               SizedBox(
                 height: 48,
-                child: Center(
-                  child: Container(
-                    width: 32,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color:
-                          theme.bottomSheetTheme.dragHandleColor ??
-                          theme.colorScheme.onSurfaceVariant.withValues(
-                            alpha: 0.4,
-                          ),
-                      borderRadius: BorderRadius.circular(2),
+                child: Stack(
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 32,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color:
+                              theme.bottomSheetTheme.dragHandleColor ??
+                              theme.colorScheme.onSurfaceVariant.withValues(
+                                alpha: 0.4,
+                              ),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
                     ),
-                  ),
+                    if (closable)
+                      PositionedDirectional(
+                        top: 0,
+                        end: TahfeezSpacing.xs,
+                        child: SheetCloseButton(
+                          onPressed: () => Navigator.of(context).maybePop(),
+                        ),
+                      ),
+                  ],
                 ),
               ),
               Flexible(child: child),

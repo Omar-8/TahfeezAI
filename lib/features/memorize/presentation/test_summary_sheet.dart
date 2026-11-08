@@ -27,6 +27,7 @@ import 'memorize_screen.dart' show ScorePair, ayahRangeLabel, surahNames;
 Future<void> showTestSummarySheet(BuildContext context, TestSummary summary) =>
     showTahfeezModalBottomSheet<void>(
       context: context,
+      besideOnWide: true,
       builder: (context) => _TestSummarySheet(summary: summary),
     );
 
@@ -63,7 +64,34 @@ class _TestSummarySheet extends ConsumerWidget {
         if (g != AyahGrade.good) (id, g),
     ]..sort((a, b) => a.$1.compareTo(b.$1));
 
-    void repeatWeak() {
+    // How long it took: from the session's start (its id holds it) to its
+    // last graded ayah.
+    final starts = [
+      for (final r in summary.rows)
+        ?RecitationSessionController.startedAtOf(r.attempt.sessionId),
+    ];
+    final minutes = starts.isEmpty
+        ? null
+        : summary.rows
+              .map((r) => r.attempt.at)
+              .reduce((a, b) => a.isAfter(b) ? a : b)
+              .difference(starts.reduce((a, b) => a.isBefore(b) ? a : b))
+              .inMinutes;
+    // Against last time: these ayahs' tests before this session, and their
+    // latest now.
+    final previous = <int, AyahAttempt>{
+      for (final r in summary.rows) r.attempt.ayahId: ?r.previous,
+    };
+    final latestAttempts = <int, AyahAttempt>{
+      for (final r in summary.rows) r.attempt.ayahId: r.attempt,
+    };
+    final then = RecitationScore.of(previous.values);
+    final nowScore = RecitationScore.of([
+      for (final id in previous.keys) ?latestAttempts[id],
+    ]);
+    String percent(double v) => '${(v * 100).round()}';
+
+    void repeatWeak(int times) {
       final location = ref.read(mushafRecitationTargetProvider)?.location;
       Navigator.of(context).pop();
       if (location == null || weak.isEmpty) return;
@@ -71,7 +99,7 @@ class _TestSummarySheet extends ConsumerWidget {
       ref.read(hifzControllerProvider.notifier).setLoop((
         from: (chapterNo: first ~/ 1000, verseNo: first % 1000),
         to: (chapterNo: last ~/ 1000, verseNo: last % 1000),
-      ), const HifzLoop(mode: HifzLoopMode.eachAyah, count: 3));
+      ), HifzLoop(mode: HifzLoopMode.eachAyah, count: times));
       ref
           .read(recitationSessionControllerProvider.notifier)
           .start(startLocation: location);
@@ -146,6 +174,13 @@ class _TestSummarySheet extends ConsumerWidget {
                   style: theme.textTheme.titleLarge,
                 ),
               ),
+              // Close, at the header's far end (right; left in RTL).
+              IconButton(
+                key: const ValueKey('mem-summary-close'),
+                tooltip: l10n.memClose,
+                icon: const Icon(Icons.close_rounded),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
             ],
           ),
           Text(
@@ -160,6 +195,30 @@ class _TestSummarySheet extends ConsumerWidget {
               color: scheme.onSurfaceVariant,
             ),
           ),
+          if (minutes != null || !then.isEmpty)
+            Wrap(
+              spacing: TahfeezSpacing.md,
+              runSpacing: TahfeezSpacing.xs,
+              children: [
+                if (minutes != null)
+                  _Fact(
+                    key: const ValueKey('mem-summary-time'),
+                    icon: Icons.timer_outlined,
+                    text: l10n.memSummaryMinutes(minutes),
+                  ),
+                if (!then.isEmpty)
+                  _Fact(
+                    key: const ValueKey('mem-summary-vs-last'),
+                    icon: nowScore.memorization >= then.memorization
+                        ? Icons.trending_up_rounded
+                        : Icons.trending_down_rounded,
+                    text: l10n.memSummaryVsLast(
+                      percent(then.memorization),
+                      percent(nowScore.memorization),
+                    ),
+                  ),
+              ],
+            ),
           TahfeezCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -193,7 +252,6 @@ class _TestSummarySheet extends ConsumerWidget {
                 for (final (id, g) in weak)
                   ActionChip(
                     key: ValueKey('mem-weak-$id'),
-                    visualDensity: VisualDensity.compact,
                     side: BorderSide(
                       color: g == AyahGrade.fail
                           ? scheme.error
@@ -212,26 +270,89 @@ class _TestSummarySheet extends ConsumerWidget {
               label: Text(l10n.memCheckMistakes),
               onPressed: () => openAyah(null),
             ),
-          Row(
-            spacing: TahfeezSpacing.sm,
-            children: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: Text(l10n.memClose),
-              ),
-              if (weak.isNotEmpty)
-                Expanded(
-                  child: FilledButton.icon(
-                    key: const ValueKey('mem-repeat-weak'),
-                    icon: const Icon(Icons.repeat_rounded),
-                    label: Text(l10n.memRepeatWeak),
-                    onPressed: repeatWeak,
-                  ),
-                ),
-            ],
-          ),
+          if (weak.isNotEmpty) _RepeatWeak(onRepeat: repeatWeak),
         ],
       ),
+    );
+  }
+}
+
+/// A fact about the session, small, with its icon.
+class _Fact extends StatelessWidget {
+  const _Fact({super.key, required this.icon, required this.text});
+
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final color = theme.colorScheme.onSurfaceVariant;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      spacing: TahfeezSpacing.xs,
+      children: [
+        Icon(icon, size: 16, color: color),
+        Flexible(
+          child: Text(
+            text,
+            style: theme.textTheme.bodySmall?.copyWith(color: color),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Repeat the ayahs to review: how many times each, then the loop.
+class _RepeatWeak extends StatefulWidget {
+  const _RepeatWeak({required this.onRepeat});
+
+  final ValueChanged<int> onRepeat;
+
+  @override
+  State<_RepeatWeak> createState() => _RepeatWeakState();
+}
+
+class _RepeatWeakState extends State<_RepeatWeak> {
+  var _times = 3;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      spacing: TahfeezSpacing.sm,
+      children: [
+        Row(
+          spacing: TahfeezSpacing.sm,
+          children: [
+            Expanded(
+              child: Text(
+                l10n.recLoopTimesAyahSub,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ),
+            for (final n in const [3, 5, 7])
+              ChoiceChip(
+                key: ValueKey('mem-repeat-$n'),
+                label: Text('×$n'),
+                selected: _times == n,
+                showCheckmark: false,
+                onSelected: (_) => setState(() => _times = n),
+              ),
+          ],
+        ),
+        FilledButton.icon(
+          key: const ValueKey('mem-repeat-weak'),
+          icon: const Icon(Icons.repeat_rounded),
+          label: Text(l10n.memRepeatWeak),
+          onPressed: () => widget.onRepeat(_times),
+        ),
+      ],
     );
   }
 }

@@ -70,7 +70,10 @@ class _TranslationPacksSheetBody extends ConsumerWidget {
         );
       },
       loading: () => const TahfeezLoadingView(),
-      error: (_, _) => TahfeezErrorView(message: l10n.searchTranslationsError),
+      error: (_, _) => TahfeezErrorView(
+        message: l10n.searchTranslationsError,
+        onRetry: () => ref.invalidate(translationLibraryControllerProvider),
+      ),
     );
   }
 }

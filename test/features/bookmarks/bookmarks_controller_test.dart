@@ -30,4 +30,21 @@ void main() {
       [(18, null), (2, 2255)],
     );
   });
+
+  test('a bookmark removed is put back where it was (Undo)', () {
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    final bookmarks = container.read(bookmarksProvider.notifier);
+    bookmarks.toggleAyah(1001);
+    bookmarks.toggleAyah(2255);
+    bookmarks.toggleSurah(18);
+    final middle = container.read(bookmarksProvider)[1];
+    bookmarks.remove(middle);
+    expect(container.read(bookmarksProvider), hasLength(2));
+    bookmarks.restore(middle, 1);
+    expect(container.read(bookmarksProvider)[1], same(middle));
+    // Twice: not doubled.
+    bookmarks.restore(middle, 1);
+    expect(container.read(bookmarksProvider), hasLength(3));
+  });
 }

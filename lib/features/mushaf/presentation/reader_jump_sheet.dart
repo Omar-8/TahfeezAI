@@ -63,11 +63,13 @@ class _ReaderJumpState extends ConsumerState<_ReaderJump> {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final surahs = ref.watch(indexedSurahsProvider).value ?? const [];
-    Widget heading(String text, IconData icon) => Row(
+    Widget heading(String text, IconData icon, {bool close = false}) => Row(
       spacing: TahfeezSpacing.sm,
       children: [
         Icon(icon, size: 20, color: theme.colorScheme.primary),
         Expanded(child: Text(text, style: theme.textTheme.titleSmall)),
+        if (close)
+          SheetCloseButton(onPressed: () => Navigator.of(context).maybePop()),
       ],
     );
 
@@ -83,7 +85,7 @@ class _ReaderJumpState extends ConsumerState<_ReaderJump> {
         spacing: TahfeezSpacing.md,
         children: [
           // A surah, and an ayah in it.
-          heading(l10n.recLoopSurah, Icons.menu_book_outlined),
+          heading(l10n.recLoopSurah, Icons.menu_book_outlined, close: true),
           if (surahs.isNotEmpty)
             VersePicker(
               id: 'jump',

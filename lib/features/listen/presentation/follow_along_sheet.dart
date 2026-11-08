@@ -384,8 +384,10 @@ class FollowAlongHint extends ConsumerWidget {
       child: AnimatedContainer(
         key: ValueKey('follow-hint-${run.phase.name}'),
         duration: const Duration(milliseconds: 250),
-        height: height,
-        padding: const EdgeInsets.symmetric(horizontal: 10),
+        // (Review: what Try again and Skip do, on two lines if need be.)
+        height: review ? null : height,
+        constraints: const BoxConstraints(minHeight: height),
+        padding: EdgeInsets.symmetric(horizontal: 10, vertical: review ? 3 : 0),
         decoration: BoxDecoration(
           color: review
               ? scheme.errorContainer
@@ -417,14 +419,15 @@ class FollowAlongHint extends ConsumerWidget {
             Flexible(
               child: Text(
                 review
-                    ? l10n.followMistakesFound
+                    ? l10n.recReviewHint
                     : !yours
                     ? l10n.followReciterTurn(reciterName(context, reciter))
                     : run.again
                     ? l10n.followAgain
                     : l10n.followYourTurn,
-                maxLines: 1,
+                maxLines: review ? 2 : 1,
                 overflow: TextOverflow.ellipsis,
+                textAlign: review ? TextAlign.center : null,
                 style: style?.copyWith(fontWeight: FontWeight.w600),
               ),
             ),

@@ -28,6 +28,7 @@ import '../../../quran/presentation/tafsir_packs_sheet.dart';
 import '../../../quran/presentation/translation_packs_sheet.dart';
 import '../../../wbw/application/wbw_preferences_controller.dart';
 import '../../mushaf/application/mushaf_page_translations.dart';
+import '../application/problem_report.dart';
 import '../application/reset_all_data.dart';
 import '../application/user_data_backup.dart';
 import '../../../core/app_store/app_store_service.dart';
@@ -63,10 +64,45 @@ class SettingsScreen extends ConsumerStatefulWidget {
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   var _query = '';
+  final _listKey = GlobalKey();
 
   /// Lower case, Arabic vowel marks dropped.
   static String _fold(String s) =>
       s.toLowerCase().replaceAll(RegExp('[\u064B-\u065F\u0670]'), '');
+
+  void _search(String text) {
+    setState(() => _query = text);
+    if (_fold(text.trim()).length < 2) return;
+    // The first option found brought into view (it is highlighted), once
+    // its section has opened.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future<void>.delayed(const Duration(milliseconds: 220), () {
+        if (!mounted || _query != text) return;
+        final list = _listKey.currentContext;
+        if (list == null) return;
+        Element? first;
+        void visit(Element e) {
+          if (first != null) return;
+          if (e.widget case _SearchText(:final text)
+              when _fold(text).contains(_fold(_query.trim()))) {
+            first = e;
+            return;
+          }
+          e.visitChildElements(visit);
+        }
+
+        (list as Element).visitChildElements(visit);
+        if (first case final found?) {
+          Scrollable.ensureVisible(
+            found,
+            alignment: 0.3,
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeOutCubic,
+          );
+        }
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -99,6 +135,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       Widget child, {
       List<String> words = const [],
       bool collapsed = false,
+      String? summary,
     }) {
       final card = TahfeezCard(
         padding: const EdgeInsets.symmetric(
@@ -116,6 +153,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           key: ValueKey('settings-group-$title'),
           title: title,
           icon: icon,
+          summary: summary,
           open: searching,
           child: card,
         ),
@@ -131,6 +169,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ),
           body: Builder(
             builder: (context) {
+              // Built afresh each time: this builder runs again on its own
+              // (the keyboard closing changes the bottom space), and every
+              // section added twice broke the list — the page frozen, the
+              // search field not tappable.
+              sections.clear();
               group(
                 l10n.settingsLanguage,
                 Icons.translate,
@@ -145,6 +188,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   l10n.settingsLanguageSystem,
                   for (final (_, _, name) in kAppLanguages) name,
                 ],
+                summary:
+                    [
+                      for (final (code, _, name) in kAppLanguages)
+                        if (code == locale?.languageCode) name,
+                    ].firstOrNull ??
+                    l10n.settingsLanguageSystem,
               );
               group(
                 l10n.settingsAppTheme,
@@ -182,8 +231,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     SwitchListTile(
                       key: const ValueKey('settings-time-of-day'),
                       contentPadding: EdgeInsets.zero,
-                      title: Text(l10n.settingsTimeOfDay),
-                      subtitle: Text(l10n.settingsTimeOfDaySub),
+                      title: _SearchText(l10n.settingsTimeOfDay),
+                      subtitle: _SearchText(l10n.settingsTimeOfDaySub),
                       value: ref.watch(homeSkyProvider),
                       onChanged: (on) =>
                           ref.read(homeSkyProvider.notifier).setEnabled(on),
@@ -191,8 +240,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     SwitchListTile(
                       key: const ValueKey('settings-animations'),
                       contentPadding: EdgeInsets.zero,
-                      title: Text(l10n.settingsAnimations),
-                      subtitle: Text(l10n.settingsAnimationsSub),
+                      title: _SearchText(l10n.settingsAnimations),
+                      subtitle: _SearchText(l10n.settingsAnimationsSub),
                       value: ref.watch(animationsProvider),
                       onChanged: (on) =>
                           ref.read(animationsProvider.notifier).setEnabled(on),
@@ -206,6 +255,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   l10n.settingsAnimations,
                   l10n.settingsAnimationsSub,
                 ],
+                summary: appTheme.label(l10n),
               );
               group(
                 l10n.settingsArabicFont,
@@ -226,6 +276,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ],
                 ),
                 words: [for (final f in ArabicUiFont.values) f.arabicName],
+                summary: arabicFont.arabicName,
                 collapsed: true,
               );
               group(
@@ -237,6 +288,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   l10n.readerTafsir,
                   l10n.settingsTransliteration,
                 ],
+                summary: _meaningSummary(ref, l10n),
               );
               group(
                 l10n.settingsRecitation,
@@ -245,8 +297,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 SwitchListTile(
                   key: const ValueKey('settings-sajdah-reminder'),
                   contentPadding: EdgeInsets.zero,
-                  title: Text(l10n.sajdahReminder),
-                  subtitle: Text(l10n.sajdahReminderSub),
+                  title: _SearchText(l10n.sajdahReminder),
+                  subtitle: _SearchText(l10n.sajdahReminderSub),
                   value: ref.watch(
                     hifzSettingsProvider.select((s) => s.sajdahReminder),
                   ),
@@ -259,6 +311,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ),
                 ),
                 words: [l10n.sajdahReminder, l10n.sajdahReminderSub],
+                summary:
+                    '${l10n.sajdahReminder}: ${ref.watch(hifzSettingsProvider.select((s) => s.sajdahReminder)) ? l10n.commonOn : l10n.commonOff}',
                 collapsed: true,
               );
               group(
@@ -271,6 +325,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     l10n.listenDownload,
                   l10n.listenSearchReciters,
                 ],
+                summary: reciterName(
+                  context,
+                  reciterFor(ref.watch(reciterProvider)),
+                ),
               );
               if (reminderSupported) {
                 group(
@@ -281,7 +339,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       SwitchListTile(
                         key: const ValueKey('settings-reminder'),
                         contentPadding: EdgeInsets.zero,
-                        title: Text(l10n.memReminderSwitch),
+                        title: _SearchText(l10n.memReminderSwitch),
                         subtitle: Text(
                           l10n.memReminderAt(reminderTime.format(context)),
                         ),
@@ -303,7 +361,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         contentPadding: EdgeInsets.zero,
                         enabled: reminder.enabled,
                         leading: const Icon(Icons.schedule),
-                        title: Text(l10n.memReminderTime),
+                        title: _SearchText(l10n.memReminderTime),
                         trailing: Text(reminderTime.format(context)),
                         onTap: () async {
                           final picked = await showTimePicker(
@@ -319,6 +377,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ],
                   ),
                   words: [l10n.memReminderSwitch, l10n.memReminderTime],
+                  summary: reminder.enabled
+                      ? l10n.memReminderAt(reminderTime.format(context))
+                      : l10n.commonOff,
                   collapsed: true,
                 );
               }
@@ -331,16 +392,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       key: const ValueKey('settings-export'),
                       contentPadding: EdgeInsets.zero,
                       leading: const Icon(Icons.upload_file_rounded),
-                      title: Text(l10n.settingsExportTitle),
-                      subtitle: Text(l10n.settingsExportSub),
+                      title: _SearchText(l10n.settingsExportTitle),
+                      subtitle: _SearchText(l10n.settingsExportSub),
                       onTap: () => _export(context, ref),
                     ),
                     ListTile(
                       key: const ValueKey('settings-import'),
                       contentPadding: EdgeInsets.zero,
                       leading: const Icon(Icons.download_rounded),
-                      title: Text(l10n.settingsImportTitle),
-                      subtitle: Text(l10n.settingsImportSub),
+                      title: _SearchText(l10n.settingsImportTitle),
+                      subtitle: _SearchText(l10n.settingsImportSub),
                       onTap: () => _import(context, ref),
                     ),
                     ListTile(
@@ -350,11 +411,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         Icons.delete_forever_outlined,
                         color: theme.colorScheme.error,
                       ),
-                      title: Text(
+                      title: _SearchText(
                         l10n.settingsResetTitle,
                         style: TextStyle(color: theme.colorScheme.error),
                       ),
-                      subtitle: Text(l10n.settingsResetSub),
+                      subtitle: _SearchText(l10n.settingsResetSub),
                       onTap: () => _confirmReset(context, ref),
                     ),
                   ],
@@ -379,6 +440,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   l10n.aboutTitle,
                   l10n.aboutSubtitle,
                   l10n.privacyTitle,
+                  l10n.settingsReport,
                 ],
                 // Last: the app — its version, source code, rating, sharing,
                 // updates, and its sources.
@@ -399,13 +461,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             section.words.any((w) => _fold(w).contains(query))))
                       section.widget,
               ];
-              // Rows and switches compact throughout.
-              return Theme(
-                data: theme.copyWith(visualDensity: VisualDensity.compact),
+              // Rows compact (dense list tiles); chips and switches keep
+              // their 48 × 48 to tap (a compact density shrank them to 40).
+              return _SettingsQuery(
+                query: query,
                 child: ListTileTheme(
                   dense: true,
                   minVerticalPadding: 2,
                   child: ListView(
+                    key: _listKey,
                     padding: withBarSpace(
                       context,
                       const EdgeInsets.fromLTRB(
@@ -422,12 +486,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         blur: false,
                         child: TextField(
                           key: const ValueKey('settings-search'),
-                          onChanged: (text) => setState(() => _query = text),
+                          onChanged: _search,
                           textInputAction: TextInputAction.search,
                           decoration: InputDecoration(
                             prefixIcon: const Icon(Icons.search_rounded),
                             hintText: l10n.settingsSearchHint,
                             isDense: true,
+                            // 48 high: a tap target's least.
+                            constraints: const BoxConstraints(minHeight: 48),
                             border: InputBorder.none,
                             contentPadding: const EdgeInsets.symmetric(
                               vertical: TahfeezSpacing.smPlus,
@@ -463,6 +529,52 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 }
 
+/// The settings search's text (folded), for [_SearchText].
+class _SettingsQuery extends InheritedWidget {
+  const _SettingsQuery({required this.query, required super.child});
+
+  final String query;
+
+  @override
+  bool updateShouldNotify(_SettingsQuery old) => query != old.query;
+}
+
+/// An option's name or description, highlighted while the search finds it:
+/// where in an opened section the match is.
+class _SearchText extends StatelessWidget {
+  const _SearchText(this.text, {this.style});
+
+  final String text;
+  final TextStyle? style;
+
+  @override
+  Widget build(BuildContext context) {
+    final query =
+        context.dependOnInheritedWidgetOfExactType<_SettingsQuery>()?.query ??
+        '';
+    final found =
+        query.length >= 2 && _SettingsScreenState._fold(text).contains(query);
+    if (!found) return Text(text, style: style);
+    final scheme = Theme.of(context).colorScheme;
+    return DecoratedBox(
+      key: const ValueKey('settings-search-match'),
+      decoration: BoxDecoration(
+        color: scheme.tertiaryContainer,
+        borderRadius: BorderRadius.circular(TahfeezRadii.sm),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4),
+        child: Text(
+          text,
+          style: (style ?? const TextStyle()).copyWith(
+            color: scheme.onTertiaryContainer,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// A theme choice's paper and ink, for its swatch.
 Color _paper(AppThemeChoice c) =>
     c.tone.surface ??
@@ -478,6 +590,21 @@ Color _ink(AppThemeChoice c) =>
 
 /// Settings → Translation & tafsir: which translations and tafsir, and
 /// whether word meanings show the transliteration too.
+/// Translation & tafsir closed: the translations chosen, and the tafsir.
+String _meaningSummary(WidgetRef ref, AppLocalizations l10n) {
+  final books = ref.watch(activeTranslationBooksProvider).value;
+  final tafsirId = ref.watch(tafsirSelectionControllerProvider);
+  final tafsir = [
+    for (final t in ref.watch(tafsirLibraryControllerProvider).value ?? [])
+      if (t.work.id == tafsirId) tafsirName(l10n, t.work),
+  ].firstOrNull;
+  return [
+    if (books != null && books.isNotEmpty)
+      for (final b in books.values) translationName(l10n, b),
+    ?tafsir,
+  ].join(' · ');
+}
+
 class _MeaningSettings extends ConsumerWidget {
   const _MeaningSettings();
 
@@ -499,7 +626,7 @@ class _MeaningSettings extends ConsumerWidget {
         ListTile(
           key: const ValueKey('settings-translations'),
           contentPadding: EdgeInsets.zero,
-          title: Text(l10n.searchTranslations),
+          title: _SearchText(l10n.searchTranslations),
           subtitle: Text(
             books == null || books.isEmpty
                 ? l10n.readerSelected(0)
@@ -512,7 +639,7 @@ class _MeaningSettings extends ConsumerWidget {
         ListTile(
           key: const ValueKey('settings-tafsir'),
           contentPadding: EdgeInsets.zero,
-          title: Text(l10n.readerTafsir),
+          title: _SearchText(l10n.readerTafsir),
           subtitle: Text(tafsirLabel ?? l10n.settingsTafsirNone),
           trailing: const Icon(Icons.chevron_right),
           onTap: () => showTafsirPacksSheet(context),
@@ -520,7 +647,7 @@ class _MeaningSettings extends ConsumerWidget {
         SwitchListTile(
           key: const ValueKey('settings-transliteration'),
           contentPadding: EdgeInsets.zero,
-          title: Text(l10n.settingsTransliteration),
+          title: _SearchText(l10n.settingsTransliteration),
           value: transliteration,
           onChanged: (on) => ref
               .read(wbwShowTransliterationPreferenceControllerProvider.notifier)
@@ -709,8 +836,8 @@ class _AboutAppState extends ConsumerState<_AboutApp> {
       key: ValueKey(key),
       contentPadding: EdgeInsets.zero,
       leading: Icon(icon),
-      title: Text(title),
-      subtitle: Text(subtitle),
+      title: _SearchText(title),
+      subtitle: _SearchText(subtitle),
       onTap: onTap,
     );
     return TahfeezCard(
@@ -782,6 +909,23 @@ class _AboutAppState extends ConsumerState<_AboutApp> {
               origin: shareOrigin(context),
             ),
           ),
+          // A problem: an email with the app's latest messages, written and
+          // sent by the user.
+          row(
+            'settings-report',
+            Icons.bug_report_outlined,
+            l10n.settingsReport,
+            l10n.settingsReportSub,
+            () => sendProblemReport(
+              store,
+              subject: l10n.settingsReportSubject(version),
+              body: problemReportBody(
+                prompt: l10n.settingsReportPrompt,
+                version: version,
+                locale: Localizations.localeOf(context).toLanguageTag(),
+              ),
+            ),
+          ),
           // Updates: Google Play's, or the App Store's on iOS.
           if (android || ref.watch(platformCapabilitiesProvider).isIOS) ...[
             row(
@@ -794,7 +938,7 @@ class _AboutAppState extends ConsumerState<_AboutApp> {
             SwitchListTile(
               key: const ValueKey('settings-update-offers'),
               contentPadding: EdgeInsets.zero,
-              title: Text(l10n.settingsUpdateOffers),
+              title: _SearchText(l10n.settingsUpdateOffers),
               value: _updateOffers ?? true,
               onChanged: (on) {
                 setState(() => _updateOffers = on);
@@ -806,8 +950,8 @@ class _AboutAppState extends ConsumerState<_AboutApp> {
             key: const ValueKey('settings-about'),
             contentPadding: EdgeInsets.zero,
             leading: const Icon(Icons.info_outline),
-            title: Text(l10n.aboutTitle),
-            subtitle: Text(l10n.aboutSubtitle),
+            title: _SearchText(l10n.aboutTitle),
+            subtitle: _SearchText(l10n.aboutSubtitle),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => context.push(AppRoutes.about),
           ),
@@ -832,7 +976,7 @@ class _ListenSettings extends ConsumerWidget {
         ListTile(
           key: const ValueKey('settings-reciter'),
           contentPadding: EdgeInsets.zero,
-          title: Text(l10n.listenReciter),
+          title: _SearchText(l10n.listenReciter),
           subtitle: Text(reciterName(context, reciter)),
           trailing: const Icon(Icons.chevron_right),
           onTap: () => showReciterSheet(context),
@@ -911,7 +1055,8 @@ class _LanguageRow extends StatelessWidget {
           ),
         ),
       ),
-      child: Padding(
+      child: Container(
+        constraints: const BoxConstraints(minHeight: 48),
         padding: const EdgeInsets.symmetric(vertical: TahfeezSpacing.sm),
         child: Row(
           children: [

@@ -157,6 +157,15 @@ void main() {
     recognizer = FakeRecognizer();
   });
 
+  testWidgets('the recitation bar and the Hifz settings: every tappable at '
+      'least 48 × 48', (tester) async {
+    final semantics = tester.ensureSemantics();
+    await tester.pumpWidget(app(colours: true));
+    await tester.pumpAndSettle();
+    await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+    semantics.dispose();
+  });
+
   testWidgets('the eye: colours shown (green, the default), then none drawn '
       '— a recitation\'s kept all the same — then the ayahs hidden, then '
       'colours again', (tester) async {
@@ -206,12 +215,42 @@ void main() {
     expect(container.read(mushafWordOverlayProvider), isNull);
 
     await tester.tap(eye);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(container.read(mushafHideModeProvider).enabled, isTrue);
+    // Each state said on the bar: the ayahs hidden…
+    final eyeNotice = find.byKey(const ValueKey('eye-notice-hint'));
+    expect(
+      find.descendant(
+        of: eyeNotice,
+        matching: find.text('Ayahs hidden — recite to reveal them'),
+      ),
+      findsOneWidget,
+    );
 
+    // …and the colours back, 3 s later: its own 5 s.
+    await tester.pump(const Duration(seconds: 3));
     await tester.tap(eye);
-    await tester.pumpAndSettle();
+    await tester.pump();
     expect(container.read(mushafHideModeProvider).enabled, isFalse);
+    expect(
+      find.descendant(
+        of: eyeNotice,
+        matching: find.text('Mistakes and colours shown'),
+      ),
+      findsOneWidget,
+    );
+    await tester.pump(const Duration(seconds: 4));
+    expect(
+      find.descendant(
+        of: eyeNotice,
+        matching: find.text('Mistakes and colours shown'),
+      ),
+      findsOneWidget,
+      reason: '7 s after the first notice, 4 s into its own',
+    );
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
+    expect(eyeNotice, findsNothing);
     expect(green, findsOneWidget);
     expect(
       container.read(mushafWordOverlayProvider)?.marks[word],
@@ -816,6 +855,31 @@ void main() {
     final settings = container.read(hifzSettingsProvider);
     expect(settings.pronunciationColor, HifzSettings.pronunciationColors[2]);
     expect(settings.tajweedColor, HifzSettings.tajweedColors[1]);
+
+    // Tajweed not judged: where its colour is chosen, said so, with the
+    // way to turn it on — not gone without a word.
+    container
+        .read(hifzSettingsProvider.notifier)
+        .update(settings.copyWith(tajweed: false));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('hifz-tajweed-colour-1')), findsNothing);
+    final off = find.byKey(const ValueKey('hifz-tajweed-colour-off'));
+    await tester.ensureVisible(off);
+    expect(
+      find.descendant(
+        of: off,
+        matching: find.text('Turn on tajweed checking to choose its colour'),
+      ),
+      findsOneWidget,
+    );
+    await tester.tap(find.descendant(of: off, matching: find.text('Turn on')));
+    await tester.pumpAndSettle();
+    expect(container.read(hifzSettingsProvider).tajweed, isTrue);
+    expect(find.byKey(const ValueKey('hifz-tajweed-colour-1')), findsOneWidget);
+    // The sheet closes by its ✕.
+    await tester.tap(find.byKey(const ValueKey('sheet-close')));
+    await tester.pumpAndSettle();
+    expect(find.text('Pronunciation mistake colour'), findsNothing);
   });
 
   testWidgets('Hifz status strip shows progress and a pending mistake', (
@@ -1138,6 +1202,18 @@ void main() {
     await tester.tap(find.widgetWithText(ChoiceChip, '5'));
     await tester.pumpAndSettle();
     expect(find.text('How many times to recite the range'), findsOneWidget);
+    // What will happen, said before it starts.
+    expect(
+      find.text(
+        'The whole range 5 times. The last time is checked: with a '
+        'mistake, try again or skip.',
+      ),
+      findsOneWidget,
+    );
+    // Every tappable in the sheet at least 48 × 48.
+    final semantics = tester.ensureSemantics();
+    await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
+    semantics.dispose();
 
     await tester.tap(find.byKey(const ValueKey('loop-start')));
     await tester.pumpAndSettle();
@@ -1254,6 +1330,8 @@ void main() {
 
     expect(find.textContaining('Microphone access is needed'), findsOneWidget);
     expect(find.byKey(const ValueKey('mic-level-ring')), findsNothing);
+    // How to allow it: the app's page in the phone's settings.
+    expect(find.byKey(const ValueKey('mic-open-settings')), findsOneWidget);
   });
 
   testWidgets('navigation is untouched where recitation is unsupported', (

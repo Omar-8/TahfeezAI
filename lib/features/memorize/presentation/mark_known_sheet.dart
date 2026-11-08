@@ -44,9 +44,38 @@ class _MarkKnownSheetState extends ConsumerState<_MarkKnownSheet> {
     }
     // An ayah in both (a juz unchecked, a surah in it checked) stays.
     unmark.removeAll(mark);
+    // What really changes, for Undo: ayahs newly marked, and unverified
+    // ones unmarked (recited ones keep their memory either way).
+    final memories = ref.read(ayahMemoriesProvider).value ?? const {};
+    final added = {
+      for (final id in mark)
+        if (!memories.containsKey(id)) id,
+    };
+    final removed = {
+      for (final id in unmark)
+        if (memories[id] case final m? when !m.verified) id,
+    };
     await repo.unmarkUnverified(unmark);
     await repo.markMemorized(mark);
-    if (mounted) Navigator.of(context).pop();
+    if (!mounted) return;
+    final messenger = ScaffoldMessenger.of(context);
+    final l10n = AppLocalizations.of(context);
+    Navigator.of(context).pop();
+    if (added.isEmpty && removed.isEmpty) return;
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(l10n.memKnownSaved),
+          action: SnackBarAction(
+            label: l10n.commonUndo,
+            onPressed: () async {
+              await repo.unmarkUnverified(added);
+              await repo.markMemorized(removed);
+            },
+          ),
+        ),
+      );
   }
 
   @override

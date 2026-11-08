@@ -90,6 +90,12 @@ class BookmarksController extends Notifier<List<Bookmark>> {
       if (!identical(b, bookmark)) b,
   ]);
 
+  /// Puts back a bookmark just removed (Undo), where it was.
+  void restore(Bookmark bookmark, int index) {
+    if (state.contains(bookmark)) return;
+    _set([...state]..insert(index.clamp(0, state.length), bookmark));
+  }
+
   void _set(List<Bookmark> bookmarks) {
     _changed = true;
     state = bookmarks;

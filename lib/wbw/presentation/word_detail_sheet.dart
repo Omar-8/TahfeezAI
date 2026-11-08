@@ -52,6 +52,7 @@ void showWordDetailSheet(BuildContext context, {required WordRef wordRef}) {
   showTahfeezModalBottomSheet(
     context: context,
     title: AppLocalizations.of(context).wordDetails,
+    besideOnWide: true,
     builder: (context) => _WordDetailSheet(first: wordRef),
   );
 }

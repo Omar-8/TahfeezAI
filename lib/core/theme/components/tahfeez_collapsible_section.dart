@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../app_spacing.dart';
+import '../tahfeez_icon_sizes.dart';
 import 'tahfeez_section_header.dart';
 
 /// A section that opens and closes: its header (as [TahfeezSectionHeader],
@@ -12,6 +13,7 @@ class TahfeezCollapsibleSection extends StatefulWidget {
     required this.title,
     required this.child,
     this.icon,
+    this.summary,
     this.open = false,
     this.initiallyExpanded = false,
     this.spacing = TahfeezSpacing.xs,
@@ -19,6 +21,10 @@ class TahfeezCollapsibleSection extends StatefulWidget {
 
   final String title;
   final IconData? icon;
+
+  /// Closed, under the title: what is chosen inside (a theme's name, the
+  /// reciter…), so it is known without opening the section.
+  final String? summary;
   final Widget child;
   final bool open;
 
@@ -58,13 +64,51 @@ class _TahfeezCollapsibleSectionState extends State<TahfeezCollapsibleSection> {
             borderRadius: BorderRadius.circular(TahfeezRadii.sm),
             onTap: widget.open ? null : _toggle,
             child: ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: 44),
+              constraints: const BoxConstraints(minHeight: 48),
               child: Row(
                 children: [
                   Expanded(
-                    child: TahfeezSectionHeader(
-                      title: widget.title,
-                      icon: widget.icon,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        TahfeezSectionHeader(
+                          title: widget.title,
+                          icon: widget.icon,
+                        ),
+                        if (widget.summary case final summary?
+                            when summary.isNotEmpty)
+                          AnimatedSize(
+                            duration: const Duration(milliseconds: 200),
+                            alignment: AlignmentDirectional.topStart,
+                            child: expanded
+                                ? const SizedBox(width: double.infinity)
+                                : Padding(
+                                    // Under the title, past the icon.
+                                    padding: EdgeInsetsDirectional.only(
+                                      start: widget.icon == null
+                                          ? 0
+                                          : TahfeezIconSize.lg +
+                                                TahfeezSpacing.sm,
+                                      bottom: TahfeezSpacing.xs,
+                                    ),
+                                    child: Text(
+                                      summary,
+                                      key: ValueKey(
+                                        'section-summary-${widget.title}',
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(
+                                            color: scheme.onSurfaceVariant,
+                                          ),
+                                    ),
+                                  ),
+                          ),
+                      ],
                     ),
                   ),
                   AnimatedRotation(

@@ -211,6 +211,9 @@ class _RecitationLoopSheetState extends ConsumerState<_RecitationLoopSheet> {
                     ),
                   ),
                 ),
+                SheetCloseButton(
+                  onPressed: () => Navigator.of(context).maybePop(),
+                ),
               ],
             ),
             const SizedBox(height: TahfeezSpacing.md),
@@ -427,6 +430,35 @@ class _RecitationLoopSheetState extends ConsumerState<_RecitationLoopSheet> {
               ),
             ),
             const SizedBox(height: TahfeezSpacing.md),
+            // What will happen, in one sentence, before it starts.
+            Container(
+              key: const ValueKey('loop-plan'),
+              padding: const EdgeInsets.all(TahfeezSpacing.smPlus),
+              decoration: BoxDecoration(
+                color: scheme.secondaryContainer.withValues(alpha: 0.6),
+                borderRadius: BorderRadius.circular(TahfeezRadii.md),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: TahfeezSpacing.sm,
+                children: [
+                  Icon(
+                    Icons.lightbulb_outline_rounded,
+                    size: 20,
+                    color: scheme.onSecondaryContainer,
+                  ),
+                  Expanded(
+                    child: Text(
+                      loopPlan(_loop, l10n),
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: scheme.onSecondaryContainer,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: TahfeezSpacing.md),
             SheetActions(
               primary: GuideTarget(
                 id: 'loop-start',
@@ -453,6 +485,17 @@ class _RecitationLoopSheetState extends ConsumerState<_RecitationLoopSheet> {
     );
   }
 }
+
+/// A loop in one sentence: how it goes, and that its last time is checked.
+String loopPlan(HifzLoop loop, AppLocalizations l10n) => [
+  if (loop.mode == HifzLoopMode.eachAyah)
+    l10n.recLoopPlanEach(loop.count)
+  else ...[
+    l10n.recLoopPlanRange(loop.count),
+    if (loop.perAyah > 1) l10n.recLoopPlanPerAyah(loop.perAyah),
+  ],
+  l10n.recLoopPlanCheck,
+].join(' ');
 
 /// One part of the loop sheet, unboxed (like the Hifz settings sheet's
 /// rows).
@@ -582,7 +625,6 @@ class CountStepper extends StatelessWidget {
         children: [
           IconButton.filledTonal(
             key: ValueKey('$id-minus'),
-            visualDensity: VisualDensity.compact,
             icon: const Icon(Icons.remove_rounded),
             onPressed: endless
                 ? () => onChanged(max)
@@ -610,9 +652,10 @@ class CountStepper extends StatelessWidget {
               );
               if (picked != null && picked != value) onChanged(picked);
             },
+            // 48 × 48 to tap, as the buttons beside it.
             child: SizedBox(
               width: 48,
-              height: 40,
+              height: 48,
               child: Center(
                 child: DefaultTextStyle.merge(
                   textAlign: TextAlign.center,
@@ -626,7 +669,6 @@ class CountStepper extends StatelessWidget {
           ),
           IconButton.filledTonal(
             key: ValueKey('$id-plus'),
-            visualDensity: VisualDensity.compact,
             icon: const Icon(Icons.add_rounded),
             onPressed: endless
                 ? null

@@ -344,6 +344,17 @@ class RecitationSessionController extends Notifier<RecitationSessionState> {
 
   static final _random = Random();
 
+  /// When the session [id] started (its id holds the time), or `null` for
+  /// an id not made by [_newSessionId] (a Follow along run's, a test's).
+  static DateTime? startedAtOf(String id) {
+    final parts = id.split('-');
+    if (parts.length != 3 || parts.first != 'rs') return null;
+    final micros = int.tryParse(parts[1], radix: 36);
+    return micros == null
+        ? null
+        : DateTime.fromMicrosecondsSinceEpoch(micros, isUtc: true).toLocal();
+  }
+
   static String _newSessionId(DateTime startedAt) {
     final time = startedAt.toUtc().microsecondsSinceEpoch.toRadixString(36);
     // Not `1 << 32`: on the web that shift wraps to 0 and nextInt throws.

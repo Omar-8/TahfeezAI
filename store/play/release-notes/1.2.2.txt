@@ -1,0 +1,189 @@
+<en-US>
+• Settings show what's chosen in each group; search highlights the option it finds (and no longer freezes)
+• Session results: time spent, compared with last time, repeat ×3/×5/×7
+• Loops say what will happen before they start; Try again and Skip explained
+• The eye says each state for 5 s
+• ✕ to close every sheet; Undo for bookmarks and memorized surahs
+• Report a problem from Settings
+• Bigger buttons; results beside the page on tablets
+</en-US>
+<ar>
+• الإعدادات تعرض ما اخترته في كل مجموعة، والبحث يُبرز الخيار الذي يجده (ولم يعد يتجمّد)
+• نتائج الجلسة: الوقت المستغرق، والمقارنة بالمرة السابقة، والتكرار ×3/×5/×7
+• التكرار يوضّح ما سيحدث قبل البدء، مع شرح «أعد المحاولة» و«تخطَّ»
+• العين تُعلن كل حالة لمدة 5 ثوانٍ
+• ✕ لإغلاق كل بطاقة، وتراجع للعلامات والسور المحفوظة
+• الإبلاغ عن مشكلة من الإعدادات
+• أزرار أكبر، والنتائج بجانب الصفحة على الأجهزة اللوحية
+</ar>
+<bn-BD>
+• সেটিংসে প্রতিটি বিভাগে কী বাছাই করা আছে দেখা যায়; খোঁজ মেলানো অপশন চিহ্নিত করে (আর আটকে যায় না)
+• সেশনের ফল: সময়, আগেরবারের সাথে তুলনা, ×3/×5/×7 পুনরাবৃত্তি
+• লুপ শুরুর আগে কী হবে বলে; আবার চেষ্টা ও এড়িয়ে যাওয়া ব্যাখ্যা করা
+• চোখ প্রতিটি অবস্থা ৫ সেকেন্ড জানায়
+• প্রতিটি শিট বন্ধে ✕; বুকমার্ক ও মুখস্থ সূরায় পূর্বাবস্থায় ফেরা
+• সেটিংস থেকে সমস্যা জানান
+• বড় বোতাম; ট্যাবলেটে ফল পৃষ্ঠার পাশে
+</bn-BD>
+<da-DK>
+• Indstillinger viser, hvad der er valgt i hver gruppe; søgning fremhæver det fundne (og fryser ikke længere)
+• Sessionsresultater: tidsforbrug, sammenlignet med sidst, gentag ×3/×5/×7
+• Løkker siger, hvad der sker, før de starter; Prøv igen og Spring over forklaret
+• Øjet viser hver tilstand i 5 s
+• ✕ lukker alle ark; Fortryd for bogmærker og huskede suraer
+• Rapportér et problem fra Indstillinger
+• Større knapper; resultater ved siden af siden på tablets
+</da-DK>
+<de-DE>
+• Einstellungen zeigen, was in jeder Gruppe gewählt ist; die Suche hebt das Gefundene hervor (und friert nicht mehr ein)
+• Sitzungsergebnisse: Dauer, Vergleich mit dem letzten Mal, Wiederholen ×3/×5/×7
+• Schleifen sagen vor dem Start, was passiert; Erneut und Überspringen erklärt
+• Das Auge nennt jeden Zustand 5 s lang
+• ✕ schließt jedes Blatt; Rückgängig für Lesezeichen und gelernte Suren
+• Problem melden in den Einstellungen
+• Größere Schaltflächen; Ergebnisse neben der Seite auf Tablets
+</de-DE>
+<el-GR>
+• Οι ρυθμίσεις δείχνουν τι έχει επιλεγεί σε κάθε ομάδα· η αναζήτηση επισημαίνει ό,τι βρίσκει (και δεν παγώνει πια)
+• Αποτελέσματα: χρόνος, σύγκριση με την προηγούμενη φορά, επανάληψη ×3/×5/×7
+• Οι επαναλήψεις λένε τι θα γίνει πριν ξεκινήσουν· εξηγούνται το Ξανά και η Παράλειψη
+• Το μάτι δείχνει κάθε κατάσταση για 5 δ.
+• ✕ σε κάθε φύλλο· Αναίρεση για σελιδοδείκτες και σούρες
+• Αναφορά προβλήματος από τις Ρυθμίσεις
+• Μεγαλύτερα κουμπιά· αποτελέσματα δίπλα στη σελίδα σε tablet
+</el-GR>
+<es-ES>
+• Los ajustes muestran lo elegido en cada grupo; la búsqueda resalta la opción que encuentra (y ya no se congela)
+• Resultados: tiempo, comparación con la vez anterior, repetir ×3/×5/×7
+• Los bucles dicen qué pasará antes de empezar; se explican Reintentar y Omitir
+• El ojo indica cada estado durante 5 s
+• ✕ para cerrar cada ficha; Deshacer en marcadores y suras memorizadas
+• Informar de un problema desde Ajustes
+• Botones más grandes; resultados junto a la página en tabletas
+</es-ES>
+<fa>
+• تنظیمات نشان می‌دهد در هر گروه چه انتخاب شده؛ جست‌وجو گزینهٔ یافته‌شده را برجسته می‌کند (و دیگر قفل نمی‌شود)
+• نتایج جلسه: زمان، مقایسه با دفعهٔ قبل، تکرار ×3/×5/×7
+• تکرار پیش از شروع می‌گوید چه می‌شود؛ «دوباره» و «رد شدن» توضیح داده شده
+• چشم هر حالت را ۵ ثانیه اعلام می‌کند
+• ✕ برای بستن هر برگه؛ واگرد برای نشانک‌ها و سوره‌های حفظ‌شده
+• گزارش مشکل از تنظیمات
+• دکمه‌های بزرگ‌تر؛ نتایج کنار صفحه در تبلت
+</fa>
+<fr-FR>
+• Les réglages montrent le choix de chaque groupe ; la recherche surligne ce qu'elle trouve (sans se figer)
+• Résultats : durée, comparaison avec la dernière fois, répéter ×3/×5/×7
+• Les boucles disent ce qui va se passer avant de commencer ; Réessayer et Passer expliqués
+• L'œil annonce chaque état pendant 5 s
+• ✕ pour fermer chaque fiche ; Annuler pour les signets et sourates mémorisées
+• Signaler un problème depuis les Réglages
+• Boutons plus grands ; résultats à côté de la page sur tablette
+</fr-FR>
+<id>
+• Pengaturan menampilkan pilihan di tiap grup; pencarian menyorot opsi yang ditemukan (dan tak lagi macet)
+• Hasil sesi: durasi, perbandingan dengan sebelumnya, ulangi ×3/×5/×7
+• Pengulangan menjelaskan yang akan terjadi sebelum mulai; Coba lagi dan Lewati dijelaskan
+• Mata menyebut tiap keadaan selama 5 detik
+• ✕ untuk menutup tiap lembar; Urungkan untuk penanda dan surah hafalan
+• Laporkan masalah dari Pengaturan
+• Tombol lebih besar; hasil di samping halaman pada tablet
+</id>
+<ja-JP>
+• 設定の各グループに選択中の内容を表示。検索で見つかった項目を強調（固まらなくなりました）
+• セッション結果：所要時間、前回との比較、×3/×5/×7で復習
+• ループは開始前に流れを説明。やり直す・スキップの説明を追加
+• 目のボタンで各状態を5秒表示
+• すべてのシートに✕。ブックマークと暗記スーラに元に戻す
+• 設定から問題を報告
+• ボタンを大きく。タブレットでは結果をページの横に表示
+</ja-JP>
+<kk>
+• Баптаулар әр топта не таңдалғанын көрсетеді; іздеу табылғанын ерекшелейді (енді қатып қалмайды)
+• Сессия нәтижесі: уақыт, өткен жолмен салыстыру, ×3/×5/×7 қайталау
+• Қайталау басталмай тұрып не болатынын айтады; Қайталау мен Өткізу түсіндірілді
+• Көз әр күйді 5 с көрсетеді
+• Әр парақты ✕ жабады; бетбелгі мен жатталған сүрелерге Болдырмау
+• Баптаулардан мәселе туралы хабарлау
+• Үлкенірек түймелер; планшетте нәтиже беттің жанында
+</kk>
+<ko-KR>
+• 설정의 각 그룹에 선택한 항목 표시, 검색은 찾은 옵션을 강조(더 이상 멈추지 않음)
+• 세션 결과: 걸린 시간, 지난번과 비교, ×3/×5/×7 반복
+• 반복은 시작 전에 진행 방식을 안내, 다시·건너뛰기 설명
+• 눈 버튼이 각 상태를 5초간 알림
+• 모든 시트에 ✕, 북마크와 암기 수라에 실행 취소
+• 설정에서 문제 신고
+• 더 큰 버튼, 태블릿에서는 결과를 페이지 옆에 표시
+</ko-KR>
+<ms>
+• Tetapan menunjukkan pilihan dalam setiap kumpulan; carian menyerlahkan pilihan yang ditemui (dan tidak lagi beku)
+• Keputusan sesi: masa, perbandingan dengan sebelumnya, ulang ×3/×5/×7
+• Ulangan menerangkan apa yang berlaku sebelum mula; Cuba lagi dan Langkau diterangkan
+• Mata memaparkan setiap keadaan selama 5 saat
+• ✕ untuk menutup setiap helaian; Buat asal untuk penanda dan surah hafalan
+• Laporkan masalah dari Tetapan
+• Butang lebih besar; keputusan di sebelah halaman pada tablet
+</ms>
+<nl-NL>
+• Instellingen tonen wat er in elke groep gekozen is; zoeken markeert de gevonden optie (en loopt niet meer vast)
+• Sessieresultaten: duur, vergeleken met vorige keer, herhaal ×3/×5/×7
+• Herhalingen zeggen vooraf wat er gebeurt; Opnieuw en Overslaan uitgelegd
+• Het oog meldt elke stand 5 s
+• ✕ sluit elk blad; Ongedaan maken voor bladwijzers en gememoriseerde soera's
+• Probleem melden via Instellingen
+• Grotere knoppen; resultaten naast de pagina op tablets
+</nl-NL>
+<pt-BR>
+• As configurações mostram o que está escolhido em cada grupo; a busca destaca a opção encontrada (e não trava mais)
+• Resultados: tempo, comparação com a vez anterior, repetir ×3/×5/×7
+• As repetições dizem o que vai acontecer antes de começar; Tentar de novo e Pular explicados
+• O olho mostra cada estado por 5 s
+• ✕ para fechar cada ficha; Desfazer em marcadores e suratas memorizadas
+• Relatar um problema nas Configurações
+• Botões maiores; resultados ao lado da página em tablets
+</pt-BR>
+<ru-RU>
+• Настройки показывают выбранное в каждой группе; поиск выделяет найденное (и больше не зависает)
+• Итоги: время, сравнение с прошлым разом, повтор ×3/×5/×7
+• Повторы заранее говорят, что будет; объяснены «Повторить» и «Пропустить»
+• Глаз показывает каждое состояние 5 с
+• ✕ закрывает каждую карточку; отмена для закладок и выученных сур
+• Сообщить о проблеме из настроек
+• Кнопки крупнее; на планшетах итоги рядом со страницей
+</ru-RU>
+<sw>
+• Mipangilio inaonyesha kilichochaguliwa katika kila kundi; utafutaji unaangazia chaguo lililopatikana (na haugandi tena)
+• Matokeo: muda, ulinganisho na mara iliyopita, rudia ×3/×5/×7
+• Marudio yanaeleza kitakachotokea kabla ya kuanza; Jaribu tena na Ruka yamefafanuliwa
+• Jicho linaonyesha kila hali kwa sekunde 5
+• ✕ kufunga kila karatasi; Tendua kwa alamisho na sura zilizohifadhiwa
+• Ripoti tatizo kutoka Mipangilio
+• Vitufe vikubwa; matokeo kando ya ukurasa kwenye tableti
+</sw>
+<tr-TR>
+• Ayarlar her grupta seçili olanı gösterir; arama bulunan seçeneği vurgular (artık donmaz)
+• Oturum sonuçları: süre, geçen seferle karşılaştırma, ×3/×5/×7 tekrar
+• Tekrarlar başlamadan ne olacağını söyler; Yeniden ve Atla açıklandı
+• Göz her durumu 5 sn gösterir
+• Her sayfayı ✕ kapatır; yer imleri ve ezberlenen sureler için Geri al
+• Ayarlar'dan sorun bildirin
+• Daha büyük düğmeler; tablette sonuçlar sayfanın yanında
+</tr-TR>
+<ur>
+• ترتیبات ہر گروپ میں منتخب چیز دکھاتی ہیں؛ تلاش ملنے والا آپشن نمایاں کرتی ہے (اب اٹکتی نہیں)
+• سیشن کے نتائج: وقت، پچھلی بار سے موازنہ، ×3/×5/×7 دہرائیں
+• تکرار شروع سے پہلے بتاتا ہے کیا ہوگا؛ دوبارہ اور آگے کی وضاحت
+• آنکھ ہر حالت 5 سیکنڈ دکھاتی ہے
+• ہر شیٹ بند کرنے کو ✕؛ بُک مارک اور حفظ سورتوں کے لیے واپس کریں
+• ترتیبات سے مسئلہ رپورٹ کریں
+• بڑے بٹن؛ ٹیبلٹ پر نتائج صفحے کے ساتھ
+</ur>
+<zh-CN>
+• 设置的每个分组显示当前选择；搜索会高亮找到的选项（不再卡住）
+• 诵读结果：用时、与上次比较、重复×3/×5/×7
+• 循环开始前说明流程；解释“重试”和“跳过”
+• 眼睛按钮显示每种状态5秒
+• 每个面板都有✕；书签和已背章节可撤销
+• 在设置中报告问题
+• 按钮更大；平板上结果显示在页面旁
+</zh-CN>

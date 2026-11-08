@@ -116,30 +116,46 @@ class _SurahInfo extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: TahfeezSpacing.md,
         children: [
-          Column(
-            spacing: TahfeezSpacing.xs,
+          Stack(
             children: [
-              SurahNameCalligraphy(
-                surahNo: surahNo,
-                height: 44,
-                maxWidth: 220,
-                color: theme.colorScheme.onSurface,
-                semanticLabel: indexed.arabicName,
-              ),
-              Text(
-                '$surahNo · $name',
-                textAlign: TextAlign.center,
-                style: theme.textTheme.titleLarge,
-              ),
-              if (facts?.meaning case final meaning? when meaning.isNotEmpty)
-                Text(
-                  meaning,
-                  key: const ValueKey('surah-info-meaning'),
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
+              Column(
+                // Full width: the ✕ at the sheet's far end, not the name's.
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                spacing: TahfeezSpacing.xs,
+                children: [
+                  Center(
+                    child: SurahNameCalligraphy(
+                      surahNo: surahNo,
+                      height: 44,
+                      maxWidth: 220,
+                      color: theme.colorScheme.onSurface,
+                      semanticLabel: indexed.arabicName,
+                    ),
                   ),
+                  Text(
+                    '$surahNo · $name',
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.titleLarge,
+                  ),
+                  if (facts?.meaning case final meaning?
+                      when meaning.isNotEmpty)
+                    Text(
+                      meaning,
+                      key: const ValueKey('surah-info-meaning'),
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                ],
+              ),
+              PositionedDirectional(
+                top: 0,
+                end: -TahfeezSpacing.sm,
+                child: SheetCloseButton(
+                  onPressed: () => Navigator.of(context).maybePop(),
                 ),
+              ),
             ],
           ),
           TahfeezCard(

@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tahfeez_ai/core/localization/generated/app_localizations.dart';
 import 'package:tahfeez_ai/features/recitation/application/hifz_controller.dart';
 import 'package:tahfeez_ai/features/recitation/presentation/recitation_controls.dart';
+import 'package:tahfeez_ai/features/recitation/presentation/recitation_loop_sheet.dart';
 import 'package:tahfeez_ai/quran/domain/models/quran_refs.dart';
 
 void main() {
@@ -61,6 +62,25 @@ void main() {
         l10n,
       ),
       isNull,
+    );
+  });
+
+  test('a loop in one sentence, before it starts', () {
+    expect(
+      loopPlan(const HifzLoop(count: 3), l10n),
+      'Each ayah 3 times, then the next. The last time is checked: with a '
+      'mistake, try again or skip.',
+    );
+    expect(
+      loopPlan(const HifzLoop(count: 1), l10n),
+      startsWith('Each ayah once, then the next.'),
+    );
+    expect(
+      loopPlan(
+        const HifzLoop(mode: HifzLoopMode.range, count: 2, perAyah: 3),
+        l10n,
+      ),
+      startsWith('The whole range 2 times. Each ayah 3 times in a row.'),
     );
   });
 }

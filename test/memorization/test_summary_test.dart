@@ -57,4 +57,21 @@ void main() {
       expect(ayahs(), [112003]);
     },
   );
+
+  test('each ayah\'s last test before this session kept, to compare '
+      '(a loop\'s earlier passes are this session, not "last time")', () async {
+    final summaries = container.read(testSummaryProvider.notifier);
+    await summaries.record([attempt(112001, 'yesterday')]);
+    await summaries.record([
+      attempt(112001, 'today'),
+      attempt(112002, 'today'),
+    ]);
+    // A second pass of the same session.
+    await summaries.record([attempt(112001, 'today')]);
+    final rows = container.read(testSummaryProvider)!.rows;
+    expect(
+      [for (final r in rows) r.previous?.sessionId],
+      ['yesterday', null, 'yesterday'],
+    );
+  });
 }

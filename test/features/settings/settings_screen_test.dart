@@ -216,6 +216,61 @@ void main() {
     expect(about, findsOneWidget);
   });
 
+  testWidgets('closed groups say what is chosen in them; a search '
+      'highlights the option found and brings it into view', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: tahfeezWidgetTestOverrides(),
+        child: const TahfeezApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Settings'));
+    await tester.pumpAndSettle();
+    // Closed: the language and the theme chosen, under their titles.
+    expect(
+      tester
+          .widget<Text>(find.byKey(const ValueKey('section-summary-Language')))
+          .data,
+      'System default',
+    );
+    expect(
+      tester
+          .widget<Text>(find.byKey(const ValueKey('section-summary-App theme')))
+          .data,
+      // (Whichever an earlier test left chosen.)
+      isIn(['System', 'Light', 'Warm', 'Sepia', 'Dark', 'Black']),
+    );
+    // Opened, the summary goes (the choices themselves are shown).
+    await _openGroup(tester, 'settings-group-App theme');
+    expect(
+      find.byKey(const ValueKey('section-summary-App theme')),
+      findsNothing,
+    );
+
+    // A search: the option found highlighted, scrolled into view.
+    await tester.enterText(
+      find.byKey(const ValueKey('settings-search')),
+      'export',
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 600));
+    await tester.pumpAndSettle();
+    final match = find.byKey(const ValueKey('settings-search-match'));
+    expect(match, findsWidgets);
+    expect(
+      find.descendant(of: match.first, matching: find.textContaining('Export')),
+      findsOneWidget,
+    );
+    final rect = tester.getRect(match.first);
+    expect(rect.top, greaterThanOrEqualTo(0));
+    expect(rect.bottom, lessThan(844));
+  });
+
   testWidgets('About lists every source with its licence, and the licences', (
     tester,
   ) async {

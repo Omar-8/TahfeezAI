@@ -131,7 +131,19 @@ class _PlanSheetState extends ConsumerState<_PlanSheet> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: TahfeezSpacing.smPlus,
         children: [
-          Text(l10n.memPlanTitle, style: theme.textTheme.titleLarge),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  l10n.memPlanTitle,
+                  style: theme.textTheme.titleLarge,
+                ),
+              ),
+              SheetCloseButton(
+                onPressed: () => Navigator.of(context).maybePop(),
+              ),
+            ],
+          ),
           TahfeezCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,

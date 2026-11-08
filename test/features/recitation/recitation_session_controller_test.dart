@@ -139,6 +139,14 @@ void main() {
     expect(state().session!.startLocation, startPage);
     expect(state().session!.startedAt, now);
     expect(source.micOpen, isTrue);
+    // Its id holds the time it started (the results' "how long").
+    expect(
+      RecitationSessionController.startedAtOf(state().session!.id)!
+          .isAtSameMomentAs(now),
+      isTrue,
+    );
+    expect(RecitationSessionController.startedAtOf('run-1'), isNull);
+    expect(RecitationSessionController.startedAtOf('s'), isNull);
   });
 
   test('permission denied never opens the microphone', () async {
