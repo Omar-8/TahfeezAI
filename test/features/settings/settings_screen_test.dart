@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:tahfeez_ai/core/theme/components/tahfeez_collapsible_section.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tahfeez_ai/app/app.dart';
@@ -19,6 +20,35 @@ import '../../test_helpers/widget_test_overrides.dart';
 final _list = find
     .descendant(of: find.byType(ListView), matching: find.byType(Scrollable))
     .first;
+
+/// A collapsed group of Settings opened (its header scrolled to, tapped).
+Future<void> _openGroup(WidgetTester tester, String key) async {
+  final header = find.byKey(ValueKey(key));
+  await tester.scrollUntilVisible(header, 200, scrollable: _list);
+  // (In the middle: not under the bottom bar.)
+  await Scrollable.ensureVisible(tester.element(header), alignment: 0.5);
+  await tester.pumpAndSettle();
+  await tester.tap(
+    find.descendant(of: header, matching: find.byType(InkWell)).first,
+  );
+  await tester.pumpAndSettle();
+}
+
+/// The Language group opened, if it is closed (its title is in the
+/// language chosen: found by its icon).
+Future<void> _openLanguage(WidgetTester tester) async {
+  if (find.byKey(const ValueKey('settings-language')).evaluate().isNotEmpty) {
+    return;
+  }
+  final header = find.ancestor(
+    of: find.byIcon(Icons.translate),
+    matching: find.byType(TahfeezCollapsibleSection),
+  );
+  await tester.tap(
+    find.descendant(of: header, matching: find.byType(InkWell)).first,
+  );
+  await tester.pumpAndSettle();
+}
 
 void main() {
   testWidgets('the Settings tab sets the theme and the language', (
@@ -42,6 +72,10 @@ void main() {
     await tester.tap(find.text('Settings'));
     await tester.pumpAndSettle();
     expect(container.read(themeModeControllerProvider), ThemeMode.system);
+    // Every group closed at first, the most used too (owner, 2026-11-08).
+    expect(find.byKey(const ValueKey('settings-app-theme')), findsNothing);
+    expect(find.byKey(const ValueKey('settings-language')), findsNothing);
+    await _openGroup(tester, 'settings-group-App theme');
 
     Finder appTheme(String name) => find.descendant(
       of: find.byKey(const ValueKey('settings-app-theme')),
@@ -75,6 +109,7 @@ void main() {
 
     // The Arabic UI font: the app's text falls back to it.
     expect(container.read(arabicFontControllerProvider), ArabicUiFont.kufi);
+    await _openGroup(tester, 'settings-group-Arabic font');
     final tajawal = find.byKey(const ValueKey('settings-arabic-font-tajawal'));
     await tester.scrollUntilVisible(tajawal, 200, scrollable: _list);
     await tester.ensureVisible(tajawal);
@@ -90,6 +125,7 @@ void main() {
     // The language list: each with its flag.
     await tester.drag(find.byType(ListView).first, const Offset(0, 2000));
     await tester.pumpAndSettle();
+    await _openLanguage(tester);
     await tester.tap(find.byKey(const ValueKey('settings-language')));
     await tester.pumpAndSettle();
     for (final name in ['Deutsch', 'Français', 'Türkçe', 'اردو']) {
@@ -99,10 +135,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(container.read(localeControllerProvider), const Locale('ar'));
     expect(find.text('اللغة'), findsOneWidget); // "Language", now in Arabic
-    expect(find.text('داكن'), findsOneWidget); // "Dark"
 
     await tester.drag(find.byType(ListView).first, const Offset(0, 2000));
     await tester.pumpAndSettle();
+    await _openLanguage(tester);
     await tester.tap(find.byKey(const ValueKey('settings-language')));
     await tester.pumpAndSettle();
     // The last of the list too (once hidden under the bottom bar).
@@ -119,6 +155,7 @@ void main() {
 
     await tester.drag(find.byType(ListView).first, const Offset(0, 2000));
     await tester.pumpAndSettle();
+    await _openLanguage(tester);
     await tester.tap(find.byKey(const ValueKey('settings-language')));
     await tester.pumpAndSettle();
     // Back to the system language.
@@ -158,13 +195,19 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('No settings match'), findsOneWidget);
 
-    // Everything again: the language first, the app's About last — not
-    // on screen until the list is scrolled to its end.
+    // Everything again, every group closed: the language first, the app's
+    // About last — not on screen until the list is scrolled to its end.
     await tester.enterText(search, '');
     await tester.pumpAndSettle();
-    expect(find.byKey(const ValueKey('settings-language')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('settings-group-Language')),
+      findsOneWidget,
+    );
+    expect(find.byKey(const ValueKey('settings-language')), findsNothing);
     final about = find.byKey(const ValueKey('settings-about-app'));
     expect(about, findsNothing);
+    // (Collapsed, below the most used.)
+    await _openGroup(tester, 'settings-group-about');
     await tester.dragUntilVisible(
       about,
       find.byType(ListView).first,
@@ -190,6 +233,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Settings'));
     await tester.pumpAndSettle();
+    await _openGroup(tester, 'settings-group-about');
     final about = find.byKey(const ValueKey('settings-about'));
     await tester.scrollUntilVisible(about, 200, scrollable: _list);
     await tester.ensureVisible(about);
@@ -243,6 +287,7 @@ void main() {
 
     await tester.tap(find.text('Settings'));
     await tester.pumpAndSettle();
+    await _openGroup(tester, 'settings-group-Your data');
     final reset = find.byKey(const ValueKey('settings-reset'));
     await tester.scrollUntilVisible(reset, 200, scrollable: _list);
     await tester.ensureVisible(reset);
@@ -289,6 +334,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('Settings'));
       await tester.pumpAndSettle();
+      await _openGroup(tester, 'settings-group-about');
       final rate = find.text('Rate TahfeezAI');
       await tester.scrollUntilVisible(rate, 200, scrollable: _list);
       expect(

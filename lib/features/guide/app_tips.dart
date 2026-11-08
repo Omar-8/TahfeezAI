@@ -35,7 +35,9 @@ enum AppTip {
   downloadReciter,
 }
 
-const tipFirstAfter = Duration(days: 1);
+/// (Three days: a new reader is not shown everything at once — owner,
+/// 2026-11-07.)
+const tipFirstAfter = Duration(days: 3);
 const tipInterval = Duration(days: 2);
 const tipChance = 0.5;
 

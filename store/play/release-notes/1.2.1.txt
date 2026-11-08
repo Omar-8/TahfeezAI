@@ -1,0 +1,147 @@
+<en-US>
+• Recitation colours now stay on the page, across surahs and after closing the app
+• The eye switches between colours, no colours (only your place) and hidden ayahs
+• Simpler settings: Gentle, Balanced and Strict levels, and collapsible groups
+• Loops: colours kept between rounds, each ayah's last time checked, times left shown, results at the end
+• Swipe between mistakes in the word sheet
+</en-US>
+<ar>
+• ألوان التلاوة تبقى الآن على الصفحة، عبر السور وبعد إغلاق التطبيق
+• العين تتنقّل بين الألوان، وبلا ألوان (موضعك فقط)، وإخفاء الآيات
+• إعدادات أبسط: مستويات لطيف ومتوازن وصارم، ومجموعات قابلة للطي
+• التكرار: الألوان تبقى بين الجولات، وتُفحص آخر مرة لكل آية، ويظهر عدد المرات المتبقية، والنتائج في النهاية
+• اسحب للتنقل بين الأخطاء في بطاقة الكلمة
+</ar>
+<bn-BD>
+• তিলাওয়াতের রং এখন পৃষ্ঠায় থেকে যায়, সূরা বদলালে ও অ্যাপ বন্ধ করার পরেও
+• চোখ বোতাম বদলায়: রং, রং ছাড়া (শুধু আপনার অবস্থান) ও লুকানো আয়াত
+• সহজ সেটিংস: কোমল, ভারসাম্যপূর্ণ ও কঠোর স্তর, এবং ভাঁজযোগ্য বিভাগ
+• লুপ: রাউন্ডের মাঝে রং থাকে, প্রতিটি আয়াতের শেষবার যাচাই হয়, বাকি সংখ্যা দেখায়, শেষে ফলাফল
+• শব্দ শিটে সোয়াইপ করে ভুলগুলোর মধ্যে যান
+</bn-BD>
+<da-DK>
+• Recitationsfarver bliver nu på siden, på tværs af suraer og efter appen lukkes
+• Øjet skifter mellem farver, ingen farver (kun hvor du er) og skjulte ayat
+• Enklere indstillinger: niveauerne Blid, Afbalanceret og Streng samt sammenfoldelige grupper
+• Løkker: farver bevares mellem runderne, hver ayahs sidste gang tjekkes, antal tilbage vises, resultater til sidst
+• Swipe mellem fejl i ordarket
+</da-DK>
+<de-DE>
+• Rezitationsfarben bleiben jetzt auf der Seite, über Suren hinweg und nach dem Schließen der App
+• Das Auge wechselt zwischen Farben, ohne Farben (nur deine Stelle) und ausgeblendeten Ayat
+• Einfachere Einstellungen: Stufen Sanft, Ausgewogen und Streng sowie einklappbare Gruppen
+• Schleifen: Farben bleiben zwischen den Runden, das letzte Mal jeder Aya wird geprüft, verbleibende Male angezeigt, Ergebnisse am Ende
+• Im Wortblatt zwischen Fehlern wischen
+</de-DE>
+<el-GR>
+• Τα χρώματα απαγγελίας μένουν πλέον στη σελίδα, σε όλες τις σούρες και μετά το κλείσιμο της εφαρμογής
+• Το μάτι εναλλάσσει χρώματα, χωρίς χρώματα (μόνο η θέση σας) και κρυμμένα εδάφια
+• Απλούστερες ρυθμίσεις: επίπεδα Ήπιο, Ισορροπημένο και Αυστηρό, και πτυσσόμενες ομάδες
+• Επαναλήψεις: τα χρώματα μένουν μεταξύ γύρων, ελέγχεται η τελευταία φορά κάθε εδαφίου, εμφανίζονται οι φορές που απομένουν, αποτελέσματα στο τέλος
+• Σύρετε ανάμεσα στα λάθη στο φύλλο λέξης
+</el-GR>
+<es-ES>
+• Los colores de la recitación ahora se quedan en la página, entre suras y al cerrar la app
+• El ojo alterna entre colores, sin colores (solo tu posición) y aleyas ocultas
+• Ajustes más sencillos: niveles Suave, Equilibrado y Estricto, y grupos plegables
+• Bucles: los colores se mantienen entre rondas, se revisa la última vez de cada aleya, se muestran las veces restantes y los resultados al final
+• Desliza entre los errores en la ficha de la palabra
+</es-ES>
+<fa>
+• رنگ‌های تلاوت اکنون روی صفحه می‌مانند، در سوره‌های دیگر و پس از بستن برنامه
+• چشم بین رنگ‌ها، بدون رنگ (فقط جای شما) و آیات پنهان جابه‌جا می‌شود
+• تنظیمات ساده‌تر: سطح‌های ملایم، متعادل و سخت‌گیر، و گروه‌های جمع‌شونده
+• تکرار: رنگ‌ها بین دورها می‌مانند، آخرین بار هر آیه بررسی می‌شود، دفعات باقی‌مانده نمایش داده می‌شود، نتایج در پایان
+• در برگهٔ واژه بین خطاها بکشید
+</fa>
+<fr-FR>
+• Les couleurs de récitation restent désormais sur la page, d'une sourate à l'autre et après la fermeture de l'app
+• L'œil alterne entre couleurs, sans couleurs (seulement votre position) et versets masqués
+• Réglages simplifiés : niveaux Doux, Équilibré et Strict, et groupes repliables
+• Boucles : couleurs conservées entre les tours, dernière fois de chaque verset vérifiée, fois restantes affichées, résultats à la fin
+• Balayez entre les erreurs dans la fiche du mot
+</fr-FR>
+<id>
+• Warna tilawah kini tetap di halaman, lintas surah dan setelah aplikasi ditutup
+• Mata beralih antara berwarna, tanpa warna (hanya posisi Anda) dan ayat tersembunyi
+• Pengaturan lebih sederhana: tingkat Lembut, Seimbang dan Ketat, serta grup yang dapat dilipat
+• Pengulangan: warna tetap antar putaran, kali terakhir tiap ayat diperiksa, sisa kali ditampilkan, hasil di akhir
+• Geser di antara kesalahan pada lembar kata
+</id>
+<ja-JP>
+• 読誦の色がページに残るようになりました（スーラをまたいでも、アプリを閉じても）
+• 目のボタンで「色あり」「色なし（現在位置のみ）」「アーヤを隠す」を切り替え
+• 設定をシンプルに：やさしい・標準・厳しめの3レベルと折りたたみグループ
+• ループ：ラウンド間で色を保持、各アーヤの最後の回をチェック、残り回数を表示、最後に結果
+• 単語シートでスワイプして間違いを移動
+</ja-JP>
+<kk>
+• Оқу түстері енді бетте қалады: сүрелер арасында да, қолданбаны жапқаннан кейін де
+• Көз түймесі ауысады: түсті, түссіз (тек орныңыз) және жасырын аяттар
+• Қарапайым баптаулар: Жұмсақ, Теңгерімді және Қатаң деңгейлер, жиналмалы топтар
+• Қайталау: түстер айналымдар арасында сақталады, әр аяттың соңғы реті тексеріледі, қалған саны көрсетіледі, соңында нәтиже
+• Сөз парағында қателер арасында сырғытыңыз
+</kk>
+<ko-KR>
+• 낭송 색상이 이제 페이지에 유지됩니다(다른 수라로 가거나 앱을 닫아도)
+• 눈 버튼으로 색상, 색상 없음(현재 위치만), 아야 숨기기를 전환
+• 더 간단한 설정: 부드럽게·균형·엄격 단계와 접을 수 있는 그룹
+• 반복: 회차 사이에 색상 유지, 각 아야의 마지막 회차 확인, 남은 횟수 표시, 끝나면 결과
+• 단어 시트에서 스와이프로 실수 사이 이동
+</ko-KR>
+<ms>
+• Warna bacaan kini kekal pada halaman, merentas surah dan selepas aplikasi ditutup
+• Mata bertukar antara berwarna, tanpa warna (hanya kedudukan anda) dan ayat tersembunyi
+• Tetapan lebih mudah: tahap Lembut, Seimbang dan Tegas, serta kumpulan boleh lipat
+• Ulangan: warna kekal antara pusingan, kali terakhir setiap ayat disemak, baki kali dipaparkan, keputusan di akhir
+• Leret antara kesilapan dalam helaian perkataan
+</ms>
+<nl-NL>
+• Recitatiekleuren blijven nu op de pagina, over soera's heen en na het sluiten van de app
+• Het oog wisselt tussen kleuren, geen kleuren (alleen waar je bent) en verborgen ayaat
+• Eenvoudigere instellingen: niveaus Mild, Gebalanceerd en Streng, en inklapbare groepen
+• Herhalingen: kleuren blijven tussen rondes, de laatste keer van elke aya wordt gecontroleerd, resterende keren getoond, resultaten aan het eind
+• Veeg tussen fouten in het woordblad
+</nl-NL>
+<pt-BR>
+• As cores da recitação agora ficam na página, entre suratas e depois de fechar o app
+• O olho alterna entre cores, sem cores (só a sua posição) e versículos ocultos
+• Configurações mais simples: níveis Suave, Equilibrado e Rigoroso, e grupos recolhíveis
+• Repetições: cores mantidas entre as rodadas, a última vez de cada versículo é verificada, vezes restantes exibidas, resultados no fim
+• Deslize entre os erros na ficha da palavra
+</pt-BR>
+<ru-RU>
+• Цвета чтения теперь остаются на странице — при переходе между сурами и после закрытия приложения
+• Глаз переключает: цвета, без цветов (только ваше место) и скрытые аяты
+• Проще настройки: уровни «Мягкий», «Сбалансированный» и «Строгий», сворачиваемые группы
+• Повторы: цвета сохраняются между кругами, последний раз каждого аята проверяется, показано, сколько осталось, итоги в конце
+• Листайте ошибки свайпом в карточке слова
+</ru-RU>
+<sw>
+• Rangi za kisomo sasa zinabaki kwenye ukurasa, katika sura zote na baada ya kufunga programu
+• Jicho hubadilisha kati ya rangi, bila rangi (mahali ulipo tu) na aya zilizofichwa
+• Mipangilio rahisi: viwango vya Upole, Wastani na Ukali, na vikundi vinavyokunjika
+• Marudio: rangi hubaki kati ya mizunguko, mara ya mwisho ya kila aya hukaguliwa, idadi iliyobaki huonyeshwa, matokeo mwishoni
+• Telezesha kati ya makosa kwenye karatasi ya neno
+</sw>
+<tr-TR>
+• Okuma renkleri artık sayfada kalıyor; sureler arasında ve uygulama kapatıldıktan sonra da
+• Göz; renkli, renksiz (yalnızca yeriniz) ve gizli ayetler arasında geçiş yapar
+• Daha basit ayarlar: Yumuşak, Dengeli ve Katı seviyeleri ile katlanabilir gruplar
+• Tekrarlar: renkler turlar arasında kalır, her ayetin son tekrarı kontrol edilir, kalan sayı gösterilir, sonda sonuçlar
+• Kelime sayfasında hatalar arasında kaydırın
+</tr-TR>
+<ur>
+• تلاوت کے رنگ اب صفحے پر رہتے ہیں، سورتیں بدلنے اور ایپ بند کرنے کے بعد بھی
+• آنکھ کا بٹن بدلتا ہے: رنگ، بغیر رنگ (صرف آپ کی جگہ) اور چھپی آیات
+• آسان ترتیبات: نرم، متوازن اور سخت درجے، اور سمٹنے والے گروپ
+• تکرار: دوروں کے درمیان رنگ برقرار، ہر آیت کی آخری بار جانچ، باقی تعداد کی نمائش، آخر میں نتائج
+• لفظ کی شیٹ میں سوائپ کر کے غلطیوں کے درمیان جائیں
+</ur>
+<zh-CN>
+• 诵读颜色现在会留在页面上，切换章节或关闭应用后依然保留
+• 眼睛按钮可切换：显示颜色、不显示颜色（只显示当前位置）、隐藏经文
+• 更简单的设置：温和、平衡、严格三档，以及可折叠的分组
+• 循环：各轮之间保留颜色，检查每节经文的最后一遍，显示剩余次数，结束时显示结果
+• 在单词卡片中左右滑动浏览错误
+</zh-CN>

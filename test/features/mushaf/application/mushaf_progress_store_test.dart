@@ -5,6 +5,7 @@ import 'package:tahfeez_ai/core/storage/storage_providers.dart';
 import 'package:tahfeez_ai/features/mushaf/application/mushaf_hide_mode.dart';
 import 'package:tahfeez_ai/features/mushaf/application/mushaf_progress_store.dart';
 import 'package:tahfeez_ai/features/mushaf/application/mushaf_word_overlay.dart';
+import 'package:tahfeez_ai/quran/domain/models/quran_refs.dart';
 
 class _MemoryStorage implements BrowserStorage {
   @override
@@ -65,44 +66,189 @@ void main() {
     },
   );
 
-  test('a finished recitation\'s colours are shown again; one under way, '
-      'or none, is not kept', () async {
-    const results = MushafWordOverlay(
-      first: (ayahId: 112001, wordIndex: 0),
-      last: (ayahId: 112004, wordIndex: 4),
-      marks: {
-        (ayahId: 112001, wordIndex: 0): MushafWordMark.correct,
-        (ayahId: 112003, wordIndex: 0): MushafWordMark.wrong,
-      },
-      heard: {(ayahId: 112003, wordIndex: 0): 'بَل'},
-      corrected: {(ayahId: 112003, wordIndex: 0)},
-      inks: {MushafWordMark.tajweed: 0xFF2255AA},
+  // (Kept a moment after they change.)
+  Future<void> saved() => Future<void>.delayed(const Duration(seconds: 1));
+
+  WordRef w(int ayahId, int wordIndex) =>
+      (ayahId: ayahId, wordIndex: wordIndex);
+
+  MushafWordOverlay finished(
+    Map<WordRef, MushafWordMark> marks, {
+    Map<WordRef, String> heard = const {},
+    Set<WordRef> corrected = const {},
+  }) {
+    final words = marks.keys.toList()..sort(compareWordRefs);
+    return MushafWordOverlay(
+      first: words.first,
+      last: words.last,
+      marks: marks,
+      heard: heard,
+      corrected: corrected,
+      inks: const {MushafWordMark.tajweed: 0xFF2255AA},
       hideUnrevealed: false,
       followHideMode: true,
     );
+  }
+
+  test('every finished recitation\'s colours are kept, on every page, and '
+      'shown again when the app opens', () async {
     final first = launch();
-    first.read(mushafWordOverlayProvider.notifier).set(results);
-    await pumpEventQueue();
+    final overlay = first.read(mushafWordOverlayProvider.notifier);
+    overlay.set(
+      finished(
+        {
+          w(112001, 0): MushafWordMark.correct,
+          w(112003, 0): MushafWordMark.wrong,
+        },
+        heard: {w(112003, 0): 'بَل'},
+        corrected: {w(112003, 0)},
+      ),
+    );
+    // Another surah, recited after it: both kept.
+    overlay.set(
+      finished({
+        w(1001, 0): MushafWordMark.correct,
+        w(1001, 1): MushafWordMark.tashkeel,
+      }),
+    );
+    // A recitation under way: kept as it was.
+    overlay.set(MushafWordOverlay(first: w(36001, 0), last: w(36083, 9)));
+    await saved();
 
     final again = launch();
     again.read(mushafWordOverlayProvider);
     await pumpEventQueue();
-    expect(again.read(mushafWordOverlayProvider), results);
-    expect(again.read(mushafWordOverlayProvider.notifier).restored, isTrue);
+    final shown = again.read(mushafWordOverlayProvider)!;
+    expect(shown.marks, {
+      w(112001, 0): MushafWordMark.correct,
+      w(112003, 0): MushafWordMark.wrong,
+      w(1001, 0): MushafWordMark.correct,
+      w(1001, 1): MushafWordMark.tashkeel,
+    });
+    expect(shown.heard, {w(112003, 0): 'بَل'});
+    expect(shown.corrected, {w(112003, 0)});
+    expect(shown.inks, {MushafWordMark.tajweed: 0xFF2255AA});
+    // Its mistakes gone through: the latest recitation's.
+    expect(markedMistakes(shown), [w(1001, 1)]);
+  });
 
-    // A recitation under way replaces them: nothing kept.
-    again
-        .read(mushafWordOverlayProvider.notifier)
-        .set(
-          const MushafWordOverlay(
-            first: (ayahId: 112001, wordIndex: 0),
-            last: (ayahId: 112004, wordIndex: 4),
-          ),
-        );
+  test('a word recited again takes its new colour; what was heard on it '
+      'before goes', () async {
+    final container = launch();
+    final overlay = container.read(mushafWordOverlayProvider.notifier);
+    overlay.set(
+      finished(
+        {
+          w(112003, 0): MushafWordMark.wrong,
+          w(112003, 1): MushafWordMark.correct,
+        },
+        heard: {w(112003, 0): 'بَل'},
+      ),
+    );
+    overlay.set(finished({w(112003, 0): MushafWordMark.correct}));
+    final shown = container.read(mushafWordOverlayProvider)!;
+    expect(shown.marks, {
+      w(112003, 0): MushafWordMark.correct,
+      w(112003, 1): MushafWordMark.correct,
+    });
+    expect(shown.heard, isEmpty);
+  });
+
+  test('while reciting, the kept colours show before its first word only, '
+      'and not on words it hides', () async {
+    final container = launch();
+    final overlay = container.read(mushafWordOverlayProvider.notifier);
+    overlay.set(
+      finished({
+        w(112001, 0): MushafWordMark.correct,
+        w(112002, 0): MushafWordMark.wrong,
+        w(112004, 0): MushafWordMark.correct,
+      }),
+    );
+    overlay.set(
+      MushafWordOverlay(
+        first: w(112002, 0),
+        last: w(112004, 4),
+        hideUnrevealed: false,
+        marks: {w(112002, 0): MushafWordMark.current},
+      ),
+    );
+    expect(container.read(mushafWordOverlayProvider)!.marks, {
+      w(112001, 0): MushafWordMark.correct,
+      w(112002, 0): MushafWordMark.current,
+    });
+    expect(
+      markedMistakes(container.read(mushafWordOverlayProvider)),
+      isEmpty,
+      reason: 'not the kept ones',
+    );
+    // Hidden (hide mode): not drawn on hidden words.
+    overlay.set(MushafWordOverlay(first: w(112002, 0), last: w(112004, 4)));
+    expect(container.read(mushafWordOverlayProvider)!.marks, isEmpty);
+    // Over: all kept again.
+    overlay.set(null);
+    expect(container.read(mushafWordOverlayProvider)!.marks, hasLength(3));
+  });
+
+  test('colours hidden (the plain eye): none drawn but the recitation '
+      'followed, a recitation\'s kept '
+      'all the same — and so after the app is closed; shown again, all '
+      'there', () async {
+    final container = launch();
+    final overlay = container.read(mushafWordOverlayProvider.notifier);
+    overlay.set(finished({w(112001, 0): MushafWordMark.wrong}));
+    container.read(mushafColoursShownProvider.notifier).set(false);
+    expect(container.read(mushafWordOverlayProvider), isNull);
+    // Reciting: the current word's band only (no trail), nothing judged;
+    // after, nothing drawn.
+    overlay.set(
+      MushafWordOverlay(
+        first: w(112002, 0),
+        last: w(112004, 4),
+        hideUnrevealed: false,
+        marks: {
+          w(112002, 0): MushafWordMark.wrong,
+          w(112002, 1): MushafWordMark.current,
+        },
+      ),
+    );
+    expect(container.read(mushafWordOverlayProvider)!.marks, {
+      w(112002, 1): MushafWordMark.current,
+    });
+    overlay.set(finished({w(112001, 0): MushafWordMark.correct}));
+    expect(container.read(mushafWordOverlayProvider), isNull);
+    await saved();
+
+    final again = launch();
+    again.read(mushafWordOverlayProvider);
     await pumpEventQueue();
-    final third = launch();
-    third.read(mushafWordOverlayProvider);
+    expect(again.read(mushafColoursShownProvider), isFalse);
+    expect(again.read(mushafWordOverlayProvider), isNull);
+    again.read(mushafColoursShownProvider.notifier).set(true);
+    expect(again.read(mushafWordOverlayProvider)!.marks, {
+      w(112001, 0): MushafWordMark.correct,
+    });
+  });
+
+  test('the colours kept before 1.2.1 (the last recitation\'s) are moved '
+      'over', () async {
+    await MushafProgressStore(storage).saveResults(
+      finished(
+        {
+          w(112001, 0): MushafWordMark.correct,
+          w(112003, 0): MushafWordMark.wrong,
+        },
+        heard: {w(112003, 0): 'بَل'},
+      ),
+    );
+    final container = launch();
+    container.read(mushafWordOverlayProvider);
     await pumpEventQueue();
-    expect(third.read(mushafWordOverlayProvider), isNull);
+    final shown = container.read(mushafWordOverlayProvider)!;
+    expect(shown.marks, hasLength(2));
+    expect(shown.heard, {w(112003, 0): 'بَل'});
+    expect(markedMistakes(shown), [w(112003, 0)]);
+    expect(storage.values.containsKey(MushafProgressStore.resultsKey), isFalse);
+    expect(storage.values.containsKey(MushafProgressStore.keptKey), isTrue);
   });
 }

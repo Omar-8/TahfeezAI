@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../../core/core_providers.dart';
 import '../../../core/ui/type_once.dart';
 
 import '../../../core/ui/bar_space.dart';
@@ -29,8 +30,8 @@ import '../../../core/ui/app_name_text.dart';
 /// Tahfeez's Home screen — the app's single non-tabbed landing screen
 /// (`docs/reference/03_NAVIGATION_MAP.md`), composed from the
 /// reference-equivalent information hierarchy this milestone requires:
-/// resource/update notices, Daily Ayah, Continue Reading, today's
-/// memorization, and Featured Reading. The persistent
+/// resource/update notices, Continue Reading, today's memorization, Daily
+/// Ayah, and (in a browser) Featured Reading. The persistent
 /// mini-player region (item 6) is mounted at the app-shell level
 /// (`lib/app/shell/app_shell.dart`), not here, so it can persist across
 /// Home/Quran/Search rather than being tied to one screen.
@@ -40,12 +41,13 @@ import '../../../core/ui/app_name_text.dart';
 /// every section exists in the widget tree for widget tests without needing
 /// to scroll first (the same lesson recorded for `ComponentGalleryScreen`
 /// in `docs/ARCHITECTURE.md` §11a).
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
+    final web = ref.watch(platformCapabilitiesProvider).isWeb;
 
     // Back on Home: once to be told, twice (within 2 s) to leave the app.
     // The sky of the time of day behind the top (under the status bar too),
@@ -109,32 +111,37 @@ class HomeScreen extends StatelessWidget {
                               // (Spaced apart here, not above: hidden parts left
                               // a gap each, three between the header and the
                               // daily ayah.)
+                              // Where to carry on first — reading, then
+                              // today's memorization — then the daily ayah
+                              // (owner, 2026-11-07); Featured Reading in a
+                              // browser only.
                               if (twoColumns)
-                                const Row(
-                                  key: ValueKey('home-two-columns'),
+                                Row(
+                                  key: const ValueKey('home-two-columns'),
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   spacing: TahfeezSpacing.lg,
                                   children: [
-                                    Expanded(
+                                    const Expanded(
                                       child: _Sections([
-                                        HomeDailyAyahSection(),
                                         HomeReadHistorySection(),
+                                        HomeDailyAyahSection(),
                                       ]),
                                     ),
                                     Expanded(
                                       child: _Sections([
-                                        HomeMemorizationSection(),
-                                        HomeFeaturedReadingSection(),
+                                        const HomeMemorizationSection(),
+                                        if (web)
+                                          const HomeFeaturedReadingSection(),
                                       ]),
                                     ),
                                   ],
                                 )
                               else
-                                const _Sections([
-                                  HomeDailyAyahSection(),
-                                  HomeReadHistorySection(),
-                                  HomeMemorizationSection(),
-                                  HomeFeaturedReadingSection(),
+                                _Sections([
+                                  const HomeReadHistorySection(),
+                                  const HomeMemorizationSection(),
+                                  const HomeDailyAyahSection(),
+                                  if (web) const HomeFeaturedReadingSection(),
                                 ]),
                             ],
                           ),

@@ -9,6 +9,10 @@ import 'package:tahfeez_ai/wbw/data/wbw_database.dart';
 import 'package:tahfeez_ai/wbw/presentation/word_detail_sheet.dart';
 import 'package:tahfeez_ai/wbw/wbw_providers.dart';
 
+import 'package:tahfeez_ai/core/storage/browser_storage.dart';
+import 'package:tahfeez_ai/core/storage/storage_providers.dart';
+import 'package:tahfeez_ai/features/mushaf/application/mushaf_word_overlay.dart';
+
 import '../wbw_test_fixtures.dart';
 
 void main() {
@@ -95,6 +99,96 @@ void main() {
       ); // both the tapped word + transliteration
     },
   );
+
+  testWidgets('a recitation\'s mistakes: swiped through as the Mushaf\'s '
+      'pages turn — right, the next; left, the previous', (tester) async {
+    final db = WbwDatabase(NativeDatabase.memory());
+    addTearDown(db.close);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          wbwDatabaseProvider.overrideWith((ref) => db),
+          browserStorageProvider.overrideWithValue(_NoStorage()),
+          for (var i = 0; i < 3; i++)
+            canonicalAyahWordTextProvider(
+              ayahId: 1001,
+              wordIndex: i,
+            ).overrideWith((ref) => 'word$i'),
+        ],
+        child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: Consumer(
+              builder: (context, ref, _) => TextButton(
+                onPressed: () {
+                  ref
+                      .read(mushafWordOverlayProvider.notifier)
+                      .set(
+                        const MushafWordOverlay(
+                          first: (ayahId: 1001, wordIndex: 0),
+                          last: (ayahId: 1001, wordIndex: 2),
+                          hideUnrevealed: false,
+                          marks: {
+                            (ayahId: 1001, wordIndex: 0): MushafWordMark.wrong,
+                            (ayahId: 1001, wordIndex: 1): MushafWordMark.wrong,
+                            (ayahId: 1001, wordIndex: 2): MushafWordMark.wrong,
+                          },
+                        ),
+                      );
+                  showWordDetailSheet(
+                    context,
+                    wordRef: (ayahId: 1001, wordIndex: 0),
+                  );
+                },
+                child: const Text('open sheet'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('open sheet'));
+    await tester.pumpAndSettle();
+    final count = find.byKey(const ValueKey('word-mistake-count'));
+    String shown() => tester.widget<Text>(count).data!;
+    expect(shown(), '1 / 3');
+    final swipe = find.byKey(const ValueKey('word-mistake-swipe'));
+
+    await tester.fling(swipe, const Offset(300, 0), 1000);
+    await tester.pumpAndSettle();
+    expect(shown(), '2 / 3');
+    expect(find.text('word1'), findsOneWidget);
+    await tester.fling(swipe, const Offset(300, 0), 1000);
+    await tester.pumpAndSettle();
+    expect(shown(), '3 / 3');
+    // Past the last: nothing.
+    await tester.fling(swipe, const Offset(300, 0), 1000);
+    await tester.pumpAndSettle();
+    expect(shown(), '3 / 3');
+    await tester.fling(swipe, const Offset(-300, 0), 1000);
+    await tester.pumpAndSettle();
+    expect(shown(), '2 / 3');
+  });
+}
+
+class _NoStorage implements BrowserStorage {
+  @override
+  Future<void> clearExcept(Set<String> keep) async {}
+  @override
+  Future<Map<String, Object?>> readAll() async => const {};
+  @override
+  Future<void> writeAll(Map<String, Object?> values) async {}
+  @override
+  Future<String?> getString(String key) async => null;
+  @override
+  Future<void> setString(String key, String value) async {}
+  @override
+  Future<bool?> getBool(String key) async => null;
+  @override
+  Future<void> setBool(String key, bool value) async {}
+  @override
+  Future<void> remove(String key) async {}
 }
 
 class _FixedSelectedPack extends WbwSelectedPackController {

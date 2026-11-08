@@ -106,6 +106,7 @@ void main() {
     bool hideMode = true,
     int revealedOnPage = 0,
     HifzLoop? loop,
+    bool ownLoop = true,
   }) async {
     recognizer = FakeRecognizer();
     vibrations = 0;
@@ -165,7 +166,7 @@ void main() {
     if (from != null && to != null) {
       final controller = container.read(hifzControllerProvider.notifier);
       if (loop != null) {
-        controller.setLoop((from: from, to: to), loop);
+        controller.setLoop((from: from, to: to), loop, ownLoop: ownLoop);
       } else {
         controller.setRange((from: from, to: to));
       }
@@ -748,8 +749,8 @@ void main() {
     expect(container.read(mushafPageTurnRequestsProvider)?.page, 42);
   });
 
-  test('after the session the recited words keep their colours, until hide '
-      'mode is toggled', () async {
+  test('after the session the recited words keep their colours, hide mode '
+      'toggled or not', () async {
     const kursiVerse = (chapterNo: 2, verseNo: 255);
     await setUpHifz(from: kursiVerse, to: kursiVerse);
     final start = corpus.verseStartPosition(kursiVerse)!;
@@ -764,21 +765,27 @@ void main() {
     expect(kept.followHideMode, isTrue, reason: 'the page is not hidden');
     container.read(mushafHideModeProvider.notifier).toggle();
     await pumpEventQueue();
-    expect(container.read(mushafWordOverlayProvider), isNull);
+    final still = container.read(mushafWordOverlayProvider)!;
+    expect(still.marks[corpus.words[start].ref], MushafWordMark.correct);
+    expect(still.followHideMode, isTrue, reason: 'hidden as hide mode hides');
   });
 
-  test('leaving the Mushaf clears the colours', () async {
+  test('leaving the Mushaf keeps the colours', () async {
     const kursiVerse = (chapterNo: 2, verseNo: 255);
     await setUpHifz(from: kursiVerse, to: kursiVerse);
+    final start = corpus.verseStartPosition(kursiVerse)!;
     await recite(kursi.split(' ').take(5).join(' '));
     await session().stop();
     await pumpEventQueue();
     expect(container.read(mushafWordOverlayProvider), isNotNull);
-    // Nothing watches the test any more (the Mushaf closed): it goes, and
-    // its colours with it.
+    // Nothing watches the test any more (the Mushaf closed): it goes, its
+    // colours stay (owner, 2026-11-07).
     hifzListener.close();
     await pumpEventQueue();
-    expect(container.read(mushafWordOverlayProvider), isNull);
+    expect(
+      container.read(mushafWordOverlayProvider)?.marks[corpus.words[start].ref],
+      MushafWordMark.correct,
+    );
   });
 
   test('a wrong word keeps what was heard in its place', () async {
@@ -1265,11 +1272,16 @@ void main() {
         await recite(spoken(2, 256));
         await pauseAndResume();
       }
-      expect(hifz().completed, isTrue);
-      expect(hifz().running, isFalse);
-      expect(hifz().repetition, 2);
       expect(container.read(recitationPassProvider), 3);
-      expect(loopProgress(hifz(), corpus)?.value, 1);
+      // The loop done (its last times without mistakes): the recitation
+      // ends, its results shown.
+      await Future<void>.delayed(const Duration(milliseconds: 1700));
+      await pumpEventQueue();
+      expect(
+        container.read(recitationSessionControllerProvider).isActive,
+        isFalse,
+      );
+      expect(hifz().loop, isNull);
     });
 
     test('whole range, each ayah twice per pass: ayah by ayah, then the '
@@ -1320,8 +1332,9 @@ void main() {
       );
     });
 
-    test('strict: a pass with a mistake waits, its marks kept, to be '
-        'recited again or skipped', () async {
+    test('strict or not, only the loop\'s last time is checked: a mistake '
+        'before it goes on (owner, 2026-11-08: "Mistakes found" after every '
+        'pass was a bug)', () async {
       await setUpHifz(
         from: kursiVerse,
         to: kursiVerse,
@@ -1329,36 +1342,84 @@ void main() {
         // (The test's own strictness off: a skipped word does not hold it.)
         strict: false,
       );
-      // A word left out.
+      // A word left out, the first time: on, no review.
       final words = kursi.split(' ')..removeAt(6);
       await recite(words.join(' '));
       await pauseAndResume();
       await Future<void>.delayed(const Duration(milliseconds: 1700));
-      expect(hifz().loopReview, isTrue);
-      expect(hifz().repetition, 1, reason: 'not on to the next pass');
-      expect(hifz().counts[HifzVerdict.skipped], greaterThan(0));
-
-      container.read(hifzControllerProvider.notifier).loopTryAgain();
-      await pumpEventQueue();
-      expect(hifz().loopReview, isFalse);
-      expect(hifz().repetition, 1, reason: 'the same pass, not counted');
-      expect(hifz().expected, kursiFirst);
-
-      await recite(words.join(' '));
-      await pauseAndResume();
-      await Future<void>.delayed(const Duration(milliseconds: 1700));
-      expect(hifz().loopReview, isTrue);
-      container.read(hifzControllerProvider.notifier).loopSkip();
-      await pumpEventQueue();
       expect((hifz().loopReview, hifz().repetition), (false, 2));
       expect(hifz().expected, kursiFirst);
 
-      // Without a mistake: on, no review.
+      // The last time with a mistake: held, its marks kept.
+      await recite(words.join(' '));
+      await pauseAndResume();
+      await Future<void>.delayed(const Duration(milliseconds: 1700));
+      expect((hifz().loopReview, hifz().repetition), (true, 2));
+      expect(hifz().counts[HifzVerdict.skipped], greaterThan(0));
+
+      // Tried again, right: the recitation ends.
+      container.read(hifzControllerProvider.notifier).loopTryAgain();
+      await pumpEventQueue();
+      expect((hifz().loopReview, hifz().repetition), (false, 2));
       await recite(kursi);
       await pauseAndResume();
       await Future<void>.delayed(const Duration(milliseconds: 1700));
-      expect(hifz().loopReview, isFalse);
-      expect(hifz().completed, isTrue);
+      await pumpEventQueue();
+      expect(
+        container.read(recitationSessionControllerProvider).isActive,
+        isFalse,
+      );
+      expect(hifz().loop, isNull);
+    });
+
+    test('each ayah: its last time checked before the next ayah, the times '
+        'before not', () async {
+      await setUpHifz(
+        from: kursiVerse,
+        to: (chapterNo: 2, verseNo: 256),
+        loop: const HifzLoop(count: 2),
+        strict: false,
+      );
+      final words = kursi.split(' ')..removeAt(6);
+      await recite(words.join(' '));
+      await pauseAndResume();
+      await Future<void>.delayed(const Duration(milliseconds: 1700));
+      expect(hifz().loopReview, isFalse, reason: 'not its last time');
+      expect((hifz().loopAyah, hifz().repetition), (kursiVerse, 2));
+      await recite(words.join(' '));
+      await pauseAndResume();
+      await Future<void>.delayed(const Duration(milliseconds: 1700));
+      expect(hifz().loopReview, isTrue, reason: 'held before the next ayah');
+      expect(hifz().loopAyah, kursiVerse);
+      container.read(hifzControllerProvider.notifier).loopSkip();
+      await pumpEventQueue();
+      expect(hifz().loopAyah, (chapterNo: 2, verseNo: 256));
+    });
+
+    test('a pass\'s pronunciation verdicts arriving after it ended still '
+        'colour its words, until they are recited again', () async {
+      await setUpHifz(
+        from: kursiVerse,
+        to: kursiVerse,
+        loop: const HifzLoop(mode: HifzLoopMode.range, count: 3),
+        hideMode: false,
+      );
+      await recite(kursi);
+      await pauseAndResume();
+      expect(hifz().repetition, 2);
+      final acoustic = container.read(
+        acousticVerificationControllerProvider.notifier,
+      ) as _Acoustic;
+      final last = corpus.words[corpus.verseEndPosition(kursiVerse)!].ref;
+      // The first pass's last ayah checked once the second has begun.
+      acoustic.put({
+        last: const AcousticWordResult(RecitationErrorType.wrongVowel, []),
+      });
+      await pumpEventQueue();
+      expect(
+        container.read(mushafWordOverlayProvider)!.marks[last],
+        MushafWordMark.tashkeel,
+      );
     });
 
     test('whole range: recited again from its start; the session end ends '
@@ -1379,17 +1440,109 @@ void main() {
       await recite(kursi.split(' ').skip(25).join(' '));
       session().pause();
       await pumpEventQueue();
-      expect(hifz().completed, isTrue);
       expect(
         container.read(mushafPageTurnRequestsProvider),
         isNull,
         reason: 'its start is on the page',
       );
-
-      await session().stop();
+      // The loop done (its last times without mistakes): the recitation
+      // ends, its results shown.
+      await Future<void>.delayed(const Duration(milliseconds: 1700));
       await pumpEventQueue();
+      expect(
+        container.read(recitationSessionControllerProvider).isActive,
+        isFalse,
+      );
       expect(hifz().loop, isNull);
+
       expect(hifz().range, isNull, reason: 'the range chosen before');
+    });
+
+    test('the last time with a mistake waits to be tried again (once more '
+        'each time) or skipped; skipped, the recitation ends', () async {
+      await setUpHifz(
+        from: kursiVerse,
+        to: kursiVerse,
+        loop: const HifzLoop(mode: HifzLoopMode.range, count: 2),
+        strict: false,
+      );
+      final words = kursi.split(' ')..removeAt(6);
+      // The first time: a mistake, but on (not the last).
+      await recite(words.join(' '));
+      await pauseAndResume();
+      expect((hifz().loopReview, hifz().repetition), (false, 2));
+      // The last: held.
+      await recite(words.join(' '));
+      await pauseAndResume();
+      await Future<void>.delayed(const Duration(milliseconds: 1700));
+      expect((hifz().loopReview, hifz().repetition), (true, 2));
+      container.read(hifzControllerProvider.notifier).loopTryAgain();
+      await pumpEventQueue();
+      expect((hifz().loopReview, hifz().repetition), (false, 2));
+      await recite(words.join(' '));
+      await pauseAndResume();
+      await Future<void>.delayed(const Duration(milliseconds: 1700));
+      expect(hifz().loopReview, isTrue, reason: 'still a mistake: again');
+      container.read(hifzControllerProvider.notifier).loopSkip();
+      // The loop done (its last times without mistakes): the recitation
+      // ends, its results shown.
+      await Future<void>.delayed(const Duration(milliseconds: 1700));
+      await pumpEventQueue();
+      expect(
+        container.read(recitationSessionControllerProvider).isActive,
+        isFalse,
+      );
+      expect(hifz().loop, isNull);
+    });
+
+    test('a loop not the reciter\'s own (Follow along\'s turn): done, the '
+        'session kept for its caller to check and end', () async {
+      await setUpHifz(
+        from: kursiVerse,
+        to: kursiVerse,
+        loop: const HifzLoop(mode: HifzLoopMode.range, count: 1),
+        strict: false,
+        ownLoop: false,
+      );
+      final words = kursi.split(' ')..removeAt(6);
+      await recite(words.join(' '));
+      await pauseAndResume();
+      await Future<void>.delayed(const Duration(milliseconds: 1700));
+      await pumpEventQueue();
+      expect(
+        container.read(recitationSessionControllerProvider).isActive,
+        isTrue,
+      );
+      expect((hifz().completed, hifz().loopReview), (true, false));
+    });
+
+    test('a pass\'s colours stay as the next is recited, each until its '
+        'word is recited again', () async {
+      await setUpHifz(
+        from: kursiVerse,
+        to: kursiVerse,
+        loop: const HifzLoop(mode: HifzLoopMode.range, count: 3),
+        strict: false,
+        hideMode: false,
+      );
+      final words = kursi.split(' ')..removeAt(6);
+      await recite(words.join(' '));
+      await pauseAndResume();
+      expect(hifz().repetition, 2);
+      final overlay = container.read(mushafWordOverlayProvider)!;
+      final skipped = overlay.marks.entries
+          .where((e) => e.value == MushafWordMark.skipped)
+          .map((e) => e.key)
+          .toList();
+      expect(skipped, isNotEmpty, reason: 'the first pass\'s mistake shown');
+      expect(
+        overlay.marks.values.where((m) => m == MushafWordMark.correct).length,
+        greaterThan(20),
+      );
+      // The second pass, recited right: the mistake's word recolored.
+      await recite(kursi);
+      final again = container.read(mushafWordOverlayProvider)!;
+      expect(again.marks[skipped.first], isNot(MushafWordMark.skipped));
     });
 
     test("a repetition's pronunciation verdicts are its own", () async {

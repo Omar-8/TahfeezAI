@@ -15,6 +15,7 @@ import 'package:tahfeez_ai/core/ui/full_bleed_content.dart';
 import 'package:tahfeez_ai/ai/hifz/hifz_judge.dart';
 import 'package:tahfeez_ai/features/mushaf/application/mushaf_hide_mode.dart';
 import 'package:tahfeez_ai/features/mushaf/application/mushaf_page_verses.dart';
+import 'package:tahfeez_ai/features/mushaf/application/mushaf_word_overlay.dart';
 import 'package:tahfeez_ai/ai/matching/quran_word_corpus.dart';
 import 'package:tahfeez_ai/features/recitation/application/hifz_controller.dart';
 import 'package:tahfeez_ai/features/recitation/application/quran_match_controller.dart';
@@ -51,9 +52,16 @@ void main() {
     bool introSeen = true,
     Locale? locale,
     bool appTheme = false,
+    // The eye starting in colour (the app's default); else plain, one tap
+    // from the ayahs hidden.
+    bool colours = false,
   }) {
     return ProviderScope(
       overrides: [
+        if (!colours)
+          mushafColoursShownProvider.overrideWith(
+            () => MushafColoursShown(initial: false),
+          ),
         // The first recitation's explanation, already seen (its own test
         // shows it).
         if (introSeen) hifzSettingsProvider.overrideWith(_IntroSeen.new),
@@ -147,6 +155,132 @@ void main() {
     repository = FakeRepository();
     mushafOpen = ValueNotifier(true);
     recognizer = FakeRecognizer();
+  });
+
+  testWidgets('the eye: colours shown (green, the default), then none drawn '
+      '— a recitation\'s kept all the same — then the ayahs hidden, then '
+      'colours again', (tester) async {
+    await tester.pumpWidget(app(colours: true));
+    await tester.pumpAndSettle();
+    final container = ProviderScope.containerOf(
+      tester.element(find.text('mushaf body')),
+    );
+    const word = (ayahId: 2023, wordIndex: 0);
+    final overlay = container.read(mushafWordOverlayProvider.notifier);
+    void recited(MushafWordMark mark) => overlay.set(
+      MushafWordOverlay(
+        first: word,
+        last: word,
+        marks: {word: mark},
+        hideUnrevealed: false,
+        followHideMode: true,
+      ),
+    );
+    final eye = find.byKey(const ValueKey('mushaf-hide-toggle'));
+    final green = find.byKey(const ValueKey('mushaf-eye-coloured'));
+    expect(green, findsOneWidget);
+    expect(find.byTooltip('Hide recitation colours'), findsOneWidget);
+    // The Recite button's green.
+    expect(
+      tester.widget<Icon>(green).color,
+      Theme.of(tester.element(green)).colorScheme.primary,
+    );
+    recited(MushafWordMark.wrong);
+    await tester.pumpAndSettle();
+    expect(container.read(mushafWordOverlayProvider)?.marks[word], isNotNull);
+
+    await tester.tap(eye);
+    await tester.pumpAndSettle();
+    expect(green, findsNothing);
+    expect(find.byTooltip('Hide ayahs'), findsOneWidget);
+    expect(container.read(mushafWordOverlayProvider), isNull);
+    // Said on the bar for 5 s.
+    final notice = find.byKey(const ValueKey('colours-off-hint'));
+    expect(notice, findsOneWidget);
+    await tester.pump(const Duration(seconds: 5));
+    await tester.pumpAndSettle();
+    expect(notice, findsNothing);
+    // Recited without colours: the new one replaces the old, unseen.
+    recited(MushafWordMark.correct);
+    await tester.pumpAndSettle();
+    expect(container.read(mushafWordOverlayProvider), isNull);
+
+    await tester.tap(eye);
+    await tester.pumpAndSettle();
+    expect(container.read(mushafHideModeProvider).enabled, isTrue);
+
+    await tester.tap(eye);
+    await tester.pumpAndSettle();
+    expect(container.read(mushafHideModeProvider).enabled, isFalse);
+    expect(green, findsOneWidget);
+    expect(
+      container.read(mushafWordOverlayProvider)?.marks[word],
+      MushafWordMark.correct,
+    );
+  });
+
+  testWidgets('"Mistakes found" only after a recitation since the reader '
+      'opened — not for the colours kept from an earlier visit', (
+    tester,
+  ) async {
+    await tester.pumpWidget(app(colours: true));
+    await tester.pumpAndSettle();
+    final container = ProviderScope.containerOf(
+      tester.element(find.text('mushaf body')),
+    );
+    const word = (ayahId: 2023, wordIndex: 0);
+    container.read(mushafPageWordRangesProvider.notifier).report(5, (
+      first: word,
+      last: (ayahId: 2030, wordIndex: 5),
+    ));
+    container
+        .read(mushafWordOverlayProvider.notifier)
+        .set(
+          const MushafWordOverlay(
+            first: word,
+            last: word,
+            marks: {word: MushafWordMark.wrong},
+            hideUnrevealed: false,
+            followHideMode: true,
+          ),
+        );
+    await tester.pumpAndSettle();
+    final banner = find.byKey(const ValueKey('mistakes-found-hint'));
+    expect(banner, findsNothing, reason: 'kept from before: no banner');
+
+    // A recitation over, here.
+    container.read(freshResultsProvider.notifier).set(true);
+    await tester.pumpAndSettle();
+    expect(banner, findsOneWidget);
+  });
+
+  testWidgets('the colours-off notice: once while it shows (turned off '
+      'again quickly, not queued or started over), gone after 5 s', (
+    tester,
+  ) async {
+    await tester.pumpWidget(app(colours: true));
+    await tester.pumpAndSettle();
+    final container = ProviderScope.containerOf(
+      tester.element(find.text('mushaf body')),
+    );
+    final notice = find.byKey(const ValueKey('colours-off-hint'));
+    final colours = container.read(mushafColoursShownProvider.notifier);
+    await tester.tap(find.byKey(const ValueKey('mushaf-hide-toggle')));
+    await tester.pump(const Duration(seconds: 3));
+    expect(notice, findsOneWidget);
+    // Short, and wrapped rather than cut off where one line is too short.
+    final text = tester.widget<Text>(
+      find.descendant(of: notice, matching: find.byType(Text)),
+    );
+    expect(text.data, 'Mistakes and colours hidden');
+    expect(text.maxLines, 2);
+    // Back to colour and off again at once: the same notice, its 5 s kept.
+    colours.set(true);
+    await tester.pump();
+    await tester.tap(find.byKey(const ValueKey('mushaf-hide-toggle')));
+    await tester.pump(const Duration(seconds: 2));
+    await tester.pumpAndSettle();
+    expect(notice, findsNothing);
   });
 
   testWidgets('eye toggles hide mode; reveal uncovers one word at a time', (
@@ -489,6 +623,10 @@ void main() {
       expect(tester.getRect(find.byTooltip('Show ayahs')), off);
       await tester.tap(find.byTooltip('Show ayahs'));
       await tester.pumpAndSettle();
+      // (Shown again in colour: once more, to the plain eye.)
+      expect(tester.getRect(find.byTooltip('Hide recitation colours')), off);
+      await tester.tap(find.byTooltip('Hide recitation colours'));
+      await tester.pumpAndSettle();
     }
 
     await toggleKeepsEye();
@@ -553,6 +691,23 @@ void main() {
     expect(container.read(mushafHideModeProvider).revealedOn(3), 0);
   });
 
+  /// The Hifz sheet's Advanced chosen, and its group [key] opened.
+  Future<void> advancedGroup(WidgetTester tester, String key) async {
+    final advanced = find.byKey(const ValueKey('hifz-level-advanced'));
+    if (find.byKey(ValueKey(key)).evaluate().isEmpty) {
+      await tester.ensureVisible(advanced);
+      await tester.tap(advanced);
+      await tester.pumpAndSettle();
+    }
+    final group = find.byKey(ValueKey(key));
+    await tester.ensureVisible(group);
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.descendant(of: group, matching: find.byType(InkWell)).first,
+    );
+    await tester.pumpAndSettle();
+  }
+
   testWidgets('Hifz settings are in the top bar', (tester) async {
     await tester.pumpWidget(app());
     await tester.pumpAndSettle();
@@ -570,7 +725,31 @@ void main() {
 
     await tester.tap(find.byTooltip('Hifz settings'));
     await tester.pumpAndSettle();
-    expect(find.text('Strict'), findsOneWidget);
+    // The levels; Balanced, the default, chosen.
+    for (final l in ['gentle', 'balanced', 'strict', 'advanced']) {
+      expect(find.byKey(ValueKey('hifz-level-$l')), findsOneWidget);
+    }
+    final container = ProviderScope.containerOf(
+      tester.element(find.byKey(const ValueKey('hifz-level-strict'))),
+    );
+    expect(container.read(hifzSettingsProvider).level, HifzLevel.balanced);
+    expect(find.text('Highlight the next word'), findsNothing);
+    await tester.tap(find.byKey(const ValueKey('hifz-level-strict')));
+    await tester.pumpAndSettle();
+    final strict = container.read(hifzSettingsProvider);
+    expect(strict.strict, isTrue, reason: 'held until corrected');
+    expect(strict.strictness, RecitationStrictness.strict);
+    expect(strict.tajweed, isTrue);
+    await tester.tap(find.byKey(const ValueKey('hifz-level-gentle')));
+    await tester.pumpAndSettle();
+    final gentle = container.read(hifzSettingsProvider);
+    expect(gentle.strict, isFalse);
+    expect(gentle.strictness, RecitationStrictness.lenient);
+    expect(gentle.tajweed, isFalse);
+
+    // Advanced: every setting, in groups (collapsed).
+    await advancedGroup(tester, 'hifz-group-marks');
+    expect(container.read(hifzSettingsProvider).advanced, isTrue);
     expect(find.text('Highlight the next word'), findsOneWidget);
     expect(find.text('Show mistakes'), findsOneWidget);
     expect(
@@ -578,13 +757,6 @@ void main() {
       findsNothing,
       reason: 'Android only',
     );
-    await tester.tap(find.text('Strict'));
-    await tester.pumpAndSettle();
-    final container = ProviderScope.containerOf(
-      tester.element(find.text('Strict')),
-    );
-    // Off until chosen: tapped, on.
-    expect(container.read(hifzSettingsProvider).strict, isTrue);
   });
 
   testWidgets('pronunciation strictness is chosen in the Hifz settings', (
@@ -594,6 +766,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('Hifz settings'));
     await tester.pumpAndSettle();
+    await advancedGroup(tester, 'hifz-group-checking');
     final container = ProviderScope.containerOf(
       tester.element(find.text('Pronunciation strictness')),
     );
@@ -622,6 +795,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('Hifz settings'));
     await tester.pumpAndSettle();
+    await advancedGroup(tester, 'hifz-group-marks');
     final container = ProviderScope.containerOf(
       tester.element(find.text('Pronunciation mistake colour')),
     );
@@ -1059,11 +1233,12 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(settings);
     await tester.pumpAndSettle();
-    expect(find.text('Pronunciation strictness'), findsOneWidget);
+    final balanced = find.byKey(const ValueKey('hifz-level-balanced'));
+    expect(balanced, findsOneWidget);
     // Closed: back to the explanation, still there.
-    Navigator.of(tester.element(find.text('Pronunciation strictness'))).pop();
+    Navigator.of(tester.element(balanced)).pop();
     await tester.pumpAndSettle();
-    expect(find.text('Pronunciation strictness'), findsNothing);
+    expect(balanced, findsNothing);
     expect(find.byKey(const ValueKey('recitation-intro')), findsOneWidget);
   });
 

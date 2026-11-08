@@ -50,7 +50,17 @@ void main() {
     expect(find.text('Daily Ayah'), findsOneWidget);
     expect(find.text('Continue Reading'), findsOneWidget);
     expect(find.text('Memorization'), findsOneWidget);
-    expect(find.text('Featured Reading'), findsOneWidget);
+    // (Featured Reading: in a browser only.)
+    expect(find.text('Featured Reading'), findsNothing);
+    // Where to carry on first, the daily ayah below.
+    expect(
+      tester.getTopLeft(find.text('Continue Reading')).dy,
+      lessThan(tester.getTopLeft(find.text('Memorization')).dy),
+    );
+    expect(
+      tester.getTopLeft(find.text('Memorization')).dy,
+      lessThan(tester.getTopLeft(find.text('Daily Ayah')).dy),
+    );
 
     // No Quran dataset is installed in this test's (empty) in-memory
     // database, so every Quran-data-dependent section shows its honest
@@ -67,12 +77,7 @@ void main() {
       ),
       findsOneWidget,
     );
-    expect(
-      find.text(
-        "Featured passages will appear once a Qur'an dataset is installed.",
-      ),
-      findsOneWidget,
-    );
+
 
     // Today's memorization: nothing memorized and no plan yet, with the
     // way into the Memorize tab.

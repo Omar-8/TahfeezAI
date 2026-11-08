@@ -71,6 +71,9 @@ class _WordDetailSheet extends ConsumerStatefulWidget {
 class _WordDetailSheetState extends ConsumerState<_WordDetailSheet> {
   late WordRef _word = widget.first;
 
+  /// The last move was on to a next mistake (it slides in from the left).
+  var _forward = true;
+
   /// Shows [word] — its page turned to first when it is not on screen.
   Future<void> _go(WordRef word) async {
     setState(() => _word = word);
@@ -134,7 +137,47 @@ class _WordDetailSheetState extends ConsumerState<_WordDetailSheet> {
             ),
           ),
         ),
-        Flexible(child: body),
+        // Swiped as the Mushaf's pages turn (owner, 2026-11-08): to the
+        // right, the next mistake (it reads right to left); to the left,
+        // the previous one.
+        Flexible(
+          child: GestureDetector(
+            key: const ValueKey('word-mistake-swipe'),
+            behavior: HitTestBehavior.translucent,
+            onHorizontalDragEnd: (details) {
+              final v = details.primaryVelocity ?? 0;
+              if (v.abs() < 200) return;
+              final to = v > 0 ? at + 1 : at - 1;
+              if (to >= 0 && to < mistakes.length) {
+                _forward = v > 0;
+                _go(mistakes[to]);
+              }
+            },
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 220),
+              transitionBuilder: (child, animation) {
+                // The new word in from the side it was swiped towards.
+                final incoming = child.key == ValueKey(_word);
+                final dx = (_forward ? -1.0 : 1.0) * (incoming ? 1 : -1);
+                return FadeTransition(
+                  opacity: animation,
+                  child: SlideTransition(
+                    position: Tween(
+                      begin: Offset(dx * 0.25, 0),
+                      end: Offset.zero,
+                    ).animate(animation),
+                    child: child,
+                  ),
+                );
+              },
+              layoutBuilder: (current, previous) => Stack(
+                alignment: Alignment.topCenter,
+                children: [...previous, ?current],
+              ),
+              child: body,
+            ),
+          ),
+        ),
         // At the bottom, always in reach: the next mistake to the left (its
         // arrow pointing there), the previous one to the right — in every
         // language.
@@ -160,7 +203,10 @@ class _WordDetailSheetState extends ConsumerState<_WordDetailSheet> {
                       overflow: TextOverflow.ellipsis,
                     ),
                     onPressed: at + 1 < mistakes.length
-                        ? () => _go(mistakes[at + 1])
+                        ? () {
+                            _forward = true;
+                            _go(mistakes[at + 1]);
+                          }
                         : null,
                   ),
                 ),
@@ -174,7 +220,12 @@ class _WordDetailSheetState extends ConsumerState<_WordDetailSheet> {
                       textDirection: Directionality.of(context),
                       overflow: TextOverflow.ellipsis,
                     ),
-                    onPressed: at > 0 ? () => _go(mistakes[at - 1]) : null,
+                    onPressed: at > 0
+                        ? () {
+                            _forward = false;
+                            _go(mistakes[at - 1]);
+                          }
+                        : null,
                   ),
                 ),
               ],

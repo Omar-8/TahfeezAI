@@ -6,6 +6,7 @@ import 'package:tahfeez_ai/features/home/presentation/home_sky.dart';
 import 'package:tahfeez_ai/features/home/presentation/sections/home_daily_ayah_section.dart';
 import 'package:tahfeez_ai/features/home/presentation/sections/home_featured_reading_section.dart';
 import 'package:tahfeez_ai/features/home/presentation/sections/home_memorization_section.dart';
+import 'package:tahfeez_ai/features/home/presentation/sections/home_read_history_section.dart';
 
 import '../../test_helpers/real_app.dart';
 import '../../test_helpers/web_platform.dart';
@@ -26,7 +27,8 @@ void main() {
       await RealApp.launch(tester, size: size, locale: locale);
       RealApp.fits(tester, 'Home on $name');
       expect(twoColumns, findsOneWidget);
-      final ayah = tester.getRect(find.byType(HomeDailyAyahSection));
+      // Where to carry on first: reading beside today's memorization.
+      final ayah = tester.getRect(find.byType(HomeReadHistorySection));
       final memorization = tester.getRect(find.byType(HomeMemorizationSection));
       expect(
         (ayah.top - memorization.top).abs(),
@@ -99,11 +101,10 @@ void main() {
     await RealApp.quit(tester);
   });
 
-  testWidgets('a 13" iPad (not a browser): the rail, as before', (
-    tester,
-  ) async {
+  testWidgets('the app (not a browser): no Featured Reading', (tester) async {
     await RealApp.launch(tester, size: const Size(1032, 1376));
-    expect(rail(tester), isTrue);
+    expect(find.byType(HomeFeaturedReadingSection), findsNothing);
+    expect(rail(tester), isFalse);
     await RealApp.quit(tester);
   });
 }

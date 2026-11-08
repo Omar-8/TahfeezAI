@@ -45,6 +45,7 @@ class _FakeHifz extends HifzController {
 
   bool showBefore = false;
   bool keepMarks = false;
+  bool? ownLoop;
 
   @override
   void setLoop(
@@ -52,9 +53,11 @@ class _FakeHifz extends HifzController {
     HifzLoop loop, {
     bool showBefore = false,
     bool keepMarks = false,
+    bool ownLoop = true,
   }) {
     this.showBefore = showBefore;
     this.keepMarks = keepMarks;
+    this.ownLoop = ownLoop;
     loopRange = range;
     this.loop = loop;
   }
@@ -184,6 +187,13 @@ void main() {
     );
     audio.finish();
     await Future<void>.delayed(Duration.zero);
+    expect(
+      hifz.ownLoop,
+      isFalse,
+      reason:
+          'its turns end here: the loop\'s own end would stop the '
+          'session before the review (a bug, 2026-11-08)',
+    );
     await userRecites(3, wrong: 1);
     expect(run()!.index, 0, reason: 'not on to the next ayah');
     expect(run()!.phase, FollowAlongPhase.review);

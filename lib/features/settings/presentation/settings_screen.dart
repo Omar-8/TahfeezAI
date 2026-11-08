@@ -88,29 +88,39 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
 
     // Each section with the words it is found by (its options' names).
-    final sections = <({List<String> words, Widget widget})>[];
+    // The most used at the top, the others below — every one collapsed to
+    // its header (owner, 2026-11-07/08) — opened, as they always look; a search
+    // opens those it finds.
+    final searching = _query.trim().isNotEmpty;
+    final sections = <({List<String> words, Widget widget, bool collapsed})>[];
     void group(
       String title,
       IconData icon,
       Widget child, {
       List<String> words = const [],
-    }) => sections.add((
-      words: [title, ...words],
-      widget: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        spacing: TahfeezSpacing.xs,
-        children: [
-          TahfeezSectionHeader(title: title, icon: icon),
-          TahfeezCard(
-            padding: const EdgeInsets.symmetric(
-              horizontal: TahfeezSpacing.md,
-              vertical: TahfeezSpacing.sm,
-            ),
-            child: child,
-          ),
-        ],
-      ),
-    ));
+      bool collapsed = false,
+    }) {
+      final card = TahfeezCard(
+        padding: const EdgeInsets.symmetric(
+          horizontal: TahfeezSpacing.md,
+          vertical: TahfeezSpacing.sm,
+        ),
+        child: child,
+      );
+      sections.add((
+        words: [title, ...words],
+        collapsed: collapsed,
+        // Every one closed at first, the most used at the top (owner,
+        // 2026-11-08).
+        widget: TahfeezCollapsibleSection(
+          key: ValueKey('settings-group-$title'),
+          title: title,
+          icon: icon,
+          open: searching,
+          child: card,
+        ),
+      ));
+    }
 
     return BackToExit(
       child: SkyBackdrop(
@@ -216,6 +226,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ],
                 ),
                 words: [for (final f in ArabicUiFont.values) f.arabicName],
+                collapsed: true,
               );
               group(
                 l10n.readerTranslationTafsir,
@@ -248,6 +259,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ),
                 ),
                 words: [l10n.sajdahReminder, l10n.sajdahReminderSub],
+                collapsed: true,
               );
               group(
                 l10n.listenTitle,
@@ -307,6 +319,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ],
                   ),
                   words: [l10n.memReminderSwitch, l10n.memReminderTime],
+                  collapsed: true,
                 );
               }
               group(
@@ -352,8 +365,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   l10n.settingsResetTitle,
                   l10n.settingsResetSub,
                 ],
+                collapsed: true,
               );
               sections.add((
+                collapsed: true,
                 words: [
                   l10n.appName,
                   'GitHub',
@@ -367,14 +382,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ],
                 // Last: the app — its version, source code, rating, sharing,
                 // updates, and its sources.
-                widget: const _AboutApp(),
+                widget: TahfeezCollapsibleSection(
+                  key: const ValueKey('settings-group-about'),
+                  title: l10n.aboutTitle,
+                  icon: Icons.info_outline_rounded,
+                  open: searching,
+                  child: const _AboutApp(),
+                ),
               ));
               final query = _fold(_query.trim());
               final shown = [
-                for (final section in sections)
-                  if (query.isEmpty ||
-                      section.words.any((w) => _fold(w).contains(query)))
-                    section.widget,
+                for (final collapsed in [false, true])
+                  for (final section in sections)
+                    if (section.collapsed == collapsed &&
+                        (query.isEmpty ||
+                            section.words.any((w) => _fold(w).contains(query))))
+                      section.widget,
               ];
               // Rows and switches compact throughout.
               return Theme(

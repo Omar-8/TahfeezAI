@@ -63,6 +63,21 @@ enum MistakeAlert {
 /// together ([AcousticVerificationController.withStrictness]).
 enum RecitationStrictness { lenient, balanced, strict }
 
+/// The Hifz settings' checking levels (owner, 2026-11-07): each sets how
+/// strictly pronunciation is judged, whether tajweed is, and whether a
+/// mistake holds the recitation until corrected. (Every setting, one by
+/// one: [HifzSettings.advanced].)
+enum HifzLevel {
+  /// Letters and vowels only, leniently; the recitation goes on.
+  gentle,
+
+  /// As calibrated, tajweed too (the default).
+  balanced,
+
+  /// Everything, strictly; a mistake corrected before going on.
+  strict,
+}
+
 /// The recitation modes with an explanation before their first run.
 enum RecitationIntroMode { recite, loop, follow }
 
@@ -84,7 +99,40 @@ class HifzSettings {
     this.pronunciationColor = defaultPronunciationColor,
     this.tajweedColor = defaultTajweedColor,
     this.introsSeen = const {},
+    this.advanced = false,
   });
+
+  /// Every setting shown, one by one (the sheet's "Advanced"), not the
+  /// levels alone.
+  final bool advanced;
+
+  /// The level these settings are, if one.
+  HifzLevel? get level {
+    final allRules = tajweedRules.length == allTajweedRules.length;
+    for (final l in HifzLevel.values) {
+      final at = const HifzSettings().atLevel(l);
+      if (strict == at.strict &&
+          strictness == at.strictness &&
+          tajweed == at.tajweed &&
+          (!tajweed || allRules)) {
+        return l;
+      }
+    }
+    return null;
+  }
+
+  /// These settings at [level] (the others as they are).
+  HifzSettings atLevel(HifzLevel level) => copyWith(
+    strictness: switch (level) {
+      HifzLevel.gentle => RecitationStrictness.lenient,
+      HifzLevel.balanced => RecitationStrictness.balanced,
+      HifzLevel.strict => RecitationStrictness.strict,
+    },
+    tajweed: level != HifzLevel.gentle,
+    tajweedRules: allTajweedRules,
+    strict: level == HifzLevel.strict,
+    advanced: false,
+  );
 
   /// The mode the explanation (how the check works) was shown for outside
   /// the guide — once for all three modes: any one, and it is not shown
@@ -209,6 +257,7 @@ class HifzSettings {
     int? pronunciationColor,
     int? tajweedColor,
     Set<RecitationIntroMode>? introsSeen,
+    bool? advanced,
   }) => HifzSettings(
     strict: strict ?? this.strict,
     highlightCurrent: highlightCurrent ?? this.highlightCurrent,
@@ -223,6 +272,7 @@ class HifzSettings {
     pronunciationColor: pronunciationColor ?? this.pronunciationColor,
     tajweedColor: tajweedColor ?? this.tajweedColor,
     introsSeen: introsSeen ?? this.introsSeen,
+    advanced: advanced ?? this.advanced,
   );
 
   Map<String, Object> toJson() => {
@@ -242,6 +292,7 @@ class HifzSettings {
     'pronunciationColor': pronunciationColor,
     'tajweedColor': tajweedColor,
     'introsSeen': [for (final m in introsSeen) m.name],
+    'advanced': advanced,
   };
 
   static HifzSettings fromJson(Object? json) {
@@ -295,6 +346,7 @@ class HifzSettings {
         // (Saved when only Recite had one.)
         if (read('introSeen', false)) RecitationIntroMode.recite,
       },
+      advanced: read('advanced', false),
     );
   }
 }
@@ -577,13 +629,18 @@ class HifzController extends Notifier<HifzState> {
 
   @override
   HifzState build() {
-    // The page's colours belong to this controller: leaving the Mushaf
-    // (which disposes it) clears them, and so does finding a finished
-    // recitation's left over when it starts.
+    // A recitation's overlay belongs to this controller: leaving the
+    // Mushaf (which disposes it) ends it. (The colours of finished ones
+    // are kept: see [KeptMarks].)
     final overlay = ref.read(mushafWordOverlayProvider.notifier);
-    if (ref.read(mushafWordOverlayProvider)?.followHideMode ?? false) {
-      Future.microtask(() => overlay.set(null));
-    }
+    ref.listen(hifzSettingsProvider, (_, next) {
+      Future.microtask(
+        () => overlay.showKept(
+          words: next.colorWords,
+          mistakes: next.showMistakes,
+        ),
+      );
+    }, fireImmediately: true);
     ref.onDispose(() {
       _pacer?.cancel();
       _turnLater?.cancel();
@@ -649,10 +706,11 @@ class HifzController extends Notifier<HifzState> {
     });
     ref.listen(mushafHideModeProvider, (previous, next) {
       if (previous?.enabled == next.enabled) return;
-      // Turning hide mode on or off clears a finished recitation's colours
-      // (this run's, or restored from before the app was closed).
+      // Turning hide mode on or off: a finished recitation's colours no
+      // longer this controller's to show (they are kept: on the words
+      // hide mode uncovers).
       final overlay = ref.read(mushafWordOverlayProvider.notifier);
-      if (_results || overlay.restored) {
+      if (_results) {
         _results = false;
         _judge = null;
         overlay.set(null);
@@ -759,11 +817,13 @@ class HifzController extends Notifier<HifzState> {
     HifzLoop loop, {
     bool showBefore = false,
     bool keepMarks = false,
+    bool ownLoop = true,
   }) {
     if (state.running) return;
     if (state.loop == null) _rangeBeforeLoop = state.range;
     _showBefore = showBefore;
     _keepMarks = keepMarks;
+    _ownLoop = ownLoop;
     state = state.copyWith(range: () => range, loop: () => loop);
   }
 
@@ -838,6 +898,42 @@ class HifzController extends Notifier<HifzState> {
           ...marks,
         };
 
+  /// The reciter's own loop — not Follow along's turns (`ownLoop: false`
+  /// to [setLoop]), which check, review and end their own way: its last
+  /// time of an ayah (or of the range) with a mistake waits to be tried
+  /// again (once more, each time) or skipped, and its end ends the
+  /// recitation (owner, 2026-11-08).
+  var _ownLoop = true;
+
+  /// A loop's passes before this one, each with its number: their colours
+  /// stay until their words are recited again — not wiped between passes
+  /// (owner, 2026-11-08). Worked out afresh each time, so a pass's
+  /// pronunciation verdicts arriving after it ended (its last ayah's, as a
+  /// rule — every one, looping an ayah at a time) still colour its words.
+  final _finishedPasses = <(HifzJudge, int)>[];
+
+  /// The colours of [_finishedPasses], later passes over earlier ones (none
+  /// with words not coloured).
+  Map<WordRef, MushafWordMark> _earlierMarks(
+    Map<WordRef, AcousticWordResult> acoustic,
+    HifzSettings settings,
+  ) => !settings.colorWords
+      ? const {}
+      : {
+          for (final (judge, pass) in _finishedPasses)
+            for (final p in judge.revealed)
+              if (!judge.given.contains(p))
+                judge.corpus.words[p].ref: switch (judge.marked[p]) {
+                  HifzVerdict.skipped => MushafWordMark.skipped,
+                  HifzVerdict.wrong ||
+                  HifzVerdict.selfCorrected => MushafWordMark.wrong,
+                  _ => _pronunciationMark(
+                    acoustic[judge.corpus.words[p].ref],
+                    pass,
+                  ),
+                },
+        };
+
   /// The pass being recited: one more each time a loop starts again (see
   /// [recitationPassProvider]).
   int _pass = 0;
@@ -889,6 +985,7 @@ class HifzController extends Notifier<HifzState> {
     // A loop lasts one session.
     _showBefore = false;
     _keepMarks = false;
+    _ownLoop = true;
     state = HifzState(
       range: state.loop != null ? _rangeBeforeLoop : state.range,
     );
@@ -948,6 +1045,10 @@ class HifzController extends Notifier<HifzState> {
       else if (next != null && settings.highlightCurrent)
         next: MushafWordMark.current,
     };
+    final shown = _withSettings(marks, settings);
+    final earlier = _withSettings(_earlierMarks(acoustic, settings), settings);
+    final revealed = {..._loopDone, ...s.revealed}.difference(held);
+    final hiding = ref.read(mushafHideModeProvider).enabled;
     ref
         .read(mushafWordOverlayProvider.notifier)
         .set(
@@ -955,9 +1056,15 @@ class HifzController extends Notifier<HifzState> {
             first: s.first!,
             // Looping ayah by ayah: the ayahs still to come stay hidden too.
             last: _loopEnd ?? s.last!,
-            revealed: {..._loopDone, ...s.revealed}.difference(held),
+            revealed: revealed,
             marks: _withCarried(
-              _withSettings(marks, settings),
+              {
+                // A loop's earlier passes: their colours until recited
+                // again (on the words in view).
+                for (final e in earlier.entries)
+                  if (!hiding || revealed.contains(e.key)) e.key: e.value,
+                ...shown,
+              },
               s.first!,
               _loopEnd ?? s.last!,
             ),
@@ -1028,6 +1135,7 @@ class HifzController extends Notifier<HifzState> {
             last: corpus.words[judge.end].ref,
             marks: _withCarried(
               _withSettings({
+                ..._earlierMarks(acoustic, ref.read(hifzSettingsProvider)),
                 for (final p in judge.revealed)
                   if (!judge.given.contains(p))
                     corpus.words[p].ref: switch (judge.marked[p]) {
@@ -1082,6 +1190,7 @@ class HifzController extends Notifier<HifzState> {
     _showHeld();
     _lastBatch = null;
     _setPass(0);
+    _finishedPasses.clear();
     _loopEnd = null;
     _loopDone.clear();
     _checkingPass = false;
@@ -1092,10 +1201,15 @@ class HifzController extends Notifier<HifzState> {
     // Follow along's next turn: the colours so far stay (not the bands of
     // a next word or a pending mistake); any other recitation starts clean.
     final shown = ref.read(mushafWordOverlayProvider);
+    // (Its own range's: the colours kept from other recitations are drawn
+    // anyway.)
     _carried = _keepMarks && shown != null
         ? {
             for (final e in shown.marks.entries)
-              if (!_bandMarks.contains(e.value)) e.key: e.value,
+              if (!_bandMarks.contains(e.value) &&
+                  compareWordRefs(e.key, shown.first) >= 0 &&
+                  compareWordRefs(e.key, shown.last) <= 0)
+                e.key: e.value,
           }
         : const {};
     // A new recitation: the last one's colours go.
@@ -1479,16 +1593,17 @@ class HifzController extends Notifier<HifzState> {
   }
 
   /// A fixed range — a lesson, a "Test me" question — recited to its end
-  /// (not a loop: Follow along's turns and loops end their own way): the
-  /// recitation ends, as Stop would, once its last ayah's pronunciation
-  /// check is in ([settleAcousticCheck]). It was left listening, nothing
-  /// more to hear (owner, 2026-11-01).
-  void _endFinishedRange() {
+  /// (not Follow along's turns, which end their own way), or a loop's last
+  /// pass done ([loopDone]): the recitation ends, as Stop would, once its
+  /// last ayah's pronunciation check is in ([settleAcousticCheck]) — its
+  /// results shown, and "Mistakes found" for the last pass's. It was left
+  /// listening, nothing more to hear (owner, 2026-11-01; loops 2026-11-08).
+  void _endFinishedRange({bool loopDone = false}) {
     final judge = _judge;
     if (judge == null ||
         !judge.completed ||
         state.range == null ||
-        state.loop != null ||
+        (state.loop != null && !loopDone) ||
         _endingRange) {
       return;
     }
@@ -1683,7 +1798,9 @@ class HifzController extends Notifier<HifzState> {
       return true;
     }
     if (state.loopReview || _checkingPass) return true;
-    if (loop.strict) {
+    // The reciter's own loop: only each ayah's (or the range's) last time
+    // is checked (owner, 2026-11-08: not every pass, strict or not).
+    if (_ownLoop ? _endsAfter(loop) : loop.strict) {
       _checkingPass = true;
       unawaited(_checkPass(judge));
       return true;
@@ -1691,6 +1808,15 @@ class HifzController extends Notifier<HifzState> {
     _nextPass(judge);
     return true;
   }
+
+  /// The pass under way is the last time of its ayah — ayah by ayah (a
+  /// whole range's, in its last pass) — or of the whole range: checked
+  /// before the loop moves on (owner, 2026-11-08).
+  bool _endsAfter(HifzLoop loop) => switch (loop.mode) {
+    HifzLoopMode.range when loop.byAyah =>
+      state.ayahRepetition >= loop.perAyah && state.repetition >= loop.count,
+    _ => state.repetition >= loop.count,
+  };
 
   /// A strict loop's pass being checked for mistakes (the microphone
   /// paused meanwhile).
@@ -1783,7 +1909,10 @@ class HifzController extends Notifier<HifzState> {
       if (++ayahRepetition > loop.perAyah) {
         ayahRepetition = 1;
         if (last == null || afterAyah > last) {
-          if (++repetition > loop.count) return; // the loop is done
+          if (++repetition > loop.count) {
+            if (_ownLoop) _endFinishedRange(loopDone: true); // the loop is done
+            return;
+          }
           ayah = range.from;
           restart = true;
         } else {
@@ -1792,7 +1921,8 @@ class HifzController extends Notifier<HifzState> {
       }
     } else if (++repetition > loop.count) {
       if (loop.mode == HifzLoopMode.range || last == null || afterAyah > last) {
-        return; // the loop is done
+        if (_ownLoop) _endFinishedRange(loopDone: true); // the loop is done
+        return;
       }
       ayah = corpus.words[afterAyah].verse;
       repetition = 1;
@@ -1831,6 +1961,7 @@ class HifzController extends Notifier<HifzState> {
       end: end,
       config: HifzConfig(strict: ref.read(hifzSettingsProvider).strict),
     );
+    _finishedPasses.add((finished, _pass));
     _setPass(_pass + 1);
     _heardAt.clear();
     _correctedAt.clear();

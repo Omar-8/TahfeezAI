@@ -1,11 +1,12 @@
 import 'dart:math' as math;
-import 'dart:async' show unawaited;
+import 'dart:async' show Timer, unawaited;
 
 import '../../../core/sharing/image_sharer.dart';
 import '../../../core/localization/generated/app_localizations.dart';
 import '../../../ai/acoustic/local_quran_acoustic_model.dart';
 
-import 'package:flutter/foundation.dart' show ValueListenable, listEquals;
+import 'package:flutter/foundation.dart'
+    show ValueListenable, kReleaseMode, listEquals;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -19,6 +20,7 @@ import '../../../core/app_store/app_store_service.dart';
 import '../../../core/core_providers.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/components/tahfeez_bottom_sheet.dart';
+import '../../../core/theme/components/tahfeez_collapsible_section.dart';
 import '../../../core/ui/full_bleed_content.dart';
 import '../../../quran/domain/models/quran_location.dart';
 import '../../../quran/domain/models/quran_refs.dart';
@@ -377,20 +379,35 @@ class RecitationBottomBar extends ConsumerWidget {
     ref.listen(recitationSessionControllerProvider, (previous, next) {
       if (previous?.isActive != true || next.isActive) return;
       _sessionHint = _recitationHint(context, ref);
+      ref.read(freshResultsProvider.notifier).set(true);
     });
+    // (Kept while the bar is: gone, and reset, with the reader.)
+    ref.listen(freshResultsProvider, (_, _) {});
 
     // A session over: its results (each ayah's grade and strength) — not
     // between Follow along's turns.
     ref.listen(testSummaryProvider, (previous, next) {
       if (next == null || identical(previous, next)) return;
-      if (ref.read(recitationSessionControllerProvider).isActive) return;
+      // (Logged outside release builds: why a summary was not shown.)
+      void skipped(String why) {
+        if (!kReleaseMode) {
+          debugPrint('Summary: ${next.rows.length} rows not shown: $why');
+        }
+      }
+
+      if (ref.read(recitationSessionControllerProvider).isActive) {
+        return skipped('session active');
+      }
       // Started again with new settings: not the cut-short run's.
-      if (restartedJustNow) return;
+      if (restartedJustNow) return skipped('restarted');
       // Not while the guide runs: practice ends back at its choice of modes.
-      if (ref.read(guideProvider) != null) return;
+      if (ref.read(guideProvider) != null) return skipped('guide');
       if (ref.exists(followAlongControllerProvider) &&
           ref.read(followAlongControllerProvider) != null) {
-        return;
+        return skipped('follow along');
+      }
+      if (!kReleaseMode) {
+        debugPrint('Summary: ${next.rows.length} rows shown');
       }
       _shownSummary = next;
       // After the Sujood al-Tilawah reminder, if it is up.
@@ -574,7 +591,7 @@ class RecitationBottomBar extends ConsumerWidget {
               ],
             ),
           ),
-          if (recognition != null)
+          if (recognition != null || ref.watch(coloursOffNoticeProvider))
             const Positioned(
               top: -FollowAlongHint.height / 2 + 4,
               left: 16,
@@ -586,6 +603,52 @@ class RecitationBottomBar extends ConsumerWidget {
     );
   }
 }
+
+/// Whether a recitation has finished since the reader opened: its
+/// "Mistakes found" shown — not the kept colours' of an earlier visit
+/// (owner, 2026-11-08). Gone with the reader.
+class FreshResults extends Notifier<bool> {
+  @override
+  bool build() => false;
+
+  void set(bool fresh) => state = fresh;
+}
+
+final freshResultsProvider = NotifierProvider.autoDispose<FreshResults, bool>(
+  FreshResults.new,
+);
+
+/// Whether the eye's "colours off" notice is showing: for 5 s after the
+/// colours are turned off (or until two words are heard). Turned off again
+/// while it shows, it is neither queued nor started over (owner,
+/// 2026-11-08).
+class ColoursOffNotice extends Notifier<bool> {
+  static const duration = Duration(seconds: 5);
+
+  Timer? _timer;
+
+  @override
+  bool build() {
+    ref.onDispose(() => _timer?.cancel());
+    return false;
+  }
+
+  void show() {
+    if (state) return;
+    state = true;
+    _timer = Timer(duration, hide);
+  }
+
+  void hide() {
+    _timer?.cancel();
+    _timer = null;
+    if (ref.mounted && state) state = false;
+  }
+}
+
+final coloursOffNoticeProvider = NotifierProvider<ColoursOffNotice, bool>(
+  ColoursOffNotice.new,
+);
 
 /// Follow along's hint and a strict loop's, on the bar's top border: taps
 /// go through them — but "Mistakes found" opens the first mistake's word
@@ -651,10 +714,13 @@ class _BarHints extends ConsumerWidget {
         ref.watch(guideProvider) == null;
     // After a recitation, its mistakes on the page in view — until one of
     // them has been looked at.
+    // (Only a recitation finished since the reader opened: not the colours
+    // kept from before — owner, 2026-11-08.)
     final idle =
         !review &&
         follow == null &&
         !session.isActive &&
+        ref.watch(freshResultsProvider) &&
         ref.watch(quranAudioPlayerProvider) == null &&
         ref.watch(guideProvider) == null;
     final overlay = ref.watch(mushafWordOverlayProvider);
@@ -666,8 +732,26 @@ class _BarHints extends ConsumerWidget {
             )
         ? _onScreen(ref)
         : const <WordRef>[];
+    // Colours just turned off: said for 5 s, or until two words are heard.
+    final coloursOff = ref.watch(coloursOffNoticeProvider);
+    if (coloursOff && id != null && heard >= 2) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => ref.read(coloursOffNoticeProvider.notifier).hide(),
+      );
+    }
+    final loopLeft = follow == null && !review
+        ? loopTimesLeft(
+            ref.watch(hifzControllerProvider),
+            AppLocalizations.of(context),
+          )
+        : null;
     final Widget child;
-    if (review || onScreen.isNotEmpty) {
+    if (coloursOff && !review) {
+      child = const IgnorePointer(
+        key: ValueKey('colours-off'),
+        child: _HintPill.coloursOff(key: ValueKey('colours-off-hint')),
+      );
+    } else if (review || onScreen.isNotEmpty) {
       child = MouseRegion(
         key: ValueKey(review ? 'mistakes-review' : 'mistakes-found'),
         cursor: SystemMouseCursors.click,
@@ -692,6 +776,12 @@ class _BarHints extends ConsumerWidget {
       child = const IgnorePointer(
         key: ValueKey('listening'),
         child: _HintPill.listening(key: ValueKey('listening-hint')),
+      );
+    } else if (session.isActive && loopLeft != null) {
+      // A loop under way: the times left of the ayah being recited.
+      child = IgnorePointer(
+        key: const ValueKey('loop-left'),
+        child: _HintPill.loop(loopLeft, key: const ValueKey('loop-left-hint')),
       );
     } else {
       child = const IgnorePointer(
@@ -737,26 +827,42 @@ class _MistakesPill extends StatelessWidget {
 /// A hint as a pill on the bar's top border: mistakes found, or the
 /// microphone listening.
 class _HintPill extends StatelessWidget {
-  const _HintPill.mistakes() : mistakes = true;
-  const _HintPill.listening({super.key}) : mistakes = false;
+  const _HintPill.mistakes() : kind = _Hint.mistakes, loopText = null;
+  const _HintPill.listening({super.key})
+    : kind = _Hint.listening,
+      loopText = null;
+  const _HintPill.coloursOff({super.key})
+    : kind = _Hint.coloursOff,
+      loopText = null;
+  const _HintPill.loop(String this.loopText, {super.key}) : kind = _Hint.loop;
 
-  final bool mistakes;
+  final _Hint kind;
+
+  /// A loop's: the ayah, and how many times are left.
+  final String? loopText;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final l10n = AppLocalizations.of(context);
-    final foreground = mistakes ? scheme.onErrorContainer : scheme.onPrimary;
+    final (background, foreground) = switch (kind) {
+      _Hint.mistakes => (scheme.errorContainer, scheme.onErrorContainer),
+      _Hint.loop => (scheme.secondaryContainer, scheme.onSecondaryContainer),
+      _ => (scheme.primary, scheme.onPrimary),
+    };
     final style = theme.textTheme.labelMedium?.copyWith(
       color: foreground,
       fontWeight: FontWeight.w600,
     );
+    // (Colours off: wrapped to two lines where one is too short.)
+    final wraps = kind == _Hint.coloursOff;
     return Container(
-      height: FollowAlongHint.height,
-      padding: const EdgeInsets.symmetric(horizontal: 10),
+      height: wraps ? null : FollowAlongHint.height,
+      constraints: const BoxConstraints(minHeight: FollowAlongHint.height),
+      padding: EdgeInsets.symmetric(horizontal: 10, vertical: wraps ? 4 : 0),
       decoration: BoxDecoration(
-        color: mistakes ? scheme.errorContainer : scheme.primary,
+        color: background,
         borderRadius: BorderRadius.circular(TahfeezRadii.pill),
         boxShadow: [
           BoxShadow(
@@ -771,15 +877,26 @@ class _HintPill extends StatelessWidget {
         spacing: 6,
         children: [
           Icon(
-            mistakes ? Icons.error_outline_rounded : Icons.mic_rounded,
+            switch (kind) {
+              _Hint.mistakes => Icons.error_outline_rounded,
+              _Hint.coloursOff => Icons.visibility_outlined,
+              _Hint.loop => Icons.repeat_rounded,
+              _Hint.listening => Icons.mic_rounded,
+            },
             color: foreground,
             size: 16,
           ),
           Flexible(
             child: Text(
-              mistakes ? l10n.followMistakesFound : l10n.recListeningHint,
-              maxLines: 1,
+              switch (kind) {
+                _Hint.mistakes => l10n.followMistakesFound,
+                _Hint.coloursOff => l10n.recColoursOffHint,
+                _Hint.loop => loopText!,
+                _Hint.listening => l10n.recListeningHint,
+              },
+              maxLines: wraps ? 2 : 1,
               overflow: TextOverflow.ellipsis,
+              textAlign: wraps ? TextAlign.center : null,
               style: style,
             ),
           ),
@@ -787,6 +904,29 @@ class _HintPill extends StatelessWidget {
       ),
     );
   }
+}
+
+enum _Hint { mistakes, listening, coloursOff, loop }
+
+/// A running loop, in words for the bar: the ayah being recited and how
+/// many times are left of it, this one included (owner, 2026-11-08) — a
+/// whole-range loop's passes left, without its ayahs one by one; `null`
+/// without a loop under way.
+String? loopTimesLeft(HifzState hifz, AppLocalizations l10n) {
+  final loop = hifz.loop;
+  if (loop == null || hifz.repetition == 0 || hifz.completed) return null;
+  final ayah = hifz.loopAyah;
+  final left = switch (loop.mode) {
+    HifzLoopMode.eachAyah => loop.count - hifz.repetition + 1,
+    HifzLoopMode.range when loop.byAyah =>
+      loop.perAyah - hifz.ayahRepetition + 1,
+    HifzLoopMode.range => loop.count - hifz.repetition + 1,
+  };
+  if (left < 1) return null;
+  return [
+    if (ayah != null && loop.byAyah) '${ayah.chapterNo}:${ayah.verseNo}',
+    l10n.recLoopLeft(left),
+  ].join(' · ');
 }
 
 /// The idle bar's row: the modes, then the reveal/hide buttons and the eye.
@@ -1860,6 +2000,13 @@ class MushafHideControls extends ConsumerWidget {
             hideOrTurnBack(() => notifier.hideLastAyah(page, spread: spread)),
           );
 
+    // The eye's three states (owner, 2026-11-07): recitation colours shown
+    // (the green eye, the default) → none drawn, reciting without them
+    // (the plain eye) → ayahs hidden (their colours shown as uncovered) →
+    // the colours shown again.
+    final colours = ref.watch(mushafColoursShownProvider);
+    final setColours = ref.read(mushafColoursShownProvider.notifier).set;
+    final l10n = AppLocalizations.of(context);
     // Forward on the left, backward on the right — reading runs right to
     // left, so "next" points left — and the eye at the end: turning hide
     // mode on or off adds the reveal/hide buttons on the far side, never
@@ -1870,11 +2017,20 @@ class MushafHideControls extends ConsumerWidget {
         key: const ValueKey('mushaf-hide-toggle'),
         visualDensity: density,
         isSelected: hide.enabled,
-        icon: const Icon(Icons.visibility_outlined),
+        // (The Recite button's green.)
+        icon: colours
+            ? Icon(
+                Icons.visibility_outlined,
+                key: const ValueKey('mushaf-eye-coloured'),
+                color: Theme.of(context).colorScheme.primary,
+              )
+            : const Icon(Icons.visibility_outlined),
         selectedIcon: const Icon(Icons.visibility_off_outlined),
         tooltip: hide.enabled
-            ? AppLocalizations.of(context).recShowAyahs
-            : AppLocalizations.of(context).recHideAyahs,
+            ? l10n.recShowAyahs
+            : colours
+            ? l10n.recHideColours
+            : l10n.recHideAyahs,
         style: hide.enabled
             ? IconButton.styleFrom(
                 backgroundColor: Theme.of(context)
@@ -1882,7 +2038,20 @@ class MushafHideControls extends ConsumerWidget {
                     .secondaryContainer,
               )
             : null,
-        onPressed: notifier.toggle,
+        onPressed: () {
+          // (The guide's hide tour: straight to the ayahs hidden.)
+          if (hide.enabled || ref.read(guideProvider) != null) {
+            notifier.toggle();
+          } else if (colours) {
+            setColours(false);
+            ref.read(coloursOffNoticeProvider.notifier).show();
+            return;
+          } else {
+            notifier.toggle();
+          }
+          // Ayahs hidden or shown again: in colour.
+          setColours(true);
+        },
       ),
     );
     final steps = part == MushafHideControlsPart.pinned
@@ -2424,256 +2593,370 @@ class _HifzSettingsSheetState extends ConsumerState<_HifzSettingsSheet>
       );
     }
 
+    final l10n = AppLocalizations.of(context);
+    // Advanced chosen, or settings no level gives (chosen one by one).
+    final level = settings.advanced ? null : settings.level;
+    Widget choice(
+      String key,
+      String title,
+      String subtitle,
+      bool selected,
+      VoidCallback onTap,
+    ) => ListTile(
+      key: ValueKey(key),
+      selected: selected,
+      leading: Icon(
+        selected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+      ),
+      title: Text(title),
+      subtitle: Text(subtitle),
+      onTap: onTap,
+    );
+    Widget section(String key, String title, IconData icon, List<Widget> c) =>
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: TahfeezCollapsibleSection(
+            key: ValueKey(key),
+            title: title,
+            icon: icon,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: c,
+            ),
+          ),
+        );
+
+    // A level (owner, 2026-11-07) — or Advanced: every setting, in
+    // collapsed groups.
     return Column(
       mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        toggle(
-          AppLocalizations.of(context).recStrict,
-          AppLocalizations.of(context).recStrictSub,
-          settings.strict,
-          (v) => settings.copyWith(strict: v),
-        ),
-        toggle(
-          AppLocalizations.of(context).recHighlight,
-          AppLocalizations.of(context).recHighlightSub,
-          settings.highlightCurrent,
-          (v) => settings.copyWith(highlightCurrent: v),
-        ),
-        toggle(
-          AppLocalizations.of(context).recColour,
-          AppLocalizations.of(context).recColourSub,
-          settings.colorWords,
-          (v) => settings.copyWith(colorWords: v),
-        ),
-        if (settings.colorWords)
-          _ColourChoice(
-            key: const ValueKey('hifz-pronunciation-colour'),
-            title: AppLocalizations.of(context).recPronunciationColour,
-            colours: HifzSettings.pronunciationColors,
-            selected: settings.pronunciationColor,
-            onSelected: (c) =>
-                controller.update(settings.copyWith(pronunciationColor: c)),
+        for (final (l, title, subtitle) in [
+          (HifzLevel.gentle, l10n.hifzLevelGentle, l10n.hifzLevelGentleSub),
+          (
+            HifzLevel.balanced,
+            l10n.hifzLevelBalanced,
+            l10n.hifzLevelBalancedSub,
           ),
-        ListTile(
-          key: const ValueKey('hifz-strictness'),
-          title: Text(AppLocalizations.of(context).recStrictness),
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(AppLocalizations.of(context).recStrictnessSub),
-              const SizedBox(height: 8),
-              // One shift for every threshold, tajweed's too.
-              SegmentedButton<RecitationStrictness>(
-                segments: [
-                  ButtonSegment(
-                    value: RecitationStrictness.lenient,
-                    label: Text(
-                      AppLocalizations.of(context).recStrictnessLenient,
-                    ),
-                  ),
-                  ButtonSegment(
-                    value: RecitationStrictness.balanced,
-                    label: Text(
-                      AppLocalizations.of(context).recStrictnessBalanced,
-                    ),
-                  ),
-                  ButtonSegment(
-                    value: RecitationStrictness.strict,
-                    label: Text(
-                      AppLocalizations.of(context).recStrictnessStrict,
-                    ),
-                  ),
-                ],
-                selected: {settings.strictness},
-                showSelectedIcon: false,
-                onSelectionChanged: (s) =>
-                    controller.update(settings.copyWith(strictness: s.first)),
+          (HifzLevel.strict, l10n.hifzLevelStrict, l10n.hifzLevelStrictSub),
+        ])
+          choice(
+            'hifz-level-${l.name}',
+            title,
+            subtitle,
+            level == l,
+            () => controller.update(settings.atLevel(l)),
+          ),
+        choice(
+          'hifz-level-advanced',
+          l10n.hifzLevelAdvanced,
+          l10n.hifzLevelAdvancedSub,
+          level == null,
+          () => controller.update(settings.copyWith(advanced: true)),
+        ),
+        if (level == null) ...[
+          const Divider(),
+          section(
+            'hifz-group-checking',
+            l10n.hifzGroupChecking,
+            Icons.fact_check_outlined,
+            [
+              toggle(
+                AppLocalizations.of(context).recStrict,
+                AppLocalizations.of(context).recStrictSub,
+                settings.strict,
+                (v) => settings.copyWith(strict: v),
               ),
-              const SizedBox(height: 8),
-              // A legend: each level on its line, the chosen one in full.
-              for (final (level, name, meaning) in [
-                (
-                  RecitationStrictness.lenient,
-                  AppLocalizations.of(context).recStrictnessLenient,
-                  AppLocalizations.of(context).recStrictnessLenientSub,
-                ),
-                (
-                  RecitationStrictness.balanced,
-                  AppLocalizations.of(context).recStrictnessBalanced,
-                  AppLocalizations.of(context).recStrictnessBalancedSub,
-                ),
-                (
-                  RecitationStrictness.strict,
-                  AppLocalizations.of(context).recStrictnessStrict,
-                  AppLocalizations.of(context).recStrictnessStrictSub,
-                ),
-              ])
-                Padding(
-                  padding: const EdgeInsets.only(top: 2),
-                  child: Opacity(
-                    opacity: level == settings.strictness ? 1 : 0.65,
-                    child: Text.rich(
-                      TextSpan(
-                        children: [
-                          TextSpan(
-                            text: '$name: ',
-                            style: const TextStyle(fontWeight: FontWeight.w600),
+              ListTile(
+                key: const ValueKey('hifz-strictness'),
+                title: Text(AppLocalizations.of(context).recStrictness),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(AppLocalizations.of(context).recStrictnessSub),
+                    const SizedBox(height: 8),
+                    // One shift for every threshold, tajweed's too.
+                    SegmentedButton<RecitationStrictness>(
+                      segments: [
+                        ButtonSegment(
+                          value: RecitationStrictness.lenient,
+                          label: Text(
+                            AppLocalizations.of(context).recStrictnessLenient,
                           ),
-                          TextSpan(text: meaning),
-                        ],
+                        ),
+                        ButtonSegment(
+                          value: RecitationStrictness.balanced,
+                          label: Text(
+                            AppLocalizations.of(context).recStrictnessBalanced,
+                          ),
+                        ),
+                        ButtonSegment(
+                          value: RecitationStrictness.strict,
+                          label: Text(
+                            AppLocalizations.of(context).recStrictnessStrict,
+                          ),
+                        ),
+                      ],
+                      selected: {settings.strictness},
+                      showSelectedIcon: false,
+                      onSelectionChanged: (s) => controller.update(
+                        settings.copyWith(strictness: s.first),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    // A legend: each level on its line, the chosen one in full.
+                    for (final (level, name, meaning) in [
+                      (
+                        RecitationStrictness.lenient,
+                        AppLocalizations.of(context).recStrictnessLenient,
+                        AppLocalizations.of(context).recStrictnessLenientSub,
+                      ),
+                      (
+                        RecitationStrictness.balanced,
+                        AppLocalizations.of(context).recStrictnessBalanced,
+                        AppLocalizations.of(context).recStrictnessBalancedSub,
+                      ),
+                      (
+                        RecitationStrictness.strict,
+                        AppLocalizations.of(context).recStrictnessStrict,
+                        AppLocalizations.of(context).recStrictnessStrictSub,
+                      ),
+                    ])
+                      Padding(
+                        padding: const EdgeInsets.only(top: 2),
+                        child: Opacity(
+                          opacity: level == settings.strictness ? 1 : 0.65,
+                          child: Text.rich(
+                            TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: '$name: ',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                TextSpan(text: meaning),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              toggle(
+                AppLocalizations.of(context).recTajweed,
+                AppLocalizations.of(context).recTajweedSub,
+                settings.tajweed,
+                (v) => settings.copyWith(tajweed: v),
+              ),
+              // Each rule on or off, under tajweed.
+              if (settings.tajweed) ...[
+                for (final (rule, name) in [
+                  (TajweedRule.ikhfa, AppLocalizations.of(context).ruleIkhfa),
+                  (TajweedRule.iqlab, AppLocalizations.of(context).ruleIqlab),
+                  (
+                    TajweedRule.ikhfaShafawi,
+                    AppLocalizations.of(context).ruleIkhfaShafawi,
+                  ),
+                  (TajweedRule.idgham, AppLocalizations.of(context).ruleIdgham),
+                  (
+                    TajweedRule.idghamMim,
+                    AppLocalizations.of(context).ruleIdghamMim,
+                  ),
+                  (
+                    TajweedRule.qalqala,
+                    AppLocalizations.of(context).ruleQalqala,
+                  ),
+                  (TajweedRule.madd, AppLocalizations.of(context).ruleMadd),
+                  (
+                    TajweedRule.ghunnah,
+                    AppLocalizations.of(context).ruleGhunnah,
+                  ),
+                ])
+                  CheckboxListTile(
+                    key: ValueKey('tajweed-rule-${rule.name}'),
+                    dense: true,
+                    contentPadding: const EdgeInsetsDirectional.only(
+                      start: 32,
+                      end: 16,
+                    ),
+                    title: Text(name),
+                    value: settings.tajweedRules.contains(rule),
+                    onChanged: (v) => controller.update(
+                      settings.copyWith(
+                        tajweedRules: v == true
+                            ? {...settings.tajweedRules, rule}
+                            : ({...settings.tajweedRules}..remove(rule)),
                       ),
                     ),
                   ),
-                ),
+              ],
             ],
           ),
-        ),
-        toggle(
-          AppLocalizations.of(context).recTajweed,
-          AppLocalizations.of(context).recTajweedSub,
-          settings.tajweed,
-          (v) => settings.copyWith(tajweed: v),
-        ),
-        // Each rule on or off, under tajweed.
-        if (settings.tajweed) ...[
-          for (final (rule, name) in [
-            (TajweedRule.ikhfa, AppLocalizations.of(context).ruleIkhfa),
-            (TajweedRule.iqlab, AppLocalizations.of(context).ruleIqlab),
-            (
-              TajweedRule.ikhfaShafawi,
-              AppLocalizations.of(context).ruleIkhfaShafawi,
-            ),
-            (TajweedRule.idgham, AppLocalizations.of(context).ruleIdgham),
-            (TajweedRule.idghamMim, AppLocalizations.of(context).ruleIdghamMim),
-            (TajweedRule.qalqala, AppLocalizations.of(context).ruleQalqala),
-            (TajweedRule.madd, AppLocalizations.of(context).ruleMadd),
-            (TajweedRule.ghunnah, AppLocalizations.of(context).ruleGhunnah),
-          ])
-            CheckboxListTile(
-              key: ValueKey('tajweed-rule-${rule.name}'),
-              dense: true,
-              contentPadding: const EdgeInsetsDirectional.only(
-                start: 32,
-                end: 16,
+          section(
+            'hifz-group-marks',
+            l10n.hifzGroupMarks,
+            Icons.format_color_fill_outlined,
+            [
+              toggle(
+                AppLocalizations.of(context).recHighlight,
+                AppLocalizations.of(context).recHighlightSub,
+                settings.highlightCurrent,
+                (v) => settings.copyWith(highlightCurrent: v),
               ),
-              title: Text(name),
-              value: settings.tajweedRules.contains(rule),
-              onChanged: (v) => controller.update(
-                settings.copyWith(
-                  tajweedRules: v == true
-                      ? {...settings.tajweedRules, rule}
-                      : ({...settings.tajweedRules}..remove(rule)),
+              toggle(
+                AppLocalizations.of(context).recColour,
+                AppLocalizations.of(context).recColourSub,
+                settings.colorWords,
+                (v) => settings.copyWith(colorWords: v),
+              ),
+              if (settings.colorWords)
+                _ColourChoice(
+                  key: const ValueKey('hifz-pronunciation-colour'),
+                  title: AppLocalizations.of(context).recPronunciationColour,
+                  colours: HifzSettings.pronunciationColors,
+                  selected: settings.pronunciationColor,
+                  onSelected: (c) => controller.update(
+                    settings.copyWith(pronunciationColor: c),
+                  ),
                 ),
+              // (Tajweed's, while tajweed is judged.)
+              if (settings.colorWords && settings.tajweed)
+                _ColourChoice(
+                  key: const ValueKey('hifz-tajweed-colour'),
+                  title: AppLocalizations.of(context).recTajweedColour,
+                  colours: HifzSettings.tajweedColors,
+                  selected: settings.tajweedColor,
+                  onSelected: (c) =>
+                      controller.update(settings.copyWith(tajweedColor: c)),
+                ),
+              toggle(
+                AppLocalizations.of(context).recShowMistakes,
+                AppLocalizations.of(context).recShowMistakesSub,
+                settings.showMistakes,
+                (v) => settings.copyWith(showMistakes: v),
               ),
+            ],
+          ),
+          if (alerts)
+            section(
+              'hifz-group-alerts',
+              l10n.hifzGroupAlerts,
+              Icons.notifications_active_outlined,
+              [
+                if (alerts)
+                  ListTile(
+                    key: const ValueKey('hifz-mistake-alert'),
+                    title: Text(AppLocalizations.of(context).recAlert),
+                    subtitle: Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      // Vibrate and sound, each on or off: both, one, or none.
+                      child: SegmentedButton<MistakeAlert>(
+                        multiSelectionEnabled: true,
+                        emptySelectionAllowed: true,
+                        segments: [
+                          // (A browser: the sound alone.)
+                          if (!web)
+                            ButtonSegment(
+                              value: MistakeAlert.vibrate,
+                              icon: const Icon(Icons.vibration),
+                              label: Text(
+                                AppLocalizations.of(context).recAlertVibrate,
+                              ),
+                            ),
+                          ButtonSegment(
+                            value: MistakeAlert.sound,
+                            icon: const Icon(Icons.volume_up_outlined),
+                            label: Text(
+                              AppLocalizations.of(context).recAlertSound,
+                            ),
+                          ),
+                        ],
+                        selected: {
+                          if (!web && settings.alert.vibrates)
+                            MistakeAlert.vibrate,
+                          if (settings.alert.beeps) MistakeAlert.sound,
+                        },
+                        showSelectedIcon: false,
+                        onSelectionChanged: (s) => controller.update(
+                          settings.copyWith(
+                            alert: MistakeAlert.of(
+                              vibrate: web
+                                  ? settings.alert.vibrates
+                                  : s.contains(MistakeAlert.vibrate),
+                              sound: s.contains(MistakeAlert.sound),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                // Tajweed mistakes (purple) alert apart, as chosen here.
+                if (alerts && settings.tajweed)
+                  ListTile(
+                    key: const ValueKey('hifz-tajweed-alert'),
+                    title: Text(AppLocalizations.of(context).recTajweedAlert),
+                    subtitle: Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: SegmentedButton<MistakeAlert>(
+                        multiSelectionEnabled: true,
+                        emptySelectionAllowed: true,
+                        segments: [
+                          // (A browser: the sound alone.)
+                          if (!web)
+                            ButtonSegment(
+                              value: MistakeAlert.vibrate,
+                              icon: const Icon(Icons.vibration),
+                              label: Text(
+                                AppLocalizations.of(context).recAlertVibrate,
+                              ),
+                            ),
+                          ButtonSegment(
+                            value: MistakeAlert.sound,
+                            icon: const Icon(Icons.volume_up_outlined),
+                            label: Text(
+                              AppLocalizations.of(context).recAlertSound,
+                            ),
+                          ),
+                        ],
+                        selected: {
+                          if (!web && settings.tajweedAlert.vibrates)
+                            MistakeAlert.vibrate,
+                          if (settings.tajweedAlert.beeps) MistakeAlert.sound,
+                        },
+                        showSelectedIcon: false,
+                        onSelectionChanged: (s) => controller.update(
+                          settings.copyWith(
+                            tajweedAlert: MistakeAlert.of(
+                              vibrate: web
+                                  ? settings.tajweedAlert.vibrates
+                                  : s.contains(MistakeAlert.vibrate),
+                              sound: s.contains(MistakeAlert.sound),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
-          if (settings.colorWords)
-            _ColourChoice(
-              key: const ValueKey('hifz-tajweed-colour'),
-              title: AppLocalizations.of(context).recTajweedColour,
-              colours: HifzSettings.tajweedColors,
-              selected: settings.tajweedColor,
-              onSelected: (c) =>
-                  controller.update(settings.copyWith(tajweedColor: c)),
-            ),
+          section(
+            'hifz-group-other',
+            l10n.hifzGroupOther,
+            Icons.more_horiz_rounded,
+            [
+              toggle(
+                AppLocalizations.of(context).sajdahReminder,
+                AppLocalizations.of(context).sajdahReminderSub,
+                settings.sajdahReminder,
+                (v) => settings.copyWith(sajdahReminder: v),
+              ),
+            ],
+          ),
         ],
-        toggle(
-          AppLocalizations.of(context).recShowMistakes,
-          AppLocalizations.of(context).recShowMistakesSub,
-          settings.showMistakes,
-          (v) => settings.copyWith(showMistakes: v),
-        ),
-        toggle(
-          AppLocalizations.of(context).sajdahReminder,
-          AppLocalizations.of(context).sajdahReminderSub,
-          settings.sajdahReminder,
-          (v) => settings.copyWith(sajdahReminder: v),
-        ),
-        if (alerts)
-          ListTile(
-            key: const ValueKey('hifz-mistake-alert'),
-            title: Text(AppLocalizations.of(context).recAlert),
-            subtitle: Padding(
-              padding: const EdgeInsets.only(top: 8),
-              // Vibrate and sound, each on or off: both, one, or none.
-              child: SegmentedButton<MistakeAlert>(
-                multiSelectionEnabled: true,
-                emptySelectionAllowed: true,
-                segments: [
-                  // (A browser: the sound alone.)
-                  if (!web)
-                    ButtonSegment(
-                      value: MistakeAlert.vibrate,
-                      icon: const Icon(Icons.vibration),
-                      label: Text(AppLocalizations.of(context).recAlertVibrate),
-                    ),
-                  ButtonSegment(
-                    value: MistakeAlert.sound,
-                    icon: const Icon(Icons.volume_up_outlined),
-                    label: Text(AppLocalizations.of(context).recAlertSound),
-                  ),
-                ],
-                selected: {
-                  if (!web && settings.alert.vibrates) MistakeAlert.vibrate,
-                  if (settings.alert.beeps) MistakeAlert.sound,
-                },
-                showSelectedIcon: false,
-                onSelectionChanged: (s) => controller.update(
-                  settings.copyWith(
-                    alert: MistakeAlert.of(
-                      vibrate: web
-                          ? settings.alert.vibrates
-                          : s.contains(MistakeAlert.vibrate),
-                      sound: s.contains(MistakeAlert.sound),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        // Tajweed mistakes (purple) alert apart, as chosen here.
-        if (alerts && settings.tajweed)
-          ListTile(
-            key: const ValueKey('hifz-tajweed-alert'),
-            title: Text(AppLocalizations.of(context).recTajweedAlert),
-            subtitle: Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: SegmentedButton<MistakeAlert>(
-                multiSelectionEnabled: true,
-                emptySelectionAllowed: true,
-                segments: [
-                  // (A browser: the sound alone.)
-                  if (!web)
-                    ButtonSegment(
-                      value: MistakeAlert.vibrate,
-                      icon: const Icon(Icons.vibration),
-                      label: Text(AppLocalizations.of(context).recAlertVibrate),
-                    ),
-                  ButtonSegment(
-                    value: MistakeAlert.sound,
-                    icon: const Icon(Icons.volume_up_outlined),
-                    label: Text(AppLocalizations.of(context).recAlertSound),
-                  ),
-                ],
-                selected: {
-                  if (!web && settings.tajweedAlert.vibrates)
-                    MistakeAlert.vibrate,
-                  if (settings.tajweedAlert.beeps) MistakeAlert.sound,
-                },
-                showSelectedIcon: false,
-                onSelectionChanged: (s) => controller.update(
-                  settings.copyWith(
-                    tajweedAlert: MistakeAlert.of(
-                      vibrate: web
-                          ? settings.tajweedAlert.vibrates
-                          : s.contains(MistakeAlert.vibrate),
-                      sound: s.contains(MistakeAlert.sound),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
       ],
     );
   }

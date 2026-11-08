@@ -63,6 +63,13 @@ class GuideStep {
 }
 
 enum GuideTour {
+  /// The first time the reader opens (owner, 2026-11-07): three steps — a
+  /// word tapped, Recite, the eye — and "?" for the rest ([overview]).
+  intro,
+
+  /// The first time the ayahs are hidden: the buttons that uncover them.
+  firstHide,
+
   overview,
   recite,
   loop,
@@ -75,9 +82,21 @@ enum GuideTour {
   tipPageTheme;
 
   bool get isTip => this == tipPageTheme;
+
+  /// Over once its steps are (not back to choosing a mode).
+  bool get endsAlone => isTip || this == intro || this == firstHide;
 }
 
 List<GuideStep> guideSteps(GuideTour tour) => switch (tour) {
+  GuideTour.intro => [
+    GuideStep(null, (l) => l.guideWordTap, tryIt: true),
+    GuideStep('mode-recite', (l) => l.guideRecite),
+    GuideStep('eye', (l) => '${l.guideEye}\n\n${l.guideIntroMore}'),
+  ],
+  GuideTour.firstHide => [
+    GuideStep('mushaf-reveal-word', (l) => l.guideRevealWord),
+    GuideStep('mushaf-reveal-ayah', (l) => l.guideRevealAyah),
+  ],
   GuideTour.overview => [
     // First the page itself: a word tapped, then long-pressed.
     GuideStep(null, (l) => l.guideWordTap, tryIt: true),
@@ -188,7 +207,7 @@ class GuideController extends Notifier<GuideState?> {
 
   /// Starts [tour] (the overview with the ayahs shown, so the modes are).
   void start([GuideTour tour = GuideTour.overview, int index = 0]) {
-    if (tour == GuideTour.overview &&
+    if ((tour == GuideTour.overview || tour == GuideTour.intro) &&
         ref.read(mushafHideModeProvider).enabled) {
       ref.read(mushafHideModeProvider.notifier).toggle();
     }
@@ -203,7 +222,7 @@ class GuideController extends Notifier<GuideState?> {
     if (s == null) return;
     if (s.index + 1 < length) {
       state = (tour: s.tour, index: s.index + 1);
-    } else if (s.tour.isTip) {
+    } else if (s.tour.endsAlone) {
       state = null;
     } else if (s.tour != GuideTour.overview) {
       // A mode learned: what it started stops (so the modes show again),
@@ -313,8 +332,10 @@ class _GuideTargetState extends ConsumerState<GuideTarget> {
 }
 
 /// The Mushaf top bar's "?": starts the guide's overview (where the modes
-/// are: with live recognition) — and, the first time the reader opens (the
-/// printed page or Ayah mode), starts it by itself.
+/// are: with live recognition). By itself, only a little: the first time
+/// the reader opens (the printed page or Ayah mode), three steps
+/// ([GuideTour.intro]); the first time the ayahs are hidden, the buttons
+/// that uncover them ([GuideTour.firstHide]).
 class GuideButton extends ConsumerStatefulWidget {
   const GuideButton({super.key});
 
@@ -351,8 +372,23 @@ class _GuideButtonState extends ConsumerState<GuideButton> {
       await Future<void>.delayed(const Duration(milliseconds: 1200));
       if (!mounted || ref.read(guideProvider) != null) return;
       if (!(ModalRoute.of(context)?.isCurrent ?? true)) return;
-      ref.read(guideProvider.notifier).start();
+      ref.read(guideProvider.notifier).start(GuideTour.intro);
     });
+  }
+
+  /// The ayahs hidden for the first time (not by the guide, nor while
+  /// reciting): their buttons, once they are in place.
+  Future<void> _firstHide() async {
+    bool quiet() =>
+        mounted &&
+        ref.read(guideProvider) == null &&
+        ref.read(mushafHideModeProvider).enabled &&
+        !(ref.exists(recitationSessionControllerProvider) &&
+            ref.read(recitationSessionControllerProvider).isActive) &&
+        (ModalRoute.of(context)?.isCurrent ?? true);
+    if (!quiet() || !await firstRunDue(ref, 'hide-hint')) return;
+    await Future<void>.delayed(const Duration(milliseconds: 600));
+    if (quiet()) ref.read(guideProvider.notifier).start(GuideTour.firstHide);
   }
 
   @override
@@ -360,6 +396,9 @@ class _GuideButtonState extends ConsumerState<GuideButton> {
     if (!ref.watch(liveRecognitionEnabledProvider)) {
       return const SizedBox.shrink();
     }
+    ref.listen(mushafHideModeProvider.select((h) => h.enabled), (was, on) {
+      if (on && !(was ?? false)) unawaited(_firstHide());
+    });
     return IconButton(
       key: const ValueKey('guide-open'),
       icon: const Icon(Icons.help_outline_rounded),

@@ -279,6 +279,8 @@ class FollowAlongController extends Notifier<FollowAlongState?> {
           // The colours of this run's earlier turns stay (its first turn
           // starts clean).
           keepMarks: s.index > 0 || s.round > 1 || s.again,
+          // (Its turns end, and are checked, here.)
+          ownLoop: false,
         );
     await ref
         .read(recitationSessionControllerProvider.notifier)

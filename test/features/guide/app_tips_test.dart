@@ -57,7 +57,7 @@ class _Player extends QuranAudioPlayer {
   void set(NowPlaying? now) => state = now;
 }
 
-/// "Did you know" tips: none on the first day, then at most one every two
+/// "Did you know" tips: none in the first three days, then at most one every two
 /// days, at random; never while reciting or listening; "Don't show tips
 /// again" ends them all.
 void main() {
@@ -65,7 +65,7 @@ void main() {
 
   group('appTipDue', () {
     test(
-      'not on the first day; then due, and not again for two days',
+      'not in the first three days; then due, and not again for two days',
       () async {
         final storage = _Memory();
         final heads = _Coin(0);
@@ -73,7 +73,11 @@ void main() {
             appTipDue(storage, tip, now: now, random: heads);
         expect(await due(day0), isFalse, reason: 'the first day starts');
         expect(await due(day0.add(const Duration(hours: 23))), isFalse);
-        final shown = day0.add(const Duration(days: 1));
+        expect(
+          await due(day0.add(const Duration(days: 2, hours: 23))),
+          isFalse,
+        );
+        final shown = day0.add(tipFirstAfter);
         expect(await due(shown), isTrue);
         expect(
           await due(

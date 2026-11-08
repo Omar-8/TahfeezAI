@@ -408,7 +408,9 @@ class _RecitationLoopSheetState extends ConsumerState<_RecitationLoopSheet> {
               key: const ValueKey('loop-strict'),
               contentPadding: EdgeInsets.zero,
               title: Text(l10n.followStrict),
-              subtitle: Text(l10n.recLoopStrictSub),
+              // (The words judged strictly; a loop's last time is checked,
+              // strict or not.)
+              subtitle: Text(l10n.recStrictSub),
               value: _loop.strict,
               onChanged: (v) => setState(() {
                 _loop = _loop.copyWith(strict: v);

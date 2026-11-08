@@ -9,6 +9,7 @@ export 'tahfeez_app_bar.dart';
 export 'tahfeez_bottom_sheet.dart';
 export 'tahfeez_card.dart';
 export 'tahfeez_chips.dart';
+export 'tahfeez_collapsible_section.dart';
 export 'tahfeez_dialog.dart';
 export 'tahfeez_geometric_pattern.dart';
 export 'tahfeez_download_progress_row.dart';
