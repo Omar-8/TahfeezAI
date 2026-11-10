@@ -157,6 +157,80 @@ void main() {
     recognizer = FakeRecognizer();
   });
 
+  testWidgets('a Mushaf opened: the recitation bar fades in over the '
+      'navigation at its own height at once (not grown frame by frame)', (
+    tester,
+  ) async {
+    mushafOpen.value = false;
+    await tester.pumpWidget(app());
+    await tester.pumpAndSettle();
+    expect(find.text('Home Quran Search'), findsOneWidget);
+    expect(find.byKey(bar), findsNothing);
+
+    mushafOpen.value = true;
+    await tester.pump(); // the Mushaf reports itself
+    await tester.pump();
+    Rect barRect() => tester.getRect(find.byKey(bar));
+    final atOnce = barRect();
+    double opacityOf(Finder of) => tester
+        .widget<FadeTransition>(
+          find.ancestor(of: of, matching: find.byType(FadeTransition)).first,
+        )
+        .opacity
+        .value;
+    final navigation = find.text('Home Quran Search');
+    // First (the reader's first frames being built): the navigation whole,
+    // the recitation bar not yet showing.
+    await tester.pump(const Duration(milliseconds: 80));
+    expect(opacityOf(navigation), 1);
+    expect(opacityOf(find.byKey(bar)), 0);
+    expect(barRect(), atOnce, reason: 'its full height from the start');
+    // Then the two crossing.
+    await tester.pump(const Duration(milliseconds: 160));
+    expect(opacityOf(navigation), inExclusiveRange(0.0, 1.0));
+    expect(opacityOf(find.byKey(bar)), inExclusiveRange(0.0, 1.0));
+    expect(barRect(), atOnce);
+
+    await tester.pumpAndSettle();
+    expect(find.text('Home Quran Search'), findsNothing);
+    expect(barRect(), atOnce);
+  });
+
+  testWidgets('the Mushaf closed: the navigation fades in over the '
+      'recitation bar, at its own height at once (not snapped to it at the '
+      'end)', (tester) async {
+    mushafOpen.value = false;
+    await tester.pumpWidget(app());
+    await tester.pumpAndSettle();
+    final navigation = find.text('Home Quran Search');
+    Rect slot() => tester.getRect(find.byType(RecitationBottomBar));
+    final navigationSlot = slot();
+    mushafOpen.value = true;
+    await tester.pumpAndSettle();
+    expect(slot().height, greaterThan(navigationSlot.height));
+
+    mushafOpen.value = false;
+    await tester.pump();
+    await tester.pump();
+    double opacityOf(Finder of) => tester
+        .widget<FadeTransition>(
+          find.ancestor(of: of, matching: find.byType(FadeTransition)).first,
+        )
+        .opacity
+        .value;
+    expect(slot(), navigationSlot, reason: 'its own height at once');
+    await tester.pump(const Duration(milliseconds: 80));
+    expect(opacityOf(find.byKey(bar)), 1, reason: 'whole for a moment');
+    expect(opacityOf(navigation), 0);
+    await tester.pump(const Duration(milliseconds: 160));
+    expect(opacityOf(find.byKey(bar)), inExclusiveRange(0.0, 1.0));
+    expect(opacityOf(navigation), inExclusiveRange(0.0, 1.0));
+    expect(slot(), navigationSlot);
+    await tester.pumpAndSettle();
+    expect(find.byKey(bar), findsNothing);
+    expect(slot(), navigationSlot, reason: 'no snap at the end');
+  });
+
   testWidgets('the recitation bar and the Hifz settings: every tappable at '
       'least 48 × 48', (tester) async {
     final semantics = tester.ensureSemantics();

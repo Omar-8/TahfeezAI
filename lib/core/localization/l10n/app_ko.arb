@@ -679,5 +679,8 @@
   "settingsReport": "문제 신고",
   "settingsReportSub": "앱의 최근 로그가 담긴 이메일 — 보내기 전에 확인할 수 있습니다",
   "settingsReportSubject": "Tahfeez AI {version}: 문제",
-  "settingsReportPrompt": "무슨 일이 있었나요? (한 일, 기대한 것, 본 것)"
+  "settingsReportPrompt": "무슨 일이 있었나요? (한 일, 기대한 것, 본 것)",
+  "homeToday": "오늘",
+  "homeStartReading": "알파티하부터 시작",
+  "bookmarksOpenQuran": "꾸란 열기"
 }

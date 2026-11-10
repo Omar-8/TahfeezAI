@@ -166,6 +166,15 @@ void main() {
       await tester.pumpAndSettle(const Duration(milliseconds: 400));
 
       expect(find.textContaining('No results for'), findsOneWidget);
+
+      // Clear: the field empty again, to search for something else.
+      await tester.tap(find.byKey(const ValueKey('search-clear')));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('No results for'), findsNothing);
+      expect(
+        tester.widget<TextField>(find.byType(TextField)).controller!.text,
+        isEmpty,
+      );
     });
 
     testWidgets('running a search records it in history', (tester) async {

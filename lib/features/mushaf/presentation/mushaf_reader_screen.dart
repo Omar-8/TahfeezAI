@@ -18,6 +18,7 @@ import 'mushaf_page_title.dart';
 import 'reader_mode_toggle.dart';
 import '../application/reading_surah.dart';
 import '../../../quran/presentation/quran_unavailable_view.dart';
+import '../../../core/theme/components/tahfeez_state_views.dart';
 
 /// Tahfeez's standalone Mushaf (paginated, printed-page-style) reader route
 /// — reached from the Quran index's Page tab, with no underlying
@@ -116,9 +117,7 @@ class _MushafReaderScreenState extends ConsumerState<MushafReaderScreen> {
                     setState(() => _currentPageNumber = pageNumber),
               );
             },
-            loading: () => Center(
-              child: CircularProgressIndicator(color: colors.secondaryText),
-            ),
+            loading: () => TahfeezPageSkeleton(color: colors.secondaryText),
             error: (_, _) => _unavailable(colors.secondaryText),
           ),
         ),

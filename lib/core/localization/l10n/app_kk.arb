@@ -679,5 +679,8 @@
   "settingsReport": "Мәселе туралы хабарлау",
   "settingsReportSub": "Қолданбаның соңғы журналы бар хат — жібермес бұрын көресіз",
   "settingsReportSubject": "Tahfeez AI {version}: мәселе",
-  "settingsReportPrompt": "Не болды? (Не істедіңіз, не күттіңіз, не көрдіңіз.)"
+  "settingsReportPrompt": "Не болды? (Не істедіңіз, не күттіңіз, не көрдіңіз.)",
+  "homeToday": "Бүгін",
+  "homeStartReading": "Әл-Фатихадан бастау",
+  "bookmarksOpenQuran": "Құранды ашу"
 }

@@ -7,7 +7,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/localization/locale_controller.dart';
 import '../../../core/theme/components/tahfeez_bottom_sheet.dart'
     show isWideWebWindow;
+import '../../../core/theme/tahfeez_motion.dart';
 import '../../../core/ui/full_bleed_content.dart';
+import '../../../core/ui/motion.dart';
 import '../../../quran/application/quran_chapter_localization.dart';
 import '../../../quran/domain/models/mushaf_token_models.dart';
 import '../application/mushaf_hide_mode.dart' show firstVisiblePage;
@@ -74,22 +76,21 @@ class _MushafPageTitleState extends ConsumerState<MushafPageTitle> {
 
     if (bundle == null) {
       final name = _lastName;
-      if (name == null) {
-        return Text(
-          AppLocalizations.of(context).homeContinueReadingPage(pageNumber),
-          overflow: TextOverflow.ellipsis,
-        );
-      }
-      return _title(
-        context,
-        name,
-        [
-          _pages(context),
-          if (_lastJuz != null)
-            AppLocalizations.of(context).homeContinueReadingJuz(_lastJuz!),
-        ],
-        baseColor,
-        _lastSurah,
+      // Nothing known yet: no title until the surah's name is (not "Page
+      // N", then "Surah N", then the name, a frame or two apart).
+      if (name == null) return _shown(null);
+      return _shown(
+        _title(
+          context,
+          name,
+          [
+            _pages(context),
+            if (_lastJuz != null)
+              AppLocalizations.of(context).homeContinueReadingJuz(_lastJuz!),
+          ],
+          baseColor,
+          _lastSurah,
+        ),
       );
     }
 
@@ -103,17 +104,18 @@ class _MushafPageTitleState extends ConsumerState<MushafPageTitle> {
             : _firstSurahNo(bundle));
     final languageCode =
         ref.watch(localeControllerProvider)?.languageCode ?? 'en';
-    final localizedName = surahNo == null
+    final localization = surahNo == null
         ? null
-        : ref
-              .watch(
-                chapterLocalizationProvider(
-                  surahNo,
-                  languageCode: languageCode,
-                ),
-              )
-              .value
-              ?.name;
+        : ref.watch(
+            chapterLocalizationProvider(surahNo, languageCode: languageCode),
+          );
+    final localizedName = localization?.value?.name;
+    if (_lastName == null &&
+        localization != null &&
+        localization.isLoading &&
+        !localization.hasValue) {
+      return _shown(null);
+    }
 
     // The surah's name still loading: the last one shown, if any.
     final name =
@@ -132,8 +134,22 @@ class _MushafPageTitleState extends ConsumerState<MushafPageTitle> {
         AppLocalizations.of(context).homeContinueReadingJuz(bundle.juzNo!),
     ];
 
-    return _title(context, name, subtitleParts, baseColor, surahNo);
+    return _shown(_title(context, name, subtitleParts, baseColor, surahNo));
   }
+
+  /// The title fading in once, when first known (the same afterwards, as
+  /// pages turn: no fade).
+  Widget _shown(Widget? title) => AnimatedSwitcher(
+    duration: motion(context, TahfeezMotionDuration.medium),
+    switchInCurve: TahfeezMotionCurves.standard,
+    layoutBuilder: (current, previous) => Stack(
+      alignment: AlignmentDirectional.centerStart,
+      children: [...previous, ?current],
+    ),
+    child: title == null
+        ? const SizedBox.shrink(key: ValueKey('mushaf-title-waiting'))
+        : KeyedSubtree(key: const ValueKey('mushaf-title-shown'), child: title),
+  );
 
   /// "Page N" — in a wide browser window's two-page spread, both pages,
   /// in the order they are laid out ("Page 598 – 597").

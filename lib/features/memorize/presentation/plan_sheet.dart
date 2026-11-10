@@ -95,7 +95,7 @@ class _PlanSheetState extends ConsumerState<_PlanSheet> {
     if (surahList == null) {
       return const Padding(
         padding: EdgeInsets.all(TahfeezSpacing.xl),
-        child: Center(child: CircularProgressIndicator()),
+        child: TahfeezLoadingView(),
       );
     }
     final surahs = {for (final s in surahList) s.surah.surahNo: s};

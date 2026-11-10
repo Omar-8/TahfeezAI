@@ -1326,5 +1326,11 @@
   "settingsReportSubject": "Tahfeez AI {version}: a problem",
   "@settingsReportSubject": {"description": "Subject of the problem report email.", "placeholders": {"version": {"type": "String"}}},
   "settingsReportPrompt": "What happened? (What you did, what you expected, what you saw.)",
-  "@settingsReportPrompt": {"description": "First line of the problem report email body: where the user writes what happened."}
+  "@settingsReportPrompt": {"description": "First line of the problem report email body: where the user writes what happened."},
+  "homeToday": "Today",
+  "@homeToday": {"description": "Home, memorization card: the title beside the ring showing how much of today's memorization (lesson and revision) is done."},
+  "homeStartReading": "Start with Al-Fatiha",
+  "@homeStartReading": {"description": "Home, Continue Reading card when nothing has been read yet: button opening Surah Al-Fatiha."},
+  "bookmarksOpenQuran": "Open the Qur'an",
+  "@bookmarksOpenQuran": {"description": "Bookmarks screen when there are no bookmarks: button opening the Qur'an tab."}
 }

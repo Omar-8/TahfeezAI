@@ -47,6 +47,7 @@ import '../../../quran/presentation/meaning_resource_names.dart';
 import '../../../core/ui/back_to_exit.dart';
 import '../../../core/ui/app_name_text.dart';
 import '../../../core/ui/animations_setting.dart';
+import '../../../core/theme/tahfeez_motion.dart';
 
 /// The Settings tab: the app's language and theme (the Quran page's own
 /// theme is chosen in the Mushaf, independently, so the two can be mixed).
@@ -96,7 +97,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           Scrollable.ensureVisible(
             found,
             alignment: 0.3,
-            duration: const Duration(milliseconds: 250),
+            duration: TahfeezMotionDuration.medium,
             curve: Curves.easeOutCubic,
           );
         }

@@ -679,5 +679,8 @@
   "settingsReport": "Ripoti tatizo",
   "settingsReportSub": "Barua pepe yenye kumbukumbu za karibuni za programu — unaiona kabla ya kutuma",
   "settingsReportSubject": "Tahfeez AI {version}: tatizo",
-  "settingsReportPrompt": "Nini kilitokea? (Ulichofanya, ulichotarajia, ulichoona.)"
+  "settingsReportPrompt": "Nini kilitokea? (Ulichofanya, ulichotarajia, ulichoona.)",
+  "homeToday": "Leo",
+  "homeStartReading": "Anza na Al-Fatiha",
+  "bookmarksOpenQuran": "Fungua Qur'ani"
 }

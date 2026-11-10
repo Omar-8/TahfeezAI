@@ -679,5 +679,8 @@
   "settingsReport": "Bayar da rahoton matsala",
   "settingsReportSub": "Imel tare da bayanan manhajar na kwanan nan — za ka gani kafin aikawa",
   "settingsReportSubject": "Tahfeez AI {version}: matsala",
-  "settingsReportPrompt": "Me ya faru? (Abin da ka yi, abin da ka zata, abin da ka gani.)"
+  "settingsReportPrompt": "Me ya faru? (Abin da ka yi, abin da ka zata, abin da ka gani.)",
+  "homeToday": "Yau",
+  "homeStartReading": "Fara da Al-Fatiha",
+  "bookmarksOpenQuran": "Buɗe Alƙur'ani"
 }

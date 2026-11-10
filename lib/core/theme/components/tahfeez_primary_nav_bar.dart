@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../app_spacing.dart';
 import '../tahfeez_icon_sizes.dart';
+import '../tahfeez_motion.dart';
 
 /// One destination in [TahfeezPrimaryNavigationBar]/[TahfeezPrimaryNavigationRail].
 class TahfeezPrimaryNavItem {
@@ -139,7 +140,7 @@ class _PrimaryNavBarItem extends StatelessWidget {
             children: [
               // The selected one on a small glass pill.
               AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
+                duration: TahfeezMotionDuration.medium,
                 padding: const EdgeInsets.symmetric(
                   horizontal: TahfeezSpacing.md,
                   vertical: 2,

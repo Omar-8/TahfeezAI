@@ -679,5 +679,8 @@
   "settingsReport": "Αναφορά προβλήματος",
   "settingsReportSub": "Ένα email με τα πρόσφατα αρχεία καταγραφής — το βλέπετε πριν την αποστολή",
   "settingsReportSubject": "Tahfeez AI {version}: ένα πρόβλημα",
-  "settingsReportPrompt": "Τι συνέβη; (Τι κάνατε, τι περιμένατε, τι είδατε.)"
+  "settingsReportPrompt": "Τι συνέβη; (Τι κάνατε, τι περιμένατε, τι είδατε.)",
+  "homeToday": "Σήμερα",
+  "homeStartReading": "Ξεκινήστε με την Αλ-Φάτιχα",
+  "bookmarksOpenQuran": "Άνοιγμα του Κορανίου"
 }

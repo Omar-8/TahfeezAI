@@ -104,7 +104,16 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             ? const QuranUnavailableView(icon: Icons.search_outlined)
             : _committedQuery.trim().isEmpty
             ? _EmptyQueryBody(onSelectHistory: _runSearch)
-            : _ResultsBody(query: _committedQuery, onResultTap: _onResultTap),
+            : _ResultsBody(
+                query: _committedQuery,
+                onResultTap: _onResultTap,
+                onClear: () {
+                  _controller.clear();
+                  _debounce?.cancel();
+                  setState(() => _committedQuery = '');
+                  _focusNode.requestFocus();
+                },
+              ),
       ),
     );
   }
@@ -143,10 +152,17 @@ class _EmptyQueryBody extends StatelessWidget {
 }
 
 class _ResultsBody extends ConsumerWidget {
-  const _ResultsBody({required this.query, required this.onResultTap});
+  const _ResultsBody({
+    required this.query,
+    required this.onResultTap,
+    required this.onClear,
+  });
 
   final String query;
   final ValueChanged<SearchHit> onResultTap;
+
+  /// Nothing found: the field emptied, to search again.
+  final VoidCallback onClear;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -158,6 +174,11 @@ class _ResultsBody extends ConsumerWidget {
           return TahfeezEmptyView(
             icon: Icons.search_off_outlined,
             message: AppLocalizations.of(context).searchNoResults(query),
+            action: TextButton(
+              key: const ValueKey('search-clear'),
+              onPressed: onClear,
+              child: Text(AppLocalizations.of(context).quranClear),
+            ),
           );
         }
         return SingleChildScrollView(

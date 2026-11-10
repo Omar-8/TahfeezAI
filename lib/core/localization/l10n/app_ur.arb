@@ -679,5 +679,8 @@
   "settingsReport": "مسئلہ رپورٹ کریں",
   "settingsReportSub": "ایپ کے حالیہ لاگز کے ساتھ ای میل — بھیجنے سے پہلے آپ اسے دیکھیں گے",
   "settingsReportSubject": "Tahfeez AI {version}: ایک مسئلہ",
-  "settingsReportPrompt": "کیا ہوا؟ (آپ نے کیا کیا، کیا توقع تھی، کیا دیکھا۔)"
+  "settingsReportPrompt": "کیا ہوا؟ (آپ نے کیا کیا، کیا توقع تھی، کیا دیکھا۔)",
+  "homeToday": "آج",
+  "homeStartReading": "سورۂ فاتحہ سے شروع کریں",
+  "bookmarksOpenQuran": "قرآن کھولیں"
 }

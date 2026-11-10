@@ -459,6 +459,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('12 minutes'), findsOneWidget);
     expect(find.text('Last time 80% → now 85%'), findsOneWidget);
+    // And as a bar: last time's mark, now's fill past it.
+    expect(find.byKey(const ValueKey('mem-summary-vs-last')), findsOneWidget);
     // Three times each, or five, or seven.
     ChoiceChip chip(int n) =>
         tester.widget(find.byKey(ValueKey('mem-repeat-$n')));
@@ -687,6 +689,42 @@ void main() {
     expect(find.text('1 of 1 done'), findsOneWidget);
     expect(find.text('0 of 2 done'), findsOneWidget);
     expect(find.byKey(const ValueKey('home-mem-continue')), findsOneWidget);
+    // Today's ring: the lesson and the recent task done, of four parts.
+    expect(find.byKey(const ValueKey('home-today-ring')), findsOneWidget);
+    expect(find.text('Today'), findsOneWidget);
+    expect(find.text('2/4'), findsOneWidget);
+    expect(find.text('2 of 4 done'), findsOneWidget);
+  });
+
+  testWidgets('Home: the ring full, with a check, once today is done', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(500, 1400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      app(
+        const TodayPlan(
+          recent: [
+            RevisionTask(ayahIds: [112001, 112002], done: true),
+          ],
+        ),
+        child: const Scaffold(
+          body: SingleChildScrollView(child: HomeMemorizationSection()),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('home-today-ring')), findsOneWidget);
+    expect(find.text("Today's memorization is done."), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(TodayRing),
+        matching: find.byIcon(Icons.check_rounded),
+      ),
+      findsOneWidget,
+    );
+    expect(find.byKey(const ValueKey('home-mem-continue')), findsNothing);
   });
 
   group('progress (M4)', () {

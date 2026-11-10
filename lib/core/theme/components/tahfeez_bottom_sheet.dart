@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import '../app_spacing.dart';
 import '../tahfeez_content_widths.dart';
+import '../tahfeez_motion.dart';
 
 /// Tracks whether a Tahfeez modal bottom sheet is currently open, plus a
 /// short cooldown just after one closes. Flutter Web's platform-view
@@ -148,8 +149,8 @@ Future<T?> showTahfeezModalBottomSheet<T>({
     // Lifted above the keyboard while a field in it is being typed into.
     builder: (context) => GlassSheet(
       child: AnimatedPadding(
-        duration: const Duration(milliseconds: 150),
-        curve: Curves.easeOut,
+        duration: TahfeezMotionDuration.fast,
+        curve: TahfeezMotionCurves.standard,
         padding: EdgeInsets.only(
           bottom: MediaQuery.viewInsetsOf(context).bottom,
         ),
@@ -230,7 +231,7 @@ Future<T?> _showSidePanel<T>({
     barrierDismissible: true,
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
     barrierColor: Colors.black12,
-    transitionDuration: const Duration(milliseconds: 250),
+    transitionDuration: TahfeezMotionDuration.medium,
     pageBuilder: (context, _, _) {
       final theme = Theme.of(context);
       return Align(

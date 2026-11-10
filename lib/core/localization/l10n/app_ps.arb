@@ -679,5 +679,8 @@
   "settingsReport": "د ستونزې راپور",
   "settingsReportSub": "د اپ د وروستیو لاګونو سره برېښنالیک — له لېږلو مخکې یې وینئ",
   "settingsReportSubject": "Tahfeez AI {version}: یوه ستونزه",
-  "settingsReportPrompt": "څه وشول؟ (څه مو وکړل، څه مو تمه درلوده، څه مو ولیدل.)"
+  "settingsReportPrompt": "څه وشول؟ (څه مو وکړل، څه مو تمه درلوده، څه مو ولیدل.)",
+  "homeToday": "نن",
+  "homeStartReading": "په فاتحه پیل وکړئ",
+  "bookmarksOpenQuran": "قرآن پرانیزئ"
 }

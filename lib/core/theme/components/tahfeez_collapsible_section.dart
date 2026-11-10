@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../app_spacing.dart';
 import '../tahfeez_icon_sizes.dart';
 import 'tahfeez_section_header.dart';
+import '../tahfeez_motion.dart';
 
 /// A section that opens and closes: its header (as [TahfeezSectionHeader],
 /// with a chevron) tapped shows or hides [child] below it — the section as
@@ -79,7 +80,7 @@ class _TahfeezCollapsibleSectionState extends State<TahfeezCollapsibleSection> {
                         if (widget.summary case final summary?
                             when summary.isNotEmpty)
                           AnimatedSize(
-                            duration: const Duration(milliseconds: 200),
+                            duration: TahfeezMotionDuration.medium,
                             alignment: AlignmentDirectional.topStart,
                             child: expanded
                                 ? const SizedBox(width: double.infinity)
@@ -113,7 +114,7 @@ class _TahfeezCollapsibleSectionState extends State<TahfeezCollapsibleSection> {
                   ),
                   AnimatedRotation(
                     turns: expanded ? 0.5 : 0,
-                    duration: const Duration(milliseconds: 200),
+                    duration: TahfeezMotionDuration.medium,
                     child: Icon(
                       Icons.expand_more_rounded,
                       color: scheme.onSurfaceVariant,
@@ -125,7 +126,7 @@ class _TahfeezCollapsibleSectionState extends State<TahfeezCollapsibleSection> {
           ),
         ),
         AnimatedSize(
-          duration: const Duration(milliseconds: 200),
+          duration: TahfeezMotionDuration.medium,
           curve: Curves.easeOutCubic,
           alignment: AlignmentDirectional.topStart,
           child: expanded

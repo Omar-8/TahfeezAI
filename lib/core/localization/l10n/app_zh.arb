@@ -679,5 +679,8 @@
   "settingsReport": "报告问题",
   "settingsReportSub": "附带应用近期日志的邮件——发送前您可以查看",
   "settingsReportSubject": "Tahfeez AI {version}：问题反馈",
-  "settingsReportPrompt": "发生了什么？（您做了什么、期望什么、看到了什么。）"
+  "settingsReportPrompt": "发生了什么？（您做了什么、期望什么、看到了什么。）",
+  "homeToday": "今天",
+  "homeStartReading": "从开端章开始",
+  "bookmarksOpenQuran": "打开古兰经"
 }

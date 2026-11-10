@@ -29,6 +29,7 @@ import '../application/recitation_session_controller.dart';
 import 'quick_start.dart' show markModeRestart, quickStartFrom;
 import 'recitation_controls.dart' show showRecitationIntro;
 import '../../../core/ui/sheet_actions.dart';
+import '../../../core/theme/tahfeez_motion.dart';
 
 /// Loop recitation's settings: how to repeat (the whole range, or each
 /// ayah), the range, and how many times — then starts reciting.
@@ -165,7 +166,7 @@ class _RecitationLoopSheetState extends ConsumerState<_RecitationLoopSheet> {
     if (surahList == null) {
       return const Padding(
         padding: EdgeInsets.all(TahfeezSpacing.xl),
-        child: Center(child: CircularProgressIndicator()),
+        child: TahfeezLoadingView(),
       );
     }
     final surahs = {for (final s in surahList) s.surah.surahNo: s};
@@ -865,8 +866,8 @@ class RecitationProgressBar extends ConsumerWidget {
     }
     final bar = TweenAnimationBuilder<double>(
       tween: Tween(end: value),
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeOut,
+      duration: TahfeezMotionDuration.slow,
+      curve: TahfeezMotionCurves.standard,
       builder: (context, v, _) => CustomPaint(
         key: ValueKey(loop == null ? 'reading-progress' : 'loop-progress'),
         size: const Size.fromHeight(height),
@@ -1042,8 +1043,8 @@ class SegmentedProgressLine extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return TweenAnimationBuilder<double>(
       tween: Tween(end: value),
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeOut,
+      duration: TahfeezMotionDuration.slow,
+      curve: TahfeezMotionCurves.standard,
       builder: (context, v, _) => CustomPaint(
         size: Size.fromHeight(height),
         painter: _ProgressPainter(

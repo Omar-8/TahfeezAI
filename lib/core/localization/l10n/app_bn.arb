@@ -679,5 +679,8 @@
   "settingsReport": "সমস্যা জানান",
   "settingsReportSub": "অ্যাপের সাম্প্রতিক লগসহ একটি ইমেল — পাঠানোর আগে দেখতে পাবেন",
   "settingsReportSubject": "Tahfeez AI {version}: একটি সমস্যা",
-  "settingsReportPrompt": "কী হয়েছে? (কী করেছিলেন, কী আশা করেছিলেন, কী দেখলেন।)"
+  "settingsReportPrompt": "কী হয়েছে? (কী করেছিলেন, কী আশা করেছিলেন, কী দেখলেন।)",
+  "homeToday": "আজ",
+  "homeStartReading": "আল-ফাতিহা দিয়ে শুরু করুন",
+  "bookmarksOpenQuran": "কুরআন খুলুন"
 }

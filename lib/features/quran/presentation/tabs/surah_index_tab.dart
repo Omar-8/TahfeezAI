@@ -11,7 +11,6 @@ import '../../../../core/theme/components/components.dart';
 import '../../../../quran/domain/models/quran_location.dart';
 import '../../../../quran/domain/models/surah_models.dart';
 import '../../../../memorization/application/memorization_today.dart';
-import '../../../memorize/presentation/memorize_screen.dart' show ScoreBar;
 import '../../../bookmarks/application/bookmarks_controller.dart';
 import '../../application/quran_index_providers.dart';
 import '../../../../quran/presentation/quran_unavailable_view.dart';
@@ -315,6 +314,18 @@ class _SurahIndexTabState extends ConsumerState<SurahIndexTab> {
                 return TahfeezEmptyView(
                   icon: Icons.search_off,
                   message: AppLocalizations.of(context).quranNoChaptersMatch,
+                  // The search and the filter both cleared: every surah.
+                  action: TextButton(
+                    key: const ValueKey('surah-search-clear'),
+                    onPressed: () {
+                      _searchController.clear();
+                      setState(() {
+                        _query = '';
+                        _filter = _RevelationFilter.all;
+                      });
+                    },
+                    child: Text(AppLocalizations.of(context).quranClear),
+                  ),
                 );
               }
               return ListView.builder(
@@ -357,14 +368,12 @@ class _SurahIndexTabState extends ConsumerState<SurahIndexTab> {
                             )
                           : null,
                       // How much of it is memorized (from memory, hide mode
-                      // on); recited with the page visible only: practised.
+                      // on), in the accent — a share done, not a score (half
+                      // memorized is progress, not a warning); recited with
+                      // the page visible only: practised.
                       progress: switch (progress[indexed.surah.surahNo]) {
                         final p? when p.memorized > 0 => p.memorization,
                         _ => null,
-                      },
-                      progressColor: switch (progress[indexed.surah.surahNo]) {
-                        final p? => ScoreBar.colorOf(p.memorization, scheme),
-                        null => null,
                       },
                       progressLabel: progress[indexed.surah.surahNo] == null
                           ? null

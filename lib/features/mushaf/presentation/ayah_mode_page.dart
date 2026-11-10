@@ -33,6 +33,8 @@ import '../application/mushaf_passages.dart';
 import 'ayah_view_parts.dart';
 import 'mushaf_ayah_sheet.dart';
 import '../application/reading_surah.dart';
+import '../../../core/theme/components/tahfeez_state_views.dart';
+import '../../../core/theme/tahfeez_motion.dart';
 
 /// Ayah mode's page: the Mushaf page's ayahs one after another — each
 /// one's Arabic word by word, then (as [AyahViewPreferences] says) its
@@ -172,7 +174,7 @@ class AyahModePageState extends ConsumerState<AyahModePage> {
       unawaited(
         _scroll.animateTo(
           target,
-          duration: const Duration(milliseconds: 300),
+          duration: TahfeezMotionDuration.slow,
           curve: Curves.easeInOut,
         ),
       );
@@ -459,7 +461,7 @@ class AyahModePageState extends ConsumerState<AyahModePage> {
       return _embedded ? SizedBox(height: 300, child: message) : message;
     }
     if (words == null) {
-      const loading = Center(child: CircularProgressIndicator());
+      const loading = TahfeezPageSkeleton(lines: 10);
       return _embedded ? const SizedBox(height: 600, child: loading) : loading;
     }
     // The recitation's place, and the reciter's ayah, kept in view on the
@@ -912,7 +914,7 @@ class _AyahBlock extends ConsumerWidget {
 
     return AnimatedContainer(
       key: ValueKey('ayah-mode-$ayahId'),
-      duration: const Duration(milliseconds: 250),
+      duration: TahfeezMotionDuration.medium,
       padding: const EdgeInsets.all(TahfeezSpacing.sm),
       decoration: BoxDecoration(
         color: focused

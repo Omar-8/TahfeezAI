@@ -88,7 +88,7 @@ class _MarkKnownSheetState extends ConsumerState<_MarkKnownSheet> {
     if (surahs == null || juz == null || memories == null) {
       return const Padding(
         padding: EdgeInsets.all(TahfeezSpacing.xl),
-        child: Center(child: CircularProgressIndicator()),
+        child: TahfeezLoadingView(),
       );
     }
     final ayahsOf = <String, List<int>>{

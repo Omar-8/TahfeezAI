@@ -15,6 +15,10 @@ import '../../../quran/domain/models/quran_location.dart';
 import '../../quran/application/quran_index_providers.dart';
 import '../application/bookmarks_controller.dart';
 
+import 'package:go_router/go_router.dart';
+
+import '../../../core/routing/app_routes.dart';
+
 /// The bookmarked ayahs and surahs, newest first: open one in the Mushaf,
 /// or remove it.
 class BookmarksScreen extends ConsumerWidget {
@@ -37,6 +41,11 @@ class BookmarksScreen extends ConsumerWidget {
           ? TahfeezEmptyView(
               icon: Icons.bookmark_border_rounded,
               message: l10n.bookmarksEmpty,
+              action: FilledButton.tonal(
+                key: const ValueKey('bookmarks-open-quran'),
+                onPressed: () => context.go(AppRoutes.quran),
+                child: Text(l10n.bookmarksOpenQuran),
+              ),
             )
           : ListView.separated(
               padding: withBarSpace(

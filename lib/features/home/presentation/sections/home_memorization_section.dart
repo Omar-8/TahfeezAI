@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -5,6 +7,8 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/localization/generated/app_localizations.dart';
 import '../../../../core/routing/app_routes.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/tahfeez_motion.dart';
+import '../../../../core/ui/motion.dart';
 import '../../../../core/theme/components/components.dart';
 import '../../../../memorization/application/memorization_today.dart';
 import '../../../../memorization/domain/models/memorization_models.dart';
@@ -136,12 +140,36 @@ class _TodayCard extends ConsumerWidget {
     String tasks(List<RevisionTask> list) =>
         l10n.homeMemTasksDone(list.where((t) => t.done).length, list.length);
 
+    // Today's parts done of all of them: the lesson (while there is one
+    // today) and each revision task.
+    final lessonToday =
+        lesson != null &&
+        !lesson.rest &&
+        !lesson.finished &&
+        (lesson.done || lesson.runs.isNotEmpty);
+    final total =
+        (lessonToday ? 1 : 0) + today.recent.length + today.old.length;
+    final done =
+        (lessonToday && lesson.done ? 1 : 0) +
+        today.recent.where((t) => t.done).length +
+        today.old.where((t) => t.done).length;
+    void continueNext() {
+      if (next == null) return;
+      reciteAyahs(context, ref, next.first, next.last, page: next.page);
+    }
+
     return TahfeezCard(
       key: const ValueKey('home-mem-today'),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: TahfeezSpacing.smPlus,
         children: [
+          if (total > 0)
+            _TodayRingRow(
+              done: done,
+              total: total,
+              onTap: next == null ? null : continueNext,
+            ),
           row(l10n.memNewLesson, switch (lesson) {
             null => l10n.homeMemNoPlan,
             NewLesson(finished: true) => l10n.memPlanFinished,
@@ -159,7 +187,7 @@ class _TodayCard extends ConsumerWidget {
           if (today.old.isNotEmpty)
             row(l10n.memOld, tasks(today.old), done: oldOpen == null),
           if (!score.isEmpty) ScorePair(score: score, dense: true),
-          if (next == null)
+          if (next == null && total == 0)
             Text(
               l10n.homeMemAllDone,
               style: theme.textTheme.bodyMedium?.copyWith(
@@ -173,13 +201,7 @@ class _TodayCard extends ConsumerWidget {
                 Expanded(
                   child: FilledButton(
                     key: const ValueKey('home-mem-continue'),
-                    onPressed: () => reciteAyahs(
-                      context,
-                      ref,
-                      next.first,
-                      next.last,
-                      page: next.page,
-                    ),
+                    onPressed: continueNext,
                     child: Text(l10n.homeMemContinue),
                   ),
                 ),
@@ -196,4 +218,154 @@ class _TodayCard extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// Today at a glance: a ring filling with the parts done (the lesson, each
+/// revision task), and what it means in words beside it. Tapping it goes
+/// on with the next part.
+class _TodayRingRow extends StatelessWidget {
+  const _TodayRingRow({required this.done, required this.total, this.onTap});
+
+  final int done, total;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final complete = done >= total;
+    final said = complete
+        ? l10n.homeMemAllDone
+        : l10n.homeMemTasksDone(done, total);
+    return Semantics(
+      key: const ValueKey('home-today-ring'),
+      button: onTap != null,
+      label: '${l10n.homeToday}: $said',
+      excludeSemantics: true,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(TahfeezRadii.md),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: TahfeezSpacing.xs),
+          child: Row(
+            spacing: TahfeezSpacing.md,
+            children: [
+              TodayRing(done: done, total: total),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  spacing: 2,
+                  children: [
+                    Text(l10n.homeToday, style: theme.textTheme.titleMedium),
+                    Text(
+                      said,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: complete
+                            ? scheme.primary
+                            : scheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// A ring filling to [done] of [total], animating to each new value, the
+/// count in its middle — a check once all is done.
+class TodayRing extends StatelessWidget {
+  const TodayRing({
+    super.key,
+    required this.done,
+    required this.total,
+    this.size = 56,
+  });
+
+  final int done, total;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final share = total == 0 ? 0.0 : (done / total).clamp(0.0, 1.0);
+    final complete = total > 0 && done >= total;
+    return SizedBox.square(
+      dimension: size,
+      child: TweenAnimationBuilder<double>(
+        tween: Tween(end: share),
+        duration: motion(context, TahfeezMotionDuration.emphasis),
+        curve: TahfeezMotionCurves.standard,
+        builder: (context, value, child) => CustomPaint(
+          painter: _RingPainter(
+            value: value,
+            track: scheme.surfaceContainerHighest,
+            fill: scheme.primary,
+          ),
+          child: child,
+        ),
+        child: Center(
+          child: AnimatedSwitcher(
+            duration: motion(context, TahfeezMotionDuration.medium),
+            switchInCurve: TahfeezMotionCurves.emphasized,
+            transitionBuilder: (child, animation) =>
+                ScaleTransition(scale: animation, child: child),
+            child: complete
+                ? Icon(
+                    Icons.check_rounded,
+                    key: const ValueKey('done'),
+                    color: scheme.primary,
+                    size: size * 0.5,
+                  )
+                : Text(
+                    '$done/$total',
+                    key: ValueKey('$done/$total'),
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      color: scheme.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _RingPainter extends CustomPainter {
+  _RingPainter({required this.value, required this.track, required this.fill});
+
+  final double value;
+  final Color track, fill;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    const stroke = 6.0;
+    final rect = (Offset.zero & size).deflate(stroke / 2);
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = stroke
+      ..strokeCap = StrokeCap.round;
+    canvas.drawArc(rect, 0, 2 * math.pi, false, paint..color = track);
+    if (value > 0) {
+      // From the top, clockwise.
+      canvas.drawArc(
+        rect,
+        -math.pi / 2,
+        2 * math.pi * value,
+        false,
+        paint..color = fill,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_RingPainter old) =>
+      old.value != value || old.track != track || old.fill != fill;
 }

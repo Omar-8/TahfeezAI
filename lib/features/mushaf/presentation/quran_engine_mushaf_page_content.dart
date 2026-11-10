@@ -16,6 +16,8 @@ import '../application/mushaf_quran_engine_providers.dart';
 import '../domain/mushaf_appearance.dart';
 import '../domain/quran_engine/quran_engine_mushaf_backend.dart';
 import 'mushaf_token_hit_rect.dart';
+import '../../../core/theme/components/tahfeez_state_views.dart';
+import '../../../core/theme/tahfeez_motion.dart';
 
 /// Renders one Mushaf page through Quran Engine
 /// (`mushafQuranEngineBackendProvider`'s Android/Web adapter, chosen by
@@ -49,7 +51,21 @@ class QuranEngineMushafPageContent extends ConsumerStatefulWidget {
 }
 
 class _QuranEngineMushafPageContentState
-    extends ConsumerState<QuranEngineMushafPageContent> {
+    extends ConsumerState<QuranEngineMushafPageContent>
+    with SingleTickerProviderStateMixin {
+  /// The page fading in as it first shows — only once its first frame is
+  /// drawn (nearly unseen), so the time that frame takes is not a jump in
+  /// the fade (owner, 2026-11-09).
+  late final AnimationController _appear = AnimationController(
+    vsync: this,
+    duration: TahfeezMotionDuration.slow,
+    value: 1,
+  );
+  late final Animation<double> _appearing = CurvedAnimation(
+    parent: _appear,
+    curve: TahfeezMotionCurves.standard,
+  );
+
   QuranEngineMushafBackend? _backend;
   QuranEngineMushafPage? _page;
   Object? _loadError;
@@ -58,9 +74,41 @@ class _QuranEngineMushafPageContentState
   /// The eye's hiding, applied once the words have faded into the paper.
   Timer? _maskLater;
 
+  /// When [_maskLater]'s fade ends.
+  DateTime _maskDue = DateTime.now();
+
+  /// Runs [apply] once the words fading out now are in the paper.
+  Timer _afterInkOut(void Function() apply) {
+    _maskDue = DateTime.now().add(MushafWordEffect.inkOutTime);
+    return Timer(MushafWordEffect.inkOutTime, apply);
+  }
+
   /// The phone's "remove animations": no word effects.
   bool get _calm =>
       mounted && (MediaQuery.maybeDisableAnimationsOf(context) ?? false);
+
+  /// Hide mode's on/off as last applied to this page, and whether the last
+  /// apply changed it — the eye hiding or showing the whole page, faded
+  /// however many words that is.
+  bool? _hideOn;
+  bool _eyeTurned = false;
+
+  /// The words hidden on the page as last applied, whichever way (a word
+  /// overlay, hide mode's exact words, or its mask); `null` before the
+  /// page's first.
+  Set<int>? _hiddenOnPage() {
+    final page = _page;
+    if (page == null) return null;
+    if (_appliedOverlay case (final hidden, _)) return hidden;
+    if (_windowed case final windowed?) return windowed;
+    return switch (_appliedMask) {
+      null => null,
+      (hidden: false, revealed: _) => const <int>{},
+      (hidden: true, :final revealed) => {
+        for (var i = revealed; i < page.wordCount; i++) i,
+      },
+    };
+  }
 
   /// The hide-mode state last applied to [_page], so changes to other
   /// pages' reveal progress don't re-apply this one.
@@ -108,9 +156,20 @@ class _QuranEngineMushafPageContentState
   /// changed on the page's words.
   void _applyMasks() {
     final before = _appliedOverlay;
+    final hiddenBefore = _hiddenOnPage();
     _applyMasksOnly();
     _applyHighlights();
-    _playWordEffects(before, _appliedOverlay);
+    final after = _appliedOverlay;
+    // An overlay just put on (the eye turning the colours on as it shows
+    // the ayahs): from the words the page showed, its marks as they come
+    // (not each played as new).
+    _playWordEffects(
+      before ??
+          (hiddenBefore == null || after == null
+              ? null
+              : (hiddenBefore, after.$2)),
+      after,
+    );
   }
 
   /// More words changed at once than a recitation changes (a page turned,
@@ -170,7 +229,12 @@ class _QuranEngineMushafPageContentState
         if (before.$2[i] != mark) (i, mark),
     ];
     if (changed.length > _maxEffects) return;
-    if (revealed.length <= _maxReveals) {
+    if (_eyeTurned) {
+      // The eye: the whole page shown — its words fading in, no glow.
+      for (final i in revealed) {
+        effects.playWordEffect(i, MushafWordEffect.inkIn);
+      }
+    } else if (revealed.length <= _maxReveals) {
       final blooming = {
         for (final (i, mark) in changed)
           if (mark == MushafWordMark.correct || mark == MushafWordMark.mistake)
@@ -366,36 +430,68 @@ class _QuranEngineMushafPageContentState
           if (overlay.marks.containsKey(refs[i])) i: overlay.marks[refs[i]]!,
       };
       final applied = _appliedOverlay;
-      // A hide still fading out: this newer state applied now instead.
+      // What the page showed before, if not through an overlay (the eye
+      // turning the colours on as it hides or shows the ayahs).
+      final shownBefore = applied?.$1 ?? _hiddenOnPage();
+      _eyeTurned =
+          overlay.followHideMode &&
+          _hideOn != null &&
+          _hideOn != hideMode.enabled;
+      _hideOn = hideMode.enabled;
+      // A hide still fading out: this newer state applied now instead —
+      // or, hiding the same words (the eye turning the colours on as it
+      // hides the ayahs), once that fade ends.
       final pending = _maskLater?.isActive ?? false;
       _maskLater?.cancel();
+      if (pending &&
+          shownBefore != null &&
+          setEquals(shownBefore, hidden) &&
+          applied == null) {
+        final left = _maskDue.difference(DateTime.now());
+        _maskLater = Timer(left.isNegative ? Duration.zero : left, () {
+          if (mounted && _page == page) page.setHiddenWords(hidden);
+        });
+        _appliedOverlay = (hidden, marks);
+        _appliedMask = null;
+        _windowed = null;
+        return;
+      }
       // Words hidden again (a word or ayah hidden back): their ink into
       // the paper first, then hidden — the reveal's fade reversed.
-      final covered = applied == null || _calm || page is! MushafWordEffectsPage
+      final covered =
+          shownBefore == null || _calm || page is! MushafWordEffectsPage
           ? const <int>{}
-          : hidden.difference(applied.$1);
-      if (covered.isNotEmpty && covered.length <= _maxReveals) {
+          : hidden.difference(shownBefore);
+      if (covered.isNotEmpty && (_eyeTurned || covered.length <= _maxReveals)) {
         final effects = page as MushafWordEffectsPage;
         for (final i in covered) {
           effects.playWordEffect(i, MushafWordEffect.inkOut);
         }
         page.setHiddenWords(hidden.difference(covered));
-        _maskLater = Timer(MushafWordEffect.inkOutTime, () {
+        _maskLater = _afterInkOut(() {
           if (mounted && _page == page) page.setHiddenWords(hidden);
         });
-      } else if (pending || applied == null || !setEquals(applied.$1, hidden)) {
+      } else if (pending ||
+          shownBefore == null ||
+          !setEquals(shownBefore, hidden)) {
         page.setHiddenWords(hidden);
       }
       _appliedOverlay = (hidden, marks);
       _appliedMask = null;
+      _windowed = null;
       return;
     }
-    if (_appliedOverlay != null) {
+    _eyeTurned = false;
+    final hideMode = ref.read(mushafHideModeProvider);
+    _hideOn = hideMode.enabled;
+    if (_appliedOverlay case (final hidden, _)) {
       page.setHiddenWords(const {});
       _appliedOverlay = null;
-      _appliedMask = null;
+      // Nothing hidden under the overlay: hiding the ayahs now fades them
+      // (as from a page shown whole).
+      _appliedMask = hidden.isEmpty ? (hidden: false, revealed: 0) : null;
     }
-    _applyMask(ref.read(mushafHideModeProvider));
+    _applyMask(hideMode);
   }
 
   void _applyMask(MushafHideModeState hideMode) {
@@ -423,7 +519,7 @@ class _QuranEngineMushafPageContentState
           effects.playWordEffect(i, MushafWordEffect.inkOut);
         }
         page.setHiddenWords(hidden.difference(covered));
-        _maskLater = Timer(MushafWordEffect.inkOutTime, () {
+        _maskLater = _afterInkOut(() {
           if (mounted && _page == page && setEquals(_windowed, hidden)) {
             page.setHiddenWords(hidden);
           }
@@ -490,7 +586,7 @@ class _QuranEngineMushafPageContentState
         for (var i = wanted.revealed; i < page.wordCount; i++) {
           effects.playWordEffect(i, MushafWordEffect.inkOut);
         }
-        _maskLater = Timer(MushafWordEffect.inkOutTime, () {
+        _maskLater = _afterInkOut(() {
           if (!mounted || _page != page || _appliedMask != wanted) return;
           page.setMemorizationMask(
             hidden: wanted.hidden,
@@ -518,7 +614,7 @@ class _QuranEngineMushafPageContentState
       for (var i = wanted.revealed; i < before.revealed; i++) {
         effects.playWordEffect(i, MushafWordEffect.inkOut);
       }
-      _maskLater = Timer(MushafWordEffect.inkOutTime, () {
+      _maskLater = _afterInkOut(() {
         if (!mounted || _page != page || _appliedMask != wanted) return;
         page.setMemorizationMask(hidden: true, revealedWords: wanted.revealed);
       });
@@ -552,6 +648,8 @@ class _QuranEngineMushafPageContentState
         _appliedMask = null;
         _appliedOverlay = null;
         _appliedHighlights = null;
+        _hideOn = null;
+        _eyeTurned = false;
       });
       _load();
     }
@@ -592,12 +690,21 @@ class _QuranEngineMushafPageContentState
       }
       final previous = _page;
       if (previous != null) backend.disposePage(previous);
+      if (previous == null && !_calm) {
+        // Drawn first barely there (1/255: painted, unseen), then faded in.
+        _appear.value = 1 / 255;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _appear.forward();
+        });
+      }
       setState(() {
         _backend = backend;
         _page = page;
         _appliedMask = null;
         _appliedOverlay = null;
         _appliedHighlights = null;
+        _hideOn = null;
+        _eyeTurned = false;
       });
       _applyMasks();
       // Fire-and-forget: never awaited, never allowed to affect the page
@@ -613,6 +720,7 @@ class _QuranEngineMushafPageContentState
 
   @override
   void dispose() {
+    _appear.dispose();
     _maskLater?.cancel();
     final backend = _backend;
     final page = _page;
@@ -652,9 +760,7 @@ class _QuranEngineMushafPageContentState
 
     final page = _page;
     if (page == null) {
-      return Center(
-        child: CircularProgressIndicator(color: widget.colors.secondaryText),
-      );
+      return TahfeezPageSkeleton(color: widget.colors.secondaryText);
     }
 
     // No outer AspectRatio/FittedBox wrapper here -- deliberately. Both
@@ -699,7 +805,7 @@ class _QuranEngineMushafPageContentState
     final mistakeHint = kIsWeb
         ? AppLocalizations.of(context).mistakeHover
         : null;
-    return page.buildView(
+    final view = page.buildView(
       ink: widget.colors.text,
       paper: widget.colors.background,
       hoverHint: !kIsWeb || onWordTap == null
@@ -732,6 +838,7 @@ class _QuranEngineMushafPageContentState
               _applyHighlights();
             },
     );
+    return FadeTransition(opacity: _appearing, child: view);
   }
 }
 

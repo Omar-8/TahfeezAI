@@ -1,25 +1,189 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../localization/generated/app_localizations.dart';
 import '../app_spacing.dart';
 import '../tahfeez_icon_sizes.dart';
+import '../tahfeez_motion.dart';
 
 /// A centered loading indicator, for a screen/section that has nothing to
-/// show yet. Kept trivial on purpose — this is the single place a future
-/// milestone would add a skeleton/shimmer treatment if Tahfeez adopts one,
-/// without touching every screen that shows a loading state today.
-class TahfeezLoadingView extends StatefulWidget {
+/// show yet: a few soft rounded bars, gently pulsing ([TahfeezSkeleton]) —
+/// content arriving, not a spinner.
+class TahfeezLoadingView extends StatelessWidget {
   const TahfeezLoadingView({super.key, this.message});
 
   final String? message;
 
   @override
-  State<TahfeezLoadingView> createState() => _TahfeezLoadingViewState();
+  Widget build(BuildContext context) {
+    return Center(
+      child: Semantics(
+        label: message,
+        liveRegion: message != null,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 360),
+          child: Padding(
+            padding: const EdgeInsets.all(TahfeezSpacing.lg),
+            child: TahfeezSkeleton(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                spacing: TahfeezSpacing.smPlus,
+                children: [
+                  const TahfeezSkeletonBar(height: 56),
+                  const TahfeezSkeletonBar(widthFactor: 0.85),
+                  const TahfeezSkeletonBar(widthFactor: 0.6),
+                  if (message != null)
+                    Text(
+                      message!,
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
-/// Loading as content arriving, not a spinner: a few soft rounded bars,
-/// gently pulsing.
-class _TahfeezLoadingViewState extends State<TahfeezLoadingView>
+/// A Mushaf page still loading: the page's lines as soft bars, pulsing —
+/// its shape before its text, instead of a spinner on an empty page.
+class TahfeezPageSkeleton extends StatefulWidget {
+  const TahfeezPageSkeleton({super.key, this.color, this.lines = 15});
+
+  /// The bars' colour (the page's own text colour, faint); the theme's
+  /// otherwise.
+  final Color? color;
+
+  /// How many lines the page has.
+  final int lines;
+
+  /// A page ready sooner shows no skeleton at all (no grey bars flashed
+  /// for a few frames before it).
+  static const delay = Duration(milliseconds: 250);
+
+  @override
+  State<TahfeezPageSkeleton> createState() => _TahfeezPageSkeletonState();
+}
+
+class _TahfeezPageSkeletonState extends State<TahfeezPageSkeleton> {
+  bool _shown = false;
+  late final Timer _later = Timer(TahfeezPageSkeleton.delay, () {
+    if (mounted) setState(() => _shown = true);
+  });
+
+  @override
+  void initState() {
+    super.initState();
+    _later;
+  }
+
+  @override
+  void dispose() {
+    _later.cancel();
+    super.dispose();
+  }
+
+  Color? get color => widget.color;
+  int get lines => widget.lines;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedOpacity(
+      opacity: _shown ? 1 : 0,
+      duration: TahfeezMotionDuration.medium,
+      child: _bars(context),
+    );
+  }
+
+  Widget _bars(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: TahfeezSpacing.lg,
+        vertical: TahfeezSpacing.xl,
+      ),
+      child: TahfeezSkeleton(
+        child: LayoutBuilder(
+          builder: (context, box) {
+            final bounded = box.hasBoundedHeight;
+            // As many lines as fit, at least 28 apart: a short box (an
+            // embedded page, a small window) gets fewer, never an overflow.
+            final count = bounded
+                ? (box.maxHeight ~/ 28).clamp(1, lines)
+                : lines;
+            Widget line(int i) => TahfeezSkeletonBar(
+              color: color,
+              height: 14,
+              // Most lines full, an ayah's end now and then.
+              widthFactor: i == count - 1 && count > 1
+                  ? 0.55
+                  : i % 5 == 3
+                  ? 0.8
+                  : 1,
+            );
+            return ClipRect(
+              child: Column(
+                // Spread over the page's height; 18 apart when unbounded.
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                mainAxisSize: bounded ? MainAxisSize.max : MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                spacing: bounded ? 0 : 18,
+                children: [for (var i = 0; i < count; i++) line(i)],
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+/// One soft rounded bar of a skeleton, [widthFactor] of the width, from
+/// the reading start.
+class TahfeezSkeletonBar extends StatelessWidget {
+  const TahfeezSkeletonBar({
+    super.key,
+    this.widthFactor = 1,
+    this.height = 16,
+    this.color,
+  });
+
+  final double widthFactor;
+  final double height;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    final base = color ?? Theme.of(context).colorScheme.onSurface;
+    return FractionallySizedBox(
+      widthFactor: widthFactor,
+      alignment: AlignmentDirectional.centerStart,
+      child: Container(
+        height: height,
+        decoration: BoxDecoration(
+          color: base.withValues(alpha: color == null ? 0.08 : 0.12),
+          borderRadius: BorderRadius.circular(TahfeezRadii.md),
+        ),
+      ),
+    );
+  }
+}
+
+/// Pulses [child] gently (still under the phone's "remove animations").
+class TahfeezSkeleton extends StatefulWidget {
+  const TahfeezSkeleton({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  State<TahfeezSkeleton> createState() => _TahfeezSkeletonState();
+}
+
+class _TahfeezSkeletonState extends State<TahfeezSkeleton>
     with SingleTickerProviderStateMixin {
   late final _pulse = AnimationController(
     vsync: this,
@@ -46,53 +210,13 @@ class _TahfeezLoadingViewState extends State<TahfeezLoadingView>
   }
 
   @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    Widget bar(double widthFactor, double height) => FractionallySizedBox(
-      widthFactor: widthFactor,
-      alignment: AlignmentDirectional.centerStart,
-      child: Container(
-        height: height,
-        decoration: BoxDecoration(
-          color: scheme.onSurface.withValues(alpha: 0.08),
-          borderRadius: BorderRadius.circular(TahfeezRadii.md),
-        ),
-      ),
-    );
-    return Center(
-      child: Semantics(
-        label: widget.message,
-        liveRegion: widget.message != null,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 360),
-          child: Padding(
-            padding: const EdgeInsets.all(TahfeezSpacing.lg),
-            child: FadeTransition(
-              opacity: Tween(begin: 0.45, end: 1.0).animate(
-                CurvedAnimation(parent: _pulse, curve: Curves.easeInOut),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                spacing: TahfeezSpacing.smPlus,
-                children: [
-                  bar(1, 56),
-                  bar(0.85, 16),
-                  bar(0.6, 16),
-                  if (widget.message != null)
-                    Text(
-                      widget.message!,
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => FadeTransition(
+    opacity: Tween(
+      begin: 0.45,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _pulse, curve: Curves.easeInOut)),
+    child: widget.child,
+  );
 }
 
 /// A centered "nothing here yet" state — e.g. an empty bookmarks list or

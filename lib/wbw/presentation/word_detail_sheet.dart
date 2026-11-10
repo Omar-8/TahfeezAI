@@ -28,6 +28,7 @@ import '../application/arabic_word_gloss.dart';
 import '../application/wbw_preferences_controller.dart';
 import '../application/wbw_word_lookup.dart';
 import 'wbw_packs_sheet.dart';
+import '../../core/theme/tahfeez_motion.dart';
 
 /// Tahfeez's own word detail sheet — the "tap a word" destination this
 /// milestone's reader-interaction requirement describes, shared by both
@@ -155,7 +156,7 @@ class _WordDetailSheetState extends ConsumerState<_WordDetailSheet> {
               }
             },
             child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 220),
+              duration: TahfeezMotionDuration.medium,
               transitionBuilder: (child, animation) {
                 // The new word in from the side it was swiped towards.
                 final incoming = child.key == ValueKey(_word);

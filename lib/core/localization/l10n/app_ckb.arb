@@ -679,5 +679,8 @@
   "settingsReport": "ڕاپۆرتکردنی کێشە",
   "settingsReportSub": "ئیمەیڵێک لەگەڵ تۆمارە نوێیەکانی ئەپ — پێش ناردن دەیبینیت",
   "settingsReportSubject": "Tahfeez AI {version}: کێشەیەک",
-  "settingsReportPrompt": "چی ڕوویدا؟ (چیت کرد، چاوەڕێی چیت دەکرد، چیت بینی.)"
+  "settingsReportPrompt": "چی ڕوویدا؟ (چیت کرد، چاوەڕێی چیت دەکرد، چیت بینی.)",
+  "homeToday": "ئەمڕۆ",
+  "homeStartReading": "بە فاتیحە دەست پێبکە",
+  "bookmarksOpenQuran": "قورئان بکەرەوە"
 }

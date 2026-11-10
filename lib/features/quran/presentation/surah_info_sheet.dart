@@ -66,7 +66,7 @@ class _SurahInfo extends ConsumerWidget {
     if (indexed == null) {
       return const Padding(
         padding: EdgeInsets.all(TahfeezSpacing.xl),
-        child: Center(child: CircularProgressIndicator()),
+        child: TahfeezLoadingView(),
       );
     }
     final surah = indexed.surah;

@@ -679,5 +679,8 @@
   "settingsReport": "Probleem melden",
   "settingsReportSub": "Een e-mail met de recente logboeken van de app — je ziet hem voor verzenden",
   "settingsReportSubject": "Tahfeez AI {version}: een probleem",
-  "settingsReportPrompt": "Wat gebeurde er? (Wat je deed, verwachtte en zag.)"
+  "settingsReportPrompt": "Wat gebeurde er? (Wat je deed, verwachtte en zag.)",
+  "homeToday": "Vandaag",
+  "homeStartReading": "Begin met Al-Fatiha",
+  "bookmarksOpenQuran": "Open de Koran"
 }

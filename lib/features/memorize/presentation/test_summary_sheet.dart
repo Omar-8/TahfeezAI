@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/localization/generated/app_localizations.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/tahfeez_motion.dart';
 import '../../../core/theme/components/components.dart';
 import '../../../memorization/application/memorization_today.dart';
 import '../../../memorization/domain/models/memorization_models.dart';
@@ -153,7 +154,7 @@ class _TestSummarySheet extends ConsumerWidget {
             children: [
               TweenAnimationBuilder<double>(
                 tween: Tween(begin: 0, end: 1),
-                duration: motion(context, const Duration(milliseconds: 800)),
+                duration: motion(context, TahfeezMotionDuration.emphasis),
                 curve: Curves.easeOutBack,
                 builder: (context, t, child) => Transform.rotate(
                   angle: (1 - t) * -0.8,
@@ -208,7 +209,6 @@ class _TestSummarySheet extends ConsumerWidget {
                   ),
                 if (!then.isEmpty)
                   _Fact(
-                    key: const ValueKey('mem-summary-vs-last'),
                     icon: nowScore.memorization >= then.memorization
                         ? Icons.trending_up_rounded
                         : Icons.trending_down_rounded,
@@ -218,6 +218,12 @@ class _TestSummarySheet extends ConsumerWidget {
                     ),
                   ),
               ],
+            ),
+          if (!then.isEmpty)
+            _VsLastBar(
+              key: const ValueKey('mem-summary-vs-last'),
+              then: then.memorization,
+              now: nowScore.memorization,
             ),
           TahfeezCard(
             child: Column(
@@ -272,6 +278,54 @@ class _TestSummarySheet extends ConsumerWidget {
             ),
           if (weak.isNotEmpty) _RepeatWeak(onRepeat: repeatWeak),
         ],
+      ),
+    );
+  }
+}
+
+/// Last time against now, as a bar: a faint mark at last time's score,
+/// and now's filling from there to where it is — past it when better,
+/// back under it when worse.
+class _VsLastBar extends StatelessWidget {
+  const _VsLastBar({super.key, required this.then, required this.now});
+
+  /// Scores, 0-1.
+  final double then, now;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final better = now >= then;
+    Widget fill(double value, Color color) => FractionallySizedBox(
+      alignment: AlignmentDirectional.centerStart,
+      widthFactor: value.clamp(0.0, 1.0),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(TahfeezRadii.pill),
+        ),
+      ),
+    );
+    return ExcludeSemantics(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(TahfeezRadii.pill),
+        child: SizedBox(
+          height: 8,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              ColoredBox(color: scheme.surfaceContainerHighest),
+              fill(then, scheme.onSurfaceVariant.withValues(alpha: 0.3)),
+              TweenAnimationBuilder<double>(
+                tween: Tween(begin: then, end: now),
+                duration: motion(context, TahfeezMotionDuration.emphasis),
+                curve: TahfeezMotionCurves.standard,
+                builder: (context, v, _) =>
+                    fill(v, better ? scheme.primary : scheme.tertiary),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

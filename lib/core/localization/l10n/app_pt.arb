@@ -679,5 +679,8 @@
   "settingsReport": "Relatar um problema",
   "settingsReportSub": "Um e-mail com os registros recentes do app — você o vê antes de enviar",
   "settingsReportSubject": "Tahfeez AI {version}: um problema",
-  "settingsReportPrompt": "O que aconteceu? (O que fez, o que esperava, o que viu.)"
+  "settingsReportPrompt": "O que aconteceu? (O que fez, o que esperava, o que viu.)",
+  "homeToday": "Hoje",
+  "homeStartReading": "Começar pela Al-Fátiha",
+  "bookmarksOpenQuran": "Abrir o Alcorão"
 }

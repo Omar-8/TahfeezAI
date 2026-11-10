@@ -1,0 +1,168 @@
+<en-US>
+• Smoother: opening a surah, the recitation bar, and the eye's fade when hiding or showing ayahs
+• iPhone: swipe from the edge to go back
+• Surah progress in one calm colour, growing as you memorize
+• Home: a Today ring for your lesson and revision
+• Hifz: turn back to a page to recite it again
+• Start with Al-Fatiha; Open the Qur'an from empty bookmarks
+</en-US>
+<ar>
+• حركة أنعم: فتح السورة، وشريط التلاوة، وتلاشي الآيات عند إخفائها أو إظهارها بالعين
+• آيفون: اسحب من الحافة للرجوع
+• تقدّم السورة بلون هادئ واحد، يزداد كلما حفظت
+• الرئيسية: حلقة «اليوم» للدرس والمراجعة
+• التحفيظ: ارجع إلى صفحة لتتلوها من جديد
+• «ابدأ بالفاتحة»، و«افتح القرآن» حين لا توجد علامات
+</ar>
+<bn-BD>
+• আরও মসৃণ: সূরা খোলা, তিলাওয়াত বার, এবং চোখ দিয়ে আয়াত লুকানো বা দেখানোর সময় মিলিয়ে যাওয়া
+• আইফোন: ফিরে যেতে কিনারা থেকে সোয়াইপ করুন
+• সূরার অগ্রগতি একটি শান্ত রঙে, মুখস্থ করার সাথে বাড়ে
+• হোম: পাঠ ও পুনরাবৃত্তির জন্য "আজ" রিং
+• হিফজ: আবার তিলাওয়াত করতে আগের পৃষ্ঠায় ফিরুন
+• আল-ফাতিহা দিয়ে শুরু করুন; বুকমার্ক খালি হলে কুরআন খুলুন
+</bn-BD>
+<da-DK>
+• Mere glidende: åbning af en sura, recitationslinjen og øjets udtoning, når ayat skjules eller vises
+• iPhone: stryg fra kanten for at gå tilbage
+• Surafremskridt i én rolig farve, der vokser, mens du lærer udenad
+• Hjem: en I dag-ring for din lektion og repetition
+• Hifz: gå tilbage til en side for at recitere den igen
+• Start med Al-Fatiha; Åbn Koranen fra tomme bogmærker
+</da-DK>
+<de-DE>
+• Flüssiger: Öffnen einer Sure, die Rezitationsleiste und das Ausblenden der Ayat mit dem Auge
+• iPhone: vom Rand wischen, um zurückzugehen
+• Suren-Fortschritt in einer ruhigen Farbe, der mit dem Auswendiglernen wächst
+• Start: ein Heute-Ring für Lektion und Wiederholung
+• Hifz: zu einer Seite zurückblättern, um sie erneut zu rezitieren
+• Mit Al-Fatiha beginnen; Koran öffnen bei leeren Lesezeichen
+</de-DE>
+<el-GR>
+• Πιο ομαλά: άνοιγμα σούρας, η μπάρα απαγγελίας και το σβήσιμο των αγιάτ με το μάτι
+• iPhone: σύρετε από την άκρη για επιστροφή
+• Πρόοδος σούρας σε ένα ήρεμο χρώμα, που μεγαλώνει καθώς απομνημονεύετε
+• Αρχική: δακτύλιος «Σήμερα» για μάθημα και επανάληψη
+• Χιφζ: γυρίστε πίσω σε μια σελίδα για να την απαγγείλετε ξανά
+• Ξεκινήστε με την Αλ-Φάτιχα· Άνοιγμα Κορανίου από κενούς σελιδοδείκτες
+</el-GR>
+<es-ES>
+• Más fluido: abrir una sura, la barra de recitación y el desvanecido del ojo al ocultar o mostrar aleyas
+• iPhone: desliza desde el borde para volver
+• Progreso de la sura en un solo color tranquilo, que crece al memorizar
+• Inicio: un anillo de Hoy para tu lección y repaso
+• Hifz: vuelve a una página para recitarla de nuevo
+• Empieza con Al-Fatiha; Abre el Corán desde marcadores vacíos
+</es-ES>
+<fa>
+• روان‌تر: باز کردن سوره، نوار تلاوت، و محو شدن آیات هنگام پنهان یا نمایان کردن با چشم
+• آیفون: برای بازگشت از لبه بکشید
+• پیشرفت سوره با یک رنگ آرام که با حفظ کردن بیشتر می‌شود
+• خانه: حلقهٔ «امروز» برای درس و مرور
+• حفظ: به صفحه‌ای برگردید تا دوباره تلاوتش کنید
+• با الفاتحه شروع کنید؛ باز کردن قرآن وقتی نشانکی نیست
+</fa>
+<fr-FR>
+• Plus fluide : ouverture d'une sourate, la barre de récitation et le fondu de l'œil pour masquer ou afficher les versets
+• iPhone : balayez depuis le bord pour revenir
+• Progression de la sourate d'une seule couleur apaisée, qui grandit à mesure que vous mémorisez
+• Accueil : un anneau Aujourd'hui pour la leçon et la révision
+• Hifz : revenez à une page pour la réciter à nouveau
+• Commencer par Al-Fatiha ; Ouvrir le Coran depuis des signets vides
+</fr-FR>
+<id>
+• Lebih halus: membuka surah, bilah tilawah, dan efek memudar mata saat menyembunyikan atau menampilkan ayat
+• iPhone: geser dari tepi untuk kembali
+• Kemajuan surah dalam satu warna tenang, bertambah saat Anda menghafal
+• Beranda: cincin Hari Ini untuk pelajaran dan murajaah
+• Hifz: kembali ke halaman untuk membacanya lagi
+• Mulai dengan Al-Fatihah; Buka Al-Qur'an saat penanda kosong
+</id>
+<ja-JP>
+• よりなめらかに：スーラを開く動き、朗誦バー、目のボタンでアーヤを隠す・表示するときのフェード
+• iPhone：端からスワイプして戻る
+• スーラの進捗は落ち着いた一色で、暗記に合わせて伸びます
+• ホーム：レッスンと復習の「今日」リング
+• ヒフズ：ページに戻ってもう一度朗誦
+• アル・ファーティハから始める；ブックマークが空のときはクルアーンを開く
+</ja-JP>
+<kk>
+• Жұмсағырақ: сүрені ашу, оқу жолағы және көзбен аяттарды жасыру не көрсету кезіндегі өшу
+• iPhone: артқа қайту үшін шетінен сырғытыңыз
+• Сүре үлгерімі бір тыныш түсте, жаттаған сайын өседі
+• Басты бет: сабақ пен қайталауға арналған «Бүгін» шеңбері
+• Хифз: қайта оқу үшін бетке оралыңыз
+• Әл-Фатихадан бастаңыз; бетбелгілер бос болса, Құранды ашыңыз
+</kk>
+<ko-KR>
+• 더 부드럽게: 수라 열기, 낭송 바, 눈 버튼으로 아야를 숨기거나 보일 때의 페이드
+• iPhone: 가장자리에서 스와이프하여 뒤로 가기
+• 수라 진행률을 차분한 한 가지 색으로, 암기할수록 늘어납니다
+• 홈: 수업과 복습을 위한 '오늘' 링
+• 히프즈: 페이지로 돌아가 다시 낭송하기
+• 알파티하로 시작하기; 북마크가 없을 때 꾸란 열기
+</ko-KR>
+<ms>
+• Lebih lancar: membuka surah, bar bacaan, dan kesan pudar mata semasa menyembunyikan atau menunjukkan ayat
+• iPhone: leret dari tepi untuk kembali
+• Kemajuan surah dalam satu warna tenang, bertambah semasa anda menghafal
+• Laman utama: gelang Hari Ini untuk pelajaran dan ulangkaji
+• Hifz: kembali ke halaman untuk membacanya semula
+• Mula dengan Al-Fatihah; Buka al-Quran apabila penanda buku kosong
+</ms>
+<nl-NL>
+• Vloeiender: een soera openen, de recitatiebalk en het vervagen van ayat met het oog
+• iPhone: veeg vanaf de rand om terug te gaan
+• Soera-voortgang in één rustige kleur, die groeit terwijl je memoriseert
+• Start: een Vandaag-ring voor je les en herhaling
+• Hifz: ga terug naar een pagina om die opnieuw te reciteren
+• Begin met Al-Fatiha; Open de Koran vanuit lege bladwijzers
+</nl-NL>
+<pt-BR>
+• Mais suave: abrir uma surata, a barra de recitação e o esmaecer do olho ao ocultar ou mostrar versículos
+• iPhone: deslize da borda para voltar
+• Progresso da surata em uma só cor tranquila, que cresce conforme você memoriza
+• Início: um anel Hoje para sua lição e revisão
+• Hifz: volte a uma página para recitá-la de novo
+• Comece com Al-Fatiha; Abra o Alcorão quando não houver favoritos
+</pt-BR>
+<ru-RU>
+• Плавнее: открытие суры, панель чтения и затухание аятов при скрытии или показе глазом
+• iPhone: смахните от края, чтобы вернуться
+• Прогресс суры в одном спокойном цвете, растёт по мере заучивания
+• Главная: кольцо «Сегодня» для урока и повторения
+• Хифз: вернитесь к странице, чтобы прочитать её снова
+• Начните с аль-Фатихи; откройте Коран, если закладок нет
+</ru-RU>
+<sw>
+• Laini zaidi: kufungua sura, upau wa kisomo, na kufifia kwa jicho unapoficha au kuonyesha aya
+• iPhone: telezesha kutoka ukingoni kurudi nyuma
+• Maendeleo ya sura kwa rangi moja tulivu, yanayokua unapohifadhi
+• Nyumbani: pete ya Leo kwa somo na marudio
+• Hifdh: rudi kwenye ukurasa kuusoma tena
+• Anza na Al-Fatiha; Fungua Qur'ani alamisho zikiwa tupu
+</sw>
+<tr-TR>
+• Daha akıcı: sure açma, tilavet çubuğu ve göz ile ayetleri gizleyip gösterirken solma
+• iPhone: geri dönmek için kenardan kaydırın
+• Sure ilerlemesi tek ve sakin bir renkte, ezberledikçe büyür
+• Ana sayfa: ders ve tekrar için Bugün halkası
+• Hıfz: tekrar okumak için bir sayfaya geri dönün
+• Fâtiha ile başlayın; yer imleri boşken Kur'an'ı açın
+</tr-TR>
+<ur>
+• زیادہ ہموار: سورت کھولنا، تلاوت بار، اور آنکھ سے آیات چھپانے یا دکھانے پر مدھم ہونا
+• آئی فون: واپس جانے کے لیے کنارے سے سوائپ کریں
+• سورت کی پیش رفت ایک پرسکون رنگ میں، جو حفظ کے ساتھ بڑھتی ہے
+• ہوم: سبق اور دہرائی کے لیے "آج" کا حلقہ
+• حفظ: دوبارہ تلاوت کے لیے صفحے پر واپس جائیں
+• الفاتحہ سے شروع کریں؛ بک مارکس خالی ہوں تو قرآن کھولیں
+</ur>
+<zh-CN>
+• 更流畅：打开章节、诵读栏，以及用眼睛按钮隐藏或显示经文时的淡入淡出
+• iPhone：从边缘滑动即可返回
+• 章节进度采用统一的柔和颜色，随背诵而增长
+• 首页：用于课程和复习的"今天"进度环
+• 背诵：翻回某页即可重新诵读
+• 从开端章开始；书签为空时打开古兰经
+</zh-CN>

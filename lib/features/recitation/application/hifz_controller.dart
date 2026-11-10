@@ -1223,6 +1223,7 @@ class HifzController extends Notifier<HifzState> {
     _turnedFor = null;
     _seenPages = _visiblePages();
     _relocating = false;
+    _hiddenAgain = null;
     final chosen = state.range;
     if (chosen != null) {
       final start = corpus.verseStartPosition(chosen.from);
@@ -1298,6 +1299,30 @@ class HifzController extends Notifier<HifzState> {
     _judge = null;
     _locating = true;
     state = HifzState(range: state.range, running: true);
+    _showLocatingCursor(pageStart, corpus.positionOf(lastRange.last));
+  }
+
+  /// Still finding the reciter on the page shown (it is visible): the
+  /// cursor on its first word all the same — where a recitation of it
+  /// begins — until they are found, wherever on it (owner, 2026-11-09).
+  void _showLocatingCursor(int from, int? to) {
+    final corpus = _corpus;
+    if (corpus == null || to == null || _judge != null || !_locating) return;
+    final first = corpus.words[from].ref;
+    final settings = ref.read(hifzSettingsProvider);
+    ref
+        .read(mushafWordOverlayProvider.notifier)
+        .set(
+          MushafWordOverlay(
+            first: first,
+            last: corpus.words[to].ref,
+            marks: {
+              if (settings.highlightCurrent) first: MushafWordMark.current,
+            },
+            hideUnrevealed: false,
+            inks: settings.inks,
+          ),
+        );
   }
 
   void _startJudge(int start, int end, {int preRevealed = 0}) {
@@ -1355,6 +1380,12 @@ class HifzController extends Notifier<HifzState> {
   /// test continues (after turning pages by hand).
   bool _relocating = false;
 
+  /// A page recited to its end and turned back to, hidden again to be
+  /// recited once more: its words' verdicts from before. Recited again from
+  /// further down than its first word, the words above get theirs back and
+  /// the test goes on from there (as a test started mid-page does).
+  ({int from, int to, Map<int, HifzVerdict> marked})? _hiddenAgain;
+
   /// When the visible pages change and the expected word is not on them —
   /// the reciter turned the page themselves, rather than the test following
   /// them — the test moves to the new pages: with hide mode on, to their
@@ -1372,6 +1403,7 @@ class HifzController extends Notifier<HifzState> {
       final to = corpus?.positionOf(ranges[pages.$2]?.last ?? _noWord);
       if (from != null && to != null) {
         _matcher?.setFocus(from, to, only: true);
+        _showLocatingCursor(from, to);
       }
       return;
     }
@@ -1388,7 +1420,16 @@ class HifzController extends Notifier<HifzState> {
     if (from == null || to == null) return;
     // Lost and found again only on the pages on screen.
     _matcher?.setFocus(from, to, only: true);
-    if (judge.current >= from && judge.current <= to + 1) return;
+    // Still on these pages — or just past their end, the page not yet
+    // turned on. Not when turned back to by hand, though: the word after
+    // the page then is where the reciter left it (Al-Baqarah's first, once
+    // Al-Fatiha was done), and going back to the page is to recite it again
+    // (owner, 2026-11-09).
+    final turnedBack = before != null && pages.$2 < before.$1;
+    if (judge.current >= from &&
+        (judge.current <= to || (judge.current == to + 1 && !turnedBack))) {
+      return;
+    }
     // The same pages laid out anew — a two-page spread narrowed to one
     // (Mushaf mode to Ayah mode mid-recitation): not a page turned by the
     // reciter. Their page is shown again; the test stays where it is.
@@ -1400,6 +1441,23 @@ class HifzController extends Notifier<HifzState> {
       return;
     }
     _turnedFor = null;
+    // Turned back to a page recited to its end, the test past it: to
+    // recite it again — its words hidden again, expected from its first
+    // (owner, 2026-11-09). (Otherwise the test would pass over them,
+    // recited, back to where it was.) A page left before its end (turned
+    // on by hand mid-page) keeps its words and colours: the test goes on
+    // from its first word not yet recited.
+    _hiddenAgain = null;
+    if (turnedBack &&
+        judge.current > to &&
+        judge.revealed.containsAll([for (var q = from; q <= to; q++) q])) {
+      _hiddenAgain = (
+        from: from,
+        to: to,
+        marked: {for (var q = from; q <= to; q++) q: ?judge.marked[q]},
+      );
+      judge.hideRange(from, to);
+    }
     final hideOn = ref.read(mushafHideModeProvider).enabled;
     if (hideOn) {
       judge.jumpTo(from);
@@ -1407,6 +1465,11 @@ class HifzController extends Notifier<HifzState> {
         ..start(anchor: judge.expected, trustAnchor: true);
       _publish(const []);
     } else {
+      // The cursor on the page's next word to recite at once (its first,
+      // or after what was recited on it already), until the reciter is
+      // found on it — wherever on it (owner, 2026-11-09).
+      judge.jumpTo(from);
+      _publish(const []);
       _relocating = true;
       _matcher = _newMatcher()
         ..start(anchor: from)
@@ -1554,6 +1617,24 @@ class HifzController extends Notifier<HifzState> {
         _judge = fresh;
         _judgeAll(out);
         return;
+      }
+    }
+    final again = _hiddenAgain;
+    if (again != null) {
+      final heard = out.whereType<WordHeard>().where((h) => h.ref != null);
+      final at = heard.isEmpty
+          ? null
+          : judge.corpus.positionOf(heard.first.ref!);
+      if (at != null) {
+        _hiddenAgain = null;
+        if (at > judge.expected && at <= again.to) {
+          // Begun further down: the words above as they were.
+          for (var q = again.from; q < at; q++) {
+            judge.revealed.add(q);
+            if (again.marked[q] case final v?) judge.marked[q] = v;
+          }
+          judge.jumpTo(at);
+        }
       }
     }
     if (_relocating) {

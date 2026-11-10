@@ -679,5 +679,8 @@
   "settingsReport": "Muammo haqida xabar berish",
   "settingsReportSub": "Ilovaning so‘nggi jurnallari bilan xat — yuborishdan oldin ko‘rasiz",
   "settingsReportSubject": "Tahfeez AI {version}: muammo",
-  "settingsReportPrompt": "Nima bo‘ldi? (Nima qildingiz, nimani kutdingiz, nimani ko‘rdingiz.)"
+  "settingsReportPrompt": "Nima bo‘ldi? (Nima qildingiz, nimani kutdingiz, nimani ko‘rdingiz.)",
+  "homeToday": "Bugun",
+  "homeStartReading": "Al-Fotihadan boshlash",
+  "bookmarksOpenQuran": "Qur'onni ochish"
 }

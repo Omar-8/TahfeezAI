@@ -724,6 +724,170 @@ void main() {
     expect(hifz().expected!.ayahId, 2257);
   });
 
+  for (final hideMode in [true, false]) {
+    test('the page done, turned on, then turned back by hand: recited again '
+        'from its start (Al-Fatiha once more, not Al-Baqarah) — hide mode '
+        '${hideMode ? 'on' : 'off'}', () async {
+      await setUpHifz(
+        from: (chapterNo: 2, verseNo: 253),
+        to: (chapterNo: 2, verseNo: 257),
+        hideMode: hideMode,
+      );
+      await recite([for (var v = 253; v <= 256; v++) spoken(2, v)].join(' '));
+      await Future<void>.delayed(const Duration(milliseconds: 600));
+      expect(container.read(mushafPageTurnRequestsProvider)?.direction, 1);
+      expect(hifz().expected!.ayahId, 2257);
+      // Turned on to page 43, where 2:257 is…
+      container.read(mushafPageWordRangesProvider.notifier).report(43, (
+        first: corpus.words[page42Last + 1].ref,
+        last: corpus
+            .words[corpus.verseEndPosition((chapterNo: 2, verseNo: 257))!]
+            .ref,
+      ));
+      container
+          .read(mushafRecitationTargetProvider.notifier)
+          .show('screen', const QuranLocation.page(1, 43));
+      await pumpEventQueue();
+      expect(hifz().expected!.ayahId, 2257, reason: 'still the next word');
+      // …and back to page 42 by hand, to recite it again.
+      container
+          .read(mushafRecitationTargetProvider.notifier)
+          .show('screen', const QuranLocation.page(1, 42));
+      await pumpEventQueue();
+      if (hideMode) {
+        expect(hifz().expected, corpus.words[page42First].ref);
+      }
+      await recite(spoken(2, 253));
+      expect(hifz().expected!.ayahId, 2254, reason: 'recited again');
+    });
+  }
+
+  for (final hideMode in [true, false]) {
+    test('every page turned to shows the cursor at once on its next word to '
+        'recite — hide mode ${hideMode ? 'on' : 'off'}', () async {
+      await setUpHifz(hideMode: hideMode);
+      WordRef? cursor() => container
+          .read(mushafWordOverlayProvider)
+          ?.marks
+          .entries
+          .where((e) => e.value == MushafWordMark.current)
+          .firstOrNull
+          ?.key;
+      await recite('${spoken(2, 253)} ${spoken(2, 254)}');
+      await pumpEventQueue();
+      expect(cursor()?.ayahId, 2255);
+      // On to page 43 mid-page, nothing recited there: its first word.
+      final page43First = corpus.words[page42Last + 1].ref;
+      container.read(mushafPageWordRangesProvider.notifier).report(43, (
+        first: page43First,
+        last: corpus
+            .words[corpus.verseEndPosition((chapterNo: 2, verseNo: 257))!]
+            .ref,
+      ));
+      container
+          .read(mushafRecitationTargetProvider.notifier)
+          .show('screen', const QuranLocation.page(1, 43));
+      await pumpEventQueue();
+      expect(cursor(), page43First);
+      // Back to page 42, half recited: its next word to recite.
+      container
+          .read(mushafRecitationTargetProvider.notifier)
+          .show('screen', const QuranLocation.page(1, 42));
+      await pumpEventQueue();
+      expect(cursor()?.ayahId, 2255);
+      expect(cursor()?.wordIndex, 0);
+    });
+  }
+
+  test('the page visible, nothing recited yet: the cursor on the page\'s '
+      'first word, and on the next page\'s once turned to', () async {
+    await setUpHifz(hideMode: false);
+    WordRef? cursor() => container
+        .read(mushafWordOverlayProvider)
+        ?.marks
+        .entries
+        .where((e) => e.value == MushafWordMark.current)
+        .firstOrNull
+        ?.key;
+    expect(cursor(), corpus.words[page42First].ref);
+    final page43First = corpus.words[page42Last + 1].ref;
+    container.read(mushafPageWordRangesProvider.notifier).report(43, (
+      first: page43First,
+      last: corpus
+          .words[corpus.verseEndPosition((chapterNo: 2, verseNo: 257))!]
+          .ref,
+    ));
+    container
+        .read(mushafRecitationTargetProvider.notifier)
+        .show('screen', const QuranLocation.page(1, 43));
+    await pumpEventQueue();
+    expect(cursor(), page43First);
+    // Found reciting 2:257: the test from there.
+    await recite(spoken(2, 257).split(' ').take(4).join(' '));
+    expect(hifz().expected!.ayahId, 2257);
+    expect(cursor()?.ayahId, 2257);
+  });
+
+  test('a page done, turned back to, recited again from further down: '
+      'followed there', () async {
+    await setUpHifz();
+    await recite([for (var v = 253; v <= 256; v++) spoken(2, v)].join(' '));
+    await Future<void>.delayed(const Duration(milliseconds: 600));
+    container.read(mushafPageWordRangesProvider.notifier).report(43, (
+      first: corpus.words[page42Last + 1].ref,
+      last: corpus
+          .words[corpus.verseEndPosition((chapterNo: 2, verseNo: 257))!]
+          .ref,
+    ));
+    container
+        .read(mushafRecitationTargetProvider.notifier)
+        .show('screen', const QuranLocation.page(1, 43));
+    await pumpEventQueue();
+    container
+        .read(mushafRecitationTargetProvider.notifier)
+        .show('screen', const QuranLocation.page(1, 42));
+    await pumpEventQueue();
+    await recite('${spoken(2, 255)} ${spoken(2, 256)}');
+    expect(hifz().expected!.ayahId, 2257, reason: 'followed from 2:255');
+    await session().stop();
+    await pumpEventQueue();
+    expect(recorded, isNotEmpty);
+  });
+
+  test('turned on by hand mid-page and back: the page keeps its colours, '
+      'the test goes on where it was, and its results are recorded', () async {
+    await setUpHifz();
+    await recite('${spoken(2, 253)} ${spoken(2, 254)}');
+    expect(hifz().expected!.ayahId, 2255);
+    final overlayBefore = container.read(mushafWordOverlayProvider);
+    // On to page 43 by hand, before the page's end…
+    container.read(mushafPageWordRangesProvider.notifier).report(43, (
+      first: corpus.words[page42Last + 1].ref,
+      last: corpus
+          .words[corpus.verseEndPosition((chapterNo: 2, verseNo: 257))!]
+          .ref,
+    ));
+    container
+        .read(mushafRecitationTargetProvider.notifier)
+        .show('screen', const QuranLocation.page(1, 43));
+    await pumpEventQueue();
+    // …and back.
+    container
+        .read(mushafRecitationTargetProvider.notifier)
+        .show('screen', const QuranLocation.page(1, 42));
+    await pumpEventQueue();
+    expect(hifz().expected!.ayahId, 2255, reason: 'where it was');
+    expect(
+      container.read(mushafWordOverlayProvider),
+      overlayBefore,
+      reason: 'the words recited keep their colours',
+    );
+    await recite([for (var v = 253; v <= 256; v++) spoken(2, v)].join(' '));
+    await session().stop();
+    await pumpEventQueue();
+    expect([for (final a in recorded) a.ayahId], [2253, 2254, 2255, 2256]);
+  });
+
   test('a two-page spread narrowed to one page (Mushaf mode to Ayah mode '
       'mid-recitation): the test stays, its page shown again', () async {
     await setUpHifz();

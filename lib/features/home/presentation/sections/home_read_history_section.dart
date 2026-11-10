@@ -7,6 +7,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/components/components.dart';
 import '../../application/home_providers.dart';
 import '../home_location_label.dart';
+import '../../../../quran/domain/models/quran_location.dart';
 
 /// Home's "Continue Reading": the last place read, one tap from being
 /// opened again, and where the last recitation session started. An empty
@@ -34,6 +35,7 @@ class HomeReadHistorySection extends ConsumerWidget {
             child: TahfeezEmptyView(
               icon: Icons.history,
               message: l10n.homeReadHistoryEmpty,
+              action: const _StartReading(),
             ),
           ),
         ),
@@ -59,6 +61,7 @@ class _ContinueReadingCard extends StatelessWidget {
         child: TahfeezEmptyView(
           icon: Icons.history,
           message: l10n.homeReadHistoryEmpty,
+          action: const _StartReading(),
         ),
       );
     }
@@ -145,4 +148,16 @@ class _ContinueReadingCard extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Nothing read yet: one step to start, at the Qur'an's opening.
+class _StartReading extends StatelessWidget {
+  const _StartReading();
+
+  @override
+  Widget build(BuildContext context) => FilledButton.tonal(
+    key: const ValueKey('home-start-reading'),
+    onPressed: () => goToQuranLocation(context, const QuranLocation.surah(1)),
+    child: Text(AppLocalizations.of(context).homeStartReading),
+  );
 }

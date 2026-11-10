@@ -334,7 +334,7 @@ class _ListenSheetState extends ConsumerState<_ListenSheet> {
     if (surahs == null) {
       return const Padding(
         padding: EdgeInsets.all(TahfeezSpacing.xl),
-        child: Center(child: CircularProgressIndicator()),
+        child: TahfeezLoadingView(),
       );
     }
     _defaults();

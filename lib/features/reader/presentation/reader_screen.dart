@@ -7,7 +7,6 @@ import '../../mushaf/presentation/mushaf_zen_mode.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/localization/generated/app_localizations.dart';
 import '../../../quran/application/quran_script_code.dart';
 import '../../../quran/application/recent_quran_location.dart';
 import '../../../quran/domain/models/quran_location.dart';
@@ -24,6 +23,7 @@ import '../../recitation/presentation/recitation_controls.dart';
 import '../../mushaf/presentation/reader_mode_toggle.dart';
 import '../../mushaf/application/reading_surah.dart';
 import '../../../quran/presentation/quran_unavailable_view.dart';
+import '../../../core/theme/components/tahfeez_state_views.dart';
 
 /// A Quran location (a surah, an ayah, an ayah range, a juz or a hizb)
 /// opened in the Mushaf at the page its first ayah is on. Opened at an
@@ -182,11 +182,9 @@ class _MushafModeScaffold extends ConsumerWidget {
               backgroundColor: colors.background,
               foregroundColor: colors.text,
               titleSpacing: 0,
+              // (No title until its page is known: then the surah's name.)
               title: mushafId == null || pageNumber == null
-                  ? Text(
-                      AppLocalizations.of(context).readerMushaf,
-                      overflow: TextOverflow.ellipsis,
-                    )
+                  ? null
                   : MushafPageTitle(
                       mushafId: mushafId!,
                       pageNumber: pageNumber!,
@@ -215,20 +213,15 @@ class _MushafModeScaffold extends ConsumerWidget {
           child: unavailable && (mushafId == null || pageNumber == null)
               ? _unavailable(context, colors.secondaryText)
               : mushafId == null || pageNumber == null
-              ? Center(
-                  child:
-                      mushafAsync?.when(
-                        data: (_) => CircularProgressIndicator(
-                          color: colors.secondaryText,
-                        ),
-                        loading: () => CircularProgressIndicator(
-                          color: colors.secondaryText,
-                        ),
-                        error: (_, _) =>
-                            _unavailable(context, colors.secondaryText),
-                      ) ??
-                      CircularProgressIndicator(color: colors.secondaryText),
-                )
+              ? mushafAsync?.when(
+                      data: (_) =>
+                          TahfeezPageSkeleton(color: colors.secondaryText),
+                      loading: () =>
+                          TahfeezPageSkeleton(color: colors.secondaryText),
+                      error: (_, _) =>
+                          _unavailable(context, colors.secondaryText),
+                    ) ??
+                    TahfeezPageSkeleton(color: colors.secondaryText)
               : mushafAsync!.when(
                   data: (mushaf) {
                     if (mushaf == null) {
@@ -242,11 +235,8 @@ class _MushafModeScaffold extends ConsumerWidget {
                       onPageChanged: onPageChanged,
                     );
                   },
-                  loading: () => Center(
-                    child: CircularProgressIndicator(
-                      color: colors.secondaryText,
-                    ),
-                  ),
+                  loading: () =>
+                      TahfeezPageSkeleton(color: colors.secondaryText),
                   error: (_, _) => _unavailable(context, colors.secondaryText),
                 ),
         ),

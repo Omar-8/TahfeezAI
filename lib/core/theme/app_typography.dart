@@ -69,6 +69,10 @@ TextTheme buildTahfeezTextTheme(
       fontFamilyFallback: [arabic.family],
       fontSize: fontSize,
       fontWeight: fontWeight,
+      // Every digit the same width: counts, percentages and times keep
+      // their place as they change (a streak, a score counting up, the
+      // loop's times left) instead of jittering.
+      fontFeatures: const [FontFeature.tabularFigures()],
     );
   }
 

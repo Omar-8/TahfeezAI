@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../ui/motion.dart';
 import '../app_spacing.dart';
+import '../tahfeez_motion.dart';
 import '../tahfeez_icon_sizes.dart';
 import 'tahfeez_card.dart';
 import 'tahfeez_geometric_pattern.dart';
@@ -140,29 +142,34 @@ class TahfeezQuranSectionCard extends StatelessWidget {
                 ),
               if (art != null)
                 const SizedBox.shrink()
-              else if (progress case final p?)
-                SizedBox(
+              else if (progress case final target?)
+                _Growing(
                   key: const ValueKey('section-card-progress'),
-                  width: 48,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    spacing: TahfeezSpacing.xs,
-                    children: [
-                      Text(
-                        '${(p.clamp(0.0, 1.0) * 100).round()}%',
-                        style: Theme.of(context).textTheme.labelLarge
-                            ?.copyWith(color: progressColor ?? accent),
-                      ),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(TahfeezRadii.pill),
-                        child: LinearProgressIndicator(
-                          value: p.clamp(0.0, 1.0),
-                          minHeight: 4,
-                          color: progressColor ?? accent,
-                          backgroundColor: scheme.surfaceContainerHighest,
+                  value: target,
+                  builder: (p) => SizedBox(
+                    width: 48,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      spacing: TahfeezSpacing.xs,
+                      children: [
+                        Text(
+                          '${(p * 100).round()}%',
+                          style: Theme.of(context).textTheme.labelLarge
+                              ?.copyWith(color: progressColor ?? accent),
                         ),
-                      ),
-                    ],
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(
+                            TahfeezRadii.pill,
+                          ),
+                          child: LinearProgressIndicator(
+                            value: p,
+                            minHeight: 4,
+                            color: progressColor ?? accent,
+                            backgroundColor: scheme.surfaceContainerHighest,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 )
               else if (progressLabel case final label?)
@@ -199,36 +206,39 @@ class TahfeezQuranSectionCard extends StatelessWidget {
           if (art != null && (progress != null || progressLabel != null))
             Padding(
               padding: const EdgeInsets.only(top: TahfeezSpacing.smPlus),
-              child: Row(
+              child: _Growing(
                 key: const ValueKey('section-card-progress'),
-                spacing: TahfeezSpacing.sm,
-                children: [
-                  Expanded(
-                    child: progress == null
-                        ? const SizedBox.shrink()
-                        : ClipRRect(
-                            borderRadius: BorderRadius.circular(
-                              TahfeezRadii.pill,
+                value: progress ?? 0,
+                builder: (p) => Row(
+                  spacing: TahfeezSpacing.sm,
+                  children: [
+                    Expanded(
+                      child: progress == null
+                          ? const SizedBox.shrink()
+                          : ClipRRect(
+                              borderRadius: BorderRadius.circular(
+                                TahfeezRadii.pill,
+                              ),
+                              child: LinearProgressIndicator(
+                                value: p,
+                                minHeight: 3,
+                                color: progressColor ?? accent,
+                                backgroundColor: scheme.surfaceContainerHighest,
+                              ),
                             ),
-                            child: LinearProgressIndicator(
-                              value: progress!.clamp(0.0, 1.0),
-                              minHeight: 3,
-                              color: progressColor ?? accent,
-                              backgroundColor: scheme.surfaceContainerHighest,
-                            ),
-                          ),
-                  ),
-                  Text(
-                    progress != null
-                        ? '${(progress!.clamp(0.0, 1.0) * 100).round()}%'
-                        : progressLabel!,
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: progress != null
-                          ? progressColor ?? accent
-                          : scheme.onSurfaceVariant,
                     ),
-                  ),
-                ],
+                    Text(
+                      progress != null
+                          ? '${(p * 100).round()}%'
+                          : progressLabel!,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: progress != null
+                            ? progressColor ?? accent
+                            : scheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
         ],
@@ -251,6 +261,27 @@ class TahfeezQuranSectionCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(TahfeezSpacing.md),
         child: content,
       ),
+    );
+  }
+}
+
+/// [value] (clamped to 0–1) as first shown; changed (an ayah memorized
+/// meanwhile), grown — or shrunk — to the new value rather than jumped to.
+class _Growing extends StatelessWidget {
+  const _Growing({super.key, required this.value, required this.builder});
+
+  final double value;
+  final Widget Function(double value) builder;
+
+  @override
+  Widget build(BuildContext context) {
+    final target = value.clamp(0.0, 1.0);
+    return TweenAnimationBuilder<double>(
+      // Begun at the target: no growth from empty when first shown.
+      tween: Tween(begin: target, end: target),
+      duration: motion(context, TahfeezMotionDuration.slow),
+      curve: TahfeezMotionCurves.standard,
+      builder: (context, p, _) => builder(p),
     );
   }
 }

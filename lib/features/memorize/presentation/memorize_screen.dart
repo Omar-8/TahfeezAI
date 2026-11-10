@@ -27,6 +27,7 @@ import 'progress_screen.dart';
 import 'test_me_card.dart';
 import '../../../core/ui/back_to_exit.dart';
 import '../../mushaf/application/reading_surah.dart';
+import '../../../core/theme/tahfeez_motion.dart';
 
 /// The Memorize tab, in two tabs: the plan — today's memorization, the
 /// three parts of a Hifz day (`docs/MEMORIZATION_MILESTONE.md`), with how
@@ -275,7 +276,7 @@ class ScoreBar extends StatelessWidget {
           borderRadius: BorderRadius.circular(TahfeezRadii.pill),
           child: TweenAnimationBuilder<double>(
             tween: Tween(begin: 0, end: value),
-            duration: motion(context, const Duration(milliseconds: 700)),
+            duration: motion(context, TahfeezMotionDuration.emphasis),
             curve: Curves.easeOutCubic,
             builder: (context, v, _) => LinearProgressIndicator(
               value: v,

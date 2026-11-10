@@ -77,7 +77,8 @@ void main() {
       ),
       findsOneWidget,
     );
-
+    // …and the one step to start.
+    expect(find.byKey(const ValueKey('home-start-reading')), findsOneWidget);
 
     // Today's memorization: nothing memorized and no plan yet, with the
     // way into the Memorize tab.

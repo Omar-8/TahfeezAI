@@ -679,5 +679,8 @@
   "settingsReport": "Soo sheeg dhibaato",
   "settingsReportSub": "Iimayl leh diiwaannada dhawaan ee abka — waad aragtaa ka hor intaadan dirin",
   "settingsReportSubject": "Tahfeez AI {version}: dhibaato",
-  "settingsReportPrompt": "Maxaa dhacay? (Waxaad samaysay, waxaad filaysay, waxaad aragtay.)"
+  "settingsReportPrompt": "Maxaa dhacay? (Waxaad samaysay, waxaad filaysay, waxaad aragtay.)",
+  "homeToday": "Maanta",
+  "homeStartReading": "Ku bilow Al-Faatixa",
+  "bookmarksOpenQuran": "Fur Quraanka"
 }

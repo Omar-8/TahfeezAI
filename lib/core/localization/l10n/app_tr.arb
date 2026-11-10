@@ -679,5 +679,8 @@
   "settingsReport": "Sorun bildir",
   "settingsReportSub": "Uygulamanın son kayıtlarını içeren bir e-posta — göndermeden önce görürsünüz",
   "settingsReportSubject": "Tahfeez AI {version}: bir sorun",
-  "settingsReportPrompt": "Ne oldu? (Ne yaptınız, ne beklediniz, ne gördünüz.)"
+  "settingsReportPrompt": "Ne oldu? (Ne yaptınız, ne beklediniz, ne gördünüz.)",
+  "homeToday": "Bugün",
+  "homeStartReading": "Fâtiha ile başla",
+  "bookmarksOpenQuran": "Kur'an'ı aç"
 }

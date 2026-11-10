@@ -679,5 +679,8 @@
   "settingsReport": "Rapportér et problem",
   "settingsReportSub": "En e-mail med appens seneste log — du ser den før afsendelse",
   "settingsReportSubject": "Tahfeez AI {version}: et problem",
-  "settingsReportPrompt": "Hvad skete der? (Hvad du gjorde, forventede og så.)"
+  "settingsReportPrompt": "Hvad skete der? (Hvad du gjorde, forventede og så.)",
+  "homeToday": "I dag",
+  "homeStartReading": "Begynd med Al-Fatiha",
+  "bookmarksOpenQuran": "Åbn Koranen"
 }

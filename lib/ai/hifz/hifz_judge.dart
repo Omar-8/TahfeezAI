@@ -221,6 +221,22 @@ class HifzJudge {
     return true;
   }
 
+  /// Hides [from]..[to] again (a page turned back to, to recite it once
+  /// more) and expects [from] next; the words revealed after them stay
+  /// revealed, passed over once [to] is reached.
+  void hideRange(int from, int to) {
+    if (from < start) start = from;
+    for (var q = from; q <= to; q++) {
+      revealed.remove(q);
+      marked.remove(q);
+      _early.remove(q);
+    }
+    expected = from.clamp(start, end + 1);
+    pending = null;
+    reviewing = null;
+    _unplaced = null;
+  }
+
   List<HifzEvent> onHeard(WordHeard heard) {
     if (completed) return const [];
     final ref = heard.ref;

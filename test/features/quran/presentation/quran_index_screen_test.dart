@@ -1,4 +1,5 @@
 import 'package:drift/native.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -94,6 +95,26 @@ void main() {
 
       expect(find.text('Test Chapter One'), findsOneWidget);
       expect(find.text('Surah 2'), findsNothing);
+    });
+
+    testWidgets('no surah matching: Clear brings every surah back', (
+      tester,
+    ) async {
+      await tester.pumpWidget(wrap(db));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField), 'zzzz');
+      await tester.pumpAndSettle();
+      expect(find.text('No chapters match your search.'), findsOneWidget);
+
+      await tester.tap(find.byKey(const ValueKey('surah-search-clear')));
+      await tester.pumpAndSettle();
+      expect(find.text('Test Chapter One'), findsOneWidget);
+      expect(find.text('Surah 2'), findsOneWidget);
+      expect(
+        tester.widget<TextField>(find.byType(TextField)).controller!.text,
+        isEmpty,
+      );
     });
 
     testWidgets('a surah worked on shows how much of it is memorized', (
@@ -227,6 +248,16 @@ void main() {
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('Test Chapter One'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+      // The reader at once (its bars with it): no fade of the whole screen
+      // (its Mushaf page fades in by itself, once drawn).
+      final reader = find.byType(ReaderScreen);
+      expect(reader, findsOneWidget);
+      expect(
+        find.ancestor(of: reader, matching: find.byType(FadeTransition)),
+        findsNothing,
+      );
       await tester.pumpAndSettle();
 
       // Navigates to the real Reader, not a stub. (The reader is
@@ -234,6 +265,32 @@ void main() {
       // isn't asserted here, only that the tap opened the Reader.)
       expect(find.byType(ReaderScreen), findsOneWidget);
     });
+
+    testWidgets(
+      'on iOS the reader slides in and is swiped back from the edge',
+      (tester) async {
+        debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+        addTearDown(() => debugDefaultTargetPlatformOverride = null);
+        await tester.pumpWidget(wrap(db));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Test Chapter One'));
+        await tester.pumpAndSettle();
+        expect(find.byType(ReaderScreen), findsOneWidget);
+
+        // From the screen's left edge, most of the way across.
+        final size = tester.view.physicalSize / tester.view.devicePixelRatio;
+        final drag = await tester.startGesture(Offset(5, size.height / 2));
+        await drag.moveBy(const Offset(20, 0));
+        await tester.pump();
+        await drag.moveBy(Offset(size.width * 0.7, 0));
+        await tester.pump();
+        await drag.up();
+        await tester.pumpAndSettle();
+        expect(find.byType(ReaderScreen), findsNothing);
+        debugDefaultTargetPlatformOverride = null;
+      },
+    );
 
     testWidgets('the Juz tab lists the fixture\'s one Juz', (tester) async {
       await tester.pumpWidget(wrap(db));

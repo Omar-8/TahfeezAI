@@ -62,6 +62,8 @@ import 'recitation_loop_sheet.dart';
 import '../../mushaf/presentation/mushaf_appearance_sheet.dart';
 import '../../../memorization/application/memorization_today.dart';
 import '../../memorize/presentation/test_summary_sheet.dart';
+import '../../../core/theme/tahfeez_motion.dart';
+import '../../../core/ui/motion.dart';
 
 export '../application/mushaf_recitation_target.dart';
 
@@ -352,10 +354,61 @@ class RecitationBottomBar extends ConsumerWidget {
 
   final Widget navigation;
 
+  /// The navigation and the recitation bar take each other's place by a
+  /// fade, at the new one's height at once — not grown frame by frame,
+  /// which would lay the Mushaf page out again on every frame (owner,
+  /// 2026-11-09: the bar jumped as a reader opened). The old bar stays
+  /// whole for the first third — while the reader's first frames are
+  /// built, which would otherwise be a jump in the fade — then the two
+  /// cross.
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (!ref.watch(recitationBarVisibleProvider)) return navigation;
+    final shown = ref.watch(recitationBarVisibleProvider);
+    return AnimatedSwitcher(
+      duration: motion(context, TahfeezMotionDuration.slow),
+      // In: from a third of the way. Out (run backwards): whole until then.
+      switchInCurve: const Interval(
+        _barWait,
+        1,
+        curve: TahfeezMotionCurves.standard,
+      ),
+      switchOutCurve: const Interval(
+        0,
+        1 - _barWait,
+        curve: TahfeezMotionCurves.standard,
+      ),
+      // The new bar's height at once, both ways: the old one fading out
+      // over the page's edge (not holding the old height until it is gone,
+      // then snapping to the new).
+      layoutBuilder: (current, previous) => Stack(
+        alignment: Alignment.bottomCenter,
+        clipBehavior: Clip.none,
+        children: [
+          for (final old in previous)
+            Positioned(left: 0, right: 0, bottom: 0, child: old),
+          ?current,
+        ],
+      ),
+      child: shown
+          ? const _LiveRecitationBar(key: ValueKey('recitation-bar-shown'))
+          : KeyedSubtree(
+              key: const ValueKey('navigation-bar-shown'),
+              child: navigation,
+            ),
+    );
+  }
+}
 
+/// The share of the bars' cross-fade spent waiting (see
+/// [RecitationBottomBar.build]).
+const _barWait = 0.35;
+
+/// The recitation bar itself, while a Mushaf is open (or a session runs).
+class _LiveRecitationBar extends ConsumerWidget {
+  const _LiveRecitationBar({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     ref.listen(recitationSessionControllerProvider, (previous, next) {
       final messenger = ScaffoldMessenger.maybeOf(context);
       if (messenger == null) return;
@@ -569,7 +622,7 @@ class RecitationBottomBar extends ConsumerWidget {
                     child: _BarWidth(
                       width: barWidth,
                       child: AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 200),
+                        duration: TahfeezMotionDuration.medium,
                         child: state.isActive
                             ? _SessionControls(
                                 key: const ValueKey(
@@ -838,7 +891,7 @@ class _BarHints extends ConsumerWidget {
     // Each comes and goes in a fade.
     return Center(
       child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 300),
+        duration: TahfeezMotionDuration.slow,
         child: child,
       ),
     );
@@ -1480,7 +1533,7 @@ class FadeScaleIn extends StatelessWidget {
   @override
   Widget build(BuildContext context) => TweenAnimationBuilder<double>(
     tween: Tween(begin: 0, end: 1),
-    duration: const Duration(milliseconds: 220),
+    duration: TahfeezMotionDuration.medium,
     curve: Curves.easeOutCubic,
     builder: (context, t, child) => Opacity(
       opacity: t,

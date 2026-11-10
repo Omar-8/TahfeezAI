@@ -18,6 +18,10 @@ abstract final class TahfeezMotionDuration {
   /// Larger movements: page transitions, a memorization reveal animating
   /// across a whole verse.
   static const slow = Duration(milliseconds: 360);
+
+  /// A moment worth watching: a progress ring or bar filling to its new
+  /// value, a result arriving.
+  static const emphasis = Duration(milliseconds: 800);
 }
 
 abstract final class TahfeezMotionCurves {

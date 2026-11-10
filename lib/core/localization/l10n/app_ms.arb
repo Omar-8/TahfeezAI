@@ -679,5 +679,8 @@
   "settingsReport": "Laporkan masalah",
   "settingsReportSub": "E-mel dengan log terkini aplikasi — anda melihatnya sebelum menghantar",
   "settingsReportSubject": "Tahfeez AI {version}: satu masalah",
-  "settingsReportPrompt": "Apa yang berlaku? (Apa yang anda buat, jangka dan lihat.)"
+  "settingsReportPrompt": "Apa yang berlaku? (Apa yang anda buat, jangka dan lihat.)",
+  "homeToday": "Hari ini",
+  "homeStartReading": "Mulakan dengan Al-Fatihah",
+  "bookmarksOpenQuran": "Buka Al-Quran"
 }

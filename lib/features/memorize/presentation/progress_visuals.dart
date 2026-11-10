@@ -11,6 +11,7 @@ import '../../../core/theme/components/components.dart';
 import '../../../memorization/application/memorization_progress.dart';
 import '../../../memorization/domain/activity_calendar.dart';
 import '../../../memorization/domain/progress_map.dart';
+import '../../../core/theme/tahfeez_motion.dart';
 
 /// The Quran as a ring of its 30 juz, each segment filled by how much of
 /// that juz is memorized (recited from memory, then only marked, paler),
@@ -167,7 +168,7 @@ class StreakCard extends ConsumerWidget {
                         context,
                         Duration(milliseconds: 300 + 40 * current.clamp(0, 15)),
                       ),
-                      curve: Curves.easeOut,
+                      curve: TahfeezMotionCurves.standard,
                       builder: (context, v, _) => Text(
                         l10n.memStreakDays(
                           current == 0 ? 0 : v.round().clamp(1, current),

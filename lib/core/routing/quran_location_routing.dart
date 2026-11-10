@@ -1,4 +1,6 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/mushaf/presentation/mushaf_reader_screen.dart';
@@ -26,72 +28,125 @@ import 'app_routes.dart';
 int _parsePathInt(Map<String, String> params, String key) =>
     int.parse(params[key]!);
 
+/// A reader's page: shown at once, its bars with it — its Mushaf page
+/// fading in under them (`ReaderScreen`). A fade of the whole screen
+/// blended the list's app bar and tabs with the reader's (owner,
+/// 2026-11-09: jumpy).
+///
+/// On iPhone and iPad it is the system's own page: it slides in from the
+/// side and is swiped back from the screen's edge, as iOS users expect. (Not
+/// on the web, where Safari's own edge swipe already goes back.)
+Page<void> _readerPage(
+  BuildContext context,
+  GoRouterState state,
+  Widget child,
+) {
+  if (!kIsWeb && Theme.of(context).platform == TargetPlatform.iOS) {
+    return CupertinoPage<void>(
+      key: state.pageKey,
+      name: state.name,
+      arguments: state.extra,
+      child: child,
+    );
+  }
+  return NoTransitionPage<void>(
+    key: state.pageKey,
+    name: state.name,
+    arguments: state.extra,
+    child: child,
+  );
+}
+
 List<RouteBase> quranLocationRoutes() {
   return [
     GoRoute(
       path: 'surah/:surahNo',
-      builder: (context, state) => ReaderScreen(
-        // Per location: go_router keys a page by its route pattern, so going
-        // from one surah to another would otherwise keep the first reader.
-        key: ValueKey(state.matchedLocation),
-        location: QuranLocation.surah(
-          _parsePathInt(state.pathParameters, 'surahNo'),
+      pageBuilder: (context, state) => _readerPage(
+        context,
+        state,
+        ReaderScreen(
+          // Per location: go_router keys a page by its route pattern, so going
+          // from one surah to another would otherwise keep the first reader.
+          key: ValueKey(state.matchedLocation),
+          location: QuranLocation.surah(
+            _parsePathInt(state.pathParameters, 'surahNo'),
+          ),
         ),
       ),
     ),
     GoRoute(
       path: 'ayah/:chapterNo/:verseNo',
-      builder: (context, state) => ReaderScreen(
-        // Per location: go_router keys a page by its route pattern, so going
-        // from one surah to another would otherwise keep the first reader.
-        key: ValueKey(state.matchedLocation),
-        location: QuranLocation.ayah(
-          _parsePathInt(state.pathParameters, 'chapterNo'),
-          _parsePathInt(state.pathParameters, 'verseNo'),
+      pageBuilder: (context, state) => _readerPage(
+        context,
+        state,
+        ReaderScreen(
+          // Per location: go_router keys a page by its route pattern, so going
+          // from one surah to another would otherwise keep the first reader.
+          key: ValueKey(state.matchedLocation),
+          location: QuranLocation.ayah(
+            _parsePathInt(state.pathParameters, 'chapterNo'),
+            _parsePathInt(state.pathParameters, 'verseNo'),
+          ),
         ),
       ),
     ),
     GoRoute(
       path: 'ayah-range/:chapterNo/:fromVerseNo/:toVerseNo',
-      builder: (context, state) => ReaderScreen(
-        // Per location: go_router keys a page by its route pattern, so going
-        // from one surah to another would otherwise keep the first reader.
-        key: ValueKey(state.matchedLocation),
-        location: QuranLocation.ayahRange(
-          _parsePathInt(state.pathParameters, 'chapterNo'),
-          _parsePathInt(state.pathParameters, 'fromVerseNo'),
-          _parsePathInt(state.pathParameters, 'toVerseNo'),
+      pageBuilder: (context, state) => _readerPage(
+        context,
+        state,
+        ReaderScreen(
+          // Per location: go_router keys a page by its route pattern, so going
+          // from one surah to another would otherwise keep the first reader.
+          key: ValueKey(state.matchedLocation),
+          location: QuranLocation.ayahRange(
+            _parsePathInt(state.pathParameters, 'chapterNo'),
+            _parsePathInt(state.pathParameters, 'fromVerseNo'),
+            _parsePathInt(state.pathParameters, 'toVerseNo'),
+          ),
         ),
       ),
     ),
     GoRoute(
       path: 'juz/:juzNo',
-      builder: (context, state) => ReaderScreen(
-        // Per location: go_router keys a page by its route pattern, so going
-        // from one surah to another would otherwise keep the first reader.
-        key: ValueKey(state.matchedLocation),
-        location: QuranLocation.juz(
-          _parsePathInt(state.pathParameters, 'juzNo'),
+      pageBuilder: (context, state) => _readerPage(
+        context,
+        state,
+        ReaderScreen(
+          // Per location: go_router keys a page by its route pattern, so going
+          // from one surah to another would otherwise keep the first reader.
+          key: ValueKey(state.matchedLocation),
+          location: QuranLocation.juz(
+            _parsePathInt(state.pathParameters, 'juzNo'),
+          ),
         ),
       ),
     ),
     GoRoute(
       path: 'hizb/:hizbNo',
-      builder: (context, state) => ReaderScreen(
-        // Per location: go_router keys a page by its route pattern, so going
-        // from one surah to another would otherwise keep the first reader.
-        key: ValueKey(state.matchedLocation),
-        location: QuranLocation.hizb(
-          _parsePathInt(state.pathParameters, 'hizbNo'),
+      pageBuilder: (context, state) => _readerPage(
+        context,
+        state,
+        ReaderScreen(
+          // Per location: go_router keys a page by its route pattern, so going
+          // from one surah to another would otherwise keep the first reader.
+          key: ValueKey(state.matchedLocation),
+          location: QuranLocation.hizb(
+            _parsePathInt(state.pathParameters, 'hizbNo'),
+          ),
         ),
       ),
     ),
     GoRoute(
       path: 'page/:mushafId/:pageNumber',
-      builder: (context, state) => MushafReaderScreen(
-        key: ValueKey(state.matchedLocation),
-        mushafId: _parsePathInt(state.pathParameters, 'mushafId'),
-        initialPageNumber: _parsePathInt(state.pathParameters, 'pageNumber'),
+      pageBuilder: (context, state) => _readerPage(
+        context,
+        state,
+        MushafReaderScreen(
+          key: ValueKey(state.matchedLocation),
+          mushafId: _parsePathInt(state.pathParameters, 'mushafId'),
+          initialPageNumber: _parsePathInt(state.pathParameters, 'pageNumber'),
+        ),
       ),
     ),
   ];

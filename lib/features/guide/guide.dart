@@ -12,6 +12,7 @@ import '../listen/application/quran_audio_player.dart';
 import '../mushaf/application/mushaf_hide_mode.dart';
 import '../recitation/application/live_recognition_controller.dart';
 import '../recitation/application/recitation_session_controller.dart';
+import '../../core/theme/tahfeez_motion.dart';
 
 /// The Mushaf's step-by-step guide: the screen dims around one control at a
 /// time, with a short card about it. An overview of the modes, then — the
@@ -511,7 +512,7 @@ class _GuideOverlayState extends ConsumerState<_GuideOverlay> {
         Scrollable.ensureVisible(
           target,
           alignment: 0.5,
-          duration: const Duration(milliseconds: 250),
+          duration: TahfeezMotionDuration.medium,
         ),
       );
     }
