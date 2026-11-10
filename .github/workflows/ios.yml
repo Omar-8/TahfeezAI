@@ -85,7 +85,7 @@ jobs:
           path: |
             tool/quran_data/.cache
             assets/quran/quran_engine
-          key: quran-data-${{ hashFiles('tool/quran_data/**/*.dart', 'tool/quran_engine/fetch_page_data.sh', 'tool/quran_engine/pack_pages.py') }}
+          key: quran-data-${{ hashFiles('tool/quran_data/**/*.dart', 'tool/quran_engine/fetch_page_data.sh') }}
 
       # The acoustic model, bundled into the app but not in git: the
       # release "model-v3.7" of this repository (checked against its manifest).

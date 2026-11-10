@@ -54,7 +54,7 @@ jobs:
           path: |
             tool/quran_data/.cache
             assets/quran/quran_engine
-          key: quran-data-${{ hashFiles('tool/quran_data/**/*.dart', 'tool/quran_engine/fetch_page_data.sh', 'tool/quran_engine/pack_pages.py') }}
+          key: quran-data-${{ hashFiles('tool/quran_data/**/*.dart', 'tool/quran_engine/fetch_page_data.sh') }}
 
       - name: Acoustic model
         env:
