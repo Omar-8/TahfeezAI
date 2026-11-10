@@ -8,7 +8,9 @@ import '../../core/theme/components/tahfeez_bottom_sheet.dart';
 import '../../core/theme/components/tahfeez_state_views.dart';
 import '../application/tafsir_library_controller.dart';
 import '../application/tafsir_selection_controller.dart';
+import '../data/import/meaning_pack_store.dart';
 import 'meaning_language_names.dart';
+import 'meaning_pack_action.dart';
 import 'meaning_resource_names.dart';
 
 /// Which bundled tafsir to show (one, or none), each with its language.
@@ -65,11 +67,18 @@ class _TafsirPacksSheetBody extends ConsumerWidget {
                   value: work.id,
                   title: Text(tafsirName(l10n, work)),
                   subtitle: Text(nativeLanguageName(work.languageCode)),
+                  // On the phone or not: deleted, or downloaded, from here.
+                  controlAffinity: ListTileControlAffinity.leading,
+                  secondary: MeaningPackAction(
+                    kind: MeaningPackKind.tafsir,
+                    id: work.id,
+                  ),
                 ),
               RadioListTile<String>(
                 key: const ValueKey('tafsir-none'),
                 value: '',
                 title: Text(l10n.settingsTafsirNone),
+                controlAffinity: ListTileControlAffinity.leading,
               ),
             ],
           ),

@@ -682,5 +682,7 @@
   "settingsReportPrompt": "Ne oldu? (Ne yaptınız, ne beklediniz, ne gördünüz.)",
   "homeToday": "Bugün",
   "homeStartReading": "Fâtiha ile başla",
-  "bookmarksOpenQuran": "Kur'an'ı aç"
+  "bookmarksOpenQuran": "Kur'an'ı aç",
+  "meaningPackDownload": "İndir",
+  "meaningPacksOffline": "Çeviriler çevrimiçi olduğunuzda indirilecek. O zamana kadar İngilizce gösterilir."
 }

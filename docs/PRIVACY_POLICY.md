@@ -1,6 +1,6 @@
 # TahfeezAI — Privacy Policy
 
-_Last updated: 3 November 2026_
+_Last updated: 10 November 2026_
 
 TahfeezAI helps you read and memorize the Quran. It is built to keep your data on your phone. There are no accounts, no ads, no analytics and no tracking.
 
@@ -20,8 +20,9 @@ Only to play recitation audio, and only when you ask for it:
 - **Single-word audio** streams from Quran.com's audio service (`audio.qurancdn.com`).
 - **Listen to the correction** asks Quran.com (`api.quran.com`, `api.qurancdn.com`) where each word falls in the reciter's recording, and for some reciters plays that recording from QuranicAudio (`download.quranicaudio.com`). The timings are kept only until the app closes.
 - **Downloading a reciter** for offline listening fetches that reciter's audio files from the same service and stores them on your phone; you can delete them at any time.
+- **Translations, tafsir and word meanings** other than English and Arabic are downloaded on Android and iOS from the app's own open-source repository on GitHub (`github.com/Omar-8/TahfeezAI`, its release files), when the app's language needs them or when you download one, and stored on your phone; you can delete them at any time. Each download is checked against a fingerprint built into the app before it is used.
 
-These requests contain only the name of the audio file (which reciter and which ayah or word). Like any internet request, they also reveal your device's IP address to that service, which is governed by its own privacy terms. No other information about you is sent. Everything else — the Quran text, translations, tafsir and word meanings — is part of the app and works without internet.
+These requests contain only the name of the audio file (which reciter and which ayah or word). Like any internet request, they also reveal your device's IP address to that service, which is governed by its own privacy terms. No other information about you is sent. Everything else — the Quran text and the English and Arabic translations, tafsir and word meanings — is part of the app and works without internet; a downloaded translation, tafsir or word-meaning set works without internet too.
 
 On Android the app also asks Google Play, on your phone, whether an update is available, and may show Google Play's own rating box now and then; both are handled by Google Play under its terms, and the app sends nothing of its own. On iPhone and iPad the app asks the App Store (`itunes.apple.com`) for the version number of the app's listing, to know whether an update is available; that request names only the app, not you, and like any request reveals your IP address to Apple. Sharing the app hands a short text with its store link to the app you choose.
 
@@ -41,13 +42,13 @@ The web version works the same way: your recitation is checked inside your brows
 
 - **Microphone** — to follow and check your recitation, on the phone only. Used only while you are reciting.
 - **Notifications** — for the optional daily memorization reminder.
-- **Internet** — for streaming and downloading recitation audio.
+- **Internet** — for streaming and downloading recitation audio, and downloading translations, tafsir and word meanings.
 - **Vibration** — to signal a mistake while you recite.
 - **Run at startup** — to keep your daily reminder after the phone restarts.
 
 ## Deleting your data
 
-**Settings → Your data → Reset all data** deletes all of your memorization data, bookmarks and settings. Uninstalling the app deletes everything it stored, including downloaded recitations.
+**Settings → Your data → Reset all data** deletes all of your memorization data, bookmarks and settings. Uninstalling the app deletes everything it stored, including downloaded recitations, translations, tafsir and word meanings.
 
 ## Children
 

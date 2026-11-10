@@ -1,0 +1,126 @@
+<en-US>
+• A much smaller app: the same Mushaf pages, packed tighter
+• Translations, tafsir and word meanings for your language download by themselves; English and Arabic are built in
+• Download or delete any translation, tafsir or word-meaning set from its list
+• Offline? English shows until your language can download
+</en-US>
+<ar>
+• تطبيق أصغر بكثير: صفحات المصحف نفسها بضغط أفضل
+• تُنزَّل الترجمات والتفاسير ومعاني الكلمات بلغتك تلقائيًا، والإنجليزية والعربية مدمجتان
+• نزّل أو احذف أي ترجمة أو تفسير أو معاني كلمات من قائمته
+• بلا إنترنت؟ تظهر الإنجليزية حتى يمكن تنزيل لغتك
+</ar>
+<bn-BD>
+• অনেক ছোট অ্যাপ: একই মুসহাফ পৃষ্ঠা, আরও ঘনভাবে সংকুচিত
+• আপনার ভাষার অনুবাদ, তাফসির ও শব্দার্থ নিজে থেকেই ডাউনলোড হয়; ইংরেজি ও আরবি অন্তর্ভুক্ত
+• যেকোনো অনুবাদ, তাফসির বা শব্দার্থ তার তালিকা থেকে ডাউনলোড বা মুছুন
+• অফলাইন? আপনার ভাষা ডাউনলোড না হওয়া পর্যন্ত ইংরেজি দেখাবে
+</bn-BD>
+<da-DK>
+• En meget mindre app: de samme Mushaf-sider, pakket tættere
+• Oversættelser, tafsir og ordbetydninger på dit sprog hentes af sig selv; engelsk og arabisk er indbygget
+• Hent eller slet enhver oversættelse, tafsir eller ordbetydning fra listen
+• Offline? Engelsk vises, indtil dit sprog kan hentes
+</da-DK>
+<de-DE>
+• Eine viel kleinere App: dieselben Mushaf-Seiten, enger gepackt
+• Übersetzungen, Tafsir und Wortbedeutungen in deiner Sprache laden von selbst; Englisch und Arabisch sind eingebaut
+• Jede Übersetzung, jeden Tafsir und jede Wortbedeutung in der Liste laden oder löschen
+• Offline? Englisch wird angezeigt, bis deine Sprache geladen werden kann
+</de-DE>
+<el-GR>
+• Πολύ μικρότερη εφαρμογή: οι ίδιες σελίδες του Μους-χαφ, πιο συμπιεσμένες
+• Μεταφράσεις, ταφσίρ και σημασίες λέξεων στη γλώσσα σας κατεβαίνουν μόνες τους· αγγλικά και αραβικά ενσωματωμένα
+• Κατεβάστε ή διαγράψτε οποιαδήποτε μετάφραση, ταφσίρ ή σημασίες λέξεων από τη λίστα
+• Εκτός σύνδεσης; Εμφανίζονται τα αγγλικά μέχρι να κατέβει η γλώσσα σας
+</el-GR>
+<es-ES>
+• Una app mucho más pequeña: las mismas páginas del Mushaf, mejor comprimidas
+• Las traducciones, el tafsir y los significados de palabras en tu idioma se descargan solos; inglés y árabe vienen incluidos
+• Descarga o elimina cualquier traducción, tafsir o significados de palabras desde su lista
+• ¿Sin conexión? Se muestra el inglés hasta que pueda descargarse tu idioma
+</es-ES>
+<fa>
+• برنامه‌ای بسیار کوچک‌تر: همان صفحات مصحف، فشرده‌تر
+• ترجمه‌ها، تفسیر و معانی کلمات به زبان شما خودکار دانلود می‌شوند؛ انگلیسی و عربی داخل برنامه‌اند
+• هر ترجمه، تفسیر یا معانی کلمات را از فهرستش دانلود یا حذف کنید
+• آفلاین هستید؟ تا دانلود زبان شما، انگلیسی نمایش داده می‌شود
+</fa>
+<fr-FR>
+• Une application bien plus légère : les mêmes pages du Mushaf, mieux compressées
+• Traductions, tafsir et sens des mots dans votre langue se téléchargent seuls ; l'anglais et l'arabe sont intégrés
+• Téléchargez ou supprimez toute traduction, tout tafsir ou sens des mots depuis sa liste
+• Hors ligne ? L'anglais s'affiche jusqu'au téléchargement de votre langue
+</fr-FR>
+<id>
+• Aplikasi jauh lebih kecil: halaman Mushaf yang sama, dikemas lebih padat
+• Terjemahan, tafsir, dan arti kata dalam bahasa Anda terunduh sendiri; bahasa Inggris dan Arab sudah tersedia
+• Unduh atau hapus terjemahan, tafsir, atau arti kata mana pun dari daftarnya
+• Offline? Bahasa Inggris ditampilkan sampai bahasa Anda dapat diunduh
+</id>
+<ja-JP>
+• アプリが大幅に小さく：同じムスハフのページを、より効率よく圧縮
+• あなたの言語の翻訳・タフスィール・語の意味は自動でダウンロード。英語とアラビア語は内蔵
+• 翻訳・タフスィール・語の意味は一覧からダウンロードまたは削除できます
+• オフライン？ダウンロードできるまで英語で表示されます
+</ja-JP>
+<kk>
+• Әлдеқайда шағын қолданба: Мусхафтың сол беттері, тығызырақ сығылған
+• Тіліңіздегі аудармалар, тәпсір және сөз мағыналары өздігінен жүктеледі; ағылшын және араб тілдері кірістірілген
+• Кез келген аударманы, тәпсірді не сөз мағыналарын тізімнен жүктеңіз немесе жойыңыз
+• Желі жоқ па? Тіліңіз жүктелгенше ағылшынша көрсетіледі
+</kk>
+<ko-KR>
+• 훨씬 작아진 앱: 같은 무스하프 페이지를 더 촘촘하게 압축
+• 사용자 언어의 번역, 타프시르, 단어 뜻이 자동으로 다운로드됩니다. 영어와 아랍어는 기본 포함
+• 목록에서 번역, 타프시르, 단어 뜻을 다운로드하거나 삭제하세요
+• 오프라인인가요? 언어를 다운로드할 수 있을 때까지 영어로 표시됩니다
+</ko-KR>
+<ms>
+• Aplikasi jauh lebih kecil: halaman Mushaf yang sama, dimampatkan lebih padat
+• Terjemahan, tafsir dan makna perkataan dalam bahasa anda dimuat turun sendiri; bahasa Inggeris dan Arab terbina dalam
+• Muat turun atau padam mana-mana terjemahan, tafsir atau makna perkataan dari senarainya
+• Luar talian? Bahasa Inggeris dipaparkan sehingga bahasa anda boleh dimuat turun
+</ms>
+<nl-NL>
+• Een veel kleinere app: dezelfde Mushaf-pagina's, compacter verpakt
+• Vertalingen, tafsir en woordbetekenissen in jouw taal downloaden vanzelf; Engels en Arabisch zijn ingebouwd
+• Download of verwijder elke vertaling, tafsir of woordbetekenis vanuit de lijst
+• Offline? Engels wordt getoond tot je taal kan worden gedownload
+</nl-NL>
+<pt-BR>
+• Um app muito menor: as mesmas páginas do Mushaf, mais compactadas
+• Traduções, tafsir e significados das palavras no seu idioma são baixados sozinhos; inglês e árabe já vêm incluídos
+• Baixe ou exclua qualquer tradução, tafsir ou significados das palavras na lista
+• Offline? O inglês aparece até que seu idioma possa ser baixado
+</pt-BR>
+<ru-RU>
+• Приложение стало намного меньше: те же страницы Мусхафа, сжатые плотнее
+• Переводы, тафсир и значения слов на вашем языке загружаются сами; английский и арабский встроены
+• Скачивайте или удаляйте любой перевод, тафсир или значения слов из списка
+• Нет интернета? Показывается английский, пока ваш язык не загрузится
+</ru-RU>
+<sw>
+• Programu ndogo zaidi: kurasa zilezile za Mushaf, zimebanwa zaidi
+• Tafsiri, tafsiri ya maana na maana za maneno kwa lugha yako hupakuliwa zenyewe; Kiingereza na Kiarabu vimo ndani
+• Pakua au futa tafsiri yoyote au maana za maneno kutoka kwenye orodha yake
+• Hakuna mtandao? Kiingereza kinaonyeshwa hadi lugha yako ipakuliwe
+</sw>
+<tr-TR>
+• Çok daha küçük bir uygulama: aynı Mushaf sayfaları, daha sıkı paketlenmiş
+• Dilinizdeki meal, tefsir ve kelime anlamları kendiliğinden iner; İngilizce ve Arapça yerleşik
+• Herhangi bir meali, tefsiri veya kelime anlamlarını listesinden indirin ya da silin
+• Çevrimdışı mı? Diliniz inene kadar İngilizce gösterilir
+</tr-TR>
+<ur>
+• بہت چھوٹی ایپ: مصحف کے وہی صفحات، زیادہ کمپریس کیے ہوئے
+• آپ کی زبان کے ترجمے، تفسیر اور الفاظ کے معانی خود بخود ڈاؤن لوڈ ہوتے ہیں؛ انگریزی اور عربی شامل ہیں
+• کوئی بھی ترجمہ، تفسیر یا الفاظ کے معانی اس کی فہرست سے ڈاؤن لوڈ یا حذف کریں
+• آف لائن؟ آپ کی زبان ڈاؤن لوڈ ہونے تک انگریزی دکھائی جائے گی
+</ur>
+<zh-CN>
+• 应用大幅缩小：同样的古兰经页面，压缩得更紧凑
+• 您语言的译文、经注和词义会自动下载；英文和阿拉伯文为内置
+• 可在列表中下载或删除任意译文、经注或词义
+• 离线？在可以下载您的语言之前显示英文
+</zh-CN>

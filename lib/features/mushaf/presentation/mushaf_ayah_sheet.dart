@@ -19,6 +19,7 @@ import '../domain/mushaf_appearance.dart';
 import 'ayah_share_sheet.dart';
 import 'ayah_view_options.dart';
 import 'ayah_view_parts.dart';
+import '../../../quran/application/meaning_packs.dart';
 
 /// The "long-press a word" destination, in the Mushaf and in Ayah mode:
 /// the word's whole ayah, shown as Ayah mode shows it — its words (with
@@ -61,7 +62,7 @@ class _AyahDetailSheetBody extends ConsumerWidget {
         ? ref.watch(ayahWordMeaningsProvider(ayahId)).value ?? const {}
         : const <int, String>{};
     final books = ref.watch(activeTranslationBooksProvider).value;
-    final tafsirId = ref.watch(tafsirSelectionControllerProvider);
+    final tafsirId = ref.watch(shownTafsirIdProvider);
     // The sheet's own colours (it sits on the app's surface, not the page).
     final colors = MushafAppearanceColors(
       background: scheme.surface,

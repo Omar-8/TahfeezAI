@@ -682,5 +682,7 @@
   "settingsReportPrompt": "Не болды? (Не істедіңіз, не күттіңіз, не көрдіңіз.)",
   "homeToday": "Бүгін",
   "homeStartReading": "Әл-Фатихадан бастау",
-  "bookmarksOpenQuran": "Құранды ашу"
+  "bookmarksOpenQuran": "Құранды ашу",
+  "meaningPackDownload": "Жүктеу",
+  "meaningPacksOffline": "Аудармалар желіге қосылғанда жүктеледі. Оған дейін ағылшынша көрсетіледі."
 }

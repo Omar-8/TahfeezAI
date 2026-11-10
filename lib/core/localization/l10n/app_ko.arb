@@ -682,5 +682,7 @@
   "settingsReportPrompt": "무슨 일이 있었나요? (한 일, 기대한 것, 본 것)",
   "homeToday": "오늘",
   "homeStartReading": "알파티하부터 시작",
-  "bookmarksOpenQuran": "꾸란 열기"
+  "bookmarksOpenQuran": "꾸란 열기",
+  "meaningPackDownload": "다운로드",
+  "meaningPacksOffline": "온라인에 연결되면 번역이 다운로드됩니다. 그때까지는 영어로 표시됩니다."
 }

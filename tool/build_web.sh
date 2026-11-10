@@ -19,7 +19,8 @@ flutter build web --release \
 # What the browser never asks for: the datasets only desktop development
 # imports, the phones' xz meaning packs (the web imports the JSON), debug
 # symbols and Flutter's own (unregistered) service worker.
-rm -rf build/web/assets/assets/quran/mushaf build/web/assets/assets/quran/db/packs
+rm -rf build/web/assets/assets/quran/mushaf build/web/assets/assets/quran/db/packs \
+  build/web/assets/assets/quran/quran_engine/page_groups build/web/assets/assets/quran/quran_engine/page_groups.json
 rm -f build/web/assets/assets/quran/quran_dataset.json build/web/flutter_service_worker.js
 find build/web -name '*.symbols' -delete
 du -sh build/web

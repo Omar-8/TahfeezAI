@@ -107,10 +107,14 @@ void main() {
         );
         await db.customStatement('DETACH DATABASE pack');
         final asset = 'packs/${kind.name}-$id.sqlite.xz';
-        File('${out.path}/$asset').writeAsBytesSync(await xz(pack.path));
+        final packed = await xz(pack.path);
+        File('${out.path}/$asset').writeAsBytesSync(packed);
         ofKind[id] = {
           'sha256': sha256.convert(pack.readAsBytesSync()).toString(),
           'asset': asset,
+          // The download's size (the packs are downloaded on the phones:
+          // publish them with tool/quran_db/publish_meaning_packs.sh).
+          'xzBytes': packed.length,
         };
       }
       packs[kind.name] = ofKind;

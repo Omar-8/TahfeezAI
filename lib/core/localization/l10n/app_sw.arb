@@ -682,5 +682,7 @@
   "settingsReportPrompt": "Nini kilitokea? (Ulichofanya, ulichotarajia, ulichoona.)",
   "homeToday": "Leo",
   "homeStartReading": "Anza na Al-Fatiha",
-  "bookmarksOpenQuran": "Fungua Qur'ani"
+  "bookmarksOpenQuran": "Fungua Qur'ani",
+  "meaningPackDownload": "Pakua",
+  "meaningPacksOffline": "Tafsiri zitapakuliwa ukiwa mtandaoni. Hadi wakati huo, Kiingereza kitaonyeshwa."
 }

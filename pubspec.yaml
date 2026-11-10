@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.2.3+30
+version: 1.2.4+31
 
 environment:
   sdk: ^3.13.3
@@ -278,6 +278,13 @@ flutter:
     # provenance question was resolved. See
     # docs/QURAN_ENGINE_MIGRATION.md's licensing section.
     - assets/quran/quran_engine/pages/
+    # The same pages for the phones, 4 to an xz file (lossless:
+    # tool/quran_engine/pack_pages.py; QuranEnginePageGroups). The phones
+    # leave out pages/ (android/app/build.gradle.kts,
+    # ios/scripts/strip_unused_assets.sh); the web leaves out these
+    # (.github/workflows/web-app.yml).
+    - assets/quran/quran_engine/page_groups.json
+    - assets/quran/quran_engine/page_groups/
     # The on-device acoustic model and its manifest (not in git — see
     # .gitignore); extracted to app storage on Android on first use.
     - assets/models/

@@ -1,10 +1,10 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../quran/application/translation_selection_controller.dart';
 import '../../../quran/domain/models/mushaf_token_models.dart';
 import '../../../quran/domain/models/translation_models.dart';
 import '../../../quran/translation_providers.dart';
 import 'mushaf_page_providers.dart';
+import '../../../quran/application/meaning_packs.dart';
 
 part 'mushaf_page_translations.g.dart';
 
@@ -27,7 +27,7 @@ Future<Map<int, Map<String, TranslationVerseText>>> mushafPageTranslations(
   int mushafId,
   int pageNumber,
 ) async {
-  final activeSlugs = ref.watch(translationSelectionControllerProvider);
+  final activeSlugs = ref.watch(shownTranslationSlugsProvider);
   if (activeSlugs.isEmpty) return const {};
 
   final page = await ref.watch(
@@ -79,7 +79,7 @@ Future<Map<int, Map<String, TranslationVerseText>>> mushafPageTranslations(
 /// so the Mushaf sheet can show each block's author attribution too.
 @riverpod
 Future<Map<String, TranslationBook>> activeTranslationBooks(Ref ref) async {
-  final activeSlugs = ref.watch(translationSelectionControllerProvider);
+  final activeSlugs = ref.watch(shownTranslationSlugsProvider);
   final repository = ref.watch(translationRepositoryProvider);
   final books = <String, TranslationBook>{};
   for (final slug in activeSlugs) {

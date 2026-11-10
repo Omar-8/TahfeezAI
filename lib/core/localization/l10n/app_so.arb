@@ -682,5 +682,7 @@
   "settingsReportPrompt": "Maxaa dhacay? (Waxaad samaysay, waxaad filaysay, waxaad aragtay.)",
   "homeToday": "Maanta",
   "homeStartReading": "Ku bilow Al-Faatixa",
-  "bookmarksOpenQuran": "Fur Quraanka"
+  "bookmarksOpenQuran": "Fur Quraanka",
+  "meaningPackDownload": "Soo deji",
+  "meaningPacksOffline": "Turjumaadaha waa la soo dejin doonaa marka aad internetka ku xirantahay. Ilaa markaas Ingiriisi ayaa la muujinayaa."
 }

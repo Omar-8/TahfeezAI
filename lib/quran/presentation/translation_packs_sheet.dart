@@ -8,7 +8,9 @@ import '../../core/theme/components/tahfeez_bottom_sheet.dart';
 import '../../core/theme/components/tahfeez_state_views.dart';
 import '../application/translation_library_controller.dart';
 import '../application/translation_selection_controller.dart';
+import '../data/import/meaning_pack_store.dart';
 import 'meaning_language_names.dart';
+import 'meaning_pack_action.dart';
 import 'meaning_resource_names.dart';
 
 /// Which of the bundled translations to show (any number), each with its
@@ -62,6 +64,12 @@ class _TranslationPacksSheetBody extends ConsumerWidget {
                 value: active.contains(book.slug),
                 title: Text(translationName(l10n, book)),
                 subtitle: Text(nativeLanguageName(book.languageCode)),
+                // On the phone or not: deleted, or downloaded, from here.
+                controlAffinity: ListTileControlAffinity.leading,
+                secondary: MeaningPackAction(
+                  kind: MeaningPackKind.translation,
+                  id: book.slug,
+                ),
                 onChanged: (_) => ref
                     .read(translationSelectionControllerProvider.notifier)
                     .toggle(book.slug),

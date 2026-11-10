@@ -5,7 +5,6 @@ import '../../../quran/application/meaning_defaults.dart';
 import '../../../quran/application/quran_dataset_status.dart';
 import '../../../quran/application/quran_script_code.dart';
 import '../../../quran/application/recent_quran_location.dart';
-import '../../../quran/application/translation_selection_controller.dart';
 import '../../../quran/domain/models/quran_location.dart';
 import '../../../quran/domain/models/quran_refs.dart';
 import '../../../quran/domain/models/surah_models.dart';
@@ -14,6 +13,7 @@ import '../../../quran/translation_providers.dart';
 import '../../recitation/application/recitation_providers.dart';
 import '../../recitation/application/recitation_session_controller.dart';
 import '../../recitation/domain/recitation_session.dart';
+import '../../../quran/application/meaning_packs.dart';
 
 part 'home_providers.g.dart';
 
@@ -123,7 +123,7 @@ Future<DailyAyahReference?> dailyAyah(Ref ref) async {
     verse.chapterNo,
     languageCode: languageCode,
   );
-  final slugs = ref.watch(translationSelectionControllerProvider);
+  final slugs = ref.watch(shownTranslationSlugsProvider);
   final translation = slugs.isEmpty
       ? null
       : await ref

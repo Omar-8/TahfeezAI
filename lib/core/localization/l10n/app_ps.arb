@@ -682,5 +682,7 @@
   "settingsReportPrompt": "څه وشول؟ (څه مو وکړل، څه مو تمه درلوده، څه مو ولیدل.)",
   "homeToday": "نن",
   "homeStartReading": "په فاتحه پیل وکړئ",
-  "bookmarksOpenQuran": "قرآن پرانیزئ"
+  "bookmarksOpenQuran": "قرآن پرانیزئ",
+  "meaningPackDownload": "ډاونلوډ",
+  "meaningPacksOffline": "ژباړې به هغه وخت ډاونلوډ شي چې آنلاین شئ. تر هغه وخته انګلیسي ښودل کېږي."
 }

@@ -62,7 +62,7 @@ runs:
         path: |
           tool/quran_data/.cache
           assets/quran/quran_engine
-        key: quran-data-${{ hashFiles('tool/quran_data/**/*.dart', 'tool/quran_engine/fetch_page_data.sh') }}
+        key: quran-data-${{ hashFiles('tool/quran_data/**/*.dart', 'tool/quran_engine/fetch_page_data.sh', 'tool/quran_engine/pack_pages.py') }}
 
     - name: Acoustic model
       shell: bash
@@ -76,5 +76,6 @@ runs:
       shell: bash
       run: |
         [ -f assets/quran/quran_engine/pages/604.qvp ] || bash tool/quran_engine/fetch_page_data.sh --all
+        [ -f assets/quran/quran_engine/page_groups.json ] || python3 tool/quran_engine/pack_pages.py
         [ -d tool/quran_data/.cache ] || dart run tool/quran_data/fetch_sources.dart
         dart run tool/quran_data/build_production_data.dart

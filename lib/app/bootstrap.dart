@@ -1,6 +1,7 @@
 import '../features/settings/presentation/about_screen.dart';
 
 import 'dart:async';
+import 'dart:io' show Directory;
 
 import 'package:flutter/foundation.dart'
     show TargetPlatform, defaultTargetPlatform, kIsWeb;
@@ -20,10 +21,12 @@ import '../core/logging/error_reporting.dart';
 import '../core/logging/recent_log.dart';
 import '../core/platform/web_platform_channels.dart';
 import '../core/logging/logging_package_logger.dart';
+import '../core/core_providers.dart';
 import '../core/storage/storage_providers.dart';
 import '../wbw/wbw_providers.dart';
 import '../quran/data/import/bundled_database_installer.dart';
 import '../quran/data/import/bundled_dataset_seeder.dart';
+import '../quran/data/import/meaning_pack_fetch.dart';
 import '../quran/data/import/meaning_pack_store.dart';
 import '../quran/application/meaning_packs.dart';
 import '../quran/application/quran_setup.dart';
@@ -170,17 +173,23 @@ Future<void> bootstrap() async {
     final failure = await installer.installIfNeeded();
     startupMark('databases');
     if (failure != null) return failure;
-    await container
-        .read(meaningPacksProvider.notifier)
-        .attach(
-          UnpackingMeaningPackStore(
-            databases: meaningDatabases(),
-            temp: await getTemporaryDirectory(),
-            loadString: rootBundle.loadString,
-            unpack: BundledDatabaseInstaller.nativeUnpack,
+    // Downloaded (the app doesn't carry them): in the background — the
+    // app opens meanwhile, English in their place until they're there.
+    final support = await getApplicationSupportDirectory();
+    unawaited(
+      container
+          .read(meaningPacksProvider.notifier)
+          .attach(
+            DownloadingMeaningPackStore(
+              databases: meaningDatabases(),
+              loadString: rootBundle.loadString,
+              temp: await getTemporaryDirectory(),
+              cache: Directory('${support.path}/meaning_packs'),
+              fetch: meaningPackFetch(container.read(networkClientProvider)),
+              unpack: BundledDatabaseInstaller.nativeUnpackFile,
+            ),
           ),
-        );
-    startupMark('meaning packs');
+    );
     return null;
   }
 

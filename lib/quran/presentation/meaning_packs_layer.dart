@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -10,13 +12,46 @@ import '../application/meaning_packs.dart';
 /// meanings go on the phone ([meaningPacksProvider]), a short wait — the
 /// app dimmed, a card saying what's happening; and when that failed, the
 /// error, kept on screen until it works, with a way to try again.
-class MeaningPacksLayer extends ConsumerWidget {
+///
+/// A download waiting for the network: said once, for a few seconds (the
+/// app goes on in English meanwhile).
+class MeaningPacksLayer extends ConsumerStatefulWidget {
   const MeaningPacksLayer({super.key, required this.child});
 
   final Widget child;
 
+  /// How long the offline notice shows.
+  static const offlineNotice = Duration(seconds: 6);
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MeaningPacksLayer> createState() => _MeaningPacksLayerState();
+}
+
+class _MeaningPacksLayerState extends ConsumerState<MeaningPacksLayer> {
+  bool _offlineSaid = false;
+  bool _offlineShown = false;
+  Timer? _hide;
+
+  @override
+  void dispose() {
+    _hide?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    ref.listen(meaningPacksProvider.select((s) => s.waitingForNetwork), (
+      _,
+      waiting,
+    ) {
+      if (!waiting || _offlineSaid) return;
+      _offlineSaid = true;
+      setState(() => _offlineShown = true);
+      _hide = Timer(MeaningPacksLayer.offlineNotice, () {
+        if (mounted) setState(() => _offlineShown = false);
+      });
+    });
+    final child = widget.child;
     final packs = ref.watch(meaningPacksProvider);
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
@@ -63,6 +98,46 @@ class MeaningPacksLayer extends ConsumerWidget {
                       ),
                     ),
                   ),
+          ),
+        ),
+        Positioned(
+          left: 0,
+          right: 0,
+          bottom: 0,
+          child: SafeArea(
+            child: AnimatedSwitcher(
+              duration: motion(context, const Duration(milliseconds: 200)),
+              child: !_offlineShown || failure != null
+                  ? const SizedBox.shrink()
+                  : Padding(
+                      padding: const EdgeInsets.all(TahfeezSpacing.md),
+                      child: Material(
+                        key: const ValueKey('meaning-packs-offline'),
+                        color: scheme.inverseSurface,
+                        borderRadius: BorderRadius.circular(16),
+                        child: Padding(
+                          padding: const EdgeInsets.all(TahfeezSpacing.md),
+                          child: Row(
+                            spacing: TahfeezSpacing.md,
+                            children: [
+                              Icon(
+                                Icons.cloud_off_rounded,
+                                color: scheme.onInverseSurface,
+                              ),
+                              Expanded(
+                                child: Text(
+                                  l10n.meaningPacksOffline,
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: scheme.onInverseSurface,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+            ),
           ),
         ),
         if (failure != null && !packs.busy)

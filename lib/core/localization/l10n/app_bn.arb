@@ -682,5 +682,7 @@
   "settingsReportPrompt": "কী হয়েছে? (কী করেছিলেন, কী আশা করেছিলেন, কী দেখলেন।)",
   "homeToday": "আজ",
   "homeStartReading": "আল-ফাতিহা দিয়ে শুরু করুন",
-  "bookmarksOpenQuran": "কুরআন খুলুন"
+  "bookmarksOpenQuran": "কুরআন খুলুন",
+  "meaningPackDownload": "ডাউনলোড",
+  "meaningPacksOffline": "অনলাইনে এলে অনুবাদ ডাউনলোড হবে। ততক্ষণ ইংরেজি দেখানো হবে।"
 }

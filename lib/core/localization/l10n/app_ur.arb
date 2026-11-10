@@ -682,5 +682,7 @@
   "settingsReportPrompt": "کیا ہوا؟ (آپ نے کیا کیا، کیا توقع تھی، کیا دیکھا۔)",
   "homeToday": "آج",
   "homeStartReading": "سورۂ فاتحہ سے شروع کریں",
-  "bookmarksOpenQuran": "قرآن کھولیں"
+  "bookmarksOpenQuran": "قرآن کھولیں",
+  "meaningPackDownload": "ڈاؤن لوڈ",
+  "meaningPacksOffline": "آن لائن ہونے پر ترجمے ڈاؤن لوڈ ہو جائیں گے۔ تب تک انگریزی دکھائی جائے گی۔"
 }

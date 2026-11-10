@@ -12,6 +12,8 @@ import '../../quran/presentation/meaning_language_names.dart';
 import '../application/active_wbw_pack.dart';
 import '../application/wbw_library_controller.dart';
 import '../application/wbw_preferences_controller.dart';
+import '../../quran/data/import/meaning_pack_store.dart';
+import '../../quran/presentation/meaning_pack_action.dart';
 
 /// Browse/install/delete WBW language packs — this milestone's "resource
 /// states" requirement made concrete, using Tahfeez's own resource-row
@@ -57,15 +59,26 @@ class _WbwPacksSheetBody extends ConsumerWidget {
             final isActive = status.pack.id == selectedPackId;
             // Each by its language, in that language.
             final name = nativeLanguageName(status.pack.languageCode);
-            return TahfeezResourceRow(
-              title: isActive
-                  ? AppLocalizations.of(context).packsActive(name)
-                  : name,
-              subtitle: status.pack.source.startsWith('Quran.com')
-                  ? 'Quran.com'
-                  : status.pack.source,
-              state: _rowState(status.state),
-              onAction: () => _onAction(context, ref, status),
+            return Row(
+              children: [
+                Expanded(
+                  child: TahfeezResourceRow(
+                    title: isActive
+                        ? AppLocalizations.of(context).packsActive(name)
+                        : name,
+                    subtitle: status.pack.source.startsWith('Quran.com')
+                        ? 'Quran.com'
+                        : status.pack.source,
+                    state: _rowState(status.state),
+                    onAction: () => _onAction(context, ref, status),
+                  ),
+                ),
+                // On the phone or not: deleted, or downloaded, from here.
+                MeaningPackAction(
+                  kind: MeaningPackKind.wbw,
+                  id: status.pack.id,
+                ),
+              ],
             );
           },
         );

@@ -19,6 +19,10 @@ fi
 before=$(du -sk "$fw" | cut -f1)
 rm -f "$quran/quran_dataset.json"
 rm -rf "$quran/mushaf" "$quran/translations" "$quran/tafsir" "$quran/wbw"
+# The meaning packs: downloaded (DownloadingMeaningPackStore).
+rm -rf "$quran/db/packs"
+# The Mushaf's pages: carried 4 to an xz file (page_groups/).
+rm -rf "$quran/quran_engine/pages"
 after=$(du -sk "$fw" | cut -f1)
 echo "strip_unused_assets: App.framework $((before / 1024)) MB -> $((after / 1024)) MB"
 

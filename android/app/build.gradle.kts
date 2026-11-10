@@ -154,5 +154,9 @@ tasks.withType<Copy>().matching { it.name.startsWith("copyFlutterAssets") }.conf
         "**/assets/quran/translations/**",
         "**/assets/quran/tafsir/**",
         "**/assets/quran/wbw/**",
+        // The meaning packs: downloaded (DownloadingMeaningPackStore).
+        "**/assets/quran/db/packs/**",
+        // The Mushaf's pages: carried 4 to an xz file (page_groups/).
+        "**/assets/quran/quran_engine/pages/**",
     )
 }

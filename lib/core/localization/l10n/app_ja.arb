@@ -682,5 +682,7 @@
   "settingsReportPrompt": "何が起きましたか？（したこと、期待したこと、見えたこと）",
   "homeToday": "今日",
   "homeStartReading": "アル・ファーティハから始める",
-  "bookmarksOpenQuran": "クルアーンを開く"
+  "bookmarksOpenQuran": "クルアーンを開く",
+  "meaningPackDownload": "ダウンロード",
+  "meaningPacksOffline": "オンラインになると翻訳がダウンロードされます。それまでは英語で表示されます。"
 }

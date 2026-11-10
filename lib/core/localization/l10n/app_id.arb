@@ -682,5 +682,7 @@
   "settingsReportPrompt": "Apa yang terjadi? (Yang Anda lakukan, harapkan, dan lihat.)",
   "homeToday": "Hari ini",
   "homeStartReading": "Mulai dengan Al-Fatihah",
-  "bookmarksOpenQuran": "Buka Al-Qur'an"
+  "bookmarksOpenQuran": "Buka Al-Qur'an",
+  "meaningPackDownload": "Unduh",
+  "meaningPacksOffline": "Terjemahan akan diunduh saat Anda online. Sampai saat itu, bahasa Inggris ditampilkan."
 }

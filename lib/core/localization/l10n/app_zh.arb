@@ -682,5 +682,7 @@
   "settingsReportPrompt": "发生了什么？（您做了什么、期望什么、看到了什么。）",
   "homeToday": "今天",
   "homeStartReading": "从开端章开始",
-  "bookmarksOpenQuran": "打开古兰经"
+  "bookmarksOpenQuran": "打开古兰经",
+  "meaningPackDownload": "下载",
+  "meaningPacksOffline": "联网后将下载译文，在此之前显示英文。"
 }

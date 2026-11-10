@@ -682,5 +682,7 @@
   "settingsReportPrompt": "Τι συνέβη; (Τι κάνατε, τι περιμένατε, τι είδατε.)",
   "homeToday": "Σήμερα",
   "homeStartReading": "Ξεκινήστε με την Αλ-Φάτιχα",
-  "bookmarksOpenQuran": "Άνοιγμα του Κορανίου"
+  "bookmarksOpenQuran": "Άνοιγμα του Κορανίου",
+  "meaningPackDownload": "Λήψη",
+  "meaningPacksOffline": "Οι μεταφράσεις θα ληφθούν όταν συνδεθείτε. Μέχρι τότε εμφανίζονται τα αγγλικά."
 }

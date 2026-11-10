@@ -60,6 +60,15 @@ class BundledDatabaseInstaller {
         'dest': destination,
       }))!;
 
+  /// The same, from a file (a meaning pack downloaded) rather than an asset.
+  static Future<String> nativeUnpackFile(
+    String file,
+    String destination,
+  ) async => (await _channel.invokeMethod<String>('unpack', {
+    'file': file,
+    'dest': destination,
+  }))!;
+
   /// Returns why the databases could not be put in place, `null` once they
   /// are (or already were).
   Future<String?> installIfNeeded() async {

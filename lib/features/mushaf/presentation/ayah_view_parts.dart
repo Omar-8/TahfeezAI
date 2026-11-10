@@ -11,7 +11,6 @@ import '../../../core/theme/quran_text_style.dart';
 import '../application/mushaf_word_overlay.dart';
 import '../../../quran/application/ayah_reading_extras.dart';
 import '../../../quran/application/quran_script_code.dart';
-import '../../../quran/application/tafsir_selection_controller.dart';
 import '../../../quran/application/tafsir_verse_text.dart';
 import '../../../quran/domain/models/ayah_models.dart';
 import '../../../quran/domain/models/quran_refs.dart';
@@ -22,6 +21,7 @@ import '../../../quran/quran_providers.dart';
 import '../application/mushaf_page_translations.dart';
 import 'tajweed_palette.dart';
 import '../domain/mushaf_appearance.dart';
+import '../../../quran/application/meaning_packs.dart';
 
 // What an ayah shows in Ayah mode and in the ayah sheet alike: its words
 // (each with its meaning), transliteration, translations and tafsir, as
@@ -370,7 +370,7 @@ class AyahTafsir extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final tafsirId = ref.watch(tafsirSelectionControllerProvider);
+    final tafsirId = ref.watch(shownTafsirIdProvider);
     if (tafsirId == null) return const SizedBox.shrink();
     final loaded = ref.watch(
       tafsirVerseTextProvider(

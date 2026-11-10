@@ -682,5 +682,7 @@
   "settingsReportPrompt": "چه شد؟ (چه کردید، چه انتظاری داشتید، چه دیدید.)",
   "homeToday": "امروز",
   "homeStartReading": "با فاتحه شروع کنید",
-  "bookmarksOpenQuran": "قرآن را باز کنید"
+  "bookmarksOpenQuran": "قرآن را باز کنید",
+  "meaningPackDownload": "دانلود",
+  "meaningPacksOffline": "ترجمه‌ها وقتی آنلاین شوید دانلود می‌شوند. تا آن زمان انگلیسی نمایش داده می‌شود."
 }

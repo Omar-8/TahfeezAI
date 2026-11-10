@@ -682,5 +682,7 @@
   "settingsReportPrompt": "Nima bo‘ldi? (Nima qildingiz, nimani kutdingiz, nimani ko‘rdingiz.)",
   "homeToday": "Bugun",
   "homeStartReading": "Al-Fotihadan boshlash",
-  "bookmarksOpenQuran": "Qur'onni ochish"
+  "bookmarksOpenQuran": "Qur'onni ochish",
+  "meaningPackDownload": "Yuklab olish",
+  "meaningPacksOffline": "Tarjimalar internetga ulanganingizda yuklanadi. Shu paytgacha inglizcha ko‘rsatiladi."
 }

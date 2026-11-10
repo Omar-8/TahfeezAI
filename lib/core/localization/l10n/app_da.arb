@@ -682,5 +682,7 @@
   "settingsReportPrompt": "Hvad skete der? (Hvad du gjorde, forventede og så.)",
   "homeToday": "I dag",
   "homeStartReading": "Begynd med Al-Fatiha",
-  "bookmarksOpenQuran": "Åbn Koranen"
+  "bookmarksOpenQuran": "Åbn Koranen",
+  "meaningPackDownload": "Hent",
+  "meaningPacksOffline": "Oversættelserne hentes, når du er online. Indtil da vises engelsk."
 }

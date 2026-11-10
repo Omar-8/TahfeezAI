@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:drift/drift.dart';
+import 'package:flutter/services.dart' show PlatformException;
 
 import 'bundled_database_installer.dart';
 
@@ -36,11 +37,10 @@ enum MeaningPackKind {
 }
 
 /// The text of the translations, tafsirs and word meanings in use, put on
-/// the device and taken off again — the rest stays packed in the app
-/// (assets/quran/db/packs/: built by `tool/quran_db/build_databases_test
-/// .dart`), so the phone keeps ~20 MB of them rather than ~120. How a pack
-/// goes on is the platform's: [UnpackingMeaningPackStore] on the phones,
-/// [ImportingMeaningPackStore] on the web.
+/// the device and taken off again. The packs (built by
+/// `tool/quran_db/build_databases_test.dart`) are downloaded on the phones
+/// ([DownloadingMeaningPackStore]; ~25 MB the app no longer carries) and
+/// imported from the app's JSON on the web ([ImportingMeaningPackStore]).
 abstract class MeaningPackStore {
   MeaningPackStore({required this.databases, required this.loadString});
 
@@ -50,21 +50,30 @@ abstract class MeaningPackStore {
 
   Map<String, dynamic>? _manifest;
 
-  Future<Map<String, dynamic>> _packs() async => _manifest ??=
-      ((jsonDecode(
-                await loadString(
-                  '${BundledDatabaseInstaller.assetDir}/manifest.json',
-                ),
-              ) as Map<String, dynamic>)['packs']
-              as Map)
-          .cast<String, dynamic>();
+  Future<Map<String, dynamic>> _read() async => _manifest ??= jsonDecode(
+    await loadString('${BundledDatabaseInstaller.assetDir}/manifest.json'),
+  ) as Map<String, dynamic>;
 
-  /// The packs of [kind] in the app.
+  Future<Map<String, dynamic>> _packs() async =>
+      ((await _read())['packs'] as Map).cast<String, dynamic>();
+
+  Future<Map<String, dynamic>?> _entry(MeaningPackKind kind, String id) async =>
+      ((await _packs())[kind.name] as Map?)?[id] as Map<String, dynamic>?;
+
+  /// Whether a pack going on is a download (it may wait for the network;
+  /// nothing is dimmed meanwhile) rather than an import from the app.
+  bool get downloads => false;
+
+  /// The packs of [kind] there are.
   Future<Set<String>> available(MeaningPackKind kind) async => {
     ...?((await _packs())[kind.name] as Map?)?.keys.cast<String>(),
   };
 
-  /// The packs of [kind] whose text is on the phone.
+  /// [id]'s download, in bytes (`null` if it isn't one).
+  Future<int?> downloadBytes(MeaningPackKind kind, String id) async =>
+      (await _entry(kind, id))?['xzBytes'] as int?;
+
+  /// The packs of [kind] whose text is on the device.
   Future<Set<String>> installed(MeaningPackKind kind) async {
     final rows = await databases[kind]!
         .customSelect('SELECT DISTINCT ${kind.key} AS id FROM ${kind.table}')
@@ -75,7 +84,7 @@ abstract class MeaningPackStore {
   /// Puts [id]'s text on the device.
   Future<void> install(MeaningPackKind kind, String id);
 
-  /// Takes [id]'s text off the phone (the database shrinks: auto_vacuum);
+  /// Takes [id]'s text off the device (the database shrinks: auto_vacuum);
   /// never a built-in one.
   Future<void> remove(MeaningPackKind kind, String id) async {
     if (kind.builtIn.contains(id)) return;
@@ -86,36 +95,101 @@ abstract class MeaningPackStore {
   }
 }
 
-/// The phones': a pack (xz) is unpacked by the platform's own code
-/// (BundledDatabaseInstaller's), checked against its hash, and copied in by
-/// SQLite itself (ATTACH, INSERT … SELECT): quick, and little memory.
-class UnpackingMeaningPackStore extends MeaningPackStore {
-  UnpackingMeaningPackStore({
+/// A pack couldn't be downloaded: no network (or none that answers). It's
+/// tried again when the phone is back online.
+class MeaningPackOffline implements Exception {
+  const MeaningPackOffline(this.cause);
+
+  final Object cause;
+
+  @override
+  String toString() => 'Offline: $cause';
+}
+
+/// Downloads [url] to the file at [path] (throws [MeaningPackOffline] when
+/// there's no network).
+typedef MeaningPackFetch = Future<void> Function(Uri url, String path);
+
+/// Unpacks the xz file at [file] into [destination]; returns the SHA-256 of
+/// what it wrote (the app: BundledDatabaseInstaller.nativeUnpackFile).
+typedef MeaningPackUnpacker = Future<String> Function(
+  String file,
+  String destination,
+);
+
+/// The phones': a pack (xz) is downloaded from the release named after the
+/// databases' version (`meaning-packs-<version>`: the files that match
+/// them; tool/quran_db/publish_meaning_packs.sh), kept ([cache]: deleted
+/// with the pack), unpacked by the platform's own code, checked against its
+/// hash, and copied in by SQLite itself (ATTACH, INSERT … SELECT): quick,
+/// and little memory.
+class DownloadingMeaningPackStore extends MeaningPackStore {
+  DownloadingMeaningPackStore({
     required super.databases,
-    required this.temp,
     required super.loadString,
+    required this.temp,
+    required this.cache,
+    required this.fetch,
     required this.unpack,
+    this.baseUrl = defaultBaseUrl,
   });
+
+  /// Where the packs are published (a GitHub release per version).
+  static const defaultBaseUrl =
+      'https://github.com/Omar-8/TahfeezAI/releases/download';
 
   /// Where a pack is unpacked before it's copied in.
   final Directory temp;
 
-  /// (The platform's, in the app: BundledDatabaseInstaller.nativeUnpack.)
-  final DatabaseUnpacker unpack;
+  /// Where the downloaded packs are kept (each until it's deleted: put on
+  /// again — the databases replaced by a new version — without a download).
+  final Directory cache;
+
+  final MeaningPackFetch fetch;
+  final MeaningPackUnpacker unpack;
+  final String baseUrl;
+
+  @override
+  bool get downloads => true;
+
+  Future<Uri> url(MeaningPackKind kind, String id) async {
+    final entry = await _entry(kind, id);
+    if (entry == null) throw StateError('No ${kind.name} pack $id');
+    final version = (await _read())['version'];
+    final name = (entry['asset'] as String).split('/').last;
+    return Uri.parse('$baseUrl/meaning-packs-$version/$name');
+  }
+
+  File _cached(Map<String, dynamic> entry) =>
+      File('${cache.path}/${(entry['asset'] as String).split('/').last}');
 
   @override
   Future<void> install(MeaningPackKind kind, String id) async {
-    final entry =
-        ((await _packs())[kind.name] as Map?)?[id] as Map<String, dynamic>?;
-    if (entry == null) throw StateError('No ${kind.name} pack $id in the app');
+    final entry = await _entry(kind, id);
+    if (entry == null) throw StateError('No ${kind.name} pack $id');
+    final packed = _cached(entry);
     temp.createSync(recursive: true);
     final file = File('${temp.path}/${kind.name}-$id.sqlite');
     try {
-      final hash = await unpack(
-        '${BundledDatabaseInstaller.assetDir}/${entry['asset']}',
-        file.path,
-      );
+      var fresh = false;
+      Future<void> download() async {
+        cache.createSync(recursive: true);
+        final part = File('${packed.path}.part');
+        await fetch(await url(kind, id), part.path);
+        part.renameSync(packed.path);
+        fresh = true;
+      }
+
+      if (!packed.existsSync()) await download();
+      var hash = await _unpackChecked(packed.path, file.path);
+      if (hash != entry['sha256'] && !fresh) {
+        // A kept copy of another version's (or damaged): downloaded anew.
+        packed.deleteSync();
+        await download();
+        hash = await _unpackChecked(packed.path, file.path);
+      }
       if (hash != entry['sha256']) {
+        packed.deleteSync();
         throw StateError(
           '${kind.name} pack $id failed hash verification '
           '(expected ${entry['sha256']}, got $hash)',
@@ -140,6 +214,25 @@ class UnpackingMeaningPackStore extends MeaningPackStore {
     } finally {
       if (file.existsSync()) file.deleteSync();
     }
+  }
+
+  /// (Not xz at all — a damaged download — counts as a wrong hash.)
+  Future<String> _unpackChecked(String from, String to) async {
+    try {
+      return await unpack(from, to);
+    } on PlatformException catch (e) {
+      return 'unpack failed: ${e.message}';
+    }
+  }
+
+  @override
+  Future<void> remove(MeaningPackKind kind, String id) async {
+    if (kind.builtIn.contains(id)) return;
+    await super.remove(kind, id);
+    final entry = await _entry(kind, id);
+    if (entry == null) return;
+    final packed = _cached(entry);
+    if (packed.existsSync()) packed.deleteSync();
   }
 }
 

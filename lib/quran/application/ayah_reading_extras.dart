@@ -4,13 +4,13 @@ import '../../wbw/application/active_wbw_pack.dart';
 import '../../wbw/wbw_providers.dart';
 import '../domain/models/translation_models.dart';
 import '../translation_providers.dart';
-import 'translation_selection_controller.dart';
+import 'meaning_packs.dart';
 
 /// An ayah's chosen translations (Settings), by slug — for readers that
 /// show one ayah at a time (the tafsir reader).
 final ayahTranslationsProvider = FutureProvider.autoDispose
     .family<Map<String, TranslationVerseText>, int>((ref, ayahId) async {
-      final slugs = ref.watch(translationSelectionControllerProvider);
+      final slugs = ref.watch(shownTranslationSlugsProvider);
       final repository = ref.watch(translationRepositoryProvider);
       final verse = (chapterNo: ayahId ~/ 1000, verseNo: ayahId % 1000);
       final out = <String, TranslationVerseText>{};

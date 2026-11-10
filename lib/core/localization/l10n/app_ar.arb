@@ -682,5 +682,7 @@
   "settingsReportPrompt": "ماذا حدث؟ (ما فعلته، وما توقعته، وما رأيته.)",
   "homeToday": "اليوم",
   "homeStartReading": "ابدأ بالفاتحة",
-  "bookmarksOpenQuran": "افتح القرآن"
+  "bookmarksOpenQuran": "افتح القرآن",
+  "meaningPackDownload": "تنزيل",
+  "meaningPacksOffline": "ستُنزَّل الترجمات عند اتصالك بالإنترنت، وتظهر الإنجليزية حتى ذلك الحين."
 }

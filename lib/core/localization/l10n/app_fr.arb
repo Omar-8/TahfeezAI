@@ -682,5 +682,7 @@
   "settingsReportPrompt": "Que s'est-il passé ? (Ce que vous avez fait, attendu, vu.)",
   "homeToday": "Aujourd'hui",
   "homeStartReading": "Commencer par Al-Fatiha",
-  "bookmarksOpenQuran": "Ouvrir le Coran"
+  "bookmarksOpenQuran": "Ouvrir le Coran",
+  "meaningPackDownload": "Télécharger",
+  "meaningPacksOffline": "Les traductions se téléchargeront dès que vous serez en ligne. L'anglais s'affiche d'ici là."
 }

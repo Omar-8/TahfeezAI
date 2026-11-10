@@ -682,5 +682,7 @@
   "settingsReportPrompt": "Wat gebeurde er? (Wat je deed, verwachtte en zag.)",
   "homeToday": "Vandaag",
   "homeStartReading": "Begin met Al-Fatiha",
-  "bookmarksOpenQuran": "Open de Koran"
+  "bookmarksOpenQuran": "Open de Koran",
+  "meaningPackDownload": "Downloaden",
+  "meaningPacksOffline": "De vertalingen worden gedownload zodra je online bent. Tot dan wordt Engels getoond."
 }

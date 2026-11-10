@@ -682,5 +682,7 @@
   "settingsReportPrompt": "Что случилось? (Что вы делали, чего ждали, что увидели.)",
   "homeToday": "Сегодня",
   "homeStartReading": "Начать с аль-Фатихи",
-  "bookmarksOpenQuran": "Открыть Коран"
+  "bookmarksOpenQuran": "Открыть Коран",
+  "meaningPackDownload": "Скачать",
+  "meaningPacksOffline": "Переводы загрузятся, когда появится интернет. До тех пор показывается английский."
 }

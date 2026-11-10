@@ -1,4 +1,5 @@
-import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter/services.dart'
+    show MissingPluginException, Uint8List, rootBundle;
 import 'package:flutter/widgets.dart';
 import 'package:qvp_flutter/qvp_flutter.dart';
 
@@ -7,6 +8,7 @@ import '../../../../quran/domain/models/quran_refs.dart';
 import '../../domain/quran_engine/quran_engine_mushaf_backend.dart';
 import '../../domain/quran_engine_ref_adapter.dart';
 import '../../presentation/mushaf_token_hit_rect.dart';
+import 'quran_engine_page_groups.dart';
 
 /// Android implementation of [QuranEngineMushafBackend], promoted from the
 /// `poc/quran-engine` branch's evaluation
@@ -33,6 +35,16 @@ import '../../presentation/mushaf_token_hit_rect.dart';
 /// section), and this decision does not change that legal status. There is
 /// deliberately no `kReleaseMode` refusal here any more.
 class QuranEngineAndroidBackend implements QuranEngineMushafBackend {
+  QuranEngineAndroidBackend({QuranEnginePageGroups? pages})
+    : _pages = pages ?? QuranEnginePageGroups();
+
+  /// The pages, as the phones carry them (4 to a file, unpacked as needed).
+  final QuranEnginePageGroups _pages;
+
+  /// No native unpacking here (desktop development, tests): the .qvp files
+  /// read as they are.
+  bool _plainFiles = false;
+
   QvpEngine? _engine;
 
   QvpEngine get _requireEngine {
@@ -54,20 +66,30 @@ class QuranEngineAndroidBackend implements QuranEngineMushafBackend {
 
   @override
   Future<QuranEngineMushafPage> loadPage(int pageNumber) async {
-    final assetPath = quranEnginePageAssetPath(pageNumber);
-    final data = await rootBundle.load(assetPath);
-    final page = _requireEngine.loadPage(data.buffer.asUint8List());
+    final page = _requireEngine.loadPage(await _bytes(pageNumber));
     return QuranEngineAndroidPage(pageNumber: pageNumber, page: page);
   }
 
   @override
   void disposePage(QuranEngineMushafPage page) => page.dispose();
 
+  Future<Uint8List> _bytes(int pageNumber) async {
+    if (!_plainFiles) {
+      try {
+        return await _pages.page(pageNumber);
+      } on MissingPluginException {
+        _plainFiles = true;
+      }
+    }
+    final data = await rootBundle.load(quranEnginePageAssetPath(pageNumber));
+    return data.buffer.asUint8List();
+  }
+
   @override
   Future<void> preloadAround(int pageNumber, {int radius = 1}) async {
-    // No-op: pages are bundled local assets (`rootBundle.load`), not
-    // fetched over a network transport with a per-page cost worth
-    // hiding — unlike the Web backend, there is nothing useful to warm.
+    // The groups either side unpacked ahead: reading on never waits.
+    if (_plainFiles) return;
+    await _pages.preloadAround(pageNumber);
   }
 }
 

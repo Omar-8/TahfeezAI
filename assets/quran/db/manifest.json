@@ -26,187 +26,232 @@
     "translation": {
       "bn-rowwad": {
         "sha256": "7ddabe0b2f871ec6eb1d0edf5d18f9507051db818a42e99d64add6181f980787",
-        "asset": "packs/translation-bn-rowwad.sqlite.xz"
+        "asset": "packs/translation-bn-rowwad.sqlite.xz",
+        "xzBytes": 358616
       },
       "ckb-bamoki": {
         "sha256": "df7c9dac2523693e15615f09e9a2f0345736739c57137ce1be775cbacaf7be90",
-        "asset": "packs/translation-ckb-bamoki.sqlite.xz"
+        "asset": "packs/translation-ckb-bamoki.sqlite.xz",
+        "xzBytes": 358148
       },
       "de-rowwad": {
         "sha256": "44457b15696886fdea69fe10e08322a061c4f96253480f29b6b1f8d84d85ce15",
-        "asset": "packs/translation-de-rowwad.sqlite.xz"
+        "asset": "packs/translation-de-rowwad.sqlite.xz",
+        "xzBytes": 291512
       },
       "el-rowwad": {
         "sha256": "4c10197a44c0596df949f5e17673f11fa12a45ca7a5906dbf96d47995c514c31",
-        "asset": "packs/translation-el-rowwad.sqlite.xz"
+        "asset": "packs/translation-el-rowwad.sqlite.xz",
+        "xzBytes": 421328
       },
       "es-noor": {
         "sha256": "57d3173ba2ada8488cae363076e06d3d29b4a834a9f9db7ec4ae6c8827afb52e",
-        "asset": "packs/translation-es-noor.sqlite.xz"
+        "asset": "packs/translation-es-noor.sqlite.xz",
+        "xzBytes": 401316
       },
       "fa-rowwad": {
         "sha256": "61a994ef87980af545c2cebce25ef406b5b72a908f437b3410cfaccbf600e02b",
-        "asset": "packs/translation-fa-rowwad.sqlite.xz"
+        "asset": "packs/translation-fa-rowwad.sqlite.xz",
+        "xzBytes": 354480
       },
       "fr-noor": {
         "sha256": "8217f269ebf6c0ddc0ebb3a1515640d387b6431c784a1d507cd9804d95c8adc8",
-        "asset": "packs/translation-fr-noor.sqlite.xz"
+        "asset": "packs/translation-fr-noor.sqlite.xz",
+        "xzBytes": 345216
       },
       "ha-gumi": {
         "sha256": "79d81516b7389851a57ff86857fc95f0c958cc4aa4a5f2354856462c720f806f",
-        "asset": "packs/translation-ha-gumi.sqlite.xz"
+        "asset": "packs/translation-ha-gumi.sqlite.xz",
+        "xzBytes": 364228
       },
       "id-affairs": {
         "sha256": "0a1764217760ebbf19ff5a404b28813914c94f861c3bee591a11eb3b47cdb104",
-        "asset": "packs/translation-id-affairs.sqlite.xz"
+        "asset": "packs/translation-id-affairs.sqlite.xz",
+        "xzBytes": 285504
       },
       "ja-sato": {
         "sha256": "7503f8c92b1cbc835fe35f579d33b49b630b0e7392419abbe0b8d8e5435c1722",
-        "asset": "packs/translation-ja-sato.sqlite.xz"
+        "asset": "packs/translation-ja-sato.sqlite.xz",
+        "xzBytes": 545988
       },
       "kk-altai": {
         "sha256": "100d1f1d34480eff0040dfb6a375db708673a231585e4eb4af02351e75c5ece4",
-        "asset": "packs/translation-kk-altai.sqlite.xz"
+        "asset": "packs/translation-kk-altai.sqlite.xz",
+        "xzBytes": 303604
       },
       "ko-hamid": {
         "sha256": "fcac1813984e28251c00ed30f0843424f969c70170a067d1d4ff27fc517d2d45",
-        "asset": "packs/translation-ko-hamid.sqlite.xz"
+        "asset": "packs/translation-ko-hamid.sqlite.xz",
+        "xzBytes": 289776
       },
       "ms-basumayyah": {
         "sha256": "e80b4d4fc7c0fb091aa04d144da61950dc670ea7918326ff8f901ac9f457014d",
-        "asset": "packs/translation-ms-basumayyah.sqlite.xz"
+        "asset": "packs/translation-ms-basumayyah.sqlite.xz",
+        "xzBytes": 352340
       },
       "nl-rowwad": {
         "sha256": "6062a7c4abf8f3c1480266d258129d5a3fb59239ce9a12901eb9dfdbb503ad31",
-        "asset": "packs/translation-nl-rowwad.sqlite.xz"
+        "asset": "packs/translation-nl-rowwad.sqlite.xz",
+        "xzBytes": 323308
       },
       "ps-rowwad": {
         "sha256": "9dcf87e63750d70901234355efba35cbe5f047dd71a8c80fbcaeee99f3a7d140",
-        "asset": "packs/translation-ps-rowwad.sqlite.xz"
+        "asset": "packs/translation-ps-rowwad.sqlite.xz",
+        "xzBytes": 323880
       },
       "pt-nasr": {
         "sha256": "6947dbc5b770a1a887f35ebac882e4a8f0473fb0ae02e778eca20123842637e4",
-        "asset": "packs/translation-pt-nasr.sqlite.xz"
+        "asset": "packs/translation-pt-nasr.sqlite.xz",
+        "xzBytes": 360612
       },
       "ru-rowwad": {
         "sha256": "c21a3e07eff0969920e4117ae23bcf6beda63af333718c95571e758faf7178a7",
-        "asset": "packs/translation-ru-rowwad.sqlite.xz"
+        "asset": "packs/translation-ru-rowwad.sqlite.xz",
+        "xzBytes": 295648
       },
       "so-yaqoub": {
         "sha256": "9157778530726c29d16ba04d3771bc11286a41a29692a897a9256266166b64b4",
-        "asset": "packs/translation-so-yaqoub.sqlite.xz"
+        "asset": "packs/translation-so-yaqoub.sqlite.xz",
+        "xzBytes": 368428
       },
       "sw-rowwad": {
         "sha256": "cc4b5cc49327e876c6da20d7501985a528add32f5ac5a9d03c7947fd83e219ec",
-        "asset": "packs/translation-sw-rowwad.sqlite.xz"
+        "asset": "packs/translation-sw-rowwad.sqlite.xz",
+        "xzBytes": 257248
       },
       "tr-rowwad": {
         "sha256": "5dda48b0b03064c1761553bfa529a96ce4069d95fcfd2f47f5df76d0254d5881",
-        "asset": "packs/translation-tr-rowwad.sqlite.xz"
+        "asset": "packs/translation-tr-rowwad.sqlite.xz",
+        "xzBytes": 290940
       },
       "ur-junagarhi": {
         "sha256": "fdcdd13329c85d0cb6687f58a9108478840cc1e8740ad8eeba7915504696a1c5",
-        "asset": "packs/translation-ur-junagarhi.sqlite.xz"
+        "asset": "packs/translation-ur-junagarhi.sqlite.xz",
+        "xzBytes": 1147076
       },
       "uz-rowwad": {
         "sha256": "575141a87017c6eab4ca7a846b96db59ce25e5ac64c5181b6b2ca1e9e838ff24",
-        "asset": "packs/translation-uz-rowwad.sqlite.xz"
+        "asset": "packs/translation-uz-rowwad.sqlite.xz",
+        "xzBytes": 283236
       },
       "zh-makin": {
         "sha256": "14b7b11d1c804966a1bec41775f8cc42a9180d6e483d30abe9808ddafc75855b",
-        "asset": "packs/translation-zh-makin.sqlite.xz"
+        "asset": "packs/translation-zh-makin.sqlite.xz",
+        "xzBytes": 244812
       },
       "zh-suliman": {
         "sha256": "a992f7ff18f693caf91ceb929a75bffd760272b2463513f1e915b87603261e1f",
-        "asset": "packs/translation-zh-suliman.sqlite.xz"
+        "asset": "packs/translation-zh-suliman.sqlite.xz",
+        "xzBytes": 245800
       }
     },
     "tafsir": {
       "ar-mukhtasar": {
         "sha256": "7ae123ba349a80674f1567ed1abf6fbe3e7600608fa71d026f777d76ca741796",
-        "asset": "packs/tafsir-ar-mukhtasar.sqlite.xz"
+        "asset": "packs/tafsir-ar-mukhtasar.sqlite.xz",
+        "xzBytes": 443572
       },
       "ar-nafahat": {
         "sha256": "fd66a43d1d4511a718e67797703c29912b3ab8b0036d5561335d69db5c0d78b5",
-        "asset": "packs/tafsir-ar-nafahat.sqlite.xz"
+        "asset": "packs/tafsir-ar-nafahat.sqlite.xz",
+        "xzBytes": 742644
       },
       "ar-yaseer": {
         "sha256": "c369dd8e3a5236799012a75a9313822502cab4d7d7a351f77a7f172497b4d73f",
-        "asset": "packs/tafsir-ar-yaseer.sqlite.xz"
+        "asset": "packs/tafsir-ar-yaseer.sqlite.xz",
+        "xzBytes": 646768
       },
       "bn-mukhtasar": {
         "sha256": "15a9be8760d08326a9854a15785a22a46c9448f6fe02bb5fc4ebb89db45a25d7",
-        "asset": "packs/tafsir-bn-mukhtasar.sqlite.xz"
+        "asset": "packs/tafsir-bn-mukhtasar.sqlite.xz",
+        "xzBytes": 561764
       },
       "ckb-mukhtasar": {
         "sha256": "790490edd22ee8ce5c301791c178557d1e3b8e09735ee561084c091b6b3301bc",
-        "asset": "packs/tafsir-ckb-mukhtasar.sqlite.xz"
+        "asset": "packs/tafsir-ckb-mukhtasar.sqlite.xz",
+        "xzBytes": 620924
       },
       "es-mukhtasar": {
         "sha256": "b7ae5b113769409e98ed523cd27d77d4871913e8d2abed4f3a29983631175202",
-        "asset": "packs/tafsir-es-mukhtasar.sqlite.xz"
+        "asset": "packs/tafsir-es-mukhtasar.sqlite.xz",
+        "xzBytes": 485388
       },
       "fa-mukhtasar": {
         "sha256": "8ab0c8bbcd1a791471189705d31cf8aa92c33e4099a31c99b5579befe288d93c",
-        "asset": "packs/tafsir-fa-mukhtasar.sqlite.xz"
+        "asset": "packs/tafsir-fa-mukhtasar.sqlite.xz",
+        "xzBytes": 503764
       },
       "fr-mukhtasar": {
         "sha256": "535ab87adbe7cc2080f815b872e64085c5eebb1e82e222d8c501376d510d0cc5",
-        "asset": "packs/tafsir-fr-mukhtasar.sqlite.xz"
+        "asset": "packs/tafsir-fr-mukhtasar.sqlite.xz",
+        "xzBytes": 495864
       },
       "id-mukhtasar": {
         "sha256": "bc8307df76996ea8e3b933acef746d626b75ce1272fb0812b9088dd94f1078f1",
-        "asset": "packs/tafsir-id-mukhtasar.sqlite.xz"
+        "asset": "packs/tafsir-id-mukhtasar.sqlite.xz",
+        "xzBytes": 489452
       },
       "ja-mukhtasar": {
         "sha256": "00fa5d43a5f37aeba1c74db4f92d637ea7a899b001f18a977fdd2edb8064af21",
-        "asset": "packs/tafsir-ja-mukhtasar.sqlite.xz"
+        "asset": "packs/tafsir-ja-mukhtasar.sqlite.xz",
+        "xzBytes": 459428
       },
       "ps-mukhtasar": {
         "sha256": "b1959fc66a8c23537d9654222665c6baa0aea2fcc10de30c5b00c2b615e7e6a6",
-        "asset": "packs/tafsir-ps-mukhtasar.sqlite.xz"
+        "asset": "packs/tafsir-ps-mukhtasar.sqlite.xz",
+        "xzBytes": 568100
       },
       "ru-mukhtasar": {
         "sha256": "6b6682ff027d04243e348a41d193c384298aeb8f6917be059859948712c935e2",
-        "asset": "packs/tafsir-ru-mukhtasar.sqlite.xz"
+        "asset": "packs/tafsir-ru-mukhtasar.sqlite.xz",
+        "xzBytes": 538312
       },
       "tr-mukhtasar": {
         "sha256": "e57ced2c4e2400427af04f79899f611b6d6a243cda0c6824c3479543b9f00513",
-        "asset": "packs/tafsir-tr-mukhtasar.sqlite.xz"
+        "asset": "packs/tafsir-tr-mukhtasar.sqlite.xz",
+        "xzBytes": 506248
       },
       "ur-ahsanulbayan": {
         "sha256": "71355c3cdc15af62879d4327ec0360e05f73e74ac43e5dff9da895573f7b7bc8",
-        "asset": "packs/tafsir-ur-ahsanulbayan.sqlite.xz"
+        "asset": "packs/tafsir-ur-ahsanulbayan.sqlite.xz",
+        "xzBytes": 861440
       },
       "uz-mukhtasar": {
         "sha256": "5c362dcd6720e2773515d163cacb69b3913134f176f650bf9f582612d95daedd",
-        "asset": "packs/tafsir-uz-mukhtasar.sqlite.xz"
+        "asset": "packs/tafsir-uz-mukhtasar.sqlite.xz",
+        "xzBytes": 477616
       }
     },
     "wbw": {
       "bn-qurancom": {
         "sha256": "0437911b283599d7f7260abab0e2c0419de452a4f38ca9496cfd8215002e3cf3",
-        "asset": "packs/wbw-bn-qurancom.sqlite.xz"
+        "asset": "packs/wbw-bn-qurancom.sqlite.xz",
+        "xzBytes": 831648
       },
       "fa-qurancom": {
         "sha256": "91cb1e68e075b058bbf39f078324e3ec9e4a12217ef3c3959ec994fcba14c0dd",
-        "asset": "packs/wbw-fa-qurancom.sqlite.xz"
+        "asset": "packs/wbw-fa-qurancom.sqlite.xz",
+        "xzBytes": 687656
       },
       "fr-qurancom": {
         "sha256": "851500823b1b1e2c2f8def111d1fb5710c717c3bfcdafd0449b454d0d406a7f9",
-        "asset": "packs/wbw-fr-qurancom.sqlite.xz"
+        "asset": "packs/wbw-fr-qurancom.sqlite.xz",
+        "xzBytes": 727196
       },
       "id-qurancom": {
         "sha256": "7a50b4315c3fe7a8563b4aa1bbe04846eb7ae717b7315cb66372dae4032028a1",
-        "asset": "packs/wbw-id-qurancom.sqlite.xz"
+        "asset": "packs/wbw-id-qurancom.sqlite.xz",
+        "xzBytes": 674700
       },
       "tr-qurancom": {
         "sha256": "6e8e7f36647fe1035f649c7bb8e7ea02ed0912f078b2041686de9ae0afaab8d8",
-        "asset": "packs/wbw-tr-qurancom.sqlite.xz"
+        "asset": "packs/wbw-tr-qurancom.sqlite.xz",
+        "xzBytes": 683748
       },
       "ur-qurancom": {
         "sha256": "557b7acdbd160dd3922c29235b2088ea1bf860d6984493e60131d31c2dc2cc47",
-        "asset": "packs/wbw-ur-qurancom.sqlite.xz"
+        "asset": "packs/wbw-ur-qurancom.sqlite.xz",
+        "xzBytes": 744028
       }
     }
   }

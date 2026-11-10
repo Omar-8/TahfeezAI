@@ -682,5 +682,7 @@
   "settingsReportPrompt": "چی ڕوویدا؟ (چیت کرد، چاوەڕێی چیت دەکرد، چیت بینی.)",
   "homeToday": "ئەمڕۆ",
   "homeStartReading": "بە فاتیحە دەست پێبکە",
-  "bookmarksOpenQuran": "قورئان بکەرەوە"
+  "bookmarksOpenQuran": "قورئان بکەرەوە",
+  "meaningPackDownload": "داگرتن",
+  "meaningPacksOffline": "وەرگێڕانەکان کاتێک ئۆنلاین بیت دادەگیرێن. تا ئەو کاتە ئینگلیزی پیشان دەدرێت."
 }
