@@ -1019,12 +1019,17 @@ class HifzController extends Notifier<HifzState> {
     // Words recited but still to be shown, one after another.
     final held = _held.toSet();
     final next = held.isEmpty ? expected : _held.first;
+    // A page turned back to (the page visible): its colours from before on
+    // the words not recited again yet ([_keptShown]).
+    final kept = _keptShown;
+    HifzVerdict? verdictOf(int p) =>
+        judge!.revealed.contains(p) ? judge.marked[p] : kept?.marked[p];
     final marks = <WordRef, MushafWordMark>{
       if (settings.colorWords && judge != null)
-        for (final p in judge.revealed)
+        for (final p in {...judge.revealed, ...?kept?.revealed})
           if (!judge.given.contains(p) &&
               !held.contains(judge.corpus.words[p].ref))
-            judge.corpus.words[p].ref: switch (judge.marked[p]) {
+            judge.corpus.words[p].ref: switch (verdictOf(p)) {
               HifzVerdict.skipped => MushafWordMark.skipped,
               HifzVerdict.wrong ||
               HifzVerdict.selfCorrected => MushafWordMark.wrong,
@@ -1224,6 +1229,7 @@ class HifzController extends Notifier<HifzState> {
     _seenPages = _visiblePages();
     _relocating = false;
     _hiddenAgain = null;
+    _keptShown = null;
     final chosen = state.range;
     if (chosen != null) {
       final start = corpus.verseStartPosition(chosen.from);
@@ -1386,6 +1392,13 @@ class HifzController extends Notifier<HifzState> {
   /// the test goes on from there (as a test started mid-page does).
   ({int from, int to, Map<int, HifzVerdict> marked})? _hiddenAgain;
 
+  /// With the page visible, a page turned back to keeps showing its colours
+  /// from before while it's recited again — each word's new one replacing
+  /// it as it's recited (owner, 2026-11-10: they had all gone at once, as
+  /// if lost). Not in hide mode: there the page is hidden again, to be
+  /// recited from memory.
+  ({Set<int> revealed, Map<int, HifzVerdict> marked})? _keptShown;
+
   /// When the visible pages change and the expected word is not on them —
   /// the reciter turned the page themselves, rather than the test following
   /// them — the test moves to the new pages: with hide mode on, to their
@@ -1448,6 +1461,7 @@ class HifzController extends Notifier<HifzState> {
     // on by hand mid-page) keeps its words and colours: the test goes on
     // from its first word not yet recited.
     _hiddenAgain = null;
+    _keptShown = null;
     if (turnedBack &&
         judge.current > to &&
         judge.revealed.containsAll([for (var q = from; q <= to; q++) q])) {
@@ -1459,6 +1473,13 @@ class HifzController extends Notifier<HifzState> {
       judge.hideRange(from, to);
     }
     final hideOn = ref.read(mushafHideModeProvider).enabled;
+    final again = _hiddenAgain;
+    if (!hideOn && again != null) {
+      _keptShown = (
+        revealed: {for (var q = again.from; q <= again.to; q++) q},
+        marked: again.marked,
+      );
+    }
     if (hideOn) {
       judge.jumpTo(from);
       _matcher = _newMatcher()
@@ -1793,6 +1814,7 @@ class HifzController extends Notifier<HifzState> {
       }
     }
     final judge = _judge!;
+    _trackVisibility(judge);
     final corpus = judge.corpus;
     final recent = [...state.recent, ...events];
     state = HifzState(
@@ -1800,8 +1822,17 @@ class HifzController extends Notifier<HifzState> {
       running: (running ?? state.running) && !judge.completed,
       first: corpus.words[judge.start].ref,
       last: corpus.words[judge.end].ref,
-      revealed: {for (final p in judge.revealed) corpus.words[p].ref},
+      revealed: {
+        for (final p in judge.revealed) corpus.words[p].ref,
+        // (A page turned back to: its colours from before, until recited.)
+        for (final p in _keptShown?.revealed ?? const <int>{})
+          corpus.words[p].ref,
+      },
       marked: {
+        for (final MapEntry(key: p, value: v)
+            in _keptShown?.marked.entries ??
+                const <MapEntry<int, HifzVerdict>>[])
+          if (!judge.revealed.contains(p)) corpus.words[p].ref: v,
         for (final e in judge.marked.entries) corpus.words[e.key].ref: e.value,
       },
       expected: judge.expectedRef,
@@ -2068,6 +2099,34 @@ class HifzController extends Notifier<HifzState> {
   /// The test whose results were last recorded (each test once).
   HifzJudge? _recorded;
 
+  /// The words recited while the page was visible (hide mode off as they
+  /// were recited): their ayahs were read, not recited from memory, so
+  /// they never count as memorized — whatever hide mode is when the
+  /// recitation stops (owner, 2026-11-10: five pages read with the page
+  /// visible counted as memorized, hide mode turned on before stopping).
+  final _recitedVisible = <int>{};
+
+  /// The words seen recited so far ([_trackVisibility]), and their test.
+  final _seenRevealed = <int>{};
+  HifzJudge? _seenFor;
+
+  /// Notes, for each word newly recited, whether it was hidden then.
+  void _trackVisibility(HifzJudge judge) {
+    if (!identical(_seenFor, judge)) {
+      _seenFor = judge;
+      _seenRevealed.clear();
+      _recitedVisible.clear();
+    }
+    // (Hidden again — a page to recite once more, a loop's next pass:
+    // judged anew as they're recited again.)
+    _seenRevealed.retainAll(judge.revealed);
+    _recitedVisible.retainAll(judge.revealed);
+    final hiding = ref.read(mushafHideModeProvider).enabled;
+    for (final p in judge.revealed) {
+      if (_seenRevealed.add(p) && !hiding) _recitedVisible.add(p);
+    }
+  }
+
   /// Records a finished test for memorization: every ayah it covered whole,
   /// graded from its words (wrong, skipped or revealed by hand, corrected,
   /// and this pass's pronunciation mistakes).
@@ -2078,7 +2137,11 @@ class HifzController extends Notifier<HifzState> {
     final corpus = judge.corpus;
     final pass = _pass;
     final at = ref.read(recitationClockProvider)();
-    final hidden = ref.read(mushafHideModeProvider).enabled;
+    _trackVisibility(judge);
+    // From memory: every word of it recited while hidden.
+    final readVisible = {
+      for (final p in _recitedVisible) corpus.words[p].ref.ayahId,
+    };
     final recorder = ref.read(memorizationRecorderProvider);
     final settle = ref.read(memorizationRecordDelayProvider);
     // Activity: the words heard recited, and the ayahs recited whole.
@@ -2151,7 +2214,7 @@ class HifzController extends Notifier<HifzState> {
         ayahWords: ayahWords,
         sessionId: sessionId,
         at: at,
-        hidden: hidden,
+        hidden: (ayahId) => !readVisible.contains(ayahId),
       );
       if (attempts.isNotEmpty) await recorder(attempts);
     }());

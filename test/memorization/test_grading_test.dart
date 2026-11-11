@@ -19,8 +19,13 @@ void main() {
         pronunciationMistake: pronunciation.contains(w),
       ),
   ];
-  List<AyahAttempt> grade(List<TestWord> ws, {bool hidden = true}) =>
-      gradeTest(ws, ayahWords: words, sessionId: 's1', at: at, hidden: hidden);
+  List<AyahAttempt> grade(List<TestWord> ws, {bool hidden = true}) => gradeTest(
+    ws,
+    ayahWords: words,
+    sessionId: 's1',
+    at: at,
+    hidden: (_) => hidden,
+  );
 
   test('clean ayahs are good; only ayahs recited whole are graded', () {
     final out = grade([

@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../application/mushaf_focus_ayah.dart';
 import '../application/mushaf_hide_mode.dart';
 import '../application/mushaf_page_verses.dart';
+import '../../bookmarks/application/bookmarks_controller.dart';
 import '../application/mushaf_passages.dart';
 import '../application/mushaf_word_overlay.dart';
 import '../../recitation/application/hifz_controller.dart';
@@ -303,9 +304,10 @@ class _QuranEngineMushafPageContentState
   }
 
   /// Draws every highlight on the page at once, each word's by priority:
-  /// the focus (or long-pressed) ayah's blue, then a recitation's marks,
-  /// then — with "Colour thematic passages" on — its passage's tint, on
-  /// the words not hidden (in hide mode, as they are revealed). Ink marks
+  /// the focus (or long-pressed) ayah's band, then a recitation's marks,
+  /// then a bookmarked ayah's light green ([bookmarkedAyahColor]), then —
+  /// with "Colour thematic passages" on — its passage's tint, on the words
+  /// not hidden (in hide mode, as they are revealed). Ink marks
   /// colour the letters over whichever band is behind them.
   void _applyHighlights() {
     final page = _page;
@@ -325,9 +327,21 @@ class _QuranEngineMushafPageContentState
     final focus = focusId != null && refs.any((w) => w.ayahId == focusId)
         ? focusId
         : null;
-    final passages = ref.read(mushafPassagesProvider)
+    final passageTints = ref.read(mushafPassagesProvider)
         ? ref.read(passageColorsProvider).value
         : null;
+    // Bookmarked ayahs over the passages' tints.
+    final onPage = {for (final w in refs) w.ayahId};
+    final bookmarked = {
+      for (final b in ref.read(bookmarksProvider))
+        if (b.ayahId case final id? when onPage.contains(id)) id,
+    };
+    final Map<int, Color>? passages = bookmarked.isEmpty
+        ? passageTints
+        : {
+            ...?passageTints,
+            for (final id in bookmarked) id: bookmarkedAyahColor,
+          };
     // Hidden words' places stay plain: a recitation's own reveals while
     // one runs, else hide mode's.
     final hideMode = ref.read(mushafHideModeProvider);
@@ -341,7 +355,7 @@ class _QuranEngineMushafPageContentState
     final applied = _appliedHighlights;
     if (applied != null &&
         applied.focus == focus &&
-        identical(applied.passages, passages) &&
+        mapEquals(applied.passages, passages) &&
         mapEquals(applied.marks, marks) &&
         mapEquals(applied.inks, inks) &&
         setEquals(applied.hidden, hidden)) {
@@ -738,6 +752,8 @@ class _QuranEngineMushafPageContentState
       ref.listen(passageColorsProvider, (_, _) => _applyHighlights());
     }
     ref.listen(mushafPassagesProvider, (_, _) => _applyHighlights());
+    // An ayah bookmarked or no longer: its tint on or off at once.
+    ref.listen(bookmarksProvider, (_, _) => _applyHighlights());
     if (_page == null && _loadError == null) {
       // Fire-and-forget: harmless to call every build (a no-op once a
       // load is in flight or complete) -- the same pattern

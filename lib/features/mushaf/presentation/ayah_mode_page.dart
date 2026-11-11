@@ -885,9 +885,14 @@ class _AyahBlock extends ConsumerWidget {
     final anyHidden = hidden.contains(true);
     ref.watch(bookmarksProvider);
     final bookmarked = ref.read(bookmarksProvider.notifier).hasAyah(ayahId);
-    // The passage's tint (as on the printed page): under the blue of the
-    // ayah in focus, and not while words of it are hidden.
-    final tint = ref.watch(mushafPassagesProvider) && !anyHidden
+    // A bookmarked ayah's light green, else its passage's tint (as on the
+    // printed page): under the ayah in focus, and not while words of it
+    // are hidden.
+    final tint = anyHidden
+        ? null
+        : bookmarked
+        ? bookmarkedAyahColor
+        : ref.watch(mushafPassagesProvider)
         ? (ref.watch(passageColorsProvider).value ?? const {})[ayahId]
         : null;
     final verse = (chapterNo: ayahId ~/ 1000, verseNo: ayahId % 1000);

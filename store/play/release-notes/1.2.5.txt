@@ -1,0 +1,126 @@
+<en-US>
+• Bookmarked ayahs are highlighted in light green on the page
+• A page you recited keeps its colours when you turn back to it
+• Reading with the page shown no longer counts as memorized
+• No more "needs an internet connection" message when you're online
+</en-US>
+<ar>
+• تظهر الآيات المحفوظة في العلامات بلون أخضر فاتح على الصفحة
+• تحتفظ الصفحة التي تلوتها بألوانها عند الرجوع إليها
+• القراءة والصفحة ظاهرة لم تعد تُحسب حفظًا
+• لا تظهر رسالة «يحتاج اتصالًا بالإنترنت» وأنت متصل
+</ar>
+<bn-BD>
+• বুকমার্ক করা আয়াত পৃষ্ঠায় হালকা সবুজে চিহ্নিত হয়
+• তিলাওয়াত করা পৃষ্ঠায় ফিরে গেলে তার রং থেকে যায়
+• পৃষ্ঠা দেখে পড়া আর মুখস্থ হিসেবে গণ্য হয় না
+• অনলাইনে থাকলে আর "ইন্টারনেট সংযোগ প্রয়োজন" বার্তা দেখাবে না
+</bn-BD>
+<da-DK>
+• Bogmærkede ayat fremhæves med lysegrønt på siden
+• En side, du har reciteret, beholder sine farver, når du går tilbage til den
+• Læsning med siden vist tæller ikke længere som memoreret
+• Ingen besked om "kræver internetforbindelse", når du er online
+</da-DK>
+<de-DE>
+• Ayat mit Lesezeichen werden auf der Seite hellgrün hervorgehoben
+• Eine rezitierte Seite behält ihre Farben, wenn du zu ihr zurückblätterst
+• Lesen bei sichtbarer Seite zählt nicht mehr als auswendig gelernt
+• Keine Meldung „Internetverbindung erforderlich“ mehr, wenn du online bist
+</de-DE>
+<el-GR>
+• Τα αγιάτ με σελιδοδείκτη επισημαίνονται με ανοιχτό πράσινο στη σελίδα
+• Μια σελίδα που απαγγείλατε κρατά τα χρώματά της όταν επιστρέφετε σε αυτήν
+• Η ανάγνωση με ορατή σελίδα δεν μετράει πλέον ως απομνημόνευση
+• Δεν εμφανίζεται πια «απαιτείται σύνδεση στο διαδίκτυο» όταν είστε συνδεδεμένοι
+</el-GR>
+<es-ES>
+• Las aleyas marcadas se resaltan en verde claro en la página
+• Una página que recitaste conserva sus colores al volver a ella
+• Leer con la página visible ya no cuenta como memorizado
+• Ya no aparece «necesita conexión a internet» cuando estás conectado
+</es-ES>
+<fa>
+• آیه‌های نشانک‌شده با رنگ سبز روشن در صفحه مشخص می‌شوند
+• صفحه‌ای که تلاوت کرده‌اید هنگام بازگشت رنگ‌هایش را نگه می‌دارد
+• خواندن با صفحهٔ نمایان دیگر حفظ شمرده نمی‌شود
+• وقتی آنلاین هستید پیام «نیاز به اتصال اینترنت» دیگر نمایش داده نمی‌شود
+</fa>
+<fr-FR>
+• Les versets en signet sont surlignés en vert clair sur la page
+• Une page récitée garde ses couleurs quand vous y revenez
+• Lire avec la page affichée ne compte plus comme mémorisé
+• Plus de message « connexion Internet requise » quand vous êtes en ligne
+</fr-FR>
+<id>
+• Ayat yang ditandai disorot hijau muda di halaman
+• Halaman yang sudah dibaca tetap berwarna saat Anda kembali ke sana
+• Membaca dengan halaman terlihat tidak lagi dihitung sebagai hafalan
+• Pesan "perlu koneksi internet" tidak muncul lagi saat Anda online
+</id>
+<ja-JP>
+• ブックマークしたアーヤがページ上で薄い緑色で表示されます
+• 朗誦したページは、戻ったときも色が保たれます
+• ページを表示したままの読誦は暗記として数えられなくなりました
+• オンライン時に「インターネット接続が必要」と表示されなくなりました
+</ja-JP>
+<kk>
+• Бетбелгідегі аяттар бетте ашық жасыл түспен белгіленеді
+• Оқылған бетке қайта оралғанда оның түстері сақталады
+• Бет ашық тұрғанда оқу енді жатталған болып саналмайды
+• Желіде болғанда «интернет байланысы қажет» хабары енді шықпайды
+</kk>
+<ko-KR>
+• 북마크한 아야가 페이지에서 연한 초록색으로 표시됩니다
+• 낭송한 페이지로 돌아가도 색이 그대로 유지됩니다
+• 페이지를 보며 읽은 것은 더 이상 암기로 계산되지 않습니다
+• 온라인 상태에서 "인터넷 연결 필요" 메시지가 더 이상 표시되지 않습니다
+</ko-KR>
+<ms>
+• Ayat yang ditanda buku diserlahkan dengan hijau muda pada halaman
+• Halaman yang telah dibaca mengekalkan warnanya apabila anda kembali kepadanya
+• Membaca dengan halaman ditunjukkan tidak lagi dikira sebagai hafalan
+• Tiada lagi mesej "memerlukan sambungan internet" semasa anda dalam talian
+</ms>
+<nl-NL>
+• Ayat met een bladwijzer worden lichtgroen gemarkeerd op de pagina
+• Een gereciteerde pagina houdt haar kleuren als je ernaar terugbladert
+• Lezen met de pagina zichtbaar telt niet meer als gememoriseerd
+• Geen melding "internetverbinding nodig" meer als je online bent
+</nl-NL>
+<pt-BR>
+• Aiás marcados aparecem destacados em verde-claro na página
+• Uma página recitada mantém suas cores quando você volta a ela
+• Ler com a página visível não conta mais como memorizado
+• A mensagem "precisa de conexão com a internet" não aparece mais quando você está online
+</pt-BR>
+<ru-RU>
+• Аяты в закладках выделяются на странице светло-зелёным
+• Прочитанная страница сохраняет цвета, когда вы к ней возвращаетесь
+• Чтение с открытой страницей больше не засчитывается как выученное
+• Сообщение «нужно подключение к интернету» больше не появляется, когда вы онлайн
+</ru-RU>
+<sw>
+• Aya zilizowekwa alama zinaangaziwa kwa kijani hafifu kwenye ukurasa
+• Ukurasa uliousoma unabaki na rangi zake unaporudi kwake
+• Kusoma ukurasa ukiwa wazi hakuhesabiwi tena kama kuhifadhi
+• Ujumbe wa "inahitaji muunganisho wa intaneti" hauonekani tena ukiwa mtandaoni
+</sw>
+<tr-TR>
+• Yer imli ayetler sayfada açık yeşil ile vurgulanır
+• Okuduğunuz sayfa, ona geri döndüğünüzde renklerini korur
+• Sayfa açıkken okumak artık ezber sayılmıyor
+• Çevrimiçiyken artık "internet bağlantısı gerekli" mesajı çıkmıyor
+</tr-TR>
+<ur>
+• بک مارک کی گئی آیات صفحے پر ہلکے سبز رنگ میں نمایاں ہوتی ہیں
+• تلاوت کیا گیا صفحہ واپس جانے پر اپنے رنگ برقرار رکھتا ہے
+• صفحہ دکھا کر پڑھنا اب حفظ میں شمار نہیں ہوتا
+• آن لائن ہونے پر اب "انٹرنیٹ کنکشن درکار ہے" کا پیغام نہیں آتا
+</ur>
+<zh-CN>
+• 已加书签的阿耶在页面上以浅绿色高亮显示
+• 已诵读的页面在翻回时保留其颜色
+• 显示页面时的朗读不再计为已背诵
+• 联网时不再显示"需要互联网连接"提示
+</zh-CN>

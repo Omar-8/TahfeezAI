@@ -4,14 +4,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tahfeez_ai/features/bookmarks/application/bookmarks_controller.dart';
+import 'package:tahfeez_ai/features/mushaf/application/mushaf_focus_ayah.dart';
 import 'package:tahfeez_ai/features/mushaf/application/mushaf_hide_mode.dart';
+import 'package:tahfeez_ai/features/mushaf/application/mushaf_passages.dart';
 import 'package:tahfeez_ai/features/mushaf/application/mushaf_quran_engine_providers.dart';
 import 'package:tahfeez_ai/features/mushaf/application/mushaf_word_overlay.dart';
 import 'package:tahfeez_ai/features/mushaf/domain/mushaf_appearance.dart';
 import 'package:tahfeez_ai/features/mushaf/domain/quran_engine/quran_engine_mushaf_backend.dart';
 import 'package:tahfeez_ai/features/mushaf/presentation/mushaf_token_hit_rect.dart';
 import 'package:tahfeez_ai/features/mushaf/presentation/quran_engine_mushaf_page_content.dart';
+import 'package:tahfeez_ai/core/storage/storage_providers.dart';
 import 'package:tahfeez_ai/quran/domain/models/quran_refs.dart';
+
+import '../../../test_helpers/memory_storage.dart';
 
 /// More words than an ayah or two: a whole page.
 const _words = 100;
@@ -73,17 +79,28 @@ class _Page implements QuranEngineMushafPage, MushafWordEffectsPage {
     ValueChanged<MushafTokenHitRect>? onWordLongHit,
     String? Function(WordRef word)? hoverHint,
   }) => const SizedBox.expand();
+
+  /// The bands last drawn.
+  List<PageBand> bands = const [];
+
+  /// The ayahs last highlighted as the focus.
+  final focused = <VerseRef>[];
+
   @override
   void setWordHighlights(
     List<({int word, Color color, bool ink})> highlights, {
     List<PageBand> bands = const [],
-  }) {}
+  }) => this.bands = bands;
   @override
   int highlightWordAt(int wordIndex, {required Color color}) => 0;
   @override
   int highlightWord(WordRef target, {String mode = 'band'}) => 0;
   @override
-  int highlightAyah(VerseRef target, {String mode = 'band'}) => 0;
+  int highlightAyah(VerseRef target, {String mode = 'band'}) {
+    focused.add(target);
+    return 0;
+  }
+
   @override
   void clearHighlights() {}
   @override
@@ -118,6 +135,8 @@ void main() {
     final container = ProviderContainer(
       overrides: [
         mushafQuranEngineBackendProvider.overrideWith((ref) async => backend),
+        // (Each test's own: bookmarks kept by one never reach the next.)
+        browserStorageProvider.overrideWithValue(MemoryStorage()),
       ],
     );
     addTearDown(container.dispose);
@@ -261,5 +280,67 @@ void main() {
     expect(opacity(), inExclusiveRange(0.05, 1.0));
     await tester.pumpAndSettle();
     expect(opacity(), 1);
+  });
+
+  group('bookmarked ayahs', () {
+    PageBand? bandOf(_Page page, int ayah) => page.bands
+        .where(
+          (b) =>
+              b.isAyahs &&
+              b.surah == ayah ~/ 1000 &&
+              b.fromAyah <= ayah % 1000 &&
+              b.toAyah >= ayah % 1000,
+        )
+        .firstOrNull;
+
+    testWidgets('a bookmarked ayah on the page: tinted light green, and '
+        'the tint gone once unbookmarked', (tester) async {
+      final (page, container) = await open(tester);
+      expect(bandOf(page, 2042), isNull);
+
+      container.read(bookmarksProvider.notifier).toggleAyah(2042);
+      await tester.pump();
+      expect(bandOf(page, 2042)?.color, bookmarkedAyahColor);
+      expect(bandOf(page, 2043), isNull, reason: 'only the bookmarked one');
+
+      container.read(bookmarksProvider.notifier).toggleAyah(2042);
+      await tester.pump();
+      expect(bandOf(page, 2042), isNull);
+    });
+
+    testWidgets("a bookmark on another page: nothing tinted here", (
+      tester,
+    ) async {
+      final (page, container) = await open(tester);
+      container.read(bookmarksProvider.notifier).toggleAyah(3001);
+      container.read(bookmarksProvider.notifier).toggleSurah(2);
+      await tester.pump();
+      expect(page.bands, isEmpty);
+    });
+
+    testWidgets('the ayah in focus (the Daily Ayah) keeps its own band', (
+      tester,
+    ) async {
+      final (page, container) = await open(tester);
+      container.read(bookmarksProvider.notifier).toggleAyah(2042);
+      container.read(bookmarksProvider.notifier).toggleAyah(2043);
+      final owner = Object();
+      container.read(mushafFocusAyahProvider.notifier).focus(owner, 2043);
+      await tester.pump();
+      expect(page.focused.last, (chapterNo: 2, verseNo: 43));
+      expect(bandOf(page, 2043), isNull, reason: 'the focus band, not green');
+      expect(bandOf(page, 2042)?.color, bookmarkedAyahColor);
+    });
+
+    testWidgets('hidden words (hide mode) stay plain', (tester) async {
+      final (page, container) = await open(tester);
+      container.read(bookmarksProvider.notifier).toggleAyah(2042);
+      await tester.pump();
+      expect(bandOf(page, 2042), isNotNull);
+      container.read(mushafHideModeProvider.notifier).toggle();
+      await tester.pump(MushafWordEffect.inkOutTime);
+      await tester.pump();
+      expect(bandOf(page, 2042), isNull);
+    });
   });
 }

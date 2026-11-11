@@ -93,6 +93,12 @@ class NowPlaying {
 class QuranAudioPlayer extends Notifier<NowPlaying?> {
   StreamSubscription<AudioPlaybackState>? _sub;
 
+  /// Each playback asked for, counted: one replaced by a newer one while it
+  /// was loading fails (its loading cut short) — not for want of a network,
+  /// and the newer one plays (owner, 2026-11-10: "Audio needs an internet
+  /// connection" on Wi-Fi, then the audio played).
+  int _attempt = 0;
+
   final _finished = StreamController<NowPlaying>.broadcast(sync: true);
 
   /// Each run of ayahs that played to its end (not stopped), as it ends.
@@ -276,6 +282,7 @@ class QuranAudioPlayer extends Notifier<NowPlaying?> {
     ),
   }) async {
     if (ayahIds.isEmpty) return false;
+    final attempt = ++_attempt;
     final reciter = reciterFor(ref.read(reciterProvider));
     // A translation chosen: each ayah, then its translation read aloud.
     final voice = translationVoiceFor(options.translationVoice);
@@ -347,6 +354,9 @@ class QuranAudioPlayer extends Notifier<NowPlaying?> {
       );
       return true;
     } catch (_) {
+      // Replaced by a newer playback meanwhile (its loading cut short):
+      // not a failure — that one plays.
+      if (attempt != _attempt) return true;
       _clear();
       return false;
     }
@@ -415,6 +425,7 @@ class QuranAudioPlayer extends Notifier<NowPlaying?> {
 
   /// One word, as Quran.com recites it alone.
   Future<bool> playWord(int ayahId, int wordIndex) async {
+    final attempt = ++_attempt;
     ref.read(mushafFocusAyahProvider.notifier).clear(this);
     _started = false;
     _played = false;
@@ -426,6 +437,7 @@ class QuranAudioPlayer extends Notifier<NowPlaying?> {
           .playUrl(wordAudioUrl(ayahId, wordIndex));
       return true;
     } catch (_) {
+      if (attempt != _attempt) return true; // (replaced: see playAyahs)
       _clear();
       return false;
     }
@@ -463,6 +475,7 @@ class QuranAudioPlayer extends Notifier<NowPlaying?> {
           ? CorrectionPlayback.wordAlone
           : CorrectionPlayback.failed;
     }
+    final attempt = ++_attempt;
     ref.read(mushafFocusAyahProvider.notifier).clear(this);
     _started = false;
     _played = false;
@@ -486,6 +499,8 @@ class QuranAudioPlayer extends Notifier<NowPlaying?> {
       );
       return CorrectionPlayback.reciter;
     } catch (_) {
+      // (Replaced: see playAyahs.)
+      if (attempt != _attempt) return CorrectionPlayback.reciter;
       _clear();
       return CorrectionPlayback.failed;
     }

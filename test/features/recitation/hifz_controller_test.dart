@@ -763,6 +763,79 @@ void main() {
   }
 
   for (final hideMode in [true, false]) {
+    test('the page done, turned on, then back: its colours '
+        '${hideMode ? 'hidden with its words (recited from memory again)' : 'kept, each replaced as it is recited again'} '
+        '— hide mode ${hideMode ? 'on' : 'off'} (owner, 2026-11-10)', () async {
+      await setUpHifz(
+        from: (chapterNo: 2, verseNo: 253),
+        to: (chapterNo: 2, verseNo: 257),
+        hideMode: hideMode,
+      );
+      await recite([for (var v = 253; v <= 256; v++) spoken(2, v)].join(' '));
+      await Future<void>.delayed(const Duration(milliseconds: 600));
+      final page42 = {
+        for (var q = page42First; q <= page42Last; q++) corpus.words[q].ref,
+      };
+      // The colours on the page (green for each word recited right).
+      Map<WordRef, MushafWordMark> colours() => {
+        for (final e
+            in container.read(mushafWordOverlayProvider)?.marks.entries ??
+                const <MapEntry<WordRef, MushafWordMark>>[])
+          if (page42.contains(e.key) && e.value != MushafWordMark.current)
+            e.key: e.value,
+      };
+      final before = colours();
+      expect(hifz().revealed.containsAll(page42), isTrue);
+      expect(before, hasLength(page42.length));
+      container.read(mushafPageWordRangesProvider.notifier).report(43, (
+        first: corpus.words[page42Last + 1].ref,
+        last: corpus
+            .words[corpus.verseEndPosition((chapterNo: 2, verseNo: 257))!]
+            .ref,
+      ));
+      container
+          .read(mushafRecitationTargetProvider.notifier)
+          .show('screen', const QuranLocation.page(1, 43));
+      await pumpEventQueue();
+      container
+          .read(mushafRecitationTargetProvider.notifier)
+          .show('screen', const QuranLocation.page(1, 42));
+      await pumpEventQueue();
+      if (hideMode) {
+        expect(hifz().revealed.intersection(page42), isEmpty);
+        expect(
+          colours(),
+          isEmpty,
+          reason: 'hidden: nothing to give a hidden word away',
+        );
+      } else {
+        expect(
+          hifz().revealed.containsAll(page42),
+          isTrue,
+          reason: 'not lost: the page as it was',
+        );
+        // Every colour still there — but the first word's: the cursor's
+        // band there now (recited next).
+        expect(
+          colours(),
+          {...before}..remove(corpus.words[page42First].ref),
+          reason: 'not lost',
+        );
+      }
+      // Recited again: on from there, its words shown (and marked) anew.
+      await recite(spoken(2, 253));
+      expect(hifz().expected!.ayahId, 2254);
+      final ayah253 = page42.where((w) => w.ayahId == 2253);
+      expect(hifz().revealed.containsAll(ayah253), isTrue);
+      if (!hideMode) {
+        // All coloured but the next word (the cursor's, 2:254's first).
+        expect(colours(), hasLength(page42.length - 1));
+        expect(colours().keys, isNot(contains(hifz().expected)));
+      }
+    });
+  }
+
+  for (final hideMode in [true, false]) {
     test('every page turned to shows the cursor at once on its next word to '
         'recite — hide mode ${hideMode ? 'on' : 'off'}', () async {
       await setUpHifz(hideMode: hideMode);
@@ -1354,6 +1427,46 @@ void main() {
         );
       },
     );
+
+    test(
+      'read with the page visible, hide mode turned on before stopping: '
+      'read, not from memory — never memorized (owner, 2026-11-10)',
+      () async {
+        await setUpHifz(
+          from: (chapterNo: 2, verseNo: 253),
+          to: (chapterNo: 2, verseNo: 254),
+          hideMode: false,
+        );
+        await recite('${spoken(2, 253)} ${spoken(2, 254)}');
+        container.read(mushafHideModeProvider.notifier).toggle();
+        await pumpEventQueue();
+        await session().stop();
+        await pumpEventQueue();
+        expect(recorded.map((a) => a.ayahId), [2253, 2254]);
+        expect(recorded.map((a) => a.hidden), [
+          false,
+          false,
+        ], reason: 'recited with the page visible');
+      },
+    );
+
+    test('from memory then the page shown: only the ayah recited hidden '
+        'counts as from memory', () async {
+      await setUpHifz(
+        from: (chapterNo: 2, verseNo: 253),
+        to: (chapterNo: 2, verseNo: 254),
+      );
+      await recite(spoken(2, 253));
+      container.read(mushafHideModeProvider.notifier).toggle(); // shown
+      await pumpEventQueue();
+      await recite(spoken(2, 254));
+      await session().stop();
+      await pumpEventQueue();
+      expect(
+        [for (final a in recorded) (a.ayahId, a.hidden)],
+        [(2253, true), (2254, false)],
+      );
+    });
 
     test('a loop records every repetition', () async {
       await setUpHifz(

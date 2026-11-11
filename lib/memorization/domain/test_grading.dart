@@ -35,12 +35,15 @@ class TestWord {
 ///
 /// Pronunciation mistakes make an ayah hard, never failed: memorization is
 /// about the words.
+///
+/// [hidden]: whether an ayah was recited from memory (its words hidden as
+/// they were recited) — only then can it count as memorized.
 List<AyahAttempt> gradeTest(
   Iterable<TestWord> words, {
   required int Function(int ayahId) ayahWords,
   required String sessionId,
   required DateTime at,
-  required bool hidden,
+  required bool Function(int ayahId) hidden,
 }) {
   final byAyah = <int, Map<int, TestWord>>{};
   for (final w in words) {
@@ -72,7 +75,7 @@ List<AyahAttempt> gradeTest(
         skipped: skipped,
         selfCorrected: corrected,
         pronunciation: pronunciation,
-        hidden: hidden,
+        hidden: hidden(ayahId),
       ),
     );
   }

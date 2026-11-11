@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tahfeez_ai/core/audio/audio_models.dart';
 import 'package:tahfeez_ai/core/core_providers.dart';
 import 'package:tahfeez_ai/features/listen/application/listen_options.dart';
 import 'package:tahfeez_ai/features/listen/application/quran_audio_player.dart';
@@ -242,4 +245,65 @@ void main() {
       );
     },
   );
+
+  test('a word tapped while another is loading: the first one cut short is '
+      'no failure — never "needs an internet connection" — and the second '
+      'plays (owner, 2026-11-10)', () async {
+    final audio = _Interrupting();
+    final container = ProviderContainer(
+      overrides: [
+        audioControllerProvider.overrideWithValue(audio),
+        defaultMushafProvider.overrideWith((ref) async => null),
+      ],
+    );
+    addTearDown(container.dispose);
+    final player = container.read(quranAudioPlayerProvider.notifier);
+    final first = player.playWord(1001, 0);
+    final second = player.playWord(1001, 1);
+    expect(await first, isTrue, reason: 'replaced, not failed');
+    expect(await second, isTrue);
+    expect(
+      container.read(quranAudioPlayerProvider)?.isWord,
+      isTrue,
+      reason: "the second's playback not cleared by the first",
+    );
+    expect(audio.url, contains('001_001_002'));
+  });
+
+  test('a word that really fails (no newer one): a failure', () async {
+    final audio = _Interrupting()..failAlone = true;
+    final container = ProviderContainer(
+      overrides: [
+        audioControllerProvider.overrideWithValue(audio),
+        defaultMushafProvider.overrideWith((ref) async => null),
+      ],
+    );
+    addTearDown(container.dispose);
+    expect(
+      await container.read(quranAudioPlayerProvider.notifier).playWord(1001, 0),
+      isFalse,
+    );
+    expect(container.read(quranAudioPlayerProvider), isNull);
+  });
+}
+
+/// A file's loading cut short when another is asked for meanwhile (as the
+/// real player's is) — or, [failAlone], every one failing.
+class _Interrupting extends FakeAudioController {
+  Completer<void>? _loading;
+  bool failAlone = false;
+
+  @override
+  Future<void> playUrl(String url, {AudioItemInfo? info}) async {
+    final before = _loading;
+    if (before != null && !before.isCompleted) {
+      before.completeError(StateError('Loading interrupted'));
+    }
+    if (failAlone) throw StateError('Source error');
+    final loading = _loading = Completer<void>();
+    // (The first is still loading when the second comes.)
+    if (before == null) return loading.future;
+    loading.complete();
+    return super.playUrl(url, info: info);
+  }
 }

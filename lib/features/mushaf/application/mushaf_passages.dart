@@ -80,3 +80,8 @@ final passageColorsProvider = FutureProvider<Map<int, Color>>((ref) async {
       ayah: passagePalette[tints[n - 1]],
   };
 });
+
+/// A bookmarked ayah's tint on the page: a light green, apart from the
+/// Daily Ayah's (and any ayah in focus) yellow and the passages' own
+/// green; see-through, so it reads on light and dark paper alike.
+const bookmarkedAyahColor = Color(0x4081C784);
