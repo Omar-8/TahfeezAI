@@ -776,7 +776,10 @@ class _QuranEngineMushafPageContentState
 
     final page = _page;
     if (page == null) {
-      return TahfeezPageSkeleton(color: widget.colors.secondaryText);
+      return TahfeezPageSkeleton(
+        color: widget.colors.secondaryText,
+        seed: widget.pageNumber,
+      );
     }
 
     // No outer AspectRatio/FittedBox wrapper here -- deliberately. Both

@@ -31,6 +31,7 @@ import '../application/quran_audio_player.dart';
 import '../application/reciter_controller.dart';
 import '../application/reciter_downloads.dart';
 import '../domain/quran_audio_sources.dart';
+import 'reciter_avatar.dart';
 import '../../../core/ui/sheet_actions.dart';
 import '../../recitation/presentation/quick_start.dart' show quickStartFrom;
 
@@ -383,7 +384,10 @@ class _ListenSheetState extends ConsumerState<_ListenSheet> {
                 key: const ValueKey('listen-reciter'),
                 leading: const Icon(Icons.record_voice_over_outlined),
                 title: Text(l10n.listenReciter),
-                subtitle: Text(reciterName(context, reciter)),
+                subtitle: ReciterNameWithAvatar(
+                  reciter: reciter,
+                  name: reciterName(context, reciter),
+                ),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => showReciterSheet(context),
               ),
@@ -615,7 +619,13 @@ class _ReciterRow extends ConsumerWidget {
     };
     return ListTile(
       contentPadding: const EdgeInsetsDirectional.only(start: 4, end: 4),
-      leading: Radio<String>(value: reciter.edition),
+      leading: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Radio<String>(value: reciter.edition),
+          ReciterAvatar(reciter: reciter),
+        ],
+      ),
       title: Text(reciterName(context, reciter)),
       subtitle: Text(
         [?size, ?status].join(' · '),

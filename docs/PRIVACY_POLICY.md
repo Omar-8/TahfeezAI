@@ -1,6 +1,6 @@
 # TahfeezAI — Privacy Policy
 
-_Last updated: 10 November 2026_
+_Last updated: 11 November 2026_
 
 TahfeezAI helps you read and memorize the Quran. It is built to keep your data on your phone. There are no accounts, no ads, no analytics and no tracking.
 
@@ -33,6 +33,31 @@ The web version works the same way: your recitation is checked inside your brows
 - **The app's files and its recitation model** (about 91 MB, fetched the first time you open a Mushaf page, then kept by your browser) come from the website that hosts the app. Like any website, its host receives these requests, including your IP address, under its own terms.
 - **Fonts.** The engine the app is built with (Flutter) loads its default font and, where the app's own fonts lack a character (for example Japanese or Korean translations), a matching font from Google Fonts (`fonts.gstatic.com`). These requests name only the font; like any request, they reveal your IP address to Google.
 - Downloading reciters for offline listening and the daily reminder are not available in the browser.
+
+## Reciters' photos
+
+Some reciters are shown with a small photo beside their name. The photos are part of the app (no internet is used to show them) and come from Wikimedia Commons, credited here as Commons states their author and licence:
+
+- Mahmoud Khalil Al-Husary — Egyptian Government (identity card), public domain
+- Muhammad Siddiq Al-Minshawi — unknown photographer, public domain
+- Abdul Basit Abdus-Samad — unknown photographer, Muslim News (South Africa) 1966, public domain
+- Abdur-Rahman As-Sudais — Prime Minister's Office, Government of India, GODL-India
+- Saud Ash-Shuraym — Vice President's Secretariat, Government of India, GODL-India
+- Yasser Al-Dossary — MAL MALDIVE, CC BY-SA 4.0
+- Nasser Al-Qatami — Ayman dhū alghiná, CC BY-SA 4.0
+- Shahriar Parhizgar — Mostafameraji, CC BY-SA 4.0
+- Karim Mansoori — Mostafameraji, CC BY-SA 4.0
+- Muhammad Jibreel — Alhidaya Croydon, CC BY 3.0
+- Mishary Alafasy — quranic.ru, "copyrighted free use"
+- Maher Al-Muaiqly — Real avdulmouhd, CC BY-SA 4.0
+- Saad Al-Ghamdi — الشيخ هيثم الدخين, CC BY-SA 4.0
+- Ahmad al-Ajamy — أحمد زين, CC BY-SA 3.0
+- Ayman Suwaid — propagerlislam.net, public domain
+- Ali Jaber — Engalali9, CC0
+- Abdullah Awad Al-Juhani — الشيخ هيثم الدخين, CC BY-SA 4.0
+- Abdullah Matroud — tvquran.com, CC BY-SA 4.0
+
+The photos were cropped and made smaller. If you hold the rights to one of them, or are its subject, and want it removed, write to the address below and it will be taken out of the app. Reciters without a photo are shown by the first letter of their name.
 
 ## Backups
 

@@ -1,3 +1,5 @@
+import '../../khatmah/presentation/khatmah_section.dart';
+
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -113,7 +115,8 @@ class HomeScreen extends ConsumerWidget {
                               // daily ayah.)
                               // Where to carry on first — reading, then
                               // today's memorization — then the daily ayah
-                              // (owner, 2026-11-07); Featured Reading in a
+                              // (owner, 2026-11-07), the khatmah before it;
+                              // Featured Reading in a
                               // browser only.
                               if (twoColumns)
                                 Row(
@@ -124,6 +127,7 @@ class HomeScreen extends ConsumerWidget {
                                     const Expanded(
                                       child: _Sections([
                                         HomeReadHistorySection(),
+                                        HomeKhatmahSection(),
                                         HomeDailyAyahSection(),
                                       ]),
                                     ),
@@ -140,6 +144,7 @@ class HomeScreen extends ConsumerWidget {
                                 _Sections([
                                   const HomeReadHistorySection(),
                                   const HomeMemorizationSection(),
+                                  const HomeKhatmahSection(),
                                   const HomeDailyAyahSection(),
                                   if (web) const HomeFeaturedReadingSection(),
                                 ]),

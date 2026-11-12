@@ -461,8 +461,8 @@ class AyahModePageState extends ConsumerState<AyahModePage> {
       return _embedded ? SizedBox(height: 300, child: message) : message;
     }
     if (words == null) {
-      const loading = TahfeezPageSkeleton(lines: 10);
-      return _embedded ? const SizedBox(height: 600, child: loading) : loading;
+      final loading = TahfeezPageSkeleton(lines: 10, seed: widget.pageNumber);
+      return _embedded ? SizedBox(height: 600, child: loading) : loading;
     }
     // The recitation's place, and the reciter's ayah, kept in view on the
     // page being read.

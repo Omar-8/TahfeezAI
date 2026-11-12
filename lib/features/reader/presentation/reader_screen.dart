@@ -1,3 +1,4 @@
+import '../../khatmah/application/khatmah_controller.dart';
 import '../../guide/app_tips_host.dart';
 import '../../guide/guide.dart';
 
@@ -167,6 +168,8 @@ class _MushafModeScaffold extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // The khatmah counts the pages read here.
+    ref.watch(khatmahProvider.select((_) => 0));
     final colors = ref.watch(mushafAppearanceControllerProvider).colors;
     final mushafAsync = mushafId == null
         ? null
@@ -214,14 +217,21 @@ class _MushafModeScaffold extends ConsumerWidget {
               ? _unavailable(context, colors.secondaryText)
               : mushafId == null || pageNumber == null
               ? mushafAsync?.when(
-                      data: (_) =>
-                          TahfeezPageSkeleton(color: colors.secondaryText),
-                      loading: () =>
-                          TahfeezPageSkeleton(color: colors.secondaryText),
+                      data: (_) => TahfeezPageSkeleton(
+                        color: colors.secondaryText,
+                        seed: pageNumber ?? 0,
+                      ),
+                      loading: () => TahfeezPageSkeleton(
+                        color: colors.secondaryText,
+                        seed: pageNumber ?? 0,
+                      ),
                       error: (_, _) =>
                           _unavailable(context, colors.secondaryText),
                     ) ??
-                    TahfeezPageSkeleton(color: colors.secondaryText)
+                    TahfeezPageSkeleton(
+                      color: colors.secondaryText,
+                      seed: pageNumber ?? 0,
+                    )
               : mushafAsync!.when(
                   data: (mushaf) {
                     if (mushaf == null) {
@@ -235,8 +245,10 @@ class _MushafModeScaffold extends ConsumerWidget {
                       onPageChanged: onPageChanged,
                     );
                   },
-                  loading: () =>
-                      TahfeezPageSkeleton(color: colors.secondaryText),
+                  loading: () => TahfeezPageSkeleton(
+                    color: colors.secondaryText,
+                    seed: pageNumber ?? 0,
+                  ),
                   error: (_, _) => _unavailable(context, colors.secondaryText),
                 ),
         ),

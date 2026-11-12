@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tahfeez_ai/core/routing/app_router.dart';
 import 'package:tahfeez_ai/core/theme/app_typography.dart';
 import 'package:tahfeez_ai/core/theme/quran_text_style.dart';
+import 'package:tahfeez_ai/features/khatmah/presentation/khatmah_section.dart';
 import 'package:tahfeez_ai/features/listen/presentation/follow_along_sheet.dart';
 import 'package:tahfeez_ai/features/listen/presentation/listen_sheet.dart';
 import 'package:tahfeez_ai/features/memorize/presentation/mark_known_sheet.dart';
@@ -305,6 +306,9 @@ void main() {
     'search filters': showSearchFilterSheet,
     'plan': (c) => showPlanSheet(c),
     'mark what I know': (c) => showMarkKnownSheet(c),
+    // Its similar ayahs (2:123, …) under its words.
+    'ayah with look-alikes': (c) => showAyahDetailSheet(c, ayahId: 2048),
+    'khatmah days': (c) => showKhatmahDaysSheet(c),
   };
   var t = 0;
   for (final MapEntry(key: sizeName, value: size) in sizes.entries) {

@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.2.5+32
+version: 1.2.6+33
 
 environment:
   sdk: ^3.13.3
@@ -158,6 +158,7 @@ flutter:
     - assets/branding/splash_icon.png
     # The same emblem, cut out (transparent), over the splash's sky.
     - assets/branding/splash_emblem.png
+    - assets/reciters/
     - assets/quran/resource_manifest.json
     # Fonts loaded only when chosen (lib/core/theme/lazy_fonts.dart): out of
     # `fonts:`, which the web downloads before its first frame.
@@ -181,6 +182,7 @@ flutter:
     - assets/quran/surah_names/surah_names.json
     # Tajweed colours for Ayah mode (tool/quran_data/build_tajweed.py).
     - assets/quran/tajweed/tajweed.json
+    - assets/quran/similar_ayahs.json
     # Word meanings (translation milestone T3; licence unverified, owner
     # decision — docs/THIRD_PARTY_RESOURCES.md).
     - assets/quran/wbw/en_qurancom.json

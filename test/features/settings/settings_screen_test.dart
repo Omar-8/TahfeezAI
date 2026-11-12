@@ -1,3 +1,4 @@
+import 'package:tahfeez_ai/features/listen/presentation/reciter_avatar.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:tahfeez_ai/core/theme/components/tahfeez_collapsible_section.dart';
@@ -269,6 +270,48 @@ void main() {
     final rect = tester.getRect(match.first);
     expect(rect.top, greaterThanOrEqualTo(0));
     expect(rect.bottom, lessThan(844));
+  });
+
+  testWidgets('the reciter: his picture beside his name, closed and open', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: tahfeezWidgetTestOverrides(),
+        child: const TahfeezApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Settings'));
+    await tester.pumpAndSettle();
+    final group = find.byKey(const ValueKey('settings-group-Recitation audio'));
+    await tester.scrollUntilVisible(group, 200, scrollable: _list);
+    // Closed: the reciter's picture before his name.
+    final summary = find.byKey(
+      const ValueKey('section-summary-Recitation audio'),
+    );
+    final picture = find.descendant(
+      of: group,
+      matching: find.byType(ReciterAvatar),
+    );
+    expect(picture, findsOne);
+    expect(
+      tester.getCenter(picture).dx,
+      lessThan(tester.getCenter(summary).dx),
+    );
+    // Open: the same beside the name under "Reciter".
+    await _openGroup(tester, 'settings-group-Recitation audio');
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('settings-reciter')),
+        matching: find.byType(ReciterNameWithAvatar),
+      ),
+      findsOne,
+    );
   });
 
   testWidgets('About lists every source with its licence, and the licences', (

@@ -136,6 +136,16 @@ class MilestoneController extends Notifier<Milestone?> {
     state = _queue.first;
   }
 
+  /// [milestone] reached now, outside the memorization data (a khatmah
+  /// complete): shown like the others, the highest first.
+  void celebrate(Milestone milestone) {
+    if (_queue.any((m) => m.id == milestone.id)) return;
+    _queue
+      ..add(milestone)
+      ..sort((a, b) => b.rank - a.rank);
+    state = _queue.first;
+  }
+
   /// [shown] was shown: the next waiting, if any. Surahs added to it while
   /// it was on screen stay waiting.
   void dismiss([Milestone? shown]) {

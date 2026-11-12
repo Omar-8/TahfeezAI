@@ -15,6 +15,7 @@ class TahfeezCollapsibleSection extends StatefulWidget {
     required this.child,
     this.icon,
     this.summary,
+    this.summaryLeading,
     this.open = false,
     this.initiallyExpanded = false,
     this.spacing = TahfeezSpacing.xs,
@@ -26,6 +27,9 @@ class TahfeezCollapsibleSection extends StatefulWidget {
   /// Closed, under the title: what is chosen inside (a theme's name, the
   /// reciter…), so it is known without opening the section.
   final String? summary;
+
+  /// Before [summary]: a small picture of what is chosen (the reciter's).
+  final Widget? summaryLeading;
   final Widget child;
   final bool open;
 
@@ -93,19 +97,28 @@ class _TahfeezCollapsibleSectionState extends State<TahfeezCollapsibleSection> {
                                                 TahfeezSpacing.sm,
                                       bottom: TahfeezSpacing.xs,
                                     ),
-                                    child: Text(
-                                      summary,
-                                      key: ValueKey(
-                                        'section-summary-${widget.title}',
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodySmall
-                                          ?.copyWith(
-                                            color: scheme.onSurfaceVariant,
+                                    child: Row(
+                                      spacing: TahfeezSpacing.xs,
+                                      children: [
+                                        ?widget.summaryLeading,
+                                        Flexible(
+                                          child: Text(
+                                            summary,
+                                            key: ValueKey(
+                                              'section-summary-${widget.title}',
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodySmall
+                                                ?.copyWith(
+                                                  color:
+                                                      scheme.onSurfaceVariant,
+                                                ),
                                           ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                           ),

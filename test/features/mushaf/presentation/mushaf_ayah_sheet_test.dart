@@ -13,6 +13,8 @@ import 'package:tahfeez_ai/quran/application/tafsir_verse_text.dart';
 import 'package:tahfeez_ai/quran/domain/models/ayah_models.dart';
 import 'package:tahfeez_ai/quran/domain/models/tafsir_models.dart';
 import 'package:tahfeez_ai/quran/domain/models/translation_models.dart';
+import 'package:tahfeez_ai/quran/application/similar_ayahs_provider.dart';
+import 'package:tahfeez_ai/quran/domain/similar_ayahs.dart';
 
 import '../../../test_helpers/widget_test_overrides.dart';
 
@@ -35,9 +37,11 @@ void main() {
       showTafsir: true,
     ),
     String? tafsirId = 'ar-muyassar',
+    List<SimilarAyah> similar = const [],
   }) => ProviderScope(
     overrides: [
       ...tahfeezWidgetTestOverrides(),
+      ayahLookAlikesProvider.overrideWith((ref, _) => similar),
       ayahViewPreferencesProvider.overrideWithBuild((ref, _) => view),
       tafsirSelectionControllerProvider.overrideWithBuild((ref, _) => tafsirId),
       ayahCanonicalWordsProvider.overrideWith(
@@ -165,5 +169,33 @@ void main() {
       ),
       findsOneWidget,
     );
+  });
+
+  testWidgets('its look-alikes under its words; none, nothing', (tester) async {
+    await open(
+      tester,
+      app(
+        similar: [
+          SimilarAyah(
+            ayahId: 113001,
+            score: 75,
+            differ: const {2},
+            otherDiffer: const {2},
+          ),
+        ],
+      ),
+    );
+    expect(find.byKey(const ValueKey('similar-ayahs')), findsOne);
+    expect(find.byKey(const ValueKey('similar-ayah-113001')), findsOne);
+    expect(
+      tester.getTopLeft(find.byKey(const ValueKey('similar-ayahs'))).dy,
+      greaterThan(
+        tester.getTopLeft(find.byKey(const ValueKey('ayah-sheet-words'))).dy,
+      ),
+    );
+    await tester.tapAt(const Offset(5, 5)); // closed
+    await tester.pumpAndSettle();
+    await open(tester, app());
+    expect(find.byKey(const ValueKey('similar-ayahs')), findsNothing);
   });
 }

@@ -31,6 +31,9 @@ class MilestoneLayer extends ConsumerStatefulWidget {
 class _MilestoneLayerState extends ConsumerState<MilestoneLayer> {
   static const _shownFor = Duration(seconds: 5);
 
+  /// A khatmah complete stays a little longer.
+  static const _khatmahShownFor = Duration(seconds: 7);
+
   Milestone? _showing;
   Timer? _timer;
 
@@ -58,13 +61,28 @@ class _MilestoneLayerState extends ConsumerState<MilestoneLayer> {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted || _showing != null) return;
         setState(() => _showing = pending);
-        _timer = Timer(_shownFor, _hide);
+        _timer = Timer(
+          pending is KhatmahMilestone ? _khatmahShownFor : _shownFor,
+          _hide,
+        );
       });
     }
     final milestone = _showing;
     return Stack(
       children: [
         widget.child,
+        // A surah memorized, a khatmah complete: stars burst behind the
+        // card (a khatmah's fuller and longer).
+        if (milestone case final Milestone m
+            when m is SurahMilestone ||
+                m is SurahsMilestone ||
+                m is KhatmahMilestone)
+          Positioned.fill(
+            child: TahfeezCelebration(
+              key: ValueKey('celebration-${m.id}'),
+              grand: m is KhatmahMilestone,
+            ),
+          ),
         Positioned(
           top: 0,
           left: 0,
@@ -134,6 +152,7 @@ class _Banner extends ConsumerWidget {
       ),
       ShareMilestone(:final percent) => l10n.memProgressShare(percent),
       StreakMilestone(:final days) => l10n.memStreakDays(days),
+      KhatmahMilestone() => l10n.khatmahFinished,
     };
     return Padding(
       padding: const EdgeInsets.all(TahfeezSpacing.md),

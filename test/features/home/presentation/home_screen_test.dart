@@ -50,6 +50,16 @@ void main() {
     expect(find.text('Daily Ayah'), findsOneWidget);
     expect(find.text('Continue Reading'), findsOneWidget);
     expect(find.text('Memorization'), findsOneWidget);
+    // The khatmah, under Memorization, before the daily ayah.
+    expect(find.text('Khatmah'), findsOneWidget);
+    expect(find.byKey(const ValueKey('khatmah-start')), findsOneWidget);
+    expect(
+      tester.getTopLeft(find.text('Khatmah')).dy,
+      inExclusiveRange(
+        tester.getTopLeft(find.text('Memorization')).dy,
+        tester.getTopLeft(find.text('Daily Ayah')).dy,
+      ),
+    );
     // (Featured Reading: in a browser only.)
     expect(find.text('Featured Reading'), findsNothing);
     // Where to carry on first, the daily ayah below.

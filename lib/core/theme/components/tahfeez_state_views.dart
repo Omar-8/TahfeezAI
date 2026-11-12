@@ -50,10 +50,20 @@ class TahfeezLoadingView extends StatelessWidget {
   }
 }
 
-/// A Mushaf page still loading: the page's lines as soft bars, pulsing —
-/// its shape before its text, instead of a spinner on an empty page.
+/// A Mushaf page still loading, pulsing: its lines of words, justified from
+/// the right, with an ayah's end marker here and there — the page's shape
+/// before its text, instead of a spinner on an empty page.
 class TahfeezPageSkeleton extends StatefulWidget {
-  const TahfeezPageSkeleton({super.key, this.color, this.lines = 15});
+  const TahfeezPageSkeleton({
+    super.key,
+    this.color,
+    this.lines = 15,
+    this.seed = 0,
+  });
+
+  /// Which arrangement of words and ayah ends (the page number, say): the
+  /// same every time for one seed, different from page to page.
+  final int seed;
 
   /// The bars' colour (the page's own text colour, faint); the theme's
   /// otherwise.
@@ -115,24 +125,16 @@ class _TahfeezPageSkeletonState extends State<TahfeezPageSkeleton> {
             final count = bounded
                 ? (box.maxHeight ~/ 28).clamp(1, lines)
                 : lines;
-            Widget line(int i) => TahfeezSkeletonBar(
-              color: color,
-              height: 14,
-              // Most lines full, an ayah's end now and then.
-              widthFactor: i == count - 1 && count > 1
-                  ? 0.55
-                  : i % 5 == 3
-                  ? 0.8
-                  : 1,
-            );
-            return ClipRect(
-              child: Column(
-                // Spread over the page's height; 18 apart when unbounded.
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                mainAxisSize: bounded ? MainAxisSize.max : MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                spacing: bounded ? 0 : 18,
-                children: [for (var i = 0; i < count; i++) line(i)],
+            final base = color ?? Theme.of(context).colorScheme.onSurface;
+            return CustomPaint(
+              size: Size(
+                box.hasBoundedWidth ? box.maxWidth : 0,
+                bounded ? box.maxHeight : count * 32.0,
+              ),
+              painter: TahfeezMushafSkeletonPainter(
+                lines: count,
+                seed: widget.seed,
+                color: base.withValues(alpha: color == null ? 0.08 : 0.12),
               ),
             );
           },
@@ -140,6 +142,122 @@ class _TahfeezPageSkeletonState extends State<TahfeezPageSkeleton> {
       ),
     );
   }
+}
+
+/// Paints [lines] Mushaf lines filling the size: rounded words of varied
+/// length, justified right to left (the Mushaf's lines run edge to edge),
+/// and now and then an ayah's end — a ring with a dot for its number.
+@visibleForTesting
+class TahfeezMushafSkeletonPainter extends CustomPainter {
+  const TahfeezMushafSkeletonPainter({
+    required this.lines,
+    required this.color,
+    this.seed = 0,
+  });
+
+  final int lines;
+  final Color color;
+  final int seed;
+
+  /// The space between words, in word thicknesses.
+  static const gapFactor = 0.55;
+
+  /// The words and ayah ends of each line, as (width, isAyahEnd), with the
+  /// line's word thickness [t] and width [w]; deterministic for [seed].
+  @visibleForTesting
+  List<List<(double, bool)>> layout(double w, double t) {
+    var state = (seed * 7919 + 104729) & 0x7fffffff;
+    double next() {
+      // xorshift32: the same "random" page for the same seed.
+      state ^= (state << 13) & 0xffffffff;
+      state ^= state >> 17;
+      state ^= (state << 5) & 0xffffffff;
+      return (state & 0xffff) / 0x10000;
+    }
+
+    final gap = t * gapFactor;
+    final marker = t * 1.6;
+    var sinceEnd = 0;
+    return [
+      for (var line = 0; line < lines; line++)
+        () {
+          final items = <(double, bool)>[];
+          var used = 0.0;
+          while (true) {
+            // An ayah ends after a few words, more likely the longer since
+            // the last one; never as a line's first item.
+            final end =
+                items.isNotEmpty &&
+                !items.last.$2 &&
+                sinceEnd > 6 &&
+                next() < 0.02 + sinceEnd * 0.005;
+            final width = end ? marker : t * (1.1 + next() * 3.4);
+            final add = width + (items.isEmpty ? 0 : gap);
+            if (used + add > w && items.length >= 2) break;
+            if (used + add > w) {
+              // A box too narrow for two words: one, shortened to fit.
+              items.add((w - used - (items.isEmpty ? 0 : gap), false));
+              break;
+            }
+            items.add((width, end));
+            used += add;
+            sinceEnd = end ? 0 : sinceEnd + 1;
+          }
+          return items;
+        }(),
+    ];
+  }
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (lines <= 0 || size.width <= 0 || size.height <= 0) return;
+    final pitch = size.height / lines;
+    final t = (pitch * 0.42).clamp(8.0, 15.0);
+    final fill = Paint()..color = color;
+    final ring = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = t * 0.2;
+    final rows = layout(size.width, t);
+    for (var i = 0; i < rows.length; i++) {
+      final items = rows[i];
+      final cy = pitch * (i + 0.5);
+      final gap = t * gapFactor;
+      final words = items
+          .where((item) => !item.$2)
+          .fold(0.0, (sum, item) => sum + item.$1);
+      final markers = items
+          .where((item) => item.$2)
+          .fold(0.0, (sum, item) => sum + item.$1);
+      // Justified as the Mushaf is: the words drawn out (kashida) to fill
+      // the line, the gaps between them kept.
+      final room = size.width - markers - gap * (items.length - 1);
+      final stretch = words > 0 ? room / words : 1.0;
+      var x = size.width; // From the right, as the Mushaf is read.
+      for (final (natural, end) in items) {
+        final width = end ? natural : natural * stretch;
+        if (end) {
+          final c = Offset(x - width / 2, cy);
+          canvas
+            ..drawCircle(c, width / 2 - ring.strokeWidth / 2, ring)
+            ..drawCircle(c, width * 0.14, fill);
+        } else {
+          canvas.drawRRect(
+            RRect.fromRectAndRadius(
+              Rect.fromLTRB(x - width, cy - t / 2, x, cy + t / 2),
+              Radius.circular(t / 2),
+            ),
+            fill,
+          );
+        }
+        x -= width + gap;
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(TahfeezMushafSkeletonPainter old) =>
+      old.lines != lines || old.color != color || old.seed != seed;
 }
 
 /// One soft rounded bar of a skeleton, [widthFactor] of the width, from

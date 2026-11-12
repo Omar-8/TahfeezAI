@@ -1,3 +1,4 @@
+import '../../khatmah/application/khatmah_controller.dart';
 import '../../guide/app_tips_host.dart';
 import '../../guide/guide.dart';
 
@@ -68,6 +69,8 @@ class _MushafReaderScreenState extends ConsumerState<MushafReaderScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // The khatmah counts the pages read here.
+    ref.watch(khatmahProvider.select((_) => 0));
     final colors = ref.watch(mushafAppearanceControllerProvider).colors;
     final mushafAsync = ref.watch(mushafByIdProvider(widget.mushafId));
 
@@ -117,7 +120,10 @@ class _MushafReaderScreenState extends ConsumerState<MushafReaderScreen> {
                     setState(() => _currentPageNumber = pageNumber),
               );
             },
-            loading: () => TahfeezPageSkeleton(color: colors.secondaryText),
+            loading: () => TahfeezPageSkeleton(
+              color: colors.secondaryText,
+              seed: _currentPageNumber,
+            ),
             error: (_, _) => _unavailable(colors.secondaryText),
           ),
         ),

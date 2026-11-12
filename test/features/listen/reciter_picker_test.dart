@@ -283,4 +283,47 @@ void main() {
       }
     });
   }
+
+  testWidgets('every reciter with his picture: a photo, else his initial', (
+    tester,
+  ) async {
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Builder(
+            builder: (context) => TextButton(
+              onPressed: () => showReciterSheet(context),
+              child: const Text('open'),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('reciter-ar.alafasy')),
+        matching: find.byKey(const ValueKey('reciter-photo-ar.alafasy')),
+      ),
+      findsOne,
+    );
+    await tester.enterText(
+      find.byKey(const ValueKey('reciter-search')),
+      'Hudhaify',
+    );
+    await tester.pumpAndSettle();
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('reciter-ar.hudhaify')),
+        matching: find.byKey(const ValueKey('reciter-initial-ar.hudhaify')),
+      ),
+      findsOne,
+    );
+  });
 }

@@ -75,6 +75,21 @@ class StreakMilestone extends Milestone {
   int get rank => 2;
 }
 
+/// A khatmah complete: the whole Quran read in the khatmah begun on
+/// [start] (`features/khatmah`) — shown when its last page is read, not
+/// remembered like the others (it happens once by itself).
+class KhatmahMilestone extends Milestone {
+  const KhatmahMilestone(this.start);
+
+  final String start;
+
+  @override
+  String get id => 'khatmah-$start';
+
+  @override
+  int get rank => 5;
+}
+
 abstract final class Milestones {
   static const shares = [1, 5, 10, 25, 50, 75, 100];
   static const streaks = [3, 7, 14, 30, 50, 100, 200, 365];

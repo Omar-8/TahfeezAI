@@ -1,0 +1,147 @@
+<en-US>
+• Khatmah: read the whole Quran in the days you choose, or by a date
+• Similar ayahs: see the ayahs easily mixed up, the differing words marked
+• Reciters shown with their picture
+• A celebration when you memorize a surah or complete a khatmah
+• Pages load with a Mushaf-like preview
+</en-US>
+<ar>
+• الختمة: اقرأ القرآن كاملًا في الأيام التي تختارها أو قبل تاريخ
+• آيات متشابهة: اعرف الآيات التي يسهل الخلط بينها مع تمييز الكلمات المختلفة
+• صور القرّاء بجانب أسمائهم
+• احتفال عند حفظ سورة أو إتمام ختمة
+• معاينة تشبه صفحة المصحف أثناء التحميل
+</ar>
+<bn-BD>
+• খতম: আপনার বেছে নেওয়া দিনে বা একটি তারিখের মধ্যে পুরো কুরআন পড়ুন
+• সাদৃশ্যপূর্ণ আয়াত: সহজে গুলিয়ে যাওয়া আয়াত, ভিন্ন শব্দগুলো চিহ্নিত
+• ক্বারীদের ছবি তাঁদের নামের পাশে
+• সূরা হিফজ বা খতম সম্পূর্ণ হলে উদযাপন
+• লোড হওয়ার সময় মুসহাফের মতো প্রাকদর্শন
+</bn-BD>
+<da-DK>
+• Khatma: læs hele Koranen på de dage, du vælger, eller til en dato
+• Lignende ayat: se de ayat, der let forveksles, med de forskellige ord markeret
+• Recitatorer vist med deres billede
+• En fejring, når du lærer en sura udenad eller fuldfører en khatma
+• Sider indlæses med en Mushaf-lignende forhåndsvisning
+</da-DK>
+<de-DE>
+• Khatma: Lies den ganzen Koran in den Tagen deiner Wahl oder bis zu einem Datum
+• Ähnliche Ayat: leicht verwechselbare Ayat, die abweichenden Wörter markiert
+• Rezitatoren mit ihrem Bild
+• Eine Feier, wenn du eine Sura auswendig kannst oder eine Khatma vollendest
+• Seiten laden mit einer Mushaf-ähnlichen Vorschau
+</de-DE>
+<el-GR>
+• Χάτμα: διαβάστε όλο το Κοράνι στις μέρες που επιλέγετε ή έως μια ημερομηνία
+• Παρόμοια εδάφια: εδάφια που μπερδεύονται εύκολα, με σημειωμένες τις διαφορετικές λέξεις
+• Οι απαγγέλτες με τη φωτογραφία τους
+• Γιορτή όταν απομνημονεύετε μια σούρα ή ολοκληρώνετε ένα χάτμα
+• Οι σελίδες φορτώνουν με προεπισκόπηση σαν το Μουσχάφ
+</el-GR>
+<es-ES>
+• Jatma: lee el Corán completo en los días que elijas o antes de una fecha
+• Aleyas parecidas: las que se confunden fácilmente, con las palabras distintas marcadas
+• Recitadores con su foto
+• Una celebración al memorizar una sura o completar una jatma
+• Las páginas cargan con una vista previa como la del Mushaf
+</es-ES>
+<fa>
+• ختم: کل قرآن را در روزهایی که انتخاب می‌کنید یا تا یک تاریخ بخوانید
+• آیات مشابه: آیه‌هایی که به‌راحتی اشتباه می‌شوند، با واژه‌های متفاوتِ مشخص‌شده
+• تصویر قاریان کنار نامشان
+• جشن هنگام حفظ یک سوره یا پایان یک ختم
+• صفحه‌ها با پیش‌نمایشی شبیه مصحف بارگیری می‌شوند
+</fa>
+<fr-FR>
+• Khatma : lisez tout le Coran dans le nombre de jours choisi ou avant une date
+• Versets semblables : ceux qu'on confond facilement, les mots qui diffèrent marqués
+• Les récitateurs avec leur photo
+• Une célébration quand vous mémorisez une sourate ou terminez une khatma
+• Les pages se chargent avec un aperçu semblable au Mushaf
+</fr-FR>
+<id>
+• Khatam: baca seluruh Al-Qur'an dalam hari yang Anda pilih atau sebelum suatu tanggal
+• Ayat yang mirip: ayat yang mudah tertukar, kata yang berbeda ditandai
+• Qari ditampilkan dengan fotonya
+• Perayaan saat menghafal satu surah atau menyelesaikan khatam
+• Halaman dimuat dengan pratinjau seperti mushaf
+</id>
+<ja-JP>
+• ハトマ：選んだ日数または期日までにクルアーン全体を読む
+• 似ているアーヤ：混同しやすいアーヤを、異なる語に印を付けて表示
+• 朗誦者を写真付きで表示
+• スーラを暗記したときやハトマを終えたときにお祝い
+• ムスハフのようなプレビューでページを読み込み
+</ja-JP>
+<kk>
+• Хатым: Құранды өзіңіз таңдаған күндерде немесе белгілі күнге дейін толық оқыңыз
+• Ұқсас аяттар: оңай шатастырылатын аяттар, өзгеше сөздер белгіленген
+• Қарилар суретімен көрсетіледі
+• Сүре жаттағанда не хатым аяқтағанда мереке
+• Беттер Мусхафқа ұқсас алдын ала көрініспен жүктеледі
+</kk>
+<ko-KR>
+• 카트마: 원하는 기간 또는 날짜까지 꾸란 전체를 읽기
+• 비슷한 아야: 혼동하기 쉬운 아야를 다른 단어에 표시하여 보기
+• 낭송자를 사진과 함께 표시
+• 수라를 암기하거나 카트마를 마치면 축하
+• 무스하프 같은 미리보기로 페이지 로딩
+</ko-KR>
+<ms>
+• Khatam: baca seluruh al-Quran dalam hari yang anda pilih atau sebelum satu tarikh
+• Ayat yang serupa: ayat yang mudah terkeliru, perkataan berbeza ditanda
+• Qari dipaparkan dengan gambar mereka
+• Sambutan apabila anda menghafaz surah atau menamatkan khatam
+• Halaman dimuatkan dengan pratonton seperti mushaf
+</ms>
+<nl-NL>
+• Khatma: lees de hele Koran in het aantal dagen dat je kiest of vóór een datum
+• Gelijkende ayat: makkelijk te verwarren ayat, de verschillende woorden gemarkeerd
+• Reciteurs met hun foto
+• Een viering als je een soera memoriseert of een khatma voltooit
+• Pagina's laden met een Mushaf-achtige voorvertoning
+</nl-NL>
+<pt-BR>
+• Khatma: leia o Alcorão inteiro nos dias que escolher ou até uma data
+• Versículos semelhantes: os que se confundem fácil, com as palavras diferentes marcadas
+• Recitadores com sua foto
+• Uma comemoração ao memorizar uma surata ou concluir uma khatma
+• Páginas carregam com uma prévia parecida com o Mushaf
+</pt-BR>
+<ru-RU>
+• Хатм: прочитайте весь Коран за выбранные дни или к нужной дате
+• Похожие аяты: аяты, которые легко спутать, с выделенными отличиями
+• Чтецы с фотографией
+• Праздник, когда вы выучили суру или завершили хатм
+• Страницы загружаются с превью, похожим на Мусхаф
+</ru-RU>
+<sw>
+• Khatma: soma Qur'ani nzima katika siku unazochagua au kabla ya tarehe
+• Aya zinazofanana: aya zinazochanganywa kwa urahisi, maneno tofauti yamewekewa alama
+• Wasomaji na picha zao
+• Sherehe unapohifadhi sura au kukamilisha khatma
+• Kurasa zinapakia kwa muonekano kama wa Msahafu
+</sw>
+<tr-TR>
+• Hatim: Kuran'ın tamamını seçtiğin günlerde veya bir tarihe kadar oku
+• Benzer ayetler: kolay karıştırılan ayetler, farklı kelimeler işaretli
+• Kurrâlar fotoğraflarıyla
+• Bir sure ezberlediğinde veya hatim bitirdiğinde kutlama
+• Sayfalar Mushaf benzeri bir önizlemeyle yüklenir
+</tr-TR>
+<ur>
+• ختم: اپنے چنے ہوئے دنوں میں یا کسی تاریخ تک پورا قرآن پڑھیں
+• ملتی جلتی آیات: آسانی سے گڈمڈ ہونے والی آیات، مختلف الفاظ نمایاں
+• قراء کی تصویر ان کے نام کے ساتھ
+• سورت حفظ کرنے یا ختم مکمل کرنے پر جشن
+• صفحات مصحف جیسے پیش منظر کے ساتھ لوڈ ہوتے ہیں
+</ur>
+<zh-CN>
+• 通读：在你选择的天数内或某日期前读完整部古兰经
+• 相似经文：查看容易混淆的经文，不同的词已标出
+• 诵读者显示照片
+• 背会一章或完成通读时的庆祝动画
+• 页面加载时显示类似经本的预览
+</zh-CN>

@@ -41,6 +41,7 @@ import '../../listen/application/reciter_controller.dart';
 import '../../recitation/application/hifz_controller.dart';
 import '../../listen/domain/quran_audio_sources.dart';
 import '../../listen/presentation/listen_sheet.dart';
+import '../../listen/presentation/reciter_avatar.dart';
 import 'arabic_font_choices.dart';
 import 'theme_choices.dart';
 import '../../../quran/presentation/meaning_resource_names.dart';
@@ -137,6 +138,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       List<String> words = const [],
       bool collapsed = false,
       String? summary,
+      Widget? summaryLeading,
     }) {
       final card = TahfeezCard(
         padding: const EdgeInsets.symmetric(
@@ -155,6 +157,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           title: title,
           icon: icon,
           summary: summary,
+          summaryLeading: summaryLeading,
           open: searching,
           child: card,
         ),
@@ -329,6 +332,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 summary: reciterName(
                   context,
                   reciterFor(ref.watch(reciterProvider)),
+                ),
+                summaryLeading: ReciterAvatar(
+                  reciter: reciterFor(ref.watch(reciterProvider)),
+                  size: 20,
                 ),
               );
               if (reminderSupported) {
@@ -979,7 +986,10 @@ class _ListenSettings extends ConsumerWidget {
           key: const ValueKey('settings-reciter'),
           contentPadding: EdgeInsets.zero,
           title: _SearchText(l10n.listenReciter),
-          subtitle: Text(reciterName(context, reciter)),
+          subtitle: ReciterNameWithAvatar(
+            reciter: reciter,
+            name: reciterName(context, reciter),
+          ),
           trailing: const Icon(Icons.chevron_right),
           onTap: () => showReciterSheet(context),
         ),

@@ -19,6 +19,7 @@ import '../domain/mushaf_appearance.dart';
 import 'ayah_share_sheet.dart';
 import 'ayah_view_options.dart';
 import 'ayah_view_parts.dart';
+import 'similar_ayahs_section.dart';
 import '../../../quran/application/meaning_packs.dart';
 
 /// The "long-press a word" destination, in the Mushaf and in Ayah mode:
@@ -165,6 +166,7 @@ class _AyahDetailSheetBody extends ConsumerWidget {
                       ],
                     ),
                   ),
+                SimilarAyahsSection(ayahId: ayahId),
                 if (view.showTransliteration)
                   AyahTransliteration(ayahId: ayahId, colors: colors),
                 if (view.showTranslation)

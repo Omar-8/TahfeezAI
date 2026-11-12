@@ -25,6 +25,7 @@ import '../domain/quran_audio_sources.dart';
 import '../../recitation/presentation/recitation_controls.dart'
     show showRecitationIntro;
 import 'listen_sheet.dart';
+import 'reciter_avatar.dart';
 import '../../recitation/presentation/quick_start.dart'
     show markModeRestart, quickStartFrom;
 import '../../../core/ui/sheet_actions.dart';
@@ -195,7 +196,10 @@ class _FollowAlongSheetState extends ConsumerState<_FollowAlongSheet> {
                 key: const ValueKey('follow-reciter'),
                 leading: const Icon(Icons.record_voice_over_outlined),
                 title: Text(l10n.listenReciter),
-                subtitle: Text(reciterName(context, reciter)),
+                subtitle: ReciterNameWithAvatar(
+                  reciter: reciter,
+                  name: reciterName(context, reciter),
+                ),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () => showReciterSheet(context),
               ),
