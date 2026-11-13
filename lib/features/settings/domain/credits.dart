@@ -119,7 +119,7 @@ const credits = <Credit>[
         'Hasan Yaqoub), Korean (Hamid Choi), Japanese (Saeed Sato) and '
         'Portuguese (Helmi Nasr), Chinese (Muhammad Suleiman, Muhammad '
         'Makin) translations; Pashto, Swahili, Uzbek, Dutch and Greek (Rowwad); '
-        'Al-Mukhtasar in Kurdish, Pashto, Uzbek and Japanese',
+        'Al-Mukhtasar in Kurdish, Pashto, Uzbek, Japanese and Chinese',
     owner: 'QuranEnc',
     licence: 'QuranEnc terms: unmodified, with attribution and version',
     url: 'https://quranenc.com',

@@ -117,9 +117,12 @@ Future<void> main(List<String> args) async {
     // through the API, below).
     'arabic_mokhtasar',
     'arabic_yaseer',
-    // Added 2026-11-07: Chinese (no tafsir in Chinese on QuranEnc).
+    // Added 2026-11-07: Chinese.
     'chinese_suliman',
     'chinese_makin',
+    // Added 2026-11-13: Al-Mukhtasar in Chinese (served, though missing
+    // from QuranEnc's translations/list).
+    'chinese_mokhtasar',
   ]) {
     await _fetchQuranEnc(
       key: key,

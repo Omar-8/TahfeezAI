@@ -1,5 +1,5 @@
 {
-  "version": "a291e920e2998694",
+  "version": "678999de318e1ee7",
   "databases": {
     "quran": {
       "sha256": "2846cbd56153e37a79c1072f293203ae968488a30e42cce8d96299196b970d94",
@@ -12,7 +12,7 @@
       "asset": "translations.sqlite.zlib"
     },
     "tafsirs": {
-      "sha256": "7cafe970a5828f55839d3217667ce8f5140f064122930fb5c726ef6b1900e9a2",
+      "sha256": "5fc7f3fe748a5dfee07c186936898f137aeef8e5eec2191f851f1446917df344",
       "bytes": 5943296,
       "asset": "tafsirs.sqlite.zlib"
     },
@@ -220,6 +220,11 @@
         "sha256": "5c362dcd6720e2773515d163cacb69b3913134f176f650bf9f582612d95daedd",
         "asset": "packs/tafsir-uz-mukhtasar.sqlite.xz",
         "xzBytes": 477616
+      },
+      "zh-mukhtasar": {
+        "sha256": "9092e30bdc389008cabdd1c3f19573ec9a237bba8c770c1d14655ced1120a107",
+        "asset": "packs/tafsir-zh-mukhtasar.sqlite.xz",
+        "xzBytes": 398228
       }
     },
     "wbw": {

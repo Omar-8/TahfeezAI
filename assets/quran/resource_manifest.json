@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "buildDate": "2026-11-07T08:42:11.702209Z",
+  "buildDate": "2026-11-13T14:11:27.548104Z",
   "canonicalQuranSource": "Tanzil Project (tanzil.net)",
   "canonicalQuranVersion": "Uthmani, Version 1.1",
   "canonicalQuranHash": "bf4f57b968d03f4131c070b1e285da9be0e0a108a21c910e872801ca273312c8",
@@ -392,6 +392,14 @@
       "ayahCount": 6236
     },
     {
+      "id": "zh-mukhtasar",
+      "resourceId": "tahfeez.tafsir.zh.mukhtasar",
+      "quranEncKey": "chinese_mokhtasar",
+      "version": "unversioned upstream (QuranEnc lists no version for Al-Mukhtasar; tracked by sourceHash)",
+      "sourceHash": "6d3588642dfb66e1cb88b26321a30e33e5d83a942270cda24e8f33a2f4387a02",
+      "ayahCount": 6236
+    },
+    {
       "id": "ar-mukhtasar",
       "resourceId": "tahfeez.tafsir.ar.mukhtasar",
       "quranEncKey": "arabic_mokhtasar",
@@ -473,6 +481,7 @@
     "tafsir/ps_mukhtasar.json": "4276d59271585f5124ee1106d6c328d581c4bdd727db816023ebdbf5f96210b2",
     "tafsir/uz_mukhtasar.json": "638878170b187d3f5d90ec99e28046b4a59e22d577bde998f365e6e60941630a",
     "tafsir/ja_mukhtasar.json": "d7da2f2357d33d67d7d74d6f2ee1f8b82da784151f9b2369664f96ced3db40f1",
+    "tafsir/zh_mukhtasar.json": "da6355309864f0a451d4ae277903990b025ec7decec7026880d61027670f7a10",
     "tafsir/ar_mukhtasar.json": "1b94fe519308b883514088126c533538ecd8941bef0f5903ffa077be3575676d",
     "tafsir/ar_nafahat.json": "ce5830db3f36f7fac02860fb07f0e882c097dbabd7398698ae07dd848431676b",
     "tafsir/ar_yaseer.json": "b7a3bff73f063337fc3e85e181728cb446805ec2e5cdf9f33654dc345ceb1305",

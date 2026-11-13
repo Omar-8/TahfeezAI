@@ -74,8 +74,8 @@ String? defaultTafsirId(String language) => switch (language) {
   'ps' => 'ps-mukhtasar',
   'uz' => 'uz-mukhtasar',
   'ja' => 'ja-mukhtasar',
+  'zh' => 'zh-mukhtasar',
   // Malay, Hausa, Swahili, Kazakh, Somali (2026-10-25), Dutch, Korean,
-  // Greek, Portuguese and Danish (2026-11-01), Chinese (2026-11-07): no
-  // Al-Mukhtasar.
+  // Greek, Portuguese and Danish (2026-11-01): no Al-Mukhtasar.
   _ => 'en-mukhtasar',
 };

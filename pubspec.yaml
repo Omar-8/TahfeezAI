@@ -236,6 +236,8 @@ flutter:
     - assets/quran/tafsir/ar_mukhtasar.json
     - assets/quran/tafsir/ar_nafahat.json
     - assets/quran/tafsir/ar_yaseer.json
+    # Added 2026-11-13: Al-Mukhtasar in Chinese.
+    - assets/quran/tafsir/zh_mukhtasar.json
     # Expected Hafs pronunciation of every ayah for acoustic verification —
     # tool/acoustic_verification/build_reference.py.
     - assets/quran/recitation/phonetic_reference_hafs.json

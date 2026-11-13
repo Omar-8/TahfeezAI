@@ -183,6 +183,8 @@ class BundledDatasetSeeder {
       'ar_mukhtasar',
       'ar_nafahat',
       'ar_yaseer',
+      // Added 2026-11-13.
+      'zh_mukhtasar',
     ]) {
       await _seedTafsir(
         hashes,

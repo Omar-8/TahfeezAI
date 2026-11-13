@@ -334,6 +334,13 @@ const _launchTafsirs = [
     displayName: 'クルアーン簡潔注釈（日本語）',
     language: 'ja',
   ),
+  // Added 2026-11-13.
+  (
+    key: 'chinese_mokhtasar',
+    id: 'zh-mukhtasar',
+    displayName: '古兰经简明注释（中文）',
+    language: 'zh',
+  ),
 ];
 
 /// More Arabic tafsirs (owner's request, 2026-11-01), besides Al-Muyassar
