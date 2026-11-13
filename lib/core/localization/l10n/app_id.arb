@@ -719,5 +719,8 @@
   "khatmahOtherDays": "Jumlah hari lain",
   "khatmahByDate": "Selesai sebelum tanggal",
   "khatmahDaysField": "Hari (1–{max})",
-  "khatmahFinishesOn": "Selesai pada {date}"
+  "khatmahFinishesOn": "Selesai pada {date}",
+  "khatmahReminder": "Pengingat harian",
+  "khatmahReminderSwitch": "Ingatkan halaman setiap hari",
+  "khatmahReminderChannel": "Pengingat khatam"
 }

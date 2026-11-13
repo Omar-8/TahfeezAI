@@ -719,5 +719,8 @@
   "khatmahOtherDays": "Tiro kale oo maalmo ah",
   "khatmahByDate": "Dhammee ka hor taariikh",
   "khatmahDaysField": "Maalmo (1–{max})",
-  "khatmahFinishesOn": "Waxay dhammaanaysaa {date}"
+  "khatmahFinishesOn": "Waxay dhammaanaysaa {date}",
+  "khatmahReminder": "Xusuusin maalinle ah",
+  "khatmahReminderSwitch": "I xusuusi bogagga maalin kasta",
+  "khatmahReminderChannel": "Xusuusinta khatmiga"
 }

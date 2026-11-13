@@ -719,5 +719,8 @@
   "khatmahOtherDays": "অন্য সংখ্যক দিন",
   "khatmahByDate": "একটি তারিখের মধ্যে শেষ করুন",
   "khatmahDaysField": "দিন (1–{max})",
-  "khatmahFinishesOn": "শেষ হবে {date}"
+  "khatmahFinishesOn": "শেষ হবে {date}",
+  "khatmahReminder": "দৈনিক রিমাইন্ডার",
+  "khatmahReminderSwitch": "প্রতিদিনের পৃষ্ঠাগুলো মনে করিয়ে দিন",
+  "khatmahReminderChannel": "খতমের রিমাইন্ডার"
 }

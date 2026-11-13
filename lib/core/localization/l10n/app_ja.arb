@@ -719,5 +719,8 @@
   "khatmahOtherDays": "ほかの日数",
   "khatmahByDate": "日付までに読み終える",
   "khatmahDaysField": "日数（1〜{max}）",
-  "khatmahFinishesOn": "{date}に完了"
+  "khatmahFinishesOn": "{date}に完了",
+  "khatmahReminder": "毎日のリマインダー",
+  "khatmahReminderSwitch": "毎日のページを知らせる",
+  "khatmahReminderChannel": "ハトマのリマインダー"
 }

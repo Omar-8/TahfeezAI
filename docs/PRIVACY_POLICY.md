@@ -1,6 +1,6 @@
 # TahfeezAI — Privacy Policy
 
-_Last updated: 11 November 2026_
+_Last updated: 13 November 2026_
 
 TahfeezAI helps you read and memorize the Quran. It is built to keep your data on your phone. There are no accounts, no ads, no analytics and no tracking.
 
@@ -8,7 +8,7 @@ TahfeezAI helps you read and memorize the Quran. It is built to keep your data o
 
 - **Your recitation.** When you recite, the microphone audio is analysed on your phone by the app's own speech model, to follow your place and point out mistakes. The audio is never sent anywhere and is not saved: once a recitation ends, its audio is gone.
 - **Your memorization data:** which ayahs you have memorized, your test results, your plans, your bookmarks and your settings. They are stored only in the app's storage on your phone.
-- **Reminders.** The daily reminder is scheduled on your phone; nothing is sent to a server.
+- **Reminders.** The daily memorization reminder and the khatmah's reminder of each day's pages are scheduled on your phone; nothing is sent to a server.
 
 We (the developers) never receive any of this data, and we have no server that stores it.
 
@@ -32,7 +32,7 @@ The web version works the same way: your recitation is checked inside your brows
 
 - **The app's files and its recitation model** (about 91 MB, fetched the first time you open a Mushaf page, then kept by your browser) come from the website that hosts the app. Like any website, its host receives these requests, including your IP address, under its own terms.
 - **Fonts.** The engine the app is built with (Flutter) loads its default font and, where the app's own fonts lack a character (for example Japanese or Korean translations), a matching font from Google Fonts (`fonts.gstatic.com`). These requests name only the font; like any request, they reveal your IP address to Google.
-- Downloading reciters for offline listening and the daily reminder are not available in the browser.
+- Downloading reciters for offline listening and the reminders are not available in the browser.
 
 ## Reciters' photos
 
@@ -66,10 +66,10 @@ The photos were cropped and made smaller. If you hold the rights to one of them,
 ## Permissions
 
 - **Microphone** — to follow and check your recitation, on the phone only. Used only while you are reciting.
-- **Notifications** — for the optional daily memorization reminder.
+- **Notifications** — for the optional daily reminders (memorization, and each day's khatmah pages).
 - **Internet** — for streaming and downloading recitation audio, and downloading translations, tafsir and word meanings.
 - **Vibration** — to signal a mistake while you recite.
-- **Run at startup** — to keep your daily reminder after the phone restarts.
+- **Run at startup** — to keep your reminders after the phone restarts.
 
 ## Deleting your data
 

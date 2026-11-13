@@ -719,5 +719,8 @@
   "khatmahOtherDays": "其他天数",
   "khatmahByDate": "在某日期前读完",
   "khatmahDaysField": "天数（1–{max}）",
-  "khatmahFinishesOn": "于 {date} 完成"
+  "khatmahFinishesOn": "于 {date} 完成",
+  "khatmahReminder": "每日提醒",
+  "khatmahReminderSwitch": "每天提醒我当天的页数",
+  "khatmahReminderChannel": "通读提醒"
 }

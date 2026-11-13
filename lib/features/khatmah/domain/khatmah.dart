@@ -151,3 +151,32 @@ class Khatmah {
     );
   }
 }
+
+/// The khatmah's reminders from [now], [ahead] of them: each day's
+/// share at [minutes] after midnight — today's only while its time is still
+/// to come and its pages are not read. A future day's share is worked out
+/// as if nothing more is read before it: reading in the app schedules them
+/// again. Nothing once the whole Quran is read.
+List<(DateTime, KhatmahToday)> khatmahReminderPlan(
+  Khatmah khatmah,
+  DateTime now,
+  int minutes, {
+  int ahead = 14,
+}) {
+  final plan = <(DateTime, KhatmahToday)>[];
+  // Today left out: one day more, so [ahead] still come.
+  for (var i = 0; plan.length < ahead && i <= ahead; i++) {
+    final at = DateTime(
+      now.year,
+      now.month,
+      now.day + i,
+      minutes ~/ 60,
+      minutes % 60,
+    );
+    final share = khatmah.today(khatmahDay(at));
+    if (share.finished) break;
+    if (i == 0 && (!at.isAfter(now) || share.doneToday)) continue;
+    plan.add((at, share));
+  }
+  return plan;
+}

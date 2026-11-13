@@ -1406,5 +1406,11 @@
   "khatmahDaysField": "Days (1–{max})",
   "@khatmahDaysField": {"description": "Khatmah: the number-of-days field.", "placeholders": {"max": {"type": "int"}}},
   "khatmahFinishesOn": "Finishes on {date}",
-  "@khatmahFinishesOn": {"description": "Khatmah sheet: the last day for the days chosen; {date} is a formatted date.", "placeholders": {"date": {"type": "String"}}}
+  "@khatmahFinishesOn": {"description": "Khatmah sheet: the last day for the days chosen; {date} is a formatted date.", "placeholders": {"date": {"type": "String"}}},
+  "khatmahReminder": "Daily reminder",
+  "@khatmahReminder": {"description": "Khatmah menu and sheet title: the daily notification with each day's pages."},
+  "khatmahReminderSwitch": "Remind me of each day's pages",
+  "@khatmahReminderSwitch": {"description": "Khatmah reminder sheet and start sheet: switch for the daily notification."},
+  "khatmahReminderChannel": "Khatmah reminder",
+  "@khatmahReminderChannel": {"description": "Name of the khatmah reminder's notification channel (shown in the phone's settings)."}
 }

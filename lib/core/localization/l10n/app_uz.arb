@@ -719,5 +719,8 @@
   "khatmahOtherDays": "Boshqa kunlar soni",
   "khatmahByDate": "Sanagacha tugatish",
   "khatmahDaysField": "Kunlar (1–{max})",
-  "khatmahFinishesOn": "{date} kuni tugaydi"
+  "khatmahFinishesOn": "{date} kuni tugaydi",
+  "khatmahReminder": "Kundalik eslatma",
+  "khatmahReminderSwitch": "Har kungi sahifalarni eslatish",
+  "khatmahReminderChannel": "Xatm eslatmasi"
 }

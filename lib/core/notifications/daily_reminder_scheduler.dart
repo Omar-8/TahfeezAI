@@ -6,16 +6,19 @@ import 'package:timezone/timezone.dart' as tz;
 
 import '../core_providers.dart';
 
-/// Schedules one local notification a day — the platform adapter behind
-/// the daily memorization reminder (`docs/MEMORIZATION_MILESTONE.md`, M5).
-/// Callers never check the platform themselves: [supported] says whether
-/// this one can.
+/// Schedules local notifications — the platform adapter behind the daily
+/// memorization reminder (`docs/MEMORIZATION_MILESTONE.md`, M5) and the
+/// khatmah's reminder of each day's pages. Callers never check the
+/// platform themselves: [supported] says whether this one can.
 abstract class DailyReminderScheduler {
   bool get supported;
 
-  /// Sets up the plugin; [onOpen] runs when the reminder is tapped (also
-  /// when it launched the app).
-  Future<void> initialize({required void Function() onOpen});
+  /// Sets up the plugin (once, however often it is called).
+  Future<void> initialize();
+
+  /// [handler] runs when a notification scheduled with [payload] is tapped
+  /// (also when it launched the app, even before this was called).
+  void onOpen(String payload, void Function() handler);
 
   /// Asks for permission to notify; `true` once granted.
   Future<bool> requestPermission();
@@ -30,14 +33,42 @@ abstract class DailyReminderScheduler {
     required String channelName,
   });
 
+  /// Cancels the daily memorization reminder.
   Future<void> cancel();
+
+  /// Shows a notification once, at [at] local time (replacing any with the
+  /// same [id]); a tap runs [payload]'s [onOpen] handler.
+  Future<void> scheduleOnce({
+    required int id,
+    required DateTime at,
+    required String title,
+    required String body,
+    required String channelId,
+    required String channelName,
+    required String payload,
+  });
+
+  /// Cancels the notifications with these [ids].
+  Future<void> cancelIds(Iterable<int> ids);
+
+  /// Cancels every notification the app scheduled.
+  Future<void> cancelAll();
 }
+
+/// The memorization reminder's payload — also what a tap on one scheduled
+/// before payloads existed (no payload) opens.
+const memorizeReminderPayload = 'memorize';
 
 /// Android and iOS: `flutter_local_notifications`, repeating daily at the
 /// local time (Android: inexact, no exact-alarm permission).
 class LocalNotificationsReminderScheduler implements DailyReminderScheduler {
   final _plugin = FlutterLocalNotificationsPlugin();
-  bool _initialized = false;
+  Future<void>? _initialized;
+  final _handlers = <String, void Function()>{};
+
+  /// The payload of the notification that launched the app, until its
+  /// handler is there.
+  String? _pending;
 
   static const _id = 1;
   static const _channelId = 'memorization_reminder';
@@ -46,9 +77,28 @@ class LocalNotificationsReminderScheduler implements DailyReminderScheduler {
   bool get supported => true;
 
   @override
-  Future<void> initialize({required void Function() onOpen}) async {
-    if (_initialized) return;
-    _initialized = true;
+  Future<void> initialize() => _initialized ??= _initialize();
+
+  @override
+  void onOpen(String payload, void Function() handler) {
+    _handlers[payload] = handler;
+    if (_pending == payload) {
+      _pending = null;
+      handler();
+    }
+  }
+
+  void _open(String? payload) {
+    final key = payload ?? memorizeReminderPayload;
+    final handler = _handlers[key];
+    if (handler == null) {
+      _pending = key;
+    } else {
+      handler();
+    }
+  }
+
+  Future<void> _initialize() async {
     tz_data.initializeTimeZones();
     try {
       final zone = await FlutterTimezone.getLocalTimezone();
@@ -66,10 +116,12 @@ class LocalNotificationsReminderScheduler implements DailyReminderScheduler {
           requestSoundPermission: false,
         ),
       ),
-      onDidReceiveNotificationResponse: (_) => onOpen(),
+      onDidReceiveNotificationResponse: (r) => _open(r.payload),
     );
     final launch = await _plugin.getNotificationAppLaunchDetails();
-    if (launch?.didNotificationLaunchApp ?? false) onOpen();
+    if (launch?.didNotificationLaunchApp ?? false) {
+      _open(launch!.notificationResponse?.payload);
+    }
   }
 
   AndroidFlutterLocalNotificationsPlugin? get _android => _plugin
@@ -126,11 +178,58 @@ class LocalNotificationsReminderScheduler implements DailyReminderScheduler {
       ),
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
       matchDateTimeComponents: DateTimeComponents.time,
+      payload: memorizeReminderPayload,
     );
   }
 
   @override
   Future<void> cancel() => _plugin.cancel(id: _id);
+
+  @override
+  Future<void> scheduleOnce({
+    required int id,
+    required DateTime at,
+    required String title,
+    required String body,
+    required String channelId,
+    required String channelName,
+    required String payload,
+  }) async {
+    await _plugin.zonedSchedule(
+      id: id,
+      scheduledDate: tz.TZDateTime(
+        tz.local,
+        at.year,
+        at.month,
+        at.day,
+        at.hour,
+        at.minute,
+      ),
+      title: title,
+      body: body,
+      notificationDetails: NotificationDetails(
+        android: AndroidNotificationDetails(
+          channelId,
+          channelName,
+          importance: Importance.defaultImportance,
+          priority: Priority.defaultPriority,
+        ),
+        iOS: const DarwinNotificationDetails(),
+      ),
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      payload: payload,
+    );
+  }
+
+  @override
+  Future<void> cancelIds(Iterable<int> ids) async {
+    for (final id in ids) {
+      await _plugin.cancel(id: id);
+    }
+  }
+
+  @override
+  Future<void> cancelAll() => _plugin.cancelAll();
 }
 
 /// The web: no reminder.
@@ -140,7 +239,9 @@ class UnsupportedReminderScheduler implements DailyReminderScheduler {
   @override
   bool get supported => false;
   @override
-  Future<void> initialize({required void Function() onOpen}) async {}
+  Future<void> initialize() async {}
+  @override
+  void onOpen(String payload, void Function() handler) {}
   @override
   Future<bool> requestPermission() async => false;
   @override
@@ -153,6 +254,20 @@ class UnsupportedReminderScheduler implements DailyReminderScheduler {
   }) async {}
   @override
   Future<void> cancel() async {}
+  @override
+  Future<void> scheduleOnce({
+    required int id,
+    required DateTime at,
+    required String title,
+    required String body,
+    required String channelId,
+    required String channelName,
+    required String payload,
+  }) async {}
+  @override
+  Future<void> cancelIds(Iterable<int> ids) async {}
+  @override
+  Future<void> cancelAll() async {}
 }
 
 final dailyReminderSchedulerProvider = Provider<DailyReminderScheduler>(

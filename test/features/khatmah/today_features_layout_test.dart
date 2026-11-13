@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tahfeez_ai/core/localization/generated/app_localizations.dart';
+import 'package:tahfeez_ai/core/notifications/daily_reminder_scheduler.dart';
 import 'package:tahfeez_ai/core/storage/storage_providers.dart';
 import 'package:tahfeez_ai/core/theme/components/components.dart';
 import 'package:tahfeez_ai/features/khatmah/application/khatmah_controller.dart';
+import 'package:tahfeez_ai/features/khatmah/application/khatmah_reminder.dart';
 import 'package:tahfeez_ai/features/khatmah/presentation/khatmah_section.dart';
 import 'package:tahfeez_ai/features/listen/domain/quran_audio_sources.dart';
 import 'package:tahfeez_ai/features/listen/presentation/reciter_avatar.dart';
@@ -18,6 +20,7 @@ import 'package:tahfeez_ai/quran/application/similar_ayahs_provider.dart';
 import 'package:tahfeez_ai/quran/domain/models/ayah_models.dart';
 import 'package:tahfeez_ai/quran/domain/similar_ayahs.dart';
 
+import '../../test_helpers/fake_reminder_scheduler.dart';
 import '../../test_helpers/memory_storage.dart';
 import '../../test_helpers/widget_test_overrides.dart';
 
@@ -53,6 +56,9 @@ void main() {
       overrides: [
         ...tahfeezWidgetTestOverrides(),
         browserStorageProvider.overrideWithValue(MemoryStorage()),
+        dailyReminderSchedulerProvider.overrideWithValue(
+          FakeReminderScheduler(),
+        ),
         milestonesReachedProvider.overrideWith((ref) async => const []),
         memorizationClockProvider.overrideWithValue(
           () => DateTime(2026, 11, 12, 9),
@@ -118,6 +124,22 @@ void main() {
     ) async {
       await pump(tester, locale, const HomeKhatmahSection());
       fits(tester, 'none yet');
+      await tester.ensureVisible(find.byKey(const ValueKey('khatmah-start')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('khatmah-start')));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(
+        find.byKey(const ValueKey('khatmah-days-remind')),
+      );
+      await tester.pumpAndSettle();
+      fits(tester, 'start sheet, with its reminder');
+      await tester.tap(find.byKey(const ValueKey('khatmah-days-remind')));
+      await tester.ensureVisible(
+        find.byKey(const ValueKey('khatmah-days-save')),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('khatmah-days-save')));
+      await tester.pumpAndSettle();
       final k = container.read(khatmahProvider.notifier);
       await container.read(khatmahProvider.future);
       await k.start(30);
@@ -153,6 +175,15 @@ void main() {
       );
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const ValueKey('khatmah-days-save')));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const ValueKey('khatmah-menu')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('khatmah-reminder')));
+      await tester.pumpAndSettle();
+      fits(tester, 'reminder sheet');
+      expect(container.read(khatmahReminderProvider).enabled, isTrue);
+      await tester.tapAt(const Offset(160, 20)); // closed
       await tester.pumpAndSettle();
 
       await k.readThrough(604);

@@ -719,5 +719,8 @@
   "khatmahOtherDays": "Andet antal dage",
   "khatmahByDate": "Bliv færdig til en dato",
   "khatmahDaysField": "Dage (1–{max})",
-  "khatmahFinishesOn": "Slutter {date}"
+  "khatmahFinishesOn": "Slutter {date}",
+  "khatmahReminder": "Daglig påmindelse",
+  "khatmahReminderSwitch": "Mind mig om hver dags sider",
+  "khatmahReminderChannel": "Khatma-påmindelse"
 }

@@ -719,5 +719,8 @@
   "khatmahOtherDays": "Басқа күн саны",
   "khatmahByDate": "Белгілі күнге дейін аяқтау",
   "khatmahDaysField": "Күндер (1–{max})",
-  "khatmahFinishesOn": "{date} аяқталады"
+  "khatmahFinishesOn": "{date} аяқталады",
+  "khatmahReminder": "Күнделікті еске салғыш",
+  "khatmahReminderSwitch": "Әр күннің беттерін еске сал",
+  "khatmahReminderChannel": "Хатым еске салғышы"
 }

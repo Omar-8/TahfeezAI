@@ -6,30 +6,7 @@ import 'package:tahfeez_ai/core/localization/locale_controller.dart';
 import 'package:tahfeez_ai/core/notifications/daily_reminder_scheduler.dart';
 import 'package:tahfeez_ai/features/memorize/application/memorization_reminder.dart';
 
-class _Scheduler implements DailyReminderScheduler {
-  _Scheduler({this.granted = true});
-
-  final bool granted;
-  final scheduled = <(int, int, String)>[];
-  var cancelled = 0;
-
-  @override
-  bool get supported => true;
-  @override
-  Future<void> initialize({required void Function() onOpen}) async {}
-  @override
-  Future<bool> requestPermission() async => granted;
-  @override
-  Future<void> schedule({
-    required int hour,
-    required int minute,
-    required String title,
-    required String body,
-    required String channelName,
-  }) async => scheduled.add((hour, minute, title));
-  @override
-  Future<void> cancel() async => cancelled++;
-}
+import '../../../test_helpers/fake_reminder_scheduler.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -38,7 +15,7 @@ void main() {
         InMemorySharedPreferencesAsync.empty();
   });
 
-  ProviderContainer container(_Scheduler scheduler) {
+  ProviderContainer container(FakeReminderScheduler scheduler) {
     final c = ProviderContainer(
       overrides: [
         dailyReminderSchedulerProvider.overrideWithValue(scheduler),
@@ -51,7 +28,7 @@ void main() {
 
   test('off by default; on schedules it daily at its time, in the app '
       'language; a new time reschedules; off cancels', () async {
-    final scheduler = _Scheduler();
+    final scheduler = FakeReminderScheduler();
     final c = container(scheduler);
     final reminder = c.read(memorizationReminderProvider.notifier);
     expect(c.read(memorizationReminderProvider).enabled, isFalse);
@@ -68,7 +45,7 @@ void main() {
   });
 
   test('without permission it stays off', () async {
-    final scheduler = _Scheduler(granted: false);
+    final scheduler = FakeReminderScheduler(granted: false);
     final c = container(scheduler);
     final reminder = c.read(memorizationReminderProvider.notifier);
     expect(await reminder.setEnabled(true), isFalse);

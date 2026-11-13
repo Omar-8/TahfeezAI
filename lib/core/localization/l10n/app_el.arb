@@ -719,5 +719,8 @@
   "khatmahOtherDays": "Άλλος αριθμός ημερών",
   "khatmahByDate": "Ολοκλήρωση έως μια ημερομηνία",
   "khatmahDaysField": "Ημέρες (1–{max})",
-  "khatmahFinishesOn": "Τελειώνει στις {date}"
+  "khatmahFinishesOn": "Τελειώνει στις {date}",
+  "khatmahReminder": "Ημερήσια υπενθύμιση",
+  "khatmahReminderSwitch": "Υπενθύμισέ μου τις σελίδες κάθε ημέρας",
+  "khatmahReminderChannel": "Υπενθύμιση χάτμα"
 }

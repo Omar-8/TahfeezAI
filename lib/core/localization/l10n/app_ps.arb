@@ -719,5 +719,8 @@
   "khatmahOtherDays": "د ورځو بل شمېر",
   "khatmahByDate": "تر یوې نېټې پورې یې بشپړ کړئ",
   "khatmahDaysField": "ورځې (1–{max})",
-  "khatmahFinishesOn": "په {date} پای ته رسیږي"
+  "khatmahFinishesOn": "په {date} پای ته رسیږي",
+  "khatmahReminder": "ورځنۍ یادونه",
+  "khatmahReminderSwitch": "د هرې ورځې پاڼې را په یاد کړه",
+  "khatmahReminderChannel": "د ختم یادونه"
 }

@@ -719,5 +719,8 @@
   "khatmahOtherDays": "Ander aantal dagen",
   "khatmahByDate": "Klaar vóór een datum",
   "khatmahDaysField": "Dagen (1–{max})",
-  "khatmahFinishesOn": "Eindigt op {date}"
+  "khatmahFinishesOn": "Eindigt op {date}",
+  "khatmahReminder": "Dagelijkse herinnering",
+  "khatmahReminderSwitch": "Herinner me aan de pagina's van elke dag",
+  "khatmahReminderChannel": "Khatma-herinnering"
 }

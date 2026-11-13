@@ -719,5 +719,8 @@
   "khatmahOtherDays": "다른 일수",
   "khatmahByDate": "날짜까지 완독",
   "khatmahDaysField": "일수 (1–{max})",
-  "khatmahFinishesOn": "{date}에 완료"
+  "khatmahFinishesOn": "{date}에 완료",
+  "khatmahReminder": "매일 알림",
+  "khatmahReminderSwitch": "매일 읽을 페이지 알림",
+  "khatmahReminderChannel": "카트마 알림"
 }

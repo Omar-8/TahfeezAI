@@ -719,5 +719,8 @@
   "khatmahOtherDays": "Başka bir gün sayısı",
   "khatmahByDate": "Bir tarihe kadar bitir",
   "khatmahDaysField": "Gün (1–{max})",
-  "khatmahFinishesOn": "{date} tarihinde biter"
+  "khatmahFinishesOn": "{date} tarihinde biter",
+  "khatmahReminder": "Günlük hatırlatıcı",
+  "khatmahReminderSwitch": "Her günün sayfalarını hatırlat",
+  "khatmahReminderChannel": "Hatim hatırlatıcısı"
 }

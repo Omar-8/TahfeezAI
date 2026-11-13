@@ -719,5 +719,8 @@
   "khatmahOtherDays": "Outro número de dias",
   "khatmahByDate": "Concluir até uma data",
   "khatmahDaysField": "Dias (1–{max})",
-  "khatmahFinishesOn": "Termina em {date}"
+  "khatmahFinishesOn": "Termina em {date}",
+  "khatmahReminder": "Lembrete diário",
+  "khatmahReminderSwitch": "Lembrar-me das páginas de cada dia",
+  "khatmahReminderChannel": "Lembrete da khatma"
 }

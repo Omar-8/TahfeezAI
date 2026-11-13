@@ -719,5 +719,8 @@
   "khatmahOtherDays": "Idadi nyingine ya siku",
   "khatmahByDate": "Maliza kabla ya tarehe",
   "khatmahDaysField": "Siku (1–{max})",
-  "khatmahFinishesOn": "Inamalizika {date}"
+  "khatmahFinishesOn": "Inamalizika {date}",
+  "khatmahReminder": "Kikumbusho cha kila siku",
+  "khatmahReminderSwitch": "Nikumbushe kurasa za kila siku",
+  "khatmahReminderChannel": "Kikumbusho cha khatma"
 }

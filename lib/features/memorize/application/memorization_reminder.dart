@@ -1,12 +1,9 @@
-import 'dart:ui' show Locale, PlatformDispatcher;
-
 import 'package:flutter/scheduler.dart' show SchedulerBinding;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/localization/generated/app_localizations.dart';
-import '../../../core/localization/locale_controller.dart';
-import '../../../core/localization/supported_locales.dart';
 import '../../../core/notifications/daily_reminder_scheduler.dart';
+import '../../../core/notifications/reminder_locale.dart';
 import '../../../core/routing/app_router.dart';
 import '../../../core/storage/storage_providers.dart';
 
@@ -35,7 +32,8 @@ class MemorizationReminderController extends Notifier<MemorizationReminder> {
   Future<void> _restore() async {
     final scheduler = _scheduler;
     if (!scheduler.supported) return;
-    await scheduler.initialize(onOpen: _openMemorize);
+    scheduler.onOpen(memorizeReminderPayload, _openMemorize);
+    await scheduler.initialize();
     final storage = ref.read(browserStorageProvider);
     final enabled = await storage.getBool(_enabledKey) ?? false;
     final minutes =
@@ -75,24 +73,13 @@ class MemorizationReminderController extends Notifier<MemorizationReminder> {
   }
 
   Future<void> _schedule() async {
-    final l10n = lookupAppLocalizations(_locale());
+    final l10n = lookupAppLocalizations(reminderLocale(ref));
     await _scheduler.schedule(
       hour: state.minutes ~/ 60,
       minute: state.minutes % 60,
       title: l10n.memReminderNotifTitle,
       body: l10n.memReminderNotifBody,
       channelName: l10n.memReminderChannel,
-    );
-  }
-
-  /// The app's language: the chosen one, else the system's when supported.
-  Locale _locale() {
-    final chosen = ref.read(localeControllerProvider);
-    if (chosen != null) return chosen;
-    final system = PlatformDispatcher.instance.locale.languageCode;
-    return kTahfeezSupportedLocales.firstWhere(
-      (l) => l.languageCode == system,
-      orElse: () => kTahfeezSupportedLocales.first,
     );
   }
 }

@@ -719,5 +719,8 @@
   "khatmahOtherDays": "ژمارەیەکی تری ڕۆژ",
   "khatmahByDate": "تا بەروارێک تەواوی بکە",
   "khatmahDaysField": "ڕۆژ (1–{max})",
-  "khatmahFinishesOn": "لە {date} تەواو دەبێت"
+  "khatmahFinishesOn": "لە {date} تەواو دەبێت",
+  "khatmahReminder": "بیرخەرەوەی ڕۆژانە",
+  "khatmahReminderSwitch": "پەڕەکانی هەر ڕۆژێکم بیر بخەرەوە",
+  "khatmahReminderChannel": "بیرخەرەوەی خەتم"
 }

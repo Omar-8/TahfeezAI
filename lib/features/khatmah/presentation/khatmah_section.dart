@@ -12,7 +12,9 @@ import '../../../quran/domain/models/quran_location.dart';
 import '../../quran/application/quran_index_providers.dart';
 import '../../../memorization/application/memorization_today.dart'
     show memorizationClockProvider;
+import '../../../core/notifications/daily_reminder_scheduler.dart';
 import '../application/khatmah_controller.dart';
+import '../application/khatmah_reminder.dart';
 import '../domain/khatmah.dart';
 
 /// Home's khatmah card: none yet — what it is and Start; in progress —
@@ -227,7 +229,7 @@ class _ProgressCard extends ConsumerWidget {
   }
 }
 
-enum _Action { days, readThrough, end }
+enum _Action { days, reminder, readThrough, end }
 
 class _Menu extends ConsumerWidget {
   const _Menu({required this.khatmah});
@@ -247,6 +249,7 @@ class _Menu extends ConsumerWidget {
           current: khatmah.days,
           start: khatmah.start,
         ),
+        _Action.reminder => showKhatmahReminderSheet(context),
         _Action.readThrough => _readThrough(context, ref),
         _Action.end => _end(context, ref),
       },
@@ -256,6 +259,12 @@ class _Menu extends ConsumerWidget {
           key: const ValueKey('khatmah-change-days'),
           child: Text(l10n.khatmahChangeDays),
         ),
+        if (ref.read(dailyReminderSchedulerProvider).supported)
+          PopupMenuItem(
+            value: _Action.reminder,
+            key: const ValueKey('khatmah-reminder'),
+            child: Text(l10n.khatmahReminder),
+          ),
         PopupMenuItem(
           value: _Action.readThrough,
           key: const ValueKey('khatmah-read-through'),
@@ -408,6 +417,9 @@ class _DaysSheetState extends ConsumerState<_DaysSheet> {
 
   late int _days = widget.current ?? 30;
 
+  /// A new khatmah's reminder: on as it was last left.
+  late bool _remind = ref.read(khatmahReminderProvider).enabled;
+
   DateTime get _today {
     final now = ref.read(memorizationClockProvider)();
     return DateTime(now.year, now.month, now.day);
@@ -530,13 +542,37 @@ class _DaysSheetState extends ConsumerState<_DaysSheet> {
               color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
+          if (widget.current == null &&
+              ref.read(dailyReminderSchedulerProvider).supported)
+            SwitchListTile(
+              key: const ValueKey('khatmah-days-remind'),
+              contentPadding: EdgeInsets.zero,
+              title: Text(l10n.khatmahReminderSwitch),
+              subtitle: Text(
+                l10n.memReminderAt(
+                  _timeOf(ref.read(khatmahReminderProvider).minutes)
+                      .format(context),
+                ),
+              ),
+              value: _remind,
+              onChanged: (on) => setState(() => _remind = on),
+            ),
           FilledButton(
             key: const ValueKey('khatmah-days-save'),
             onPressed: () async {
               final controller = ref.read(khatmahProvider.notifier);
+              final reminder = ref.read(khatmahReminderProvider.notifier);
+              final remindWas = ref.read(khatmahReminderProvider).enabled;
+              final messenger = ScaffoldMessenger.of(context);
               Navigator.of(context).pop();
               if (widget.current == null) {
                 await controller.start(_days);
+                if (_remind != remindWas &&
+                    !await reminder.setEnabled(_remind)) {
+                  messenger.showSnackBar(
+                    SnackBar(content: Text(l10n.memReminderDenied)),
+                  );
+                }
               } else {
                 await controller.setDays(_days);
               }
@@ -544,6 +580,78 @@ class _DaysSheetState extends ConsumerState<_DaysSheet> {
             child: Text(
               widget.current == null ? l10n.khatmahStart : l10n.khatmahSave,
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+TimeOfDay _timeOf(int minutes) =>
+    TimeOfDay(hour: minutes ~/ 60, minute: minutes % 60);
+
+/// The khatmah reminder's sheet: on or off, and its time.
+Future<void> showKhatmahReminderSheet(BuildContext context) =>
+    showTahfeezModalBottomSheet<void>(
+      context: context,
+      title: AppLocalizations.of(context).khatmahReminder,
+      builder: (context) => const _ReminderSheet(),
+    );
+
+class _ReminderSheet extends ConsumerWidget {
+  const _ReminderSheet();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final reminder = ref.watch(khatmahReminderProvider);
+    final time = _timeOf(reminder.minutes);
+    return SingleChildScrollView(
+      padding: const EdgeInsetsDirectional.fromSTEB(
+        TahfeezSpacing.md,
+        0,
+        TahfeezSpacing.md,
+        TahfeezSpacing.lg,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SwitchListTile(
+            key: const ValueKey('khatmah-reminder-switch'),
+            contentPadding: EdgeInsets.zero,
+            title: Text(l10n.khatmahReminderSwitch),
+            subtitle: Text(l10n.memReminderAt(time.format(context))),
+            value: reminder.enabled,
+            onChanged: (on) async {
+              final messenger = ScaffoldMessenger.of(context);
+              final done = await ref
+                  .read(khatmahReminderProvider.notifier)
+                  .setEnabled(on);
+              if (!done) {
+                messenger.showSnackBar(
+                  SnackBar(content: Text(l10n.memReminderDenied)),
+                );
+              }
+            },
+          ),
+          ListTile(
+            key: const ValueKey('khatmah-reminder-time'),
+            contentPadding: EdgeInsets.zero,
+            enabled: reminder.enabled,
+            leading: const Icon(Icons.schedule),
+            title: Text(l10n.memReminderTime),
+            trailing: Text(time.format(context)),
+            onTap: () async {
+              final picked = await showTimePicker(
+                context: context,
+                initialTime: time,
+              );
+              if (picked == null) return;
+              await ref
+                  .read(khatmahReminderProvider.notifier)
+                  .setTime(picked.hour * 60 + picked.minute);
+            },
           ),
         ],
       ),

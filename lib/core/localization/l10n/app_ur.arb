@@ -719,5 +719,8 @@
   "khatmahOtherDays": "دنوں کی کوئی اور تعداد",
   "khatmahByDate": "کسی تاریخ تک ختم کریں",
   "khatmahDaysField": "دن (1–{max})",
-  "khatmahFinishesOn": "{date} کو مکمل"
+  "khatmahFinishesOn": "{date} کو مکمل",
+  "khatmahReminder": "روزانہ یاد دہانی",
+  "khatmahReminderSwitch": "ہر دن کے صفحات کی یاد دہانی کرائیں",
+  "khatmahReminderChannel": "ختم کی یاد دہانی"
 }

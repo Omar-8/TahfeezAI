@@ -8,10 +8,10 @@ import '../../../quran/data/import/bundled_dataset_seeder.dart';
 
 /// Settings → Reset all data: deletes the user's own data — memorization
 /// (memories, test results, plans), recitation history and every setting,
-/// and cancels the daily reminder. The Quran, translations, tafsir and
+/// and cancels its reminders. The Quran, translations, tafsir and
 /// word meanings (bundled resources, not user data) stay installed.
 Future<void> resetAllData(WidgetRef ref) async {
-  await ref.read(dailyReminderSchedulerProvider).cancel();
+  await ref.read(dailyReminderSchedulerProvider).cancelAll();
   await ref.read(memorizationRepositoryProvider).clearAll();
   await ref.read(browserStorageProvider).clearExcept(const {
     BundledDatasetSeeder.seededVersionKey,

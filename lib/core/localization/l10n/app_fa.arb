@@ -719,5 +719,8 @@
   "khatmahOtherDays": "تعداد دیگری از روزها",
   "khatmahByDate": "تا تاریخی تمام کنید",
   "khatmahDaysField": "روزها (1–{max})",
-  "khatmahFinishesOn": "پایان در {date}"
+  "khatmahFinishesOn": "پایان در {date}",
+  "khatmahReminder": "یادآور روزانه",
+  "khatmahReminderSwitch": "صفحه‌های هر روز را یادآوری کن",
+  "khatmahReminderChannel": "یادآور ختم"
 }

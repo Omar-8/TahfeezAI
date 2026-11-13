@@ -719,5 +719,8 @@
   "khatmahOtherDays": "Другое число дней",
   "khatmahByDate": "Закончить к дате",
   "khatmahDaysField": "Дни (1–{max})",
-  "khatmahFinishesOn": "Завершится {date}"
+  "khatmahFinishesOn": "Завершится {date}",
+  "khatmahReminder": "Ежедневное напоминание",
+  "khatmahReminderSwitch": "Напоминать о страницах на каждый день",
+  "khatmahReminderChannel": "Напоминание о хатме"
 }

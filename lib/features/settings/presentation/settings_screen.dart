@@ -21,6 +21,8 @@ import '../../../core/theme/app_surface_tone.dart';
 import '../../../core/notifications/daily_reminder_scheduler.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../memorize/application/memorization_reminder.dart';
+import '../../khatmah/application/khatmah_controller.dart';
+import '../../khatmah/application/khatmah_reminder.dart';
 import '../../../core/theme/theme_controller.dart';
 import '../../../quran/application/tafsir_library_controller.dart';
 import '../../../quran/application/tafsir_selection_controller.dart';
@@ -768,7 +770,7 @@ Future<void> _import(BuildContext context, WidgetRef ref) async {
   if (confirmed != true || !context.mounted) return;
   final android = ref.read(platformCapabilitiesProvider).isAndroid;
   try {
-    await ref.read(dailyReminderSchedulerProvider).cancel();
+    await ref.read(dailyReminderSchedulerProvider).cancelAll();
     await importUserData(
       bytes,
       storage: ref.read(browserStorageProvider),
@@ -781,6 +783,11 @@ Future<void> _import(BuildContext context, WidgetRef ref) async {
   if (android) {
     await SystemNavigator.pop();
   } else {
+    // The imported reminders, scheduled again.
+    ref
+      ..invalidate(memorizationReminderProvider)
+      ..invalidate(khatmahProvider)
+      ..invalidate(khatmahReminderProvider);
     messenger.showSnackBar(SnackBar(content: Text(l10n.settingsImportDone)));
   }
 }

@@ -719,5 +719,8 @@
   "khatmahOtherDays": "Wani adadin kwanaki",
   "khatmahByDate": "Gama kafin wata rana",
   "khatmahDaysField": "Kwanaki (1–{max})",
-  "khatmahFinishesOn": "Za ta ƙare {date}"
+  "khatmahFinishesOn": "Za ta ƙare {date}",
+  "khatmahReminder": "Tunatarwa ta yau da kullum",
+  "khatmahReminderSwitch": "Tunatar da ni shafukan kowace rana",
+  "khatmahReminderChannel": "Tunatarwar sauka"
 }

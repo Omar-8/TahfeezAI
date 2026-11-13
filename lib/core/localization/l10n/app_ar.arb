@@ -719,5 +719,8 @@
   "khatmahOtherDays": "عدد آخر من الأيام",
   "khatmahByDate": "اختم قبل تاريخ",
   "khatmahDaysField": "الأيام (1–{max})",
-  "khatmahFinishesOn": "تنتهي في {date}"
+  "khatmahFinishesOn": "تنتهي في {date}",
+  "khatmahReminder": "تذكير يومي",
+  "khatmahReminderSwitch": "ذكّرني بصفحات كل يوم",
+  "khatmahReminderChannel": "تذكير الختمة"
 }
