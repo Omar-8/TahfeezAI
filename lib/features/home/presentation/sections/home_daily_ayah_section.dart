@@ -38,7 +38,8 @@ class HomeDailyAyahSection extends ConsumerWidget {
           data: (ayah) => ayah == null
               ? TahfeezCard(child: const QuranUnavailableView())
               : _DailyAyahCard(ayah: ayah),
-          loading: () => const TahfeezCard(child: TahfeezLoadingView()),
+          loading: () =>
+              const TahfeezCard(child: TahfeezCardSkeleton(lines: 1, tall: 72)),
           error: (_, _) => TahfeezCard(child: const QuranUnavailableView()),
         ),
       ],

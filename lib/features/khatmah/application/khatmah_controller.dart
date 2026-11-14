@@ -14,8 +14,10 @@ import '../../../quran/domain/models/quran_location.dart';
 import '../../mushaf/application/mushaf_hide_mode.dart' show firstVisiblePage;
 import '../../recitation/application/mushaf_recitation_target.dart';
 import '../domain/khatmah.dart';
+import '../domain/khatmah_history.dart';
 
 const _key = 'khatmah.v1';
+const _historyKey = 'khatmah.completed.v1';
 
 /// The khatmah in progress (`null`: none), kept in the app's storage (so a
 /// backup carries it). A page on screen for [dwell] counts as read — both
@@ -67,6 +69,9 @@ class KhatmahController extends AsyncNotifier<Khatmah?> {
       ref
           .read(milestoneProvider.notifier)
           .celebrate(KhatmahMilestone(khatmah.start));
+      await ref
+          .read(khatmahHistoryProvider.notifier)
+          .add(CompletedKhatmah.of(khatmah));
     }
     final storage = ref.read(browserStorageProvider);
     if (khatmah == null) {
@@ -114,3 +119,55 @@ final khatmahTodayProvider = Provider<KhatmahToday?>((ref) {
   if (k == null) return null;
   return k.today(khatmahDay(ref.read(memorizationClockProvider)()));
 });
+
+/// The khatmahs completed, oldest first — kept in the app's storage (so a
+/// backup carries them), one per khatmah (by its first day). A khatmah
+/// completed before this was kept, and still the one in progress, is
+/// counted too.
+class KhatmahHistoryController extends AsyncNotifier<List<CompletedKhatmah>> {
+  @override
+  Future<List<CompletedKhatmah>> build() async {
+    final storage = ref.read(browserStorageProvider);
+    final stored = await storage.getString(_historyKey);
+    var done = <CompletedKhatmah>[];
+    if (stored != null) {
+      try {
+        done = [
+          for (final e in jsonDecode(stored) as List)
+            ?CompletedKhatmah.fromJson(e),
+        ];
+      } on FormatException {
+        done = [];
+      } on TypeError {
+        done = [];
+      }
+    }
+    final current = await ref.read(khatmahProvider.future);
+    if (current != null &&
+        current.readOn.length >= current.total &&
+        done.every((d) => d.start != current.start)) {
+      done = [...done, CompletedKhatmah.of(current)];
+      // Kept, or it would go once another khatmah is started.
+      await _store(done);
+    }
+    return done;
+  }
+
+  Future<void> _store(List<CompletedKhatmah> done) => ref
+      .read(browserStorageProvider)
+      .setString(_historyKey, jsonEncode([for (final d in done) d.toJson()]));
+
+  /// [khatmah] completed (once: not again for the same first day).
+  Future<void> add(CompletedKhatmah khatmah) async {
+    final done = await future;
+    if (done.any((d) => d.start == khatmah.start)) return;
+    final next = [...done, khatmah];
+    state = AsyncData(next);
+    await _store(next);
+  }
+}
+
+final khatmahHistoryProvider =
+    AsyncNotifierProvider<KhatmahHistoryController, List<CompletedKhatmah>>(
+      KhatmahHistoryController.new,
+    );

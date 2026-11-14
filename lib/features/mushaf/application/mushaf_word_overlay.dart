@@ -114,7 +114,13 @@ class MushafWordOverlay {
     this.heard = const {},
     this.corrected = const {},
     this.inks = const {},
+    this.band,
   });
+
+  /// A word with a colour of its own ([marks]: green, red, orange…) that
+  /// also has the next recitation's start: the band drawn around it, its
+  /// colour kept (owner, 2026-11-14).
+  final WordRef? band;
 
   /// Marks drawn in a colour the reader chose (ARGB) instead of the page's
   /// own: a pronunciation and a tajweed mistake (Hifz settings).
@@ -163,7 +169,8 @@ class MushafWordOverlay {
       setEquals(other.corrected, corrected) &&
       setEquals(other.revealed, revealed) &&
       mapEquals(other.marks, marks) &&
-      mapEquals(other.inks, inks);
+      mapEquals(other.inks, inks) &&
+      other.band == band;
 
   @override
   int get hashCode => Object.hash(first, last, revealed.length, marks.length);
@@ -296,6 +303,17 @@ class MushafWordOverlayController extends Notifier<MushafWordOverlay?> {
 
   KeptMarks get kept => _kept;
 
+  /// Where the next recitation starts (`RecitationStartController`): its
+  /// word's band drawn while none runs.
+  WordRef? _cursor;
+
+  /// The next recitation's start word ([_cursor]); `null`: none chosen.
+  void setCursor(WordRef? word) {
+    if (_cursor == word || !ref.mounted) return;
+    _cursor = word;
+    _publish();
+  }
+
   @override
   MushafWordOverlay? build() {
     // The colours kept are on the phone, shown again when the app starts.
@@ -354,9 +372,31 @@ class MushafWordOverlayController extends Notifier<MushafWordOverlay?> {
   /// before its first word (not on words it hides) — those from its start
   /// on are its own to color; with none under way, the kept colours.
   void _publish() {
-    final live = _live;
+    var live = _live;
     final kept = _shown();
     final MushafWordOverlay? next;
+    // A finished recitation's colours still shown (none runs: a start's
+    // band is drawn): its own last band gives way to the start's.
+    final cursor = _cursor;
+    if (live != null && cursor != null) {
+      final (marks, band) = _withBand({
+        for (final e in live.marks.entries)
+          if (e.value != MushafWordMark.current) e.key: e.value,
+      }, cursor);
+      live = MushafWordOverlay(
+        first: live.first,
+        last: live.last,
+        revealed: live.revealed,
+        marks: marks,
+        band: band,
+        hideUnrevealed: live.hideUnrevealed,
+        followHideMode: live.followHideMode,
+        showBefore: live.showBefore,
+        heard: live.heard,
+        corrected: live.corrected,
+        inks: live.inks,
+      );
+    }
     if (live != null) {
       final before = _before(kept, live.first);
       next = MushafWordOverlay(
@@ -386,16 +426,28 @@ class MushafWordOverlayController extends Notifier<MushafWordOverlay?> {
         heard: {..._kept.heard, ...live.heard},
         corrected: {..._kept.corrected, ...live.corrected},
         inks: live.inks,
+        band: live.band,
       );
-    } else if (kept.isEmpty || !_coloursShown) {
+    } else if ((kept.isEmpty || !_coloursShown) && _cursor == null) {
       next = null;
+    } else if (kept.isEmpty || !_coloursShown) {
+      // No colours drawn: the start's band alone.
+      next = MushafWordOverlay(
+        first: nowhere,
+        last: nowhere,
+        marks: {_cursor!: MushafWordMark.current},
+        hideUnrevealed: false,
+        followHideMode: true,
+      );
     } else {
       // Its range the latest recitation's: its mistakes the ones gone
       // through (those shown).
+      final (marks, band) = _withBand(kept, _cursor);
       next = MushafWordOverlay(
         first: _kept.from ?? nowhere,
         last: _kept.to ?? nowhere,
-        marks: kept,
+        marks: marks,
+        band: band,
         hideUnrevealed: false,
         followHideMode: true,
         heard: _kept.heard,
@@ -404,6 +456,21 @@ class MushafWordOverlayController extends Notifier<MushafWordOverlay?> {
       );
     }
     if (next != state) state = next;
+  }
+
+  /// [marks] with the start's band on [cursor]: as its mark on a word
+  /// without a colour; around a coloured one (green, red, orange…) as the
+  /// overlay's [MushafWordOverlay.band], its colour kept (owner,
+  /// 2026-11-14).
+  static (Map<WordRef, MushafWordMark>, WordRef?) _withBand(
+    Map<WordRef, MushafWordMark> marks,
+    WordRef? cursor,
+  ) {
+    if (cursor == null) return (marks, null);
+    if (marks[cursor] == null) {
+      return ({...marks, cursor: MushafWordMark.current}, null);
+    }
+    return (marks, cursor);
   }
 
   /// No word: the range of kept colours without a latest recitation.

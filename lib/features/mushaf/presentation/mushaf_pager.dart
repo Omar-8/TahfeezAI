@@ -1,5 +1,7 @@
 import 'dart:math' as math;
 
+import '../../recitation/application/recitation_start.dart';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show ScrollCacheExtent;
@@ -875,10 +877,9 @@ class _MushafPagerState extends ConsumerState<MushafPager> {
     final ayahId = hitRect.canonicalAyahId;
     final wordIndex = hitRect.canonicalWordIndex;
     if (ayahId == null || wordIndex == null) return;
-
-    showWordDetailSheet(
-      context,
-      wordRef: (ayahId: ayahId, wordIndex: wordIndex),
-    );
+    final word = (ayahId: ayahId, wordIndex: wordIndex);
+    // Also where the next recitation starts (not while one runs).
+    ref.read(recitationStartProvider.notifier).choose(word);
+    showWordDetailSheet(context, wordRef: word);
   }
 }

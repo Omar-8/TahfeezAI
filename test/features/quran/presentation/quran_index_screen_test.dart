@@ -1,6 +1,7 @@
 import 'package:drift/native.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -22,7 +23,12 @@ import '../../../quran/quran_test_fixtures.dart';
 import 'package:tahfeez_ai/core/ui/first_run.dart';
 
 void main() {
-  Widget wrap(QuranDatabase db, {Map<int, SurahProgress> progress = const {}}) {
+  Widget wrap(
+    QuranDatabase db, {
+    Map<int, SurahProgress> progress = const {},
+    Locale? locale,
+    double textScale = 1,
+  }) {
     final router = GoRouter(
       initialLocation: '/quran',
       routes: [
@@ -42,6 +48,12 @@ void main() {
       ],
       child: MaterialApp.router(
         routerConfig: router,
+        locale: locale,
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context)
+              .copyWith(textScaler: TextScaler.linear(textScale)),
+          child: child!,
+        ),
         supportedLocales: const [Locale('en'), Locale('ar')],
         localizationsDelegates: const [
           AppLocalizations.delegate,
@@ -50,6 +62,49 @@ void main() {
           GlobalCupertinoLocalizations.delegate,
         ],
       ),
+    );
+  }
+
+  for (final (width, scale, scrolls) in [
+    (800.0, 1.0, false),
+    (320.0, 2.0, true),
+  ]) {
+    testWidgets(
+      'the tabs at $width px, text ×$scale (Arabic): '
+      '${scrolls ? 'scrolling sideways, «المواضيع» whole' : 'sharing the width'}',
+      (tester) async {
+        tester.view.physicalSize = Size(width, 800);
+        tester.view.devicePixelRatio = 1;
+        addTearDown(tester.view.reset);
+        final db = QuranDatabase(NativeDatabase.memory());
+        addTearDown(db.close);
+        await tester.pumpWidget(
+          wrap(db, locale: const Locale('ar'), textScale: scale),
+        );
+        await tester.pumpAndSettle();
+        final bar = tester.widget<TabBar>(
+          find.byKey(const ValueKey('quran-tabs')),
+        );
+        expect(bar.isScrollable, scrolls);
+        expect(tester.takeException(), isNull);
+        final topics = find.text('المواضيع');
+        await tester.ensureVisible(topics);
+        await tester.pumpAndSettle();
+        // Whole: its text laid out on one line, not cut.
+        final paragraph = tester.renderObject<RenderParagraph>(
+          find.descendant(of: topics, matching: find.byType(RichText)),
+        );
+        expect(paragraph.didExceedMaxLines, isFalse);
+        expect(
+          paragraph.size.width,
+          greaterThanOrEqualTo(
+            paragraph.getMaxIntrinsicWidth(double.infinity) - 0.5,
+          ),
+        );
+        final rect = tester.getRect(topics);
+        expect(rect.left, greaterThanOrEqualTo(0));
+        expect(rect.right, lessThanOrEqualTo(width));
+      },
     );
   }
 
@@ -319,7 +374,7 @@ void main() {
       await tester.pumpWidget(wrap(db));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byTooltip('Go to Ayah'));
+      await tester.tap(find.byTooltip('Go to'));
       await tester.pumpAndSettle();
 
       await tester.enterText(
@@ -333,11 +388,38 @@ void main() {
       expect(find.byType(ReaderScreen), findsOneWidget);
     });
 
+    testWidgets('Go to: the ayah and page forms one over the other; Topics in '
+        'the Page tab\'s place', (tester) async {
+      await tester.pumpWidget(wrap(db));
+      await tester.pumpAndSettle();
+      // The Quran tab's fourth tab: Topics, not Page.
+      expect(find.text('Topics'), findsOneWidget);
+      expect(find.widgetWithText(Tab, 'Page'), findsNothing);
+
+      await tester.tap(find.byTooltip('Go to'));
+      await tester.pumpAndSettle();
+      // One over the other, no tabs: the ayah form, then the page's.
+      expect(find.byKey(const Key('goToAyahChapterField')), findsOneWidget);
+      expect(find.byKey(const ValueKey('go-to-page')), findsOneWidget);
+      expect(find.byType(TabBar), findsNWidgets(1)); // the Quran tab's own
+      expect(
+        tester.getTopLeft(find.byKey(const Key('goToAyahChapterField'))).dy,
+        lessThan(
+          tester.getTopLeft(find.byKey(const ValueKey('go-to-page'))).dy,
+        ),
+      );
+      // The ayah form's Go as wide as the forms (as the page form's).
+      expect(
+        tester.getSize(find.byKey(const ValueKey('go-to-ayah-go'))).width,
+        tester.getSize(find.byKey(const ValueKey('go-to-page'))).width,
+      );
+    });
+
     testWidgets('Go to Ayah rejects an out-of-range verse', (tester) async {
       await tester.pumpWidget(wrap(db));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byTooltip('Go to Ayah'));
+      await tester.tap(find.byTooltip('Go to'));
       await tester.pumpAndSettle();
 
       await tester.enterText(

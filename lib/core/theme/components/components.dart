@@ -23,5 +23,6 @@ export 'tahfeez_responsive_scaffold.dart';
 export 'tahfeez_section_header.dart';
 export 'tahfeez_segmented_control.dart';
 export 'tahfeez_settings_tile.dart';
+export 'tahfeez_skeletons.dart';
 export 'tahfeez_state_views.dart';
 export 'tahfeez_verse_action_bar.dart';

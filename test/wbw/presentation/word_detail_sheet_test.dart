@@ -3,6 +3,7 @@ import 'package:tahfeez_ai/core/localization/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tahfeez_ai/core/theme/app_spacing.dart';
 import 'package:tahfeez_ai/quran/application/canonical_ayah_word_text.dart';
 import 'package:tahfeez_ai/wbw/application/wbw_preferences_controller.dart';
 import 'package:tahfeez_ai/wbw/data/wbw_database.dart';
@@ -104,6 +105,115 @@ void main() {
       ); // both the tapped word + transliteration
     },
   );
+
+  for (final scale in [1.0, 2.0]) {
+    testWidgets('a word\'s meaning loading: a placeholder as tall as the '
+        'meaning (text ×$scale) — not the screen\'s loading view, which grew '
+        'the sheet for a moment on each mistake (owner, 2026-11-14)', (
+      tester,
+    ) async {
+      late double skeleton, meaning;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: MediaQuery(
+            data: MediaQueryData(textScaler: TextScaler.linear(scale)),
+            child: Builder(
+              builder: (context) {
+                final theme = Theme.of(context);
+                return Scaffold(
+                  body: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const WordMeaningSkeleton(key: ValueKey('s')),
+                      Column(
+                        key: const ValueKey('m'),
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        spacing: TahfeezSpacing.xs,
+                        children: [
+                          Text('lafz', style: theme.textTheme.bodyMedium),
+                          Text('word', style: theme.textTheme.bodyLarge),
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+      skeleton = tester.getSize(find.byKey(const ValueKey('s'))).height;
+      meaning = tester.getSize(find.byKey(const ValueKey('m'))).height;
+      expect(skeleton, moreOrLessEquals(meaning, epsilon: 3));
+    });
+  }
+
+  testWidgets('from one mistake to the next: the sheet as tall as the new '
+      'word all along — not the taller of the two for a moment (flicker; '
+      'owner, 2026-11-14)', (tester) async {
+    final db = WbwDatabase(NativeDatabase.memory());
+    addTearDown(db.close);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          wbwDatabaseProvider.overrideWith((ref) => db),
+          browserStorageProvider.overrideWithValue(_NoStorage()),
+          for (var i = 0; i < 3; i++)
+            canonicalAyahWordTextProvider(
+              ayahId: 1001,
+              wordIndex: i,
+            ).overrideWith(
+              // The first word's card much taller than the second's.
+              (ref) => i == 0 ? List.filled(40, 'word0').join(' ') : 'word$i',
+            ),
+        ],
+        child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Scaffold(
+            body: Consumer(
+              builder: (context, ref, _) => TextButton(
+                onPressed: () {
+                  ref
+                      .read(mushafWordOverlayProvider.notifier)
+                      .set(
+                        const MushafWordOverlay(
+                          first: (ayahId: 1001, wordIndex: 0),
+                          last: (ayahId: 1001, wordIndex: 2),
+                          hideUnrevealed: false,
+                          marks: {
+                            (ayahId: 1001, wordIndex: 0): MushafWordMark.wrong,
+                            (ayahId: 1001, wordIndex: 1): MushafWordMark.wrong,
+                            (ayahId: 1001, wordIndex: 2): MushafWordMark.wrong,
+                          },
+                        ),
+                      );
+                  showWordDetailSheet(
+                    context,
+                    wordRef: (ayahId: 1001, wordIndex: 0),
+                  );
+                },
+                child: const Text('open sheet'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('open sheet'));
+    await tester.pumpAndSettle();
+    final swipe = find.byKey(const ValueKey('word-mistake-swipe'));
+    await tester.tap(find.byKey(const ValueKey('word-next-mistake')));
+    final heights = <double>[];
+    for (var f = 0; f < 30; f++) {
+      await tester.pump(const Duration(milliseconds: 16));
+      heights.add(tester.getSize(swipe).height);
+    }
+    await tester.pumpAndSettle();
+    final settled = tester.getSize(swipe).height;
+    expect(heights, everyElement(moreOrLessEquals(settled, epsilon: 0.5)));
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets('a recitation\'s mistakes: swiped through as the Mushaf\'s '
       'pages turn — right, the next; left, the previous', (tester) async {

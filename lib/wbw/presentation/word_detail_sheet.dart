@@ -172,9 +172,17 @@ class _WordDetailSheetState extends ConsumerState<_WordDetailSheet> {
                   ),
                 );
               },
+              // The sheet sized by the word coming in only: the one going
+              // out fades within that size (it scrolls) — both sizing the
+              // sheet, it grew to the taller one for a moment, then went
+              // back (owner, 2026-11-14).
               layoutBuilder: (current, previous) => Stack(
                 alignment: Alignment.topCenter,
-                children: [...previous, ?current],
+                clipBehavior: Clip.hardEdge,
+                children: [
+                  for (final p in previous) Positioned.fill(child: p),
+                  ?current,
+                ],
               ),
               child: body,
             ),
@@ -446,8 +454,49 @@ class _WbwWordContent extends ConsumerWidget {
           ],
         );
       },
-      loading: () => const TahfeezLoadingView(),
+      // The meaning's own shape while it loads — its two lines — not the
+      // screen-sized loading view: that grew the sheet for a moment on
+      // each word (owner, 2026-11-14: a flicker going through mistakes).
+      loading: () => const WordMeaningSkeleton(),
       error: (_, _) => const SizedBox.shrink(),
+    );
+  }
+}
+
+/// A word's meaning loading: a transliteration's line and a translation's,
+/// pulsing — the height of the meaning that replaces it.
+class WordMeaningSkeleton extends StatelessWidget {
+  const WordMeaningSkeleton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scaler = MediaQuery.textScalerOf(context);
+    double line(TextStyle? style) =>
+        scaler.scale((style?.fontSize ?? 14) * (style?.height ?? 1.4));
+    return TahfeezSkeleton(
+      key: const ValueKey('word-meaning-skeleton'),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        spacing: TahfeezSpacing.xs,
+        children: [
+          for (final (style, width) in [
+            (theme.textTheme.bodyMedium, 0.35),
+            (theme.textTheme.bodyLarge, 0.6),
+          ])
+            // Each a line's full height, its bar inside.
+            SizedBox(
+              height: line(style),
+              child: Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: TahfeezSkeletonBar(
+                  widthFactor: width,
+                  height: line(style) * 0.7,
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

@@ -30,7 +30,8 @@ class HomeReadHistorySection extends ConsumerWidget {
         const SizedBox(height: TahfeezSpacing.sm),
         continueReading.when(
           data: (c) => _ContinueReadingCard(data: c),
-          loading: () => const TahfeezCard(child: TahfeezLoadingView()),
+          loading: () =>
+              const TahfeezCard(child: TahfeezCardSkeleton(lines: 2)),
           error: (_, _) => TahfeezCard(
             child: TahfeezEmptyView(
               icon: Icons.history,

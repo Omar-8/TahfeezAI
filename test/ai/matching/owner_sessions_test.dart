@@ -97,6 +97,14 @@ const _sessions = <_Session>[
     from: 1001,
     to: 1007,
   ),
+  (
+    tag: 'owner1114f_v37',
+    note:
+        '2026-11-14 19:31 Al-Fatiha, the basmala read on into «ٱلْحَمْدُ» '
+        '(was: «ٱلْحَمْدُ» wrong), then again with a pause',
+    from: 1001,
+    to: 1007,
+  ),
 ];
 
 AcousticFrames? _frames(String tag) {
@@ -207,6 +215,16 @@ void main() {
           reason: '$tag: words past Al-Fatiha',
         );
       }
+    });
+
+    test('2026-11-14: the basmala read on into «ٱلْحَمْدُ» (no pause): '
+        '«ٱلْحَمْدُ» said right, not a wrong word', () {
+      final r = run('owner1114f_v37');
+      expect(r.verdicts[HifzVerdict.wrong] ?? 0, 0, reason: r.log.join(' / '));
+      expect(placedAt(r).take(5), [
+        for (var w = 1; w <= 4; w++) pos(1, 1, w),
+        pos(1, 2, 1),
+      ]);
     });
 
     test('13:52: after the English in ayah 3, not back to the basmala', () {

@@ -101,11 +101,20 @@ class QuranAudioPlayer extends Notifier<NowPlaying?> {
 
   final _finished = StreamController<NowPlaying>.broadcast(sync: true);
 
+  /// Its ayah shared as it changes ([reciterAyahProvider]).
+  @protected
+  void shareReciterAyah() => listenSelf(
+    (_, now) => ref
+        .read(reciterAyahProvider.notifier)
+        .set(now == null || now.isWord ? null : now.ayahId),
+  );
+
   /// Each run of ayahs that played to its end (not stopped), as it ends.
   Stream<NowPlaying> get finished => _finished.stream;
 
   @override
   NowPlaying? build() {
+    shareReciterAyah();
     final controller = ref.watch(audioControllerProvider);
     _sub?.cancel();
     _sub = controller.state.listen(_onPlayback);
@@ -536,3 +545,19 @@ void showListenOffline(ScaffoldMessengerState messenger, String message) {
 
 final quranAudioPlayerProvider =
     NotifierProvider<QuranAudioPlayer, NowPlaying?>(QuranAudioPlayer.new);
+
+/// The ayah the reciter is on while ayahs play (not a word's own audio);
+/// else `null` — shared by the player, for those that must not build it
+/// (the recitation's start: the band not drawn meanwhile).
+class ReciterAyah extends Notifier<int?> {
+  @override
+  int? build() => null;
+
+  void set(int? ayahId) {
+    if (state != ayahId) state = ayahId;
+  }
+}
+
+final reciterAyahProvider = NotifierProvider<ReciterAyah, int?>(
+  ReciterAyah.new,
+);

@@ -37,7 +37,8 @@ class HomeMemorizationSection extends ConsumerWidget {
         const SizedBox(height: TahfeezSpacing.sm),
         plan.when(
           data: (today) => _TodayCard(today: today),
-          loading: () => const TahfeezCard(child: TahfeezLoadingView()),
+          loading: () =>
+              const TahfeezCard(child: TahfeezCardSkeleton(lines: 3)),
           error: (_, _) => const _TodayCard(today: TodayPlan()),
         ),
       ],

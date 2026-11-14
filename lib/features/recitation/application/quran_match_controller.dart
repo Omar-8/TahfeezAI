@@ -18,21 +18,30 @@ import 'mushaf_recitation_target.dart';
 import 'recitation_session_controller.dart';
 
 /// Every canonical word of the Quran in reading order, built once from the
-/// Uthmani words in the local dataset (the only script it ships).
+/// Uthmani words in the local dataset (the only script it ships) — built
+/// off the main thread ([compute]): its 77,000 words sorted, normalized and
+/// indexed there held up the screen each time a Mushaf opened (owner,
+/// 2026-11-14: "no waiting time at all").
 final quranWordCorpusProvider = FutureProvider<QuranWordCorpus>((ref) async {
   final words = await ref
       .watch(quranRepositoryProvider)
       .getAllWordsForScript(defaultQuranScriptCode);
-  return QuranWordCorpus.fromWords([
-    for (final w in words)
-      (
-        ref: (ayahId: w.ayahId, wordIndex: w.wordIndex),
-        // Stable ayah id = chapterNo * 1000 + verseNo (QuranRepository).
-        verse: (chapterNo: w.ayahId ~/ 1000, verseNo: w.ayahId % 1000),
-        text: w.text,
-      ),
+  return compute(_buildCorpus, [
+    for (final w in words) (w.ayahId, w.wordIndex, w.text),
   ]);
 });
+
+/// The corpus from (ayah id, word index, text) — in a background isolate.
+QuranWordCorpus _buildCorpus(List<(int, int, String)> words) =>
+    QuranWordCorpus.fromWords([
+      for (final (ayahId, wordIndex, text) in words)
+        (
+          ref: (ayahId: ayahId, wordIndex: wordIndex),
+          // Stable ayah id = chapterNo * 1000 + verseNo (QuranRepository).
+          verse: (chapterNo: ayahId ~/ 1000, verseNo: ayahId % 1000),
+          text: text,
+        ),
+    ]);
 
 class QuranMatchState {
   const QuranMatchState({

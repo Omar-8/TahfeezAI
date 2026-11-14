@@ -13,12 +13,12 @@ import '../../../quran/domain/models/quran_location.dart';
 import 'go_to_ayah_sheet.dart';
 import 'tabs/hizb_index_tab.dart';
 import 'tabs/juz_index_tab.dart';
-import 'tabs/page_index_tab.dart';
+import 'tabs/topics_index_tab.dart';
 import 'tabs/surah_index_tab.dart';
 import '../../../core/ui/back_to_exit.dart';
 
 /// Tahfeez's Quran index: a Tahfeez-owned tabbed browse surface (Surah /
-/// Juz / Hizb / Page) plus a "Go to Ayah" quick action, covering every
+/// Juz / Hizb / Topics) plus a "Go to" quick action (an ayah or a page), covering every
 /// navigation mode this milestone requires. Every result — from any tab or
 /// the quick action — resolves to a [QuranLocation] and routes through the
 /// single [goToQuranLocation] helper (`core/routing`), never a
@@ -74,8 +74,9 @@ class _QuranIndexScreenState extends ConsumerState<QuranIndexScreen>
                   onPressed: () => goToQuranLocation(context, recent),
                 ),
               IconButton(
+                key: const ValueKey('quran-go-to'),
                 icon: const Icon(Icons.pin_outlined),
-                tooltip: AppLocalizations.of(context).quranGoToAyah,
+                tooltip: AppLocalizations.of(context).quranGoTo,
                 onPressed: _goToAyah,
               ),
               IconButton(
@@ -93,13 +94,13 @@ class _QuranIndexScreenState extends ConsumerState<QuranIndexScreen>
           ),
           body: Column(
             children: [
-              TabBar(
+              _FittingTabBar(
                 controller: _tabController,
-                tabs: [
-                  Tab(text: AppLocalizations.of(context).quranTabSurah),
-                  Tab(text: AppLocalizations.of(context).quranTabJuz),
-                  Tab(text: AppLocalizations.of(context).quranTabHizb),
-                  Tab(text: AppLocalizations.of(context).quranTabPage),
+                labels: [
+                  AppLocalizations.of(context).quranTabSurah,
+                  AppLocalizations.of(context).quranTabJuz,
+                  AppLocalizations.of(context).quranTabHizb,
+                  AppLocalizations.of(context).quranTabTopics,
                 ],
               ),
               Expanded(
@@ -109,7 +110,7 @@ class _QuranIndexScreenState extends ConsumerState<QuranIndexScreen>
                     SurahIndexTab(onSelect: _select),
                     JuzIndexTab(onSelect: _select),
                     HizbIndexTab(onSelect: _select),
-                    PageIndexTab(onSelect: _select),
+                    TopicsIndexTab(onSelect: _select),
                   ],
                 ),
               ),
@@ -117,6 +118,48 @@ class _QuranIndexScreenState extends ConsumerState<QuranIndexScreen>
           ),
         ),
       ),
+    );
+  }
+}
+
+/// The tabs sharing the width when their labels fit; else scrolling
+/// sideways, each label whole (a long one — «المواضيع» at large text).
+class _FittingTabBar extends StatelessWidget {
+  const _FittingTabBar({required this.controller, required this.labels});
+
+  final TabController controller;
+  final List<String> labels;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final style = theme.tabBarTheme.labelStyle ?? theme.textTheme.titleSmall;
+    final scaler = MediaQuery.textScalerOf(context);
+    final direction = Directionality.of(context);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Each tab its share of the width; its label and padding (16 each
+        // side) to fit in it.
+        final share = constraints.maxWidth / labels.length;
+        final fits = labels.every((label) {
+          final painter = TextPainter(
+            text: TextSpan(text: label, style: style),
+            textDirection: direction,
+            textScaler: scaler,
+            maxLines: 1,
+          )..layout();
+          final width = painter.width;
+          painter.dispose();
+          return width + 32 <= share;
+        });
+        return TabBar(
+          key: const ValueKey('quran-tabs'),
+          controller: controller,
+          isScrollable: !fits,
+          tabAlignment: fits ? null : TabAlignment.start,
+          tabs: [for (final label in labels) Tab(text: label)],
+        );
+      },
     );
   }
 }

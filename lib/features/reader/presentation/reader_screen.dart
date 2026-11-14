@@ -61,13 +61,27 @@ class _ReaderScreenState extends ConsumerState<ReaderScreen> {
     _focus = ref.read(mushafFocusAyahProvider.notifier);
     _target = ref.read(ayahModeTargetProvider.notifier);
     _reading = ref.read(readingSurahProvider.notifier);
-    if (widget.location case QuranLocationAyah(
-      :final chapterNo,
-      :final verseNo,
-    )) {
-      Future.microtask(() {
-        if (mounted) _focus.focus(this, chapterNo * 1000 + verseNo);
-      });
+    switch (widget.location) {
+      case QuranLocationAyah(:final chapterNo, :final verseNo):
+        Future.microtask(() {
+          if (mounted) _focus.focus(this, chapterNo * 1000 + verseNo);
+        });
+      // A run of ayahs (a topic's passage): all of them highlighted.
+      case QuranLocationAyahRange(
+        :final chapterNo,
+        :final fromVerseNo,
+        :final toVerseNo,
+      ):
+        Future.microtask(() {
+          if (mounted) {
+            _focus.focus(
+              this,
+              chapterNo * 1000 + fromVerseNo,
+              lastAyahId: chapterNo * 1000 + toVerseNo,
+            );
+          }
+        });
+      default:
     }
     _resolve();
   }

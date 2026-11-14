@@ -289,7 +289,7 @@ class _ListenSheetState extends ConsumerState<_ListenSheet> {
           : null;
       // Where a tap on Listen would begin, else the page's first ayah.
       first =
-          quickStartFrom(ref) ??
+          quickStartFrom(ref, chosenWord: false) ??
           ref.read(mushafPageVersesProvider)[page]?.first ??
           (chapterNo: 1, verseNo: 1);
     }

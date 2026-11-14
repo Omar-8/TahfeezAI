@@ -402,7 +402,12 @@ class _SurahIndexTabState extends ConsumerState<SurahIndexTab> {
                 },
               );
             },
-            loading: () => const TahfeezLoadingView(),
+            loading: () => TahfeezListSkeleton(
+              padding: withBarSpace(
+                context,
+                const EdgeInsets.all(TahfeezSpacing.md),
+              ),
+            ),
             error: (_, _) => const QuranUnavailableView(),
           ),
         ),

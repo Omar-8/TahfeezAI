@@ -136,7 +136,11 @@ class _MemorizeScreenState extends ConsumerState<MemorizeScreen>
     Map<int, String> names,
     Widget Function(String, String, IconData, Widget) section,
   ) => plan.when(
-    loading: () => const TahfeezLoadingView(),
+    // Its cards' shape: the score, the new lesson, the revision.
+    loading: () => TahfeezCardsSkeleton(
+      cards: const [2, 4, 4],
+      padding: withBarSpace(context, const EdgeInsets.all(TahfeezSpacing.md)),
+    ),
     error: (e, _) => TahfeezEmptyView(message: '$e'),
     data: (today) => ListView(
       padding: withBarSpace(context, const EdgeInsets.all(TahfeezSpacing.md)),

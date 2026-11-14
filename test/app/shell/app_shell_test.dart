@@ -114,7 +114,7 @@ void main() {
     await tester.tap(find.text('القرآن'));
     await tester.pumpAndSettle();
     expect(find.text('القرآن'), findsNWidgets(2)); // the tab and the title
-    for (final tab in ['السور', 'الأجزاء', 'الأحزاب', 'الصفحات']) {
+    for (final tab in ['السور', 'الأجزاء', 'الأحزاب', 'المواضيع']) {
       expect(find.text(tab), findsOneWidget);
     }
     expect(find.text('Surah'), findsNothing);

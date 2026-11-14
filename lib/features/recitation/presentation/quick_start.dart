@@ -21,6 +21,7 @@ import '../application/mushaf_recitation_target.dart';
 import '../application/quran_match_controller.dart'
     show quranWordCorpusProvider;
 import '../application/recitation_session_controller.dart';
+import '../application/recitation_start.dart';
 import 'recitation_controls.dart' show showRecitationIntro;
 import 'recitation_loop_sheet.dart' show showRecitationLoopSheet;
 
@@ -44,14 +45,25 @@ bool get restartedJustNow {
       DateTime.now().difference(at) < const Duration(seconds: 4);
 }
 
-/// Where a quick start begins: with the ayahs hidden, the ayah of the next
-/// word to uncover on screen; otherwise (or all uncovered) the first ayah
-/// on screen. `null` before the page is known.
-VerseRef? quickStartFrom(WidgetRef ref) {
+/// Where a quick start begins: a word chosen on the page (tapped, or where
+/// the last recitation stopped) — its ayah, from its start; else, with the
+/// ayahs hidden, the ayah of the next word to uncover on screen; otherwise
+/// (or all uncovered) the first ayah on screen. `null` before the page is
+/// known. (Recite itself starts at the chosen word: hifz_controller.)
+///
+/// [chosenWord] `false` — the Listen, Loop and Follow along menus' own
+/// "from" (owner, 2026-11-14): as before, not the chosen word's ayah.
+VerseRef? quickStartFrom(WidgetRef ref, {bool chosenWord = true}) {
   final location = ref.read(mushafRecitationTargetProvider)?.location;
   if (location is! QuranLocationPage) return null;
   final spread = ref.read(fullBleedContentProvider);
   final first = firstVisiblePage(location.pageNumber, spread: spread);
+  final chosen = chosenWord ? ref.read(recitationStartProvider) : null;
+  if (chosen != null &&
+      (chosen.page == first || (spread && chosen.page == first + 1))) {
+    final ayahId = chosen.word.ayahId;
+    return (chapterNo: ayahId ~/ 1000, verseNo: ayahId % 1000);
+  }
   final spans = ref.read(mushafPageVersesProvider);
   final hide = ref.read(mushafHideModeProvider);
   if (hide.enabled) {

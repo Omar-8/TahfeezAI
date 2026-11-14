@@ -62,6 +62,17 @@ const credits = <Credit>[
   ),
   Credit(
     group: CreditGroup.quran,
+    name: "Ontology of Quranic concepts (Quranic Arabic Corpus)",
+    owner: 'Kais Dukes, University of Leeds',
+    licence: 'GNU GPL v3 (non-commercial use)',
+    url: 'https://corpus.quran.com/ontology.jsp',
+    useEn:
+        "The Quran tab's Topics (names in other languages translated by "
+        'TahfeezAI)',
+    useAr: 'المواضيع في تبويب القرآن',
+  ),
+  Credit(
+    group: CreditGroup.quran,
     name: "quran-transcript (Qur'an phonetizer)",
     owner: 'Abdullah (obadx)',
     licence: 'MIT',

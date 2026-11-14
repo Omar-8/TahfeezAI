@@ -52,7 +52,12 @@ class AyahWordView extends StatefulWidget {
     this.onLongPress,
     this.fade = true,
     this.tajweed = const [],
+    this.band,
   });
+
+  /// A band drawn around the word as well as its [style]'s colour (the
+  /// next recitation's start on a coloured word — owner, 2026-11-14).
+  final Color? band;
 
   final String fontFamily;
   final String text;
@@ -152,7 +157,7 @@ class _AyahWordViewState extends State<AyahWordView>
     final mark = widget.style;
     final colors = widget.colors;
     final ink = mark != null && mark.ink ? mark.color : colors.text;
-    final band = mark != null && !mark.ink ? mark.color : null;
+    final band = widget.band ?? (mark != null && !mark.ink ? mark.color : null);
     final smooth = t * t * (3 - 2 * t);
     // Hidden: its place kept (the line does not reflow), the word not
     // shown — fading out as it is hidden, in as it is revealed.

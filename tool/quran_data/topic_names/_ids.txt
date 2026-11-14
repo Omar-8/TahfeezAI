@@ -1,0 +1,243 @@
+musa	Musa
+ibrahim	Ibrahim
+nuh	Nuh
+israel	Israel
+lut	Lut
+yusuf	Yusuf
+adam	Adam
+jesus	Jesus
+harun	Harun
+david	David
+isaac	Isaac
+solomon	Solomon
+yaqub	Yaqub
+ishmael	Ishmael
+shuayb	Shuayb
+messiah	Messiah
+salih	Salih
+hud	Hud
+zechariah	Zechariah
+muhammad	Muhammad
+yahya	Yahya
+ayyub	Ayyub
+yunus	Yunus
+elijah	Elijah
+elisha	Elisha
+idris	Idris
+ahmad	Ahmad
+allah	Allah
+satan	Satan
+jinn	Jinn
+iblis	Iblis
+jibreel	Jibreel
+azrael	Azrael
+beast-of-the-earth	Beast of the Earth
+harut	Harut
+malik	Malik
+marut	Marut
+mikaeel	Mikaeel
+hell	Hell
+day-of-resurrection	Day of Resurrection
+paradise	Paradise
+last-day	Last Day
+garden-of-eden	Garden of Eden
+lote-tree	Lote Tree
+saqar	Saqar
+zaqqum	Zaqqum
+firdous	Firdous
+sijjeen	Sijjeen
+ladha	Ladha
+salsabil	Salsabil
+pharaoh	Pharaoh
+children-of-israel	Children of Israel
+maryam	Maryam
+thamud	Thamud
+aad	Aad
+king	King
+bedouin	Bedouin
+madyan	Madyan
+children-of-adam	Children of Adam
+haman	Haman
+companions-of-the-wood	Companions of the Wood
+qarun	Qarun
+dhul-qarnayn	Dhul Qarnayn
+imran	Imran
+jalut	Jalut
+samiri	Samiri
+ansar	Ansar
+gog-and-magog	Gog and Magog
+luqman	Luqman
+talut	Talut
+tubba	Tubba
+abel	Abel
+abu-lahab	Abu Lahab
+azar	Azar
+cain	Cain
+companions-of-the-cave	Companions of the Cave
+companions-of-the-elephant	Companions of the Elephant
+companions-of-the-pit	Companions of the Pit
+companions-of-the-rass	Companions of the Rass
+dhul-kifl	Dhul Kifl
+people-of-al-hijr	People of al-Hijr
+quraysh	Quraysh
+romans	Romans
+umm-jamil	Umm Jamil
+uzair	Uzair
+zayd	Zayd
+masjid-al-haram	Masjid al-Haram
+mosque	Mosque
+kaaba	Kaaba
+medinah	Medinah
+egypt	Egypt
+qiblah	Qiblah
+horizon	Horizon
+mount-sinai	Mount Sinai
+sheba	Sheba
+al-ahqaf	Al-Ahqaf
+al-judi	Al-Judi
+al-marwah	Al-Marwah
+al-safa	Al-Safa
+babylon	Babylon
+badr	Badr
+bakkah	Bakkah
+church	Church
+desert	Desert
+hunayn	Hunayn
+iram	Iram
+makkah	Makkah
+masjid-al-aqsa	Masjid al-Aqsa
+monastery	Monastery
+mount-arafat	Mount Arafat
+synagogue	Synagogue
+yathrib	Yathrib
+earth	Earth
+sun	Sun
+moon	Moon
+star	Star
+cloud	Cloud
+rain	Rain
+dawn	Dawn
+lightning	Lightning
+constellation	Constellation
+thunder	Thunder
+sirius	Sirius
+tree	Tree
+date-palm	Date Palm
+bird	Bird
+camel	Camel
+grape	Grape
+cow	Cow
+grain	Grain
+olive	Olive
+sheep	Sheep
+wine	Wine
+fish	Fish
+leaf	Leaf
+snake	Snake
+horse	Horse
+pork	Pork
+ape	Ape
+carrion	Carrion
+dog	Dog
+pomegranate	Pomegranate
+quail	Quail
+wolf	Wolf
+honey	Honey
+locust	Locust
+meat	Meat
+milk	Milk
+salt	Salt
+ant	Ant
+bee	Bee
+bread	Bread
+crow	Crow
+cucumber	Cucumber
+fig	Fig
+fly	Fly
+frog	Frog
+garlic	Garlic
+ginger	Ginger
+goat	Goat
+herb	Herb
+hoopoe	Hoopoe
+lentil	Lentil
+lion	Lion
+louse	Louse
+mosquito	Mosquito
+mule	Mule
+onion	Onion
+pig	Pig
+spider	Spider
+heart	Heart
+eye	Eye
+tongue	Tongue
+ear	Ear
+bone	Bone
+heel	Heel
+wing	Wing
+alaq	Alaq
+finger	Finger
+forelock	Forelock
+intestine	Intestine
+leprosy	Leprosy
+lip	Lip
+breast-bone	Breast Bone
+embryo	Embryo
+forehead	Forehead
+snout	Snout
+night-of-decree	Night of Decree
+sabbath	Sabbath
+hajj	Hajj
+al-jahiliyah	Al-Jahiliyah
+umra	Umra
+friday	Friday
+ramadan	Ramadan
+quran	Quran
+islam	Islam
+judaism	Judaism
+torah	Torah
+christianity	Christianity
+injeel	Injeel
+arabic	Arabic
+golden-calf	Golden Calf
+idol	Idol
+language	Language
+sabians	Sabians
+zabur	Zabur
+al-uzza	Al-Uzza
+allat	Allat
+baal	Baal
+magians	Magians
+manat	Manat
+nasr	Nasr
+suwa	Suwa
+wadd	Wadd
+yaghuth	Yaghuth
+yauq	Yauq
+ship	Ship
+clay	Clay
+dust	Dust
+gold	Gold
+color	Color
+green	Green
+lamp	Lamp
+silver	Silver
+iron	Iron
+pearl	Pearl
+silk	Silk
+key	Key
+pen	Pen
+boat	Boat
+oil	Oil
+arrow	Arrow
+glass	Glass
+soil	Soil
+ark-of-the-covenant	Ark of the Covenant
+brass	Brass
+coat-of-mail	Coat of Mail
+coin	Coin
+coral	Coral
+ink	Ink
+knife	Knife
+ladder	Ladder
+ruby	Ruby

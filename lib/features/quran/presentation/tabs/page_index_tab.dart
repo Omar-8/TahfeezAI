@@ -19,9 +19,17 @@ import '../../../../quran/presentation/quran_unavailable_view.dart';
 /// commonly has 600+ pages) — a Tahfeez-owned, more utility-appropriate
 /// take on the same "jump to any page" capability.
 class PageIndexTab extends ConsumerStatefulWidget {
-  const PageIndexTab({super.key, required this.onSelect});
+  const PageIndexTab({
+    super.key,
+    required this.onSelect,
+    this.embedded = false,
+  });
 
   final ValueChanged<QuranLocation> onSelect;
+
+  /// Inside another scrolling layout (the Go to sheet): no padding or
+  /// scrolling of its own.
+  final bool embedded;
 
   @override
   ConsumerState<PageIndexTab> createState() => _PageIndexTabState();
@@ -61,13 +69,15 @@ class _PageIndexTabState extends ConsumerState<PageIndexTab> {
     final mushaf = ref.watch(defaultMushafProvider);
 
     return Padding(
-      padding: withBarSpace(context, const EdgeInsets.all(TahfeezSpacing.md)),
+      padding: widget.embedded
+          ? EdgeInsets.zero
+          : withBarSpace(context, const EdgeInsets.all(TahfeezSpacing.md)),
       child: mushaf.when(
         data: (mushaf) {
           if (mushaf == null) {
             return const QuranUnavailableView();
           }
-          return Column(
+          final form = Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             spacing: TahfeezSpacing.md,
             children: [
@@ -86,11 +96,13 @@ class _PageIndexTabState extends ConsumerState<PageIndexTab> {
                 onSubmitted: (_) => _go(mushaf.id),
               ),
               FilledButton(
+                key: const ValueKey('go-to-page-go'),
                 onPressed: () => _go(mushaf.id),
                 child: Text(AppLocalizations.of(context).quranGo),
               ),
             ],
           );
+          return widget.embedded ? form : SingleChildScrollView(child: form);
         },
         loading: () => const TahfeezLoadingView(),
         error: (_, _) => const QuranUnavailableView(),

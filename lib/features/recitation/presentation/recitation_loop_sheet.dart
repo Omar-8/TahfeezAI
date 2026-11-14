@@ -91,7 +91,9 @@ class _RecitationLoopSheetState extends ConsumerState<_RecitationLoopSheet> {
     // Where a tap on Loop would begin (the ayah being uncovered, the surah
     // opened), else the page's first ayah.
     final first =
-        quickStartFrom(ref) ?? spans[page]?.first ?? (chapterNo: 1, verseNo: 1);
+        quickStartFrom(ref, chosenWord: false) ??
+        spans[page]?.first ??
+        (chapterNo: 1, verseNo: 1);
     _from = first;
     _to = (
       chapterNo: first.chapterNo,

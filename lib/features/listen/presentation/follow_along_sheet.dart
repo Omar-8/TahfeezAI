@@ -80,7 +80,7 @@ class _FollowAlongSheetState extends ConsumerState<_FollowAlongSheet> {
         : null;
     // Where a tap on Follow along would begin, else the page's first ayah.
     final first =
-        quickStartFrom(ref) ??
+        quickStartFrom(ref, chosenWord: false) ??
         ref.read(mushafPageVersesProvider)[page]?.first ??
         (chapterNo: 1, verseNo: 1);
     _from = first;

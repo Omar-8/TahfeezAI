@@ -1,5 +1,7 @@
 import 'dart:async' show Timer, unawaited;
 
+import '../../recitation/application/recitation_start.dart';
+
 import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show RenderAbstractViewport;
@@ -318,6 +320,9 @@ class AyahModePageState extends ConsumerState<AyahModePage> {
             wordCount: page.wordCount,
             ayahBoundaries: ends,
           );
+      ref
+          .read(mushafPageWordsProvider.notifier)
+          .report(widget.pageNumber, words);
       if (words.isNotEmpty) {
         ref.read(mushafPageWordRangesProvider.notifier).report(
           widget.pageNumber,
@@ -867,12 +872,17 @@ class _AyahBlock extends ConsumerWidget {
     final meanings = view.showWordMeanings
         ? ref.watch(ayahWordMeaningsProvider(ayahId)).value ?? const {}
         : const <int, String>{};
-    final focused =
-        ref.watch(mushafFocusAyahProvider.select((f) => f?.ayahId)) == ayahId;
+    final focused = ref.watch(
+      mushafFocusAyahProvider.select((f) => isFocusedAyah(f, ayahId)),
+    );
     // Colours the reader chose for some marks (Hifz settings).
     final inks =
         ref.watch(mushafWordOverlayProvider.select((o) => o?.inks)) ??
         const <MushafWordMark, int>{};
+    // The start's band around a word of a colour of its own (kept).
+    final bandWord = ref.watch(
+      mushafWordOverlayProvider.select((o) => o?.band),
+    );
     ({Color color, bool ink})? styleOf(MushafWordMark? mark) {
       final style = _markStyles[mark];
       final ink = inks[mark];
@@ -1027,14 +1037,23 @@ class _AyahBlock extends ConsumerWidget {
                       meaning: meanings[words[k].wordIndex],
                       hidden: hidden[k],
                       style: styleOf(marks[k]),
+                      band: words[k] == bandWord
+                          ? styleOf(MushafWordMark.current)?.color
+                          : null,
                       mark: marks[k],
                       colors: colors,
                       fade: fade,
                       fontFamily: view.quranFont.family,
-                      onTap: hidden[k]
-                          ? null
-                          : () =>
-                                showWordDetailSheet(context, wordRef: words[k]),
+                      // Also where the next recitation starts (not while one
+                      // runs) — a hidden word too, without its sheet.
+                      onTap: () {
+                        ref
+                            .read(recitationStartProvider.notifier)
+                            .choose(words[k]);
+                        if (!hidden[k]) {
+                          showWordDetailSheet(context, wordRef: words[k]);
+                        }
+                      },
                       onLongPress: () =>
                           showAyahDetailSheet(context, ayahId: ayahId),
                     ),

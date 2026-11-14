@@ -307,6 +307,7 @@ class LocalQuranPositionTracker implements RecitationPositionMatcher {
     _placedWords.clear();
     _tail = const {};
     lastPlacedFrame = null;
+    _lastPlacedWord = null;
   }
 
   @override
@@ -1471,11 +1472,16 @@ class LocalQuranPositionTracker implements RecitationPositionMatcher {
       // expected word is let account for the sound before it): not shown
       // as said right — mumbling there once turned 112:3 green word by word
       // (owner, 2026-11-02). 1.2% of the owner's placed words.
-      final similarity = w.cost >= config.wrongWordCost
+      var similarity = w.cost >= config.wrongWordCost
           ? 0.4
           : w.cost > config.followCost
           ? 0.6
           : (1 - w.cost / (2 * config.wrongWordCost)).clamp(0.75, 1.0);
+      if (similarity < 0.75 &&
+          w.cost < _joinedHamdCost &&
+          _joinedOnFromBasmala(w.words.first, from + w.start)) {
+        similarity = 0.75;
+      }
       _log(
         'placed ${w.words.map(_fmt).join(' ')} at '
         '${from + w.start}..${from + w.end} "${w.heard}" '
@@ -1488,9 +1494,34 @@ class LocalQuranPositionTracker implements RecitationPositionMatcher {
           start: from + w.start,
           end: from + w.end,
         ));
+        _lastPlacedWord = (position: p, end: from + w.end);
       }
     }
     return events;
+  }
+
+  /// The last word placed and the stream frame it ended on.
+  ({int position, int end})? _lastPlacedWord;
+
+  /// Al-Fatiha's basmala read on into «ٱلْحَمْدُ» (no pause): the model
+  /// hears «…رَحِيمَ نَحْمَدُ» there — its «لْ» as «ن» — and the word fitted
+  /// past [LocalPositionTrackerConfig.followCost] (0.88–1.02 in the owner's
+  /// recitation of 2026-11-14, said right). Up to this cost it is taken as
+  /// said right; worse is still a wrong word.
+  static const _joinedHamdCost = 1.5;
+
+  /// The gap (frames, 40 ms) between two words read on as one.
+  static const _joinedGap = 4;
+
+  /// [p] is 1:2:1 («ٱلْحَمْدُ»), begun at stream frame [start] right after
+  /// the basmala's last word (1:1:4) was placed — read on, no pause.
+  bool _joinedOnFromBasmala(int p, int start) {
+    final last = _lastPlacedWord;
+    if (last == null || corpus.words[p].ref != (ayahId: 1002, wordIndex: 0)) {
+      return false;
+    }
+    return corpus.words[last.position].ref == (ayahId: 1001, wordIndex: 3) &&
+        start - last.end <= _joinedGap;
   }
 
   List<QuranMatchEvent> _place(int p, String heard, double similarity) {

@@ -106,7 +106,8 @@ class HomeFeaturedReadingSection extends ConsumerWidget {
               },
             );
           },
-          loading: () => const TahfeezCard(child: TahfeezLoadingView()),
+          loading: () =>
+              const TahfeezCard(child: TahfeezCardSkeleton(lines: 2)),
           error: (_, _) => TahfeezCard(
             child: TahfeezEmptyView(
               icon: Icons.menu_book_outlined,

@@ -34,6 +34,7 @@ import '../../../ai/speech/live_quran_recognizer.dart';
 import '../application/live_recognition_controller.dart';
 import '../application/recitation_providers.dart';
 import '../application/mushaf_recitation_target.dart';
+import '../application/recitation_start.dart';
 import '../application/sajdah_reminder.dart';
 import '../application/recitation_hints.dart';
 import '../../../core/storage/storage_providers.dart';
@@ -161,7 +162,15 @@ class _RecitationMushafAnchorState
   }
 
   @override
-  Widget build(BuildContext context) => Stack(
+  Widget build(BuildContext context) {
+    // Where the next recitation starts: kept, restored and its band drawn
+    // while a Mushaf is open (not from the app's start: it slowed its
+    // first screens — owner, 2026-11-14).
+    ref.listen(recitationStartProvider, (_, _) {});
+    return _stack(context);
+  }
+
+  Widget _stack(BuildContext context) => Stack(
     // The page laid out exactly as without the bar, which is drawn over its
     // top edge.
     fit: StackFit.passthrough,

@@ -140,6 +140,7 @@ class _QuranEngineMushafPageContentState
   /// once cleared.
   ({
     Map<int, MushafWordMark> marks,
+    int? band,
     int? focus,
     Map<int, Color>? passages,
     Set<int> hidden,
@@ -314,6 +315,10 @@ class _QuranEngineMushafPageContentState
     if (page == null) return;
     final refs = page.wordRefs;
     final marks = _appliedOverlay?.$2 ?? const <int, MushafWordMark>{};
+    // The start's band around a word of a colour of its own (kept).
+    final bandWord = ref.read(mushafWordOverlayProvider)?.band;
+    final bandAt = bandWord == null ? -1 : refs.indexOf(bandWord);
+    final band = bandAt < 0 ? null : bandAt;
     // Colours the reader chose for some marks (Hifz settings).
     final inks =
         ref.read(mushafWordOverlayProvider)?.inks ??
@@ -323,7 +328,10 @@ class _QuranEngineMushafPageContentState
       return ink != null ? Color(ink) : _markStyles[mark]!.color;
     }
 
-    final focusId = _pressedAyah ?? ref.read(mushafFocusAyahProvider)?.ayahId;
+    final opened = ref.read(mushafFocusAyahProvider);
+    // A run of ayahs opened (a topic's passage): tinted, each of them.
+    final openedRun = opened?.lastAyahId == null ? null : opened;
+    final focusId = _pressedAyah ?? (openedRun == null ? opened?.ayahId : null);
     final focus = focusId != null && refs.any((w) => w.ayahId == focusId)
         ? focusId
         : null;
@@ -332,15 +340,20 @@ class _QuranEngineMushafPageContentState
         : null;
     // Bookmarked ayahs over the passages' tints.
     final onPage = {for (final w in refs) w.ayahId};
+    final inRun = {
+      for (final id in onPage)
+        if (isFocusedAyah(openedRun, id)) id,
+    };
     final bookmarked = {
       for (final b in ref.read(bookmarksProvider))
         if (b.ayahId case final id? when onPage.contains(id)) id,
     };
-    final Map<int, Color>? passages = bookmarked.isEmpty
+    final Map<int, Color>? passages = bookmarked.isEmpty && inRun.isEmpty
         ? passageTints
         : {
             ...?passageTints,
             for (final id in bookmarked) id: bookmarkedAyahColor,
+            for (final id in inRun) id: openedRunColor,
           };
     // Hidden words' places stay plain: a recitation's own reveals while
     // one runs, else hide mode's.
@@ -355,6 +368,7 @@ class _QuranEngineMushafPageContentState
     final applied = _appliedHighlights;
     if (applied != null &&
         applied.focus == focus &&
+        applied.band == band &&
         mapEquals(applied.passages, passages) &&
         mapEquals(applied.marks, marks) &&
         mapEquals(applied.inks, inks) &&
@@ -375,6 +389,7 @@ class _QuranEngineMushafPageContentState
       for (final MapEntry(key: i, value: mark) in marks.entries)
         if (!_isInk(mark)) refs[i].ayahId,
       for (final i in hidden) refs[i].ayahId,
+      if (band != null) refs[band].ayahId,
     };
     final tintedWords = <int, List<int>>{};
     for (var i = 0; i < refs.length; i++) {
@@ -406,6 +421,14 @@ class _QuranEngineMushafPageContentState
       if (mark != null && _isInk(mark)) {
         highlights.add((word: i, color: colorOf(mark), ink: true));
       }
+      // The band and the word's own colour, both.
+      if (i == band) {
+        highlights.add((
+          word: i,
+          color: colorOf(MushafWordMark.current),
+          ink: false,
+        ));
+      }
     }
     for (final MapEntry(key: ayah, value: words) in tintedWords.entries) {
       bands.add(PageBand.words(words, passages![ayah]!));
@@ -416,6 +439,7 @@ class _QuranEngineMushafPageContentState
     }
     _appliedHighlights = (
       marks: marks,
+      band: band,
       focus: focus,
       passages: passages,
       hidden: hidden,
@@ -690,6 +714,9 @@ class _QuranEngineMushafPageContentState
         ayahBoundaries: page.ayahWordBoundaries,
       );
       final words = page.wordRefs;
+      ref
+          .read(mushafPageWordsProvider.notifier)
+          .report(widget.pageNumber, words);
       if (words.isNotEmpty) {
         ref.read(mushafPageWordRangesProvider.notifier).report(
           widget.pageNumber,

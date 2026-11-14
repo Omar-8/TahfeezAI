@@ -1,0 +1,168 @@
+<en-US>
+• Topics: browse the Quran by theme — prophets, the unseen, places, nature — with search
+• Tap a word to choose where your recitation starts
+• Go to: ayah and page in one sheet
+• Your completed khatmahs on the Progress page
+• Pages you turn back to keep their colours and mistakes
+• Faster opening and smoother loading
+</en-US>
+<ar>
+• المواضيع: تصفّح القرآن حسب الموضوع — الأنبياء، الغيب، الأماكن، الطبيعة — مع البحث
+• اضغط على كلمة لتختار من أين يبدأ تسميعك
+• الانتقال: الآية والصفحة في نافذة واحدة
+• ختماتك المكتملة في صفحة التقدّم
+• الصفحات التي تعود إليها تحتفظ بألوانها وأخطائها
+• فتح أسرع وتحميل أكثر سلاسة
+</ar>
+<bn-BD>
+• বিষয়: বিষয়ভিত্তিকভাবে কুরআন দেখুন — নবীগণ, অদৃশ্য জগৎ, স্থান, প্রকৃতি — অনুসন্ধানসহ
+• তিলাওয়াত কোথা থেকে শুরু হবে তা বেছে নিতে একটি শব্দে চাপুন
+• যান: আয়াত ও পৃষ্ঠা এক শিটে
+• অগ্রগতি পৃষ্ঠায় আপনার সম্পূর্ণ খতম
+• যে পৃষ্ঠায় ফিরে যান তার রং ও ভুলগুলো থেকে যায়
+• দ্রুত খোলা ও মসৃণ লোডিং
+</bn-BD>
+<da-DK>
+• Emner: gennemse Koranen efter tema — profeter, det skjulte, steder, naturen — med søgning
+• Tryk på et ord for at vælge, hvor din recitation begynder
+• Gå til: vers og side i ét ark
+• Dine fuldførte khatmah'er på siden Fremskridt
+• Sider, du vender tilbage til, beholder deres farver og fejl
+• Hurtigere åbning og jævnere indlæsning
+</da-DK>
+<de-DE>
+• Themen: den Koran nach Themen durchsuchen — Propheten, das Verborgene, Orte, Natur — mit Suche
+• Tippe auf ein Wort, um festzulegen, wo deine Rezitation beginnt
+• Gehe zu: Vers und Seite in einem Fenster
+• Deine abgeschlossenen Khatmas auf der Fortschrittsseite
+• Seiten, zu denen du zurückblätterst, behalten ihre Farben und Fehler
+• Schnelleres Öffnen und flüssigeres Laden
+</de-DE>
+<el-GR>
+• Θέματα: περιηγηθείτε στο Κοράνιο ανά θέμα — προφήτες, το αθέατο, τόποι, φύση — με αναζήτηση
+• Πατήστε μια λέξη για να επιλέξετε από πού ξεκινά η απαγγελία σας
+• Μετάβαση: εδάφιο και σελίδα σε ένα φύλλο
+• Οι ολοκληρωμένες σας khatmah στη σελίδα Πρόοδος
+• Οι σελίδες στις οποίες επιστρέφετε κρατούν τα χρώματα και τα λάθη τους
+• Γρηγορότερο άνοιγμα και πιο ομαλή φόρτωση
+</el-GR>
+<es-ES>
+• Temas: explora el Corán por temas — profetas, lo oculto, lugares, naturaleza — con búsqueda
+• Toca una palabra para elegir dónde empieza tu recitación
+• Ir a: aleya y página en una sola hoja
+• Tus jatmas completadas en la página de Progreso
+• Las páginas a las que vuelves conservan sus colores y errores
+• Apertura más rápida y carga más fluida
+</es-ES>
+<fa>
+• موضوعات: قرآن را بر اساس موضوع ببینید — پیامبران، غیب، مکان‌ها، طبیعت — با جستجو
+• روی یک کلمه بزنید تا انتخاب کنید تلاوتتان از کجا شروع شود
+• رفتن به: آیه و صفحه در یک برگه
+• ختم‌های کامل‌شده‌تان در صفحهٔ پیشرفت
+• صفحه‌هایی که به آن‌ها برمی‌گردید رنگ‌ها و اشتباه‌هایشان را نگه می‌دارند
+• باز شدن سریع‌تر و بارگذاری روان‌تر
+</fa>
+<fr-FR>
+• Thèmes : parcourez le Coran par thème — prophètes, l'invisible, lieux, nature — avec recherche
+• Touchez un mot pour choisir où commence votre récitation
+• Aller à : verset et page dans une seule fenêtre
+• Vos khatmas terminées sur la page Progrès
+• Les pages où vous revenez gardent leurs couleurs et leurs erreurs
+• Ouverture plus rapide et chargement plus fluide
+</fr-FR>
+<id>
+• Topik: jelajahi Al-Qur'an berdasarkan tema — para nabi, alam gaib, tempat, alam — dengan pencarian
+• Ketuk sebuah kata untuk memilih dari mana bacaan Anda dimulai
+• Buka: ayat dan halaman dalam satu lembar
+• Khatam yang telah selesai di halaman Kemajuan
+• Halaman yang Anda kunjungi kembali tetap menyimpan warna dan kesalahannya
+• Membuka lebih cepat dan memuat lebih lancar
+</id>
+<ja-JP>
+• トピック：テーマ別にクルアーンを閲覧 — 預言者、見えない世界、場所、自然 — 検索付き
+• 単語をタップして、読誦を始める位置を選べます
+• 移動：アーヤとページを一つのシートで
+• 完了したハトマを進捗ページに表示
+• 戻ったページは色と間違いを保持します
+• より速い起動となめらかな読み込み
+</ja-JP>
+<kk>
+• Тақырыптар: Құранды тақырып бойынша қараңыз — пайғамбарлар, ғайып, мекендер, табиғат — іздеумен
+• Оқуыңыз қай жерден басталатынын таңдау үшін сөзді түртіңіз
+• Өту: аят пен бет бір парақта
+• Аяқталған хатымдарыңыз Прогресс бетінде
+• Қайта оралған беттер түстері мен қателерін сақтайды
+• Жылдамырақ ашылу және бірқалыпты жүктелу
+</kk>
+<ko-KR>
+• 주제: 주제별로 꾸란 살펴보기 — 예언자, 보이지 않는 세계, 장소, 자연 — 검색 지원
+• 단어를 눌러 낭송을 시작할 위치를 고르세요
+• 이동: 아야와 페이지를 한 시트에서
+• 완료한 카트마를 진행 페이지에서 확인
+• 다시 돌아간 페이지는 색과 실수를 그대로 유지합니다
+• 더 빠른 실행과 부드러운 로딩
+</ko-KR>
+<ms>
+• Topik: teroka al-Quran mengikut tema — para nabi, alam ghaib, tempat, alam semula jadi — dengan carian
+• Ketik satu perkataan untuk memilih di mana bacaan anda bermula
+• Pergi ke: ayat dan halaman dalam satu helaian
+• Khatam yang telah selesai di halaman Kemajuan
+• Halaman yang anda kembali kekal dengan warna dan kesilapannya
+• Pembukaan lebih pantas dan pemuatan lebih lancar
+</ms>
+<nl-NL>
+• Onderwerpen: blader door de Koran per thema — profeten, het verborgene, plaatsen, natuur — met zoeken
+• Tik op een woord om te kiezen waar je recitatie begint
+• Ga naar: vers en pagina in één venster
+• Je voltooide khatma's op de pagina Voortgang
+• Pagina's waarnaar je terugbladert, behouden hun kleuren en fouten
+• Sneller openen en soepeler laden
+</nl-NL>
+<pt-BR>
+• Temas: navegue pelo Alcorão por tema — profetas, o oculto, lugares, natureza — com busca
+• Toque em uma palavra para escolher onde sua recitação começa
+• Ir para: versículo e página em uma única folha
+• Suas khatmas concluídas na página Progresso
+• As páginas às quais você volta mantêm suas cores e erros
+• Abertura mais rápida e carregamento mais suave
+</pt-BR>
+<ru-RU>
+• Темы: просматривайте Коран по темам — пророки, сокровенное, места, природа — с поиском
+• Нажмите на слово, чтобы выбрать, откуда начнётся чтение
+• Переход: аят и страница в одном окне
+• Завершённые хатмы на странице «Прогресс»
+• Страницы, к которым вы возвращаетесь, сохраняют цвета и ошибки
+• Более быстрый запуск и плавная загрузка
+</ru-RU>
+<sw>
+• Mada: pitia Qur'ani kwa mada — manabii, mambo ya ghaibu, mahali, maumbile — pamoja na utafutaji
+• Gusa neno ili kuchagua kisomo chako kinaanzia wapi
+• Nenda: aya na ukurasa katika karatasi moja
+• Khatma zako zilizokamilika kwenye ukurasa wa Maendeleo
+• Kurasa unazorudi zinabaki na rangi na makosa yake
+• Kufunguka haraka na upakiaji laini zaidi
+</sw>
+<tr-TR>
+• Konular: Kur'an'ı konuya göre inceleyin — peygamberler, gayb, yerler, doğa — arama ile
+• Okumanızın nereden başlayacağını seçmek için bir kelimeye dokunun
+• Git: ayet ve sayfa tek pencerede
+• Tamamlanan hatimleriniz İlerleme sayfasında
+• Geri döndüğünüz sayfalar renklerini ve hatalarını korur
+• Daha hızlı açılış ve daha akıcı yükleme
+</tr-TR>
+<ur>
+• موضوعات: قرآن کو موضوع کے لحاظ سے دیکھیں — انبیاء، غیب، مقامات، فطرت — تلاش کے ساتھ
+• کسی لفظ پر ٹیپ کریں تاکہ منتخب کریں کہ آپ کی تلاوت کہاں سے شروع ہو
+• جائیں: آیت اور صفحہ ایک ہی شیٹ میں
+• آپ کے مکمل ختمات پیش رفت کے صفحے پر
+• جن صفحات پر آپ واپس جاتے ہیں ان کے رنگ اور غلطیاں برقرار رہتی ہیں
+• تیز آغاز اور ہموار لوڈنگ
+</ur>
+<zh-CN>
+• 主题：按主题浏览古兰经——众先知、幽玄世界、地点、自然——支持搜索
+• 点按一个词，选择诵读从哪里开始
+• 前往：经文和页面在同一面板中
+• 进度页面显示你已完成的通读（赫特姆）
+• 返回的页面会保留其颜色和错误标记
+• 更快打开，加载更流畅
+</zh-CN>

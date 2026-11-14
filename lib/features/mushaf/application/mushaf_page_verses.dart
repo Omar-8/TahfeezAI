@@ -44,3 +44,28 @@ final mushafPageWordRangesProvider =
     NotifierProvider<MushafPageWordRanges, Map<int, MushafPageWordRange>>(
       MushafPageWordRanges.new,
     );
+
+/// Page number → its words in reading order, as each rendered page reports
+/// them (Quran Engine's own word list) — a page's word at an index without
+/// the whole Quran's words loaded (the next word to uncover with the ayahs
+/// hidden; owner, 2026-11-14: no waiting when a Mushaf opens).
+class MushafPageWords extends Notifier<Map<int, List<WordRef>>> {
+  @override
+  Map<int, List<WordRef>> build() => const {};
+
+  void report(int pageNumber, List<WordRef> words) {
+    final known = state[pageNumber];
+    if (known != null &&
+        known.length == words.length &&
+        (words.isEmpty ||
+            (known.first == words.first && known.last == words.last))) {
+      return;
+    }
+    state = {...state, pageNumber: List.unmodifiable(words)};
+  }
+}
+
+final mushafPageWordsProvider =
+    NotifierProvider<MushafPageWords, Map<int, List<WordRef>>>(
+      MushafPageWords.new,
+    );

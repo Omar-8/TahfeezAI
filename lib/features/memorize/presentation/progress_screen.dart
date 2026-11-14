@@ -18,6 +18,8 @@ import '../../../memorization/domain/models/memorization_models.dart';
 import '../../../memorization/domain/progress_map.dart';
 import '../../../quran/domain/models/quran_location.dart';
 import '../../quran/application/quran_index_providers.dart';
+import '../../khatmah/application/khatmah_controller.dart';
+import '../../khatmah/presentation/khatmah_section.dart';
 import 'mark_known_sheet.dart';
 import 'progress_visuals.dart';
 import 'memorize_screen.dart';
@@ -106,7 +108,11 @@ class MemorizationProgressView extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final map = ref.watch(progressMapProvider);
     return map.when(
-      loading: () => const TahfeezLoadingView(),
+      // Its cards' shape: the totals, the streak, the map, the pages.
+      loading: () => TahfeezCardsSkeleton(
+        cards: const [2, 3, 6, 3],
+        padding: withBarSpace(context, const EdgeInsets.all(TahfeezSpacing.md)),
+      ),
       error: (e, _) => TahfeezEmptyView(message: '$e'),
       data: (map) => ListView(
         padding: withBarSpace(context, const EdgeInsets.all(TahfeezSpacing.md)),
@@ -128,6 +134,13 @@ class MemorizationProgressView extends ConsumerWidget {
           const _Activity(),
           const SizedBox(height: TahfeezSpacing.lg),
           TahfeezSectionHeader(
+            title: l10n.khatmahTitle,
+            icon: Icons.auto_stories_outlined,
+          ),
+          const SizedBox(height: TahfeezSpacing.sm),
+          const _KhatmahProgress(),
+          const SizedBox(height: TahfeezSpacing.lg),
+          TahfeezSectionHeader(
             title: l10n.memMapTitle,
             icon: Icons.grid_view_outlined,
           ),
@@ -140,6 +153,127 @@ class MemorizationProgressView extends ConsumerWidget {
           ),
           const SizedBox(height: TahfeezSpacing.sm),
           _WeakPages(map: map),
+        ],
+      ),
+    );
+  }
+}
+
+/// The khatmahs completed — how many, the last one's day and how long it
+/// took — and the one in progress (its pages and day), or a way to start
+/// one.
+class _KhatmahProgress extends ConsumerWidget {
+  const _KhatmahProgress();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final done = ref.watch(khatmahHistoryProvider).value ?? const [];
+    final today = ref.watch(khatmahTodayProvider);
+    final active = today != null && !today.finished;
+    final locale = intlLocaleOf(Localizations.localeOf(context));
+    final last = done.lastOrNull;
+    return TahfeezCard(
+      key: const ValueKey('progress-khatmah'),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: TahfeezSpacing.md,
+        children: [
+          Row(
+            spacing: TahfeezSpacing.md,
+            children: [
+              Container(
+                width: 52,
+                height: 52,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: scheme.primaryContainer,
+                ),
+                child: Text(
+                  NumberFormat.decimalPattern(locale).format(done.length),
+                  key: const ValueKey('progress-khatmah-count'),
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    color: scheme.onPrimaryContainer,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  spacing: 2,
+                  children: [
+                    Text(
+                      l10n.progressKhatmahsCompleted(done.length),
+                      style: theme.textTheme.titleMedium,
+                    ),
+                    if (last != null)
+                      Text(
+                        l10n.progressKhatmahLast(
+                          DateFormat.yMMMd(locale)
+                              .format(DateTime.parse(last.end)),
+                          l10n.khatmahDays(last.tookDays),
+                        ),
+                        key: const ValueKey('progress-khatmah-last'),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          if (active) ...[
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              spacing: TahfeezSpacing.xs,
+              children: [
+                Text(
+                  l10n.progressKhatmahNow,
+                  style: theme.textTheme.labelLarge,
+                ),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(TahfeezRadii.pill),
+                  child: LinearProgressIndicator(
+                    key: const ValueKey('progress-khatmah-bar'),
+                    value: today.read / today.total,
+                    minHeight: 8,
+                  ),
+                ),
+                Wrap(
+                  spacing: TahfeezSpacing.md,
+                  children: [
+                    Text(
+                      l10n.khatmahPagesRead(today.read, today.total),
+                      style: theme.textTheme.bodySmall,
+                    ),
+                    if (today.dayNo <= today.days)
+                      Text(
+                        l10n.khatmahDayOf(today.dayNo, today.days),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          ] else
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: TextButton.icon(
+                key: const ValueKey('progress-khatmah-start'),
+                onPressed: () => showKhatmahDaysSheet(context),
+                icon: const Icon(Icons.add_rounded),
+                label: Text(
+                  done.isEmpty ? l10n.khatmahStart : l10n.khatmahStartAgain,
+                ),
+              ),
+            ),
         ],
       ),
     );
