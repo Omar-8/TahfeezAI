@@ -1,9 +1,14 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tahfeez_ai/features/mushaf/application/reader_mode.dart';
 import 'package:tahfeez_ai/memorization/application/memorization_today.dart';
 import 'package:tahfeez_ai/memorization/domain/recitation_score.dart';
+import 'package:tahfeez_ai/quran/application/surah_aims_provider.dart';
+import 'package:tahfeez_ai/quran/domain/surah_aims.dart';
 
 import '../test_helpers/real_app.dart';
 
@@ -12,6 +17,15 @@ import '../test_helpers/real_app.dart';
 void main() {
   setUpAll(RealApp.prepare);
   tearDownAll(RealApp.close);
+
+  // The bundled aims, read here (the app reads them off the UI thread,
+  // which a test's clock does not wait for).
+  final aims = surahAimsProvider.overrideWith(
+    (ref) async => SurahAims.fromJson(
+      jsonDecode(File('assets/quran/surah_aims.json').readAsStringSync())
+          as Map<String, Object?>,
+    ),
+  );
 
   Finder fact(String label, String value) => find.ancestor(
     of: find.text(value),
@@ -60,6 +74,99 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('surah-info-read')));
     await RealApp.settle(tester);
     expect(find.byKey(const ValueKey('surah-info-1')), findsNothing);
+    await RealApp.quit(tester);
+  });
+
+  testWidgets('its aims, Al-Mukhtasar\'s, in the app\'s language; where '
+      'no edition has them, Tahfeez AI\'s translation (Dutch)', (tester) async {
+    await RealApp.launch(
+      tester,
+      route: '/quran/surah/12',
+      mode: ReaderMode.ayah,
+      locale: 'ar',
+      overrides: [aims],
+    );
+    await tester.tap(find.byKey(const ValueKey('ayah-mode-surah-info-12')));
+    await RealApp.settle(tester);
+    expect(find.byKey(const ValueKey('surah-info-aims')), findsOneWidget);
+    expect(find.text('مقاصد السورة'), findsOneWidget);
+    expect(
+      tester
+          .widget<Text>(find.byKey(const ValueKey('surah-info-aims-text')))
+          .data,
+      'الاعتبار بلطف تدبير الله لأوليائه وتمكينهم، وحسن عاقبتهم.',
+    );
+    await RealApp.quit(tester);
+
+    await RealApp.launch(
+      tester,
+      route: '/quran/surah/12',
+      mode: ReaderMode.ayah,
+      overrides: [aims],
+    );
+    await tester.tap(find.byKey(const ValueKey('ayah-mode-surah-info-12')));
+    await RealApp.settle(tester);
+    // English: the Tafsir Center's own.
+    expect(find.text('Aims of the surah'), findsOneWidget);
+    expect(
+      tester
+          .widget<Text>(find.byKey(const ValueKey('surah-info-aims-text')))
+          .data,
+      startsWith('Recognizing Allah\'s kindness'),
+    );
+    expect(
+      tester
+          .widget<Text>(find.byKey(const ValueKey('surah-info-aims-source')))
+          .data,
+      contains('Tafsir Center'),
+    );
+    await RealApp.quit(tester);
+
+    await RealApp.launch(
+      tester,
+      route: '/quran/surah/12',
+      mode: ReaderMode.ayah,
+      locale: 'nl',
+      overrides: [aims],
+    );
+    await tester.tap(find.byKey(const ValueKey('ayah-mode-surah-info-12')));
+    await RealApp.settle(tester);
+    expect(find.byKey(const ValueKey('surah-info-aims')), findsOneWidget);
+    expect(
+      tester
+          .widget<Text>(find.byKey(const ValueKey('surah-info-aims-source')))
+          .data,
+      'Vertaald door TahfeezAI',
+    );
+    await RealApp.quit(tester);
+  });
+
+  testWidgets('a long surah\'s aims on a small phone, large text (French): '
+      'the sheet scrolls, nothing overflows', (tester) async {
+    await RealApp.launch(
+      tester,
+      route: '/quran/surah/2',
+      mode: ReaderMode.ayah,
+      locale: 'fr',
+      size: const Size(320, 640),
+      textScale: 2,
+      overrides: [aims],
+    );
+    await tester.tap(find.byKey(const ValueKey('ayah-mode-surah-info-2')));
+    await RealApp.settle(tester);
+    expect(tester.takeException(), isNull);
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('surah-info-read')),
+      200,
+      scrollable: find
+          .descendant(
+            of: find.byKey(const ValueKey('surah-info-2')),
+            matching: find.byType(Scrollable),
+          )
+          .first,
+    );
+    expect(tester.takeException(), isNull);
+    expect(find.byKey(const ValueKey('surah-info-aims')), findsOneWidget);
     await RealApp.quit(tester);
   });
 

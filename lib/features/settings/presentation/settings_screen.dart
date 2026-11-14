@@ -21,6 +21,7 @@ import '../../../core/theme/app_surface_tone.dart';
 import '../../../core/notifications/daily_reminder_scheduler.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../memorize/application/memorization_reminder.dart';
+import '../../onboarding/presentation/first_run_setup.dart';
 import '../../khatmah/application/khatmah_controller.dart';
 import '../../khatmah/application/khatmah_reminder.dart';
 import '../../../core/theme/theme_controller.dart';
@@ -180,6 +181,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               // section added twice broke the list — the page frozen, the
               // search field not tappable.
               sections.clear();
+              // First: the welcome setup and its recitation demo, to see
+              // again (those who had the app before it never saw it).
+              sections.add((
+                collapsed: false,
+                words: [l10n.settingsSetupAgain, l10n.settingsSetupAgainSub],
+                widget: _SetupCard(onTap: () => showFirstRunSetup(context)),
+              ));
               group(
                 l10n.settingsLanguage,
                 Icons.translate,
@@ -1086,6 +1094,66 @@ class _LanguageRow extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Settings' first card: the welcome setup — language, where to begin, a
+/// reciter, how reciting works — to go through again.
+class _SetupCard extends StatelessWidget {
+  const _SetupCard({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return TahfeezCard(
+      key: const ValueKey('settings-setup-again'),
+      onTap: onTap,
+      child: Row(
+        spacing: TahfeezSpacing.smPlus,
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: scheme.primaryContainer,
+            ),
+            child: Icon(
+              Icons.auto_awesome_outlined,
+              size: 20,
+              color: scheme.onPrimaryContainer,
+            ),
+          ),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              spacing: 2,
+              children: [
+                _SearchText(
+                  l10n.settingsSetupAgain,
+                  style: theme.textTheme.titleSmall,
+                ),
+                _SearchText(
+                  l10n.settingsSetupAgainSub,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Icon(
+            Icons.chevron_right_rounded,
+            color: scheme.onSurfaceVariant,
+            textDirection: Directionality.of(context),
+          ),
+        ],
       ),
     );
   }

@@ -75,6 +75,19 @@ final recitationBarVisibleProvider = Provider.autoDispose<bool>((ref) {
       ref.watch(recitationSessionControllerProvider).isActive;
 });
 
+/// Whether a screen over the app shell shows the recitation bar itself
+/// (the first-run setup's demo): the shell's bar then shows its navigation,
+/// so one bar answers a session — its results and messages once.
+class RecitationBarElsewhere extends Notifier<bool> {
+  @override
+  bool build() => false;
+
+  void set(bool elsewhere) => state = elsewhere;
+}
+
+final recitationBarElsewhereProvider =
+    NotifierProvider<RecitationBarElsewhere, bool>(RecitationBarElsewhere.new);
+
 /// Wraps a Mushaf screen's body and reports [location] (the page on
 /// screen) to the app shell's recitation bar while it is on screen.
 /// Lays out [child] exactly as-is, with a [RecitationProgressBar] drawn over
@@ -363,7 +376,9 @@ class RecitationBottomBar extends ConsumerWidget {
   /// cross.
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final shown = ref.watch(recitationBarVisibleProvider);
+    final shown =
+        ref.watch(recitationBarVisibleProvider) &&
+        !ref.watch(recitationBarElsewhereProvider);
     return AnimatedSwitcher(
       duration: motion(context, TahfeezMotionDuration.slow),
       // In: from a third of the way. Out (run backwards): whole until then.
@@ -390,7 +405,7 @@ class RecitationBottomBar extends ConsumerWidget {
         ],
       ),
       child: shown
-          ? const _LiveRecitationBar(key: ValueKey('recitation-bar-shown'))
+          ? const LiveRecitationBar(key: ValueKey('recitation-bar-shown'))
           : KeyedSubtree(
               key: const ValueKey('navigation-bar-shown'),
               child: navigation,
@@ -403,9 +418,10 @@ class RecitationBottomBar extends ConsumerWidget {
 /// [RecitationBottomBar.build]).
 const _barWait = 0.35;
 
-/// The recitation bar itself, while a Mushaf is open (or a session runs).
-class _LiveRecitationBar extends ConsumerWidget {
-  const _LiveRecitationBar({super.key});
+/// The recitation bar itself, while a Mushaf is open (or a session runs) —
+/// the shell's, or a screen's of its own over it ([recitationBarElsewhereProvider]).
+class LiveRecitationBar extends ConsumerWidget {
+  const LiveRecitationBar({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

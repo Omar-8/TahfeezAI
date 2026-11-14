@@ -16,6 +16,7 @@ import 'home_store_prompts.dart';
 
 import '../../../core/ui/back_to_exit.dart';
 import '../../../core/ui/first_run.dart';
+import '../../onboarding/presentation/first_run_setup.dart';
 
 import '../../../core/localization/generated/app_localizations.dart';
 import '../../../core/theme/app_breakpoints.dart';
@@ -235,8 +236,11 @@ class _HomeBrandHeader extends StatelessWidget {
   }
 }
 
-/// Nothing on screen: the first time Home shows, a welcome — what the app
-/// is for, and that its recitation checking is still learning.
+/// Nothing on screen: the first time Home shows, the setup — a welcome
+/// (what the app is for, and that its recitation checking is still
+/// learning), the language, what to begin with, a reciter, a reminder.
+/// (Those who saw the old welcome dialog are not asked again: the same
+/// key.)
 class _WelcomeOnce extends ConsumerStatefulWidget {
   const _WelcomeOnce();
 
@@ -250,22 +254,7 @@ class _WelcomeOnceState extends ConsumerState<_WelcomeOnce> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted || !await firstRunDue(ref, 'welcome') || !mounted) return;
-      final l10n = AppLocalizations.of(context);
-      await showDialog<void>(
-        context: context,
-        builder: (context) => AlertDialog(
-          key: const ValueKey('home-welcome'),
-          title: Text(l10n.homeWelcomeTitle),
-          content: SingleChildScrollView(child: Text(l10n.homeWelcomeBody)),
-          actions: [
-            FilledButton(
-              key: const ValueKey('home-welcome-continue'),
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(l10n.homeWelcomeContinue),
-            ),
-          ],
-        ),
-      );
+      await showFirstRunSetup(context);
     });
   }
 

@@ -7,26 +7,26 @@ import 'package:tahfeez_ai/features/mushaf/application/reader_mode.dart';
 
 import '../test_helpers/real_app.dart';
 
-/// The first time: Home's welcome, and the guide as the reader first opens
+/// The first time: the setup over Home, and the guide as the reader first opens
 /// (the printed page or Ayah mode) — each once only.
 void main() {
   setUpAll(RealApp.prepare);
   tearDownAll(RealApp.close);
 
-  testWidgets('the welcome on Home the first time, then never again', (
+  testWidgets('the setup over Home the first time, then never again', (
     tester,
   ) async {
     await RealApp.launch(tester, firstRun: true);
-    expect(find.byKey(const ValueKey('home-welcome')), findsOneWidget);
+    expect(find.byKey(const ValueKey('first-run-setup')), findsOneWidget);
     expect(find.textContaining('still learning'), findsOneWidget);
-    await tester.tap(find.byKey(const ValueKey('home-welcome-continue')));
+    await tester.tap(find.byKey(const ValueKey('setup-skip')));
     await RealApp.settle(tester);
-    expect(find.byKey(const ValueKey('home-welcome')), findsNothing);
+    expect(find.byKey(const ValueKey('first-run-setup')), findsNothing);
     await RealApp.quit(tester);
 
     // Started again (what was shown is remembered).
     await RealApp.launch(tester, firstRun: true);
-    expect(find.byKey(const ValueKey('home-welcome')), findsNothing);
+    expect(find.byKey(const ValueKey('first-run-setup')), findsNothing);
     await RealApp.quit(tester);
   });
 
@@ -38,8 +38,8 @@ void main() {
         firstRun: true,
         mode: mode,
       );
-      // (The welcome out of the way, if still due.)
-      final welcome = find.byKey(const ValueKey('home-welcome-continue'));
+      // (The setup out of the way, if still due.)
+      final welcome = find.byKey(const ValueKey('setup-skip'));
       if (welcome.evaluate().isNotEmpty) {
         await tester.tap(welcome);
         await RealApp.settle(tester);
@@ -71,7 +71,7 @@ void main() {
     tester,
   ) async {
     final container = await RealApp.launch(tester, firstRun: true);
-    final welcome = find.byKey(const ValueKey('home-welcome-continue'));
+    final welcome = find.byKey(const ValueKey('setup-skip'));
     if (welcome.evaluate().isNotEmpty) {
       await tester.tap(welcome);
       await RealApp.settle(tester);

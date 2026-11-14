@@ -119,7 +119,9 @@ const credits = <Credit>[
         'Hasan Yaqoub), Korean (Hamid Choi), Japanese (Saeed Sato) and '
         'Portuguese (Helmi Nasr), Chinese (Muhammad Suleiman, Muhammad '
         'Makin) translations; Pashto, Swahili, Uzbek, Dutch and Greek (Rowwad); '
-        'Al-Mukhtasar in Kurdish, Pashto, Uzbek, Japanese and Chinese',
+        'Al-Mukhtasar in Kurdish, Pashto, Uzbek, Japanese and Chinese; '
+        "Al-Mukhtasar's aims of each surah (12 languages; 8 more from "
+        "the Tafsir Center's own Al-Mukhtasar, mokhtasr.com)",
     owner: 'QuranEnc',
     licence: 'QuranEnc terms: unmodified, with attribution and version',
     url: 'https://quranenc.com',

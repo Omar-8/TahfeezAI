@@ -7,6 +7,7 @@ import '../../../core/routing/quran_location_routing.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/components/components.dart';
 import '../../../memorization/application/memorization_today.dart';
+import '../../../quran/application/surah_aims_provider.dart';
 import '../../../quran/domain/models/ayah_models.dart';
 import '../../../quran/domain/models/quran_location.dart';
 import '../../../quran/domain/models/surah_models.dart';
@@ -38,7 +39,8 @@ final surahFactsProvider = FutureProvider.autoDispose.family<SurahFacts, Surah>(
 
 /// About surah [surahNo]: its name in the Mushaf's calligraphy, where it
 /// was revealed and in which order, its ayahs, rukūʿs, pages, juz and
-/// sajdahs, how much of it is memorized — then Read and Listen.
+/// sajdahs, how much of it is memorized, its aims (Al-Mukhtasar's, where
+/// it has them in the app's language) — then Read and Listen.
 Future<void> showSurahInfoSheet(BuildContext context, {required int surahNo}) =>
     showTahfeezModalBottomSheet<void>(
       context: context,
@@ -80,6 +82,11 @@ class _SurahInfo extends ConsumerWidget {
         if (a.sajdah != null) a.verseNo,
     ];
     final progress = ref.watch(surahProgressProvider).value?[surahNo];
+    // In the app's language only: not another's in its place.
+    final language = Localizations.localeOf(context).languageCode;
+    final allAims = ref.watch(surahAimsProvider).value;
+    final aims = allAims?.of(surahNo, language);
+    final translated = allAims?.isTranslated(surahNo, language) ?? false;
     final name = indexed.localizedName ?? indexed.arabicName ?? '$surahNo';
 
     Widget fact(String label, String value, {Key? key}) => Padding(
@@ -196,6 +203,46 @@ class _SurahInfo extends ConsumerWidget {
               ],
             ),
           ),
+          if (aims != null)
+            TahfeezCard(
+              key: const ValueKey('surah-info-aims'),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                spacing: TahfeezSpacing.sm,
+                children: [
+                  Row(
+                    spacing: TahfeezSpacing.sm,
+                    children: [
+                      Icon(
+                        Icons.flag_outlined,
+                        size: 20,
+                        color: theme.colorScheme.primary,
+                      ),
+                      Expanded(
+                        child: Text(
+                          l10n.surahInfoAims,
+                          style: theme.textTheme.titleSmall,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Text(
+                    aims,
+                    key: const ValueKey('surah-info-aims-text'),
+                    style: theme.textTheme.bodyLarge?.copyWith(height: 1.6),
+                  ),
+                  Text(
+                    translated
+                        ? l10n.surahInfoAimsTranslated
+                        : l10n.surahInfoAimsSource,
+                    key: const ValueKey('surah-info-aims-source'),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           Row(
             spacing: TahfeezSpacing.sm,
             children: [

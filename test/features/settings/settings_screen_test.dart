@@ -14,6 +14,7 @@ import 'package:tahfeez_ai/core/theme/app_typography.dart';
 import 'package:tahfeez_ai/core/theme/theme_controller.dart';
 import 'package:tahfeez_ai/features/settings/domain/credits.dart';
 import 'package:tahfeez_ai/features/settings/presentation/about_screen.dart';
+import 'package:tahfeez_ai/features/onboarding/presentation/first_run_setup.dart';
 
 import '../../test_helpers/widget_test_overrides.dart';
 
@@ -270,6 +271,40 @@ void main() {
     final rect = tester.getRect(match.first);
     expect(rect.top, greaterThanOrEqualTo(0));
     expect(rect.bottom, lessThan(844));
+  });
+
+  testWidgets('first, above Language: the welcome setup, opened again', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: tahfeezWidgetTestOverrides(),
+        child: const TahfeezApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Settings'));
+    await tester.pumpAndSettle();
+    final card = find.byKey(const ValueKey('settings-setup-again'));
+    expect(card, findsOne);
+    expect(
+      tester.getTopLeft(card).dy,
+      lessThan(
+        tester
+            .getTopLeft(find.byKey(const ValueKey('settings-group-Language')))
+            .dy,
+      ),
+    );
+    await tester.tap(card);
+    await tester.pumpAndSettle();
+    expect(find.byType(FirstRunSetup), findsOne);
+    await tester.tap(find.byKey(const ValueKey('setup-skip')));
+    await tester.pumpAndSettle();
+    expect(find.byType(FirstRunSetup), findsNothing);
   });
 
   testWidgets('the reciter: his picture beside his name, closed and open', (

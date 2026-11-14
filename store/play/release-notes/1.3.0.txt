@@ -1,0 +1,147 @@
+<en-US>
+• A new welcome setup: language, where to begin, reciter, and a live demo of reciting
+• Try reciting an ayah right in the setup, with the real recitation bar
+• Surah info now shows the aims of each surah
+• Khatmah reminder: a daily notification with each day's pages
+• Al-Mukhtasar tafsir in Chinese
+</en-US>
+<ar>
+• إعداد ترحيبي جديد: اللغة، وبماذا تبدأ، والقارئ، وعرض حي للتسميع
+• جرّب تسميع آية داخل الإعداد نفسه بشريط التسميع الحقيقي
+• معلومات السورة تعرض الآن مقاصد كل سورة
+• تذكير الختمة: إشعار يومي بصفحات كل يوم
+• تفسير المختصر باللغة الصينية
+</ar>
+<bn-BD>
+• নতুন স্বাগত সেটআপ: ভাষা, কোথা থেকে শুরু, কারী এবং তিলাওয়াতের সরাসরি ডেমো
+• সেটআপেই আসল তিলাওয়াত বার দিয়ে একটি আয়াত তিলাওয়াত করে দেখুন
+• সূরার তথ্যে এখন প্রতিটি সূরার উদ্দেশ্য দেখা যায়
+• খতমের রিমাইন্ডার: প্রতিদিনের পৃষ্ঠাসহ দৈনিক নোটিফিকেশন
+• চীনা ভাষায় আল-মুখতাসার তাফসীর
+</bn-BD>
+<da-DK>
+• Ny velkomstopsætning: sprog, hvor du vil begynde, recitator og en levende demo af recitation
+• Prøv at recitere et vers direkte i opsætningen med den rigtige recitationsbjælke
+• Surainfo viser nu hver suras formål
+• Khatma-påmindelse: en daglig notifikation med dagens sider
+• Al-Mukhtasar-tafsir på kinesisk
+</da-DK>
+<de-DE>
+• Neue Willkommens-Einrichtung: Sprache, Startpunkt, Rezitator und eine Live-Demo des Rezitierens
+• Rezitiere eine Aya direkt in der Einrichtung, mit der echten Rezitationsleiste
+• Die Sure-Info zeigt jetzt die Ziele jeder Sure
+• Khatma-Erinnerung: täglich eine Benachrichtigung mit den Seiten des Tages
+• Al-Mukhtasar-Tafsir auf Chinesisch
+</de-DE>
+<el-GR>
+• Νέα αρχική ρύθμιση: γλώσσα, από πού να ξεκινήσεις, απαγγελτής και ζωντανή επίδειξη της απαγγελίας
+• Δοκίμασε να απαγγείλεις ένα εδάφιο μέσα στη ρύθμιση, με την πραγματική γραμμή απαγγελίας
+• Οι πληροφορίες της σούρας δείχνουν τώρα τους στόχους κάθε σούρας
+• Υπενθύμιση χάτμα: μια καθημερινή ειδοποίηση με τις σελίδες της ημέρας
+• Το ταφσίρ Al-Mukhtasar στα κινέζικα
+</el-GR>
+<es-ES>
+• Nueva configuración de bienvenida: idioma, por dónde empezar, recitador y una demostración en vivo de la recitación
+• Prueba a recitar una aleya en la propia configuración, con la barra de recitación real
+• La información de la sura muestra ahora los objetivos de cada sura
+• Recordatorio de la jatma: una notificación diaria con las páginas del día
+• Tafsir Al-Mukhtasar en chino
+</es-ES>
+<fa>
+• راه‌اندازی خوشامد جدید: زبان، نقطهٔ شروع، قاری و نمایش زندهٔ تلاوت
+• تلاوت یک آیه را در همان راه‌اندازی با نوار واقعی تلاوت امتحان کن
+• اطلاعات سوره اکنون مقاصد هر سوره را نشان می‌دهد
+• یادآور ختم: اعلانی روزانه با صفحه‌های هر روز
+• تفسیر المختصر به زبان چینی
+</fa>
+<fr-FR>
+• Nouvelle configuration d'accueil : langue, point de départ, récitateur et démonstration en direct de la récitation
+• Essayez de réciter un verset dans la configuration même, avec la vraie barre de récitation
+• Les infos de la sourate montrent désormais les objectifs de chaque sourate
+• Rappel de la khatma : une notification quotidienne avec les pages du jour
+• Le tafsir Al-Mukhtasar en chinois
+</fr-FR>
+<id>
+• Pengaturan sambutan baru: bahasa, mulai dari mana, qari, dan demo langsung setoran hafalan
+• Coba setorkan satu ayat langsung di pengaturan, dengan bilah setoran yang sebenarnya
+• Info surah kini menampilkan tujuan setiap surah
+• Pengingat khatam: notifikasi harian berisi halaman hari itu
+• Tafsir Al-Mukhtasar dalam bahasa Mandarin
+</id>
+<ja-JP>
+• 新しいウェルカム設定：言語、始め方、読誦者、読誦チェックのライブデモ
+• 設定の中で、本物の読誦バーを使って一節を読誦してみられます
+• スーラ情報に各スーラの主旨を表示
+• ハトマのリマインダー：その日のページを毎日お知らせ
+• 中国語のクルアーン簡潔注釈
+</ja-JP>
+<kk>
+• Жаңа сәлемдесу баптауы: тіл, неден бастау, қари және оқудың тікелей демосы
+• Баптаудың ішінде нақты оқу жолағымен бір аятты оқып көріңіз
+• Сүре туралы ақпарат енді әр сүренің мақсаттарын көрсетеді
+• Хатым еске салғышы: күн сайын сол күннің беттерімен хабарландыру
+• Қытай тіліндегі «Әл-Мухтасар» тәпсірі
+</kk>
+<ko-KR>
+• 새로운 시작 설정: 언어, 시작할 곳, 낭송자, 낭송 확인 라이브 데모
+• 설정 안에서 실제 낭송 막대로 한 구절을 낭송해 볼 수 있어요
+• 수라 정보에 이제 각 수라의 목적이 표시돼요
+• 카트마 알림: 그날 읽을 페이지를 매일 알려 드려요
+• 중국어 알-무크타사르 타프시르
+</ko-KR>
+<ms>
+• Tetapan alu-aluan baharu: bahasa, mula dari mana, qari dan demo langsung bacaan
+• Cuba baca satu ayat terus dalam tetapan, dengan bar bacaan yang sebenar
+• Maklumat surah kini memaparkan tujuan setiap surah
+• Peringatan khatam: pemberitahuan harian dengan halaman hari itu
+• Tafsir Al-Mukhtasar dalam bahasa Cina
+</ms>
+<nl-NL>
+• Nieuwe welkomstinstelling: taal, waar je begint, reciteerder en een live demo van het reciteren
+• Reciteer een aya meteen in de instelling, met de echte recitatiebalk
+• De soera-info toont nu de doelen van elke soera
+• Khatma-herinnering: elke dag een melding met de pagina's van die dag
+• Al-Mukhtasar-tafsir in het Chinees
+</nl-NL>
+<pt-BR>
+• Nova configuração de boas-vindas: idioma, por onde começar, recitador e uma demonstração ao vivo da recitação
+• Experimente recitar um versículo na própria configuração, com a barra de recitação real
+• As informações da surata agora mostram os objetivos de cada surata
+• Lembrete da khatma: uma notificação diária com as páginas do dia
+• Tafsir Al-Mukhtasar em chinês
+</pt-BR>
+<ru-RU>
+• Новая приветственная настройка: язык, с чего начать, чтец и живая демонстрация проверки чтения
+• Попробуйте прочитать аят прямо в настройке, с настоящей панелью чтения
+• В сведениях о суре теперь есть цели каждой суры
+• Напоминание о хатме: ежедневное уведомление со страницами на день
+• Тафсир «Аль-Мухтасар» на китайском
+</ru-RU>
+<sw>
+• Usanidi mpya wa kukaribisha: lugha, pa kuanzia, msomaji na onyesho la moja kwa moja la usomaji
+• Jaribu kusoma aya ndani ya usanidi wenyewe, kwa upau halisi wa usomaji
+• Taarifa za sura sasa zinaonyesha malengo ya kila sura
+• Kikumbusho cha khatma: arifa ya kila siku yenye kurasa za siku hiyo
+• Tafsiri ya Al-Mukhtasar kwa Kichina
+</sw>
+<tr-TR>
+• Yeni karşılama kurulumu: dil, nereden başlanacağı, kâri ve okumanın canlı demosu
+• Kurulumun içinde gerçek okuma çubuğuyla bir ayet okumayı dene
+• Sure bilgisi artık her surenin amaçlarını gösteriyor
+• Hatim hatırlatıcısı: her gün o günün sayfalarıyla bir bildirim
+• Çince Muhtasar Tefsir
+</tr-TR>
+<ur>
+• نیا خوش آمدید سیٹ اپ: زبان، کہاں سے شروع کریں، قاری اور تلاوت کی براہِ راست ڈیمو
+• سیٹ اپ ہی میں اصل تلاوت بار سے ایک آیت کی تلاوت آزمائیں
+• سورت کی معلومات میں اب ہر سورت کے مقاصد دکھائے جاتے ہیں
+• ختم کی یاد دہانی: روزانہ اس دن کے صفحات کے ساتھ اطلاع
+• چینی زبان میں المختصر تفسیر
+</ur>
+<zh-CN>
+• 全新欢迎设置：语言、从哪里开始、诵读者，以及诵读检查的实时演示
+• 在设置中就能用真实的诵读栏试着诵读一节经文
+• 章节信息现在显示每章的宗旨
+• 通读提醒：每天通知当天要读的页数
+• 中文版《古兰经简明注释》
+</zh-CN>
