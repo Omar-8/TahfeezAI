@@ -153,7 +153,7 @@ def frame(shot: Path, headline, sub, dark, arabic):
     y += z(14)
     for line in wrap(d, sub, sf, W - z(200)):
         d.text((W // 2, y), line, font=sf, fill=sub_c, anchor="ma", direction=direction)
-        y += z(54)
+        y += z(76) if arabic else z(54)  # (taller Arabic lines: the rule clear)
     # A small gold rule under the caption.
     d.rounded_rectangle((W // 2 - z(40), y + z(18), W // 2 + z(40), y + z(24)), z(3), fill=GOLD)
 

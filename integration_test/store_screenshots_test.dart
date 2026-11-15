@@ -29,6 +29,7 @@ import 'package:tahfeez_ai/features/mushaf/application/reader_mode.dart';
 import 'package:tahfeez_ai/features/mushaf/domain/mushaf_appearance.dart';
 import 'package:tahfeez_ai/features/mushaf/presentation/mushaf_appearance_sheet.dart';
 import 'package:tahfeez_ai/features/recitation/presentation/recitation_controls.dart';
+import 'package:tahfeez_ai/features/recitation/application/hifz_controller.dart';
 import 'package:tahfeez_ai/memorization/application/activity_stats.dart';
 import 'package:tahfeez_ai/memorization/domain/models/memorization_models.dart';
 import 'package:tahfeez_ai/memorization/memorization_providers.dart';
@@ -60,6 +61,14 @@ void main() {
     if (Platform.isAndroid) await binding.convertFlutterSurfaceToImage();
     final container = ProviderScope.containerOf(
       tester.element(find.byType(TahfeezApp)),
+    );
+    // Every recitation mode's introduction seen: not over the scenes (it
+    // covered the follow-along shot, 2026-11-15).
+    final hifz = container.read(hifzSettingsProvider.notifier);
+    hifz.update(
+      container
+          .read(hifzSettingsProvider)
+          .copyWith(introsSeen: RecitationIntroMode.values.toSet()),
     );
     GoRouter router() =>
         GoRouter.of(tester.element(find.byType(Navigator).first));
