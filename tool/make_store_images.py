@@ -71,13 +71,17 @@ def font(path, size, weight="Regular"):
 
 
 def gradient(top, bottom):
-    # One column, stretched across (the same pixels, drawn once).
-    column = Image.new("RGB", (1, H), top)
-    px = column.load()
+    # A line a row (a 1-pixel column stretched across crashed the Pillow of
+    # GitHub's Ubuntu runner, 2026-11-15).
+    img = Image.new("RGB", (W, H), top)
+    draw = ImageDraw.Draw(img)
     for y in range(H):
         t = y / (H - 1)
-        px[0, y] = tuple(round(top[i] + (bottom[i] - top[i]) * t) for i in range(3))
-    return column.resize((W, H), Image.NEAREST)
+        draw.line(
+            [(0, y), (W - 1, y)],
+            fill=tuple(round(top[i] + (bottom[i] - top[i]) * t) for i in range(3)),
+        )
+    return img
 
 
 def glow(img, centre, radius, colour, alpha):

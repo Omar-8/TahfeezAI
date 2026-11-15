@@ -42,6 +42,10 @@ void main() {
     final prefs = SharedPreferencesAsync();
     await prefs.setBool('firstRun.welcome', true);
     await prefs.setBool('firstRun.guide', true);
+    // Nor the first hiding's hint, nor the app's tips (they covered the
+    // hide mode and progress shots, 2026-11-15).
+    await prefs.setBool('firstRun.hide-hint', true);
+    await prefs.setBool('appTips.allOff', true);
 
     debugPrint('store-shots: bootstrap');
     await bootstrap();
