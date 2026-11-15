@@ -1,0 +1,168 @@
+<en-US>
+• Stories: 13 Quran stories in Topics, each as its whole passage
+• An ayah's topics in its sheet, and topics in search
+• Your completed khatmahs, each with its dates
+• Celebrations for memorized surahs and new milestones: ayahs and words recited, time in the Mushaf
+• Choose a word to start from: hiding keeps the words before it, and the marker stays put
+• Web: works offline and the Mushaf opens at its proper width
+</en-US>
+<ar>
+• القصص: ١٣ قصة قرآنية في المواضيع، كل قصة بمقطعها كاملًا
+• مواضيع الآية في نافذتها، والمواضيع في البحث
+• ختماتك المكتملة، كل ختمة بتواريخها
+• احتفال بحفظ السور وبإنجازات جديدة: الآيات والكلمات المتلوّة، والوقت مع المصحف
+• اختر كلمة لتبدأ منها: الإخفاء يُبقي ما قبلها ظاهرًا، والمؤشر يبقى مكانه
+• الويب: يعمل دون اتصال، والمصحف يفتح بعرضه الصحيح
+</ar>
+<bn-BD>
+• কাহিনি: বিষয়ে কুরআনের ১৩টি কাহিনি, প্রতিটি পুরো অংশসহ
+• আয়াতের শিটে তার বিষয়গুলো, এবং অনুসন্ধানে বিষয়
+• আপনার সম্পূর্ণ খতমগুলো, প্রতিটি তারিখসহ
+• মুখস্থ সূরা ও নতুন মাইলফলকের উদযাপন: তিলাওয়াত করা আয়াত ও শব্দ, মুসহাফে সময়
+• শুরু করার শব্দ বেছে নিন: লুকানো তার আগের শব্দ দেখায়, আর চিহ্ন জায়গায় থাকে
+• ওয়েব: অফলাইনে চলে এবং মুসহাফ সঠিক প্রস্থে খোলে
+</bn-BD>
+<da-DK>
+• Fortællinger: 13 fortællinger fra Koranen under Emner, hver som hele passagen
+• Et vers' emner i dets ark, og emner i søgningen
+• Dine fuldførte khatmah'er, hver med sine datoer
+• Fejring af lærte suraer og nye milepæle: reciterede vers og ord, tid i Mushaf
+• Vælg et ord at starte fra: skjul beholder ordene før det, og markøren bliver
+• Web: virker offline, og Mushaf åbner i den rette bredde
+</da-DK>
+<de-DE>
+• Erzählungen: 13 Erzählungen des Korans unter Themen, jede als ganzer Abschnitt
+• Die Themen eines Verses in seinem Fenster, und Themen in der Suche
+• Deine abgeschlossenen Khatmas, jede mit ihren Daten
+• Feiern für gelernte Suren und neue Meilensteine: rezitierte Verse und Wörter, Zeit im Mushaf
+• Wähle ein Wort zum Beginnen: Verbergen lässt die Wörter davor sichtbar, die Markierung bleibt
+• Web: funktioniert offline, der Mushaf öffnet in seiner richtigen Breite
+</de-DE>
+<el-GR>
+• Ιστορίες: 13 ιστορίες του Κορανίου στα Θέματα, η καθεμία ολόκληρη
+• Τα θέματα ενός εδαφίου στο φύλλο του, και θέματα στην αναζήτηση
+• Οι ολοκληρωμένες σας khatmah, η καθεμία με τις ημερομηνίες της
+• Γιορτή για σούρες που απομνημονεύσατε και νέα ορόσημα: εδάφια και λέξεις, χρόνος στο Μουσχάφ
+• Διαλέξτε λέξη για αρχή: η απόκρυψη αφήνει ορατές τις προηγούμενες, ο δείκτης μένει
+• Web: λειτουργεί εκτός σύνδεσης και το Μουσχάφ ανοίγει στο σωστό πλάτος
+</el-GR>
+<es-ES>
+• Relatos: 13 relatos del Corán en Temas, cada uno como su pasaje completo
+• Los temas de una aleya en su hoja, y temas en la búsqueda
+• Tus jatmas completadas, cada una con sus fechas
+• Celebraciones por suras memorizadas y nuevos hitos: aleyas y palabras recitadas, tiempo en el Mushaf
+• Elige una palabra para empezar: ocultar deja las anteriores visibles y el marcador se queda
+• Web: funciona sin conexión y el Mushaf se abre en su ancho correcto
+</es-ES>
+<fa>
+• داستان‌ها: ۱۳ داستان قرآنی در موضوعات، هر کدام با کل بخش خود
+• موضوعات یک آیه در برگهٔ آن، و موضوعات در جستجو
+• ختم‌های کامل‌شده‌تان، هر کدام با تاریخ‌هایش
+• جشن برای حفظ سوره‌ها و دستاوردهای تازه: آیه‌ها و کلمه‌های تلاوت‌شده، زمان با مصحف
+• کلمه‌ای برای شروع انتخاب کنید: پنهان کردن، کلمه‌های پیش از آن را نشان می‌دهد و نشانگر سر جایش می‌ماند
+• وب: بدون اینترنت کار می‌کند و مصحف با عرض درست باز می‌شود
+</fa>
+<fr-FR>
+• Récits : 13 récits du Coran dans Thèmes, chacun en entier
+• Les thèmes d'un verset dans sa fenêtre, et les thèmes dans la recherche
+• Vos khatmas terminées, chacune avec ses dates
+• Célébrations des sourates mémorisées et de nouveaux jalons : versets et mots récités, temps dans le Mushaf
+• Choisissez un mot de départ : masquer laisse visibles les mots d'avant, le repère reste en place
+• Web : fonctionne hors ligne et le Mushaf s'ouvre à sa bonne largeur
+</fr-FR>
+<id>
+• Kisah: 13 kisah Al-Qur'an di Topik, masing-masing utuh
+• Topik sebuah ayat di lembarnya, dan topik dalam pencarian
+• Khatam yang telah selesai, masing-masing dengan tanggalnya
+• Perayaan untuk surah yang dihafal dan pencapaian baru: ayat dan kata yang dibaca, waktu bersama Mushaf
+• Pilih kata untuk mulai: menyembunyikan tetap menampilkan kata sebelumnya, penanda tetap di tempatnya
+• Web: bisa offline dan Mushaf terbuka dengan lebar yang tepat
+</id>
+<ja-JP>
+• 物語：トピックにクルアーンの13の物語、それぞれ一節まるごと
+• アーヤのシートにそのトピック、検索にもトピック
+• 完了したハトマ、それぞれの日付付き
+• 暗記したスーラと新しい節目のお祝い：読誦したアーヤと語数、ムスハフでの時間
+• 開始する語を選択：隠してもその前の語は表示され、マーカーはそのまま
+• Web：オフラインで動作し、ムスハフが正しい幅で開きます
+</ja-JP>
+<kk>
+• Қиссалар: Тақырыптарда Құранның 13 қиссасы, әрқайсысы толық үзіндімен
+• Аяттың тақырыптары өз парағында және іздеуде
+• Аяқталған хатымдарыңыз, әрқайсысы күндерімен
+• Жатталған сүрелер мен жаңа белестерге мереке: оқылған аяттар мен сөздер, Мұсхафпен уақыт
+• Бастайтын сөзді таңдаңыз: жасыру алдындағы сөздерді көрсетеді, белгі орнында қалады
+• Веб: желісіз жұмыс істейді, Мұсхаф дұрыс енімен ашылады
+</kk>
+<ko-KR>
+• 이야기: 주제에 꾸란의 13가지 이야기, 각각 구절 전체로
+• 아야 시트에 그 주제, 검색에도 주제
+• 완료한 카트마, 각각의 날짜와 함께
+• 암기한 수라와 새 이정표 축하: 낭송한 아야와 단어, 무스하프와 함께한 시간
+• 시작할 단어 선택: 숨겨도 그 앞의 단어는 보이고 표시는 그대로
+• 웹: 오프라인으로 작동하고 무스하프가 알맞은 너비로 열립니다
+</ko-KR>
+<ms>
+• Kisah: 13 kisah al-Quran dalam Topik, setiap satu dengan petikan penuh
+• Topik sesuatu ayat dalam helaiannya, dan topik dalam carian
+• Khatam anda yang telah selesai, setiap satu dengan tarikhnya
+• Sambutan untuk surah yang dihafal dan pencapaian baharu: ayat dan perkataan dibaca, masa bersama Mushaf
+• Pilih perkataan untuk bermula: menyembunyikan mengekalkan perkataan sebelumnya, penanda kekal di tempatnya
+• Web: berfungsi luar talian dan Mushaf dibuka pada lebar yang betul
+</ms>
+<nl-NL>
+• Verhalen: 13 verhalen uit de Koran bij Onderwerpen, elk als hele passage
+• De onderwerpen van een vers in zijn venster, en onderwerpen in het zoeken
+• Je voltooide khatma's, elk met de data
+• Vieringen voor gememoriseerde soera's en nieuwe mijlpalen: gereciteerde verzen en woorden, tijd in de Mushaf
+• Kies een woord om te beginnen: verbergen laat de woorden ervoor zien, de markering blijft staan
+• Web: werkt offline en de Mushaf opent op de juiste breedte
+</nl-NL>
+<pt-BR>
+• Histórias: 13 histórias do Alcorão em Temas, cada uma com o trecho completo
+• Os temas de um versículo na sua folha, e temas na busca
+• Suas khatmas concluídas, cada uma com suas datas
+• Comemorações por suratas memorizadas e novas metas: versículos e palavras recitados, tempo no Mushaf
+• Escolha uma palavra para começar: ocultar mantém as anteriores visíveis e o marcador fica no lugar
+• Web: funciona offline e o Mushaf abre na largura certa
+</pt-BR>
+<ru-RU>
+• Истории: 13 историй Корана в разделе «Темы», каждая целым отрывком
+• Темы аята в его окне и темы в поиске
+• Завершённые хатмы, каждая со своими датами
+• Поздравления с выученными сурами и новыми рубежами: прочитанные аяты и слова, время с Мусхафом
+• Выберите слово для начала: при скрытии слова перед ним видны, а метка остаётся на месте
+• Веб: работает без интернета, и Мусхаф открывается правильной ширины
+</ru-RU>
+<sw>
+• Visa: visa 13 vya Qur'ani katika Mada, kila kimoja kwa kifungu kizima
+• Mada za aya katika karatasi yake, na mada katika utafutaji
+• Khatma zako zilizokamilika, kila moja na tarehe zake
+• Sherehe kwa sura zilizohifadhiwa na hatua mpya: aya na maneno yaliyosomwa, muda na Msahafu
+• Chagua neno la kuanzia: kuficha kunaacha maneno ya kabla yake yakionekana, na alama inabaki
+• Wavuti: inafanya kazi bila mtandao na Msahafu unafunguka kwa upana sahihi
+</sw>
+<tr-TR>
+• Kıssalar: Konularda Kur'an'dan 13 kıssa, her biri bütün pasajıyla
+• Bir ayetin konuları kendi penceresinde, konular aramada da
+• Tamamlanan hatimleriniz, her biri tarihleriyle
+• Ezberlenen sureler ve yeni dönüm noktaları için kutlama: okunan ayet ve kelimeler, Mushafta geçen süre
+• Başlamak için bir kelime seçin: gizleme öncesindeki kelimeleri gösterir, işaret yerinde kalır
+• Web: çevrimdışı çalışır ve Mushaf doğru genişlikte açılır
+</tr-TR>
+<ur>
+• قصے: موضوعات میں قرآن کے 13 قصے، ہر ایک پورے حصے کے ساتھ
+• آیت کی شیٹ میں اس کے موضوعات، اور تلاش میں موضوعات
+• آپ کے مکمل ختمات، ہر ایک اپنی تاریخوں کے ساتھ
+• حفظ شدہ سورتوں اور نئے سنگ میل پر جشن: تلاوت شدہ آیات و الفاظ، مصحف کے ساتھ وقت
+• شروع کرنے کے لیے لفظ چنیں: چھپانے پر اس سے پہلے کے الفاظ نظر آتے ہیں اور نشان اپنی جگہ رہتا ہے
+• ویب: آف لائن چلتی ہے اور مصحف درست چوڑائی میں کھلتا ہے
+</ur>
+<zh-CN>
+• 故事：主题中新增古兰经13个故事，每个都是完整段落
+• 经文面板中显示其主题，搜索也能找到主题
+• 已完成的通读，每次都附有日期
+• 背会苏拉和新里程碑时的庆祝：诵读的经文和词数、使用经卷的时间
+• 选择起始词：隐藏时保留其前面的词，标记保持不动
+• 网页版：可离线使用，经卷以正确宽度打开
+</zh-CN>

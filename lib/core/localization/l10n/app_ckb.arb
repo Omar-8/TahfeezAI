@@ -777,5 +777,12 @@
   "topicsCount": "{count, plural, other{{count} بابەت}}",
   "topicsAyahs": "{count, plural, other{{count} ئایەت}}",
   "topicsSource": "لە ئۆنتۆلۆجیای چەمکە قورئانییەکانی Quranic Arabic Corpus (زانکۆی لیدز).",
-  "topicsSearch": "گەڕان لە بابەتەکان"
+  "topicsSearch": "گەڕان لە بابەتەکان",
+  "topicsStories": "چیرۆکەکان",
+  "progressKhatmahPlanned": "پلان: {days}",
+  "milestoneAyahs": "{count} ئایەت خوێندرایەوە",
+  "milestoneWords": "{count} وشە خوێندرایەوە",
+  "milestoneMushafDays": "{count, plural, other{{count} ڕۆژ لەگەڵ موسحەف}}",
+  "milestoneMushafMonths": "{count, plural, other{{count} مانگ لەگەڵ موسحەف}}",
+  "milestoneMushafYear": "ساڵێک لەگەڵ موسحەف"
 }

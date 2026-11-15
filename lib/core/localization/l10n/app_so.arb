@@ -777,5 +777,12 @@
   "topicsCount": "{count, plural, =1{1 mawduuc} other{{count} mawduuc}}",
   "topicsAyahs": "{count, plural, =1{1 aayad} other{{count} aayadood}}",
   "topicsSource": "Laga soo qaatay ontolojiga fikradaha Qur'aanka ee Quranic Arabic Corpus (Jaamacadda Leeds).",
-  "topicsSearch": "Raadi mawduucyada"
+  "topicsSearch": "Raadi mawduucyada",
+  "topicsStories": "Sheekooyin",
+  "progressKhatmahPlanned": "loo qorsheeyay {days}",
+  "milestoneAyahs": "{count} aayadood ayaa la akhriyay",
+  "milestoneWords": "{count} erey ayaa la akhriyay",
+  "milestoneMushafDays": "{count, plural, =1{1 maalin Mushafka} other{{count} maalmood Mushafka}}",
+  "milestoneMushafMonths": "{count, plural, =1{1 bil Mushafka} other{{count} bilood Mushafka}}",
+  "milestoneMushafYear": "Sannad Mushafka"
 }

@@ -18,6 +18,7 @@ import '../core/theme/app_theme.dart';
 import '../core/theme/components/tahfeez_bottom_sheet.dart';
 import '../core/theme/theme_controller.dart';
 import '../features/memorize/application/memorization_reminder.dart';
+import '../memorization/application/activity_milestones.dart';
 import '../features/khatmah/application/khatmah_reminder.dart';
 import '../quran/application/meaning_language_follower.dart';
 import '../quran/presentation/meaning_packs_layer.dart';
@@ -46,6 +47,9 @@ class TahfeezApp extends ConsumerWidget {
     ref.listen(memorizationReminderProvider, (_, _) {});
     // The khatmah's: each day's pages, scheduled again as they change.
     ref.listen(khatmahReminderProvider, (_, _) {});
+    // Lifetime counts reached (ayahs, words, days in the Mushaf): each
+    // celebrated once.
+    ref.listen(activityMilestonesProvider, (_, _) {});
     // Translations, tafsir and word meanings follow the app's language.
     ref.listen(meaningLanguageFollowerProvider, (_, _) {});
 

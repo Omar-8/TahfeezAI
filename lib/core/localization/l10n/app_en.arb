@@ -1524,5 +1524,24 @@
   "topicsSearch": "Search topics",
   "@topicsSearch": {
     "description": "Hint of the search bar over the Quran tab's Topics."
-  }
+  },
+  "topicsStories": "Stories",
+  "@topicsStories": {
+    "description": "The Topics group of stories told in one passage (Musa and al-Khidr, the people of the town...)."
+  },
+  "progressKhatmahPlanned": "planned for {days}",
+  "@progressKhatmahPlanned": {
+    "description": "Progress, completed khatmahs list: the days a khatmah was planned for; {days} is e.g. '30 days'.",
+    "placeholders": {"days": {"type": "String"}}
+  },
+  "milestoneAyahs": "{count} ayahs recited",
+  "@milestoneAyahs": {"description": "Milestone banner (under Masha'Allah): a lifetime count reached; {count} is the number, formatted (10,000).", "placeholders": {"count": {"type": "String"}}},
+  "milestoneWords": "{count} words recited",
+  "@milestoneWords": {"description": "Milestone banner (under Masha'Allah): a lifetime count reached; {count} is the number, formatted (10,000).", "placeholders": {"count": {"type": "String"}}},
+  "milestoneMushafDays": "{count, plural, =1{1 day in the Mushaf} other{{count} days in the Mushaf}}",
+  "@milestoneMushafDays": {"description": "Milestone banner: time spent in the Mushaf (counted in hours, 24 a day).", "placeholders": {"count": {"type": "int"}}},
+  "milestoneMushafMonths": "{count, plural, =1{1 month in the Mushaf} other{{count} months in the Mushaf}}",
+  "@milestoneMushafMonths": {"description": "Milestone banner: time spent in the Mushaf (counted in hours, 24 a day).", "placeholders": {"count": {"type": "int"}}},
+  "milestoneMushafYear": "A year in the Mushaf",
+  "@milestoneMushafYear": {"description": "Milestone banner: a year (365 days, counted in hours) spent in the Mushaf."}
 }

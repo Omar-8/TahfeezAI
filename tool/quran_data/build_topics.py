@@ -33,6 +33,7 @@ LANGUAGES = ['en', 'ar', 'ur', 'tr', 'fr', 'de', 'id', 'es', 'ru', 'fa', 'bn',
 # concept goes to the first group it matches.
 GROUPS = [
     ('prophets', {'prophet', 'messenger'}),
+    ('stories', set()),  # STORIES only
     ('unseen', {'angel', 'satan', 'iblis', 'jinn', 'allahs-throne',
                 'beast-of-the-earth'}),
     ('hereafter', {'afterlife-location', 'afterlife-event', 'hell',
@@ -101,12 +102,39 @@ PASSAGES = {
 PROPHETS_ORDER = [
     'adam', 'idris', 'nuh', 'hud', 'salih', 'ibrahim', 'lut', 'ishmael',
     'isaac', 'yaqub', 'yusuf', 'ayyub', 'shuayb', 'musa', 'harun', 'david',
-    'solomon', 'elijah', 'elisha', 'yunus', 'zechariah', 'yahya', 'jesus',
-    'muhammad',
+    'solomon', 'elijah', 'elisha', 'yunus', 'uzair', 'zechariah', 'yahya',
+    'jesus', 'muhammad',
 ]
+
+# Stories told in one passage that are not concepts of the corpus (owner,
+# 2026-11-15): TahfeezAI's own — (id, English name, passage), in the order
+# they took place; each checked against the Tanzil text (the story begins
+# at its first ayah, the ayah after its last moves on). Their names in the
+# other languages are in topic_names/ as the corpus's concepts' are.
+STORIES = [
+    ('story-adam', 'Adam and Iblis', (2, 30, 39)),
+    ('story-nuh', 'Nuh and the Flood', (11, 25, 49)),
+    ('story-ibrahim', 'Ibrahim and the idols', (21, 51, 70)),
+    ('story-yusuf', 'The story of Yusuf', (12, 4, 101)),
+    ('story-musa-birth', 'The birth of Musa', (28, 3, 13)),
+    ('story-believer', "The believer of Pharaoh's family", (40, 28, 45)),
+    ('story-khidr', 'Musa and al-Khidr', (18, 60, 82)),
+    ('story-sabbath', 'The people of the Sabbath', (7, 163, 166)),
+    ('story-yunus', 'Yunus and the whale', (37, 139, 148)),
+    ('story-maryam', 'Maryam and the birth of Isa', (19, 16, 34)),
+    ('story-town', 'The people of the town', (36, 13, 29)),
+    ('story-two-gardens', 'The man of the two gardens', (18, 32, 44)),
+    ('story-garden', 'The owners of the garden', (68, 17, 33)),
+]
+
+# Put in a group other than the ontology's (owner, 2026-11-14): 'Uzair
+# among the prophets (the corpus has him among people; scholars differ).
+MOVED = {'uzair': 'prophets', **{i: 'stories' for i, _, _ in STORIES}}
 
 
 def group_of(concept):
+    if concept['id'] in MOVED:
+        return MOVED[concept['id']]
     lineage = set(concept['classes']) | {concept['id']}
     for group, members in GROUPS:
         if lineage & members:
@@ -116,6 +144,11 @@ def group_of(concept):
 
 def main():
     concepts = json.load(open(SOURCE, encoding='utf8'))
+    concepts += [
+        {'id': i, 'en': en, 'classes': [],
+         'ayahs': [s * 1000 + a for a in range(a0, a1 + 1)]}
+        for i, en, (s, a0, a1) in STORIES
+    ]
     order = [line.split('\t')[0] for line in
              open(os.path.join(NAMES, '_ids.txt'), encoding='utf8')
              .read().splitlines()]
@@ -174,6 +207,8 @@ def main():
     def order(group, ids):
         if group == 'prophets':
             return PROPHETS_ORDER
+        if group == 'stories':
+            return [i for i, _, _ in STORIES]
         return sorted(ids, key=lambda i: (-len(kept[i]['ayahs']),
                                           kept[i]['names']['en']))
 

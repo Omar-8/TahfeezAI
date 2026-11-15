@@ -132,24 +132,39 @@ class RecitationStartController extends Notifier<RecitationStart?> {
     _set((page: page, word: word));
   }
 
-  /// The ayahs hidden or uncovered by hand (not by a recitation or the
-  /// reciter): a chosen start goes — the band drawn on the next word to
-  /// uncover (drawn only: Recite with the ayahs hidden starts there
-  /// anyway).
+  /// The ayahs hidden or words uncovered by hand (not by a recitation or
+  /// the reciter): a word chosen stays chosen, the band on it (owner,
+  /// 2026-11-15: uncovering words moved it); none chosen, the band on the
+  /// next word to uncover.
   void _onHideMode(MushafHideModeState? was, MushafHideModeState now) {
     if (now.enabled &&
         !ref.read(recitationSessionControllerProvider).isActive &&
         _playingAyah == null) {
       final pages = _visiblePages();
-      final changed =
-          was == null ||
-          !was.enabled ||
-          (pages ?? const <int>{}).any(
-            (p) =>
-                now.revealedOn(p) != was.revealedOn(p) ||
-                now.startOf(p) != was.startOf(p),
-          );
-      if (pages != null && changed) _set(null);
+      final start = state;
+      // Turned on with a word chosen on the page: the words before it
+      // left shown (what comes before, to read), it and those after it
+      // hidden — the band staying on it, the next word to uncover (owner,
+      // 2026-11-15).
+      if (pages != null &&
+          (was == null || !was.enabled) &&
+          start != null &&
+          pages.contains(start.page)) {
+        final words = ref.read(mushafPageWordsProvider)[start.page];
+        final at = words?.indexOf(start.word) ?? -1;
+        if (at > 0) {
+          final reveal = {
+            // (A spread's page before it: all shown.)
+            for (final p in pages)
+              if (p < start.page) p: now.wordCounts[p] ?? 0,
+            start.page: at,
+          };
+          Future.microtask(() {
+            if (!ref.mounted) return;
+            ref.read(mushafHideModeProvider.notifier).setRevealed(reveal);
+          });
+        }
+      }
     }
     _drawCursor();
   }

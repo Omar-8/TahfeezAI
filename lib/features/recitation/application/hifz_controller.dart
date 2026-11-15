@@ -1284,14 +1284,25 @@ class HifzController extends Notifier<HifzState> {
         startPageFirst != null &&
         (chosenStart!.page == pages!.$1 || chosenStart.page == pages.$2)) {
       if (hideMode.enabled) {
-        ref
-            .read(mushafHideModeProvider.notifier)
-            .showFrom(
-              chosenStart.page,
-              start: startAt - startPageFirst,
-              count: 0,
-            );
-        _startJudge(startAt, corpus.length - 1);
+        // The words before it already shown (the ayahs hidden after it was
+        // chosen leave them shown — owner, 2026-11-15): kept shown, the
+        // test from it. Else hidden with it, as before.
+        final at = startAt - startPageFirst;
+        final beforeShown =
+            hideMode.startOf(chosenStart.page) == 0 &&
+            hideMode.revealedOn(chosenStart.page) >= at;
+        if (beforeShown) {
+          _startJudge(
+            pageStart,
+            corpus.length - 1,
+            preRevealed: startAt - pageStart,
+          );
+        } else {
+          ref
+              .read(mushafHideModeProvider.notifier)
+              .showFrom(chosenStart.page, start: at, count: 0);
+          _startJudge(startAt, corpus.length - 1);
+        }
         // Begun before it (or further down): looked for on the whole page,
         // the test then from there (see _startWindow).
         final lastRange = ranges[pages.$2] ?? firstRange;
@@ -1300,7 +1311,7 @@ class HifzController extends Notifier<HifzState> {
           _startWindow = (
             pageStart: pageStart,
             pageEnd: pageEnd,
-            uncovered: 0,
+            uncovered: beforeShown ? startAt - pageStart : 0,
             earlier: true,
           );
           _matcher = _newMatcher()
@@ -1495,13 +1506,6 @@ class HifzController extends Notifier<HifzState> {
       }
       return;
     }
-    if (pages != _seenPages) {
-      _diag(
-        'pages $_seenPages -> $pages: judge ${judge != null}, running '
-        '${state.running}, results $_results, hide '
-        '${ref.read(mushafHideModeProvider).enabled}',
-      );
-    }
     if (judge == null || !state.running) return;
     if (pages == _seenPages) return;
     final ranges = ref.read(mushafPageWordRangesProvider);
@@ -1561,11 +1565,6 @@ class HifzController extends Notifier<HifzState> {
     }
     final hideOn = ref.read(mushafHideModeProvider).enabled;
     final again = _hiddenAgain;
-    _diag(
-      'turned ${turnedBack ? 'back' : 'on'} to $pages: page words '
-      '$from..$to, revealed ${[for (var q = from; q <= to; q++) q].where(judge.revealed.contains).length}'
-      '/${to - from + 1}, current ${judge.current}, kept ${again != null}',
-    );
     if (again != null) {
       _keptShown = (
         revealed: {for (var q = again.from; q <= again.to; q++) q},
@@ -1738,7 +1737,8 @@ class HifzController extends Notifier<HifzState> {
                     !heard.first.provisional &&
                     heard.length >= 3
               : at > judge.expected)) {
-        if (at < judge.expected) {
+        // (The words before it shown: left shown.)
+        if (at < judge.expected && window.uncovered == 0) {
           // Begun before the word chosen: hidden from there on instead.
           final pages = _visiblePages();
           final ranges = ref.read(mushafPageWordRangesProvider);
@@ -1762,6 +1762,22 @@ class HifzController extends Notifier<HifzState> {
         // there, clean — the shaky first seconds' marks dropped, the words
         // before left hidden (see _startWindow).
         final fresh = window.uncovered == 0
+            ? HifzJudge(
+                judge.corpus,
+                start: at,
+                end: judge.end,
+                config: judge.config,
+              )
+            // Begun before the word chosen, those before it shown: from
+            // there, the words before it shown still.
+            : window.earlier && at < judge.expected
+            ? (HifzJudge(
+                judge.corpus,
+                start: window.pageStart,
+                end: judge.end,
+                config: judge.config,
+              )..preReveal(at - window.pageStart))
+            : window.uncovered == 0
             ? HifzJudge(
                 judge.corpus,
                 start: at,
@@ -2448,14 +2464,7 @@ class HifzController extends Notifier<HifzState> {
           ? (start: 0, end: 0)
           : (start: start - from, end: end - from);
     }
-    _diag('session over: hide mode shown $shown');
     ref.read(mushafHideModeProvider.notifier).setShown(shown);
-  }
-
-  /// A line in the log (not in a release build): what a page turn or the
-  /// session's end did (owner, 2026-11-14: a page turned back to hidden).
-  static void _diag(String line) {
-    if (!kReleaseMode) debugPrint('Hifz pages: $line');
   }
 }
 

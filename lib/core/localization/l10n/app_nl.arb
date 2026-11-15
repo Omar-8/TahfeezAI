@@ -777,5 +777,12 @@
   "topicsCount": "{count, plural, =1{1 onderwerp} other{{count} onderwerpen}}",
   "topicsAyahs": "{count, plural, =1{1 aya} other{{count} aya's}}",
   "topicsSource": "Uit de ontologie van Koranische begrippen van het Quranic Arabic Corpus (Universiteit van Leeds).",
-  "topicsSearch": "Onderwerpen zoeken"
+  "topicsSearch": "Onderwerpen zoeken",
+  "topicsStories": "Verhalen",
+  "progressKhatmahPlanned": "gepland voor {days}",
+  "milestoneAyahs": "{count} verzen gereciteerd",
+  "milestoneWords": "{count} woorden gereciteerd",
+  "milestoneMushafDays": "{count, plural, =1{1 dag in de Mushaf} other{{count} dagen in de Mushaf}}",
+  "milestoneMushafMonths": "{count, plural, =1{1 maand in de Mushaf} other{{count} maanden in de Mushaf}}",
+  "milestoneMushafYear": "Een jaar in de Mushaf"
 }

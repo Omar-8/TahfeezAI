@@ -178,6 +178,39 @@ void main() {
             .value,
         closeTo(151 / 604, 1e-9),
       );
+
+      // Tapped: each completed, the latest first (owner, 2026-11-15).
+      await tester.tap(find.byKey(const ValueKey('progress-khatmah-count')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const ValueKey('khatmah-history')), findsOne);
+      final second = find.byKey(const ValueKey('khatmah-history-2'));
+      final first = find.byKey(const ValueKey('khatmah-history-1'));
+      expect(
+        tester.getTopLeft(second).dy,
+        lessThan(tester.getTopLeft(first).dy),
+        reason: 'the latest first',
+      );
+      expect(
+        find.descendant(
+          of: second,
+          matching: find.text('Oct 1, 2026 – Oct 20, 2026'),
+        ),
+        findsOne,
+      );
+      expect(
+        find.descendant(
+          of: second,
+          matching: find.text('20 days · planned for 30 days'),
+        ),
+        findsOne,
+      );
+      expect(
+        find.descendant(
+          of: first,
+          matching: find.text('Sep 1, 2026 – Sep 1, 2026'),
+        ),
+        findsOne,
+      );
     });
 
     for (final locale in ['en', 'de', 'ru', 'ar', 'ur', 'ja']) {
@@ -198,6 +231,11 @@ void main() {
           find.byKey(const ValueKey('progress-khatmah')),
           200,
         );
+        expect(tester.takeException(), isNull);
+        // Its list too.
+        await tester.tap(find.byKey(const ValueKey('progress-khatmah-count')));
+        await tester.pumpAndSettle();
+        expect(find.byKey(const ValueKey('khatmah-history-1')), findsOne);
         expect(tester.takeException(), isNull);
       });
     }

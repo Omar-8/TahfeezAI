@@ -777,5 +777,12 @@
   "topicsCount": "{count, plural, =1{1 θέμα} other{{count} θέματα}}",
   "topicsAyahs": "{count, plural, =1{1 εδάφιο} other{{count} εδάφια}}",
   "topicsSource": "Από την οντολογία κορανικών εννοιών του Quranic Arabic Corpus (Πανεπιστήμιο του Λιντς).",
-  "topicsSearch": "Αναζήτηση θεμάτων"
+  "topicsSearch": "Αναζήτηση θεμάτων",
+  "topicsStories": "Ιστορίες",
+  "progressKhatmahPlanned": "σχεδιασμένη για {days}",
+  "milestoneAyahs": "{count} εδάφια απαγγέλθηκαν",
+  "milestoneWords": "{count} λέξεις απαγγέλθηκαν",
+  "milestoneMushafDays": "{count, plural, =1{1 ημέρα στο Μουσχάφ} other{{count} ημέρες στο Μουσχάφ}}",
+  "milestoneMushafMonths": "{count, plural, =1{1 μήνας στο Μουσχάφ} other{{count} μήνες στο Μουσχάφ}}",
+  "milestoneMushafYear": "Ένας χρόνος στο Μουσχάφ"
 }

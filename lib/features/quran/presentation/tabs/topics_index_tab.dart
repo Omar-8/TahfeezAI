@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/localization/generated/app_localizations.dart';
+import '../../../../core/routing/quran_location_routing.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/components/components.dart';
 import '../../../../core/ui/back_to_exit.dart';
@@ -118,6 +119,55 @@ class _TopicsIndexTabState extends ConsumerState<TopicsIndexTab> {
       },
     );
   }
+}
+
+/// A topic on its own, in a sheet (from an ayah's sheet, or a search):
+/// its ayahs and passages as in the Topics tab — one tapped opens it in the
+/// Mushaf (a passage highlighted whole).
+Future<void> showTopicSheet(
+  BuildContext context,
+  TopicGroup group,
+  TopicConcept concept,
+) {
+  final l10n = AppLocalizations.of(context);
+  final language = Localizations.localeOf(context).languageCode;
+  final honorific = prophetHonorific(group.id, concept.id);
+  // (Opened from another sheet, the ayah's: an ayah chosen closes them
+  // all, and opens from the app's own navigator, which outlives them.)
+  final navigator = Navigator.of(context, rootNavigator: true);
+  final appContext = navigator.context;
+  return showTahfeezModalBottomSheet(
+    context: context,
+    title: [
+      concept.nameIn(language),
+      if (honorific != null) honorific.words,
+      '· ${l10n.topicsAyahs(concept.ayahs.length)}',
+    ].join(' '),
+    besideOnWide: true,
+    builder: (sheetContext) {
+      final runs = ayahRuns(concept.ayahs);
+      return ListView.separated(
+        key: ValueKey('topic-sheet-${concept.id}'),
+        shrinkWrap: true,
+        padding: const EdgeInsets.fromLTRB(
+          TahfeezSpacing.md,
+          0,
+          TahfeezSpacing.md,
+          TahfeezSpacing.lg,
+        ),
+        itemCount: runs.length,
+        separatorBuilder: (_, _) => const SizedBox(height: TahfeezSpacing.xs),
+        itemBuilder: (_, i) => _TopicAyah(
+          ayahId: runs[i].first,
+          lastAyahId: runs[i].last,
+          onSelect: (location) {
+            navigator.popUntil((route) => route is! PopupRoute);
+            goToQuranLocation(appContext, location);
+          },
+        ),
+      );
+    },
+  );
 }
 
 /// The search bar over the groups — as the Surah tab's: a glass pill.
@@ -244,6 +294,7 @@ class _SearchResults extends StatelessWidget {
 (IconData, String) topicGroupLook(AppLocalizations l10n, String id) =>
     switch (id) {
       'prophets' => (Icons.record_voice_over_outlined, l10n.topicsProphets),
+      'stories' => (Icons.auto_stories_outlined, l10n.topicsStories),
       'people' => (Icons.groups_outlined, l10n.topicsPeople),
       'unseen' => (Icons.auto_awesome_outlined, l10n.topicsUnseen),
       'hereafter' => (Icons.balance_outlined, l10n.topicsHereafter),

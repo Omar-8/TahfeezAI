@@ -30,6 +30,15 @@ void main() {
     }
     expect(find.byType(Navigator), findsWidgets, reason: 'the app up');
     await run(3);
+    // A first launch: the welcome setup over Home (since 1.3.0) — skipped,
+    // or the Mushaf opened under it is never on screen.
+    final skip = find.byKey(const ValueKey('setup-skip'));
+    if (skip.evaluate().isNotEmpty) {
+      await binding.takeScreenshot('0-setup');
+      await tester.tap(skip);
+      await run(2);
+    }
+    expect(skip, findsNothing, reason: 'the welcome setup closed');
     await binding.takeScreenshot('1-home');
 
     final router = GoRouter.of(tester.element(find.byType(Navigator).first));

@@ -777,5 +777,12 @@
   "topicsCount": "{count, plural, =1{mada 1} other{mada {count}}}",
   "topicsAyahs": "{count, plural, =1{aya 1} other{aya {count}}}",
   "topicsSource": "Kutoka kwa ontolojia ya dhana za Qur'ani ya Quranic Arabic Corpus (Chuo Kikuu cha Leeds).",
-  "topicsSearch": "Tafuta mada"
+  "topicsSearch": "Tafuta mada",
+  "topicsStories": "Visa",
+  "progressKhatmahPlanned": "ilipangwa kwa {days}",
+  "milestoneAyahs": "Aya {count} zimesomwa",
+  "milestoneWords": "Maneno {count} yamesomwa",
+  "milestoneMushafDays": "{count, plural, =1{Siku 1 na Msahafu} other{Siku {count} na Msahafu}}",
+  "milestoneMushafMonths": "{count, plural, =1{Mwezi 1 na Msahafu} other{Miezi {count} na Msahafu}}",
+  "milestoneMushafYear": "Mwaka mmoja na Msahafu"
 }

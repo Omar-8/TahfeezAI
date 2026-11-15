@@ -60,6 +60,9 @@ class ActivityStatsController extends Notifier<ActivityStats> {
   /// Counted before the saved totals arrived: added to them.
   var _pending = const ActivityStats();
   var _restored = false;
+
+  /// The saved totals have arrived (before, [state] counts only this run).
+  bool get restored => _restored;
   Timer? _save;
 
   DateTime? _mushafSince;

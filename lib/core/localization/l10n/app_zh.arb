@@ -777,5 +777,12 @@
   "topicsCount": "{count, plural, other{{count} 个主题}}",
   "topicsAyahs": "{count, plural, other{{count} 节经文}}",
   "topicsSource": "出自 Quranic Arabic Corpus 的古兰经概念本体（利兹大学）。",
-  "topicsSearch": "搜索主题"
+  "topicsSearch": "搜索主题",
+  "topicsStories": "故事",
+  "progressKhatmahPlanned": "计划 {days}",
+  "milestoneAyahs": "已诵读 {count} 节经文",
+  "milestoneWords": "已诵读 {count} 个词",
+  "milestoneMushafDays": "{count, plural, other{与经卷相伴 {count} 天}}",
+  "milestoneMushafMonths": "{count, plural, other{与经卷相伴 {count} 个月}}",
+  "milestoneMushafYear": "与经卷相伴一年"
 }

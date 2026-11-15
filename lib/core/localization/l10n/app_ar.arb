@@ -777,5 +777,12 @@
   "topicsCount": "{count, plural, =1{موضوع واحد} =2{موضوعان} few{{count} مواضيع} other{{count} موضوعًا}}",
   "topicsAyahs": "{count, plural, =1{آية واحدة} =2{آيتان} few{{count} آيات} other{{count} آية}}",
   "topicsSource": "من أنطولوجيا المفاهيم القرآنية في مدوّنة القرآن العربية (جامعة ليدز).",
-  "topicsSearch": "ابحث في المواضيع"
+  "topicsSearch": "ابحث في المواضيع",
+  "topicsStories": "القصص",
+  "progressKhatmahPlanned": "المخطط لها {days}",
+  "milestoneAyahs": "تلاوة {count} آية",
+  "milestoneWords": "تلاوة {count} كلمة",
+  "milestoneMushafDays": "{count, plural, =1{يوم كامل في المصحف} =2{يومان في المصحف} few{{count} أيام في المصحف} other{{count} يومًا في المصحف}}",
+  "milestoneMushafMonths": "{count, plural, =1{شهر في المصحف} =2{شهران في المصحف} few{{count} أشهر في المصحف} other{{count} شهرًا في المصحف}}",
+  "milestoneMushafYear": "سنة كاملة في المصحف"
 }

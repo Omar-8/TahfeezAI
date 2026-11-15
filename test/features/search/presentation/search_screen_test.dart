@@ -1,8 +1,13 @@
+import 'dart:io';
+import 'dart:convert';
+
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tahfeez_ai/quran/domain/quran_topics.dart';
+import 'package:tahfeez_ai/quran/application/quran_topics_provider.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tahfeez_ai/core/localization/generated/app_localizations.dart';
 import 'package:tahfeez_ai/core/routing/app_routes.dart';
@@ -60,6 +65,12 @@ void main() {
         translationDatabaseProvider.overrideWith((ref) => translationDb),
         searchIndexDatabaseProvider.overrideWith((ref) => indexDb),
         quranScriptCodeProvider.overrideWith((ref) => testScriptCode),
+        quranTopicsProvider.overrideWith(
+          (ref) async => QuranTopics.fromJson(
+            jsonDecode(File('assets/quran/topics.json').readAsStringSync())
+                as Map<String, Object?>,
+          ),
+        ),
       ],
       child: MaterialApp.router(
         routerConfig: router,
@@ -156,6 +167,29 @@ void main() {
       // (once resolved), not a plain "Ayah 1:3" string.
       expect(find.text('Test Chapter One'), findsWidgets);
       expect(find.textContaining('Page 1'), findsOneWidget);
+    });
+
+    testWidgets('a topic\'s name: the topic found (the Quran tab\'s), with '
+        'its group — tapped, its passage in a sheet', (tester) async {
+      await tester.pumpWidget(wrap(db, translationDb, indexDb));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField), 'khidr');
+      await tester.pumpAndSettle(const Duration(milliseconds: 400));
+
+      final topic = find.byKey(const ValueKey('search-topic-story-khidr'));
+      expect(topic, findsOneWidget);
+      expect(find.text('Stories · 23 ayahs'), findsOneWidget);
+      await tester.tap(topic);
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const ValueKey('topic-sheet-story-khidr')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('topic-passage-18060-18082')),
+        findsOneWidget,
+      );
     });
 
     testWidgets('a no-match query shows the empty state', (tester) async {

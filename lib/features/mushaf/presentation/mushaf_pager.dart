@@ -99,6 +99,10 @@ bool ayahModeIsContinuous(BuildContext context, WidgetRef ref) =>
 final ValueNotifier<({double pageWidth, double gutter})?> webSpreadPages =
     ValueNotifier(null);
 
+/// The bundled Mushaf's page shape (width / height): 345 × 550, every
+/// page alike — the web frame's size before a page reports its own.
+const kMushafPageAspectRatio = 345 / 550;
+
 class MushafPager extends ConsumerStatefulWidget {
   const MushafPager({
     super.key,
@@ -532,11 +536,16 @@ class _MushafPagerState extends ConsumerState<MushafPager> {
   // ratio for a page number, or null when the ratio isn't available yet (the
   // content widget hasn't finished loading that page) -- callers then
   // degrade to the un-keyed frame rather than crashing.
+  //
+  // Not loaded yet: every page of the bundled Mushaf is 345 × 550 (all 604
+  // in their .qvp headers) — the frame its own width from the first frame,
+  // not the screen's whole width and then narrowed (owner, 2026-11-15).
   double? _mushafAspectRatio(int pageNumber, bool isWeb) {
     if (!isWeb) return null;
     return ref.watch(
-      mushafPageAspectRatiosProvider.select((ratios) => ratios[pageNumber]),
-    );
+          mushafPageAspectRatiosProvider.select((ratios) => ratios[pageNumber]),
+        ) ??
+        kMushafPageAspectRatio;
   }
 
   @override

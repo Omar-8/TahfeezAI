@@ -777,5 +777,12 @@
   "topicsCount": "{count, plural, other{주제 {count}개}}",
   "topicsAyahs": "{count, plural, other{구절 {count}개}}",
   "topicsSource": "Quranic Arabic Corpus의 꾸란 개념 온톨로지에서 (리즈 대학교).",
-  "topicsSearch": "주제 검색"
+  "topicsSearch": "주제 검색",
+  "topicsStories": "이야기",
+  "progressKhatmahPlanned": "계획 {days}",
+  "milestoneAyahs": "{count}개 아야 낭송",
+  "milestoneWords": "{count}개 단어 낭송",
+  "milestoneMushafDays": "{count, plural, other{무스하프와 {count}일}}",
+  "milestoneMushafMonths": "{count, plural, other{무스하프와 {count}개월}}",
+  "milestoneMushafYear": "무스하프와 1년"
 }

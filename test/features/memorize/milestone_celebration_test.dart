@@ -13,9 +13,10 @@ import 'package:tahfeez_ai/memorization/domain/milestones.dart';
 import '../../test_helpers/memory_storage.dart';
 import '../../test_helpers/widget_test_overrides.dart';
 
-/// A surah memorized or a khatmah complete: stars burst behind the
-/// milestone card (the khatmah's fuller); other milestones: the card only;
-/// "remove animations": no burst.
+/// A surah memorized, a khatmah complete or a lifetime count reached:
+/// the khatmah's burst of stars behind the milestone card, under
+/// "Masha'Allah"; other milestones: the card only; "remove animations": no
+/// burst.
 void main() {
   late ProviderContainer container;
 
@@ -65,7 +66,8 @@ void main() {
     await reach(tester, const SurahsMilestone([112]));
     expect(find.byKey(const ValueKey('milestone-banner')), findsOne);
     expect(find.byKey(const ValueKey('celebration')), findsOne);
-    expect(grand(tester), isFalse);
+    expect(grand(tester), isTrue, reason: 'the khatmah\'s burst (2026-11-15)');
+    expect(find.text("Masha'Allah"), findsOne);
     // It plays once, then the card goes; nothing stays.
     await tester.pump(const Duration(seconds: 6));
     await tester.pumpAndSettle();
@@ -89,6 +91,49 @@ void main() {
     await tester.pump(const Duration(seconds: 2));
     await tester.pumpAndSettle();
   });
+
+  for (final (m, text) in [
+    (
+      const ActivityMilestone(ActivityKind.ayahs, 10000),
+      '10,000 ayahs recited',
+    ),
+    (
+      const ActivityMilestone(ActivityKind.words, 100000),
+      '100,000 words recited',
+    ),
+    (
+      const ActivityMilestone(ActivityKind.mushafDays, 1),
+      '1 day in the Mushaf',
+    ),
+    (
+      const ActivityMilestone(ActivityKind.mushafDays, 14),
+      '14 days in the Mushaf',
+    ),
+    (
+      const ActivityMilestone(ActivityKind.mushafDays, 30),
+      '1 month in the Mushaf',
+    ),
+    (
+      const ActivityMilestone(ActivityKind.mushafDays, 180),
+      '6 months in the Mushaf',
+    ),
+    (
+      const ActivityMilestone(ActivityKind.mushafDays, 365),
+      'A year in the Mushaf',
+    ),
+  ]) {
+    testWidgets('a lifetime count: "$text", Masha\'Allah, the khatmah\'s '
+        'burst', (tester) async {
+      await pump(tester);
+      await reach(tester, m);
+      expect(find.text(text), findsOne);
+      expect(find.text("Masha'Allah"), findsOne);
+      expect(find.byKey(const ValueKey('celebration')), findsOne);
+      expect(grand(tester), isTrue);
+      await tester.pump(const Duration(seconds: 6));
+      await tester.pumpAndSettle();
+    });
+  }
 
   testWidgets('a streak: the card, no burst', (tester) async {
     await pump(tester);

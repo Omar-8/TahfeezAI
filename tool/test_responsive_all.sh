@@ -12,7 +12,10 @@
 #   (80 shards and 4G since 2026-11-01: with 25 languages the last of
 #   60 shards outgrew even 4G)
 #   FROM=12 tool/test_responsive_all.sh    # resume at shard 12
+#   NAME='regex' tool/test_responsive_all.sh  # only the runs it names
+#   (flutter test --name), e.g. the screens a release changed
 set -u
+NAME=${NAME:-}
 cd "$(dirname "$0")/.."
 
 TEST=${TEST:-test/app/responsive_reader_test.dart}
@@ -35,7 +38,7 @@ failed=()
 for ((i = FROM; i < SHARDS; i++)); do
   log="$LOGS/shard-$i.txt"
   if TAHFEEZ_RESPONSIVE=all TAHFEEZ_CRAWL=1 capped flutter test \
-    "$TEST" \
+    "$TEST" ${NAME:+--name "$NAME"} \
     --total-shards "$SHARDS" --shard-index "$i" >"$log" 2>&1; then
     echo "shard $((i + 1))/$SHARDS: $(tail -1 "$log")"
   else

@@ -6,6 +6,10 @@ import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
+
+import '../../../core/localization/fallback_localizations.dart'
+    show intlLocaleOf;
 
 import '../../../core/localization/generated/app_localizations.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -71,16 +75,18 @@ class _MilestoneLayerState extends ConsumerState<MilestoneLayer> {
     return Stack(
       children: [
         widget.child,
-        // A surah memorized, a khatmah complete: stars burst behind the
-        // card (a khatmah's fuller and longer).
+        // A surah memorized, a khatmah complete, a lifetime count reached:
+        // stars burst behind the card, the khatmah's fuller burst for each
+        // (owner, 2026-11-15).
         if (milestone case final Milestone m
             when m is SurahMilestone ||
                 m is SurahsMilestone ||
-                m is KhatmahMilestone)
+                m is KhatmahMilestone ||
+                m is ActivityMilestone)
           Positioned.fill(
             child: TahfeezCelebration(
               key: ValueKey('celebration-${m.id}'),
-              grand: m is KhatmahMilestone,
+              grand: true,
             ),
           ),
         Positioned(
@@ -153,6 +159,15 @@ class _Banner extends ConsumerWidget {
       ShareMilestone(:final percent) => l10n.memProgressShare(percent),
       StreakMilestone(:final days) => l10n.memStreakDays(days),
       KhatmahMilestone() => l10n.khatmahFinished,
+      ActivityMilestone(:final kind, :final amount) => switch (kind) {
+        ActivityKind.ayahs => l10n.milestoneAyahs(_count(context, amount)),
+        ActivityKind.words => l10n.milestoneWords(_count(context, amount)),
+        ActivityKind.mushafDays when amount >= 365 => l10n.milestoneMushafYear,
+        ActivityKind.mushafDays when amount >= 30 => l10n.milestoneMushafMonths(
+          amount ~/ 30,
+        ),
+        ActivityKind.mushafDays => l10n.milestoneMushafDays(amount),
+      },
     };
     return Padding(
       padding: const EdgeInsets.all(TahfeezSpacing.md),
@@ -226,3 +241,8 @@ class _Banner extends ConsumerWidget {
     );
   }
 }
+
+/// [n] as the app's language writes numbers ("10,000", "١٠٬٠٠٠").
+String _count(BuildContext context, int n) =>
+    NumberFormat.decimalPattern(intlLocaleOf(Localizations.localeOf(context)))
+        .format(n);

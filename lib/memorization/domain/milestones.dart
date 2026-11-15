@@ -90,7 +90,46 @@ class KhatmahMilestone extends Milestone {
   int get rank => 5;
 }
 
+/// What a lifetime count is of ([ActivityMilestone]).
+enum ActivityKind { ayahs, words, mushafDays }
+
+/// A lifetime count reached (owner, 2026-11-15): [amount] ayahs or words
+/// recited, or days (counted in hours) spent in the Mushaf.
+class ActivityMilestone extends Milestone {
+  const ActivityMilestone(this.kind, this.amount);
+
+  final ActivityKind kind;
+  final int amount;
+
+  @override
+  String get id => 'activity-${kind.name}-$amount';
+
+  @override
+  int get rank => 2;
+}
+
 abstract final class Milestones {
+  /// Ayahs recited (from memory or reading), words recited, days in the
+  /// Mushaf (1 day = 24 hours there, in all).
+  static const ayahsRecited = [1000, 5000, 10000, 25000, 50000, 100000];
+  static const wordsRecited = [10000, 50000, 100000, 250000, 500000, 1000000];
+  static const mushafDays = [1, 7, 14, 30, 60, 90, 180, 365];
+
+  /// Every lifetime count reached.
+  static List<ActivityMilestone> activity({
+    required int recitedAyahs,
+    required int recitedWords,
+    required int mushafSeconds,
+  }) => [
+    for (final n in ayahsRecited)
+      if (recitedAyahs >= n) ActivityMilestone(ActivityKind.ayahs, n),
+    for (final n in wordsRecited)
+      if (recitedWords >= n) ActivityMilestone(ActivityKind.words, n),
+    for (final n in mushafDays)
+      if (mushafSeconds >= n * 86400)
+        ActivityMilestone(ActivityKind.mushafDays, n),
+  ];
+
   static const shares = [1, 5, 10, 25, 50, 75, 100];
   static const streaks = [3, 7, 14, 30, 50, 100, 200, 365];
 

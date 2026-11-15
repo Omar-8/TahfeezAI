@@ -777,5 +777,12 @@
   "topicsCount": "{count, plural, =1{1 tema} other{{count} temas}}",
   "topicsAyahs": "{count, plural, =1{1 aleya} other{{count} aleyas}}",
   "topicsSource": "De la ontología de conceptos coránicos del Quranic Arabic Corpus (Universidad de Leeds).",
-  "topicsSearch": "Buscar temas"
+  "topicsSearch": "Buscar temas",
+  "topicsStories": "Relatos",
+  "progressKhatmahPlanned": "prevista en {days}",
+  "milestoneAyahs": "{count} aleyas recitadas",
+  "milestoneWords": "{count} palabras recitadas",
+  "milestoneMushafDays": "{count, plural, =1{1 día en el Mushaf} other{{count} días en el Mushaf}}",
+  "milestoneMushafMonths": "{count, plural, =1{1 mes en el Mushaf} other{{count} meses en el Mushaf}}",
+  "milestoneMushafYear": "Un año en el Mushaf"
 }

@@ -5,6 +5,9 @@ import '../../../core/localization/generated/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../quran/presentation/tabs/topics_index_tab.dart';
+import '../../../quran/application/quran_topics_provider.dart';
+
 import '../../../core/routing/quran_location_routing.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/components/components.dart';
@@ -167,10 +170,22 @@ class _ResultsBody extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final resultsAsync = ref.watch(searchControllerProvider(query));
+    // The Quran tab's Topics named so (owner, 2026-11-15) — above the
+    // ayahs found.
+    final language = Localizations.localeOf(context).languageCode;
+    final topics = ref.watch(quranTopicsProvider).value;
+    final topicHits = topics == null || query.trim().length < 2
+        ? const <TopicRef>[]
+        : [
+            for (final group in topics.groups)
+              for (final concept in group.concepts)
+                if (topicMatches(concept, query, language))
+                  (group: group, concept: concept),
+          ];
 
     return resultsAsync.when(
       data: (results) {
-        if (results.isEmpty) {
+        if (results.isEmpty && topicHits.isEmpty) {
           return TahfeezEmptyView(
             icon: Icons.search_off_outlined,
             message: AppLocalizations.of(context).searchNoResults(query),
@@ -183,16 +198,76 @@ class _ResultsBody extends ConsumerWidget {
         }
         return SingleChildScrollView(
           padding: const EdgeInsets.all(TahfeezSpacing.md),
-          child: SearchResultSections(
-            results: results,
-            query: query,
-            onResultTap: onResultTap,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            spacing: TahfeezSpacing.md,
+            children: [
+              if (topicHits.isNotEmpty) _TopicResults(hits: topicHits),
+              SearchResultSections(
+                results: results,
+                query: query,
+                onResultTap: onResultTap,
+              ),
+            ],
           ),
         );
       },
       loading: () => const TahfeezLoadingView(),
       error: (_, _) =>
           TahfeezErrorView(message: AppLocalizations.of(context).searchError),
+    );
+  }
+}
+
+/// Topics found by name (the Quran tab's): each its group and number of
+/// ayahs — tapped, the topic in a sheet. The first few, then "more".
+class _TopicResults extends StatefulWidget {
+  const _TopicResults({required this.hits});
+
+  final List<TopicRef> hits;
+
+  @override
+  State<_TopicResults> createState() => _TopicResultsState();
+}
+
+class _TopicResultsState extends State<_TopicResults> {
+  static const _first = 5;
+  var _all = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final language = Localizations.localeOf(context).languageCode;
+    final shown = _all ? widget.hits : widget.hits.take(_first).toList();
+    return Column(
+      key: const ValueKey('search-topics'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        TahfeezSectionHeader(
+          title: l10n.quranTabTopics,
+          icon: Icons.label_outline_rounded,
+        ),
+        const SizedBox(height: TahfeezSpacing.xs),
+        for (final (:group, :concept) in shown)
+          TahfeezListRow(
+            key: ValueKey('search-topic-${concept.id}'),
+            leading: Icon(topicGroupLook(l10n, group.id).$1),
+            title: concept.nameIn(language),
+            subtitle:
+                '${topicGroupLook(l10n, group.id).$2} · '
+                '${l10n.topicsAyahs(concept.ayahs.length)}',
+            onTap: () => showTopicSheet(context, group, concept),
+          ),
+        if (!_all && widget.hits.length > _first)
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: TextButton(
+              key: const ValueKey('search-topics-more'),
+              onPressed: () => setState(() => _all = true),
+              child: Text(l10n.similarAyahsShowAll(widget.hits.length)),
+            ),
+          ),
+      ],
     );
   }
 }

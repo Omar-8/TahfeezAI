@@ -777,5 +777,12 @@
   "topicsCount": "{count, plural, other{{count} ta mavzu}}",
   "topicsAyahs": "{count, plural, other{{count} ta oyat}}",
   "topicsSource": "Quranic Arabic Corpus Qur'on tushunchalari ontologiyasidan (Lids universiteti).",
-  "topicsSearch": "Mavzularni qidirish"
+  "topicsSearch": "Mavzularni qidirish",
+  "topicsStories": "Qissalar",
+  "progressKhatmahPlanned": "reja: {days}",
+  "milestoneAyahs": "{count} oyat o'qildi",
+  "milestoneWords": "{count} so'z o'qildi",
+  "milestoneMushafDays": "{count, plural, other{Mushaf bilan {count} kun}}",
+  "milestoneMushafMonths": "{count, plural, other{Mushaf bilan {count} oy}}",
+  "milestoneMushafYear": "Mushaf bilan bir yil"
 }

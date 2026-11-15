@@ -4,6 +4,9 @@ import '../../../core/ui/motion.dart';
 import '../../../core/localization/fallback_localizations.dart';
 
 import 'package:flutter/material.dart';
+
+import '../../khatmah/domain/khatmah_history.dart';
+
 import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -177,6 +180,8 @@ class _KhatmahProgress extends ConsumerWidget {
     final last = done.lastOrNull;
     return TahfeezCard(
       key: const ValueKey('progress-khatmah'),
+      // Those completed, each (owner, 2026-11-15).
+      onTap: done.isEmpty ? null : () => _showKhatmahHistory(context, done),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         spacing: TahfeezSpacing.md,
@@ -225,6 +230,11 @@ class _KhatmahProgress extends ConsumerWidget {
                   ],
                 ),
               ),
+              if (done.isNotEmpty)
+                Icon(
+                  Icons.chevron_right_rounded,
+                  color: scheme.onSurfaceVariant,
+                ),
             ],
           ),
           if (active) ...[
@@ -791,4 +801,76 @@ class _WeakPages extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// The khatmahs completed, the latest first: when each began and ended,
+/// the days it took, and the days it was planned for.
+void _showKhatmahHistory(BuildContext context, List<CompletedKhatmah> done) {
+  final l10n = AppLocalizations.of(context);
+  showTahfeezModalBottomSheet(
+    context: context,
+    title:
+        '${NumberFormat.decimalPattern(intlLocaleOf(Localizations.localeOf(context))).format(done.length)} '
+        '${l10n.progressKhatmahsCompleted(done.length)}',
+    builder: (context) {
+      final theme = Theme.of(context);
+      final locale = intlLocaleOf(Localizations.localeOf(context));
+      final dates = DateFormat.yMMMd(locale);
+      final latestFirst = done.reversed.toList();
+      return ListView.separated(
+        key: const ValueKey('khatmah-history'),
+        shrinkWrap: true,
+        padding: const EdgeInsets.fromLTRB(
+          TahfeezSpacing.md,
+          0,
+          TahfeezSpacing.md,
+          TahfeezSpacing.lg,
+        ),
+        itemCount: latestFirst.length,
+        separatorBuilder: (_, _) => const SizedBox(height: TahfeezSpacing.xs),
+        itemBuilder: (context, i) {
+          final k = latestFirst[i];
+          final number = done.length - i;
+          return TahfeezCard(
+            key: ValueKey('khatmah-history-$number'),
+            child: Row(
+              spacing: TahfeezSpacing.md,
+              children: [
+                CircleAvatar(
+                  radius: 18,
+                  backgroundColor: theme.colorScheme.primaryContainer,
+                  child: Text(
+                    NumberFormat.decimalPattern(locale).format(number),
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      color: theme.colorScheme.onPrimaryContainer,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: 2,
+                    children: [
+                      Text(
+                        '${dates.format(DateTime.parse(k.start))} – '
+                        '${dates.format(DateTime.parse(k.end))}',
+                        style: theme.textTheme.titleSmall,
+                      ),
+                      Text(
+                        '${l10n.khatmahDays(k.tookDays)} · '
+                        '${l10n.progressKhatmahPlanned(l10n.khatmahDays(k.days))}',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    },
+  );
 }

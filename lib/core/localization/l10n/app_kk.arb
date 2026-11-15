@@ -777,5 +777,12 @@
   "topicsCount": "{count, plural, other{{count} тақырып}}",
   "topicsAyahs": "{count, plural, other{{count} аят}}",
   "topicsSource": "Quranic Arabic Corpus құранның ұғымдар онтологиясынан (Лидс университеті).",
-  "topicsSearch": "Тақырыптарды іздеу"
+  "topicsSearch": "Тақырыптарды іздеу",
+  "topicsStories": "Қиссалар",
+  "progressKhatmahPlanned": "жоспар бойынша {days}",
+  "milestoneAyahs": "{count} аят оқылды",
+  "milestoneWords": "{count} сөз оқылды",
+  "milestoneMushafDays": "{count, plural, other{Мұсхафпен {count} күн}}",
+  "milestoneMushafMonths": "{count, plural, other{Мұсхафпен {count} ай}}",
+  "milestoneMushafYear": "Мұсхафпен бір жыл"
 }

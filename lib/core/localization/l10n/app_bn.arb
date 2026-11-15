@@ -777,5 +777,12 @@
   "topicsCount": "{count, plural, other{{count}টি বিষয়}}",
   "topicsAyahs": "{count, plural, other{{count}টি আয়াত}}",
   "topicsSource": "কুরআনিক অ্যারাবিক করপাসের কুরআনি ধারণার অন্টোলজি থেকে (লিডস বিশ্ববিদ্যালয়)।",
-  "topicsSearch": "বিষয় খুঁজুন"
+  "topicsSearch": "বিষয় খুঁজুন",
+  "topicsStories": "কাহিনি",
+  "progressKhatmahPlanned": "পরিকল্পনা {days}",
+  "milestoneAyahs": "{count}টি আয়াত তিলাওয়াত",
+  "milestoneWords": "{count}টি শব্দ তিলাওয়াত",
+  "milestoneMushafDays": "{count, plural, other{মুসহাফে {count} দিন}}",
+  "milestoneMushafMonths": "{count, plural, other{মুসহাফে {count} মাস}}",
+  "milestoneMushafYear": "মুসহাফে এক বছর"
 }

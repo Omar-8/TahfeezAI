@@ -777,5 +777,12 @@
   "topicsCount": "{count, plural, =1{batu 1} other{batutuwa {count}}}",
   "topicsAyahs": "{count, plural, =1{aya 1} other{ayoyi {count}}}",
   "topicsSource": "Daga ontology na ma'anonin Alƙur'ani na Quranic Arabic Corpus (Jami'ar Leeds).",
-  "topicsSearch": "Nemi batutuwa"
+  "topicsSearch": "Nemi batutuwa",
+  "topicsStories": "Labarai",
+  "progressKhatmahPlanned": "an tsara a {days}",
+  "milestoneAyahs": "An karanta ayoyi {count}",
+  "milestoneWords": "An karanta kalmomi {count}",
+  "milestoneMushafDays": "{count, plural, =1{Kwana 1 a cikin Mushaf} other{Kwanaki {count} a cikin Mushaf}}",
+  "milestoneMushafMonths": "{count, plural, =1{Wata 1 a cikin Mushaf} other{Watanni {count} a cikin Mushaf}}",
+  "milestoneMushafYear": "Shekara guda a cikin Mushaf"
 }

@@ -777,5 +777,12 @@
   "topicsCount": "{count, plural, =1{1 emne} other{{count} emner}}",
   "topicsAyahs": "{count, plural, =1{1 vers} other{{count} vers}}",
   "topicsSource": "Fra ontologien over koraniske begreber i Quranic Arabic Corpus (University of Leeds).",
-  "topicsSearch": "Søg i emner"
+  "topicsSearch": "Søg i emner",
+  "topicsStories": "Fortællinger",
+  "progressKhatmahPlanned": "planlagt til {days}",
+  "milestoneAyahs": "{count} vers reciteret",
+  "milestoneWords": "{count} ord reciteret",
+  "milestoneMushafDays": "{count, plural, =1{1 dag i Mushaf} other{{count} dage i Mushaf}}",
+  "milestoneMushafMonths": "{count, plural, =1{1 måned i Mushaf} other{{count} måneder i Mushaf}}",
+  "milestoneMushafYear": "Et år i Mushaf"
 }

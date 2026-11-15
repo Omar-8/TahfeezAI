@@ -120,6 +120,14 @@ class AyahViewOptions extends ConsumerWidget {
           view.showWordMeanings,
           (v) => view.copyWith(showWordMeanings: v),
         ),
+        // The ayah sheet's own: the topics it is in.
+        if (!showLayout)
+          toggle(
+            'ayah-view-topics',
+            l10n.quranTabTopics,
+            view.showTopics,
+            (v) => view.copyWith(showTopics: v),
+          ),
         toggle(
           'ayah-view-tajweed',
           l10n.ayahViewTajweed,

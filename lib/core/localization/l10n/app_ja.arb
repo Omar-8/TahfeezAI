@@ -777,5 +777,12 @@
   "topicsCount": "{count, plural, other{{count}件のトピック}}",
   "topicsAyahs": "{count, plural, other{{count}節}}",
   "topicsSource": "Quranic Arabic Corpus のクルアーン概念オントロジーより（リーズ大学）。",
-  "topicsSearch": "トピックを検索"
+  "topicsSearch": "トピックを検索",
+  "topicsStories": "物語",
+  "progressKhatmahPlanned": "予定 {days}",
+  "milestoneAyahs": "{count}アーヤを読誦",
+  "milestoneWords": "{count}語を読誦",
+  "milestoneMushafDays": "{count, plural, other{ムスハフと{count}日}}",
+  "milestoneMushafMonths": "{count, plural, other{ムスハフと{count}か月}}",
+  "milestoneMushafYear": "ムスハフと1年"
 }

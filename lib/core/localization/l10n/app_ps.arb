@@ -777,5 +777,12 @@
   "topicsCount": "{count, plural, other{{count} موضوعات}}",
   "topicsAyahs": "{count, plural, other{{count} آیتونه}}",
   "topicsSource": "د Quranic Arabic Corpus د قرآني مفاهیمو له آنټولوژۍ (د لیډز پوهنتون).",
-  "topicsSearch": "موضوعات ولټوئ"
+  "topicsSearch": "موضوعات ولټوئ",
+  "topicsStories": "کیسې",
+  "progressKhatmahPlanned": "پلان: {days}",
+  "milestoneAyahs": "{count} آیتونه تلاوت شول",
+  "milestoneWords": "{count} کلمې تلاوت شوې",
+  "milestoneMushafDays": "{count, plural, =1{له مصحف سره 1 ورځ} other{له مصحف سره {count} ورځې}}",
+  "milestoneMushafMonths": "{count, plural, =1{له مصحف سره 1 میاشت} other{له مصحف سره {count} میاشتې}}",
+  "milestoneMushafYear": "له مصحف سره یو کال"
 }

@@ -777,5 +777,12 @@
   "topicsCount": "{count, plural, =1{{count} тема} few{{count} темы} many{{count} тем} other{{count} темы}}",
   "topicsAyahs": "{count, plural, =1{{count} аят} few{{count} аята} many{{count} аятов} other{{count} аята}}",
   "topicsSource": "Из онтологии коранических понятий Quranic Arabic Corpus (Университет Лидса).",
-  "topicsSearch": "Поиск по темам"
+  "topicsSearch": "Поиск по темам",
+  "topicsStories": "Истории",
+  "progressKhatmahPlanned": "по плану — {days}",
+  "milestoneAyahs": "{count} аятов прочитано",
+  "milestoneWords": "{count} слов прочитано",
+  "milestoneMushafDays": "{count, plural, =1{1 день с Мусхафом} few{{count} дня с Мусхафом} many{{count} дней с Мусхафом} other{{count} дня с Мусхафом}}",
+  "milestoneMushafMonths": "{count, plural, =1{1 месяц с Мусхафом} few{{count} месяца с Мусхафом} many{{count} месяцев с Мусхафом} other{{count} месяца с Мусхафом}}",
+  "milestoneMushafYear": "Год с Мусхафом"
 }

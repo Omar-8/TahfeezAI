@@ -308,6 +308,8 @@ void main() {
     'mark what I know': (c) => showMarkKnownSheet(c),
     // Its similar ayahs (2:123, …) under its words.
     'ayah with look-alikes': (c) => showAyahDetailSheet(c, ayahId: 2048),
+    // Its topics (4:163: twelve, the prophets) as chips under its words.
+    'ayah with topics': (c) => showAyahDetailSheet(c, ayahId: 4163),
     'khatmah days': (c) => showKhatmahDaysSheet(c),
   };
   var t = 0;

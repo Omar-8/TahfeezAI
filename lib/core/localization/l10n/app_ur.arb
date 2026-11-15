@@ -777,5 +777,12 @@
   "topicsCount": "{count, plural, =1{1 موضوع} other{{count} موضوعات}}",
   "topicsAyahs": "{count, plural, =1{1 آیت} other{{count} آیات}}",
   "topicsSource": "قرآنی عربی کارپس کی قرآنی تصورات کی آنٹولوجی سے (لیڈز یونیورسٹی)۔",
-  "topicsSearch": "موضوعات تلاش کریں"
+  "topicsSearch": "موضوعات تلاش کریں",
+  "topicsStories": "قصص",
+  "progressKhatmahPlanned": "منصوبہ {days} کا",
+  "milestoneAyahs": "{count} آیات کی تلاوت",
+  "milestoneWords": "{count} الفاظ کی تلاوت",
+  "milestoneMushafDays": "{count, plural, =1{مصحف کے ساتھ 1 دن} other{مصحف کے ساتھ {count} دن}}",
+  "milestoneMushafMonths": "{count, plural, =1{مصحف کے ساتھ 1 مہینہ} other{مصحف کے ساتھ {count} مہینے}}",
+  "milestoneMushafYear": "مصحف کے ساتھ ایک سال"
 }

@@ -8,6 +8,7 @@ import 'package:tahfeez_ai/core/localization/generated/app_localizations.dart';
 import 'package:tahfeez_ai/core/localization/supported_locales.dart';
 import 'package:tahfeez_ai/core/ui/back_to_exit.dart';
 import 'package:tahfeez_ai/features/mushaf/presentation/ayah_view_parts.dart';
+import 'package:tahfeez_ai/features/quran/presentation/ayah_topics_section.dart';
 import 'package:tahfeez_ai/features/quran/presentation/tabs/topics_index_tab.dart';
 import 'package:tahfeez_ai/quran/application/quran_topics_provider.dart';
 import 'package:tahfeez_ai/quran/domain/models/ayah_models.dart';
@@ -27,17 +28,18 @@ void main() {
         as Map<String, Object?>,
   );
 
-  test('eleven groups, 239 topics, each in one group; not Allah; one '
+  test('twelve groups, 252 topics, each in one group; not Allah; one '
       'topic a prophet: Israel Ya\'qub, the Messiah Isa, Ahmad Muhammad', () {
     expect(topics.groups.map((g) => g.id), [
-      'prophets', 'unseen', 'hereafter', 'people', 'places', 'sky', //
+      'prophets', 'stories', 'unseen', 'hereafter', 'people', 'places', //
+      'sky',
       'nature', 'body', 'times', 'scriptures', 'things',
     ]);
-    expect(topics.concepts, hasLength(239));
+    expect(topics.concepts, hasLength(252));
     expect(topics.concepts['allah'], isNull);
     final placed = [for (final g in topics.groups) ...g.concepts];
-    expect(placed, hasLength(239));
-    expect(placed.map((c) => c.id).toSet(), hasLength(239));
+    expect(placed, hasLength(252));
+    expect(placed.map((c) => c.id).toSet(), hasLength(252));
     // The prophet Israel: Ya'qub, with the ayahs where إسرائيل is he; the
     // Children of Israel their own topic.
     expect(topics.concepts['israel'], isNull);
@@ -98,10 +100,30 @@ void main() {
     expect(prophets, [
       'adam', 'idris', 'nuh', 'hud', 'salih', 'ibrahim', 'lut', 'ishmael', //
       'isaac', 'yaqub', 'yusuf', 'ayyub', 'shuayb', 'musa', 'harun', 'david',
-      'solomon', 'elijah', 'elisha', 'yunus', 'zechariah', 'yahya', 'jesus',
+      'solomon', 'elijah', 'elisha', 'yunus', 'uzair', 'zechariah', 'yahya',
+      'jesus',
       'muhammad',
     ]);
-    expect(topics.groups[3].concepts.first.id, 'pharaoh');
+    expect(topics.groups[4].concepts.first.id, 'pharaoh');
+  });
+
+  test('stories told in one passage (TahfeezAI\'s): each its whole '
+      'passage, in the order they took place, named in every language', () {
+    final stories = topics.groups[1];
+    expect(stories.id, 'stories');
+    expect(stories.concepts.map((c) => c.id), [
+      'story-adam', 'story-nuh', 'story-ibrahim', 'story-yusuf', //
+      'story-musa-birth', 'story-believer', 'story-khidr', 'story-sabbath',
+      'story-yunus', 'story-maryam', 'story-town', 'story-two-gardens',
+      'story-garden',
+    ]);
+    expect(topics.concepts['story-khidr']!.ayahs, [
+      for (var a = 60; a <= 82; a++) 18000 + a,
+    ]);
+    expect(topics.concepts['story-khidr']!.arabic, 'موسى والخضر');
+    expect(ayahRuns(topics.concepts['story-town']!.ayahs), [
+      (first: 36013, last: 36029),
+    ]);
   });
 
   group('the tab', () {
@@ -156,7 +178,7 @@ void main() {
       expect(
         find.descendant(
           of: find.byKey(const ValueKey('topic-group-card-prophets')),
-          matching: find.text('24 topics'),
+          matching: find.text('25 topics'),
         ),
         findsOne,
       );
@@ -372,7 +394,8 @@ void main() {
       expect(prophetHonorific('prophets', id), alayhiSalatu, reason: id);
     }
     expect(prophetHonorific('prophets', 'muhammad'), salla);
-    for (final id in ['yusuf', 'adam', 'harun', 'yunus', 'idris']) {
+    // ('Uzair among them — owner, 2026-11-14.)
+    for (final id in ['yusuf', 'adam', 'harun', 'yunus', 'idris', 'uzair']) {
       expect(prophetHonorific('prophets', id), alayhiSalam, reason: id);
     }
     // Maryam: «عليها السلام», its sign ﵍.
@@ -389,6 +412,56 @@ void main() {
     expect(alayhiSalatu.words, 'عليه الصلاة والسلام');
     expect(salla.words, 'صلى الله عليه وسلم');
     expect(alayhiSalam.words, 'عليه السلام');
+  });
+
+  testWidgets('an ayah\'s sheet: the topics it is in — a story\'s chip '
+      'opens it, its passage whole', (tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          ...tahfeezWidgetTestOverrides(),
+          quranTopicsProvider.overrideWith((ref) async => topics),
+          ayahCanonicalWordsProvider.overrideWith(
+            (ref, id) async => [
+              AyahWord(ayahId: id, scriptId: 1, wordIndex: 0, text: 'وَإِذْ'),
+            ],
+          ),
+        ],
+        child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const Scaffold(
+            body: SingleChildScrollView(
+              child: AyahTopicsSection(ayahId: 18060),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('ayah-topics')), findsOne);
+    expect(find.byKey(const ValueKey('ayah-topic-story-khidr')), findsOne);
+    await tester.tap(find.byKey(const ValueKey('ayah-topic-story-khidr')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('topic-passage-18060-18082')), findsOne);
+  });
+
+  testWidgets('an ayah in no topic: nothing', (tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          ...tahfeezWidgetTestOverrides(),
+          quranTopicsProvider.overrideWith((ref) async => topics),
+        ],
+        child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const Scaffold(body: AyahTopicsSection(ayahId: 1001)),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('ayah-topics')), findsNothing);
   });
 
   testWidgets('back inside Topics goes up a step — never the Quran screen\'s '

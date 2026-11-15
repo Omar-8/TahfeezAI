@@ -777,5 +777,12 @@
   "topicsCount": "{count, plural, =1{1 konu} other{{count} konu}}",
   "topicsAyahs": "{count, plural, =1{1 ayet} other{{count} ayet}}",
   "topicsSource": "Kur'an Arapça Derlemi'nin Kur'anî kavramlar ontolojisinden (Leeds Üniversitesi).",
-  "topicsSearch": "Konularda ara"
+  "topicsSearch": "Konularda ara",
+  "topicsStories": "Kıssalar",
+  "progressKhatmahPlanned": "{days} için planlandı",
+  "milestoneAyahs": "{count} ayet okundu",
+  "milestoneWords": "{count} kelime okundu",
+  "milestoneMushafDays": "{count, plural, =1{Mushafta 1 gün} other{Mushafta {count} gün}}",
+  "milestoneMushafMonths": "{count, plural, =1{Mushafta 1 ay} other{Mushafta {count} ay}}",
+  "milestoneMushafYear": "Mushafta bir yıl"
 }

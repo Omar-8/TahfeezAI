@@ -1,6 +1,11 @@
+import 'dart:io';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tahfeez_ai/quran/domain/quran_topics.dart';
+import 'package:tahfeez_ai/quran/application/quran_topics_provider.dart';
 import 'package:tahfeez_ai/core/localization/generated/app_localizations.dart';
 import 'package:tahfeez_ai/core/theme/quran_text_style.dart';
 import 'package:tahfeez_ai/features/mushaf/application/mushaf_page_translations.dart';
@@ -30,6 +35,10 @@ void main() {
     checksum: 'x',
   );
   const words = ['قُلۡ', 'هُوَ', 'ٱللَّهُ', 'أَحَدٌ'];
+  final allTopics = QuranTopics.fromJson(
+    jsonDecode(File('assets/quran/topics.json').readAsStringSync())
+        as Map<String, Object?>,
+  );
 
   Widget app({
     AyahViewPreferences view = const AyahViewPreferences(
@@ -38,9 +47,12 @@ void main() {
     ),
     String? tafsirId = 'ar-muyassar',
     List<SimilarAyah> similar = const [],
+    Map<int, List<TopicRef>> topics = const {},
   }) => ProviderScope(
     overrides: [
       ...tahfeezWidgetTestOverrides(),
+      quranTopicsProvider.overrideWith((ref) async => allTopics),
+      topicsByAyahProvider.overrideWithValue(topics),
       ayahLookAlikesProvider.overrideWith((ref, _) => similar),
       ayahViewPreferencesProvider.overrideWithBuild((ref, _) => view),
       tafsirSelectionControllerProvider.overrideWithBuild((ref, _) => tafsirId),
@@ -159,6 +171,26 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('ayah-view-meanings')));
     await tester.pumpAndSettle();
     expect(find.text('Allah'), findsOneWidget);
+  });
+
+  testWidgets('its topics, shown — and hidden when turned off in its '
+      'settings (owner, 2026-11-15)', (tester) async {
+    final prophets = allTopics.groups.first;
+    final musa = allTopics.concepts['musa']!;
+    await open(
+      tester,
+      app(
+        topics: {
+          112001: [(group: prophets, concept: musa)],
+        },
+      ),
+    );
+    expect(find.byKey(const ValueKey('ayah-topic-musa')), findsOne);
+    await tester.tap(find.byKey(const ValueKey('ayah-sheet-view-options')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('ayah-view-topics')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('ayah-topics')), findsNothing);
   });
 
   testWidgets('no tafsir chosen: where to choose one', (tester) async {

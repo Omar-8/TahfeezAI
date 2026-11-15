@@ -241,3 +241,16 @@ ink	Ink
 knife	Knife
 ladder	Ladder
 ruby	Ruby
+story-adam	Adam and Iblis
+story-nuh	Nuh and the Flood
+story-ibrahim	Ibrahim and the idols
+story-yusuf	The story of Yusuf
+story-musa-birth	The birth of Musa
+story-believer	The believer of Pharaoh's family
+story-khidr	Musa and al-Khidr
+story-sabbath	The people of the Sabbath
+story-yunus	Yunus and the whale
+story-maryam	Maryam and the birth of Isa
+story-town	The people of the town
+story-two-gardens	The man of the two gardens
+story-garden	The owners of the garden

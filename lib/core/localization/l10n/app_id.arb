@@ -777,5 +777,12 @@
   "topicsCount": "{count, plural, other{{count} topik}}",
   "topicsAyahs": "{count, plural, other{{count} ayat}}",
   "topicsSource": "Dari ontologi konsep Al-Qur'an pada Quranic Arabic Corpus (Universitas Leeds).",
-  "topicsSearch": "Cari topik"
+  "topicsSearch": "Cari topik",
+  "topicsStories": "Kisah",
+  "progressKhatmahPlanned": "direncanakan {days}",
+  "milestoneAyahs": "{count} ayat dibaca",
+  "milestoneWords": "{count} kata dibaca",
+  "milestoneMushafDays": "{count, plural, other{{count} hari di Mushaf}}",
+  "milestoneMushafMonths": "{count, plural, other{{count} bulan di Mushaf}}",
+  "milestoneMushafYear": "Setahun di Mushaf"
 }

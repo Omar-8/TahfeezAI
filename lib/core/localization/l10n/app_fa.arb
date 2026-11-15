@@ -777,5 +777,12 @@
   "topicsCount": "{count, plural, other{{count} موضوع}}",
   "topicsAyahs": "{count, plural, other{{count} آیه}}",
   "topicsSource": "از هستی‌شناسی مفاهیم قرآنی در پیکرهٔ عربی قرآن (دانشگاه لیدز).",
-  "topicsSearch": "جستجوی موضوعات"
+  "topicsSearch": "جستجوی موضوعات",
+  "topicsStories": "داستان‌ها",
+  "progressKhatmahPlanned": "برنامه: {days}",
+  "milestoneAyahs": "تلاوت {count} آیه",
+  "milestoneWords": "تلاوت {count} کلمه",
+  "milestoneMushafDays": "{count, plural, other{{count} روز با مصحف}}",
+  "milestoneMushafMonths": "{count, plural, other{{count} ماه با مصحف}}",
+  "milestoneMushafYear": "یک سال با مصحف"
 }
