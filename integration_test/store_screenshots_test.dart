@@ -31,6 +31,7 @@ import 'package:tahfeez_ai/features/mushaf/presentation/mushaf_appearance_sheet.
 import 'package:tahfeez_ai/features/recitation/presentation/recitation_controls.dart';
 import 'package:tahfeez_ai/features/recitation/application/hifz_controller.dart';
 import 'package:tahfeez_ai/memorization/application/activity_stats.dart';
+import 'package:tahfeez_ai/memorization/application/memorization_progress.dart';
 import 'package:tahfeez_ai/memorization/domain/models/memorization_models.dart';
 import 'package:tahfeez_ai/memorization/memorization_providers.dart';
 import 'package:tahfeez_ai/quran/domain/quran_ayah_numbers.dart';
@@ -165,7 +166,14 @@ void main() {
           heardAyahs: 412,
           mushafSeconds: 6 * 3600 + 25 * 60,
         );
-    await run(2);
+    await run(3);
+    // The demo's milestones (its surahs memorized, its streak) put away
+    // before the scenes: their card covered the home shot (2026-11-15).
+    for (var i = 0; i < 20 && container.read(milestoneProvider) != null; i++) {
+      container.read(milestoneProvider.notifier).dismiss();
+      await run(0.5);
+    }
+    await run(6); // a card already on screen slides away
 
     // ── Light ── under a morning sky
     debugSkyTime = DateTime(2026, 10, 26, 9);
