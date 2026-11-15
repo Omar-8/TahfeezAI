@@ -162,6 +162,12 @@ void main() {
     // The surah list: glass cards, the names in the Mushaf's calligraphy.
     await go('/quran');
     await shot('18-quran-tab-light');
+    // Topics: the Quran's stories, each its whole passage (1.5.0).
+    await tester.tap(find.text('Topics'));
+    await run(3);
+    await tester.tap(find.byKey(const ValueKey('topic-group-card-stories')));
+    await run(3);
+    await shot('19-topics-light');
 
     container.read(readerModeProvider.notifier).set(ReaderMode.mushaf);
     await go('/quran/surah/36');

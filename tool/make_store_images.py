@@ -40,6 +40,7 @@ CAPTIONS = {
     "06b-pronunciation-dark": ("Hears the vowel you said", "On the hamza: ḍamma expected, fatḥa heard", True, False),
     "10b-hide-recite-dark": ("Recite it from memory", "Each word appears as you say it right", True, False),
     "17-translations-light": ("Translations, with footnotes", "Rowwad, Noor, Junagarhi and more — in 18 languages", False, False),
+    "19-topics-light": ("Stories and topics of the Quran", "13 stories, the prophets, places — a tap away", False, False),
     "18-quran-tab-light": ("Every surah, as the Mushaf writes it", "Names in calligraphy, glass over a sky of the hour", False, False),
     "04-ayah-mode-light": ("Understand every word", "Word meanings, transliteration and translation", False, False),
     "05-follow-along-light": ("Recite after the reciter", "Follow along: listen, then it's your turn", False, False),

@@ -32,7 +32,7 @@ PHONE = [
     "06b-pronunciation-dark",
     "10b-hide-recite-dark",
     "01-home-light",
-    "18-quran-tab-light",
+    "19-topics-light",
     "02-mushaf-light",
     "04-ayah-mode-light",
     "13-progress-dark",
