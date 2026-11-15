@@ -78,6 +78,12 @@ jobs:
             xcrun simctl status_bar "$udid" override --time 9:41 \
               --dataNetwork wifi --wifiBars 3 --cellularBars 4 \
               --batteryState charged --batteryLevel 100
+            # The microphone allowed beforehand: iOS's request stayed over the
+            # whole tour recording (the screenshots don't show it, the screen
+            # recording does), 2026-11-15. Again before the tour, in case
+            # flutter drive reinstalled the app in between.
+            grant() { xcrun simctl privacy "$udid" grant microphone ai.tahfeez.tahfeezAi || true; }
+            grant
 
             rm -rf screenshots
             limit 1500 flutter drive \
@@ -85,6 +91,7 @@ jobs:
               --target=integration_test/store_screenshots_test.dart \
               -d "$udid" 2>&1 | tee "shots-$device.log" || echo "::warning::$device screenshots failed"
             [ -d screenshots ] && mv screenshots "shots/$device"
+            grant
 
             # The tour, recorded; its start and end lines timed against the
             # recording's start, for the cut.

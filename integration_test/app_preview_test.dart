@@ -26,6 +26,7 @@ import 'package:tahfeez_ai/features/mushaf/application/mushaf_appearance_control
 import 'package:tahfeez_ai/features/mushaf/application/mushaf_hide_mode.dart';
 import 'package:tahfeez_ai/features/mushaf/application/reader_mode.dart';
 import 'package:tahfeez_ai/features/mushaf/domain/mushaf_appearance.dart';
+import 'package:tahfeez_ai/memorization/application/memorization_progress.dart';
 import 'package:tahfeez_ai/memorization/memorization_providers.dart';
 import 'package:tahfeez_ai/quran/domain/quran_ayah_numbers.dart';
 
@@ -38,6 +39,9 @@ void main() {
     final prefs = SharedPreferencesAsync();
     await prefs.setBool('firstRun.welcome', true);
     await prefs.setBool('firstRun.guide', true);
+    // Nor the first hiding's hint, nor the app's tips (as the screenshots).
+    await prefs.setBool('firstRun.hide-hint', true);
+    await prefs.setBool('appTips.allOff', true);
 
     await bootstrap();
     // By the clock: a slow device draws fewer frames, not a longer tour.
@@ -114,6 +118,12 @@ void main() {
     await go('/quran/surah/112', 3);
     await go('/quran/surah/36', 4);
     await go('/home', 3);
+    // The surahs just marked memorized not celebrated over the tour.
+    for (var i = 0; i < 20 && container.read(milestoneProvider) != null; i++) {
+      container.read(milestoneProvider.notifier).dismiss();
+      await wait(0.5);
+    }
+    await wait(6); // a card already on screen slides away
 
     debugPrint('app-preview: start');
     // Home.
