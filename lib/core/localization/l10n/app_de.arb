@@ -202,6 +202,7 @@
   "settingsImportConfirmBody": "Dein aktueller Lernfortschritt, deine Pläne und Einstellungen werden durch die der Sicherung ersetzt. TahfeezAI wird danach geschlossen; öffne sie erneut, um fortzufahren.",
   "settingsImportConfirm": "Importieren",
   "settingsImportDone": "Sicherung importiert. Lade die App neu, um fortzufahren.",
+  "settingsReopenToFinish": "Zum Abschluss TahfeezAI ganz schließen (aus den geöffneten Apps wischen) und wieder öffnen.",
   "settingsImportFailed": "Diese Datei ist keine TahfeezAI-Sicherung",
   "settingsTafsirNone": "Keiner",
   "settingsTransliteration": "Umschrift unter den Wortbedeutungen zeigen",

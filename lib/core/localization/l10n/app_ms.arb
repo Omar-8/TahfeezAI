@@ -202,6 +202,7 @@
   "settingsImportConfirmBody": "Kemajuan hafazan, pelan dan tetapan semasa anda akan digantikan dengan yang ada dalam sandaran. TahfeezAI kemudian ditutup; buka semula untuk meneruskan.",
   "settingsImportConfirm": "Import",
   "settingsImportDone": "Sandaran diimport. Muat semula aplikasi untuk meneruskan.",
+  "settingsReopenToFinish": "Untuk selesai, tutup TahfeezAI sepenuhnya (leret keluar daripada apl yang dibuka) dan buka semula.",
   "settingsImportFailed": "Fail ini bukan sandaran TahfeezAI",
   "settingsTafsirNone": "Tiada",
   "settingsTransliteration": "Tunjukkan transliterasi di bawah makna perkataan",

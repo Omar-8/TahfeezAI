@@ -202,6 +202,7 @@
   "settingsImportConfirmBody": "Joriy yodlash taraqqiyoti, rejalar va sozlamalaringiz zaxira nusxadagilar bilan almashtiriladi. Soʻngra TahfeezAI yopiladi; davom etish uchun uni qayta oching.",
   "settingsImportConfirm": "Import qilish",
   "settingsImportDone": "Zaxira nusxa import qilindi. Davom etish uchun ilovani qayta yuklang.",
+  "settingsReopenToFinish": "Yakunlash uchun TahfeezAI'ni butunlay yoping (ochiq ilovalardan surib olib tashlang) va qayta oching.",
   "settingsImportFailed": "Bu fayl TahfeezAI zaxira nusxasi emas",
   "settingsTafsirNone": "Yoʻq",
   "settingsTransliteration": "Soʻz maʼnolari ostida transliteratsiyani koʻrsatish",

@@ -202,6 +202,7 @@
   "settingsImportConfirmBody": "你当前的背记进度、计划和设置将被备份中的内容替换。随后 TahfeezAI 将关闭，重新打开即可继续。",
   "settingsImportConfirm": "导入",
   "settingsImportDone": "备份已导入。重新加载应用即可继续。",
+  "settingsReopenToFinish": "要完成操作，请完全关闭 TahfeezAI（从已打开的应用中滑走），然后重新打开。",
   "settingsImportFailed": "此文件不是 TahfeezAI 备份",
   "settingsTafsirNone": "无",
   "settingsTransliteration": "在词义下显示音译",

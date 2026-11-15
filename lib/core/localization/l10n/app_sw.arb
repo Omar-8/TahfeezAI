@@ -202,6 +202,7 @@
   "settingsImportConfirmBody": "Maendeleo, mipango na mipangilio yako ya sasa ya kuhifadhi itabadilishwa na ya nakala rudufu. Kisha TahfeezAI itafungwa; ifungue tena ili kuendelea.",
   "settingsImportConfirm": "Leta",
   "settingsImportDone": "Nakala rudufu imeletwa. Pakia upya programu ili kuendelea.",
+  "settingsReopenToFinish": "Ili kumaliza, funga TahfeezAI kabisa (iondoe kwenye programu zilizofunguliwa) kisha uifungue tena.",
   "settingsImportFailed": "Faili hii si nakala rudufu ya TahfeezAI",
   "settingsTafsirNone": "Hakuna",
   "settingsTransliteration": "Onyesha unukuzi chini ya maana za maneno",

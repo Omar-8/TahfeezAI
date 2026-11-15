@@ -202,6 +202,7 @@
   "settingsImportConfirmBody": "آپ کی موجودہ حفظ کی پیش رفت، منصوبے اور ترتیبات بیک اپ والی سے بدل دی جائیں گی۔ پھر TahfeezAI بند ہو جائے گی؛ جاری رکھنے کے لیے اسے دوبارہ کھولیں۔",
   "settingsImportConfirm": "امپورٹ",
   "settingsImportDone": "بیک اپ امپورٹ ہو گیا۔ جاری رکھنے کے لیے ایپ دوبارہ لوڈ کریں۔",
+  "settingsReopenToFinish": "مکمل کرنے کے لیے TahfeezAI کو پوری طرح بند کریں (کھلی ایپس میں سے ہٹا دیں) اور دوبارہ کھولیں۔",
   "settingsImportFailed": "یہ فائل TahfeezAI کا بیک اپ نہیں ہے",
   "settingsTafsirNone": "کوئی نہیں",
   "settingsTransliteration": "لفظی معانی کے نیچے نقل حرفی دکھائیں",

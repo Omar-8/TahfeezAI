@@ -23,6 +23,7 @@ import '../features/khatmah/application/khatmah_reminder.dart';
 import '../quran/application/meaning_language_follower.dart';
 import '../quran/presentation/meaning_packs_layer.dart';
 import '../core/ui/animations_setting.dart';
+import '../core/ui/reopen_required.dart';
 
 /// TahfeezAI's root widget.
 ///
@@ -101,16 +102,19 @@ class TahfeezApp extends ConsumerWidget {
           routerConfig: router,
           // The Mushaf's guide, above every screen and menu.
           // and a milestone just reached, gently, over that.
-          builder: (context, child) => _WebSheetWidth(
-            // (In a phone's browser: where to get the app.)
-            child: GetTheAppPrompt(
-              // (In a browser: the recitation model, fetched meanwhile.)
-              child: WebModelPreload(
-                child: AnimationsOff(
-                  child: MilestoneLayer(
-                    child: MeaningPacksLayer(
-                      child: GuideLayer(
-                        child: child ?? const SizedBox.shrink(),
+          // (The app's data replaced on iOS: covered until reopened.)
+          builder: (context, child) => ReopenRequiredLayer(
+            child: _WebSheetWidth(
+              // (In a phone's browser: where to get the app.)
+              child: GetTheAppPrompt(
+                // (In a browser: the recitation model, fetched meanwhile.)
+                child: WebModelPreload(
+                  child: AnimationsOff(
+                    child: MilestoneLayer(
+                      child: MeaningPacksLayer(
+                        child: GuideLayer(
+                          child: child ?? const SizedBox.shrink(),
+                        ),
                       ),
                     ),
                   ),

@@ -444,6 +444,11 @@ void main() {
       find.text('All data reset. Reload the app to start fresh.'),
       findsOneWidget,
     );
+    // Not Android, not the web (iOS here): the app covered until reopened —
+    // nothing beneath it to change (and save over the reset).
+    expect(find.byKey(const ValueKey('reopen-required')), findsOneWidget);
+    expect(find.textContaining('open it again'), findsOneWidget);
+    expect(find.text('Settings'), findsNothing);
   });
 
   for (final ios in [true, false]) {

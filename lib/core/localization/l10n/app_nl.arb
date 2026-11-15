@@ -202,6 +202,7 @@
   "settingsImportConfirmBody": "Je huidige memorisatievoortgang, plannen en instellingen worden vervangen door die van de back-up. TahfeezAI sluit daarna; open de app opnieuw om verder te gaan.",
   "settingsImportConfirm": "Importeren",
   "settingsImportDone": "Back-up geïmporteerd. Herlaad de app om verder te gaan.",
+  "settingsReopenToFinish": "Sluit TahfeezAI helemaal af (veeg de app weg uit je geopende apps) en open hem opnieuw om af te ronden.",
   "settingsImportFailed": "Dit bestand is geen TahfeezAI-back-up",
   "settingsTafsirNone": "Geen",
   "settingsTransliteration": "Transliteratie tonen onder woordbetekenissen",

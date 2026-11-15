@@ -202,6 +202,7 @@
   "settingsImportConfirmBody": "سيُستبدل تقدّم الحفظ والخطط والإعدادات الحالية بما في النسخة الاحتياطية. ثم يُغلق TahfeezAI؛ افتحه مجددًا للمتابعة.",
   "settingsImportConfirm": "استيراد",
   "settingsImportDone": "تم استيراد النسخة الاحتياطية. أعد تحميل التطبيق للمتابعة.",
+  "settingsReopenToFinish": "لإكمال ذلك، أغلق TahfeezAI تمامًا (اسحبه من التطبيقات المفتوحة) ثم افتحه من جديد.",
   "settingsImportFailed": "هذا الملف ليس نسخة احتياطية لتحفيظ",
   "settingsTafsirNone": "لا شيء",
   "settingsTransliteration": "إظهار النطق بالحروف اللاتينية مع معاني الكلمات",

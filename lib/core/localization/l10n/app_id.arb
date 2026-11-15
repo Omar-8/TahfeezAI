@@ -202,6 +202,7 @@
   "settingsImportConfirmBody": "Kemajuan hafalan, rencana, dan pengaturan Anda saat ini akan diganti dengan isi cadangan. TahfeezAI lalu tertutup; buka lagi untuk melanjutkan.",
   "settingsImportConfirm": "Impor",
   "settingsImportDone": "Cadangan diimpor. Muat ulang aplikasi untuk melanjutkan.",
+  "settingsReopenToFinish": "Untuk menyelesaikan, tutup TahfeezAI sepenuhnya (geser dari aplikasi yang terbuka) lalu buka lagi.",
   "settingsImportFailed": "File ini bukan cadangan TahfeezAI",
   "settingsTafsirNone": "Tidak ada",
   "settingsTransliteration": "Tampilkan transliterasi di bawah arti kata",

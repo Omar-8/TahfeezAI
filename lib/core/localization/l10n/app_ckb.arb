@@ -202,6 +202,7 @@
   "settingsImportConfirmBody": "پێشکەوتنی ئێستای لەبەرکردن، پلانەکان و ڕێکخستنەکانت بە هی یەدەگەکە دەگۆڕدرێن. پاشان TahfeezAI دادەخرێت؛ بۆ بەردەوامبوون دووبارە بیکەرەوە.",
   "settingsImportConfirm": "هاوردەکردن",
   "settingsImportDone": "یەدەگ هاوردە کرا. ئەپەکە دووبارە باربکەرەوە بۆ بەردەوامبوون.",
+  "settingsReopenToFinish": "بۆ تەواوکردن، TahfeezAI بە تەواوی دابخە (لە ئەپە کراوەکان ڕایبکێشە) و دووبارە بیکەرەوە.",
   "settingsImportFailed": "ئەم فایلە یەدەگی TahfeezAI نییە",
   "settingsTafsirNone": "هیچ",
   "settingsTransliteration": "خوێندنەوەی لاتینی لە ژێر واتای وشەکان پیشان بدە",

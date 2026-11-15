@@ -202,6 +202,7 @@
   "settingsImportConfirmBody": "Dine nuværende fremskridt, planer og indstillinger erstattes af sikkerhedskopiens. TahfeezAI lukker derefter; åbn den igen for at fortsætte.",
   "settingsImportConfirm": "Importér",
   "settingsImportDone": "Sikkerhedskopien er importeret. Genindlæs appen for at fortsætte.",
+  "settingsReopenToFinish": "For at afslutte skal du lukke TahfeezAI helt (stryg den væk fra dine åbne apps) og åbne den igen.",
   "settingsImportFailed": "Denne fil er ikke en TahfeezAI-sikkerhedskopi",
   "settingsTafsirNone": "Ingen",
   "settingsTransliteration": "Vis translitteration under ordbetydninger",

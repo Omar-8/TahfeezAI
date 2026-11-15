@@ -202,6 +202,7 @@
   "settingsImportConfirmBody": "현재 암기 진행 상황, 계획, 설정이 백업의 내용으로 바뀝니다. 그런 다음 TahfeezAI가 종료되며, 다시 열어 계속하세요.",
   "settingsImportConfirm": "가져오기",
   "settingsImportDone": "백업을 가져왔습니다. 앱을 다시 불러와 계속하세요.",
+  "settingsReopenToFinish": "완료하려면 TahfeezAI를 완전히 종료한 뒤(열린 앱에서 밀어서 닫기) 다시 여세요.",
   "settingsImportFailed": "이 파일은 TahfeezAI 백업이 아닙니다",
   "settingsTafsirNone": "없음",
   "settingsTransliteration": "단어 뜻 아래에 음역 표시",

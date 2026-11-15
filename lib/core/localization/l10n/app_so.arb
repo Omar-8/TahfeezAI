@@ -202,6 +202,7 @@
   "settingsImportConfirmBody": "Horumarka xifdintaada hadda, qorshayaasha iyo dejinta waxaa lagu beddeli doonaa kuwa kaydka. Kadib TahfeezAI way xirmaysaa; mar kale fur si aad u sii wado.",
   "settingsImportConfirm": "Soo dejiso",
   "settingsImportDone": "Kaydka waa la soo dejiyay. Dib u soo deji barnaamijka si aad u sii wado.",
+  "settingsReopenToFinish": "Si aad u dhammaystirto, si buuxda u xir TahfeezAI (ka saar barnaamijyada furan) kadibna mar kale fur.",
   "settingsImportFailed": "Faylkani ma aha kayd TahfeezAI",
   "settingsTafsirNone": "Midna",
   "settingsTransliteration": "Muuji higaada Laatiinka hoosta macnaha erayada",

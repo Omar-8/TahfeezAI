@@ -1,11 +1,11 @@
 import 'package:file_picker/file_picker.dart';
 
 import '../../../core/sharing/image_sharer.dart';
+import '../../../core/ui/reopen_required.dart';
 import '../../../core/ui/bar_space.dart';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show SystemNavigator;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -705,14 +705,10 @@ Future<void> _confirmReset(BuildContext context, WidgetRef ref) async {
     ),
   );
   if (confirmed != true || !context.mounted) return;
-  final android = ref.read(platformCapabilitiesProvider).isAndroid;
-  final messenger = ScaffoldMessenger.of(context);
   await resetAllData(ref);
-  if (android) {
-    await SystemNavigator.pop();
-  } else {
-    messenger.showSnackBar(SnackBar(content: Text(l10n.settingsResetDone)));
-  }
+  // Started over (Android closes, the web reloads, iOS asks to reopen):
+  // what the app read before must not be saved over the reset.
+  await startOverAfterDataReplaced(ref, DataReplaced.reset);
 }
 
 /// Saves a backup file where the user picks.
@@ -788,16 +784,16 @@ Future<void> _import(BuildContext context, WidgetRef ref) async {
     messenger.showSnackBar(SnackBar(content: Text(l10n.settingsImportFailed)));
     return;
   }
-  if (android) {
-    await SystemNavigator.pop();
-  } else {
+  if (!android) {
     // The imported reminders, scheduled again.
     ref
       ..invalidate(memorizationReminderProvider)
       ..invalidate(khatmahProvider)
       ..invalidate(khatmahReminderProvider);
-    messenger.showSnackBar(SnackBar(content: Text(l10n.settingsImportDone)));
   }
+  // Started over (Android closes, the web reloads, iOS asks to reopen):
+  // what the app read before must not be saved over the backup (2026-11-15).
+  await startOverAfterDataReplaced(ref, DataReplaced.imported);
 }
 
 /// Settings' last section: the app's name and version, then the

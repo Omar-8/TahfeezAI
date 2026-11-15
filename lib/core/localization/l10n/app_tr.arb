@@ -202,6 +202,7 @@
   "settingsImportConfirmBody": "Mevcut ezber ilerlemeniz, planlarınız ve ayarlarınız yedektekilerle değiştirilecek. Ardından TahfeezAI kapanır; devam etmek için tekrar açın.",
   "settingsImportConfirm": "İçe aktar",
   "settingsImportDone": "Yedek içe aktarıldı. Devam etmek için uygulamayı yeniden yükleyin.",
+  "settingsReopenToFinish": "Tamamlamak için TahfeezAI'ı tamamen kapatın (açık uygulamalardan kaydırarak kapatın) ve yeniden açın.",
   "settingsImportFailed": "Bu dosya bir TahfeezAI yedeği değil",
   "settingsTafsirNone": "Yok",
   "settingsTransliteration": "Kelime anlamlarının altında okunuşu göster",

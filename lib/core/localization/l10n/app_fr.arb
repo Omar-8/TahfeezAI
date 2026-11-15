@@ -202,6 +202,7 @@
   "settingsImportConfirmBody": "Votre progression, vos plans et vos réglages actuels seront remplacés par ceux de la sauvegarde. TahfeezAI se ferme ensuite ; rouvrez-la pour continuer.",
   "settingsImportConfirm": "Importer",
   "settingsImportDone": "Sauvegarde importée. Rechargez l'application pour continuer.",
+  "settingsReopenToFinish": "Pour terminer, fermez complètement TahfeezAI (balayez-la hors des apps ouvertes) puis rouvrez-la.",
   "settingsImportFailed": "Ce fichier n'est pas une sauvegarde TahfeezAI",
   "settingsTafsirNone": "Aucun",
   "settingsTransliteration": "Afficher la translittération sous le sens des mots",

@@ -202,6 +202,7 @@
   "settingsImportConfirmBody": "現在の暗記の進み具合、計画、設定はバックアップの内容に置き換わります。TahfeezAI はその後終了します。もう一度開いて続けてください。",
   "settingsImportConfirm": "読み込む",
   "settingsImportDone": "バックアップを読み込みました。アプリを再読み込みして続けてください。",
+  "settingsReopenToFinish": "完了するには、TahfeezAI を完全に終了し(開いているアプリから上にスワイプ)、もう一度開いてください。",
   "settingsImportFailed": "このファイルは TahfeezAI のバックアップではありません",
   "settingsTafsirNone": "なし",
   "settingsTransliteration": "語の意味の下に音写を表示",

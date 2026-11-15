@@ -202,6 +202,7 @@
   "settingsImportConfirmBody": "Seu progresso de memorização, planos e ajustes atuais serão substituídos pelos do backup. Depois o TahfeezAI fecha; abra-o de novo para continuar.",
   "settingsImportConfirm": "Importar",
   "settingsImportDone": "Backup importado. Recarregue o app para continuar.",
+  "settingsReopenToFinish": "Para concluir, feche o TahfeezAI por completo (deslize-o para fora dos apps abertos) e abra-o de novo.",
   "settingsImportFailed": "Este arquivo não é um backup do TahfeezAI",
   "settingsTafsirNone": "Nenhum",
   "settingsTransliteration": "Mostrar transliteração sob os significados das palavras",

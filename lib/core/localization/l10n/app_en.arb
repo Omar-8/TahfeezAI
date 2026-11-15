@@ -468,6 +468,8 @@
   "settingsImportConfirmBody": "Your current memorization progress, plans and settings will be replaced by the backup's. TahfeezAI then closes; open it again to continue.",
   "settingsImportConfirm": "Import",
   "settingsImportDone": "Backup imported. Reload the app to continue.",
+  "settingsReopenToFinish": "To finish, close TahfeezAI completely (swipe it away from your open apps) and open it again.",
+  "@settingsReopenToFinish": {"description": "Under a backup imported or data reset on iOS, which cannot restart the app itself: the reader closes and reopens it."},
   "settingsImportFailed": "This file isn't a TahfeezAI backup",
   "settingsTafsirNone": "None",
   "settingsTransliteration": "Show transliteration under word meanings",

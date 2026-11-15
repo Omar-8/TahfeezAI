@@ -202,6 +202,7 @@
   "settingsImportConfirmBody": "ستاسو اوسنی د حفظ پرمختګ، پلانونه او تنظیمات به د بیک اپ په معلوماتو بدل شي. بیا TahfeezAI بندېږي؛ د دوام لپاره یې بیا پرانیزئ.",
   "settingsImportConfirm": "وارد کړئ",
   "settingsImportDone": "بیک اپ وارد شو. د دوام لپاره اپلیکیشن بیا پورته کړئ.",
+  "settingsReopenToFinish": "د بشپړولو لپاره، TahfeezAI په بشپړ ډول وتړئ (له پرانیستو اپونو یې لرې کړئ) او بیا یې پرانیزئ.",
   "settingsImportFailed": "دا فایل د TahfeezAI بیک اپ نه دی",
   "settingsTafsirNone": "هیڅ",
   "settingsTransliteration": "د کلمو د معناوو لاندې لاتیني تلفظ وښایئ",

@@ -202,6 +202,7 @@
   "settingsImportConfirmBody": "پیشرفت حفظ، برنامه‌ها و تنظیمات فعلی شما با محتوای پشتیبان جایگزین می‌شود. سپس TahfeezAI بسته می‌شود؛ برای ادامه دوباره آن را باز کنید.",
   "settingsImportConfirm": "درون‌بری",
   "settingsImportDone": "پشتیبان درون‌بری شد. برای ادامه، برنامه را مجدداً باز کنید.",
+  "settingsReopenToFinish": "برای پایان کار، TahfeezAI را کاملاً ببندید (از برنامه‌های باز بیرونش بکشید) و دوباره باز کنید.",
   "settingsImportFailed": "این فایل پشتیبان TahfeezAI نیست",
   "settingsTafsirNone": "هیچ",
   "settingsTransliteration": "نمایش آوانویسی زیر معنای کلمات",
