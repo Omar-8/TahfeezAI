@@ -42,8 +42,7 @@ class _AcousticWorker {
   void _reply(web.MessageEvent event) {
     final data = event.data as JSObject;
     if (data.has('progress')) {
-      acousticModelDownload.value =
-          (data['progress'] as JSNumber).toDartDouble;
+      acousticModelDownload.value = (data['progress'] as JSNumber).toDartDouble;
       return;
     }
     final id = (data['id'] as JSNumber).toDartInt;
@@ -93,10 +92,16 @@ class _AcousticWorker {
     }
     try {
       final result = await _call(call.method, args);
-      if (call.method == 'load') acousticModelDownload.value = null;
+      if (call.method == 'load') {
+        acousticModelDownload.value = null;
+        acousticModelSettled.value = true;
+      }
       return _forDart(result);
     } catch (_) {
-      if (call.method == 'load') acousticModelDownload.value = null;
+      if (call.method == 'load') {
+        acousticModelDownload.value = null;
+        acousticModelSettled.value = true;
+      }
       rethrow;
     }
   }

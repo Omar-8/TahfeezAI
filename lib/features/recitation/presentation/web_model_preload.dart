@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../ai/acoustic/acoustic_model_download.dart';
 import '../../../core/platform/browser_data_saver.dart';
 import '../application/local_acoustic_inference_controller.dart';
 import '../application/recitation_ai_config.dart';
@@ -35,9 +36,13 @@ class _WebModelPreloadState extends ConsumerState<WebModelPreload> {
   }
 
   void _start() {
-    if (!mounted || browserSavesData) return;
+    if (!mounted) return;
     final config = ref.read(recitationAiConfigProvider);
-    if (config.acoustic != QuranAcousticBackend.local) return;
+    if (browserSavesData || config.acoustic != QuranAcousticBackend.local) {
+      // Not fetched now: nothing for the guide to wait for.
+      acousticModelSettled.value = true;
+      return;
+    }
     // The same load the recitation bar waits on (a failure: tried again
     // there).
     unawaited(

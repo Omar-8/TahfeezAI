@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:js_interop';
+import 'dart:typed_data' show ByteData;
 
 import 'package:drift/drift.dart';
 import 'package:drift/wasm.dart';
@@ -48,6 +49,7 @@ Future<DatabaseConnection>? _quranOpening;
 Future<DatabaseConnection> _start(String name) async {
   if (!_names.contains(name)) return _open(name, null);
   final manifest = await _manifest;
+  _prefetching ??= _prefetchMissing(manifest);
   final entry = (manifest['databases'] as Map)[name] as Map;
   return _open(
     '${name}_${manifest['version']}',
@@ -119,9 +121,36 @@ final Future<Map<String, dynamic>> _manifest = rootBundle
     .loadString('$_assetDir/manifest.json')
     .then((s) => jsonDecode(s) as Map<String, dynamic>);
 
+/// The packed files of the ready-made databases not stored yet, being
+/// fetched — all at once, as soon as the first database is opened. Each
+/// was fetched only when its turn came (after the Quran's, one after
+/// another, its browser workers set up first): a first visit's Mushaf
+/// waited ~25 s for them (2026-11-16). A database already stored fetches
+/// nothing.
+final _packed = <String, Future<ByteData>>{};
+Future<void>? _prefetching;
+
+Future<void> _prefetchMissing(Map<String, dynamic> manifest) async {
+  final version = manifest['version'];
+  final stored = {
+    for (final (_, name) in (await _probe).existingDatabases) name,
+  };
+  final databases = manifest['databases'] as Map;
+  for (final name in _names) {
+    if (stored.contains('${name}_$version')) continue;
+    final entry = databases[name] as Map?;
+    if (entry == null) continue;
+    _packed[name] = rootBundle.load('$_assetDir/${entry['asset']}');
+  }
+}
+
 Future<Uint8List> _unpack(String name, Map<String, Object?> entry) async {
-  final packed = (await rootBundle.load('$_assetDir/${entry['asset']}')).buffer
-      .asUint8List();
+  await _prefetching?.catchError((Object _) {});
+  final packed =
+      (await (_packed.remove(name) ??
+              rootBundle.load('$_assetDir/${entry['asset']}')))
+          .buffer
+          .asUint8List();
   // zlib (RFC 1950): the browser's "deflate".
   final inflated = web.Blob([packed.toJS].toJS).stream().pipeThrough(
     web.DecompressionStream('deflate') as web.ReadableWritablePair,

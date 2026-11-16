@@ -328,7 +328,7 @@ Future<T?> _showSidePanel<T>({
                   Expanded(
                     child: Align(
                       alignment: Alignment.topCenter,
-                      child: builder(context),
+                      child: _SidePanelScope(child: Builder(builder: builder)),
                     ),
                   ),
                 ],
@@ -346,6 +346,33 @@ Future<T?> _showSidePanel<T>({
       child: child,
     ),
   );
+}
+
+/// Marks a sheet shown as a side panel ([_showSidePanel]).
+class _SidePanelScope extends InheritedWidget {
+  const _SidePanelScope({required super.child});
+
+  @override
+  bool updateShouldNotify(_SidePanelScope oldWidget) => false;
+}
+
+/// Whether the sheet at [context] is a browser's side panel: its buttons at
+/// the foot stay at the panel's bottom, not up under short content (owner,
+/// 2026-11-16 — the web only; the apps' panels keep theirs).
+bool sheetFootPinned(BuildContext context) =>
+    kIsWeb && context.getInheritedWidgetOfExactType<_SidePanelScope>() != null;
+
+/// A sheet's column ([child]: its content, a [Flexible] made tight with
+/// [sheetFootPinned], then its foot) as tall as its side panel in a
+/// browser; elsewhere as it is.
+class SheetFootPinned extends StatelessWidget {
+  const SheetFootPinned({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) =>
+      sheetFootPinned(context) ? SizedBox.expand(child: child) : child;
 }
 
 /// A sheet's ✕, at the far end of its header row: 48 × 48 to tap.

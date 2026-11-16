@@ -92,98 +92,104 @@ class _AyahDetailSheetState extends ConsumerState<_AyahDetailSheet> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final next = nextAyahId(_ayah), previous = previousAyahId(_ayah);
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Flexible(
-          child: GestureDetector(
-            key: const ValueKey('ayah-sheet-swipe'),
-            behavior: HitTestBehavior.translucent,
-            onHorizontalDragEnd: (details) {
-              final v = details.primaryVelocity ?? 0;
-              if (v.abs() < 200) return;
-              final to = v > 0 ? next : previous;
-              if (to != null) _go(to, forward: v > 0);
-            },
-            child: AnimatedSwitcher(
-              duration: TahfeezMotionDuration.medium,
-              transitionBuilder: (child, animation) {
-                final incoming = child.key == ValueKey(_ayah);
-                final dx = (_forward ? -1.0 : 1.0) * (incoming ? 1 : -1);
-                return FadeTransition(
-                  opacity: animation,
-                  child: SlideTransition(
-                    position: Tween(
-                      begin: Offset(dx * 0.25, 0),
-                      end: Offset.zero,
-                    ).animate(animation),
-                    child: child,
-                  ),
-                );
+    return SheetFootPinned(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Flexible(
+            fit: sheetFootPinned(context) ? FlexFit.tight : FlexFit.loose,
+            child: GestureDetector(
+              key: const ValueKey('ayah-sheet-swipe'),
+              behavior: HitTestBehavior.translucent,
+              onHorizontalDragEnd: (details) {
+                final v = details.primaryVelocity ?? 0;
+                if (v.abs() < 200) return;
+                final to = v > 0 ? next : previous;
+                if (to != null) _go(to, forward: v > 0);
               },
-              // Sized by the ayah coming in (see the word sheet's).
-              layoutBuilder: (current, previous) => Stack(
-                alignment: Alignment.topCenter,
-                clipBehavior: Clip.hardEdge,
+              child: AnimatedSwitcher(
+                duration: TahfeezMotionDuration.medium,
+                transitionBuilder: (child, animation) {
+                  final incoming = child.key == ValueKey(_ayah);
+                  final dx = (_forward ? -1.0 : 1.0) * (incoming ? 1 : -1);
+                  return FadeTransition(
+                    opacity: animation,
+                    child: SlideTransition(
+                      position: Tween(
+                        begin: Offset(dx * 0.25, 0),
+                        end: Offset.zero,
+                      ).animate(animation),
+                      child: child,
+                    ),
+                  );
+                },
+                // Sized by the ayah coming in (see the word sheet's).
+                layoutBuilder: (current, previous) => Stack(
+                  alignment: Alignment.topCenter,
+                  clipBehavior: Clip.hardEdge,
+                  children: [
+                    for (final p in previous) Positioned.fill(child: p),
+                    ?current,
+                  ],
+                ),
+                child: _AyahDetailSheetBody(
+                  key: ValueKey(_ayah),
+                  ayahId: _ayah,
+                ),
+              ),
+            ),
+          ),
+          // At the foot, in reach: the next ayah to the left (its arrow
+          // pointing there, as the Mushaf reads), the previous to the right
+          // — in every language.
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              TahfeezSpacing.md,
+              TahfeezSpacing.sm,
+              TahfeezSpacing.md,
+              TahfeezSpacing.sm,
+            ),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Row(
+                spacing: TahfeezSpacing.sm,
                 children: [
-                  for (final p in previous) Positioned.fill(child: p),
-                  ?current,
+                  Expanded(
+                    child: FilledButton.tonalIcon(
+                      key: const ValueKey('ayah-sheet-next'),
+                      icon: const Icon(Icons.chevron_left_rounded),
+                      label: Text(
+                        l10n.ayahNext,
+                        textDirection: Directionality.of(context),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      onPressed: next == null
+                          ? null
+                          : () => _go(next, forward: true),
+                    ),
+                  ),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      key: const ValueKey('ayah-sheet-previous'),
+                      iconAlignment: IconAlignment.end,
+                      icon: const Icon(Icons.chevron_right_rounded),
+                      label: Text(
+                        l10n.ayahPrevious,
+                        textDirection: Directionality.of(context),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      onPressed: previous == null
+                          ? null
+                          : () => _go(previous, forward: false),
+                    ),
+                  ),
                 ],
               ),
-              child: _AyahDetailSheetBody(key: ValueKey(_ayah), ayahId: _ayah),
             ),
           ),
-        ),
-        // At the foot, in reach: the next ayah to the left (its arrow
-        // pointing there, as the Mushaf reads), the previous to the right
-        // — in every language.
-        Padding(
-          padding: const EdgeInsets.fromLTRB(
-            TahfeezSpacing.md,
-            TahfeezSpacing.sm,
-            TahfeezSpacing.md,
-            TahfeezSpacing.sm,
-          ),
-          child: Directionality(
-            textDirection: TextDirection.ltr,
-            child: Row(
-              spacing: TahfeezSpacing.sm,
-              children: [
-                Expanded(
-                  child: FilledButton.tonalIcon(
-                    key: const ValueKey('ayah-sheet-next'),
-                    icon: const Icon(Icons.chevron_left_rounded),
-                    label: Text(
-                      l10n.ayahNext,
-                      textDirection: Directionality.of(context),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    onPressed: next == null
-                        ? null
-                        : () => _go(next, forward: true),
-                  ),
-                ),
-                Expanded(
-                  child: OutlinedButton.icon(
-                    key: const ValueKey('ayah-sheet-previous'),
-                    iconAlignment: IconAlignment.end,
-                    icon: const Icon(Icons.chevron_right_rounded),
-                    label: Text(
-                      l10n.ayahPrevious,
-                      textDirection: Directionality.of(context),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    onPressed: previous == null
-                        ? null
-                        : () => _go(previous, forward: false),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

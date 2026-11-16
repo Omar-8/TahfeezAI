@@ -90,140 +90,143 @@ class _WordDetailSheetState extends ConsumerState<_WordDetailSheet> {
     });
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        // Which mistake this is: its count, and the line across the sheet
-        // in as many segments, filling from the right as the Mushaf reads.
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: TahfeezSpacing.md),
-          child: Semantics(
-            label: l10n.wordMistakeOf(at + 1, mistakes.length),
-            child: ExcludeSemantics(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                spacing: 6,
-                children: [
-                  Text(
-                    '${at + 1} / ${mistakes.length}',
-                    key: const ValueKey('word-mistake-count'),
-                    style: theme.textTheme.labelLarge,
-                  ),
-                  SegmentedProgressLine(
-                    value: (at + 1) / mistakes.length,
-                    segments: mistakes.length,
-                    rtl: true,
-                  ),
-                ],
+    return SheetFootPinned(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Which mistake this is: its count, and the line across the sheet
+          // in as many segments, filling from the right as the Mushaf reads.
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: TahfeezSpacing.md),
+            child: Semantics(
+              label: l10n.wordMistakeOf(at + 1, mistakes.length),
+              child: ExcludeSemantics(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 6,
+                  children: [
+                    Text(
+                      '${at + 1} / ${mistakes.length}',
+                      key: const ValueKey('word-mistake-count'),
+                      style: theme.textTheme.labelLarge,
+                    ),
+                    SegmentedProgressLine(
+                      value: (at + 1) / mistakes.length,
+                      segments: mistakes.length,
+                      rtl: true,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
-        ),
-        // Swiped as the Mushaf's pages turn (owner, 2026-11-08): to the
-        // right, the next mistake (it reads right to left); to the left,
-        // the previous one.
-        Flexible(
-          child: GestureDetector(
-            key: const ValueKey('word-mistake-swipe'),
-            behavior: HitTestBehavior.translucent,
-            onHorizontalDragEnd: (details) {
-              final v = details.primaryVelocity ?? 0;
-              if (v.abs() < 200) return;
-              final to = v > 0 ? at + 1 : at - 1;
-              if (to >= 0 && to < mistakes.length) {
-                _forward = v > 0;
-                _go(mistakes[to]);
-              }
-            },
-            child: AnimatedSwitcher(
-              duration: TahfeezMotionDuration.medium,
-              transitionBuilder: (child, animation) {
-                // The new word in from the side it was swiped towards.
-                final incoming = child.key == ValueKey(_word);
-                final dx = (_forward ? -1.0 : 1.0) * (incoming ? 1 : -1);
-                return FadeTransition(
-                  opacity: animation,
-                  child: SlideTransition(
-                    position: Tween(
-                      begin: Offset(dx * 0.25, 0),
-                      end: Offset.zero,
-                    ).animate(animation),
-                    child: child,
-                  ),
-                );
+          // Swiped as the Mushaf's pages turn (owner, 2026-11-08): to the
+          // right, the next mistake (it reads right to left); to the left,
+          // the previous one.
+          Flexible(
+            fit: sheetFootPinned(context) ? FlexFit.tight : FlexFit.loose,
+            child: GestureDetector(
+              key: const ValueKey('word-mistake-swipe'),
+              behavior: HitTestBehavior.translucent,
+              onHorizontalDragEnd: (details) {
+                final v = details.primaryVelocity ?? 0;
+                if (v.abs() < 200) return;
+                final to = v > 0 ? at + 1 : at - 1;
+                if (to >= 0 && to < mistakes.length) {
+                  _forward = v > 0;
+                  _go(mistakes[to]);
+                }
               },
-              // The sheet sized by the word coming in only: the one going
-              // out fades within that size (it scrolls) — both sizing the
-              // sheet, it grew to the taller one for a moment, then went
-              // back (owner, 2026-11-14).
-              layoutBuilder: (current, previous) => Stack(
-                alignment: Alignment.topCenter,
-                clipBehavior: Clip.hardEdge,
+              child: AnimatedSwitcher(
+                duration: TahfeezMotionDuration.medium,
+                transitionBuilder: (child, animation) {
+                  // The new word in from the side it was swiped towards.
+                  final incoming = child.key == ValueKey(_word);
+                  final dx = (_forward ? -1.0 : 1.0) * (incoming ? 1 : -1);
+                  return FadeTransition(
+                    opacity: animation,
+                    child: SlideTransition(
+                      position: Tween(
+                        begin: Offset(dx * 0.25, 0),
+                        end: Offset.zero,
+                      ).animate(animation),
+                      child: child,
+                    ),
+                  );
+                },
+                // The sheet sized by the word coming in only: the one going
+                // out fades within that size (it scrolls) — both sizing the
+                // sheet, it grew to the taller one for a moment, then went
+                // back (owner, 2026-11-14).
+                layoutBuilder: (current, previous) => Stack(
+                  alignment: Alignment.topCenter,
+                  clipBehavior: Clip.hardEdge,
+                  children: [
+                    for (final p in previous) Positioned.fill(child: p),
+                    ?current,
+                  ],
+                ),
+                child: body,
+              ),
+            ),
+          ),
+          // At the bottom, always in reach: the next mistake to the left (its
+          // arrow pointing there), the previous one to the right — in every
+          // language.
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              TahfeezSpacing.md,
+              TahfeezSpacing.sm,
+              TahfeezSpacing.md,
+              TahfeezSpacing.sm,
+            ),
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Row(
+                spacing: TahfeezSpacing.sm,
                 children: [
-                  for (final p in previous) Positioned.fill(child: p),
-                  ?current,
+                  Expanded(
+                    child: FilledButton.tonalIcon(
+                      key: const ValueKey('word-next-mistake'),
+                      icon: const Icon(Icons.chevron_left_rounded),
+                      label: Text(
+                        l10n.wordNextMistake,
+                        textDirection: Directionality.of(context),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      onPressed: at + 1 < mistakes.length
+                          ? () {
+                              _forward = true;
+                              _go(mistakes[at + 1]);
+                            }
+                          : null,
+                    ),
+                  ),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      key: const ValueKey('word-previous-mistake'),
+                      iconAlignment: IconAlignment.end,
+                      icon: const Icon(Icons.chevron_right_rounded),
+                      label: Text(
+                        l10n.wordPreviousMistake,
+                        textDirection: Directionality.of(context),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      onPressed: at > 0
+                          ? () {
+                              _forward = false;
+                              _go(mistakes[at - 1]);
+                            }
+                          : null,
+                    ),
+                  ),
                 ],
               ),
-              child: body,
             ),
           ),
-        ),
-        // At the bottom, always in reach: the next mistake to the left (its
-        // arrow pointing there), the previous one to the right — in every
-        // language.
-        Padding(
-          padding: const EdgeInsets.fromLTRB(
-            TahfeezSpacing.md,
-            TahfeezSpacing.sm,
-            TahfeezSpacing.md,
-            TahfeezSpacing.sm,
-          ),
-          child: Directionality(
-            textDirection: TextDirection.ltr,
-            child: Row(
-              spacing: TahfeezSpacing.sm,
-              children: [
-                Expanded(
-                  child: FilledButton.tonalIcon(
-                    key: const ValueKey('word-next-mistake'),
-                    icon: const Icon(Icons.chevron_left_rounded),
-                    label: Text(
-                      l10n.wordNextMistake,
-                      textDirection: Directionality.of(context),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    onPressed: at + 1 < mistakes.length
-                        ? () {
-                            _forward = true;
-                            _go(mistakes[at + 1]);
-                          }
-                        : null,
-                  ),
-                ),
-                Expanded(
-                  child: OutlinedButton.icon(
-                    key: const ValueKey('word-previous-mistake'),
-                    iconAlignment: IconAlignment.end,
-                    icon: const Icon(Icons.chevron_right_rounded),
-                    label: Text(
-                      l10n.wordPreviousMistake,
-                      textDirection: Directionality.of(context),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    onPressed: at > 0
-                        ? () {
-                            _forward = false;
-                            _go(mistakes[at - 1]);
-                          }
-                        : null,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

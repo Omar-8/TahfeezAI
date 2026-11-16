@@ -1,6 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+
+import '../../ai/acoustic/acoustic_model_download.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/localization/generated/app_localizations.dart';
@@ -368,6 +371,10 @@ class _GuideButtonState extends ConsumerState<GuideButton> {
     _guide = ref.read(guideProvider.notifier);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted || !ref.read(liveRecognitionEnabledProvider)) return;
+      // In a browser, after the recitation model's first download (its
+      // steps recite).
+      await _modelSettled();
+      if (!mounted) return;
       if (!await firstRunDue(ref, 'guide')) return;
       // The page and its bar in place first.
       await Future<void>.delayed(const Duration(milliseconds: 1200));
@@ -375,6 +382,19 @@ class _GuideButtonState extends ConsumerState<GuideButton> {
       if (!(ModalRoute.of(context)?.isCurrent ?? true)) return;
       ref.read(guideProvider.notifier).start(GuideTour.intro);
     });
+  }
+
+  static Future<void> _modelSettled() {
+    if (acousticModelSettled.value) return Future.value();
+    final done = Completer<void>();
+    void settled() {
+      if (!acousticModelSettled.value || done.isCompleted) return;
+      acousticModelSettled.removeListener(settled);
+      done.complete();
+    }
+
+    acousticModelSettled.addListener(settled);
+    return done.future;
   }
 
   /// The ayahs hidden for the first time (not by the guide, nor while
