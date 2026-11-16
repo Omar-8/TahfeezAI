@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
 import '../../../../core/localization/generated/app_localizations.dart';
@@ -20,6 +21,7 @@ void showSearchFilterSheet(BuildContext context) {
   showTahfeezModalBottomSheet(
     context: context,
     title: AppLocalizations.of(context).searchFilters,
+    besideOnWide: kIsWeb,
     builder: (context) => const _SearchFilterSheetBody(),
   );
 }

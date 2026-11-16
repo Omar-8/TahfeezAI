@@ -1,5 +1,6 @@
 import '../../guide/guide.dart';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -39,6 +40,7 @@ Future<void> showFollowAlongSheet(BuildContext context) =>
     showTahfeezModalBottomSheet<void>(
       context: context,
       title: AppLocalizations.of(context).followTitle,
+      besideOnWide: kIsWeb,
       builder: (context) => const _FollowAlongSheet(),
     );
 

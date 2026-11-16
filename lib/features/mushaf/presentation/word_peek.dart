@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart' show ValueListenable;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/theme/components/tahfeez_bottom_sheet.dart';
 import '../../../core/localization/generated/app_localizations.dart';
 import '../../../core/ui/script_direction.dart';
 import '../../../quran/domain/models/quran_refs.dart';
@@ -181,18 +182,21 @@ class _WordPeekLayer extends StatelessWidget {
       child: TapRegion(
         key: pillKey,
         onTapOutside: (_) => onTapOutside?.call(),
-        child: ValueListenableBuilder(
-          valueListenable: visible,
-          builder: (context, shown, child) => AnimatedOpacity(
-            opacity: shown ? 1 : 0,
-            duration: WordPeek._fade,
-            child: AnimatedScale(
-              scale: shown ? 1 : 0.92,
+        // (A click on it not reaching the web's Mushaf canvas under it.)
+        child: CanvasClickShield(
+          child: ValueListenableBuilder(
+            valueListenable: visible,
+            builder: (context, shown, child) => AnimatedOpacity(
+              opacity: shown ? 1 : 0,
               duration: WordPeek._fade,
-              child: child,
+              child: AnimatedScale(
+                scale: shown ? 1 : 0.92,
+                duration: WordPeek._fade,
+                child: child,
+              ),
             ),
+            child: child,
           ),
-          child: child,
         ),
       ),
     );
@@ -447,9 +451,10 @@ class _WordPeekPill extends ConsumerWidget {
   }
 }
 
-/// Glass in the Mushaf page's own colours — see-through (owner,
-/// 2026-11-16: more glassy), the blur keeping the ink behind from fighting
-/// the text (the bars' frost — what is behind
+/// Glass in the Mushaf page's own colours — mostly opaque (owner,
+/// 2026-11-16: the more see-through version was too glassy), the blur
+/// keeping the ink behind from fighting the text (the bars' frost — what
+/// is behind
 /// blurred, a see-through tint, a bright hairline — over the page's paper
 /// and ink): the word pills (owner, 2026-11-16).
 class PageGlass extends StatelessWidget {
@@ -483,7 +488,7 @@ class PageGlass extends StatelessWidget {
       child: ClipRRect(
         borderRadius: r,
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
           child: DecoratedBox(
             decoration: BoxDecoration(
               borderRadius: r,
@@ -495,12 +500,12 @@ class PageGlass extends StatelessWidget {
                     paper,
                     Colors.white,
                     dark ? 0.06 : 0.35,
-                  )!.withValues(alpha: dark ? 0.42 : 0.4),
+                  )!.withValues(alpha: dark ? 0.7 : 0.72),
                   Color.lerp(
                     paper,
                     ink,
                     0.04,
-                  )!.withValues(alpha: dark ? 0.58 : 0.55),
+                  )!.withValues(alpha: dark ? 0.84 : 0.86),
                 ],
               ),
               border: Border.all(

@@ -72,6 +72,12 @@ ThemeData buildTahfeezTheme(
         borderRadius: BorderRadius.circular(TahfeezRadii.lg),
       ),
       elevation: TahfeezElevation.medium,
+      // In a browser, a dialog a normal width on a wide window too
+      // (Material's own goes to 560, its text spread wide — owner,
+      // 2026-11-16: "Reset all data" too wide). The apps keep theirs.
+      constraints: kIsWeb
+          ? const BoxConstraints(minWidth: 280, maxWidth: 400)
+          : null,
     ),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(

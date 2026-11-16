@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -39,6 +40,7 @@ Future<void> showAyahDetailSheet(BuildContext context, {required int ayahId}) =>
     showTahfeezModalBottomSheet<void>(
       context: context,
       title: AppLocalizations.of(context).ayahDetails,
+      besideOnWide: kIsWeb,
       builder: (context) => _AyahDetailSheet(first: ayahId),
     );
 

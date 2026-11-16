@@ -38,10 +38,62 @@ class TahfeezModalSheetActivity {
 
   static void _opened() => _openCount++;
 
+  /// The places on screen covered by [CanvasClickShield]s (the guide's
+  /// card, a word's pill): a click there is theirs, not the page's under
+  /// them.
+  static final _shields = <Rect? Function()>{};
+
+  /// Whether [global] (logical pixels) is on a [CanvasClickShield].
+  static bool shieldedAt(Offset global) {
+    for (final rect in _shields) {
+      if (rect()?.contains(global) ?? false) return true;
+    }
+    return false;
+  }
+
   static void _closed() {
     _openCount = _openCount > 0 ? _openCount - 1 : 0;
     _lastClosedAt = DateTime.now();
   }
+}
+
+/// Something drawn over the web's Mushaf canvas (not a popup): a click on
+/// it stays its own. The canvas has its own DOM click listener, which
+/// Flutter's hit-testing does not stop — the guide's Next opened the word
+/// under it too (owner, 2026-11-16).
+class CanvasClickShield extends StatefulWidget {
+  const CanvasClickShield({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  State<CanvasClickShield> createState() => _CanvasClickShieldState();
+}
+
+class _CanvasClickShieldState extends State<CanvasClickShield> {
+  Rect? _rect() {
+    if (!mounted) return null;
+    final box = context.findRenderObject();
+    if (box is! RenderBox || !box.attached || !box.hasSize) return null;
+    return box.localToGlobal(Offset.zero) & box.size;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    TahfeezModalSheetActivity._shields.add(_rect);
+  }
+
+  @override
+  void dispose() {
+    TahfeezModalSheetActivity._shields.remove(_rect);
+    // (The same click may reach the canvas just after it goes.)
+    TahfeezModalSheetActivity._lastClosedAt = DateTime.now();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }
 
 /// Counts every sheet, dialog and menu on the navigator it observes (the

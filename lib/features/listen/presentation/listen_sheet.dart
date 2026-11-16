@@ -5,6 +5,7 @@ import '../../guide/guide.dart';
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
 import '../../../core/core_providers.dart';
@@ -42,6 +43,7 @@ Future<void> showListenSheet(BuildContext context, {VerseRef? from}) =>
     showTahfeezModalBottomSheet<void>(
       context: context,
       title: AppLocalizations.of(context).listenMenuTitle,
+      besideOnWide: kIsWeb,
       builder: (context) => _ListenSheet(from: from),
     );
 
@@ -153,6 +155,7 @@ Future<void> showReciterSheet(BuildContext context) =>
     showTahfeezModalBottomSheet<void>(
       context: context,
       title: AppLocalizations.of(context).listenReciter,
+      besideOnWide: kIsWeb,
       builder: (context) => const _ReciterPicker(),
     );
 

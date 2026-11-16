@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
@@ -393,6 +394,7 @@ Future<void> showKhatmahDaysSheet(
   String? start,
 }) => showTahfeezModalBottomSheet<void>(
   context: context,
+  besideOnWide: kIsWeb,
   title: current == null
       ? AppLocalizations.of(context).khatmahStart
       : AppLocalizations.of(context).khatmahChangeDays,

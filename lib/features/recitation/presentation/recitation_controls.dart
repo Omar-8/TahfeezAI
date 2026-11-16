@@ -6,7 +6,7 @@ import '../../../core/localization/generated/app_localizations.dart';
 import '../../../ai/acoustic/local_quran_acoustic_model.dart';
 
 import 'package:flutter/foundation.dart'
-    show ValueListenable, kReleaseMode, listEquals;
+    show ValueListenable, kIsWeb, kReleaseMode, listEquals;
 import 'package:flutter/material.dart';
 
 import '../../../core/platform/app_settings_opener.dart';
@@ -2659,6 +2659,15 @@ class _RecitationIntroSheet extends ConsumerWidget {
 }
 
 Future<void> showHifzSettingsSheet(BuildContext context) {
+  // In a wide browser window: beside the page.
+  if (kIsWeb && sheetBesidePage(context)) {
+    return showTahfeezModalBottomSheet<void>(
+      context: context,
+      besideOnWide: kIsWeb,
+      title: AppLocalizations.of(context).recHifzSettings,
+      builder: (context) => const _HifzSettingsSheet(),
+    );
+  }
   return showModalBottomSheet<void>(
     context: context,
     // (Its drag handle on the glass: GlassSheet.)

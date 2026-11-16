@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
 import '../../../core/localization/generated/app_localizations.dart';
@@ -18,6 +19,7 @@ Future<QuranLocation?> showGoToAyahSheet(BuildContext context) {
   return showTahfeezModalBottomSheet<QuranLocation>(
     context: context,
     title: AppLocalizations.of(context).quranGoTo,
+    besideOnWide: kIsWeb,
     builder: (context) => const _GoToSheet(),
   );
 }

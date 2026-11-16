@@ -144,7 +144,7 @@ class QuranEngineWebPage {
           // here and open the word-detail popup. Ignored while any
           // Tahfeez modal sheet is active, plus a short cooldown after it
           // closes (`TahfeezModalSheetActivity`).
-          if (TahfeezModalSheetActivity.isActive) return;
+          if (TahfeezModalSheetActivity.isActive || _shielded(event)) return;
           // (The end of a long press: its ayah opened, not the word too.)
           if (_longPressed) {
             _longPressed = false;
@@ -167,7 +167,7 @@ class QuranEngineWebPage {
         (web.MouseEvent event) {
           event.preventDefault();
           _holdTimer?.cancel();
-          if (_longPressed) return;
+          if (_longPressed || _shielded(event)) return;
           longPress(event.offsetX.toDouble(), event.offsetY.toDouble());
           // (A right-click has no click after it.)
           _longPressed = false;
@@ -179,6 +179,7 @@ class QuranEngineWebPage {
           _longPressed = false;
           _holdTimer?.cancel();
           if (event.pointerType != 'mouse' || event.button != 0) return;
+          if (_shielded(event)) return;
           final x = event.offsetX.toDouble(), y = event.offsetY.toDouble();
           _holdAt = (x, y);
           _holdTimer = Timer(
@@ -263,6 +264,13 @@ class QuranEngineWebPage {
     canvas.style.cursor = hint == null ? '' : 'pointer';
     canvas.title = hint ?? '';
   }
+
+  /// A click on something drawn over the canvas ([CanvasClickShield]: the
+  /// guide's card, a word's pill), not on the page.
+  static bool _shielded(web.MouseEvent event) =>
+      TahfeezModalSheetActivity.shieldedAt(
+        Offset(event.clientX.toDouble(), event.clientY.toDouble()),
+      );
 
   /// Sets the canvas element's own CSS background — the "paper" behind
   /// the engine's ink, since `CanvasRenderer.draw` itself never fills a

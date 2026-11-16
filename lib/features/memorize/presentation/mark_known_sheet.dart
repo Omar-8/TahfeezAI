@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -18,6 +19,7 @@ Future<void> showMarkKnownSheet(BuildContext context) =>
     showTahfeezModalBottomSheet<void>(
       context: context,
       title: AppLocalizations.of(context).memMarkKnown,
+      besideOnWide: kIsWeb,
       builder: (context) => const _MarkKnownSheet(),
     );
 

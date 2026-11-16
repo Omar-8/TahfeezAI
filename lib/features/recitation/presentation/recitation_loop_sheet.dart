@@ -2,6 +2,7 @@ import 'dart:async';
 
 import '../../guide/guide.dart';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -36,6 +37,14 @@ import '../../../core/theme/tahfeez_motion.dart';
 /// Shown like the Hifz settings sheet: a drag handle, as tall as its
 /// content, below the app bar.
 Future<void> showRecitationLoopSheet(BuildContext context) {
+  // In a wide browser window: beside the page (its own header and ✕).
+  if (kIsWeb && sheetBesidePage(context)) {
+    return showTahfeezModalBottomSheet<void>(
+      context: context,
+      besideOnWide: kIsWeb,
+      builder: (context) => const _RecitationLoopSheet(),
+    );
+  }
   return showModalBottomSheet<void>(
     context: context,
     // (Its drag handle on the glass: GlassSheet.)

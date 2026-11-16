@@ -1,5 +1,6 @@
 import '../../../core/localization/fallback_localizations.dart';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -21,6 +22,7 @@ import '../../recitation/presentation/recitation_loop_sheet.dart'
 Future<void> showPlanSheet(BuildContext context, {MemorizationPlan? plan}) =>
     showTahfeezModalBottomSheet<void>(
       context: context,
+      besideOnWide: kIsWeb,
       builder: (context) => _PlanSheet(plan: plan),
     );
 

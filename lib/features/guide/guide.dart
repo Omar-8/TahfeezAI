@@ -609,7 +609,10 @@ class _GuideOverlayState extends ConsumerState<_GuideOverlay> {
     // reach the control.
     Widget blocker(Rect r) => Positioned.fromRect(
       rect: r,
-      child: const AbsorbPointer(child: SizedBox.expand()),
+      // (On the web's Mushaf canvas too: its clicks stop here.)
+      child: const CanvasClickShield(
+        child: AbsorbPointer(child: SizedBox.expand()),
+      ),
     );
     final blockers = hole == null || !passThrough
         ? [blocker(Offset.zero & size)]
@@ -740,75 +743,77 @@ class _GuideCard extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final last = index + 1 >= length;
-    return Material(
-      key: const ValueKey('guide-card'),
-      elevation: 6,
-      color: theme.colorScheme.surfaceContainerHigh,
-      borderRadius: BorderRadius.circular(TahfeezRadii.md),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                if (length > 1)
-                  Text(
-                    '${index + 1}/$length',
+    return CanvasClickShield(
+      child: Material(
+        key: const ValueKey('guide-card'),
+        elevation: 6,
+        color: theme.colorScheme.surfaceContainerHigh,
+        borderRadius: BorderRadius.circular(TahfeezRadii.md),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  if (length > 1)
+                    Text(
+                      '${index + 1}/$length',
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  const Spacer(),
+                  IconButton(
+                    key: const ValueKey('guide-close'),
+                    icon: const Icon(Icons.close_rounded),
+                    tooltip: l10n.guideClose,
+                    visualDensity: VisualDensity.compact,
+                    onPressed: onClose,
+                  ),
+                ],
+              ),
+              Padding(
+                padding: const EdgeInsetsDirectional.only(end: 8),
+                child: Text(text, style: theme.textTheme.bodyLarge),
+              ),
+              if (tapToContinue)
+                Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: Text(
+                    l10n.guideTapToContinue,
                     style: theme.textTheme.labelMedium?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
+                      color: theme.colorScheme.primary,
                     ),
                   ),
-                const Spacer(),
-                IconButton(
-                  key: const ValueKey('guide-close'),
-                  icon: const Icon(Icons.close_rounded),
-                  tooltip: l10n.guideClose,
-                  visualDensity: VisualDensity.compact,
-                  onPressed: onClose,
                 ),
-              ],
-            ),
-            Padding(
-              padding: const EdgeInsetsDirectional.only(end: 8),
-              child: Text(text, style: theme.textTheme.bodyLarge),
-            ),
-            if (tapToContinue)
-              Padding(
-                padding: const EdgeInsets.only(top: 6),
-                child: Text(
-                  l10n.guideTapToContinue,
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    color: theme.colorScheme.primary,
-                  ),
-                ),
+              const SizedBox(height: 4),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  if (onBack != null)
+                    TextButton(
+                      key: const ValueKey('guide-back'),
+                      onPressed: onBack,
+                      child: Text(l10n.guideBack),
+                    ),
+                  if (onNext != null && !tapToContinue)
+                    FilledButton(
+                      key: const ValueKey('guide-next'),
+                      onPressed: onNext,
+                      child: Text(last ? l10n.guideDone : l10n.guideNext),
+                    ),
+                  if (tapToContinue && last)
+                    TextButton(
+                      key: const ValueKey('guide-finish'),
+                      onPressed: onNext ?? onClose,
+                      child: Text(l10n.guideDone),
+                    ),
+                ],
               ),
-            const SizedBox(height: 4),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                if (onBack != null)
-                  TextButton(
-                    key: const ValueKey('guide-back'),
-                    onPressed: onBack,
-                    child: Text(l10n.guideBack),
-                  ),
-                if (onNext != null && !tapToContinue)
-                  FilledButton(
-                    key: const ValueKey('guide-next'),
-                    onPressed: onNext,
-                    child: Text(last ? l10n.guideDone : l10n.guideNext),
-                  ),
-                if (tapToContinue && last)
-                  TextButton(
-                    key: const ValueKey('guide-finish'),
-                    onPressed: onNext ?? onClose,
-                    child: Text(l10n.guideDone),
-                  ),
-              ],
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
