@@ -23,6 +23,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:qvp_flutter/qvp_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tahfeez_ai/app/app.dart';
 import 'package:tahfeez_ai/app/bootstrap.dart';
 import 'package:tahfeez_ai/features/listen/application/quran_audio_player.dart';
@@ -68,6 +69,10 @@ void main() {
       tester.takeException();
     }
 
+    // Past the first-run welcome and guide (they cover the app).
+    final prefs = SharedPreferencesAsync();
+    await prefs.setBool('firstRun.welcome', true);
+    await prefs.setBool('firstRun.guide', true);
     await bootstrap();
     // Frames for [seconds] (the app animates, so it never settles).
     Future<void> run(double seconds) async {
