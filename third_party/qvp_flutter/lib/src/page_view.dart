@@ -654,6 +654,10 @@ class _InkCache {
   List<List<int>>? linePaths;
   final lines = <int, _LineImage>{};
 
+  /// Tahfeez patch 0008: the words fading in or out, a line's at one
+  /// moment as one image (drawn see-through), kept while they fade.
+  final fades = <String, _LineImage>{};
+
   List<List<int>> buildLinePaths(QvpPage p) {
     final cached = linePaths;
     if (cached != null) return cached;
@@ -700,6 +704,10 @@ class _InkCache {
       line.dispose();
     }
     lines.clear();
+    for (final fade in fades.values) {
+      fade.dispose();
+    }
+    fades.clear();
   }
 
   void dispose() {
@@ -865,7 +873,7 @@ class _QvpPainter extends CustomPainter {
     List<Rect?> bounds,
     List<int> ids,
     Map<int, int> colorOf,
-    Map<int, double> shakes,
+    Set<int> live,
     int ink,
     Size size,
     String key,
@@ -894,7 +902,7 @@ class _QvpPainter extends CustomPainter {
     for (final i in ids) {
       final color = colorOf[i] ?? ink;
       if ((color & 0xff) == 0) continue;
-      if (shakes.isNotEmpty && shakes.containsKey(page.pathWord(i))) continue;
+      if (live.isNotEmpty && live.contains(page.pathWord(i))) continue;
       paint.color = QvpColor.toColor(color);
       c.drawPath(paths[i], paint);
     }
@@ -914,6 +922,33 @@ class _QvpPainter extends CustomPainter {
         ..scale(1 / dpr)
         ..drawPicture(pic);
       return _LineImage(key, rect, null, placed.endRecording());
+    }
+  }
+
+  /// A line's image (or, with no GPU image, its picture) in place, at
+  /// [opacity] (Tahfeez patch 0008: fading words see-through).
+  void _drawLineImage(ui.Canvas canvas, _LineImage line, double opacity) {
+    final img = line.image;
+    if (img != null) {
+      canvas.drawImageRect(
+        img,
+        Rect.fromLTWH(0, 0, img.width.toDouble(), img.height.toDouble()),
+        line.rect,
+        ui.Paint()
+          ..filterQuality = FilterQuality.none
+          ..color = Color.fromRGBO(0, 0, 0, opacity),
+      );
+    } else if (line.picture != null) {
+      if (opacity >= 1) {
+        canvas.drawPicture(line.picture!);
+      } else {
+        canvas.saveLayer(
+          line.rect,
+          ui.Paint()..color = Color.fromRGBO(0, 0, 0, opacity),
+        );
+        canvas.drawPicture(line.picture!);
+        canvas.restore();
+      }
     }
   }
 
@@ -1089,6 +1124,22 @@ class _QvpPainter extends CustomPainter {
     // image rebuilt only when something on that line changes — a recited
     // word recolours one line, not the page; a swaying word drawn live.
     final colorOf = <int, int>{for (final s in styled) s.path: s.color};
+    // Tahfeez patch 0008: a word's ink fading in or out — the word itself
+    // see-through, over whatever is behind it (the paper, or a band that
+    // stays: a paper patch over the word cut into the band, then the band
+    // came back whole).
+    final fading = <int, double>{};
+    for (final (e, t) in _running(fx, QvpWordEffectKind.inkOut, now)) {
+      final p = (t * 460 / 400).clamp(0.0, 1.0);
+      fading[e.word] = 1 - p * p * (3 - 2 * p);
+    }
+    for (final (e, t) in _running(fx, QvpWordEffectKind.inkIn, now)) {
+      // The same curve as inkOut, mirrored: the two fades match.
+      fading[e.word] = t * t * (3 - 2 * t);
+    }
+    fading.removeWhere((w, _) => shakes.containsKey(w));
+    // Drawn apart from their lines' images: swaying or fading.
+    final live = {...shakes.keys, ...fading.keys};
     final lines = cache.buildLinePaths(page);
     final tkey =
         '${view.scale.toStringAsFixed(5)}|${view.offsetX.toStringAsFixed(2)}|${view.offsetY.toStringAsFixed(2)}|$dpr|$ink|${identityHashCode(l)}|${size.width}x${size.height}';
@@ -1102,7 +1153,7 @@ class _QvpPainter extends CustomPainter {
       for (final i in ids) {
         final c = colorOf[i];
         if (c != null) sig.write(',$i:$c');
-        if (shakes.isNotEmpty && shakes.containsKey(page.pathWord(i))) {
+        if (live.isNotEmpty && live.contains(page.pathWord(i))) {
           sig.write(',$i~');
         }
       }
@@ -1116,7 +1167,7 @@ class _QvpPainter extends CustomPainter {
           bounds,
           ids,
           colorOf,
-          shakes,
+          live,
           ink,
           size,
           key,
@@ -1124,18 +1175,47 @@ class _QvpPainter extends CustomPainter {
         cache.lines[ln] = line;
         rebuilt++;
       }
-      final img = line.image;
-      if (img != null) {
-        canvas.drawImageRect(
-          img,
-          Rect.fromLTWH(0, 0, img.width.toDouble(), img.height.toDouble()),
-          line.rect,
-          ui.Paint()..filterQuality = FilterQuality.none,
+      _drawLineImage(canvas, line, 1);
+    }
+    // Tahfeez patch 0008: the fading words, a line's fading together as
+    // one image — rastered once, then drawn more or less see-through.
+    final used = <String>{};
+    if (fading.isNotEmpty) {
+      final groups = <(int, int), List<int>>{};
+      for (var ln = 0; ln < lines.length; ln++) {
+        for (final i in lines[ln]) {
+          final a = fading[page.pathWord(i)];
+          if (a == null) continue;
+          (groups[(ln, (a * 1000).round())] ??= []).add(i);
+        }
+      }
+      for (final MapEntry(key: (ln, a), value: ids) in groups.entries) {
+        if (a <= 0) continue;
+        final sig = StringBuffer('$tkey|f$ln');
+        for (final i in ids) {
+          sig.write(',$i:${colorOf[i] ?? ink}');
+        }
+        final key = sig.toString();
+        used.add(key);
+        final fade = cache.fades[key] ??= _rasterLine(
+          l,
+          paths,
+          bounds,
+          ids,
+          colorOf,
+          const {},
+          ink,
+          size,
+          key,
         );
-      } else if (line.picture != null) {
-        canvas.drawPicture(line.picture!);
+        _drawLineImage(canvas, fade, a / 1000);
       }
     }
+    cache.fades.removeWhere((key, fade) {
+      if (used.contains(key)) return false;
+      fade.dispose();
+      return true;
+    });
     if (rebuilt > 0) {
       cache.basePaths = rebuilt;
       cache.baseMs = baseSw.elapsedMicroseconds / 1000;
@@ -1158,30 +1238,6 @@ class _QvpPainter extends CustomPainter {
           canvas.drawPath(paths[i], paint);
           canvas.restore();
         }
-      }
-    }
-
-    // Tahfeez patch 0005: ink fading in — the paper over the word, fading
-    // out — or fading out, the paper over it fading in.
-    if (fx.isNotEmpty && paperColor != null) {
-      for (final (e, t) in _running(fx, QvpWordEffectKind.inkOut, now)) {
-        final r = _wordBounds(l, paths, e.word);
-        if (r == null) continue;
-        final p = (t * 460 / 400).clamp(0.0, 1.0);
-        canvas.drawRect(
-          r.inflate(1.5),
-          ui.Paint()..color = paperColor.withValues(alpha: p * p * (3 - 2 * p)),
-        );
-      }
-      for (final (e, t) in _running(fx, QvpWordEffectKind.inkIn, now)) {
-        final r = _wordBounds(l, paths, e.word);
-        if (r == null) continue;
-        // The same curve as inkOut, mirrored: the two fades match.
-        final ease = t * t * (3 - 2 * t);
-        canvas.drawRect(
-          r.inflate(1.5),
-          ui.Paint()..color = paperColor.withValues(alpha: 1 - ease),
-        );
       }
     }
 

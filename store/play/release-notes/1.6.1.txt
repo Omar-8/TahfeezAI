@@ -1,0 +1,84 @@
+<en-US>
+• Smoother scrolling in Memorize → Progress and in the Qur'an list
+• Hiding the ayahs fades the words out smoothly again, also over a highlighted word or ayah
+</en-US>
+<ar>
+• تمرير أكثر سلاسة في الحفظ ← التقدم وفي قائمة السور
+• إخفاء الآيات يُخفي الكلمات بتلاشٍ سلس من جديد، حتى فوق الكلمة أو الآية المظلَّلة
+</ar>
+<bn-BD>
+• মুখস্থ → অগ্রগতি এবং কুরআনের তালিকায় আরও মসৃণ স্ক্রল
+• আয়াত লুকালে শব্দগুলো আবার মসৃণভাবে মিলিয়ে যায়, চিহ্নিত শব্দ বা আয়াতের ওপরেও
+</bn-BD>
+<da-DK>
+• Glattere rulning i Memorér → Fremskridt og i Koran-listen
+• Når versene skjules, toner ordene igen blødt ud, også over et markeret ord eller vers
+</da-DK>
+<de-DE>
+• Flüssigeres Scrollen unter Auswendiglernen → Fortschritt und in der Koran-Liste
+• Beim Ausblenden der Verse verblassen die Wörter wieder sanft, auch über einem markierten Wort oder Vers
+</de-DE>
+<el-GR>
+• Πιο ομαλή κύλιση στην Απομνημόνευση → Πρόοδος και στη λίστα του Κορανίου
+• Η απόκρυψη των εδαφίων σβήνει ξανά ομαλά τις λέξεις, και πάνω από επισημασμένη λέξη ή εδάφιο
+</el-GR>
+<es-ES>
+• Desplazamiento más fluido en Memorizar → Progreso y en la lista del Corán
+• Al ocultar las aleyas, las palabras vuelven a desvanecerse con suavidad, también sobre una palabra o aleya resaltada
+</es-ES>
+<fa>
+• پیمایش روان‌تر در حفظ ← پیشرفت و در فهرست قرآن
+• پنهان کردن آیه‌ها دوباره کلمات را به‌نرمی محو می‌کند، حتی روی کلمه یا آیهٔ برجسته‌شده
+</fa>
+<fr-FR>
+• Défilement plus fluide dans Mémoriser → Progrès et dans la liste du Coran
+• Masquer les versets fait de nouveau disparaître les mots en douceur, même sur un mot ou un verset surligné
+</fr-FR>
+<id>
+• Gulir lebih mulus di Hafalan → Kemajuan dan di daftar Al-Qur'an
+• Menyembunyikan ayat kembali memudarkan kata dengan halus, juga di atas kata atau ayat yang disorot
+</id>
+<ja-JP>
+• 暗記 → 進捗とクルアーン一覧のスクロールがより滑らかに
+• アーヤを隠すと、語が再び滑らかにフェードアウト（ハイライトされた語やアーヤの上でも）
+</ja-JP>
+<kk>
+• Жаттау → Үлгерім бөлімінде және Құран тізімінде жылжу тегісірек
+• Аяттарды жасырғанда сөздер қайтадан біртіндеп жоғалады, белгіленген сөз не аят үстінде де
+</kk>
+<ko-KR>
+• 암기 → 진행 상황과 꾸란 목록의 스크롤이 더 부드러워졌습니다
+• 아야를 숨기면 단어가 다시 부드럽게 사라집니다 (강조된 단어나 아야 위에서도)
+</ko-KR>
+<ms>
+• Tatal lebih lancar di Hafazan → Kemajuan dan dalam senarai al-Quran
+• Menyembunyikan ayat kembali memudarkan perkataan dengan lancar, juga di atas perkataan atau ayat yang diserlahkan
+</ms>
+<nl-NL>
+• Soepeler scrollen in Memoriseren → Voortgang en in de Koranlijst
+• Bij het verbergen van de verzen vervagen de woorden weer vloeiend, ook over een gemarkeerd woord of vers
+</nl-NL>
+<pt-BR>
+• Rolagem mais suave em Memorizar → Progresso e na lista do Alcorão
+• Ocultar os versículos volta a esmaecer as palavras suavemente, também sobre uma palavra ou versículo destacado
+</pt-BR>
+<ru-RU>
+• Более плавная прокрутка в разделе Заучивание → Прогресс и в списке Корана
+• При скрытии аятов слова снова плавно исчезают, в том числе на выделенном слове или аяте
+</ru-RU>
+<sw>
+• Kusogeza kwa ulaini zaidi katika Kuhifadhi → Maendeleo na katika orodha ya Qur'an
+• Kuficha aya kunafifisha maneno kwa ulaini tena, hata juu ya neno au aya iliyoangaziwa
+</sw>
+<tr-TR>
+• Ezberle → İlerleme bölümünde ve Kur'an listesinde daha akıcı kaydırma
+• Ayetleri gizlemek kelimeleri yeniden yumuşakça soldurur, vurgulanmış bir kelime ya da ayet üzerinde de
+</tr-TR>
+<ur>
+• حفظ ← پیش رفت اور قرآن کی فہرست میں زیادہ ہموار اسکرول
+• آیات چھپانے پر الفاظ پھر سے نرمی سے مدھم ہوتے ہیں، نمایاں لفظ یا آیت پر بھی
+</ur>
+<zh-CN>
+• 背诵 → 进度和古兰经列表的滚动更流畅
+• 隐藏经文时，词语再次平滑淡出，在高亮的词或经文上也是如此
+</zh-CN>

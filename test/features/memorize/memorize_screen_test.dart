@@ -779,12 +779,46 @@ void main() {
       expect(find.text("28% of the Qur'an memorized"), findsOneWidget);
       expect(find.text('5 of 18 ayahs memorized'), findsOneWidget);
       expect(find.text('1 ayah marked, not recited yet'), findsOneWidget);
-      expect(find.byKey(const ValueKey('mem-map-page-603')), findsOneWidget);
-      expect(find.byKey(const ValueKey('mem-map-page-604')), findsOneWidget);
+      // The juz's pages drawn as one strip (one screen-reader node).
+      final strip = find.byKey(const ValueKey('mem-map-juz-30'));
+      expect(strip, findsOneWidget);
+      expect(
+        tester.getSemantics(strip),
+        matchesSemantics(
+          label: 'Juz 30 · 5 of 18 ayahs memorized',
+          isButton: true,
+          hasTapAction: true,
+        ),
+      );
       // Page 603 at 50%: weak, revised from its memorized ayahs.
       expect(find.byKey(const ValueKey('mem-weak-page-603')), findsOneWidget);
       expect(find.text('Al-Ikhlas 1–4'), findsOneWidget);
       expect(find.byKey(const ValueKey('mem-weak-page-604')), findsNothing);
+    });
+
+    testWidgets("a tap on the map opens the page under it (its 16 px "
+        'square, 3 px apart)', (tester) async {
+      tester.view.physicalSize = const Size(500, 1600);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(
+        app(const TodayPlan(), extra: overrides(memories)),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('mem-tab-progress')));
+      await tester.pumpAndSettle();
+      final strip = find.byKey(const ValueKey('mem-map-juz-30'));
+      await tester.ensureVisible(strip);
+      await tester.pumpAndSettle();
+      final origin = tester.getTopLeft(strip);
+      await tester.tapAt(origin + const Offset(8, 8));
+      await tester.pumpAndSettle();
+      expect(find.text('Page 603 · Juz 30'), findsOneWidget);
+      await tester.tapAt(const Offset(10, 10)); // the sheet away
+      await tester.pumpAndSettle();
+      await tester.tapAt(origin + const Offset(16 + 3 + 8, 8));
+      await tester.pumpAndSettle();
+      expect(find.text('Page 604 · Juz 30'), findsOneWidget);
     });
 
     testWidgets('marking what is known: checked surahs are marked, unchecked '

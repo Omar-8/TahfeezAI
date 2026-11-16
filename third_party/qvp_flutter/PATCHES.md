@@ -240,3 +240,21 @@ it (owner, 2026-11-16).
 
 Re-apply with `patch -p1 < patches/0007-word-rect-on-screen.patch` after
 0006 (2026-11-16).
+
+## Patch 0008 — fading words see-through
+
+`patches/0008-fading-words-see-through.patch` (on top of 0007) changes how
+a word's ink fades in or out (`inkIn` / `inkOut`, patch 0005). Before, a
+paper-coloured patch over the word's ink box faded in or out. On a word
+with a highlight behind it (the band of a word tapped, an opened ayah's
+tint), that patch cut into the highlight, and the highlight came back
+whole at the end: blocky, not smooth (owner, 2026-11-16).
+
+- The fading words are left out of their lines' images (as a swaying
+  word already was) and drawn from an image of their own — a line's
+  words fading at one moment as one image, rastered once and kept while
+  they fade — at the fade's opacity. Whatever is behind them stays put.
+- The paper patches are gone.
+
+Re-apply with `patch -p1 < patches/0008-fading-words-see-through.patch`
+after 0007 (2026-11-16).

@@ -424,26 +424,23 @@ class QuranEngineWebPage {
     final c = canvas.getContext('2d') as web.CanvasRenderingContext2D;
     c.save();
     c.setTransform(1.toJS, 0, 0, 1, 0, 0);
+    // How much of each fading word's ink is taken away now (0: all of
+    // it drawn, 1: none).
+    final erase = <int, double>{};
     for (final e in _effects) {
       final t = (now - e.start) / e.duration;
       if (t < 0) {
-        // Not started: a word about to fade in stays covered.
-        if (e.kind == 'inkIn') _cover(c, renderer, view!, e.word, 1);
+        // Not started: a word about to fade in stays out.
+        if (e.kind == 'inkIn') erase[e.word] = 1;
         continue;
       }
       final k = t.clamp(0.0, 1.0);
       switch (e.kind) {
         case 'inkIn':
-          _cover(c, renderer, view!, e.word, 1 - _ease(k));
+          erase[e.word] = 1 - _ease(k);
         case 'inkOut':
-          // To the paper in 400 of its 460 ms, then held.
-          _cover(
-            c,
-            renderer,
-            view!,
-            e.word,
-            _ease((k * 460 / 400).clamp(0, 1)),
-          );
+          // Gone in 400 of its 460 ms, then held.
+          erase[e.word] = _ease((k * 460 / 400).clamp(0, 1));
         case 'bloom':
           _band(c, renderer, view!, e, 0.45 * (1 - k), 2 + 6 * k);
         case 'shake':
@@ -457,6 +454,7 @@ class QuranEngineWebPage {
           );
       }
     }
+    _fadeInk(c, canvas, renderer, view!, erase);
     c.restore();
   }
 
@@ -470,12 +468,7 @@ class QuranEngineWebPage {
     if (renderer == null || view == null) return null;
     Rect? out;
     for (final r in _rects(renderer, view, word, 0)) {
-      final box = Rect.fromLTWH(
-        r.x / _dpr,
-        r.y / _dpr,
-        r.w / _dpr,
-        r.h / _dpr,
-      );
+      final box = Rect.fromLTWH(r.x / _dpr, r.y / _dpr, r.w / _dpr, r.h / _dpr);
       out = out == null ? box : out.expandToInclude(box);
     }
     return out;
@@ -515,22 +508,105 @@ class QuranEngineWebPage {
     }
   }
 
-  /// The paper over the word's ink, [alpha] opaque.
-  void _cover(
+  /// Each word's paths (the page's path indices), built when first needed.
+  late final List<List<int>> _pathsOfWord = () {
+    final n = (_page.getProperty('nPaths'.toJS) as JSNumber).toDartInt;
+    final words = (_page.getProperty('nWords'.toJS) as JSNumber).toDartInt;
+    final out = List.generate(words, (_) => <int>[], growable: false);
+    for (var i = 0; i < n; i++) {
+      final w =
+          (_page.callMethod('pathWord'.toJS, i.toJS) as JSNumber).toDartInt;
+      if (w >= 0 && w < words) out[w].add(i);
+    }
+    return out;
+  }();
+
+  /// The letters of the words fading (their ink [erase]d that much) and,
+  /// under them, what lies behind each: the paper, or a band kept (a word
+  /// tapped, the ayah opened). Before, a paper patch over each word's box
+  /// cut into its band, which came back whole at the end (owner,
+  /// 2026-11-16).
+  web.HTMLCanvasElement? _fadeMask, _fadeUnder;
+
+  void _fadeInk(
     web.CanvasRenderingContext2D c,
+    web.HTMLCanvasElement canvas,
     JSObject renderer,
     JSObject view,
-    int word,
-    double alpha,
+    Map<int, double> erase,
   ) {
-    if (alpha <= 0) return;
-    c.globalAlpha = alpha;
-    c.globalCompositeOperation = 'source-over';
-    c.fillStyle = (_paperColorCss ?? '#ffffff').toJS;
-    for (final r in _rects(renderer, view, word, 1.5)) {
-      c.fillRect(r.x, r.y, r.w, r.h);
+    erase.removeWhere((_, e) => e <= 0);
+    if (erase.isEmpty) return;
+    final w = canvas.width, h = canvas.height;
+    // The letters, each word as see-through as its fade has gone.
+    final mask = _fadeMask ??= web.HTMLCanvasElement();
+    mask
+      ..width = w
+      ..height = h;
+    final m = mask.getContext('2d') as web.CanvasRenderingContext2D;
+    m.fillStyle = '#000'.toJS;
+    final paths =
+        (_page.callMethod('buildPaths'.toJS) as JSArray<JSObject>).toDart;
+    for (final MapEntry(key: word, value: e) in erase.entries) {
+      if (word < 0 || word >= _pathsOfWord.length) continue;
+      m.globalAlpha = e.clamp(0.0, 1.0);
+      var line = -1;
+      for (final i in _pathsOfWord[word]) {
+        final ln =
+            (_page.callMethod('pathLine'.toJS, i.toJS) as JSNumber).toDartInt;
+        if (ln != line) {
+          final tf = (renderer.callMethod(
+            'lineTransform'.toJS,
+            _page,
+            view,
+            ln.toJS,
+            _dpr.toJS,
+          ) as JSArray<JSNumber>).toDart;
+          final scale = tf[0].toDartDouble;
+          m.setTransform(
+            scale.toJS,
+            0,
+            0,
+            scale,
+            tf[1].toDartDouble,
+            tf[2].toDartDouble,
+          );
+          line = ln;
+        }
+        final evenOdd =
+            (_page.callMethod('pathEvenOdd'.toJS, i.toJS) as JSBoolean).toDart;
+        m.callMethod(
+          'fill'.toJS,
+          paths[i],
+          (evenOdd ? 'evenodd' : 'nonzero').toJS,
+        );
+      }
     }
-    c.globalAlpha = 1;
+    // The bands behind those letters, as much as the ink taken away.
+    final bands = _page.callMethod('highlightBoxes'.toJS) as JSArray<JSObject>;
+    web.HTMLCanvasElement? under;
+    if (bands.length > 0) {
+      under = _fadeUnder ??= web.HTMLCanvasElement();
+      under
+        ..width = w
+        ..height = h;
+      final u = under.getContext('2d') as web.CanvasRenderingContext2D;
+      renderer.callMethod('drawBoxes'.toJS, u, bands, view, _dpr.toJS);
+      u
+        ..setTransform(1.toJS, 0, 0, 1, 0, 0)
+        ..globalCompositeOperation = 'destination-in'
+        ..drawImage(mask, 0, 0);
+    }
+    c
+      ..globalAlpha = 1
+      ..globalCompositeOperation = 'destination-out'
+      ..drawImage(mask, 0, 0);
+    if (under != null) {
+      c
+        ..globalCompositeOperation = 'lighter'
+        ..drawImage(under, 0, 0);
+    }
+    c.globalCompositeOperation = 'source-over';
   }
 
   /// A soft band of the effect's colour behind the word's ink.

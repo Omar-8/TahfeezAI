@@ -3,11 +3,12 @@ import '../../../core/ui/bar_space.dart';
 import '../../../core/ui/motion.dart';
 import '../../../core/localization/fallback_localizations.dart';
 
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
 
 import '../../khatmah/domain/khatmah_history.dart';
 
-import 'package:intl/intl.dart';
+import 'package:intl/intl.dart' hide TextDirection;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../memorization/application/activity_stats.dart';
@@ -512,33 +513,20 @@ class _StrengthMap extends ConsumerWidget {
 
     Widget juzRow(JuzProgress juz, {required bool fill}) => Row(
       children: [
+        // (Said by the strip's label: "Juz 30 · …".)
         SizedBox(
           width: 26,
-          child: Text(
-            '${juz.juz}',
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: scheme.onSurfaceVariant,
+          child: ExcludeSemantics(
+            child: Text(
+              '${juz.juz}',
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
             ),
           ),
         ),
         Expanded(
-          child: LayoutBuilder(
-            builder: (context, box) {
-              final n = juz.pages.length;
-              final cell = ((box.maxWidth - (n - 1) * _gap) / n).clamp(
-                4.0,
-                // In a browser, as wide as the row allows (a juz's pages
-                // across its column); the apps keep their cells.
-                fill ? 28.0 : 16.0,
-              );
-              return Row(
-                spacing: _gap,
-                children: [
-                  for (final p in juz.pages) _PageCell(page: p, size: cell),
-                ],
-              );
-            },
-          ),
+          child: _JuzStrip(juz: juz, gap: _gap, maxCell: fill ? 28.0 : 16.0),
         ),
       ],
     );
@@ -598,36 +586,128 @@ class _StrengthMap extends ConsumerWidget {
   }
 }
 
-class _PageCell extends ConsumerWidget {
-  const _PageCell({required this.page, required this.size});
+/// A juz's pages on the map, a square each, drawn as one picture: 604
+/// separate widgets were each a node for screen readers too, and adding or
+/// dropping them as the map scrolled in and out took 35–50 ms a frame on a
+/// phone with an accessibility service on (2026-11-16). A tap opens the
+/// page under it; for a screen reader the juz is one button (its pages
+/// memorized), opening its first memorized page.
+class _JuzStrip extends ConsumerWidget {
+  const _JuzStrip({
+    required this.juz,
+    required this.gap,
+    required this.maxCell,
+  });
 
-  final PageProgress page;
-  final double size;
+  final JuzProgress juz;
+  final double gap;
+
+  /// The largest a square gets (smallest: 4).
+  final double maxCell;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
-    final fill = _cellColor(page, scheme);
-    return Semantics(
-      button: true,
-      label: AppLocalizations.of(context).memPage(page.page),
-      child: GestureDetector(
-        key: ValueKey('mem-map-page-${page.page}'),
-        onTap: () => _showPage(context, ref, page),
-        child: Container(
-          width: size,
-          height: size,
-          decoration: BoxDecoration(
-            color: fill,
-            border: fill == null
-                ? Border.all(color: scheme.primary, width: 1.2)
-                : null,
-            borderRadius: BorderRadius.circular(size / 5),
+    final rtl = Directionality.of(context) == TextDirection.rtl;
+    final pages = juz.pages;
+    return LayoutBuilder(
+      builder: (context, box) {
+        final n = pages.length;
+        if (n == 0) return const SizedBox.shrink();
+        final cell = ((box.maxWidth - (n - 1) * gap) / n).clamp(4.0, maxCell);
+        PageProgress? at(Offset local) {
+          var x = local.dx;
+          if (rtl) x = box.maxWidth - x;
+          final i = (x / (cell + gap)).floor();
+          return i >= 0 && i < n ? pages[i] : null;
+        }
+
+        final first = pages.firstWhere(
+          (p) => !p.isEmpty,
+          orElse: () => pages.first,
+        );
+        return Semantics(
+          key: ValueKey('mem-map-juz-${juz.juz}'),
+          container: true,
+          button: true,
+          label:
+              '${l10n.memJuzNo(juz.juz)} · '
+              '${l10n.memPageAyahs(juz.memorized, juz.ayahs)}',
+          onTap: () => _showPage(context, ref, first),
+          excludeSemantics: true,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTapUp: (d) {
+              final page = at(d.localPosition);
+              if (page != null) _showPage(context, ref, page);
+            },
+            child: CustomPaint(
+              size: Size(box.maxWidth, cell),
+              painter: _JuzStripPainter(
+                fills: [for (final p in pages) _cellColor(p, scheme)],
+                outline: scheme.primary,
+                cell: cell,
+                gap: gap,
+                rtl: rtl,
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
+}
+
+class _JuzStripPainter extends CustomPainter {
+  _JuzStripPainter({
+    required this.fills,
+    required this.outline,
+    required this.cell,
+    required this.gap,
+    required this.rtl,
+  });
+
+  /// Each page's fill, in order; null: outlined (only marked).
+  final List<Color?> fills;
+  final Color outline;
+  final double cell, gap;
+  final bool rtl;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final radius = Radius.circular(cell / 5);
+    final fill = Paint();
+    final stroke = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.2
+      ..color = outline;
+    for (var i = 0; i < fills.length; i++) {
+      final x = i * (cell + gap);
+      final left = rtl ? size.width - x - cell : x;
+      final rect = Rect.fromLTWH(left, 0, cell, cell);
+      final c = fills[i];
+      if (c == null) {
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(rect.deflate(0.6), radius),
+          stroke,
+        );
+      } else {
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(rect, radius),
+          fill..color = c,
+        );
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(_JuzStripPainter old) =>
+      old.cell != cell ||
+      old.gap != gap ||
+      old.rtl != rtl ||
+      old.outline != outline ||
+      !listEquals(old.fills, fills);
 }
 
 /// A page from the map: how much of it is memorized and how strongly, with

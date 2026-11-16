@@ -254,7 +254,12 @@ class _SurahIndexTabState extends ConsumerState<SurahIndexTab> {
               SizedBox(
                 height: _searchBarHeight,
                 width: _searchBarHeight,
+                // Without the blur, as the cards: each backdrop blur is
+                // about five more GPU passes a frame, and this list's three
+                // made its scrolling miss frames on a 120 Hz phone
+                // (2026-11-16: 23 passes a frame, 13 on Topics).
                 child: TahfeezGlassSurface(
+                  blur: false,
                   borderRadius: BorderRadius.circular(TahfeezRadii.pill),
                   child: IconButton(
                     onPressed: _showFilterSheet,
@@ -295,6 +300,7 @@ class _SurahIndexTabState extends ConsumerState<SurahIndexTab> {
                         child: _reverseButton(scheme),
                       )
                     : TahfeezGlassSurface(
+                        blur: false, // (as the filter button's)
                         borderRadius: BorderRadius.circular(TahfeezRadii.pill),
                         child: _reverseButton(scheme),
                       ),

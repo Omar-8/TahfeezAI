@@ -238,6 +238,50 @@ void main() {
     await expectFade(tester, page, MushafWordEffect.inkIn, hiddenAfter: {});
   });
 
+  testWidgets('the page\'s masks applied again while the ayahs fade out: '
+      'still faded, not hidden at once (owner, 2026-11-16: "no fade out '
+      'animation")', (tester) async {
+    final (page, container) = await open(tester);
+    const word = (ayahId: 2042, wordIndex: 3);
+    container
+        .read(mushafWordOverlayProvider.notifier)
+        .set(
+          const MushafWordOverlay(
+            first: word,
+            last: word,
+            marks: {word: MushafWordMark.correct},
+            hideUnrevealed: false,
+            followHideMode: true,
+            band: word,
+          ),
+        );
+    await tester.pump(MushafWordEffect.inkOutTime);
+    page.effects.clear();
+
+    // The ayahs hidden with the colours on (as the guide's hide tour)…
+    container.read(mushafHideModeProvider.notifier).toggle();
+    await tester.pump();
+    // …and the page's overlay changing while they fade (its masks applied
+    // again: the same words hidden).
+    container
+        .read(mushafWordOverlayProvider.notifier)
+        .set(
+          const MushafWordOverlay(
+            first: word,
+            last: word,
+            marks: {word: MushafWordMark.wrong},
+            hideUnrevealed: false,
+            followHideMode: true,
+            band: word,
+          ),
+        );
+    await tester.pump();
+    expect(page.played(MushafWordEffect.inkOut), all);
+    expect(page.hidden, isEmpty, reason: 'drawn until faded out');
+    await tester.pump(MushafWordEffect.inkOutTime);
+    expect(page.hidden, all);
+  });
+
   testWidgets('a page loaded: its first frame drawn barely there, then '
       'faded in', (tester) async {
     final backend = _Backend();

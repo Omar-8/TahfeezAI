@@ -483,13 +483,12 @@ class _QuranEngineMushafPageContentState
       _hideOn = hideMode.enabled;
       // A hide still fading out: this newer state applied now instead —
       // or, hiding the same words (the eye turning the colours on as it
-      // hides the ayahs), once that fade ends.
+      // hides the ayahs, or the same words applied again in that frame),
+      // once that fade ends. (Applied again at once, the second call cut
+      // every fade short: the words gone on its first frame — 2026-11-16.)
       final pending = _maskLater?.isActive ?? false;
       _maskLater?.cancel();
-      if (pending &&
-          shownBefore != null &&
-          setEquals(shownBefore, hidden) &&
-          applied == null) {
+      if (pending && shownBefore != null && setEquals(shownBefore, hidden)) {
         final left = _maskDue.difference(DateTime.now());
         _maskLater = Timer(left.isNegative ? Duration.zero : left, () {
           if (mounted && _page == page) page.setHiddenWords(hidden);
