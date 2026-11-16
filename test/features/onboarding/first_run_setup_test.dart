@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:tahfeez_ai/features/recitation/application/hifz_controller.dart';
+import 'package:tahfeez_ai/features/recitation/application/mistake_hint.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -213,6 +215,57 @@ void main() {
     await step(tester, 'setup-done');
     expect(router.state.matchedLocation, '/memorize');
     expect(container.read(khatmahProvider).value, isNull);
+  });
+
+  testWidgets("the demo: a sure mistake's hint above its word, as in the "
+      'Mushaf; no session results at its end (only a first try)', (
+    tester,
+  ) async {
+    await pump(tester);
+    for (var i = 0; i < 4; i++) {
+      await step(tester, 'setup-next');
+    }
+    // The demo's ayah the recitation's range: it ends by itself after
+    // the last word, as a lesson's does.
+    await tester.pump();
+    expect(container.read(hifzControllerProvider).range, (
+      from: (chapterNo: 1, verseNo: 2),
+      to: (chapterNo: 1, verseNo: 2),
+    ));
+    // (Its bar, once shown: no results at the end.)
+    await tester.pump(const Duration(milliseconds: 500));
+    for (final bar in tester.widgetList<LiveRecitationBar>(
+      find.byKey(const ValueKey('setup-bar')),
+    )) {
+      expect(bar.showResults, isFalse);
+    }
+    container.read(mistakeHintProvider.notifier).report(const [
+      (ayahId: 1002, wordIndex: 2),
+    ]);
+    await tester.pump();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.byKey(const ValueKey('mistake-peek')), findsOneWidget);
+    final word = tester.getRect(
+      find.byKey(const ValueKey('setup-demo-word-2')),
+    );
+    final hint = tester.getRect(find.byKey(const ValueKey('mistake-peek')));
+    expect(hint.center.dx, moreOrLessEquals(word.center.dx, epsilon: 0.5));
+    // Above it — or, no room above, below it.
+    expect(
+      (hint.bottom - (word.top - 6)).abs() < 0.5 ||
+          (hint.top - (word.bottom + 6)).abs() < 0.5,
+      isTrue,
+      reason: 'hint $hint, word $word',
+    );
+    // Gone with the demo.
+    await tester.pump(const Duration(seconds: 4));
+    expect(find.byKey(const ValueKey('mistake-peek')), findsNothing);
+    // Left (back a step): the range as it was before it (none).
+    await step(tester, 'setup-back');
+    await tester.pump();
+    expect(container.read(hifzControllerProvider).range, isNull);
   });
 
   testWidgets('how reciting works: the ayah recited word by word; a tap '

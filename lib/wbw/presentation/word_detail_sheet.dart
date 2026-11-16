@@ -12,14 +12,10 @@ import '../../core/theme/quran_text_style.dart';
 import '../../features/listen/application/quran_audio_player.dart';
 import '../../features/mushaf/application/mushaf_appearance_controller.dart';
 import '../../features/mushaf/domain/mushaf_appearance.dart';
-import '../../features/mushaf/application/mushaf_page_turn.dart';
-import '../../features/mushaf/application/mushaf_page_verses.dart';
+import '../../features/mushaf/application/mushaf_pages_on_screen.dart';
 import '../../features/mushaf/application/mushaf_word_overlay.dart';
-import '../../features/recitation/application/mushaf_recitation_target.dart';
 import '../../features/recitation/presentation/recitation_loop_sheet.dart'
     show SegmentedProgressLine;
-import '../../quran/domain/models/quran_location.dart';
-import '../../quran/quran_providers.dart';
 import '../../features/recitation/presentation/recitation_word_feedback.dart';
 import '../../quran/application/canonical_ayah_word_text.dart';
 import '../../quran/domain/models/quran_refs.dart';
@@ -79,22 +75,7 @@ class _WordDetailSheetState extends ConsumerState<_WordDetailSheet> {
   /// Shows [word] — its page turned to first when it is not on screen.
   Future<void> _go(WordRef word) async {
     setState(() => _word = word);
-    final location = ref.read(mushafRecitationTargetProvider)?.location;
-    if (location is! QuranLocationPage) return;
-    final shown = ref
-        .read(mushafPageWordRangesProvider)
-        .values
-        .any(
-          (r) =>
-              compareWordRefs(r.first, word) <= 0 &&
-              compareWordRefs(r.last, word) >= 0,
-        );
-    if (shown) return;
-    final turns = ref.read(mushafPageTurnRequestsProvider.notifier);
-    final page = await ref
-        .read(quranRepositoryProvider)
-        .getPageForAyah(mushafId: location.mushafId, ayahId: word.ayahId);
-    if (page != null) turns.toPage(page);
+    await showMushafPageOf(ref.read, word);
   }
 
   @override
@@ -264,7 +245,8 @@ class _WordDetailSheetBody extends ConsumerWidget {
         wordIndex: wordRef.wordIndex,
       ),
     );
-    final gloss = Localizations.localeOf(context).languageCode == 'ar'
+    final arabic = Localizations.localeOf(context).languageCode == 'ar';
+    final gloss = arabic
         ? ref
               .watch(
                 arabicWordGlossProvider((
@@ -273,6 +255,9 @@ class _WordDetailSheetBody extends ConsumerWidget {
                 )),
               )
               .value
+        : null;
+    final muyassar = arabic && gloss == null
+        ? ref.watch(arabicAyahMeaningProvider(wordRef.ayahId)).value
         : null;
     final quranTextColor = ref
         .watch(mushafAppearanceControllerProvider)
@@ -345,6 +330,27 @@ class _WordDetailSheetBody extends ConsumerWidget {
                 ),
                 Text(
                   gloss,
+                  textDirection: TextDirection.rtl,
+                  style: Theme.of(context).textTheme.bodyLarge
+                      ?.copyWith(height: 1.7),
+                ),
+              ],
+            )
+          // In Arabic, a word al-Sirāj does not explain (an everyday word):
+          // its ayah's meaning from al-Muyassar (owner, 2026-11-16).
+          else if (arabic && muyassar != null)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              spacing: TahfeezSpacing.xs,
+              children: [
+                Text(
+                  AppLocalizations.of(context).wordAyahMeaningMuyassar,
+                  style: Theme.of(context).textTheme.labelMedium
+                      ?.copyWith(color: scheme.primary),
+                ),
+                Text(
+                  muyassar,
+                  key: const ValueKey('word-muyassar'),
                   textDirection: TextDirection.rtl,
                   style: Theme.of(context).textTheme.bodyLarge
                       ?.copyWith(height: 1.7),

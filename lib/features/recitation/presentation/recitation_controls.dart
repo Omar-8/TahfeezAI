@@ -430,7 +430,11 @@ const _barWait = 0.35;
 /// The recitation bar itself, while a Mushaf is open (or a session runs) —
 /// the shell's, or a screen's of its own over it ([recitationBarElsewhereProvider]).
 class LiveRecitationBar extends ConsumerWidget {
-  const LiveRecitationBar({super.key});
+  const LiveRecitationBar({super.key, this.showResults = true});
+
+  /// A session's results sheet when it ends — not in the first-run guide's
+  /// demo (owner, 2026-11-16: only a first try).
+  final bool showResults;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -499,6 +503,7 @@ class LiveRecitationBar extends ConsumerWidget {
         }
       }
 
+      if (!showResults) return skipped('the guide demo');
       if (ref.read(recitationSessionControllerProvider).isActive) {
         return skipped('session active');
       }
@@ -538,6 +543,7 @@ class LiveRecitationBar extends ConsumerWidget {
         summaries.endRun();
         final summary = ref.read(testSummaryProvider);
         if (!context.mounted ||
+            !showResults ||
             summary == null ||
             summary.rows.isEmpty ||
             identical(summary, _shownSummary) ||
@@ -3030,6 +3036,13 @@ class _HifzSettingsSheetState extends ConsumerState<_HifzSettingsSheet>
                 AppLocalizations.of(context).recShowMistakesSub,
                 settings.showMistakes,
                 (v) => settings.copyWith(showMistakes: v),
+              ),
+              // A sure mistake's hint above its word (owner, 2026-11-16).
+              toggle(
+                l10n.recMistakeHints,
+                l10n.recMistakeHintsSub,
+                settings.mistakeHints,
+                (v) => settings.copyWith(mistakeHints: v),
               ),
             ],
           ),

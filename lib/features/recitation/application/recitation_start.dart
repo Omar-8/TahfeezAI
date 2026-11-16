@@ -260,7 +260,10 @@ class RecitationStartController extends Notifier<RecitationStart?> {
   /// again, none. Not while a recitation runs or the reciter plays.
   void choose(WordRef word) {
     if (ref.read(recitationSessionControllerProvider).isActive) return;
-    if (ref.read(quranAudioPlayerProvider) != null) return;
+    // (A word's own sound playing, from its pill or sheet, is no reciter.)
+    if (ref.read(quranAudioPlayerProvider) case final p? when !p.isWord) {
+      return;
+    }
     final page = _pageOf(word);
     final pages = _visiblePages();
     if (page == null || pages == null || !pages.contains(page)) return;

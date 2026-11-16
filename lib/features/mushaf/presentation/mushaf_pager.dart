@@ -25,6 +25,10 @@ import '../domain/mushaf_appearance.dart';
 import 'ayah_mode_continuous.dart';
 import 'mushaf_ayah_sheet.dart';
 import 'mushaf_token_hit_rect.dart';
+import 'word_peek.dart';
+import '../../recitation/application/mistake_hint.dart';
+import '../../recitation/application/mushaf_recitation_target.dart';
+import '../../recitation/application/recitation_session_controller.dart';
 import 'mushaf_page_view.dart';
 
 /// A [MaterialScrollBehavior] that additionally accepts mouse-drag input.
@@ -178,6 +182,8 @@ class _MushafPagerState extends ConsumerState<MushafPager> {
 
   @override
   void dispose() {
+    WordPeek.hide(now: true);
+    MistakePeek.hide(now: true);
     // The spread's widths go with the last Mushaf on screen (one replacing
     // another — focus mode, Ayah ↔ Mushaf mode — has published its own).
     _mountedPagers--;
@@ -550,6 +556,25 @@ class _MushafPagerState extends ConsumerState<MushafPager> {
 
   @override
   Widget build(BuildContext context) {
+    // A sure mistake while reciting: its hint above its word.
+    ref.listen(mistakeHintProvider, (_, hint) {
+      if (hint == null) {
+        MistakePeek.hide();
+      } else {
+        _showMistakeHint(hint);
+      }
+    });
+    // A word's pill: gone with its page (turned), or a recitation begun.
+    ref.listen(
+      mushafRecitationTargetProvider.select((t) => t?.location),
+      (_, _) => WordPeek.hide(),
+    );
+    ref.listen(recitationSessionControllerProvider.select((s) => s.isActive), (
+      _,
+      active,
+    ) {
+      if (active) WordPeek.hide(now: true);
+    });
     final breakpoint = TahfeezBreakpoint.of(context);
     final size = MediaQuery.sizeOf(context);
     final isLandscape = size.width > size.height;
@@ -859,6 +884,19 @@ class _MushafPagerState extends ConsumerState<MushafPager> {
   Widget _rightToLeft(Widget pageView) =>
       Directionality(textDirection: TextDirection.ltr, child: pageView);
 
+  void _showMistakeHint(MistakeHint hint) {
+    final pagerBox = context.findRenderObject();
+    showMistakeHint(
+      context,
+      ref,
+      hint,
+      // (The page's top: a word on its first line has it below.)
+      top: pagerBox is RenderBox && pagerBox.hasSize
+          ? pagerBox.localToGlobal(Offset.zero).dy
+          : null,
+    );
+  }
+
   /// A long-pressed word's ayah, in its sheet; completes when it closes.
   Future<void> _showAyahInfo(
     BuildContext context,
@@ -887,8 +925,38 @@ class _MushafPagerState extends ConsumerState<MushafPager> {
     final wordIndex = hitRect.canonicalWordIndex;
     if (ayahId == null || wordIndex == null) return;
     final word = (ayahId: ayahId, wordIndex: wordIndex);
-    // Also where the next recitation starts (not while one runs).
-    ref.read(recitationStartProvider.notifier).choose(word);
-    showWordDetailSheet(context, wordRef: word);
+    // A tap moves the blue band — where the next recitation starts — and
+    // shows the word in a pill above it: its sound, its meaning (its sheet)
+    // and its ayah's sheet (owner, 2026-11-16: the sheet opening on every
+    // tap was in the way); the band's word tapped again, the pill again.
+    // While a recitation runs or the reciter plays the band stays (it
+    // follows them): the pill alone — over a mistake's hint, in its place.
+    final at = hitRect.position;
+    if (at == null) {
+      WordPeek.hide(now: true);
+      showWordDetailSheet(context, wordRef: word);
+      return;
+    }
+    // (Chosen already: kept — choosing it again would clear it.)
+    if (ref.read(recitationStartProvider)?.word != word) {
+      ref.read(recitationStartProvider.notifier).choose(word);
+    }
+    // (The page's top: a word on its first line has the pill below.)
+    final pagerBox = this.context.findRenderObject();
+    final box = pagerBox is RenderBox ? pagerBox : null;
+    WordPeek.show(
+      context,
+      word: word,
+      at: at,
+      top: box == null || !box.hasSize
+          ? null
+          : box.localToGlobal(Offset.zero).dy,
+      onWord: () {
+        if (context.mounted) showWordDetailSheet(context, wordRef: word);
+      },
+      onAyah: () {
+        if (context.mounted) showAyahDetailSheet(context, ayahId: ayahId);
+      },
+    );
   }
 }

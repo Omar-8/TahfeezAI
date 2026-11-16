@@ -1,0 +1,148 @@
+<en-US>
+• Tap a word: a small pill with its sound, its meaning and its ayah — the marker moves to it
+• Mistake hints while reciting, right above the word (a switch in the settings)
+• Ayah sheet: swipe or tap for the next and previous ayah; similar ayahs can be hidden
+• Earlier sessions' mistakes say exactly what was wrong
+• Fixes: restoring a backup on iPhone and the web; pages turning from the sheets
+</en-US>
+<ar>
+• المس كلمة: شريط صغير بصوتها ومعناها وآيتها، وينتقل المؤشر إليها
+• تلميحات الأخطاء أثناء التسميع فوق الكلمة مباشرة (مع مفتاح في الإعدادات)
+• نافذة الآية: اسحب أو المس للآية التالية والسابقة، ويمكن إخفاء الآيات المتشابهة
+• أخطاء الجلسات السابقة تبيّن الخطأ بدقة
+• العربية: معنى الآية (التفسير الميسر) للكلمات التي ليس لها شرح خاص
+• إصلاحات: استعادة النسخة الاحتياطية على الآيفون والويب، وتقليب الصفحات من النوافذ
+</ar>
+<bn-BD>
+• একটি শব্দে ট্যাপ করুন: তার উচ্চারণ, অর্থ ও আয়াতসহ ছোট একটি পিল — চিহ্ন সেখানে সরে যায়
+• তিলাওয়াতের সময় শব্দের ঠিক ওপরে ভুলের ইঙ্গিত (সেটিংসে একটি সুইচ)
+• আয়াতের শিট: পরের ও আগের আয়াতে যেতে সোয়াইপ বা ট্যাপ করুন; সদৃশ আয়াত লুকানো যায়
+• আগের সেশনের ভুলে ঠিক কী ভুল ছিল তা দেখায়
+• সংশোধন: আইফোন ও ওয়েবে ব্যাকআপ পুনরুদ্ধার; শিট থেকে পৃষ্ঠা উল্টানো
+</bn-BD>
+<da-DK>
+• Tryk på et ord: en lille pille med dets lyd, betydning og vers — markøren flytter dertil
+• Fejltips under recitation, lige over ordet (en kontakt i indstillingerne)
+• Versark: stryg eller tryk for næste og forrige vers; lignende vers kan skjules
+• Fejl fra tidligere sessioner siger præcis, hvad der var galt
+• Rettelser: gendannelse af backup på iPhone og web; sider, der vendes fra arkene
+</da-DK>
+<de-DE>
+• Tippe auf ein Wort: eine kleine Leiste mit Klang, Bedeutung und Vers — die Markierung springt dorthin
+• Fehlerhinweise beim Rezitieren direkt über dem Wort (ein Schalter in den Einstellungen)
+• Versfenster: wischen oder tippen für den nächsten und vorherigen Vers; ähnliche Verse ausblendbar
+• Fehler früherer Sitzungen zeigen genau, was falsch war
+• Korrekturen: Sicherung wiederherstellen auf iPhone und im Web; Seiten blättern aus den Fenstern
+</de-DE>
+<el-GR>
+• Πατήστε μια λέξη: μια μικρή ετικέτα με τον ήχο, τη σημασία και το εδάφιό της — ο δείκτης μετακινείται εκεί
+• Υποδείξεις λαθών κατά την απαγγελία, ακριβώς πάνω από τη λέξη (διακόπτης στις ρυθμίσεις)
+• Φύλλο εδαφίου: σύρετε ή πατήστε για το επόμενο και το προηγούμενο εδάφιο· τα παρόμοια εδάφια κρύβονται
+• Τα λάθη προηγούμενων συνεδριών λένε ακριβώς τι ήταν λάθος
+• Διορθώσεις: επαναφορά αντιγράφου σε iPhone και web· γύρισμα σελίδων από τα φύλλα
+</el-GR>
+<es-ES>
+• Toca una palabra: una pequeña píldora con su sonido, su significado y su aleya; el marcador va a ella
+• Pistas de errores al recitar, justo encima de la palabra (un interruptor en los ajustes)
+• Hoja de la aleya: desliza o toca para la aleya siguiente y anterior; se pueden ocultar las aleyas similares
+• Los errores de sesiones anteriores dicen exactamente qué estuvo mal
+• Arreglos: restaurar una copia en iPhone y web; pasar páginas desde las hojas
+</es-ES>
+<fa>
+• روی یک کلمه بزنید: برچسبی کوچک با صدا، معنا و آیهٔ آن؛ نشانگر به آن می‌رود
+• نکته‌های خطا هنگام تلاوت، درست بالای کلمه (با کلیدی در تنظیمات)
+• برگهٔ آیه: برای آیهٔ بعد و قبل بکشید یا بزنید؛ آیه‌های مشابه را می‌توان پنهان کرد
+• خطاهای جلسه‌های قبلی دقیقاً می‌گویند چه چیزی اشتباه بود
+• اصلاحات: بازیابی پشتیبان در آیفون و وب؛ ورق خوردن صفحه‌ها از برگه‌ها
+</fa>
+<fr-FR>
+• Touchez un mot : une petite bulle avec son son, son sens et son verset — le repère s'y place
+• Indices d'erreur pendant la récitation, juste au-dessus du mot (un interrupteur dans les réglages)
+• Fenêtre du verset : balayez ou touchez pour le verset suivant et précédent ; les versets similaires peuvent être masqués
+• Les erreurs des séances précédentes disent exactement ce qui n'allait pas
+• Corrections : restauration d'une sauvegarde sur iPhone et le web ; pages tournées depuis les fenêtres
+</fr-FR>
+<id>
+• Ketuk sebuah kata: pil kecil dengan suara, makna, dan ayatnya — penanda pindah ke sana
+• Petunjuk kesalahan saat membaca, tepat di atas kata (sakelar di pengaturan)
+• Lembar ayat: geser atau ketuk untuk ayat berikutnya dan sebelumnya; ayat serupa bisa disembunyikan
+• Kesalahan sesi sebelumnya menjelaskan dengan tepat apa yang salah
+• Perbaikan: memulihkan cadangan di iPhone dan web; halaman berbalik dari lembar
+</id>
+<ja-JP>
+• 語をタップ：音・意味・アーヤを表示する小さなピル、マーカーもその語へ
+• 読誦中の間違いヒントを語のすぐ上に表示（設定でオン・オフ）
+• アーヤのシート：スワイプやタップで次・前のアーヤへ、似たアーヤは非表示にできます
+• 過去のセッションの間違いも、何が違ったかを正確に表示
+• 修正：iPhoneとWebでのバックアップ復元、シートからのページめくり
+</ja-JP>
+<kk>
+• Сөзді түртіңіз: оның дыбысы, мағынасы және аяты бар шағын белгі — белгі соған ауысады
+• Оқу кезінде қате кеңестері сөздің дәл үстінде (баптауларда қосқыш бар)
+• Аят парағы: келесі және алдыңғы аятқа сырғытыңыз не түртіңіз; ұқсас аяттарды жасыруға болады
+• Бұрынғы сессиялардың қателері нені дұрыс емес екенін нақты айтады
+• Түзетулер: iPhone мен вебте сақтық көшірмені қалпына келтіру; парақтардан бет аудару
+</kk>
+<ko-KR>
+• 단어를 탭하세요: 소리, 뜻, 아야가 담긴 작은 알약 — 표시가 그 단어로 이동합니다
+• 낭송 중 실수 힌트가 단어 바로 위에 표시됩니다 (설정에서 켜고 끄기)
+• 아야 시트: 스와이프하거나 탭해 다음·이전 아야로; 비슷한 아야는 숨길 수 있습니다
+• 지난 세션의 실수도 무엇이 틀렸는지 정확히 알려 줍니다
+• 수정: iPhone과 웹에서 백업 복원, 시트에서 페이지 넘기기
+</ko-KR>
+<ms>
+• Ketik satu perkataan: pil kecil dengan bunyi, makna dan ayatnya — penanda bergerak ke situ
+• Petunjuk kesilapan semasa membaca, betul-betul di atas perkataan (suis dalam tetapan)
+• Helaian ayat: leret atau ketik untuk ayat seterusnya dan sebelumnya; ayat serupa boleh disembunyikan
+• Kesilapan sesi lepas menyatakan dengan tepat apa yang salah
+• Pembaikan: memulihkan sandaran di iPhone dan web; halaman diselak dari helaian
+</ms>
+<nl-NL>
+• Tik op een woord: een klein label met de klank, betekenis en het vers — de markering gaat ernaartoe
+• Fouthints tijdens het reciteren, vlak boven het woord (een schakelaar in de instellingen)
+• Versvenster: veeg of tik voor het volgende en vorige vers; vergelijkbare verzen kun je verbergen
+• Fouten uit eerdere sessies zeggen precies wat er mis was
+• Oplossingen: back-up terugzetten op iPhone en web; pagina's omslaan vanuit de vensters
+</nl-NL>
+<pt-BR>
+• Toque numa palavra: uma pequena pílula com o som, o significado e o versículo — o marcador vai até ela
+• Dicas de erro ao recitar, logo acima da palavra (um botão nos ajustes)
+• Folha do versículo: deslize ou toque para o próximo e o anterior; versículos parecidos podem ser ocultados
+• Os erros de sessões anteriores dizem exatamente o que estava errado
+• Correções: restaurar backup no iPhone e na web; páginas virando a partir das folhas
+</pt-BR>
+<ru-RU>
+• Нажмите на слово: маленькая плашка с его звучанием, значением и аятом — метка переходит к нему
+• Подсказки об ошибках при чтении прямо над словом (переключатель в настройках)
+• Окно аята: смахните или нажмите для следующего и предыдущего аята; похожие аяты можно скрыть
+• Ошибки прошлых сессий показывают, что именно было не так
+• Исправления: восстановление копии на iPhone и в вебе; перелистывание страниц из окон
+</ru-RU>
+<sw>
+• Gusa neno: kibonge kidogo chenye sauti yake, maana yake na aya yake — alama inahamia kwake
+• Vidokezo vya makosa wakati wa kusoma, juu kabisa ya neno (swichi katika mipangilio)
+• Karatasi ya aya: telezesha au gusa kwa aya inayofuata na iliyotangulia; aya zinazofanana zinaweza kufichwa
+• Makosa ya vipindi vilivyopita yanaeleza hasa kilichokosewa
+• Marekebisho: kurejesha nakala kwenye iPhone na wavuti; kurasa kugeuka kutoka kwenye karatasi
+</sw>
+<tr-TR>
+• Bir kelimeye dokunun: sesi, anlamı ve ayetiyle küçük bir kutucuk — işaret ona geçer
+• Okurken hata ipuçları, kelimenin hemen üstünde (ayarlarda bir anahtar)
+• Ayet penceresi: sonraki ve önceki ayet için kaydırın ya da dokunun; benzer ayetler gizlenebilir
+• Önceki oturumların hataları neyin yanlış olduğunu tam olarak söyler
+• Düzeltmeler: iPhone ve webde yedeği geri yükleme; pencerelerden sayfa çevirme
+</tr-TR>
+<ur>
+• کسی لفظ کو چھوئیں: اس کی آواز، معنی اور آیت کے ساتھ ایک چھوٹی پٹی — نشان وہاں چلا جاتا ہے
+• تلاوت کے دوران غلطی کے اشارے، عین لفظ کے اوپر (ترتیبات میں ایک سوئچ)
+• آیت کی شیٹ: اگلی اور پچھلی آیت کے لیے سوائپ کریں یا چھوئیں؛ ملتی جلتی آیات چھپائی جا سکتی ہیں
+• پچھلے سیشنز کی غلطیاں ٹھیک ٹھیک بتاتی ہیں کہ کیا غلط تھا
+• اصلاحات: آئی فون اور ویب پر بیک اپ بحال کرنا؛ شیٹس سے صفحات پلٹنا
+</ur>
+<zh-CN>
+• 轻点一个词：显示其读音、含义和经文的小提示，标记随之移到该词
+• 诵读时的错误提示直接显示在该词上方（设置中可开关）
+• 经文面板：滑动或轻点切换上一节和下一节；相似经文可隐藏
+• 以往练习中的错误会准确说明哪里不对
+• 修复：在 iPhone 和网页上恢复备份；从面板翻页
+</zh-CN>

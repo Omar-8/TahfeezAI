@@ -22,6 +22,9 @@ import 'ayah_view_parts.dart';
 import 'similar_ayahs_section.dart';
 import '../../quran/presentation/ayah_topics_section.dart';
 import '../../../quran/application/meaning_packs.dart';
+import '../../../core/theme/tahfeez_motion.dart';
+import '../application/mushaf_pages_on_screen.dart';
+import '../../../quran/domain/quran_ayah_numbers.dart' show surahAyahCounts;
 
 /// The "long-press a word" destination, in the Mushaf and in Ayah mode:
 /// the word's whole ayah, shown as Ayah mode shows it — its words (with
@@ -36,11 +39,155 @@ Future<void> showAyahDetailSheet(BuildContext context, {required int ayahId}) =>
     showTahfeezModalBottomSheet<void>(
       context: context,
       title: AppLocalizations.of(context).ayahDetails,
-      builder: (context) => _AyahDetailSheetBody(ayahId: ayahId),
+      builder: (context) => _AyahDetailSheet(first: ayahId),
     );
 
+/// The ayah after [ayahId] (the next surah's first after a surah's last),
+/// `null` after the Quran's last.
+int? nextAyahId(int ayahId) {
+  final surah = ayahId ~/ 1000, verse = ayahId % 1000;
+  if (verse < surahAyahCounts[surah - 1]) return ayahId + 1;
+  return surah < 114 ? (surah + 1) * 1000 + 1 : null;
+}
+
+/// The ayah before [ayahId] (the previous surah's last before a surah's
+/// first), `null` before the Quran's first.
+int? previousAyahId(int ayahId) {
+  final surah = ayahId ~/ 1000, verse = ayahId % 1000;
+  if (verse > 1) return ayahId - 1;
+  return surah > 1 ? (surah - 1) * 1000 + surahAyahCounts[surah - 2] : null;
+}
+
+/// The sheet, from [first] to the ayahs around it (owner, 2026-11-16, as
+/// the word sheet goes through mistakes): swiped as the Mushaf's pages
+/// turn — to the right the next ayah, to the left the previous — or by
+/// the buttons at its foot; the Mushaf behind turned to each one's page.
+class _AyahDetailSheet extends ConsumerStatefulWidget {
+  const _AyahDetailSheet({required this.first});
+
+  final int first;
+
+  @override
+  ConsumerState<_AyahDetailSheet> createState() => _AyahDetailSheetState();
+}
+
+class _AyahDetailSheetState extends ConsumerState<_AyahDetailSheet> {
+  late int _ayah = widget.first;
+
+  /// The last move was on to the next ayah (it slides in from the left).
+  var _forward = true;
+
+  Future<void> _go(int ayahId, {required bool forward}) async {
+    setState(() {
+      _ayah = ayahId;
+      _forward = forward;
+    });
+    // In the Mushaf: its page turned to, when not on screen.
+    await showMushafPageOf(ref.read, (ayahId: ayahId, wordIndex: 0));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final next = nextAyahId(_ayah), previous = previousAyahId(_ayah);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Flexible(
+          child: GestureDetector(
+            key: const ValueKey('ayah-sheet-swipe'),
+            behavior: HitTestBehavior.translucent,
+            onHorizontalDragEnd: (details) {
+              final v = details.primaryVelocity ?? 0;
+              if (v.abs() < 200) return;
+              final to = v > 0 ? next : previous;
+              if (to != null) _go(to, forward: v > 0);
+            },
+            child: AnimatedSwitcher(
+              duration: TahfeezMotionDuration.medium,
+              transitionBuilder: (child, animation) {
+                final incoming = child.key == ValueKey(_ayah);
+                final dx = (_forward ? -1.0 : 1.0) * (incoming ? 1 : -1);
+                return FadeTransition(
+                  opacity: animation,
+                  child: SlideTransition(
+                    position: Tween(
+                      begin: Offset(dx * 0.25, 0),
+                      end: Offset.zero,
+                    ).animate(animation),
+                    child: child,
+                  ),
+                );
+              },
+              // Sized by the ayah coming in (see the word sheet's).
+              layoutBuilder: (current, previous) => Stack(
+                alignment: Alignment.topCenter,
+                clipBehavior: Clip.hardEdge,
+                children: [
+                  for (final p in previous) Positioned.fill(child: p),
+                  ?current,
+                ],
+              ),
+              child: _AyahDetailSheetBody(key: ValueKey(_ayah), ayahId: _ayah),
+            ),
+          ),
+        ),
+        // At the foot, in reach: the next ayah to the left (its arrow
+        // pointing there, as the Mushaf reads), the previous to the right
+        // — in every language.
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+            TahfeezSpacing.md,
+            TahfeezSpacing.sm,
+            TahfeezSpacing.md,
+            TahfeezSpacing.sm,
+          ),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Row(
+              spacing: TahfeezSpacing.sm,
+              children: [
+                Expanded(
+                  child: FilledButton.tonalIcon(
+                    key: const ValueKey('ayah-sheet-next'),
+                    icon: const Icon(Icons.chevron_left_rounded),
+                    label: Text(
+                      l10n.ayahNext,
+                      textDirection: Directionality.of(context),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    onPressed: next == null
+                        ? null
+                        : () => _go(next, forward: true),
+                  ),
+                ),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    key: const ValueKey('ayah-sheet-previous'),
+                    iconAlignment: IconAlignment.end,
+                    icon: const Icon(Icons.chevron_right_rounded),
+                    label: Text(
+                      l10n.ayahPrevious,
+                      textDirection: Directionality.of(context),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    onPressed: previous == null
+                        ? null
+                        : () => _go(previous, forward: false),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _AyahDetailSheetBody extends ConsumerWidget {
-  const _AyahDetailSheetBody({required this.ayahId});
+  const _AyahDetailSheetBody({super.key, required this.ayahId});
 
   final int ayahId;
 
@@ -167,7 +314,7 @@ class _AyahDetailSheetBody extends ConsumerWidget {
                       ],
                     ),
                   ),
-                SimilarAyahsSection(ayahId: ayahId),
+                if (view.showSimilar) SimilarAyahsSection(ayahId: ayahId),
                 if (view.showTopics) AyahTopicsSection(ayahId: ayahId),
                 if (view.showTransliteration)
                   AyahTransliteration(ayahId: ayahId, colors: colors),

@@ -128,6 +128,14 @@ class AyahViewOptions extends ConsumerWidget {
             view.showTopics,
             (v) => view.copyWith(showTopics: v),
           ),
+        // And the ayahs easily mixed up with it.
+        if (!showLayout)
+          toggle(
+            'ayah-view-similar',
+            l10n.similarAyahsTitle,
+            view.showSimilar,
+            (v) => view.copyWith(showSimilar: v),
+          ),
         toggle(
           'ayah-view-tajweed',
           l10n.ayahViewTajweed,

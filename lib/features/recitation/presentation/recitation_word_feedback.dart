@@ -10,6 +10,7 @@ import '../../listen/application/reciter_controller.dart';
 import '../../listen/domain/word_timings.dart';
 import '../../mushaf/application/mushaf_word_overlay.dart';
 import '../application/acoustic_verification_controller.dart';
+import '../application/kept_word_errors.dart';
 import 'recitation_controls.dart';
 
 /// What the last recitation found wrong in [wordRef] — a different word, a
@@ -30,49 +31,10 @@ class RecitationWordFeedback extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final overlay = ref.watch(mushafWordOverlayProvider);
-    final mark = overlay?.marks[wordRef];
     final l10n = AppLocalizations.of(context);
-    final List<String> lines;
-    // A mistake on the word's first letter: its correction starts at the
-    // word before, which may join into it.
-    var onFirstLetter = false;
-    switch (mark) {
-      case MushafWordMark.wrong:
-        final heard = overlay!.heard[wordRef];
-        lines = [
-          if (overlay.corrected.contains(wordRef)) l10n.recFeedbackCorrected,
-          if (heard != null && readablePhonetic(heard).isNotEmpty)
-            l10n.recFeedbackHeardInstead(readablePhonetic(heard))
-          else if (!overlay.corrected.contains(wordRef))
-            l10n.recFeedbackWrongWord,
-        ];
-      case MushafWordMark.skipped:
-        lines = [l10n.recFeedbackSkipped];
-      case MushafWordMark.tashkeel ||
-          MushafWordMark.tajweed ||
-          MushafWordMark.checking:
-        final errors = [
-          for (final e
-              in ref
-                      .watch(acousticVerificationControllerProvider)
-                      .words[wordRef]
-                      ?.errors ??
-                  const <RecitationError>[])
-            if (e.type.isError) e,
-        ];
-        onFirstLetter = errors.any((e) => e.letter == 0);
-        lines = errors.isEmpty
-            ? [l10n.recFeedbackPronunciation]
-            : {
-                // (one mistake may show as two: a nūn heard and the
-                // merged letter single — the same idgham)
-                for (final e in errors)
-                  _onLetter(e, l10n, HifzStatusStrip.describe(e, l10n)),
-              }.take(3).toList();
-      default:
-        return const SizedBox.shrink();
-    }
+    final feedback = recitationFeedbackLines(ref, l10n, wordRef, wordText);
+    if (feedback == null) return const SizedBox.shrink();
+    final (:lines, :onFirstLetter) = feedback;
     final scheme = Theme.of(context).colorScheme;
     final text = Theme.of(context).textTheme;
     return Container(
@@ -119,17 +81,81 @@ class RecitationWordFeedback extends ConsumerWidget {
       ),
     );
   }
-
-  /// [detail], said on the mistake's letter when the word's text names it.
-  String _onLetter(RecitationError e, AppLocalizations l10n, String detail) {
-    final letters = baseLetters(wordText ?? '');
-    if (e.letter < 0 || e.letter >= letters.length) return _capital(detail);
-    return l10n.recFeedbackOnLetter(letters[e.letter], detail);
-  }
-
-  static String _capital(String s) =>
-      s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);
 }
+
+/// What the last recitation found wrong in [wordRef] (its sheet's lines,
+/// the mistake hint's first), and whether it is on the word's first
+/// letter; `null` for a word recited right or not recited.
+({List<String> lines, bool onFirstLetter})? recitationFeedbackLines(
+  WidgetRef ref,
+  AppLocalizations l10n,
+  WordRef wordRef,
+  String? wordText,
+) {
+  final overlay = ref.watch(mushafWordOverlayProvider);
+  final mark = overlay?.marks[wordRef];
+  // A mistake on the word's first letter: its correction starts at the
+  // word before, which may join into it.
+  var onFirstLetter = false;
+  final List<String> lines;
+  switch (mark) {
+    case MushafWordMark.wrong:
+      final heard = overlay!.heard[wordRef];
+      lines = [
+        if (overlay.corrected.contains(wordRef)) l10n.recFeedbackCorrected,
+        if (heard != null && readablePhonetic(heard).isNotEmpty)
+          l10n.recFeedbackHeardInstead(readablePhonetic(heard))
+        else if (!overlay.corrected.contains(wordRef))
+          l10n.recFeedbackWrongWord,
+      ];
+    case MushafWordMark.skipped:
+      lines = [l10n.recFeedbackSkipped];
+    case MushafWordMark.tashkeel ||
+        MushafWordMark.tajweed ||
+        MushafWordMark.checking:
+      final live = [
+        for (final e
+            in ref
+                    .watch(acousticVerificationControllerProvider)
+                    .words[wordRef]
+                    ?.errors ??
+                const <RecitationError>[])
+          if (e.type.isError) e,
+      ];
+      // An earlier session's (the app opened again since): as kept.
+      final errors = live.isNotEmpty
+          ? live
+          : ref.watch(keptWordErrorsProvider)[wordRef] ??
+                const <RecitationError>[];
+      onFirstLetter = errors.any((e) => e.letter == 0);
+      lines = errors.isEmpty
+          ? [l10n.recFeedbackPronunciation]
+          : {
+              // (one mistake may show as two: a nūn heard and the merged
+              // letter single — the same idgham)
+              for (final e in errors)
+                _onLetter(e, l10n, HifzStatusStrip.describe(e, l10n), wordText),
+            }.take(3).toList();
+    default:
+      return null;
+  }
+  return (lines: lines, onFirstLetter: onFirstLetter);
+}
+
+/// [detail], said on the mistake's letter when the word's text names it.
+String _onLetter(
+  RecitationError e,
+  AppLocalizations l10n,
+  String detail,
+  String? wordText,
+) {
+  final letters = baseLetters(wordText ?? '');
+  if (e.letter < 0 || e.letter >= letters.length) return _capital(detail);
+  return l10n.recFeedbackOnLetter(letters[e.letter], detail);
+}
+
+String _capital(String s) =>
+    s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);
 
 /// "Listen to the correction": the word as the chosen reciter recites it,
 /// joined to the next word — or, for a reciter without word timings, the

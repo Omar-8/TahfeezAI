@@ -345,11 +345,18 @@ class FakePage implements QuranEngineMushafPage {
     VoidCallback? onEmptyHit,
     ValueChanged<MushafTokenHitRect>? onWordLongHit,
     String? Function(WordRef word)? hoverHint,
-  }) => ColoredBox(
-    key: const ValueKey('printed-page'),
-    color: paper,
-    child: const SizedBox.expand(),
-  );
+  }) {
+    tapWordHandlers[pageNumber] = onWordHit;
+    return ColoredBox(
+      key: const ValueKey('printed-page'),
+      color: paper,
+      child: const SizedBox.expand(),
+    );
+  }
+
+  /// Each page's word tap, as the engine reports one (by page number):
+  /// `tapWordHandlers[page]!(hit)` taps a word in a test.
+  static final tapWordHandlers = <int, ValueChanged<MushafTokenHitRect>?>{};
 
   @override
   void setWordHighlights(

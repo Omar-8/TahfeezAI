@@ -101,7 +101,10 @@ String quranEnginePageAssetPath(int pageNumber) =>
     'assets/quran/quran_engine/pages/${pageNumber.toString().padLeft(3, '0')}.qvp';
 
 class QuranEngineAndroidPage
-    implements QuranEngineMushafPage, MushafWordEffectsPage {
+    implements
+        QuranEngineMushafPage,
+        MushafWordEffectsPage,
+        MushafWordLocatingPage {
   QuranEngineAndroidPage({required this.pageNumber, required this.page});
 
   /// Left at `QvpViewLayout`'s own natural default (`1`, the printed
@@ -466,6 +469,18 @@ class QuranEngineAndroidPage
     _viewController.dispose();
     _effects.dispose();
     page.dispose();
+  }
+
+  /// Where [word] is drawn, from the view showing this page (patch 0007).
+  @override
+  Rect? wordRectOnScreen(WordRef word) {
+    final index = page.findWord(
+      word.ayahId ~/ 1000,
+      word.ayahId % 1000,
+      word.wordIndex + 1,
+    );
+    if (index < 0) return null;
+    return QvpPageViewState.showing(page)?.wordRectGlobal(index);
   }
 
   /// [T.word] expects the engine's own page-local word-array index — not

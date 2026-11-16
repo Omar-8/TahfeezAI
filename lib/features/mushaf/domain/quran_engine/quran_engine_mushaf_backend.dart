@@ -1,5 +1,5 @@
 import 'package:flutter/widgets.dart'
-    show Widget, ValueChanged, VoidCallback, Color;
+    show Widget, ValueChanged, VoidCallback, Color, Rect;
 
 import '../../../../quran/domain/models/quran_refs.dart';
 import '../../presentation/mushaf_token_hit_rect.dart' show MushafTokenHitRect;
@@ -191,6 +191,15 @@ enum MushafWordEffect {
 
 /// A [QuranEngineMushafPage] that can animate its words ([MushafWordEffect]):
 /// Android's. Pages without one simply show the marks.
+/// A page that can tell where a word is drawn on the screen (the phones'
+/// engine and the browser's): a recitation's mistake hint shown just above
+/// the word (owner, 2026-11-16).
+abstract interface class MushafWordLocatingPage {
+  /// [word]'s box in global logical pixels; `null` when not on this page,
+  /// or the page is not laid out on screen.
+  Rect? wordRectOnScreen(WordRef word);
+}
+
 abstract interface class MushafWordEffectsPage {
   /// Plays [effect] on the page word at engine index [wordIndex] (in
   /// [color], for a [MushafWordEffect.bloom] — with a band behind the word

@@ -1,3 +1,4 @@
+import 'dart:ui' show Offset, Rect;
 import 'dart:math' as math;
 // Web-only file (imports `dart:js_interop` and `package:web`) — never
 // imported from platform-shared code; only `quran_engine_web_backend.dart`
@@ -460,6 +461,29 @@ class QuranEngineWebPage {
   }
 
   static double _ease(double t) => t * t * (3 - 2 * t);
+
+  /// Page word [word]'s box in the view (logical pixels from the
+  /// canvas's top left; its ink over every line it spans), or `null`
+  /// before the page is drawn.
+  Rect? wordRectInView(int word) {
+    final renderer = _renderer, view = _view;
+    if (renderer == null || view == null) return null;
+    Rect? out;
+    for (final r in _rects(renderer, view, word, 0)) {
+      final box = Rect.fromLTWH(
+        r.x / _dpr,
+        r.y / _dpr,
+        r.w / _dpr,
+        r.h / _dpr,
+      );
+      out = out == null ? box : out.expandToInclude(box);
+    }
+    return out;
+  }
+
+  /// Where the page's view is on the screen (set by its widget), for
+  /// [wordRectInView] to be placed.
+  Offset Function()? viewOrigin;
 
   /// The word's boxes in canvas pixels, grown by [pad] CSS pixels.
   Iterable<({double x, double y, double w, double h})> _rects(

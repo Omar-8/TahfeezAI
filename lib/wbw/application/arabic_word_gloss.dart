@@ -113,3 +113,21 @@ final arabicWordGlossProvider =
         for (final w in words) w.text,
       ], word.wordIndex);
     });
+
+/// al-Muyassar (bundled): the whole ayah's meaning in plain Arabic.
+const muyassarTafsirId = 'ar-muyassar';
+
+/// The ayah's meaning in Arabic from al-Muyassar — for a word al-Sirāj
+/// does not explain (an everyday word: al-Sirāj explains only the
+/// difficult ones — owner, 2026-11-16).
+final arabicAyahMeaningProvider = FutureProvider.family<String?, int>((
+  ref,
+  ayahId,
+) async {
+  final entry = await ref.watch(tafsirRepositoryProvider).getVerseText((
+    chapterNo: ayahId ~/ 1000,
+    verseNo: ayahId % 1000,
+  ), tafsirId: muyassarTafsirId);
+  final text = entry?.text.trim();
+  return text == null || text.isEmpty ? null : text;
+});

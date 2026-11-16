@@ -1,4 +1,4 @@
-import 'package:flutter/rendering.dart' show Rect;
+import 'package:flutter/rendering.dart' show Offset, Rect;
 
 import '../../../quran/domain/models/mushaf_token_models.dart';
 
@@ -24,6 +24,7 @@ class MushafTokenHitRect {
     required this.canonicalWordIndex,
     required this.text,
     this.surahBanner,
+    this.position,
   });
 
   final Rect rect;
@@ -35,4 +36,21 @@ class MushafTokenHitRect {
 
   /// The surah whose name banner was tapped (a decoration), if it was one.
   final int? surahBanner;
+
+  /// Where on screen (global) the finger touched it, when known — the
+  /// engine gives no word geometry ([rect] is empty): what is shown beside
+  /// the word goes there.
+  final Offset? position;
+
+  /// This hit, touched at [at] (global).
+  MushafTokenHitRect touchedAt(Offset? at) => MushafTokenHitRect(
+    rect: rect,
+    sourceTokenId: sourceTokenId,
+    tokenType: tokenType,
+    canonicalAyahId: canonicalAyahId,
+    canonicalWordIndex: canonicalWordIndex,
+    text: text,
+    surahBanner: surahBanner,
+    position: at,
+  );
 }

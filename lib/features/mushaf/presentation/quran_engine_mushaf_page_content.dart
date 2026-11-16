@@ -16,6 +16,7 @@ import '../../recitation/application/hifz_controller.dart';
 import '../application/mushaf_quran_engine_providers.dart';
 import '../domain/mushaf_appearance.dart';
 import '../domain/quran_engine/quran_engine_mushaf_backend.dart';
+import '../application/mushaf_pages_on_screen.dart' show mushafWordLocators;
 import 'mushaf_token_hit_rect.dart';
 import '../../../core/theme/components/tahfeez_state_views.dart';
 import '../../../core/theme/tahfeez_motion.dart';
@@ -151,6 +152,10 @@ class _QuranEngineMushafPageContentState
   /// The ayah being long-pressed (its sheet open): highlighted like the
   /// focus ayah.
   int? _pressedAyah;
+
+  /// Where the finger last touched the page (global): a word tapped is
+  /// there.
+  Offset? _lastTouch;
 
   static bool _isInk(MushafWordMark mark) => _markStyles[mark]!.ink;
 
@@ -680,6 +685,7 @@ class _QuranEngineMushafPageContentState
   void didUpdateWidget(covariant QuranEngineMushafPageContent oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.pageNumber != widget.pageNumber) {
+      _unregister();
       setState(() {
         _page = null;
         _loadError = null;
@@ -738,6 +744,7 @@ class _QuranEngineMushafPageContentState
           if (mounted) _appear.forward();
         });
       }
+      _register(page);
       setState(() {
         _backend = backend;
         _page = page;
@@ -759,8 +766,21 @@ class _QuranEngineMushafPageContentState
     }
   }
 
+  void _register(QuranEngineMushafPage page) {
+    _unregister();
+    if (page is MushafWordLocatingPage) {
+      mushafWordLocators[widget.pageNumber] = page as MushafWordLocatingPage;
+    }
+  }
+
+  void _unregister() {
+    final page = _page;
+    mushafWordLocators.removeWhere((_, p) => identical(p, page));
+  }
+
   @override
   void dispose() {
+    _unregister();
     _appear.dispose();
     _maskLater?.cancel();
     final backend = _backend;
@@ -868,7 +888,7 @@ class _QuranEngineMushafPageContentState
       onWordHit: onWordTap == null
           ? null
           : (hit) {
-              if (!isHidden(hit)) onWordTap(hit);
+              if (!isHidden(hit)) onWordTap(hit.touchedAt(_lastTouch));
             },
       onDecorationHit: widget.onWordTap,
       onWordLongHit: onWordLongPress == null
@@ -884,7 +904,16 @@ class _QuranEngineMushafPageContentState
               _applyHighlights();
             },
     );
-    return FadeTransition(opacity: _appearing, child: view);
+    return FadeTransition(
+      opacity: _appearing,
+      // Where the finger last touched the page (the engine reports the
+      // word, not where it is): the word's pop-up shown there.
+      child: Listener(
+        behavior: HitTestBehavior.translucent,
+        onPointerDown: (event) => _lastTouch = event.position,
+        child: view,
+      ),
+    );
   }
 }
 

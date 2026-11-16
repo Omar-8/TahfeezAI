@@ -39,6 +39,7 @@ import 'recitation_position.dart';
 import 'live_recognition_controller.dart';
 import 'mushaf_recitation_target.dart';
 import 'recitation_start.dart';
+import 'mistake_hint.dart';
 import 'quran_match_controller.dart' show quranWordCorpusProvider;
 import 'recitation_session_controller.dart';
 
@@ -101,7 +102,12 @@ class HifzSettings {
     this.tajweedColor = defaultTajweedColor,
     this.introsSeen = const {},
     this.advanced = false,
+    this.mistakeHints = true,
   });
+
+  /// A sure mistake's hint in a small pill above its word while reciting
+  /// (owner, 2026-11-16); on until turned off.
+  final bool mistakeHints;
 
   /// Every setting shown, one by one (the sheet's "Advanced"), not the
   /// levels alone.
@@ -259,6 +265,7 @@ class HifzSettings {
     int? tajweedColor,
     Set<RecitationIntroMode>? introsSeen,
     bool? advanced,
+    bool? mistakeHints,
   }) => HifzSettings(
     strict: strict ?? this.strict,
     highlightCurrent: highlightCurrent ?? this.highlightCurrent,
@@ -274,6 +281,7 @@ class HifzSettings {
     tajweedColor: tajweedColor ?? this.tajweedColor,
     introsSeen: introsSeen ?? this.introsSeen,
     advanced: advanced ?? this.advanced,
+    mistakeHints: mistakeHints ?? this.mistakeHints,
   );
 
   Map<String, Object> toJson() => {
@@ -294,6 +302,7 @@ class HifzSettings {
     'tajweedColor': tajweedColor,
     'introsSeen': [for (final m in introsSeen) m.name],
     'advanced': advanced,
+    'mistakeHints': mistakeHints,
   };
 
   static HifzSettings fromJson(Object? json) {
@@ -348,6 +357,7 @@ class HifzSettings {
         if (read('introSeen', false)) RecitationIntroMode.recite,
       },
       advanced: read('advanced', false),
+      mistakeHints: read('mistakeHints', true),
     );
   }
 }
@@ -1896,8 +1906,17 @@ class HifzController extends Notifier<HifzState> {
   /// per word.
   void _alert(Iterable<WordRef> words, {int? pass, bool tajweed = false}) {
     final p = pass ?? _pass;
-    if (!state.running || !words.map((w) => (p, w)).any(_alerted.add)) return;
+    if (!state.running) return;
+    final fresh = [
+      for (final w in words)
+        if (_alerted.add((p, w))) w,
+    ];
+    if (fresh.isEmpty) return;
     final settings = ref.read(hifzSettingsProvider);
+    // Its hint above the word (owner, 2026-11-16).
+    if (settings.mistakeHints) {
+      ref.read(mistakeHintProvider.notifier).report(fresh);
+    }
     final alert = tajweed ? settings.tajweedAlert : settings.alert;
     if (alert.vibrates) ref.read(hifzHapticsProvider)();
     if (alert.beeps) ref.read(hifzBeepProvider)();

@@ -340,6 +340,31 @@ class QvpPageViewState extends State<QvpPageView>
   QvpViewController get controller => _ctl;
   QvpPage get page => widget.page;
 
+  /// Tahfeez patch 0007: the view showing each page (the latest built).
+  static final _shown = Expando<QvpPageViewState>('qvp-page-view');
+
+  /// Tahfeez patch 0007: the view on screen showing [page], if any.
+  static QvpPageViewState? showing(QvpPage page) => _shown[page];
+
+  /// Tahfeez patch 0007: page word [word]'s box on the screen (global
+  /// logical pixels, its ink's extent over every line it spans), or
+  /// `null` when it can't be told (not laid out, no such word).
+  Rect? wordRectGlobal(int word) {
+    if (!mounted || page.isDisposed) return null;
+    final box = context.findRenderObject();
+    if (box is! RenderBox || !box.hasSize) return null;
+    final r = _QvpPainter(
+      page: page,
+      view: _ctl,
+      frame: _frame,
+      cache: _cache,
+      dpr: 1,
+      paper: null,
+      paperShadow: false,
+    )._wordBounds(page.currentLayout, _cache.buildPaths(page), word);
+    return r?.shift(box.localToGlobal(Offset.zero));
+  }
+
   /// True while the engine is animating.
   bool get animating => _ticker.isActive;
 
@@ -354,6 +379,7 @@ class QvpPageViewState extends State<QvpPageView>
   }
 
   void _attachPage() {
+    _shown[widget.page] = this;
     widget.page.addListener(_onPageChanged);
     _cache.attach(widget.page);
     _selHandle = 0;
@@ -389,6 +415,7 @@ class QvpPageViewState extends State<QvpPageView>
 
   @override
   void dispose() {
+    if (identical(_shown[widget.page], this)) _shown[widget.page] = null;
     widget.page.removeListener(_onPageChanged);
     widget.effects?.removeListener(_ensureTicking);
     _ticker.dispose();

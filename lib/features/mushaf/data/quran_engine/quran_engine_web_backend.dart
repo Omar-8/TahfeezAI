@@ -154,7 +154,10 @@ class QuranEngineWebBackend implements QuranEngineMushafBackend {
 }
 
 class QuranEngineWebPageAdapter
-    implements QuranEngineMushafPage, MushafWordEffectsPage {
+    implements
+        QuranEngineMushafPage,
+        MushafWordEffectsPage,
+        MushafWordLocatingPage {
   QuranEngineWebPageAdapter({required this.pageNumber, required this.page}) {
     if (_biggerTextPages.contains(pageNumber)) page.textZoom = _biggerTextZoom;
   }
@@ -193,6 +196,20 @@ class QuranEngineWebPageAdapter
       onDecorationHit: onDecorationHit,
       onEmptyHit: onEmptyHit,
     );
+  }
+
+  /// Where [word] is drawn: its box in the canvas, placed where the view
+  /// is on the screen.
+  @override
+  Rect? wordRectOnScreen(WordRef word) {
+    final index = page.findWord(
+      word.ayahId ~/ 1000,
+      word.ayahId % 1000,
+      word.wordIndex + 1,
+    );
+    final origin = page.viewOrigin;
+    if (index < 0 || origin == null) return null;
+    return page.wordRectInView(index)?.shift(origin());
   }
 
   /// The phones' word effects, drawn over the canvas in the browser
@@ -369,6 +386,12 @@ class _QuranEngineWebPageViewState extends State<_QuranEngineWebPageView> {
     widget.page.onTap = _handleTap;
     widget.page.onLongPress = _handleLongPress;
     widget.page.onHover = _handleHover;
+    widget.page.viewOrigin = () {
+      final box = context.findRenderObject();
+      return box is RenderBox && box.hasSize
+          ? box.localToGlobal(Offset.zero)
+          : Offset.zero;
+    };
   }
 
   @override
@@ -376,6 +399,7 @@ class _QuranEngineWebPageViewState extends State<_QuranEngineWebPageView> {
     widget.page.onTap = null;
     widget.page.onLongPress = null;
     widget.page.onHover = null;
+    widget.page.viewOrigin = null;
     super.dispose();
   }
 

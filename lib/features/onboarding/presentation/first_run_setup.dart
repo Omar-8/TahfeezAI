@@ -1,5 +1,15 @@
 import 'dart:async';
 
+import '../../recitation/application/hifz_controller.dart';
+import '../../mushaf/application/mushaf_pages_on_screen.dart'
+    show mushafWordLocators;
+import '../../mushaf/domain/quran_engine/quran_engine_mushaf_backend.dart'
+    show MushafWordLocatingPage;
+import '../../mushaf/presentation/word_peek.dart'
+    show MistakePeek, showMistakeHint;
+import '../../recitation/application/mistake_hint.dart';
+import '../../../quran/domain/models/quran_refs.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -232,7 +242,11 @@ class _FirstRunSetupState extends ConsumerState<FirstRunSetup> {
                     // The real recitation bar, on the demo's ayah.
                     if (_step == _Step.demo &&
                         ref.watch(recitationBarVisibleProvider))
-                      const LiveRecitationBar(key: ValueKey('setup-bar')),
+                      const LiveRecitationBar(
+                        key: ValueKey('setup-bar'),
+                        // (A first try: no session results.)
+                        showResults: false,
+                      ),
                     _BottomBar(
                       first: _index == 0,
                       last: _last,
@@ -717,12 +731,26 @@ class _DemoPageReport extends ConsumerStatefulWidget {
   ConsumerState<_DemoPageReport> createState() => _DemoPageReportState();
 }
 
+/// Whether the app's state is still there (false once it is disposed).
+final _appStateAliveProvider = Provider<ValueNotifier<bool>>((ref) {
+  final alive = ValueNotifier(true);
+  ref.onDispose(() => alive.value = false);
+  return alive;
+});
+
 class _DemoPageReportState extends ConsumerState<_DemoPageReport> {
   // Captured up front: `ref` is unusable by the time dispose runs.
   late final _verses = ref.read(mushafPageVersesProvider.notifier);
   late final _ranges = ref.read(mushafPageWordRangesProvider.notifier);
   late final _hide = ref.read(mushafHideModeProvider.notifier);
   late final _elsewhere = ref.read(recitationBarElsewhereProvider.notifier);
+  // (The recitation's controller looked up each time: it comes and goes.)
+  late final _container = ProviderScope.containerOf(context, listen: false);
+
+  /// The range chosen before the demo (given back after it).
+  HifzRange? _rangeBefore;
+  // (The app's state gone first — a test's end: nothing to give back.)
+  late final _alive = ref.read(_appStateAliveProvider);
 
   MushafPageVerseSpan? _span;
   MushafPageWordRange? _range;
@@ -732,6 +760,8 @@ class _DemoPageReportState extends ConsumerState<_DemoPageReport> {
   @override
   void initState() {
     super.initState();
+    _alive; // (captured while `ref` can be used)
+    _container;
     _span = ref.read(mushafPageVersesProvider)[_demoPage];
     _range = ref.read(mushafPageWordRangesProvider)[_demoPage];
     final hide = ref.read(mushafHideModeProvider);
@@ -752,6 +782,13 @@ class _DemoPageReportState extends ConsumerState<_DemoPageReport> {
         ayahBoundaries: [widget.wordCount],
       );
       _elsewhere.set(true);
+      // The demo's ayah its range: the recitation ends by itself after its
+      // last word (its check in), as a lesson's does (owner, 2026-11-16).
+      _rangeBefore = ref.read(hifzControllerProvider).range;
+      ref.read(hifzControllerProvider.notifier).setRange((
+        from: verse,
+        to: verse,
+      ));
     });
   }
 
@@ -760,7 +797,11 @@ class _DemoPageReportState extends ConsumerState<_DemoPageReport> {
     final (span, range, count, ends) = (_span, _range, _wordCount, _boundaries);
     final verses = _verses, ranges = _ranges, hide = _hide;
     final elsewhere = _elsewhere;
+    final alive = _alive;
+    final container = _container, rangeBefore = _rangeBefore;
     Future.microtask(() {
+      if (!alive.value) return;
+      container.read(hifzControllerProvider.notifier).setRange(rangeBefore);
       if (span != null) verses.report(_demoPage, span);
       if (range != null) ranges.report(_demoPage, range);
       if (count != null) {
@@ -905,6 +946,32 @@ class _TryDemoState extends ConsumerState<_TryDemo> {
   int? _word;
   _Opened? _opened;
 
+  /// Each word's widget, to tell where it is: a mistake's hint above it,
+  /// as in the Mushaf (owner, 2026-11-16).
+  final _wordKeys = <int, GlobalKey>{};
+  late final _locator = _DemoWordsLocator(_wordKeys);
+  MushafWordLocatingPage? _replaced;
+
+  @override
+  void initState() {
+    super.initState();
+    _replaced = mushafWordLocators[_demoPage];
+    mushafWordLocators[_demoPage] = _locator;
+  }
+
+  @override
+  void dispose() {
+    MistakePeek.hide(now: true);
+    if (identical(mushafWordLocators[_demoPage], _locator)) {
+      if (_replaced case final r?) {
+        mushafWordLocators[_demoPage] = r;
+      } else {
+        mushafWordLocators.remove(_demoPage);
+      }
+    }
+    super.dispose();
+  }
+
   /// The Mushaf's marks: a band behind the next word (red over a mistake),
   /// recited words inked by how they went.
   static const _bands = {
@@ -929,6 +996,15 @@ class _TryDemoState extends ConsumerState<_TryDemo> {
     final meanings =
         ref.watch(ayahWordMeaningsProvider(_demoAyah)).value ?? const {};
     final overlay = ref.watch(mushafWordOverlayProvider);
+    // A sure mistake while trying: its hint above its word, as in the
+    // Mushaf (no results at the end: only a first try).
+    ref.listen(mistakeHintProvider, (_, hint) {
+      if (hint == null) {
+        MistakePeek.hide();
+      } else {
+        showMistakeHint(context, ref, hint);
+      }
+    });
     final hide = ref.watch(mushafHideModeProvider);
     // The reader's own colours for some marks (Hifz settings).
     final chosenInks = overlay?.inks ?? const <MushafWordMark, int>{};
@@ -1098,23 +1174,26 @@ class _TryDemoState extends ConsumerState<_TryDemo> {
                           _word = null;
                           _opened = _Opened.actions;
                         }),
-                        child: _DemoWord(
-                          text: text,
-                          font: widget.font,
-                          band:
-                              _bands[mark] ??
-                              (index == word
-                                  ? scheme.primary.withValues(alpha: 0.16)
-                                  : null),
-                          // Hidden: its place kept, the word not shown.
-                          ink: hidden
-                              ? Colors.transparent
-                              : ink == null
-                              ? scheme.onSurface
-                              : Color(ink),
-                          blank: hidden
-                              ? scheme.onSurface.withValues(alpha: 0.10)
-                              : null,
+                        child: KeyedSubtree(
+                          key: _wordKeys.putIfAbsent(index, GlobalKey.new),
+                          child: _DemoWord(
+                            text: text,
+                            font: widget.font,
+                            band:
+                                _bands[mark] ??
+                                (index == word
+                                    ? scheme.primary.withValues(alpha: 0.16)
+                                    : null),
+                            // Hidden: its place kept, the word not shown.
+                            ink: hidden
+                                ? Colors.transparent
+                                : ink == null
+                                ? scheme.onSurface
+                                : Color(ink),
+                            blank: hidden
+                                ? scheme.onSurface.withValues(alpha: 0.10)
+                                : null,
+                          ),
                         ),
                       );
                     },
@@ -1488,5 +1567,21 @@ class _BottomBar extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+/// Where the demo's words are on the screen (each one's widget): its
+/// mistakes' hints placed as in the Mushaf.
+class _DemoWordsLocator implements MushafWordLocatingPage {
+  _DemoWordsLocator(this.keys);
+
+  final Map<int, GlobalKey> keys;
+
+  @override
+  Rect? wordRectOnScreen(WordRef word) {
+    if (word.ayahId != _demoAyah) return null;
+    final box = keys[word.wordIndex]?.currentContext?.findRenderObject();
+    if (box is! RenderBox || !box.hasSize) return null;
+    return box.localToGlobal(Offset.zero) & box.size;
   }
 }

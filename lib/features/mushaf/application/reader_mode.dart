@@ -30,12 +30,17 @@ class AyahViewPreferences {
     this.showWordMeanings = false,
     this.showTajweed = true,
     this.showTopics = true,
+    this.showSimilar = true,
     this.quranFont = QuranFont.scheherazade,
   });
 
   /// The ayah sheet's topics (the Quran tab's Topics it is in); on until
   /// turned off (owner, 2026-11-15).
   final bool showTopics;
+
+  /// The ayah sheet's similar ayahs (easily mixed up when reciting); on
+  /// until turned off (owner, 2026-11-16).
+  final bool showSimilar;
 
   final AyahLayout layout;
   final bool showTranslation, showTransliteration, showTafsir;
@@ -56,6 +61,7 @@ class AyahViewPreferences {
     bool? showWordMeanings,
     bool? showTajweed,
     bool? showTopics,
+    bool? showSimilar,
     QuranFont? quranFont,
   }) => AyahViewPreferences(
     layout: layout ?? this.layout,
@@ -65,6 +71,7 @@ class AyahViewPreferences {
     showWordMeanings: showWordMeanings ?? this.showWordMeanings,
     showTajweed: showTajweed ?? this.showTajweed,
     showTopics: showTopics ?? this.showTopics,
+    showSimilar: showSimilar ?? this.showSimilar,
     quranFont: quranFont ?? this.quranFont,
   );
 }
@@ -121,6 +128,7 @@ class AyahViewPreferencesController extends Notifier<AyahViewPreferences> {
     final meanings = await s.getBool('${_prefix}meanings');
     final tajweed = await s.getBool('${_prefix}tajweed');
     final topics = await s.getBool('${_prefix}topics');
+    final similar = await s.getBool('${_prefix}similar');
     final font = await s.getString('${_prefix}font');
     // (Changed meanwhile: the saved view is older.)
     if (!ref.mounted || _set) return;
@@ -132,6 +140,7 @@ class AyahViewPreferencesController extends Notifier<AyahViewPreferences> {
       showWordMeanings: meanings,
       showTajweed: tajweed,
       showTopics: topics,
+      showSimilar: similar,
       quranFont: QuranFont.values.asNameMap()[font],
     );
   }
@@ -150,6 +159,7 @@ class AyahViewPreferencesController extends Notifier<AyahViewPreferences> {
     await s.setBool('${_prefix}meanings', value.showWordMeanings);
     await s.setBool('${_prefix}tajweed', value.showTajweed);
     await s.setBool('${_prefix}topics', value.showTopics);
+    await s.setBool('${_prefix}similar', value.showSimilar);
     await s.setString('${_prefix}font', value.quranFont.name);
   }
 }

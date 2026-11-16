@@ -222,3 +222,21 @@ smoothly on a phone (frame timing: `integration_test/effects_perf_test.dart`):
 
 Re-apply with `patch -p1 < patches/0006-line-ink-images.patch` after 0005
 (2026-10-29).
+
+## Patch 0007 — a word's box on screen
+
+`patches/0007-word-rect-on-screen.patch` (on top of 0006) lets the app ask
+where a word is drawn, so a recitation's mistake hint can sit just above
+it (owner, 2026-11-16).
+
+- `QvpPageViewState.showing(page)`: the view showing a page (each view
+  registers itself for its page when attached, and unregisters on
+  dispose — no `GlobalKey`, so a page built twice, as in a focus-mode
+  transition, cannot clash).
+- `QvpPageViewState.wordRectGlobal(word)`: the word's ink box in global
+  logical pixels — the same bounds the word effects (patch 0005) already
+  compute, shifted by the view's position on screen. Read-only; nothing
+  drawn or laid out differently.
+
+Re-apply with `patch -p1 < patches/0007-word-rect-on-screen.patch` after
+0006 (2026-11-16).
