@@ -192,6 +192,10 @@ class _MushafModeScaffold extends ConsumerWidget {
     // Focus mode: the page alone (and the recitation bar).
     final zen = ref.watch(mushafZenModeProvider);
     return Scaffold(
+      // The page and its bars as they are while a sheet's field is typed
+      // into (the keyboard over them, not the page squeezed above it):
+      // nothing here takes text itself.
+      resizeToAvoidBottomInset: false,
       backgroundColor: colors.background,
       appBar: zen
           ? null

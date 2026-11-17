@@ -1,0 +1,105 @@
+<en-US>
+• Search Hifz settings by a word; each group shows what it is set to
+• Turn mistake hints off from a word's sheet
+• The keyboard no longer squeezes the Mushaf page; the word and mistake pills are clearer again
+</en-US>
+<ar>
+• ابحث في إعدادات الحفظ بكلمة، وكل مجموعة تعرض ما ضُبطت عليه
+• أوقف تلميحات الأخطاء من نافذة الكلمة
+• لوحة المفاتيح لم تعد تضغط صفحة المصحف، وبطاقات الكلمة والخطأ أوضح من جديد
+</ar>
+<bn-BD>
+• একটি শব্দ দিয়ে হিফজ সেটিংসে খুঁজুন; প্রতিটি গ্রুপ দেখায় কী সেট করা আছে
+• শব্দের শিট থেকে ভুলের ইঙ্গিত বন্ধ করুন
+• কীবোর্ড আর মুসহাফের পৃষ্ঠা চেপে ছোট করে না; শব্দ ও ভুলের পিল আবার আরও স্পষ্ট
+</bn-BD>
+<da-DK>
+• Søg i Hifz-indstillinger med et ord; hver gruppe viser, hvad den er sat til
+• Slå fejltips fra i et ords ark
+• Tastaturet klemmer ikke længere Mushaf-siden; ord- og fejlpillerne er tydeligere igen
+</da-DK>
+<de-DE>
+• Hifz-Einstellungen per Stichwort durchsuchen; jede Gruppe zeigt, worauf sie eingestellt ist
+• Fehlerhinweise direkt im Blatt eines Wortes ausschalten
+• Die Tastatur drückt die Mushaf-Seite nicht mehr zusammen; Wort- und Fehler-Pillen sind wieder deutlicher
+</de-DE>
+<el-GR>
+• Αναζήτηση στις Ρυθμίσεις χιφζ με μια λέξη· κάθε ομάδα δείχνει τι έχει οριστεί
+• Απενεργοποίηση των υποδείξεων λαθών από το φύλλο μιας λέξης
+• Το πληκτρολόγιο δεν συμπιέζει πια τη σελίδα του Μουσχάφ· οι ετικέτες λέξης και λάθους είναι ξανά πιο καθαρές
+</el-GR>
+<es-ES>
+• Busca en los Ajustes de hifz con una palabra; cada grupo muestra cómo está configurado
+• Desactiva las pistas de errores desde la hoja de una palabra
+• El teclado ya no encoge la página del Mushaf; las etiquetas de palabra y de error vuelven a verse más claras
+</es-ES>
+<fa>
+• جست‌وجو در تنظیمات حفظ با یک واژه؛ هر گروه نشان می‌دهد روی چه تنظیم شده است
+• خاموش کردن نکته‌های خطا از برگهٔ یک کلمه
+• صفحه‌کلید دیگر صفحهٔ مصحف را فشرده نمی‌کند؛ برچسب‌های کلمه و خطا دوباره واضح‌ترند
+</fa>
+<fr-FR>
+• Recherchez dans les Réglages du hifz par mot-clé ; chaque groupe indique sa configuration
+• Désactivez les indices d'erreur depuis la fiche d'un mot
+• Le clavier ne comprime plus la page du Mushaf ; les étiquettes de mot et d'erreur sont de nouveau plus nettes
+</fr-FR>
+<id>
+• Cari di Pengaturan hafalan dengan kata kunci; setiap grup menampilkan pengaturannya
+• Matikan petunjuk kesalahan dari lembar sebuah kata
+• Keyboard tidak lagi menyempitkan halaman Mushaf; label kata dan kesalahan kembali lebih jelas
+</id>
+<ja-JP>
+• ヒフズの設定をキーワードで検索。各グループに現在の設定を表示
+• 語のシートから間違いヒントをオフに
+• キーボードでムスハフのページが縮まなくなりました。語と間違いの表示が再び見やすく
+</ja-JP>
+<kk>
+• Жаттау баптауларын кілт сөзбен іздеңіз; әр топ неге орнатылғанын көрсетеді
+• Қате кеңестерін сөз парағынан өшіріңіз
+• Пернетақта енді Мусхаф бетін қыспайды; сөз бен қате белгілері қайтадан анығырақ
+</kk>
+<ko-KR>
+• 히프즈 설정을 키워드로 검색하고, 각 그룹에서 현재 설정을 확인하세요
+• 단어 시트에서 실수 힌트를 끌 수 있습니다
+• 키보드가 더 이상 무스하프 페이지를 줄이지 않으며, 단어와 실수 표시가 다시 더 선명해졌습니다
+</ko-KR>
+<ms>
+• Cari dalam Tetapan hafazan dengan kata kunci; setiap kumpulan menunjukkan tetapannya
+• Matikan petunjuk kesilapan dari helaian sesuatu perkataan
+• Papan kekunci tidak lagi menghimpit halaman Mushaf; label perkataan dan kesilapan kembali lebih jelas
+</ms>
+<nl-NL>
+• Zoek in Hifz-instellingen op een woord; elke groep toont waarop hij staat
+• Zet fouthints uit vanuit het blad van een woord
+• Het toetsenbord drukt de Mushaf-pagina niet meer samen; de woord- en foutlabels zijn weer duidelijker
+</nl-NL>
+<pt-BR>
+• Pesquise nos Ajustes de hifz por palavra-chave; cada grupo mostra como está configurado
+• Desative as dicas de erro pela folha de uma palavra
+• O teclado não espreme mais a página do Mushaf; as etiquetas de palavra e de erro estão mais nítidas de novo
+</pt-BR>
+<ru-RU>
+• Поиск в настройках хифза по слову; каждая группа показывает, что в ней выбрано
+• Подсказки об ошибках можно выключить прямо в карточке слова
+• Клавиатура больше не сжимает страницу Мусхафа; метки слова и ошибки снова чётче
+</ru-RU>
+<sw>
+• Tafuta katika Mipangilio ya kuhifadhi kwa neno; kila kundi linaonyesha lilivyowekwa
+• Zima vidokezo vya makosa kutoka kwenye karatasi ya neno
+• Kibodi haibani tena ukurasa wa Msahafu; vibandiko vya neno na kosa viko wazi zaidi tena
+</sw>
+<tr-TR>
+• Hafızlık ayarlarında kelimeyle arayın; her grup neye ayarlı olduğunu gösterir
+• Hata ipuçlarını bir kelimenin sayfasından kapatın
+• Klavye artık Mushaf sayfasını sıkıştırmıyor; kelime ve hata etiketleri yeniden daha net
+</tr-TR>
+<ur>
+• حفظ کی ترتیبات میں کسی لفظ سے تلاش کریں؛ ہر گروپ دکھاتا ہے کہ وہ کس پر سیٹ ہے
+• لفظ کی شیٹ سے غلطی کے اشارے بند کریں
+• کی بورڈ اب مصحف کے صفحے کو نہیں دباتا؛ لفظ اور غلطی کے لیبل پھر سے زیادہ واضح ہیں
+</ur>
+<zh-CN>
+• 可按关键词搜索背记设置，每组显示当前设置
+• 可在单词面板中关闭错误提示
+• 键盘不再挤压经文页面；单词和错误标签再次更清晰
+</zh-CN>

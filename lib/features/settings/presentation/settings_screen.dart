@@ -6,6 +6,9 @@ import '../../../core/ui/bar_space.dart';
 
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+
+import '../../../core/ui/settings_search.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -71,9 +74,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   var _query = '';
   final _listKey = GlobalKey();
 
-  /// Lower case, Arabic vowel marks dropped.
-  static String _fold(String s) =>
-      s.toLowerCase().replaceAll(RegExp('[\u064B-\u065F\u0670]'), '');
+  static String _fold(String s) => foldForSearch(s);
 
   void _search(String text) {
     setState(() => _query = text);
@@ -88,7 +89,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         Element? first;
         void visit(Element e) {
           if (first != null) return;
-          if (e.widget case _SearchText(:final text)
+          if (e.widget case SearchText(:final text)
               when _fold(text).contains(_fold(_query.trim()))) {
             first = e;
             return;
@@ -245,8 +246,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     SwitchListTile(
                       key: const ValueKey('settings-time-of-day'),
                       contentPadding: EdgeInsets.zero,
-                      title: _SearchText(l10n.settingsTimeOfDay),
-                      subtitle: _SearchText(l10n.settingsTimeOfDaySub),
+                      title: SearchText(l10n.settingsTimeOfDay),
+                      subtitle: SearchText(l10n.settingsTimeOfDaySub),
                       value: ref.watch(homeSkyProvider),
                       onChanged: (on) =>
                           ref.read(homeSkyProvider.notifier).setEnabled(on),
@@ -254,8 +255,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     SwitchListTile(
                       key: const ValueKey('settings-animations'),
                       contentPadding: EdgeInsets.zero,
-                      title: _SearchText(l10n.settingsAnimations),
-                      subtitle: _SearchText(l10n.settingsAnimationsSub),
+                      title: SearchText(l10n.settingsAnimations),
+                      subtitle: SearchText(l10n.settingsAnimationsSub),
                       value: ref.watch(animationsProvider),
                       onChanged: (on) =>
                           ref.read(animationsProvider.notifier).setEnabled(on),
@@ -311,8 +312,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 SwitchListTile(
                   key: const ValueKey('settings-sajdah-reminder'),
                   contentPadding: EdgeInsets.zero,
-                  title: _SearchText(l10n.sajdahReminder),
-                  subtitle: _SearchText(l10n.sajdahReminderSub),
+                  title: SearchText(l10n.sajdahReminder),
+                  subtitle: SearchText(l10n.sajdahReminderSub),
                   value: ref.watch(
                     hifzSettingsProvider.select((s) => s.sajdahReminder),
                   ),
@@ -357,7 +358,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       SwitchListTile(
                         key: const ValueKey('settings-reminder'),
                         contentPadding: EdgeInsets.zero,
-                        title: _SearchText(l10n.memReminderSwitch),
+                        title: SearchText(l10n.memReminderSwitch),
                         subtitle: Text(
                           l10n.memReminderAt(reminderTime.format(context)),
                         ),
@@ -379,7 +380,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         contentPadding: EdgeInsets.zero,
                         enabled: reminder.enabled,
                         leading: const Icon(Icons.schedule),
-                        title: _SearchText(l10n.memReminderTime),
+                        title: SearchText(l10n.memReminderTime),
                         trailing: Text(reminderTime.format(context)),
                         onTap: () async {
                           final picked = await showTimePicker(
@@ -410,16 +411,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       key: const ValueKey('settings-export'),
                       contentPadding: EdgeInsets.zero,
                       leading: const Icon(Icons.upload_file_rounded),
-                      title: _SearchText(l10n.settingsExportTitle),
-                      subtitle: _SearchText(l10n.settingsExportSub),
+                      title: SearchText(l10n.settingsExportTitle),
+                      subtitle: SearchText(l10n.settingsExportSub),
                       onTap: () => _export(context, ref),
                     ),
                     ListTile(
                       key: const ValueKey('settings-import'),
                       contentPadding: EdgeInsets.zero,
                       leading: const Icon(Icons.download_rounded),
-                      title: _SearchText(l10n.settingsImportTitle),
-                      subtitle: _SearchText(l10n.settingsImportSub),
+                      title: SearchText(l10n.settingsImportTitle),
+                      subtitle: SearchText(l10n.settingsImportSub),
                       onTap: () => _import(context, ref),
                     ),
                     ListTile(
@@ -429,11 +430,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         Icons.delete_forever_outlined,
                         color: theme.colorScheme.error,
                       ),
-                      title: _SearchText(
+                      title: SearchText(
                         l10n.settingsResetTitle,
                         style: TextStyle(color: theme.colorScheme.error),
                       ),
-                      subtitle: _SearchText(l10n.settingsResetSub),
+                      subtitle: SearchText(l10n.settingsResetSub),
                       onTap: () => _confirmReset(context, ref),
                     ),
                   ],
@@ -481,7 +482,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ];
               // Rows compact (dense list tiles); chips and switches keep
               // their 48 × 48 to tap (a compact density shrank them to 40).
-              return _SettingsQuery(
+              return SettingsSearchScope(
                 query: query,
                 child: ListTileTheme(
                   dense: true,
@@ -548,52 +549,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 }
 
-/// The settings search's text (folded), for [_SearchText].
-class _SettingsQuery extends InheritedWidget {
-  const _SettingsQuery({required this.query, required super.child});
-
-  final String query;
-
-  @override
-  bool updateShouldNotify(_SettingsQuery old) => query != old.query;
-}
-
-/// An option's name or description, highlighted while the search finds it:
-/// where in an opened section the match is.
-class _SearchText extends StatelessWidget {
-  const _SearchText(this.text, {this.style});
-
-  final String text;
-  final TextStyle? style;
-
-  @override
-  Widget build(BuildContext context) {
-    final query =
-        context.dependOnInheritedWidgetOfExactType<_SettingsQuery>()?.query ??
-        '';
-    final found =
-        query.length >= 2 && _SettingsScreenState._fold(text).contains(query);
-    if (!found) return Text(text, style: style);
-    final scheme = Theme.of(context).colorScheme;
-    return DecoratedBox(
-      key: const ValueKey('settings-search-match'),
-      decoration: BoxDecoration(
-        color: scheme.tertiaryContainer,
-        borderRadius: BorderRadius.circular(TahfeezRadii.sm),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 4),
-        child: Text(
-          text,
-          style: (style ?? const TextStyle()).copyWith(
-            color: scheme.onTertiaryContainer,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 /// A theme choice's paper and ink, for its swatch.
 Color _paper(AppThemeChoice c) =>
     c.tone.surface ??
@@ -645,7 +600,7 @@ class _MeaningSettings extends ConsumerWidget {
         ListTile(
           key: const ValueKey('settings-translations'),
           contentPadding: EdgeInsets.zero,
-          title: _SearchText(l10n.searchTranslations),
+          title: SearchText(l10n.searchTranslations),
           subtitle: Text(
             books == null || books.isEmpty
                 ? l10n.readerSelected(0)
@@ -658,7 +613,7 @@ class _MeaningSettings extends ConsumerWidget {
         ListTile(
           key: const ValueKey('settings-tafsir'),
           contentPadding: EdgeInsets.zero,
-          title: _SearchText(l10n.readerTafsir),
+          title: SearchText(l10n.readerTafsir),
           subtitle: Text(tafsirLabel ?? l10n.settingsTafsirNone),
           trailing: const Icon(Icons.chevron_right),
           onTap: () => showTafsirPacksSheet(context),
@@ -666,7 +621,7 @@ class _MeaningSettings extends ConsumerWidget {
         SwitchListTile(
           key: const ValueKey('settings-transliteration'),
           contentPadding: EdgeInsets.zero,
-          title: _SearchText(l10n.settingsTransliteration),
+          title: SearchText(l10n.settingsTransliteration),
           value: transliteration,
           onChanged: (on) => ref
               .read(wbwShowTransliterationPreferenceControllerProvider.notifier)
@@ -856,8 +811,8 @@ class _AboutAppState extends ConsumerState<_AboutApp> {
       key: ValueKey(key),
       contentPadding: EdgeInsets.zero,
       leading: Icon(icon),
-      title: _SearchText(title),
-      subtitle: _SearchText(subtitle),
+      title: SearchText(title),
+      subtitle: SearchText(subtitle),
       onTap: onTap,
     );
     return TahfeezCard(
@@ -958,7 +913,7 @@ class _AboutAppState extends ConsumerState<_AboutApp> {
             SwitchListTile(
               key: const ValueKey('settings-update-offers'),
               contentPadding: EdgeInsets.zero,
-              title: _SearchText(l10n.settingsUpdateOffers),
+              title: SearchText(l10n.settingsUpdateOffers),
               value: _updateOffers ?? true,
               onChanged: (on) {
                 setState(() => _updateOffers = on);
@@ -970,8 +925,8 @@ class _AboutAppState extends ConsumerState<_AboutApp> {
             key: const ValueKey('settings-about'),
             contentPadding: EdgeInsets.zero,
             leading: const Icon(Icons.info_outline),
-            title: _SearchText(l10n.aboutTitle),
-            subtitle: _SearchText(l10n.aboutSubtitle),
+            title: SearchText(l10n.aboutTitle),
+            subtitle: SearchText(l10n.aboutSubtitle),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => context.push(AppRoutes.about),
           ),
@@ -996,7 +951,7 @@ class _ListenSettings extends ConsumerWidget {
         ListTile(
           key: const ValueKey('settings-reciter'),
           contentPadding: EdgeInsets.zero,
-          title: _SearchText(l10n.listenReciter),
+          title: SearchText(l10n.listenReciter),
           subtitle: ReciterNameWithAvatar(
             reciter: reciter,
             name: reciterName(context, reciter),
@@ -1131,11 +1086,11 @@ class _SetupCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               spacing: 2,
               children: [
-                _SearchText(
+                SearchText(
                   l10n.settingsSetupAgain,
                   style: theme.textTheme.titleSmall,
                 ),
-                _SearchText(
+                SearchText(
                   l10n.settingsSetupAgainSub,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: scheme.onSurfaceVariant,

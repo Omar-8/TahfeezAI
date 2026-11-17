@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/ui/settings_search.dart';
+
 import '../../../core/localization/generated/app_localizations.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -31,6 +33,28 @@ void showMushafAppearanceSheet(BuildContext context) {
 /// The Mushaf's appearance: in Ayah mode what each ayah shows, then the
 /// page's theme and the thematic passages' colours — in its own sheet and
 /// at the end of the Hifz settings.
+/// The words a search (Hifz settings', [SettingsSearchScope]) finds the
+/// page's theme by: its title and each theme's name.
+List<String> _themeWords(AppLocalizations l10n) => [
+  l10n.mushafPageTheme,
+  for (final a in MushafAppearance.values) mushafAppearanceName(a, l10n),
+];
+
+List<String> _passageWords(AppLocalizations l10n) => [
+  l10n.mushafPassages,
+  l10n.mushafPassagesSub,
+];
+
+/// Whether [query] (folded) finds any of [MushafAppearanceOptions]'
+/// settings.
+bool mushafAppearanceHits(BuildContext context, String query) {
+  final l10n = AppLocalizations.of(context);
+  return SettingsSearchScope.hits(query, [
+    ..._themeWords(l10n),
+    ..._passageWords(l10n),
+  ]);
+}
+
 class MushafAppearanceOptions extends ConsumerWidget {
   const MushafAppearanceOptions({super.key});
 
@@ -39,56 +63,64 @@ class MushafAppearanceOptions extends ConsumerWidget {
     final selected = ref.watch(mushafAppearanceControllerProvider);
 
     final l10n = AppLocalizations.of(context);
+    // Under a search (Hifz settings'): only what it finds.
+    final query = SettingsSearchScope.of(context);
+    final themes = SettingsSearchScope.hits(query, _themeWords(l10n));
+    final passages = SettingsSearchScope.hits(query, _passageWords(l10n));
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         // Ayah mode: what each ayah shows.
-        if (ref.watch(readerModeProvider) == ReaderMode.ayah)
+        if (query.isEmpty && ref.watch(readerModeProvider) == ReaderMode.ayah)
           const AyahViewOptions(),
-        if (ref.watch(readerModeProvider) == ReaderMode.ayah)
+        if (query.isEmpty && ref.watch(readerModeProvider) == ReaderMode.ayah)
           const Divider(height: 24),
         // The page's theme: each with a swatch of its paper and ink.
-        Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: Text(
-            l10n.mushafPageTheme,
-            style: Theme.of(context).textTheme.titleSmall,
+        if (themes) ...[
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: SearchText(
+              l10n.mushafPageTheme,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
           ),
-        ),
-        GuideTarget(
-          id: 'mushaf-page-theme',
-          child: Wrap(
-            key: const ValueKey('mushaf-page-theme'),
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              for (final appearance in MushafAppearance.values)
-                ChoiceChip(
-                  key: ValueKey('mushaf-page-theme-${appearance.name}'),
-                  avatar: ThemeSwatch(
-                    paper: appearance.colors.background,
-                    ink: appearance.colors.text,
+          GuideTarget(
+            id: 'mushaf-page-theme',
+            child: Wrap(
+              key: const ValueKey('mushaf-page-theme'),
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final appearance in MushafAppearance.values)
+                  ChoiceChip(
+                    key: ValueKey('mushaf-page-theme-${appearance.name}'),
+                    avatar: ThemeSwatch(
+                      paper: appearance.colors.background,
+                      ink: appearance.colors.text,
+                    ),
+                    showCheckmark: false,
+                    label: SearchText(mushafAppearanceName(appearance, l10n)),
+                    selected: appearance == selected,
+                    onSelected: (_) => ref
+                        .read(mushafAppearanceControllerProvider.notifier)
+                        .setAppearance(appearance),
                   ),
-                  showCheckmark: false,
-                  label: Text(mushafAppearanceName(appearance, l10n)),
-                  selected: appearance == selected,
-                  onSelected: (_) => ref
-                      .read(mushafAppearanceControllerProvider.notifier)
-                      .setAppearance(appearance),
-                ),
-            ],
+              ],
+            ),
           ),
-        ),
-        const SizedBox(height: 8),
-        SwitchListTile(
-          key: const ValueKey('mushaf-passages'),
-          contentPadding: EdgeInsets.zero,
-          title: Text(l10n.mushafPassages),
-          subtitle: Text(l10n.mushafPassagesSub),
-          value: ref.watch(mushafPassagesProvider),
-          onChanged: (on) => ref.read(mushafPassagesProvider.notifier).set(on),
-        ),
+          const SizedBox(height: 8),
+        ],
+        if (passages)
+          SwitchListTile(
+            key: const ValueKey('mushaf-passages'),
+            contentPadding: EdgeInsets.zero,
+            title: SearchText(l10n.mushafPassages),
+            subtitle: SearchText(l10n.mushafPassagesSub),
+            value: ref.watch(mushafPassagesProvider),
+            onChanged: (on) =>
+                ref.read(mushafPassagesProvider.notifier).set(on),
+          ),
       ],
     );
   }

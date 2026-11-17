@@ -60,6 +60,11 @@ class AppShell extends ConsumerWidget {
     final fullBleed = _isStandaloneMushafRoute(currentLocation) ||
         _fullWidthTabs.contains(Uri.tryParse(currentLocation)?.path) ||
         isQuranLocationPath(currentLocation);
+    // On the reader, a sheet's keyboard (the Hifz settings' search) over
+    // the page and its bar, not them squeezed above it (owner, 2026-11-17);
+    // the tabs' own screens, with their fields, still lifted above it.
+    final reader = _isStandaloneMushafRoute(currentLocation) ||
+        isQuranLocationPath(currentLocation);
     // While a Mushaf is open (or a recitation session runs), the live
     // recitation bar takes the place of the Home/Quran/Settings navigation.
     final recitationBar = ref.watch(recitationBarVisibleProvider);
@@ -120,6 +125,7 @@ class AppShell extends ConsumerWidget {
       return AnnotatedRegion<SystemUiOverlayStyle>(
         value: _systemNavigationBarStyle(scheme),
         child: Scaffold(
+          resizeToAvoidBottomInset: !reader,
           // Screens drawn on beneath the glass navigation bar, which blurs
           // them — not the Mushaf under its recitation bar.
           extendBody: !recitationBar,
@@ -138,6 +144,7 @@ class AppShell extends ConsumerWidget {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: _systemNavigationBarStyle(scheme),
       child: Scaffold(
+        resizeToAvoidBottomInset: !reader,
         body: Row(
           children: [
             // Swapped in place (not removed) so `content` keeps its

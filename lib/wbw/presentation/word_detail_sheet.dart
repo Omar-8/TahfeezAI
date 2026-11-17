@@ -16,6 +16,8 @@ import '../../features/mushaf/application/mushaf_pages_on_screen.dart';
 import '../../features/mushaf/application/mushaf_word_overlay.dart';
 import '../../features/recitation/presentation/recitation_loop_sheet.dart'
     show SegmentedProgressLine;
+import '../../features/recitation/application/hifz_controller.dart'
+    show hifzSettingsProvider;
 import '../../features/recitation/presentation/recitation_word_feedback.dart';
 import '../../quran/application/canonical_ayah_word_text.dart';
 import '../../quran/domain/models/quran_refs.dart';
@@ -170,6 +172,26 @@ class _WordDetailSheetState extends ConsumerState<_WordDetailSheet> {
                 child: body,
               ),
             ),
+          ),
+          // The mistake hints over the page while reciting, turned off (or
+          // on) from here (owner, 2026-11-17) — no trip to Hifz settings.
+          Consumer(
+            builder: (context, ref, _) {
+              final settings = ref.watch(hifzSettingsProvider);
+              return SwitchListTile(
+                key: const ValueKey('word-mistake-hints-switch'),
+                dense: true,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: TahfeezSpacing.md,
+                ),
+                secondary: const Icon(Icons.lightbulb_outline_rounded),
+                title: Text(l10n.recMistakeHints),
+                value: settings.mistakeHints,
+                onChanged: (on) => ref
+                    .read(hifzSettingsProvider.notifier)
+                    .update(settings.copyWith(mistakeHints: on)),
+              );
+            },
           ),
           // At the bottom, always in reach: the next mistake to the left (its
           // arrow pointing there), the previous one to the right — in every

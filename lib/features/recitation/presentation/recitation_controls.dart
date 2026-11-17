@@ -9,6 +9,10 @@ import 'package:flutter/foundation.dart'
     show ValueListenable, kIsWeb, kReleaseMode, listEquals;
 import 'package:flutter/material.dart';
 
+import '../../../core/ui/settings_search.dart';
+import '../../../core/theme/components/tahfeez_card.dart'
+    show TahfeezGlassSurface;
+
 import '../../../core/platform/app_settings_opener.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -2677,10 +2681,17 @@ Future<void> showHifzSettingsSheet(BuildContext context) {
     useSafeArea: true,
     useRootNavigator: true,
     constraints: sheetBelowAppBar(context),
-    builder: (context) => GlassSheet(
-      handle: true,
-      closable: true,
-      child: const _HifzSettingsSheet(),
+    // Lifted above the keyboard while its search is typed into, as tall as
+    // before (owner, 2026-11-17).
+    builder: (context) => AnimatedPadding(
+      duration: TahfeezMotionDuration.fast,
+      curve: TahfeezMotionCurves.standard,
+      padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+      child: GlassSheet(
+        handle: true,
+        closable: true,
+        child: const _HifzSettingsSheet(),
+      ),
     ),
   );
 }
@@ -2701,6 +2712,39 @@ class _HifzSettingsSheetState extends ConsumerState<_HifzSettingsSheet>
       if (mounted) setState(() {});
     });
 
+  /// The search over both tabs' settings (owner, 2026-11-16: "search for
+  /// them by keyword like we do in settings"), folded; empty: the tabs.
+  var _query = '';
+  final _results = GlobalKey();
+
+  /// Whether the search found anything in the recitation settings (set as
+  /// they are built).
+  var _found = false;
+
+  /// The tabs' height when a search began: the results keep the sheet at
+  /// least that tall (owner, 2026-11-17: it "should keep its height and not
+  /// become shorter due to less content").
+  final _tabsArea = GlobalKey();
+  double? _tabsHeight;
+
+  void _search(String text) {
+    if (_query.isEmpty) {
+      final box = _tabsArea.currentContext?.findRenderObject();
+      if (box is RenderBox && box.hasSize) _tabsHeight = box.size.height;
+    }
+    setState(() => _query = foldForSearch(text.trim()));
+    final query = _query;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future<void>.delayed(const Duration(milliseconds: 220), () {
+        if (!mounted || _query != query) return;
+        final results = _results.currentContext;
+        if (results != null && results.mounted) {
+          revealFirstSearchMatch(results, query);
+        }
+      });
+    });
+  }
+
   @override
   void dispose() {
     _tabs.dispose();
@@ -2715,36 +2759,117 @@ class _HifzSettingsSheetState extends ConsumerState<_HifzSettingsSheet>
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // (Its ✕ on the drag handle's line: the tabs the full width, no
-          // row of its own.)
-          TabBar(
-            key: const ValueKey('hifz-settings-tabs'),
-            controller: _tabs,
-            tabs: [
-              Tab(text: l10n.settingsRecitation),
-              Tab(text: l10n.hifzTabAppearance),
-            ],
-          ),
-          // Both tabs laid out, one shown: the sheet keeps the taller one's
-          // height whichever is open.
-          // Each tab its own scroll (one scrolled down leaves the other at
-          // its top).
-          Flexible(
-            child: IndexedStack(
-              index: _tabs.index,
-              children: [
-                SingleChildScrollView(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: _recitationSettings(context),
+          // Every setting of both tabs found by a word, as in Settings.
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: TahfeezGlassSurface(
+              borderRadius: BorderRadius.circular(TahfeezRadii.pill),
+              blur: false,
+              child: TextField(
+                key: const ValueKey('hifz-settings-search'),
+                onChanged: _search,
+                textInputAction: TextInputAction.search,
+                textAlignVertical: TextAlignVertical.center,
+                decoration: InputDecoration(
+                  prefixIcon: const Icon(Icons.search_rounded),
+                  hintText: l10n.settingsSearchHint,
+                  isDense: true,
+                  constraints: const BoxConstraints(minHeight: 48),
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.zero,
                 ),
-                const SingleChildScrollView(
-                  padding: EdgeInsets.fromLTRB(16, 16, 16, 16),
-                  child: MushafAppearanceOptions(),
-                ),
-              ],
+              ),
             ),
           ),
+          if (_query.isNotEmpty)
+            Flexible(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: _tabsHeight ?? 0),
+                child: _searchResults(context),
+              ),
+            )
+          else
+            Flexible(
+              child: Column(
+                key: _tabsArea,
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // (Its ✕ on the drag handle's line: the tabs the full width, no
+                  // row of its own.)
+                  TabBar(
+                    key: const ValueKey('hifz-settings-tabs'),
+                    controller: _tabs,
+                    tabs: [
+                      Tab(text: l10n.settingsRecitation),
+                      Tab(text: l10n.hifzTabAppearance),
+                    ],
+                  ),
+                  // Both tabs laid out, one shown: the sheet keeps the taller one's
+                  // height whichever is open.
+                  // Each tab its own scroll (one scrolled down leaves the other at
+                  // its top).
+                  Flexible(
+                    child: IndexedStack(
+                      index: _tabs.index,
+                      children: [
+                        SingleChildScrollView(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: _recitationSettings(context),
+                        ),
+                        const SingleChildScrollView(
+                          padding: EdgeInsets.fromLTRB(16, 16, 16, 16),
+                          child: MushafAppearanceOptions(),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
         ],
+      ),
+    );
+  }
+
+  /// Both tabs' settings the search finds, in one list: the recitation's
+  /// (its groups opened, every setting — Advanced's too), then the page's
+  /// appearance; or that nothing was found.
+  Widget _searchResults(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    _found = false;
+    final recitation = _recitationSettings(context);
+    final appearance = mushafAppearanceHits(context, _query);
+    final theme = Theme.of(context);
+    return SettingsSearchScope(
+      query: _query,
+      child: SingleChildScrollView(
+        key: _results,
+        padding: const EdgeInsets.only(top: 8, bottom: 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            recitation,
+            if (appearance)
+              const Padding(
+                padding: EdgeInsets.fromLTRB(16, 8, 16, 0),
+                child: MushafAppearanceOptions(),
+              ),
+            if (!_found && !appearance)
+              Padding(
+                key: const ValueKey('hifz-settings-no-match'),
+                padding: const EdgeInsets.all(24),
+                child: Text(
+                  l10n.settingsNoMatch,
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -2759,18 +2884,40 @@ class _HifzSettingsSheetState extends ConsumerState<_HifzSettingsSheet>
         capabilities.isAndroid || capabilities.isIOS || capabilities.isWeb;
     // A browser: no vibration choice (the sound only).
     final web = capabilities.isWeb;
+    final query = _query;
+    final searching = query.isNotEmpty;
+    // A setting found by its words (all of them while not searching).
+    Widget find(List<String> words, Widget child) =>
+        _Found(words: words, child: child);
     Widget toggle(
       String title,
       String subtitle,
       bool value,
       HifzSettings Function(bool) apply,
     ) {
-      return SwitchListTile(
-        title: Text(title),
-        subtitle: Text(subtitle),
-        value: value,
-        onChanged: (v) => controller.update(apply(v)),
+      return find(
+        [title, subtitle],
+        SwitchListTile(
+          title: SearchText(title),
+          subtitle: SearchText(subtitle),
+          value: value,
+          onChanged: (v) => controller.update(apply(v)),
+        ),
       );
+    }
+
+    /// [children] the search finds (every one of a group it finds by its
+    /// title); none: the group left out.
+    List<Widget> found(List<Widget> children, {String? title}) {
+      if (!searching) return children;
+      final all = title != null && SettingsSearchScope.hits(query, [title]);
+      final shown = [
+        for (final c in children)
+          if (c is! _Found || all || SettingsSearchScope.hits(query, c.words))
+            c,
+      ];
+      if (shown.any((c) => c is _Found)) _found = true;
+      return shown;
     }
 
     final l10n = AppLocalizations.of(context);
@@ -2782,37 +2929,80 @@ class _HifzSettingsSheetState extends ConsumerState<_HifzSettingsSheet>
       String subtitle,
       bool selected,
       VoidCallback onTap,
-    ) => ListTile(
-      key: ValueKey(key),
-      selected: selected,
-      leading: Icon(
-        selected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+    ) => find(
+      [title, subtitle],
+      ListTile(
+        key: ValueKey(key),
+        selected: selected,
+        leading: Icon(
+          selected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+        ),
+        title: SearchText(title),
+        subtitle: SearchText(subtitle),
+        onTap: onTap,
       ),
-      title: Text(title),
-      subtitle: Text(subtitle),
-      onTap: onTap,
     );
-    Widget section(String key, String title, IconData icon, List<Widget> c) =>
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: TahfeezCollapsibleSection(
-            key: ValueKey(key),
-            title: title,
-            icon: icon,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: c,
-            ),
+    Widget section(
+      String key,
+      String title,
+      IconData icon,
+      List<Widget> c, {
+      String? summary,
+    }) {
+      final shown = found(c, title: title);
+      if (searching && !shown.any((w) => w is _Found)) {
+        return const SizedBox.shrink();
+      }
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: TahfeezCollapsibleSection(
+          key: ValueKey(key),
+          title: title,
+          icon: icon,
+          // Closed: what it is set to, under its title.
+          summary: summary,
+          // A search opens the groups it finds.
+          open: searching,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: shown,
           ),
-        );
+        ),
+      );
+    }
+
+    // Each group's settings in a line, under its title (owner, 2026-11-17).
+    String onOff(bool on) => on ? l10n.commonOn : l10n.commonOff;
+    String joined(List<String> on) =>
+        on.isEmpty ? l10n.commonOff : on.join(' · ');
+    final strictness = switch (settings.strictness) {
+      RecitationStrictness.lenient => l10n.recStrictnessLenient,
+      RecitationStrictness.balanced => l10n.recStrictnessBalanced,
+      RecitationStrictness.strict => l10n.recStrictnessStrict,
+    };
+    final checkingSummary = [
+      strictness,
+      if (settings.tajweed) l10n.recTajweed,
+      if (settings.strict) l10n.recStrict,
+    ].join(' · ');
+    final marksSummary = joined([
+      if (settings.highlightCurrent) l10n.recHighlight,
+      if (settings.colorWords) l10n.recColour,
+      if (settings.showMistakes) l10n.recShowMistakes,
+      if (settings.mistakeHints) l10n.recMistakeHints,
+    ]);
+    final alertsSummary =
+        '${l10n.recAlert}: ${joined([if (!web && settings.alert.vibrates) l10n.recAlertVibrate, if (settings.alert.beeps) l10n.recAlertSound])}';
+    final otherSummary =
+        '${l10n.sajdahReminder}: ${onOff(settings.sajdahReminder)}';
 
     // A level (owner, 2026-11-07) — or Advanced: every setting, in
     // collapsed groups.
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
+      children: found([
         for (final (l, title, subtitle) in [
           (HifzLevel.gentle, l10n.hifzLevelGentle, l10n.hifzLevelGentleSub),
           (
@@ -2836,8 +3026,9 @@ class _HifzSettingsSheetState extends ConsumerState<_HifzSettingsSheet>
           level == null,
           () => controller.update(settings.copyWith(advanced: true)),
         ),
-        if (level == null) ...[
-          const Divider(),
+        // (A search finds every setting, whatever the level.)
+        if (level == null || searching) ...[
+          if (!searching) const Divider(),
           section(
             'hifz-group-checking',
             l10n.hifzGroupChecking,
@@ -2849,81 +3040,91 @@ class _HifzSettingsSheetState extends ConsumerState<_HifzSettingsSheet>
                 settings.strict,
                 (v) => settings.copyWith(strict: v),
               ),
-              ListTile(
-                key: const ValueKey('hifz-strictness'),
-                title: Text(AppLocalizations.of(context).recStrictness),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(AppLocalizations.of(context).recStrictnessSub),
-                    const SizedBox(height: 8),
-                    // One shift for every threshold, tajweed's too.
-                    SegmentedButton<RecitationStrictness>(
-                      segments: [
-                        ButtonSegment(
-                          value: RecitationStrictness.lenient,
-                          label: Text(
-                            AppLocalizations.of(context).recStrictnessLenient,
+              find(
+                [
+                  l10n.recStrictness,
+                  l10n.recStrictnessSub,
+                  l10n.recStrictnessLenient,
+                  l10n.recStrictnessBalanced,
+                  l10n.recStrictnessStrict,
+                ],
+                ListTile(
+                  key: const ValueKey('hifz-strictness'),
+                  title: SearchText(AppLocalizations.of(context).recStrictness),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(AppLocalizations.of(context).recStrictnessSub),
+                      const SizedBox(height: 8),
+                      // One shift for every threshold, tajweed's too.
+                      SegmentedButton<RecitationStrictness>(
+                        segments: [
+                          ButtonSegment(
+                            value: RecitationStrictness.lenient,
+                            label: Text(
+                              AppLocalizations.of(context).recStrictnessLenient,
+                            ),
                           ),
-                        ),
-                        ButtonSegment(
-                          value: RecitationStrictness.balanced,
-                          label: Text(
-                            AppLocalizations.of(context).recStrictnessBalanced,
+                          ButtonSegment(
+                            value: RecitationStrictness.balanced,
+                            label: Text(
+                              AppLocalizations.of(context)
+                                  .recStrictnessBalanced,
+                            ),
                           ),
-                        ),
-                        ButtonSegment(
-                          value: RecitationStrictness.strict,
-                          label: Text(
-                            AppLocalizations.of(context).recStrictnessStrict,
+                          ButtonSegment(
+                            value: RecitationStrictness.strict,
+                            label: Text(
+                              AppLocalizations.of(context).recStrictnessStrict,
+                            ),
                           ),
+                        ],
+                        selected: {settings.strictness},
+                        showSelectedIcon: false,
+                        onSelectionChanged: (s) => controller.update(
+                          settings.copyWith(strictness: s.first),
                         ),
-                      ],
-                      selected: {settings.strictness},
-                      showSelectedIcon: false,
-                      onSelectionChanged: (s) => controller.update(
-                        settings.copyWith(strictness: s.first),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    // A legend: each level on its line, the chosen one in full.
-                    for (final (level, name, meaning) in [
-                      (
-                        RecitationStrictness.lenient,
-                        AppLocalizations.of(context).recStrictnessLenient,
-                        AppLocalizations.of(context).recStrictnessLenientSub,
-                      ),
-                      (
-                        RecitationStrictness.balanced,
-                        AppLocalizations.of(context).recStrictnessBalanced,
-                        AppLocalizations.of(context).recStrictnessBalancedSub,
-                      ),
-                      (
-                        RecitationStrictness.strict,
-                        AppLocalizations.of(context).recStrictnessStrict,
-                        AppLocalizations.of(context).recStrictnessStrictSub,
-                      ),
-                    ])
-                      Padding(
-                        padding: const EdgeInsets.only(top: 2),
-                        child: Opacity(
-                          opacity: level == settings.strictness ? 1 : 0.65,
-                          child: Text.rich(
-                            TextSpan(
-                              children: [
-                                TextSpan(
-                                  text: '$name: ',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w600,
+                      const SizedBox(height: 8),
+                      // A legend: each level on its line, the chosen one in full.
+                      for (final (level, name, meaning) in [
+                        (
+                          RecitationStrictness.lenient,
+                          AppLocalizations.of(context).recStrictnessLenient,
+                          AppLocalizations.of(context).recStrictnessLenientSub,
+                        ),
+                        (
+                          RecitationStrictness.balanced,
+                          AppLocalizations.of(context).recStrictnessBalanced,
+                          AppLocalizations.of(context).recStrictnessBalancedSub,
+                        ),
+                        (
+                          RecitationStrictness.strict,
+                          AppLocalizations.of(context).recStrictnessStrict,
+                          AppLocalizations.of(context).recStrictnessStrictSub,
+                        ),
+                      ])
+                        Padding(
+                          padding: const EdgeInsets.only(top: 2),
+                          child: Opacity(
+                            opacity: level == settings.strictness ? 1 : 0.65,
+                            child: Text.rich(
+                              TextSpan(
+                                children: [
+                                  TextSpan(
+                                    text: '$name: ',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
-                                ),
-                                TextSpan(text: meaning),
-                              ],
+                                  TextSpan(text: meaning),
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
               toggle(
@@ -2956,25 +3157,29 @@ class _HifzSettingsSheetState extends ConsumerState<_HifzSettingsSheet>
                     AppLocalizations.of(context).ruleGhunnah,
                   ),
                 ])
-                  CheckboxListTile(
-                    key: ValueKey('tajweed-rule-${rule.name}'),
-                    dense: true,
-                    contentPadding: const EdgeInsetsDirectional.only(
-                      start: 32,
-                      end: 16,
-                    ),
-                    title: Text(name),
-                    value: settings.tajweedRules.contains(rule),
-                    onChanged: (v) => controller.update(
-                      settings.copyWith(
-                        tajweedRules: v == true
-                            ? {...settings.tajweedRules, rule}
-                            : ({...settings.tajweedRules}..remove(rule)),
+                  find(
+                    [name, l10n.recTajweed],
+                    CheckboxListTile(
+                      key: ValueKey('tajweed-rule-${rule.name}'),
+                      dense: true,
+                      contentPadding: const EdgeInsetsDirectional.only(
+                        start: 32,
+                        end: 16,
+                      ),
+                      title: SearchText(name),
+                      value: settings.tajweedRules.contains(rule),
+                      onChanged: (v) => controller.update(
+                        settings.copyWith(
+                          tajweedRules: v == true
+                              ? {...settings.tajweedRules, rule}
+                              : ({...settings.tajweedRules}..remove(rule)),
+                        ),
                       ),
                     ),
                   ),
               ],
             ],
+            summary: checkingSummary,
           ),
           section(
             'hifz-group-marks',
@@ -2994,51 +3199,63 @@ class _HifzSettingsSheetState extends ConsumerState<_HifzSettingsSheet>
                 (v) => settings.copyWith(colorWords: v),
               ),
               if (settings.colorWords)
-                _ColourChoice(
-                  key: const ValueKey('hifz-pronunciation-colour'),
-                  title: AppLocalizations.of(context).recPronunciationColour,
-                  colours: HifzSettings.pronunciationColors,
-                  selected: settings.pronunciationColor,
-                  onSelected: (c) => controller.update(
-                    settings.copyWith(pronunciationColor: c),
+                find(
+                  [l10n.recPronunciationColour, l10n.recColour],
+                  _ColourChoice(
+                    key: const ValueKey('hifz-pronunciation-colour'),
+                    title: AppLocalizations.of(context).recPronunciationColour,
+                    colours: HifzSettings.pronunciationColors,
+                    selected: settings.pronunciationColor,
+                    onSelected: (c) => controller.update(
+                      settings.copyWith(pronunciationColor: c),
+                    ),
                   ),
                 ),
               // (Tajweed's, while tajweed is judged.)
               if (settings.colorWords && settings.tajweed)
-                _ColourChoice(
-                  key: const ValueKey('hifz-tajweed-colour'),
-                  title: AppLocalizations.of(context).recTajweedColour,
-                  colours: HifzSettings.tajweedColors,
-                  selected: settings.tajweedColor,
-                  onSelected: (c) =>
-                      controller.update(settings.copyWith(tajweedColor: c)),
+                find(
+                  [l10n.recTajweedColour, l10n.recColour],
+                  _ColourChoice(
+                    key: const ValueKey('hifz-tajweed-colour'),
+                    title: AppLocalizations.of(context).recTajweedColour,
+                    colours: HifzSettings.tajweedColors,
+                    selected: settings.tajweedColor,
+                    onSelected: (c) =>
+                        controller.update(settings.copyWith(tajweedColor: c)),
+                  ),
                 )
               else if (settings.colorWords)
                 // Where its colour is chosen, while tajweed is not judged:
                 // said, with the way to turn it on (it once just vanished).
-                Row(
-                  key: const ValueKey('hifz-tajweed-colour-off'),
-                  spacing: TahfeezSpacing.sm,
-                  children: [
-                    Icon(
-                      Icons.info_outline_rounded,
-                      size: 18,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                    Expanded(
-                      child: Text(
-                        l10n.recTajweedColourOff,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                find(
+                  [l10n.recTajweedColour, l10n.recTajweedColourOff],
+                  Row(
+                    key: const ValueKey('hifz-tajweed-colour-off'),
+                    spacing: TahfeezSpacing.sm,
+                    children: [
+                      Icon(
+                        Icons.info_outline_rounded,
+                        size: 18,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                      Expanded(
+                        child: Text(
+                          l10n.recTajweedColourOff,
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
+                              ),
                         ),
                       ),
-                    ),
-                    TextButton(
-                      onPressed: () =>
-                          controller.update(settings.copyWith(tajweed: true)),
-                      child: Text(l10n.recTurnOn),
-                    ),
-                  ],
+                      TextButton(
+                        onPressed: () =>
+                            controller.update(settings.copyWith(tajweed: true)),
+                        child: Text(l10n.recTurnOn),
+                      ),
+                    ],
+                  ),
                 ),
               toggle(
                 AppLocalizations.of(context).recShowMistakes,
@@ -3054,6 +3271,7 @@ class _HifzSettingsSheetState extends ConsumerState<_HifzSettingsSheet>
                 (v) => settings.copyWith(mistakeHints: v),
               ),
             ],
+            summary: marksSummary,
           ),
           if (alerts)
             section(
@@ -3062,46 +3280,49 @@ class _HifzSettingsSheetState extends ConsumerState<_HifzSettingsSheet>
               Icons.notifications_active_outlined,
               [
                 if (alerts)
-                  ListTile(
-                    key: const ValueKey('hifz-mistake-alert'),
-                    title: Text(AppLocalizations.of(context).recAlert),
-                    subtitle: Padding(
-                      padding: const EdgeInsets.only(top: 8),
-                      // Vibrate and sound, each on or off: both, one, or none.
-                      child: SegmentedButton<MistakeAlert>(
-                        multiSelectionEnabled: true,
-                        emptySelectionAllowed: true,
-                        segments: [
-                          // (A browser: the sound alone.)
-                          if (!web)
+                  find(
+                    [l10n.recAlert, l10n.recAlertVibrate, l10n.recAlertSound],
+                    ListTile(
+                      key: const ValueKey('hifz-mistake-alert'),
+                      title: SearchText(AppLocalizations.of(context).recAlert),
+                      subtitle: Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        // Vibrate and sound, each on or off: both, one, or none.
+                        child: SegmentedButton<MistakeAlert>(
+                          multiSelectionEnabled: true,
+                          emptySelectionAllowed: true,
+                          segments: [
+                            // (A browser: the sound alone.)
+                            if (!web)
+                              ButtonSegment(
+                                value: MistakeAlert.vibrate,
+                                icon: const Icon(Icons.vibration),
+                                label: Text(
+                                  AppLocalizations.of(context).recAlertVibrate,
+                                ),
+                              ),
                             ButtonSegment(
-                              value: MistakeAlert.vibrate,
-                              icon: const Icon(Icons.vibration),
+                              value: MistakeAlert.sound,
+                              icon: const Icon(Icons.volume_up_outlined),
                               label: Text(
-                                AppLocalizations.of(context).recAlertVibrate,
+                                AppLocalizations.of(context).recAlertSound,
                               ),
                             ),
-                          ButtonSegment(
-                            value: MistakeAlert.sound,
-                            icon: const Icon(Icons.volume_up_outlined),
-                            label: Text(
-                              AppLocalizations.of(context).recAlertSound,
-                            ),
-                          ),
-                        ],
-                        selected: {
-                          if (!web && settings.alert.vibrates)
-                            MistakeAlert.vibrate,
-                          if (settings.alert.beeps) MistakeAlert.sound,
-                        },
-                        showSelectedIcon: false,
-                        onSelectionChanged: (s) => controller.update(
-                          settings.copyWith(
-                            alert: MistakeAlert.of(
-                              vibrate: web
-                                  ? settings.alert.vibrates
-                                  : s.contains(MistakeAlert.vibrate),
-                              sound: s.contains(MistakeAlert.sound),
+                          ],
+                          selected: {
+                            if (!web && settings.alert.vibrates)
+                              MistakeAlert.vibrate,
+                            if (settings.alert.beeps) MistakeAlert.sound,
+                          },
+                          showSelectedIcon: false,
+                          onSelectionChanged: (s) => controller.update(
+                            settings.copyWith(
+                              alert: MistakeAlert.of(
+                                vibrate: web
+                                    ? settings.alert.vibrates
+                                    : s.contains(MistakeAlert.vibrate),
+                                sound: s.contains(MistakeAlert.sound),
+                              ),
                             ),
                           ),
                         ),
@@ -3110,45 +3331,54 @@ class _HifzSettingsSheetState extends ConsumerState<_HifzSettingsSheet>
                   ),
                 // Tajweed mistakes (purple) alert apart, as chosen here.
                 if (alerts && settings.tajweed)
-                  ListTile(
-                    key: const ValueKey('hifz-tajweed-alert'),
-                    title: Text(AppLocalizations.of(context).recTajweedAlert),
-                    subtitle: Padding(
-                      padding: const EdgeInsets.only(top: 8),
-                      child: SegmentedButton<MistakeAlert>(
-                        multiSelectionEnabled: true,
-                        emptySelectionAllowed: true,
-                        segments: [
-                          // (A browser: the sound alone.)
-                          if (!web)
+                  find(
+                    [
+                      l10n.recTajweedAlert,
+                      l10n.recAlertVibrate,
+                      l10n.recAlertSound,
+                    ],
+                    ListTile(
+                      key: const ValueKey('hifz-tajweed-alert'),
+                      title: SearchText(
+                        AppLocalizations.of(context).recTajweedAlert,
+                      ),
+                      subtitle: Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: SegmentedButton<MistakeAlert>(
+                          multiSelectionEnabled: true,
+                          emptySelectionAllowed: true,
+                          segments: [
+                            // (A browser: the sound alone.)
+                            if (!web)
+                              ButtonSegment(
+                                value: MistakeAlert.vibrate,
+                                icon: const Icon(Icons.vibration),
+                                label: Text(
+                                  AppLocalizations.of(context).recAlertVibrate,
+                                ),
+                              ),
                             ButtonSegment(
-                              value: MistakeAlert.vibrate,
-                              icon: const Icon(Icons.vibration),
+                              value: MistakeAlert.sound,
+                              icon: const Icon(Icons.volume_up_outlined),
                               label: Text(
-                                AppLocalizations.of(context).recAlertVibrate,
+                                AppLocalizations.of(context).recAlertSound,
                               ),
                             ),
-                          ButtonSegment(
-                            value: MistakeAlert.sound,
-                            icon: const Icon(Icons.volume_up_outlined),
-                            label: Text(
-                              AppLocalizations.of(context).recAlertSound,
-                            ),
-                          ),
-                        ],
-                        selected: {
-                          if (!web && settings.tajweedAlert.vibrates)
-                            MistakeAlert.vibrate,
-                          if (settings.tajweedAlert.beeps) MistakeAlert.sound,
-                        },
-                        showSelectedIcon: false,
-                        onSelectionChanged: (s) => controller.update(
-                          settings.copyWith(
-                            tajweedAlert: MistakeAlert.of(
-                              vibrate: web
-                                  ? settings.tajweedAlert.vibrates
-                                  : s.contains(MistakeAlert.vibrate),
-                              sound: s.contains(MistakeAlert.sound),
+                          ],
+                          selected: {
+                            if (!web && settings.tajweedAlert.vibrates)
+                              MistakeAlert.vibrate,
+                            if (settings.tajweedAlert.beeps) MistakeAlert.sound,
+                          },
+                          showSelectedIcon: false,
+                          onSelectionChanged: (s) => controller.update(
+                            settings.copyWith(
+                              tajweedAlert: MistakeAlert.of(
+                                vibrate: web
+                                    ? settings.tajweedAlert.vibrates
+                                    : s.contains(MistakeAlert.vibrate),
+                                sound: s.contains(MistakeAlert.sound),
+                              ),
                             ),
                           ),
                         ),
@@ -3156,6 +3386,7 @@ class _HifzSettingsSheetState extends ConsumerState<_HifzSettingsSheet>
                     ),
                   ),
               ],
+              summary: alertsSummary,
             ),
           section(
             'hifz-group-other',
@@ -3169,11 +3400,23 @@ class _HifzSettingsSheetState extends ConsumerState<_HifzSettingsSheet>
                 (v) => settings.copyWith(sajdahReminder: v),
               ),
             ],
+            summary: otherSummary,
           ),
         ],
-      ],
+      ]),
     );
   }
+}
+
+/// A Hifz setting with the words a search finds it by.
+class _Found extends StatelessWidget {
+  const _Found({required this.words, required this.child});
+
+  final List<String> words;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => child;
 }
 
 /// Development-only live recognition diagnostics: engine status, the

@@ -13,6 +13,7 @@ import 'package:tahfeez_ai/wbw/wbw_providers.dart';
 import 'package:tahfeez_ai/core/storage/browser_storage.dart';
 import 'package:tahfeez_ai/core/storage/storage_providers.dart';
 import 'package:tahfeez_ai/features/mushaf/application/mushaf_word_overlay.dart';
+import 'package:tahfeez_ai/features/recitation/application/hifz_controller.dart';
 
 import '../wbw_test_fixtures.dart';
 
@@ -213,6 +214,22 @@ void main() {
     final settled = tester.getSize(swipe).height;
     expect(heights, everyElement(moreOrLessEquals(settled, epsilon: 0.5)));
     expect(tester.takeException(), isNull);
+
+    // The mistake hints over the page turned off from the sheet (owner,
+    // 2026-11-17), and on again.
+    final container = ProviderScope.containerOf(
+      tester.element(find.text('open sheet')),
+    );
+    bool hints() => container.read(hifzSettingsProvider).mistakeHints;
+    final toggle = find.byKey(const ValueKey('word-mistake-hints-switch'));
+    expect(hints(), isTrue);
+    await tester.ensureVisible(toggle);
+    await tester.tap(toggle);
+    await tester.pumpAndSettle();
+    expect(hints(), isFalse);
+    await tester.tap(toggle);
+    await tester.pumpAndSettle();
+    expect(hints(), isTrue);
   });
 
   testWidgets('a recitation\'s mistakes: swiped through as the Mushaf\'s '
