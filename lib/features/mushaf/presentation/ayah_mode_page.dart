@@ -4,7 +4,8 @@ import '../../recitation/application/recitation_start.dart';
 
 import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart' show RenderAbstractViewport;
+import 'package:flutter/rendering.dart'
+    show RenderAbstractViewport, ScrollDirection;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/localization/generated/app_localizations.dart';
@@ -26,6 +27,7 @@ import '../application/mushaf_focus_ayah.dart';
 import '../application/mushaf_hide_mode.dart';
 import '../application/mushaf_page_turn.dart';
 import '../application/mushaf_page_verses.dart';
+import '../application/mushaf_pages_on_screen.dart' show mushafWordLocators;
 import '../application/mushaf_quran_engine_providers.dart';
 import '../application/mushaf_word_overlay.dart';
 import '../application/reader_mode.dart';
@@ -33,6 +35,9 @@ import '../domain/mushaf_appearance.dart';
 import '../../bookmarks/application/bookmarks_controller.dart';
 import '../application/mushaf_passages.dart';
 import 'ayah_view_parts.dart';
+import 'word_peek.dart';
+import '../domain/quran_engine/quran_engine_mushaf_backend.dart'
+    show MushafWordLocatingPage;
 import 'mushaf_ayah_sheet.dart';
 import '../application/reading_surah.dart';
 import '../../../core/theme/components/tahfeez_state_views.dart';
@@ -72,7 +77,8 @@ class AyahModePage extends ConsumerStatefulWidget {
   ConsumerState<AyahModePage> createState() => AyahModePageState();
 }
 
-class AyahModePageState extends ConsumerState<AyahModePage> {
+class AyahModePageState extends ConsumerState<AyahModePage>
+    implements MushafWordLocatingPage {
   /// The page's words in reading order (the engine's), and each ayah's
   /// end as a count of them.
   List<WordRef>? _words;
@@ -274,6 +280,54 @@ class AyahModePageState extends ConsumerState<AyahModePage> {
   void initState() {
     super.initState();
     _load();
+    _locate(widget.pageNumber);
+    _scroll.addListener(_onScroll);
+  }
+
+  /// The locator its page had before (the printed page's, if it was
+  /// built), given back when this one goes.
+  MushafWordLocatingPage? _replaced;
+
+  /// Its words' boxes told to the mistake hints, as the printed page's are
+  /// (owner, 2026-11-17: the pills in Ayah mode too).
+  void _locate(int page) {
+    final current = mushafWordLocators[page];
+    if (identical(current, this)) return;
+    _replaced = current;
+    mushafWordLocators[page] = this;
+  }
+
+  void _unlocate(int page) {
+    if (!identical(mushafWordLocators[page], this)) return;
+    if (_replaced case final r?) {
+      mushafWordLocators[page] = r;
+    } else {
+      mushafWordLocators.remove(page);
+    }
+    _replaced = null;
+  }
+
+  @override
+  Rect? wordRectOnScreen(WordRef word) {
+    final index = _words?.indexOf(word) ?? -1;
+    if (index < 0 || !mounted) return null;
+    final box = _wordKeys[index]?.currentContext?.findRenderObject();
+    if (box is! RenderBox || !box.attached || !box.hasSize) return null;
+    final rect = box.localToGlobal(Offset.zero) & box.size;
+    // (Built but scrolled away: not on screen.)
+    return rect.overlaps(Offset.zero & MediaQuery.sizeOf(context))
+        ? rect
+        : null;
+  }
+
+  /// A word's pill gone as the reader scrolls the ayahs (it stays where
+  /// it was shown, the words moving away under it).
+  void _onScroll() {
+    if (!_scroll.hasClients) return;
+    final scrolling = _scroll.positions.any(
+      (p) => p.userScrollDirection != ScrollDirection.idle,
+    );
+    if (scrolling) WordPeek.hide(now: true);
   }
 
   @override
@@ -288,6 +342,8 @@ class AyahModePageState extends ConsumerState<AyahModePage> {
       }
     }
     if (oldWidget.pageNumber != widget.pageNumber) {
+      _unlocate(oldWidget.pageNumber);
+      _locate(widget.pageNumber);
       setState(() => _words = null);
       _load();
     }
@@ -296,6 +352,8 @@ class AyahModePageState extends ConsumerState<AyahModePage> {
   @override
   void dispose() {
     _recitationScroll?.cancel();
+    _scroll.removeListener(_onScroll);
+    _unlocate(widget.pageNumber);
     _ownScroll.dispose();
     super.dispose();
   }
@@ -439,12 +497,50 @@ class AyahModePageState extends ConsumerState<AyahModePage> {
     );
   }
 
+  /// The word sheet's word ([index] on the page) brought into view, above
+  /// the sheet (owner, 2026-11-17): its ayah's card at the top — or, the
+  /// word far down a long ayah (where the sheet would cover it), the word
+  /// itself near the top.
+  void _showWord(int ayahId, int index) {
+    _unpin();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      ref.read(ayahModeTargetProvider.notifier).done();
+      final ayah = _ayahKeys[ayahId]?.currentContext?.findRenderObject();
+      final word = index < 0
+          ? null
+          : _wordKeys[index]?.currentContext?.findRenderObject();
+      if (ayah is RenderBox &&
+          word is RenderBox &&
+          ayah.hasSize &&
+          word.hasSize &&
+          _scroll.hasClients) {
+        final bottom =
+            word.localToGlobal(Offset.zero, ancestor: ayah).dy +
+            word.size.height;
+        if (bottom > _scroll.position.viewportDimension * 0.4) {
+          _reveal(_wordKeys[index], alignment: 0.2);
+          return;
+        }
+      }
+      _reveal(_ayahKeys[ayahId]);
+    });
+  }
+
   void _bringTargetIntoView() {
     final target = ref.read(ayahModeTargetProvider);
     final words = _words;
-    if (target == null || words == null || _pinned == target) return;
+    if (target == null || words == null) return;
     if (!words.any((w) => w.ayahId == target)) return;
-    _showBefore(target);
+    final asked = ref.read(ayahModeTargetProvider.notifier);
+    if (asked.word case final word?) {
+      _showWord(target, words.indexOf(word));
+      return;
+    }
+    if (_pinned == target) return;
+    if (ref.read(ayahModeTargetProvider.notifier).revealBefore) {
+      _showBefore(target);
+    }
     _pin(target);
     // Asked until shown and settled (or the reader takes over): a page
     // replaced meanwhile — the saved layout read back as the app starts —
@@ -1045,14 +1141,42 @@ class _AyahBlock extends ConsumerWidget {
                       fade: fade,
                       fontFamily: view.quranFont.family,
                       // Also where the next recitation starts (not while one
-                      // runs) — a hidden word too, without its sheet.
-                      onTap: () {
-                        ref
-                            .read(recitationStartProvider.notifier)
-                            .choose(words[k]);
-                        if (!hidden[k]) {
-                          showWordDetailSheet(context, wordRef: words[k]);
+                      // runs) — a hidden word too, without its pill. Shown,
+                      // the word in a pill above it, as in the Mushaf: its
+                      // sound, its meaning (its sheet) and its ayah's sheet
+                      // (owner, 2026-11-17).
+                      onTapAt: (at) {
+                        final word = words[k];
+                        // (Chosen already: kept — choosing it again would
+                        // clear it.)
+                        if (ref.read(recitationStartProvider)?.word != word) {
+                          ref
+                              .read(recitationStartProvider.notifier)
+                              .choose(word);
                         }
+                        if (hidden[k]) return;
+                        // (The ayahs' top: a word on the first line seen
+                        // has the pill below.)
+                        final list = Scrollable.maybeOf(context)?.context
+                            .findRenderObject();
+                        WordPeek.show(
+                          context,
+                          word: word,
+                          at: at,
+                          top: list is RenderBox && list.hasSize
+                              ? list.localToGlobal(Offset.zero).dy
+                              : null,
+                          onWord: () {
+                            if (context.mounted) {
+                              showWordDetailSheet(context, wordRef: word);
+                            }
+                          },
+                          onAyah: () {
+                            if (context.mounted) {
+                              showAyahDetailSheet(context, ayahId: ayahId);
+                            }
+                          },
+                        );
                       },
                       onLongPress: () =>
                           showAyahDetailSheet(context, ayahId: ayahId),

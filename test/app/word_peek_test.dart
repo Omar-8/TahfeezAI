@@ -9,6 +9,7 @@ import 'package:tahfeez_ai/quran/domain/models/quran_refs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tahfeez_ai/features/mushaf/application/reader_mode.dart';
+import 'package:tahfeez_ai/features/mushaf/application/mushaf_word_overlay.dart';
 import 'package:tahfeez_ai/features/mushaf/presentation/mushaf_ayah_sheet.dart';
 import 'package:tahfeez_ai/features/mushaf/presentation/similar_ayahs_section.dart';
 import 'package:tahfeez_ai/features/mushaf/presentation/mushaf_token_hit_rect.dart';
@@ -311,6 +312,159 @@ void main() {
     expect(previousAyahId(1001), isNull);
     expect(previousAyahId(113001), 112004);
   });
+
+  // Ayah mode's words as the printed page's (owner, 2026-11-17): a tap, the
+  // pill; a sure mistake, its hint above its word.
+  for (final layout in AyahLayout.values) {
+    group('Ayah mode (${layout.name})', () {
+      testWidgets('a word tapped: the band on it and its pill, no sheet; '
+          "the pill opens the word's sheet", (tester) async {
+        final container = await RealApp.launch(
+          tester,
+          route: '/quran/surah/1',
+          mode: ReaderMode.ayah,
+          layout: layout,
+        );
+        final word = find.byKey(const ValueKey('ayah-word-1001:1'));
+        await tester.tap(word);
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 300));
+        expect(container.read(recitationStartProvider)?.word, (
+          ayahId: 1001,
+          wordIndex: 1,
+        ));
+        expect(find.byKey(const ValueKey('word-peek')), findsOneWidget);
+        expect(find.text('Word details'), findsNothing);
+        // Above the word tapped.
+        final pill = tester.getRect(find.byKey(const ValueKey('word-peek')));
+        expect(pill.bottom, lessThanOrEqualTo(tester.getCenter(word).dy));
+
+        await tester.tap(find.byKey(const ValueKey('word-peek-word')));
+        await RealApp.settle(tester);
+        expect(find.text('Word details'), findsOneWidget);
+        expect(WordPeek.isShown, isFalse);
+        await RealApp.quit(tester);
+      });
+
+      testWidgets('scrolled: the pill gone', (tester) async {
+        await RealApp.launch(
+          tester,
+          route: '/quran/surah/1',
+          mode: ReaderMode.ayah,
+          layout: layout,
+        );
+        await tester.tap(find.byKey(const ValueKey('ayah-word-1001:1')));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 300));
+        expect(WordPeek.isShown, isTrue);
+        await tester.drag(
+          find.byKey(const ValueKey('ayah-word-1001:0')),
+          const Offset(0, -200),
+        );
+        await tester.pump();
+        expect(WordPeek.isShown, isFalse);
+        await RealApp.quit(tester);
+      });
+
+      testWidgets("the ayah sheet's next and previous: the Ayah view "
+          'scrolled to its ayah', (tester) async {
+        final container = await RealApp.launch(
+          tester,
+          route: '/quran/surah/2',
+          mode: ReaderMode.ayah,
+          layout: layout,
+        );
+        final card = find.byKey(const ValueKey('ayah-mode-bookmark-2005'));
+        final screen = tester.view.physicalSize / tester.view.devicePixelRatio;
+        bool inView() =>
+            card.evaluate().isNotEmpty &&
+            tester.getRect(card).top >= 0 &&
+            tester.getRect(card).bottom < screen.height / 2;
+        expect(inView(), isFalse);
+        showAyahDetailSheet(
+          tester.element(find.byType(Scaffold).last),
+          ayahId: 2002,
+        );
+        await RealApp.settle(tester);
+        for (var i = 0; i < 3; i++) {
+          await tester.tap(find.byKey(const ValueKey('ayah-sheet-next')));
+          await RealApp.settle(tester);
+        }
+        expect(find.byKey(const ValueKey('ayah-sheet-word-2005:0')), findsOne);
+        // Its card at the top, above the sheet.
+        expect(inView(), isTrue);
+        expect(container.read(ayahModeTargetProvider), isNull);
+        await RealApp.quit(tester);
+      });
+
+      testWidgets("the word sheet's next mistake: the Ayah view scrolled "
+          'to its word', (tester) async {
+        final container = await RealApp.launch(
+          tester,
+          route: '/quran/surah/2',
+          mode: ReaderMode.ayah,
+          layout: layout,
+        );
+        container
+            .read(mushafWordOverlayProvider.notifier)
+            .set(
+              const MushafWordOverlay(
+                first: (ayahId: 2002, wordIndex: 0),
+                last: (ayahId: 2005, wordIndex: 3),
+                hideUnrevealed: false,
+                marks: {
+                  (ayahId: 2002, wordIndex: 0): MushafWordMark.wrong,
+                  (ayahId: 2005, wordIndex: 3): MushafWordMark.wrong,
+                },
+              ),
+            );
+        await RealApp.settle(tester);
+        final word = find.byKey(const ValueKey('ayah-word-2005:3'));
+        final screen = tester.view.physicalSize / tester.view.devicePixelRatio;
+        bool inView() =>
+            word.evaluate().isNotEmpty &&
+            tester.getRect(word).top >= 0 &&
+            tester.getRect(word).bottom < screen.height / 2;
+        expect(inView(), isFalse);
+        showWordDetailSheet(
+          tester.element(find.byType(Scaffold).last),
+          wordRef: (ayahId: 2002, wordIndex: 0),
+        );
+        await RealApp.settle(tester);
+        await tester.tap(find.byKey(const ValueKey('word-next-mistake')));
+        await RealApp.settle(tester);
+        // The word above the sheet.
+        expect(inView(), isTrue);
+        expect(container.read(ayahModeTargetProvider), isNull);
+        await RealApp.quit(tester);
+      });
+
+      testWidgets("a sure mistake: its hint above its word", (tester) async {
+        final container = await RealApp.launch(
+          tester,
+          route: '/quran/surah/1',
+          mode: ReaderMode.ayah,
+          layout: layout,
+        );
+        container.read(mistakeHintProvider.notifier).report(const [
+          (ayahId: 1001, wordIndex: 2),
+        ]);
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 300));
+        final hint = find.byKey(const ValueKey('mistake-peek'));
+        expect(hint, findsOneWidget);
+        final word = tester.getRect(
+          find.byKey(const ValueKey('ayah-word-1001:2')),
+        );
+        final box = tester.getRect(hint);
+        // Over its word, just above it.
+        expect(box.center.dx, closeTo(word.center.dx, word.width));
+        expect(box.bottom, lessThanOrEqualTo(word.top + 1));
+        await tester.pump(const Duration(seconds: 4));
+        await RealApp.quit(tester);
+      });
+    });
+  }
 }
 
 /// A page standing in for the engine's: where each word is drawn.

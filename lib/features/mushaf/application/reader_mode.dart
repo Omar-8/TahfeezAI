@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/storage/storage_providers.dart';
 import '../../../core/theme/quran_text_style.dart';
+import '../../../quran/domain/models/quran_refs.dart' show WordRef;
 
 /// How the Mushaf's pages are shown: as printed, or ayah by ayah with
 /// their translation, transliteration, tafsir and word meanings (Ayah
@@ -175,7 +176,23 @@ class AyahModeTarget extends Notifier<int?> {
   @override
   int? build() => null;
 
-  void show(int ayahId) => state = ayahId;
+  /// Whether, in hide mode, the ayahs before it on its page are shown
+  /// (recited from it) — not for an ayah only looked at (the ayah sheet
+  /// going from ayah to ayah).
+  var revealBefore = true;
+
+  /// A word of it to bring into view (the word sheet going from word to
+  /// word, or mistake to mistake): the ayah's card, or — the word further
+  /// down a long ayah — the word itself.
+  WordRef? word;
+
+  void show(int ayahId, {bool revealBefore = true, WordRef? word}) {
+    this.revealBefore = revealBefore;
+    this.word = word;
+    // (The same ayah again — another word in it: told again.)
+    if (state == ayahId) state = null;
+    state = ayahId;
+  }
 
   void done() {
     // (Also called as a reader closes — maybe with the whole scope.)

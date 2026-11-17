@@ -13,6 +13,7 @@ import '../../features/listen/application/quran_audio_player.dart';
 import '../../features/mushaf/application/mushaf_appearance_controller.dart';
 import '../../features/mushaf/domain/mushaf_appearance.dart';
 import '../../features/mushaf/application/mushaf_pages_on_screen.dart';
+import '../../features/mushaf/application/reader_mode.dart';
 import '../../features/mushaf/application/mushaf_word_overlay.dart';
 import '../../features/recitation/presentation/recitation_loop_sheet.dart'
     show SegmentedProgressLine;
@@ -78,6 +79,12 @@ class _WordDetailSheetState extends ConsumerState<_WordDetailSheet> {
   Future<void> _go(WordRef word) async {
     setState(() => _word = word);
     await showMushafPageOf(ref.read, word);
+    // In Ayah mode: scrolled to it as well (owner, 2026-11-17).
+    if (mounted && ref.read(readerModeProvider) == ReaderMode.ayah) {
+      ref
+          .read(ayahModeTargetProvider.notifier)
+          .show(word.ayahId, revealBefore: false, word: word);
+    }
   }
 
   @override

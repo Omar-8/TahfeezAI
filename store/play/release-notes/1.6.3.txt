@@ -1,0 +1,84 @@
+<en-US>
+• Ayah mode: a tapped word shows its pill (sound, meaning, ayah), and mistake hints appear above their words while reciting
+• Ayah mode: going to the next or previous ayah, word or mistake in their sheets scrolls to it
+</en-US>
+<ar>
+• عرض الآيات: الكلمة المضغوطة تُظهر بطاقتها (الصوت والمعنى والآية)، وتلميحات الأخطاء تظهر فوق كلماتها أثناء التسميع
+• عرض الآيات: الانتقال إلى الآية أو الكلمة أو الخطأ التالي أو السابق في نوافذها يمرّر إليه
+</ar>
+<bn-BD>
+• আয়াত মোড: চাপা শব্দে তার পিল দেখা যায় (ধ্বনি, অর্থ, আয়াত), আর তিলাওয়াতের সময় ভুলের ইঙ্গিত শব্দের ওপরে আসে
+• আয়াত মোড: শিটে পরের বা আগের আয়াত, শব্দ বা ভুলে গেলে সেখানে স্ক্রল হয়
+</bn-BD>
+<da-DK>
+• Verstilstand: et trykket ord viser sin pille (lyd, betydning, vers), og fejltips vises over ordene under recitation
+• Verstilstand: at gå til næste eller forrige vers, ord eller fejl i deres ark ruller hen til det
+</da-DK>
+<de-DE>
+• Versansicht: Ein angetipptes Wort zeigt seine Pille (Klang, Bedeutung, Vers), und Fehlerhinweise erscheinen beim Rezitieren über ihren Wörtern
+• Versansicht: Der Wechsel zum nächsten oder vorherigen Vers, Wort oder Fehler in deren Blättern scrollt dorthin
+</de-DE>
+<el-GR>
+• Λειτουργία εδαφίων: μια λέξη που πατήθηκε δείχνει την ετικέτα της (ήχος, σημασία, εδάφιο) και οι υποδείξεις λαθών εμφανίζονται πάνω από τις λέξεις κατά την απαγγελία
+• Λειτουργία εδαφίων: η μετάβαση στο επόμενο ή προηγούμενο εδάφιο, λέξη ή λάθος στα φύλλα τους κάνει κύλιση εκεί
+</el-GR>
+<es-ES>
+• Modo aleya: una palabra tocada muestra su etiqueta (sonido, significado, aleya) y las pistas de errores aparecen sobre sus palabras al recitar
+• Modo aleya: ir a la aleya, palabra o error siguiente o anterior en sus hojas desplaza la vista hasta él
+</es-ES>
+<fa>
+• حالت آیه: کلمهٔ لمس‌شده برچسب خود را نشان می‌دهد (صدا، معنا، آیه) و نکته‌های خطا هنگام تلاوت بالای کلمه‌ها ظاهر می‌شوند
+• حالت آیه: رفتن به آیه، کلمه یا خطای بعدی یا قبلی در برگه‌هایشان، صفحه را تا آن پیمایش می‌کند
+</fa>
+<fr-FR>
+• Mode versets : un mot touché affiche son étiquette (son, sens, verset), et les indices d'erreur apparaissent au-dessus des mots pendant la récitation
+• Mode versets : passer au verset, mot ou erreur suivant ou précédent dans leurs fiches fait défiler jusqu'à lui
+</fr-FR>
+<id>
+• Mode ayat: kata yang diketuk menampilkan labelnya (suara, makna, ayat), dan petunjuk kesalahan muncul di atas kata saat membaca
+• Mode ayat: berpindah ke ayat, kata, atau kesalahan berikutnya atau sebelumnya di lembarnya menggulir ke sana
+</id>
+<ja-JP>
+• アーヤ表示：タップした語にラベル（音声・意味・アーヤ）を表示。読誦中は間違いヒントが語の上に表示されます
+• アーヤ表示：シートで次・前のアーヤ、語、間違いに移ると、その位置までスクロールします
+</ja-JP>
+<kk>
+• Аят режимі: басылған сөз өз белгісін көрсетеді (дыбыс, мағына, аят), ал оқу кезінде қате кеңестері сөздердің үстінде шығады
+• Аят режимі: парақтарда келесі не алдыңғы аятқа, сөзге не қатеге өткенде, соған айналдырады
+</kk>
+<ko-KR>
+• 아야 보기: 누른 단어에 표시(소리, 뜻, 아야)가 나타나고, 낭송 중 실수 힌트가 단어 위에 표시됩니다
+• 아야 보기: 시트에서 다음 또는 이전 아야, 단어, 실수로 이동하면 그 위치로 스크롤됩니다
+</ko-KR>
+<ms>
+• Mod ayat: perkataan yang diketik memaparkan labelnya (bunyi, makna, ayat), dan petunjuk kesilapan muncul di atas perkataan semasa membaca
+• Mod ayat: beralih ke ayat, perkataan atau kesilapan seterusnya atau sebelumnya dalam helaiannya menatal ke situ
+</ms>
+<nl-NL>
+• Versmodus: een aangetikt woord toont zijn label (klank, betekenis, vers), en fouthints verschijnen tijdens het reciteren boven hun woorden
+• Versmodus: naar het volgende of vorige vers, woord of fout gaan in hun bladen scrolt ernaartoe
+</nl-NL>
+<pt-BR>
+• Modo versículo: uma palavra tocada mostra sua etiqueta (som, significado, versículo), e as dicas de erro aparecem sobre as palavras ao recitar
+• Modo versículo: ir ao versículo, palavra ou erro seguinte ou anterior nas suas folhas rola a tela até ele
+</pt-BR>
+<ru-RU>
+• Режим аятов: нажатое слово показывает метку (звук, значение, аят), а подсказки об ошибках появляются над словами во время чтения
+• Режим аятов: переход к следующему или предыдущему аяту, слову или ошибке в их карточках прокручивает к нему
+</ru-RU>
+<sw>
+• Hali ya aya: neno lililoguswa linaonyesha kibandiko chake (sauti, maana, aya), na vidokezo vya makosa vinaonekana juu ya maneno wakati wa kusoma
+• Hali ya aya: kwenda kwenye aya, neno au kosa linalofuata au lililotangulia kwenye karatasi zake kunasogeza hadi hapo
+</sw>
+<tr-TR>
+• Ayet görünümü: dokunulan kelime etiketini gösterir (ses, anlam, ayet) ve okurken hata ipuçları kelimelerin üstünde belirir
+• Ayet görünümü: sayfalarında sonraki veya önceki ayete, kelimeye ya da hataya geçmek oraya kaydırır
+</tr-TR>
+<ur>
+• آیات کا منظر: دبایا گیا لفظ اپنا لیبل دکھاتا ہے (آواز، معنی، آیت)، اور تلاوت کے دوران غلطی کے اشارے الفاظ کے اوپر آتے ہیں
+• آیات کا منظر: شیٹ میں اگلی یا پچھلی آیت، لفظ یا غلطی پر جانے سے منظر وہاں تک اسکرول ہوتا ہے
+</ur>
+<zh-CN>
+• 经节模式：点按的单词会显示其标签（读音、释义、经节），诵读时错误提示显示在单词上方
+• 经节模式：在面板中切换到下一个或上一个经节、单词或错误时，会滚动到该处
+</zh-CN>

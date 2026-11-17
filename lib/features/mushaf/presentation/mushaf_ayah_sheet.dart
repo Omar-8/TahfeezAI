@@ -86,6 +86,12 @@ class _AyahDetailSheetState extends ConsumerState<_AyahDetailSheet> {
     });
     // In the Mushaf: its page turned to, when not on screen.
     await showMushafPageOf(ref.read, (ayahId: ayahId, wordIndex: 0));
+    // In Ayah mode: its card scrolled to as well (owner, 2026-11-17).
+    if (mounted && ref.read(readerModeProvider) == ReaderMode.ayah) {
+      ref
+          .read(ayahModeTargetProvider.notifier)
+          .show(ayahId, revealBefore: false);
+    }
   }
 
   @override

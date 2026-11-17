@@ -49,6 +49,7 @@ class AyahWordView extends StatefulWidget {
     required this.fontFamily,
     this.mark,
     this.onTap,
+    this.onTapAt,
     this.onLongPress,
     this.fade = true,
     this.tajweed = const [],
@@ -76,6 +77,10 @@ class AyahWordView extends StatefulWidget {
   /// Whether hiding or revealing it fades (else it changes at once).
   final bool fade;
   final VoidCallback? onTap;
+
+  /// Tapped, where on screen (global) — what is shown beside the word
+  /// goes there (its pill, as the printed page's words have).
+  final ValueChanged<Offset>? onTapAt;
   final VoidCallback? onLongPress;
 
   @override
@@ -217,6 +222,9 @@ class _AyahWordViewState extends State<AyahWordView>
         : 0.0;
     final detector = GestureDetector(
       onTap: widget.onTap,
+      onTapUp: widget.onTapAt == null
+          ? null
+          : (details) => widget.onTapAt!(details.globalPosition),
       onLongPress: widget.onLongPress,
       // In a browser, a right-click too (the mouse's long press).
       onSecondaryTap: kIsWeb ? widget.onLongPress : null,
@@ -258,7 +266,7 @@ class _AyahWordViewState extends State<AyahWordView>
     if (!kIsWeb ||
         !(_mistakes.contains(widget.mark) ||
             widget.mark == MushafWordMark.mistake) ||
-        widget.onTap == null) {
+        (widget.onTap == null && widget.onTapAt == null)) {
       return detector;
     }
     return MouseRegion(
