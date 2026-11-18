@@ -4,7 +4,7 @@ Al-Mukhtasar fi Tafsir al-Qur'an al-Karim gives them — the Arabic original
 and its translations — from two places:
 
 - QuranEnc.com's pages of that tafsir (the aims are on its pages only: not
-  in its API nor its sqlite exports): the 12 languages in EDITIONS;
+  in its API nor its sqlite exports): the 16 languages in EDITIONS;
 - the Tafsir Center's own Al-Mukhtasar API (mokhtasr.com/en/api-doc,
   `mobile-updated-data`: every edition's surah introductions), for the
   languages QuranEnc has no pages of: those in API_BOOKS. It needs the
@@ -57,6 +57,11 @@ EDITIONS = {
     'uz': 'uzbek_mokhtasar',
     'ja': 'japanese_mokhtasar',
     'zh': 'chinese_mokhtasar',
+    # Added 2026-11-18.
+    'hi': 'hindi_mokhtasar',
+    'ta': 'tamil_mokhtasar',
+    'ml': 'malayalam_mokhtasar',
+    'it': 'italian_mokhtasar',
 }
 
 # The app's language -> the Al-Mukhtasar API's book (edition) id.

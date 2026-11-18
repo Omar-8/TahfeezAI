@@ -52,6 +52,9 @@ const quranComLanguageNames = {
   // Not served by Quran.com: QUL's French word by word, laid over Quran.com's
   // English word list by position (build_production_data.dart).
   'fr': 'french',
+  // Added 2026-11-18.
+  'hi': 'hindi',
+  'ta': 'tamil',
 };
 
 /// [languageCode]'s meanings, aligned. A meaning Quran.com serves in

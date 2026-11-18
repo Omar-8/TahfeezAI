@@ -24,6 +24,7 @@ import '../../quran/application/canonical_ayah_word_text.dart';
 import '../../quran/domain/models/quran_refs.dart';
 import '../application/active_wbw_pack.dart';
 import '../application/arabic_word_gloss.dart';
+import '../application/word_root.dart';
 import '../application/wbw_preferences_controller.dart';
 import '../application/wbw_word_lookup.dart';
 import 'wbw_packs_sheet.dart';
@@ -291,6 +292,18 @@ class _WordDetailSheetBody extends ConsumerWidget {
     final muyassar = arabic && gloss == null
         ? ref.watch(arabicAyahMeaningProvider(wordRef.ayahId)).value
         : null;
+    // In Arabic, the word's root always, where it has one (owner,
+    // 2026-11-18).
+    final root = arabic
+        ? ref
+              .watch(
+                wordRootProvider((
+                  ayahId: wordRef.ayahId,
+                  wordIndex: wordRef.wordIndex,
+                )),
+              )
+              .value
+        : null;
     final quranTextColor = ref
         .watch(mushafAppearanceControllerProvider)
         .colors
@@ -348,6 +361,24 @@ class _WordDetailSheetBody extends ConsumerWidget {
             wordRef: wordRef,
             wordText: arabicTextAsync.value,
           ),
+          if (root != null)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              spacing: TahfeezSpacing.xs,
+              children: [
+                Text(
+                  AppLocalizations.of(context).wordRoot,
+                  style: Theme.of(context).textTheme.labelMedium
+                      ?.copyWith(color: scheme.primary),
+                ),
+                Text(
+                  root,
+                  key: const ValueKey('word-root'),
+                  textDirection: TextDirection.rtl,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ],
+            ),
           // In Arabic: the word's meaning from al-Sirāj, where it explains
           // the word; else (or in another language) the word-by-word pack.
           if (gloss != null)

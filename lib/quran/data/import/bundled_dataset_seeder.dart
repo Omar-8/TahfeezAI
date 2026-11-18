@@ -121,7 +121,18 @@ class BundledDatasetSeeder {
     );
     // Word meanings: English (with the transliteration), then each
     // language Quran.com has them in.
-    for (final language in const ['en', 'ur', 'id', 'tr', 'fa', 'bn', 'fr']) {
+    for (final language in const [
+      'en',
+      'ur',
+      'id',
+      'tr',
+      'fa',
+      'bn',
+      'fr',
+      // Added 2026-11-18.
+      'hi',
+      'ta',
+    ]) {
       await _seedWbw(
         hashes,
         assetPath: 'assets/quran/wbw/${language}_qurancom.json',
@@ -156,6 +167,11 @@ class BundledDatasetSeeder {
       // Added 2026-11-07.
       'zh_suliman',
       'zh_makin',
+      // Added 2026-11-18.
+      'hi_omari',
+      'ta_omar',
+      'ml_kunhi',
+      'it_rowwad',
     ]) {
       await _seedTranslation(
         hashes,
@@ -185,6 +201,11 @@ class BundledDatasetSeeder {
       'ar_yaseer',
       // Added 2026-11-13.
       'zh_mukhtasar',
+      // Added 2026-11-18.
+      'hi_mukhtasar',
+      'ta_mukhtasar',
+      'ml_mukhtasar',
+      'it_mukhtasar',
     ]) {
       await _seedTafsir(
         hashes,

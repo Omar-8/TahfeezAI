@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "buildDate": "2026-11-13T14:11:27.548104Z",
+  "buildDate": "2026-11-18T14:26:51.554903Z",
   "canonicalQuranSource": "Tanzil Project (tanzil.net)",
   "canonicalQuranVersion": "Uthmani, Version 1.1",
   "canonicalQuranHash": "bf4f57b968d03f4131c070b1e285da9be0e0a108a21c910e872801ca273312c8",
@@ -226,6 +226,38 @@
       "version": "1.0.2",
       "sourceHash": "669bb611de8a5b96c8824c55bd9537e8cb30e1601127d3c72d9b9abeb4beea91",
       "ayahCount": 6236
+    },
+    {
+      "slug": "hi-omari",
+      "resourceId": "tahfeez.translation.hi.omari",
+      "quranEncKey": "hindi_omari",
+      "version": "1.1.5",
+      "sourceHash": "9f5208ae22da5b6af4a9be95438cf5f35e0e195a91f217aa26b336f58efed31b",
+      "ayahCount": 6236
+    },
+    {
+      "slug": "ta-omar",
+      "resourceId": "tahfeez.translation.ta.omar",
+      "quranEncKey": "tamil_omar",
+      "version": "1.0.4",
+      "sourceHash": "3ce6f1e9674ef35c3355ab30d590a6979dc2648f35a8ebcad83cfe67088372ef",
+      "ayahCount": 6236
+    },
+    {
+      "slug": "ml-kunhi",
+      "resourceId": "tahfeez.translation.ml.kunhi",
+      "quranEncKey": "malayalam_kunhi",
+      "version": "1.0.3",
+      "sourceHash": "5f737cb1ab41d99af57dd4ebab8824de1a2a33261775341dc0ff5fc845bad64d",
+      "ayahCount": 6236
+    },
+    {
+      "slug": "it-rowwad",
+      "resourceId": "tahfeez.translation.it.rowwad",
+      "quranEncKey": "italian_rwwad",
+      "version": "unversioned upstream (tracked by sourceHash)",
+      "sourceHash": "522822007b32a083b367de8641cccfe12e36e8e852aaffab6a8e67bbba07861b",
+      "ayahCount": 6236
     }
   ],
   "wbwResources": [
@@ -283,6 +315,22 @@
       "source": "Quran.com API v4 (api.quran.com/api/v4), language=fr",
       "licenseStatus": "UNVERIFIED — as the English pack (owner decision 2026-10-09), extended 2026-10-14",
       "sourceHash": "8e8a89a294c4211162cb86f02238e213b5262c662f981ccb9b1538d859a0237d",
+      "wordCount": 77433
+    },
+    {
+      "id": "hi-qurancom",
+      "resourceId": "tahfeez.wbw.hi.qurancom",
+      "source": "Quran.com API v4 (api.quran.com/api/v4), language=hi",
+      "licenseStatus": "UNVERIFIED — as the English pack (owner decision 2026-10-09), extended 2026-10-14",
+      "sourceHash": "a0b484413dbfb0d6a3e611c122f4c25dd10357b50375de3733852a0174b3c252",
+      "wordCount": 77433
+    },
+    {
+      "id": "ta-qurancom",
+      "resourceId": "tahfeez.wbw.ta.qurancom",
+      "source": "Quran.com API v4 (api.quran.com/api/v4), language=ta",
+      "licenseStatus": "UNVERIFIED — as the English pack (owner decision 2026-10-09), extended 2026-10-14",
+      "sourceHash": "d7d231172cb3434ffa4f9d0a21b400aab1205bfd7876fb81caa064df5208cefe",
       "wordCount": 77433
     }
   ],
@@ -400,6 +448,38 @@
       "ayahCount": 6236
     },
     {
+      "id": "hi-mukhtasar",
+      "resourceId": "tahfeez.tafsir.hi.mukhtasar",
+      "quranEncKey": "hindi_mokhtasar",
+      "version": "unversioned upstream (QuranEnc lists no version for Al-Mukhtasar; tracked by sourceHash)",
+      "sourceHash": "32f7136c0fe52d2106585653c6fc3581f97e732059310b1c9fe5338914c06d32",
+      "ayahCount": 6236
+    },
+    {
+      "id": "ta-mukhtasar",
+      "resourceId": "tahfeez.tafsir.ta.mukhtasar",
+      "quranEncKey": "tamil_mokhtasar",
+      "version": "unversioned upstream (QuranEnc lists no version for Al-Mukhtasar; tracked by sourceHash)",
+      "sourceHash": "92dd24158e9d9d4dfa7d336e7de72d681d15d7350c3b84bfd7749bbbe1c4614f",
+      "ayahCount": 6236
+    },
+    {
+      "id": "ml-mukhtasar",
+      "resourceId": "tahfeez.tafsir.ml.mukhtasar",
+      "quranEncKey": "malayalam_mokhtasar",
+      "version": "unversioned upstream (QuranEnc lists no version for Al-Mukhtasar; tracked by sourceHash)",
+      "sourceHash": "5c231aa076f52115289a56acfe29398f49b8ca49f717d1df6e43e69e89a42602",
+      "ayahCount": 6236
+    },
+    {
+      "id": "it-mukhtasar",
+      "resourceId": "tahfeez.tafsir.it.mukhtasar",
+      "quranEncKey": "italian_mokhtasar",
+      "version": "unversioned upstream (QuranEnc lists no version for Al-Mukhtasar; tracked by sourceHash)",
+      "sourceHash": "9de16f6b00045e0d03c5a3f6b3981930a68c08ceaf5e66c4e880a1abf61b66de",
+      "ayahCount": 6236
+    },
+    {
       "id": "ar-mukhtasar",
       "resourceId": "tahfeez.tafsir.ar.mukhtasar",
       "quranEncKey": "arabic_mokhtasar",
@@ -469,6 +549,10 @@
     "translations/pt_nasr.json": "3a0e748197a824024c5fedb890b93f912247168362b6abc4250b6a8a19699793",
     "translations/zh_suliman.json": "db9741bb4d7562993b9544cbe1e6c0ecae463f386f2a9678143b32f78489fbca",
     "translations/zh_makin.json": "6ffe82f24638d36e3b90a160d5cad313ecaaa132a54600cc428b973d15e2ffad",
+    "translations/hi_omari.json": "bef7c170c17b8935a7c8666572d89ce32a904f8404bf29a6a00c05fa46144ab6",
+    "translations/ta_omar.json": "624b73d3810c05f56de9a5220bbe9bb739dddad0b4c23c64eefa65b9b8809433",
+    "translations/ml_kunhi.json": "371486294597e2a7560f6ed676a0769001b8b614ef6b3f33b68edbbf8d97ed3d",
+    "translations/it_rowwad.json": "50e78a000ae823d716643021105bb8b406a5c9b716f18901de0dce6e46185df6",
     "tafsir/en_mukhtasar.json": "fa13bc9b62ab765e2bae5773c75f6c5937bf15a6aefafec74b6f1ef5b2188dd5",
     "tafsir/id_mukhtasar.json": "fe1f0c695678c21afbef804e4fe4fcf217a83007ecf7949c4e0b6e63f17625c1",
     "tafsir/tr_mukhtasar.json": "ec2d0086212638862e82cdf38282b369684234f28cc702b6342a39832f60787c",
@@ -482,6 +566,10 @@
     "tafsir/uz_mukhtasar.json": "638878170b187d3f5d90ec99e28046b4a59e22d577bde998f365e6e60941630a",
     "tafsir/ja_mukhtasar.json": "d7da2f2357d33d67d7d74d6f2ee1f8b82da784151f9b2369664f96ced3db40f1",
     "tafsir/zh_mukhtasar.json": "da6355309864f0a451d4ae277903990b025ec7decec7026880d61027670f7a10",
+    "tafsir/hi_mukhtasar.json": "419b30797a8445724999dda6b9f38a417a28ca1d42126c01b26995b4f74a9878",
+    "tafsir/ta_mukhtasar.json": "63a7efecfcaf174f3deecfd71cec79e7d03105e205342243bcbfc9a26ea53867",
+    "tafsir/ml_mukhtasar.json": "067e83bda4c3267f0b8fed9b292d3141a719d976e286318216c277ddc1d4a8bf",
+    "tafsir/it_mukhtasar.json": "c8219d64b965ace48fa6d377c55017d5a21386f8336e7690c1be80dac502844b",
     "tafsir/ar_mukhtasar.json": "1b94fe519308b883514088126c533538ecd8941bef0f5903ffa077be3575676d",
     "tafsir/ar_nafahat.json": "ce5830db3f36f7fac02860fb07f0e882c097dbabd7398698ae07dd848431676b",
     "tafsir/ar_yaseer.json": "b7a3bff73f063337fc3e85e181728cb446805ec2e5cdf9f33654dc345ceb1305",
@@ -493,6 +581,8 @@
     "wbw/tr_qurancom.json": "d6a6fb12eb0ddb93788df772392c3280a5238f1099db9a4c65525e3f87e8374b",
     "wbw/fa_qurancom.json": "e20ad7ab64ead232679a1f8012fe035c3f0862ff08d7460fda14a2db2f38c2c1",
     "wbw/bn_qurancom.json": "26b2945a663b1ce1b8c8813d6d22d0257a1bcef58458c4084bb78ed789a7e6db",
-    "wbw/fr_qurancom.json": "88c8e3532a0a924484133f2d02ab90513da78e8b502535ef26e690781aefef9b"
+    "wbw/fr_qurancom.json": "88c8e3532a0a924484133f2d02ab90513da78e8b502535ef26e690781aefef9b",
+    "wbw/hi_qurancom.json": "6dff46d7fbd7b493a4aad0a285f28a9335092623fa946211958c0d44548549b5",
+    "wbw/ta_qurancom.json": "65019a0736ddfa7869180be2ce453b18c830cda3a0f5bb7d3b41bf35fc1ef7c8"
   }
 }

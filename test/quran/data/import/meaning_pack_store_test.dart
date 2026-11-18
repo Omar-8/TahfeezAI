@@ -109,12 +109,12 @@ void main() {
         'ar-seraj',
       });
       expect(await store.installed(MeaningPackKind.wbw), {'en-qurancom'});
-      expect(await store.available(MeaningPackKind.translation), hasLength(24));
+      expect(await store.available(MeaningPackKind.translation), hasLength(28));
       // Every language's list is there, to choose from.
       final books = await translations
           .select(translations.translationBooks)
           .get();
-      expect(books, hasLength(25));
+      expect(books, hasLength(29));
     },
   );
 

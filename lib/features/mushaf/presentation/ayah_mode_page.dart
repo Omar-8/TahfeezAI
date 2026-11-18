@@ -792,18 +792,28 @@ class AyahModePageState extends ConsumerState<AyahModePage>
     final (ayahId, indices) = ayahs[k];
     return KeyedSubtree(
       key: _ayahKeys.putIfAbsent(ayahId, GlobalKey.new),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          if (ayahId % 1000 == 1)
-            _SurahHeader(surahNo: ayahId ~/ 1000, colors: colors),
-          _block(ayahId, indices, words, hidden, mark),
-          if (k < ayahs.length - 1)
-            Divider(
-              height: TahfeezSpacing.xl,
-              color: colors.secondaryText.withValues(alpha: 0.2),
-            ),
-        ],
+      // Each ayah painted once, its own layer: scrolling moves the layers
+      // instead of painting every ayah's text again each frame (13 ms a
+      // frame on a long page — POCO F3, 2026-11-18).
+      child: RepaintBoundary(
+        // Its own node for screen readers and other accessibility
+        // services, so scrolling moves it whole.
+        child: Semantics(
+          container: true,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (ayahId % 1000 == 1)
+                _SurahHeader(surahNo: ayahId ~/ 1000, colors: colors),
+              _block(ayahId, indices, words, hidden, mark),
+              if (k < ayahs.length - 1)
+                Divider(
+                  height: TahfeezSpacing.xl,
+                  color: colors.secondaryText.withValues(alpha: 0.2),
+                ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -1239,7 +1249,14 @@ class _PageButtons extends ConsumerWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  const Icon(Icons.chevron_right),
+                  // Pointing its way in every language: a chevron icon
+                  // flips itself in Arabic, and the row is already laid
+                  // out for it (owner, 2026-11-18).
+                  Icon(
+                    Icons.chevron_right,
+                    key: const ValueKey('ayah-mode-chevron_right'),
+                    textDirection: TextDirection.ltr,
+                  ),
                 ],
               ),
             ),
@@ -1263,7 +1280,14 @@ class _PageButtons extends ConsumerWidget {
                 textDirection: TextDirection.ltr,
                 spacing: TahfeezSpacing.xs,
                 children: [
-                  const Icon(Icons.chevron_left),
+                  // Pointing its way in every language: a chevron icon
+                  // flips itself in Arabic, and the row is already laid
+                  // out for it (owner, 2026-11-18).
+                  Icon(
+                    Icons.chevron_left,
+                    key: const ValueKey('ayah-mode-chevron_left'),
+                    textDirection: TextDirection.ltr,
+                  ),
                   Flexible(
                     child: Text(
                       l10n.commonNext,

@@ -123,6 +123,17 @@ Future<void> main(List<String> args) async {
     // Added 2026-11-13: Al-Mukhtasar in Chinese (served, though missing
     // from QuranEnc's translations/list).
     'chinese_mokhtasar',
+    // Added 2026-11-18: Hindi, Tamil, Malayalam and Italian, each with its
+    // Al-Mukhtasar (served, though missing from QuranEnc's
+    // translations/list: Italian's both).
+    'hindi_omari',
+    'tamil_omar',
+    'malayalam_kunhi',
+    'italian_rwwad',
+    'hindi_mokhtasar',
+    'tamil_mokhtasar',
+    'malayalam_mokhtasar',
+    'italian_mokhtasar',
   ]) {
     await _fetchQuranEnc(
       key: key,
@@ -221,8 +232,9 @@ Future<void> _fetchQuranEnc({required String key, required String url}) async {
 }
 
 /// The languages Quran.com has word meanings in, of the app's (French,
-/// German, Spanish and Russian it serves in English only).
-const wbwLanguages = ['en', 'ur', 'id', 'tr', 'fa', 'bn'];
+/// German, Spanish and Russian it serves in English only; Hindi and Tamil
+/// added 2026-11-18 — Malayalam and Italian it serves in English).
+const wbwLanguages = ['en', 'ur', 'id', 'tr', 'fa', 'bn', 'hi', 'ta'];
 
 /// Quran.com's word-by-word meanings in [language] (and the
 /// transliteration), from its public API v4, one JSON file per surah under

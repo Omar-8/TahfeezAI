@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.6.3+40
+version: 1.6.4+41
 
 environment:
   sdk: ^3.13.3
@@ -187,6 +187,8 @@ flutter:
     - assets/quran/surah_aims.json
     # The Quran tab's Topics (Quranic Arabic Corpus ontology) — tool/quran_data/build_topics.py.
     - assets/quran/topics.json
+    # Each word's root (Quranic Arabic Corpus) — tool/quran_data/build_word_roots.py.
+    - assets/quran/word_roots.json
     # Word meanings (translation milestone T3; licence unverified, owner
     # decision — docs/THIRD_PARTY_RESOURCES.md).
     - assets/quran/wbw/en_qurancom.json
@@ -196,6 +198,8 @@ flutter:
     - assets/quran/wbw/fa_qurancom.json
     - assets/quran/wbw/bn_qurancom.json
     - assets/quran/wbw/fr_qurancom.json
+    - assets/quran/wbw/hi_qurancom.json
+    - assets/quran/wbw/ta_qurancom.json
     # The translation milestone's launch languages (T4).
     - assets/quran/translations/ur_junagarhi.json
     - assets/quran/translations/id_affairs.json
@@ -242,6 +246,15 @@ flutter:
     - assets/quran/tafsir/ar_yaseer.json
     # Added 2026-11-13: Al-Mukhtasar in Chinese.
     - assets/quran/tafsir/zh_mukhtasar.json
+    # Added 2026-11-18: Hindi, Tamil, Malayalam and Italian.
+    - assets/quran/translations/hi_omari.json
+    - assets/quran/translations/ta_omar.json
+    - assets/quran/translations/ml_kunhi.json
+    - assets/quran/translations/it_rowwad.json
+    - assets/quran/tafsir/hi_mukhtasar.json
+    - assets/quran/tafsir/ta_mukhtasar.json
+    - assets/quran/tafsir/ml_mukhtasar.json
+    - assets/quran/tafsir/it_mukhtasar.json
     # Expected Hafs pronunciation of every ayah for acoustic verification —
     # tool/acoustic_verification/build_reference.py.
     - assets/quran/recitation/phonetic_reference_hafs.json

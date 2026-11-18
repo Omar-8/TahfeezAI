@@ -1,0 +1,55 @@
+Memorizza il Corano con un ascoltatore in tasca.
+
+Leggi il Mushaf di Medina, comprendi ogni parola e recita a memoria mentre un'IA sul tuo dispositivo ti segue — cogliendo la parola sbagliata, il versetto saltato e il madd mancato. Gratis, offline, senza pubblicità, senza account.
+
+RECITA A MEMORIA — CON RISCONTRO
+• Nascondi la pagina e recita: ogni parola appare mentre la pronunci
+• Parole colorate man mano: giuste, sbagliate, saltate o pronunciate male — una parola detta bene si illumina, un errore oscilla e una pagina finita brilla con una leggera vibrazione
+• Un anello attorno al tasto stop respira con la tua voce: sai di essere ascoltato
+• Sente come reciti, non solo cosa: lettere, vocali, shadda e desinenze, suono per suono secondo la pronuncia di Ḥafṣ
+• Controlla anche il tajwid: durata del madd, qalqala, ghunna (ikhfāʾ, iqlāb, idghām e nūn o mīm raddoppiate), lettere enfatiche e leggere, lettere gutturali — ogni regola si può attivare o disattivare
+• Scegli quanto è rigoroso il controllo: indulgente, equilibrato o preciso
+• Vibrazione o suono a ogni errore, con un avviso a parte per il tajwid
+• Scegli i colori degli errori di pronuncia e di tajwid
+• Ripeti un versetto, segui un recitatore o mettiti alla prova su una pagina
+
+LEGGI E COMPRENDI
+• Il Mushaf di Medina pagina per pagina, come stampato — o versetto per versetto, a scorrimento o in un'unica lista
+• Significati parola per parola e traslitterazione — anche in arabo, da al-Sirāj
+• Traduzioni in 28 lingue e tafsir accanto a ogni versetto, secondo la tua lingua — in italiano anche il tafsir Al-Mukhtasar
+• Colori del tajwid sulle lettere in modalità versetti, regola per regola
+• Tocca il nome di una sura per il suo significato, la rivelazione e altro
+• Condividi un versetto come immagine, con la sua traduzione
+• Nomi delle sure nella calligrafia del Mushaf; modalità concentrazione per la sola pagina
+• Cerca nel Corano, in arabo o in traduzione
+• Segnalibri e passi tematici colorati sulla pagina
+
+ASCOLTA
+• 31 recitatori, tra cui Alafasy, Al-Husary, Al-Minshawi, Abdul Basit e As-Sudais
+• Il versetto si illumina mentre viene recitato; ripeti un versetto o un intervallo
+• Scarica un recitatore per ascoltare offline; la riproduzione continua a schermo bloccato
+• Una traduzione letta ad alta voce dopo ogni versetto, in 8 lingue
+• Un timer di spegnimento per ascoltare di notte
+
+MEMORIZZA CON UN PIANO
+• Una lezione al giorno e ripassi distanziati
+• Modalità nascondi, ciclo e segui la recitazione
+• Mettimi alla prova: le prime parole di un punto a caso che conosci — continua a memoria
+• La solidità di ogni parte è registrata, così sai cosa ripassare
+• La tua serie di giorni, un calendario dei giorni in cui hai recitato, un anello dei 30 juz' e traguardi discreti
+
+FALLA TUA
+• Un cielo con i colori dell'ora del giorno, schede di vetro e un motivo geometrico islamico
+• Temi chiaro, scuro, caldo, seppia e nero; 4 caratteri per il Corano; testo fino al 200%
+• In 30 lingue, tra cui italiano, arabo, inglese, francese, tedesco, spagnolo, turco, urdu, hindi, bengalese, indonesiano e malese
+• Telefoni e tablet
+
+LA TUA VOCE RESTA SUL TELEFONO
+La tua recitazione viene controllata sul dispositivo dal modello vocale dell'app e poi scartata. Nulla viene caricato: nessun account, nessuna statistica, nessun tracciamento. Lettura, traduzioni, tafsir, ricerca, memorizzazione e controllo della recitazione funzionano tutti senza Internet.
+
+UN DONO, NON UN PRODOTTO
+Niente pubblicità, niente abbonamenti, niente acquisti — gratis per tutti, per sempre. Tahfeez AI è open source: github.com/Omar-8/TahfeezAI
+
+Il modello di recitazione è giovane e sta ancora imparando: può non vedere un errore o segnalare una parola corretta. Ogni versione migliora — il tuo riscontro aiuta: tahfeez.ai.app@gmail.com
+
+Con gratitudine a Tanzil, al Complesso di Re Fahd, a Quran Engine, a QUL (Tarteel), a QuranEnc, a quran.com, ai recitatori e agli autori del modello Muaalem e dei dati elencati in Informazioni nell'app.

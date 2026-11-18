@@ -252,6 +252,45 @@ const _launchTranslations = [
     version: '1.0.2',
     versionCode: 1002,
   ),
+  // Added 2026-11-18 with their languages (Tamil: Omar Sharif's full
+  // translation, not his abridged one or Baqavi's).
+  (
+    key: 'hindi_omari',
+    slug: 'hi-omari',
+    displayName: 'Hindi Translation - Azizul Haq Al-Omari',
+    language: 'hi',
+    author: 'Azizul Haq Al-Omari',
+    version: '1.1.5',
+    versionCode: 1105,
+  ),
+  (
+    key: 'tamil_omar',
+    slug: 'ta-omar',
+    displayName: 'Tamil Translation - Omar Sharif',
+    language: 'ta',
+    author: 'Omar Sharif ibn Abdussalam',
+    version: '1.0.4',
+    versionCode: 1004,
+  ),
+  (
+    key: 'malayalam_kunhi',
+    slug: 'ml-kunhi',
+    displayName:
+        'Malayalam Translation - Abdul Hamid Haidar and Kunhi Muhammad',
+    language: 'ml',
+    author: 'Abdul Hamid Haidar Al-Madani and Kunhi Muhammad',
+    version: '1.0.3',
+    versionCode: 1003,
+  ),
+  (
+    key: 'italian_rwwad',
+    slug: 'it-rowwad',
+    displayName: 'Italian Translation - Rowwad Translation Center',
+    language: 'it',
+    author: 'Rowwad Translation Center',
+    version: 'unversioned upstream (tracked by sourceHash)',
+    versionCode: 1,
+  ),
 ];
 
 const _mukhtasarAuthor = 'Tafsir Center for Quranic Studies';
@@ -341,6 +380,31 @@ const _launchTafsirs = [
     displayName: '古兰经简明注释（中文）',
     language: 'zh',
   ),
+  // Added 2026-11-18 with their languages.
+  (
+    key: 'hindi_mokhtasar',
+    id: 'hi-mukhtasar',
+    displayName: 'अल-मुख़्तसर फ़ी तफ़सीरिल क़ुरआनिल करीम (हिंदी)',
+    language: 'hi',
+  ),
+  (
+    key: 'tamil_mokhtasar',
+    id: 'ta-mukhtasar',
+    displayName: 'அல்-முக்தஸர் ஃபீ தஃப்ஸீரில் குர்ஆனில் கரீம் (தமிழ்)',
+    language: 'ta',
+  ),
+  (
+    key: 'malayalam_mokhtasar',
+    id: 'ml-mukhtasar',
+    displayName: 'അൽ-മുഖ്തസർ ഫീ തഫ്സീരിൽ ഖുർആനിൽ കരീം (മലയാളം)',
+    language: 'ml',
+  ),
+  (
+    key: 'italian_mokhtasar',
+    id: 'it-mukhtasar',
+    displayName: "Al-Mukhtasar nell'esegesi del Nobile Corano (italiano)",
+    language: 'it',
+  ),
 ];
 
 /// More Arabic tafsirs (owner's request, 2026-11-01), besides Al-Muyassar
@@ -385,6 +449,9 @@ const _wbwLanguages = [
   ('fa', 'Persian word by word (Quran.com)'),
   ('bn', 'Bengali word by word (Quran.com)'),
   ('fr', 'French word by word (QUL)'),
+  // Added 2026-11-18.
+  ('hi', 'Hindi word by word (Quran.com)'),
+  ('ta', 'Tamil word by word (Quran.com)'),
 ];
 
 const _cache = 'tool/quran_data/.cache';

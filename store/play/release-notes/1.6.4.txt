@@ -1,0 +1,125 @@
+<en-US>
+• New languages: Hindi, Tamil, Malayalam and Italian — the app, a translation and Al-Mukhtasar tafsir in each
+• Arabic: a tapped word's pill is always in Arabic — al-Sirāj's meaning, else the word's root; its sheet shows the root
+• Smoother scrolling in Ayah mode; its next/previous arrows point the right way in right-to-left languages
+</en-US>
+<ar>
+• لغات جديدة: الهندية والتاميلية والمالايالامية والإيطالية — التطبيق وترجمة وتفسير المختصر بكل منها
+• العربية: بطاقة الكلمة المضغوطة بالعربية دائمًا — معناها من السراج، وإلا جذرها؛ ونافذتها تعرض الجذر
+• تمرير أسلس في عرض الآيات، وأسهم التالي والسابق في اتجاهها الصحيح في اللغات التي تُكتب من اليمين
+</ar>
+<bn-BD>
+• নতুন ভাষা: হিন্দি, তামিল, মালয়ালম ও ইতালীয় — প্রতিটিতে অ্যাপ, একটি অনুবাদ ও আল-মুখতাসার তাফসীর
+• আরবি: চাপা শব্দের পিল সবসময় আরবিতে — আস-সিরাজের অর্থ, নইলে শব্দের মূল; শিটে মূল দেখায়
+• আয়াত মোডে মসৃণ স্ক্রল; ডান-থেকে-বাম ভাষায় পরের/আগের তীর সঠিক দিকে
+</bn-BD>
+<da-DK>
+• Nye sprog: hindi, tamil, malayalam og italiensk — appen, en oversættelse og Al-Mukhtasar-tafsir på hvert
+• Arabisk: et trykket ords pille er altid på arabisk — al-Sirājs betydning, ellers ordets rod; arket viser roden
+• Jævnere rulning i verstilstand; næste/forrige-pilene peger rigtigt i højre-mod-venstre-sprog
+</da-DK>
+<de-DE>
+• Neue Sprachen: Hindi, Tamil, Malayalam und Italienisch — die App, eine Übersetzung und der Tafsir Al-Mukhtasar in jeder
+• Arabisch: Die Pille eines angetippten Wortes ist immer auf Arabisch — al-Sirājs Bedeutung, sonst die Wurzel; das Blatt zeigt die Wurzel
+• Flüssigeres Scrollen in der Versansicht; die Pfeile für Weiter/Zurück zeigen in Rechts-nach-links-Sprachen richtig
+</de-DE>
+<el-GR>
+• Νέες γλώσσες: χίντι, ταμίλ, μαλαγιαλάμ και ιταλικά — η εφαρμογή, μια μετάφραση και το ταφσίρ Al-Mukhtasar σε καθεμία
+• Αραβικά: η ετικέτα μιας λέξης είναι πάντα στα αραβικά — η σημασία από το al-Sirāj, αλλιώς η ρίζα· το φύλλο δείχνει τη ρίζα
+• Ομαλότερη κύλιση στη λειτουργία εδαφίων· τα βέλη επόμενου/προηγούμενου δείχνουν σωστά στις γλώσσες από δεξιά προς αριστερά
+</el-GR>
+<es-ES>
+• Nuevos idiomas: hindi, tamil, malayalam e italiano — la app, una traducción y el tafsir Al-Mukhtasar en cada uno
+• Árabe: la etiqueta de una palabra tocada siempre en árabe — el significado de al-Sirāj o, si no, su raíz; su hoja muestra la raíz
+• Desplazamiento más fluido en el modo aleya; sus flechas de siguiente/anterior apuntan bien en idiomas de derecha a izquierda
+</es-ES>
+<fa>
+• زبان‌های تازه: هندی، تامیلی، مالایالامی و ایتالیایی — برنامه، یک ترجمه و تفسیر المختصر در هر کدام
+• عربی: برچسب کلمهٔ لمس‌شده همیشه عربی است — معنای السراج، وگرنه ریشهٔ کلمه؛ برگهٔ آن ریشه را نشان می‌دهد
+• پیمایش روان‌تر در حالت آیه؛ پیکان‌های بعدی و قبلی در زبان‌های راست‌به‌چپ درست نشان می‌دهند
+</fa>
+<fr-FR>
+• Nouvelles langues : hindi, tamoul, malayalam et italien — l'application, une traduction et le tafsir Al-Mukhtasar dans chacune
+• Arabe : l'étiquette d'un mot touché est toujours en arabe — le sens d'al-Sirāj, sinon sa racine ; sa fiche montre la racine
+• Défilement plus fluide en mode versets ; ses flèches suivant/précédent pointent dans le bon sens dans les langues de droite à gauche
+</fr-FR>
+<id>
+• Bahasa baru: Hindi, Tamil, Malayalam, dan Italia — aplikasi, terjemahan, dan tafsir Al-Mukhtasar dalam masing-masing
+• Arab: label kata yang diketuk selalu dalam bahasa Arab — makna dari al-Sirāj, jika tidak akar katanya; lembarnya menampilkan akar
+• Gulir lebih mulus di mode ayat; panah berikutnya/sebelumnya mengarah benar dalam bahasa kanan-ke-kiri
+</id>
+<ja-JP>
+• 新しい言語：ヒンディー語、タミル語、マラヤーラム語、イタリア語 — それぞれでアプリ、翻訳、アル・ムフタサル注釈
+• アラビア語：タップした語のラベルは常にアラビア語 — アッ＝スィラージュの意味、なければ語根。シートに語根を表示
+• アーヤ表示のスクロールがより滑らかに。右から左の言語で次・前の矢印が正しい向きに
+</ja-JP>
+<kk>
+• Жаңа тілдер: хинди, тамил, малаялам және итальян — әрқайсысында қолданба, аударма және «Әл-Мухтасар» тәпсірі
+• Араб тілі: басылған сөз белгісі әрдайым арабша — ас-Сираждың мағынасы, болмаса сөздің түбірі; парағы түбірді көрсетеді
+• Аят режимінде тегісірек айналдыру; оңнан солға жазылатын тілдерде келесі/алдыңғы көрсеткілері дұрыс бағытта
+</kk>
+<ko-KR>
+• 새 언어: 힌디어, 타밀어, 말라얄람어, 이탈리아어 — 각 언어로 앱, 번역, 알무크타사르 타프시르
+• 아랍어: 누른 단어의 표시는 항상 아랍어 — 앗시라즈의 뜻, 없으면 어근; 시트에 어근 표시
+• 아야 보기 스크롤이 더 부드러워짐; 오른쪽에서 왼쪽 언어에서 다음/이전 화살표가 올바른 방향
+</ko-KR>
+<ms>
+• Bahasa baharu: Hindi, Tamil, Malayalam dan Itali — aplikasi, terjemahan dan tafsir Al-Mukhtasar dalam setiap satu
+• Arab: label perkataan yang diketik sentiasa dalam bahasa Arab — makna al-Sirāj, jika tiada akar katanya; helaiannya menunjukkan akar
+• Tatal lebih lancar dalam mod ayat; anak panah seterusnya/sebelumnya menghala betul dalam bahasa kanan-ke-kiri
+</ms>
+<nl-NL>
+• Nieuwe talen: Hindi, Tamil, Malayalam en Italiaans — de app, een vertaling en de tafsir Al-Mukhtasar in elk
+• Arabisch: het label van een aangetikt woord is altijd Arabisch — de betekenis uit al-Sirāj, anders de wortel; het blad toont de wortel
+• Soepeler scrollen in versmodus; de pijlen volgende/vorige wijzen goed in rechts-naar-links-talen
+</nl-NL>
+<pt-BR>
+• Novos idiomas: hindi, tâmil, malaiala e italiano — o app, uma tradução e o tafsir Al-Mukhtasar em cada um
+• Árabe: a etiqueta da palavra tocada sempre em árabe — o significado de al-Sirāj ou, se não houver, a raiz; a folha mostra a raiz
+• Rolagem mais suave no modo versículo; as setas de próximo/anterior apontam certo em idiomas da direita para a esquerda
+</pt-BR>
+<ru-RU>
+• Новые языки: хинди, тамильский, малаялам и итальянский — приложение, перевод и тафсир «Аль-Мухтасар» на каждом
+• Арабский: метка нажатого слова всегда на арабском — значение из ас-Сираджа, иначе корень слова; в карточке показан корень
+• Плавнее прокрутка в режиме аятов; стрелки «далее/назад» указывают верно в языках справа налево
+</ru-RU>
+<sw>
+• Lugha mpya: Kihindi, Kitamili, Kimalayalam na Kiitaliano — programu, tafsiri na tafsiri ya Al-Mukhtasar katika kila moja
+• Kiarabu: kibandiko cha neno lililoguswa daima ni cha Kiarabu — maana ya al-Sirāj, la sivyo mzizi wake; karatasi yake inaonyesha mzizi
+• Kusogeza kulaini zaidi katika hali ya aya; mishale ya inayofuata/iliyotangulia inaelekea sawa katika lugha za kulia-kwenda-kushoto
+</sw>
+<tr-TR>
+• Yeni diller: Hintçe, Tamilce, Malayalamca ve İtalyanca — her birinde uygulama, bir meal ve El-Muhtasar tefsiri
+• Arapça: dokunulan kelimenin etiketi her zaman Arapça — es-Sirâc'ın anlamı, yoksa kelimenin kökü; sayfası kökü gösterir
+• Ayet görünümünde daha akıcı kaydırma; sağdan sola dillerde sonraki/önceki okları doğru yönü gösterir
+</tr-TR>
+<ur>
+• نئی زبانیں: ہندی، تمل، ملیالم اور اطالوی — ہر ایک میں ایپ، ترجمہ اور تفسیر المختصر
+• عربی: دبائے گئے لفظ کا لیبل ہمیشہ عربی میں — السراج کا معنی، ورنہ لفظ کا مادہ؛ اس کی شیٹ مادہ دکھاتی ہے
+• آیات کے منظر میں ہموار اسکرول؛ دائیں سے بائیں زبانوں میں اگلے/پچھلے کے تیر درست سمت میں
+</ur>
+<zh-CN>
+• 新语言：印地语、泰米尔语、马拉雅拉姆语和意大利语 — 每种都有应用界面、一种译本和《古兰经简明注释》
+• 阿拉伯语：点按单词的标签始终为阿拉伯语 — 取自 al-Sirāj 的释义，否则为词根；单词面板显示词根
+• 经节模式滚动更流畅；从右到左语言中“下一个/上一个”箭头方向正确
+</zh-CN>
+<hi-IN>
+• नई भाषाएँ: हिंदी, तमिल, मलयालम और इतालवी — हर एक में ऐप, एक अनुवाद और अल-मुख़्तसर तफ़सीर
+• अरबी: टैप किए गए शब्द का लेबल हमेशा अरबी में — अस-सिराज का अर्थ, वरना शब्द का मूल; उसका पैनल मूल दिखाता है
+• आयत मोड में और सहज स्क्रॉलिंग; दाएँ-से-बाएँ भाषाओं में अगले/पिछले के तीर सही दिशा में
+</hi-IN>
+<ta-IN>
+• புதிய மொழிகள்: இந்தி, தமிழ், மலையாளம், இத்தாலியம் — ஒவ்வொன்றிலும் செயலி, ஒரு மொழிபெயர்ப்பு, அல்-முக்தஸர் தஃப்ஸீர்
+• அரபு: தட்டிய சொல்லின் குறிப்பு எப்போதும் அரபியில் — அஸ்-ஸிராஜின் பொருள், இல்லையெனில் அதன் வேர்ச்சொல்; பலகத்தில் வேர்ச்சொல்
+• வசன முறையில் மென்மையான உருட்டல்; வலமிருந்து இடமான மொழிகளில் அடுத்து/முந்தைய அம்புகள் சரியான திசையில்
+</ta-IN>
+<ml-IN>
+• പുതിയ ഭാഷകൾ: ഹിന്ദി, തമിഴ്, മലയാളം, ഇറ്റാലിയൻ — ഓരോന്നിലും ആപ്പും ഒരു പരിഭാഷയും അൽ-മുഖ്തസർ തഫ്സീറും
+• അറബി: തൊട്ട വാക്കിന്റെ ലേബൽ എപ്പോഴും അറബിയിൽ — അസ്സിറാജിന്റെ അർത്ഥം, ഇല്ലെങ്കിൽ വാക്കിന്റെ മൂലം; പാളിയിൽ മൂലം കാണിക്കും
+• ആയത്ത് മോഡിൽ കൂടുതൽ സുഗമമായ സ്ക്രോളിംഗ്; വലത്തുനിന്ന് ഇടത്തോട്ടുള്ള ഭാഷകളിൽ അടുത്തത്/മുമ്പത്തേത് അമ്പുകൾ ശരിയായ ദിശയിൽ
+</ml-IN>
+<it-IT>
+• Nuove lingue: hindi, tamil, malayalam e italiano — l'app, una traduzione e il tafsir Al-Mukhtasar in ciascuna
+• Arabo: l'etichetta di una parola toccata è sempre in arabo — il significato di al-Sirāj, altrimenti la radice; la sua scheda mostra la radice
+• Scorrimento più fluido in modalità versetti; le frecce successivo/precedente puntano bene nelle lingue da destra a sinistra
+</it-IT>

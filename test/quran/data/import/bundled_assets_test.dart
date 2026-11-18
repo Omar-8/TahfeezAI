@@ -73,7 +73,7 @@ void main() {
         '${w['ayahId']}:${w['wordIndex']}',
     };
     final names = hashes.keys.where((n) => n.startsWith('wbw/')).toList();
-    expect(names, hasLength(7));
+    expect(names, hasLength(9));
     for (final name in names) {
       final pack =
           jsonDecode(File('assets/quran/$name').readAsStringSync()) as Map;
@@ -86,7 +86,7 @@ void main() {
       final without = words.where((w) => '${w[2] ?? ''}'.trim().isEmpty);
       // English has every meaning (and the transliteration); another
       // language may lack a few, which the English fills in the app
-      // (Turkish the most: about 9 %).
+      // (Turkish and Hindi about 9 %; Tamil, below, 21 %).
       if (name == 'wbw/en_qurancom.json') {
         expect(without, isEmpty, reason: 'every word has a meaning');
         expect(
@@ -94,6 +94,10 @@ void main() {
           isEmpty,
           reason: 'every word has its transliteration',
         );
+      } else if (name == 'wbw/ta_qurancom.json') {
+        // Quran.com's Tamil lacks about 21 % (15,972 words, 2026-11-18):
+        // shipped at the owner's request, the English filling them in.
+        expect(without.length, lessThan(words.length ~/ 4), reason: name);
       } else {
         expect(without.length, lessThan(words.length ~/ 10), reason: name);
       }

@@ -58,4 +58,53 @@ void main() {
     expect(translations.first.textDirection, TextDirection.ltr);
     await RealApp.quit(tester);
   });
+
+  // Ayah mode's page buttons read as a Mushaf's pages turn: «< Next» on the
+  // left, «Previous >» on the right, each arrow pointing its way in every
+  // language — a chevron icon flips itself in a right-to-left one
+  // (owner, 2026-11-18).
+  for (final locale in ['en', 'ar', 'ur', 'fa']) {
+    testWidgets("$locale: Ayah mode's page buttons point their way", (
+      tester,
+    ) async {
+      await RealApp.launch(
+        tester,
+        route: '/quran/surah/1',
+        mode: ReaderMode.ayah,
+        layout: AyahLayout.paged,
+        locale: locale,
+      );
+      final next = find.byKey(const ValueKey('ayah-mode-next-page'));
+      final previous = find.byKey(const ValueKey('ayah-mode-previous-page'));
+      await tester.scrollUntilVisible(
+        next,
+        300,
+        scrollable: find.byType(Scrollable).last,
+      );
+      await tester.pumpAndSettle();
+      expect(
+        tester.getCenter(next).dx,
+        lessThan(tester.getCenter(previous).dx),
+      );
+      for (final icon in ['chevron_left', 'chevron_right']) {
+        final finder = find.byKey(ValueKey('ayah-mode-$icon'));
+        // Not mirrored (a mirrored icon is drawn under a flipping Transform).
+        expect(
+          find.descendant(of: finder, matching: find.byType(Transform)),
+          findsNothing,
+          reason: '$icon mirrored in $locale',
+        );
+      }
+      // Each arrow on the outer side of its button's word.
+      final left = tester
+          .getCenter(find.byKey(const ValueKey('ayah-mode-chevron_left')))
+          .dx;
+      final right = tester
+          .getCenter(find.byKey(const ValueKey('ayah-mode-chevron_right')))
+          .dx;
+      expect(left, lessThan(tester.getCenter(next).dx));
+      expect(right, greaterThan(tester.getCenter(previous).dx));
+      await RealApp.quit(tester);
+    });
+  }
 }

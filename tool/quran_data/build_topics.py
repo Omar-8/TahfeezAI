@@ -27,7 +27,7 @@ OUT = os.path.join(ROOT, 'assets/quran/topics.json')
 
 LANGUAGES = ['en', 'ar', 'ur', 'tr', 'fr', 'de', 'id', 'es', 'ru', 'fa', 'bn',
              'ms', 'ha', 'ckb', 'ps', 'sw', 'kk', 'uz', 'so', 'nl', 'da', 'el',
-             'ja', 'ko', 'pt', 'zh']
+             'ja', 'ko', 'pt', 'zh', 'hi', 'ta', 'ml', 'it']
 
 # Group -> the ontology classes (or concepts) whose members it takes; a
 # concept goes to the first group it matches.

@@ -73,6 +73,15 @@ const credits = <Credit>[
   ),
   Credit(
     group: CreditGroup.quran,
+    name: 'Quranic Arabic Corpus morphology 0.4',
+    owner: 'Kais Dukes, University of Leeds',
+    licence: 'GNU GPL',
+    url: 'https://corpus.quran.com',
+    useEn: "Each word's root, in the word's pill and its sheet (Arabic)",
+    useAr: 'جذر الكلمة في بطاقتها ونافذتها',
+  ),
+  Credit(
+    group: CreditGroup.quran,
     name: "quran-transcript (Qur'an phonetizer)",
     owner: 'Abdullah (obadx)',
     licence: 'MIT',
@@ -129,9 +138,12 @@ const credits = <Credit>[
         '(Muhammad Salih Bamoki), Kazakh (Khalifa Altai), Somali (Abdullah '
         'Hasan Yaqoub), Korean (Hamid Choi), Japanese (Saeed Sato) and '
         'Portuguese (Helmi Nasr), Chinese (Muhammad Suleiman, Muhammad '
-        'Makin) translations; Pashto, Swahili, Uzbek, Dutch and Greek (Rowwad); '
-        'Al-Mukhtasar in Kurdish, Pashto, Uzbek, Japanese and Chinese; '
-        "Al-Mukhtasar's aims of each surah (12 languages; 8 more from "
+        'Makin), Hindi (Azizul Haq Al-Omari), Tamil (Omar Sharif) and '
+        'Malayalam (Abdul Hamid Haidar, Kunhi Muhammad) translations; '
+        'Pashto, Swahili, Uzbek, Dutch, Greek and Italian (Rowwad); '
+        'Al-Mukhtasar in Kurdish, Pashto, Uzbek, Japanese, Chinese, Hindi, '
+        'Tamil, Malayalam and Italian; '
+        "Al-Mukhtasar's aims of each surah (16 languages; 8 more from "
         "the Tafsir Center's own Al-Mukhtasar, mokhtasr.com)",
     owner: 'QuranEnc',
     licence: 'QuranEnc terms: unmodified, with attribution and version',

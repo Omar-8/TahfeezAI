@@ -34,6 +34,10 @@
 		<string>ko</string>
 		<string>pt</string>
 		<string>zh-Hans</string>
+		<string>hi</string>
+		<string>ta</string>
+		<string>ml</string>
+		<string>it</string>
 	</array>
 	<key>CFBundleDisplayName</key>
 	<string>TahfeezAI</string>

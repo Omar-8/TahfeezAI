@@ -12,6 +12,7 @@ import '../../../core/ui/script_direction.dart';
 import '../../../quran/domain/models/quran_refs.dart';
 import '../../../wbw/application/active_wbw_pack.dart';
 import '../../../wbw/application/arabic_word_gloss.dart';
+import '../../../wbw/application/word_root.dart';
 import '../../../wbw/application/wbw_word_lookup.dart';
 import '../application/mushaf_appearance_controller.dart';
 import '../domain/mushaf_appearance.dart';
@@ -422,18 +423,29 @@ class _WordPeekPill extends ConsumerWidget {
     );
   }
 
-  /// The word's meaning, one line: in Arabic al-Sirāj's, else the
-  /// word-by-word pack's (English's where it has none); `null` loading.
+  /// The word's meaning, one line: in Arabic al-Sirāj's, else its root
+  /// («الجذر: قول»), else the word itself — never another language
+  /// (owner, 2026-11-18); in other languages the word-by-word pack's
+  /// (English's where it has none). `null` loading.
   String? _meaning(BuildContext context, WidgetRef ref) {
     if (Localizations.localeOf(context).languageCode == 'ar') {
-      final gloss = ref.watch(
-        arabicWordGlossProvider((
-          ayahId: word.ayahId,
-          wordIndex: word.wordIndex,
-        )),
-      );
+      final at = (ayahId: word.ayahId, wordIndex: word.wordIndex);
+      final gloss = ref.watch(arabicWordGlossProvider(at));
       if (gloss.value case final g?) return g;
       if (gloss.isLoading) return null;
+      final root = ref.watch(wordRootProvider(at));
+      if (root.value case final r?) {
+        return '${AppLocalizations.of(context).wordRoot}: $r';
+      }
+      if (root.isLoading) return null;
+      return ref
+          .watch(
+            canonicalAyahWordTextProvider(
+              ayahId: word.ayahId,
+              wordIndex: word.wordIndex,
+            ),
+          )
+          .value;
     }
     final pack = ref.watch(activeWbwPackProvider).value;
     String? lookup(String packId) => ref

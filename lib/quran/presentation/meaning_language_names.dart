@@ -27,5 +27,9 @@ String nativeLanguageName(String code) => switch (code) {
   'da' => 'Dansk',
   'pt' => 'Português',
   'zh' => '中文',
+  'hi' => 'हिन्दी',
+  'ta' => 'தமிழ்',
+  'ml' => 'മലയാളം',
+  'it' => 'Italiano',
   _ => code,
 };
