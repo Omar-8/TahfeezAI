@@ -6,8 +6,8 @@ RECITA A MEMORIA — CON RISCONTRO
 • Nascondi la pagina e recita: ogni parola appare mentre la pronunci
 • Parole colorate man mano: giuste, sbagliate, saltate o pronunciate male — una parola detta bene si illumina, un errore oscilla e una pagina finita brilla con una leggera vibrazione
 • Un anello attorno al tasto stop respira con la tua voce: sai di essere ascoltato
-• Sente come reciti, non solo cosa: lettere, vocali, shadda e desinenze, suono per suono secondo la pronuncia di Ḥafṣ
-• Controlla anche il tajwid: durata del madd, qalqala, ghunna (ikhfāʾ, iqlāb, idghām e nūn o mīm raddoppiate), lettere enfatiche e leggere, lettere gutturali — ogni regola si può attivare o disattivare
+• Sente come reciti, non solo cosa: lettere, vocali, shadda e desinenze, suono per suono secondo la pronuncia di Hafs
+• Controlla anche il tajwid: durata del madd, qalqala, ghunna (ikhfa, iqlab, idgham e nun o mim raddoppiate), lettere enfatiche e leggere, lettere gutturali — ogni regola si può attivare o disattivare
 • Scegli quanto è rigoroso il controllo: indulgente, equilibrato o preciso
 • Vibrazione o suono a ogni errore, con un avviso a parte per il tajwid
 • Scegli i colori degli errori di pronuncia e di tajwid
@@ -15,7 +15,7 @@ RECITA A MEMORIA — CON RISCONTRO
 
 LEGGI E COMPRENDI
 • Il Mushaf di Medina pagina per pagina, come stampato — o versetto per versetto, a scorrimento o in un'unica lista
-• Significati parola per parola e traslitterazione — anche in arabo, da al-Sirāj
+• Significati parola per parola e traslitterazione — anche in arabo, da al-Siraj
 • Traduzioni in 28 lingue e tafsir accanto a ogni versetto, secondo la tua lingua — in italiano anche il tafsir Al-Mukhtasar
 • Colori del tajwid sulle lettere in modalità versetti, regola per regola
 • Tocca il nome di una sura per il suo significato, la rivelazione e altro
