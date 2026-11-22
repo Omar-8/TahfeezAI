@@ -115,7 +115,7 @@ extension Color {
 }
 
 /// A font by the first of [names] the extension has.
-func font(_ names: [String], _ size: CGFloat) -> Font {
+func widgetFont(_ names: [String], _ size: CGFloat) -> Font {
   for n in names where UIFont(name: n, size: size) != nil { return .custom(n, size: size) }
   return .system(size: size)
 }
@@ -126,7 +126,7 @@ struct AppIcon: View {
   var size: CGFloat = 22
   var body: some View {
     Text(String(UnicodeScalar(codepoint).map(Character.init) ?? " "))
-      .font(font(["MaterialIcons-Regular", "Material Icons"], size))
+      .font(widgetFont(["MaterialIcons-Regular", "Material Icons"], size))
   }
 }
 
@@ -503,7 +503,7 @@ struct AyahView: View {
         Spacer(minLength: 0)
         // The verified text, as the app's Quran font draws it.
         Text(ayah?["text"] as? String ?? "")
-          .font(font(["AmiriQuran-Regular", "Amiri Quran"], family == .systemLarge ? 24 : 20))
+          .font(widgetFont(["AmiriQuran-Regular", "Amiri Quran"], family == .systemLarge ? 24 : 20))
           .foregroundColor(look.text).multilineTextAlignment(.center)
           .environment(\.layoutDirection, .rightToLeft)
           .minimumScaleFactor(0.5)
