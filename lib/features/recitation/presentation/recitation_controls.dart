@@ -545,9 +545,10 @@ class LiveRecitationBar extends ConsumerWidget {
       final summaries = ref.read(testSummaryProvider.notifier);
       Future<void>.delayed(const Duration(milliseconds: 2500), () {
         summaries.endRun();
+        // (The reader left meanwhile: its ref is no longer usable.)
+        if (!context.mounted) return;
         final summary = ref.read(testSummaryProvider);
-        if (!context.mounted ||
-            !showResults ||
+        if (!showResults ||
             summary == null ||
             summary.rows.isEmpty ||
             identical(summary, _shownSummary) ||
