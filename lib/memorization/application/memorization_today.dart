@@ -14,8 +14,13 @@ import '../memorization_providers.dart';
 
 /// Wall-clock time for memorization; overridden in tests.
 final memorizationClockProvider = Provider<DateTime Function()>(
-  (ref) => DateTime.now,
+  (ref) =>
+      () => debugClockTime ?? DateTime.now(),
 );
+
+/// The store screenshots' time of day (as [debugSkyTime] is their sky's);
+/// `null`: the real time.
+DateTime? debugClockTime;
 
 /// Every tracked ayah's memory, live.
 final ayahMemoriesProvider = StreamProvider<Map<int, AyahMemory>>(

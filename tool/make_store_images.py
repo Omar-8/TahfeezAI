@@ -33,7 +33,11 @@ NIGHT_GREEN = (16, 48, 40)
 
 # shot name -> (headline, line under it, dark background?, Arabic?)
 CAPTIONS = {
-    "01-home-light": ("Your daily Quran companion", "Daily ayah, continue reading, today's revision", False, False),
+    "01-home-light": ('Your daily companion', "Prayer times, the date, today's ayah and reading", False, False),
+    "20-prayer-times-light": ('Prayer times, with the adhan', "Your city's times — the adhan of Makkah or Madinah", False, False),
+    "21-athkar-light": ('Morning and evening athkar', 'From Hisn al-Muslim, counted, with audio', False, False),
+    "22-habits-dark": ('Keep your good habits', 'Wird, sunnah prayers, fasting — with reminders', True, False),
+    "23-calendar-light": ("The Hijri calendar", "Its months, and the year's occasions ahead", False, False),
     "02-mushaf-light": ("The Madinah Mushaf", "Every page as printed — crisp on any screen", False, False),
     "03-listening-dark": ("Listen to 18 reciters", "The ayah being recited lights up and follows", True, False),
     "05b-recite-marks-dark": ("Every word, checked", "Recite from the page: right in green, mistakes in red", True, False),

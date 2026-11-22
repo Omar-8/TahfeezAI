@@ -35,6 +35,10 @@ jobs:
         timeout-minutes: 130
         run: |
           set -o pipefail
+          # Makkah's time zone, the shots' prayer times' place: the
+          # simulators take the Mac's (2.0.0).
+          sudo systemsetup -settimezone Asia/Riyadh >/dev/null 2>&1 || true
+          export TZ=Asia/Riyadh SIMCTL_CHILD_TZ=Asia/Riyadh
           now() { perl -MTime::HiRes=time -e 'printf "%.3f\n", time'; }
           stamp() { perl -MTime::HiRes=time -ne '$|=1; printf "%.3f %s", time, $_'; }
           # A device type: the first of $2.. (exact names; ones known to work

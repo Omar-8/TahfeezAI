@@ -38,6 +38,8 @@ void main() {
     // Seen already: no welcome or guide over the tour.
     final prefs = SharedPreferencesAsync();
     await prefs.setBool('firstRun.welcome', true);
+    // Nor the ṣalawāt reminder over the app (2026-11-22).
+    await prefs.setBool('salawat.onStart', false);
     await prefs.setBool('firstRun.guide', true);
     // Nor the first hiding's hint, nor the app's tips (as the screenshots).
     await prefs.setBool('firstRun.hide-hint', true);

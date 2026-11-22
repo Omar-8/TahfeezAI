@@ -32,10 +32,10 @@ PHONE = [
     "06b-pronunciation-dark",
     "10b-hide-recite-dark",
     "01-home-light",
-    "19-topics-light",
+    "20-prayer-times-light",
+    "21-athkar-light",
+    "22-habits-dark",
     "02-mushaf-light",
-    "04-ayah-mode-light",
-    "13-progress-dark",
 ]
 
 

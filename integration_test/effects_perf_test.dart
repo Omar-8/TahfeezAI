@@ -32,6 +32,8 @@ void main() {
   testWidgets('word animations, frame timing', (tester) async {
     final prefs = SharedPreferencesAsync();
     await prefs.setBool('firstRun.welcome', true);
+    // Nor the ṣalawāt reminder over the app (2026-11-22).
+    await prefs.setBool('salawat.onStart', false);
     await prefs.setBool('firstRun.guide', true);
     await bootstrap();
     // Frames as the phone draws them, not only when the test pumps.

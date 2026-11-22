@@ -38,6 +38,7 @@ import 'package:tahfeez_ai/features/mushaf/presentation/mushaf_appearance_sheet.
 import 'package:tahfeez_ai/features/recitation/presentation/recitation_controls.dart';
 import 'package:tahfeez_ai/features/recitation/application/hifz_controller.dart';
 import 'package:tahfeez_ai/memorization/application/activity_stats.dart';
+import 'package:tahfeez_ai/memorization/application/memorization_today.dart';
 import 'package:tahfeez_ai/memorization/application/memorization_progress.dart';
 import 'package:tahfeez_ai/memorization/domain/models/memorization_models.dart';
 import 'package:tahfeez_ai/memorization/memorization_providers.dart';
@@ -55,6 +56,8 @@ void main() {
     // hide mode and progress shots, 2026-11-15).
     await prefs.setBool('firstRun.hide-hint', true);
     await prefs.setBool('appTips.allOff', true);
+    // Nor the ṣalawāt reminder (it covered every scene, 2026-11-22).
+    await prefs.setBool('salawat.onStart', false);
 
     debugPrint('store-shots: bootstrap');
     await bootstrap();
@@ -208,7 +211,8 @@ void main() {
     await run(3);
 
     // ── Light ── under a morning sky
-    debugSkyTime = DateTime(2026, 10, 26, 9);
+    debugSkyTime = DateTime(now.year, now.month, now.day, 9, 41);
+    debugClockTime = debugSkyTime;
     await theme(dark: false);
     await go('/home');
     await shot('01-home-light');
@@ -275,7 +279,8 @@ void main() {
     await shot('23-calendar-light');
 
     // ── Dark ── under a night sky
-    debugSkyTime = DateTime(2026, 10, 26, 21);
+    debugSkyTime = DateTime(now.year, now.month, now.day, 21, 5);
+    debugClockTime = debugSkyTime;
     await theme(dark: true);
     await ayahView(tafsir: true, meanings: true);
     container.read(readerModeProvider.notifier).set(ReaderMode.ayah);
