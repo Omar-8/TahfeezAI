@@ -1,0 +1,51 @@
+# Committed (not Flutter's generated one) for the ONNX Runtime pods' source
+# below; otherwise Flutter's iOS template.
+platform :ios, '15.1'
+
+# CocoaPods analytics sends network stats synchronously affecting flutter build latency.
+ENV['COCOAPODS_DISABLE_STATS'] = 'true'
+
+project 'Runner', {
+  'Debug' => :debug,
+  'Profile' => :release,
+  'Release' => :release,
+}
+
+def flutter_root
+  generated_xcode_build_settings_path = File.expand_path(File.join('..', 'Flutter', 'Generated.xcconfig'), __FILE__)
+  unless File.exist?(generated_xcode_build_settings_path)
+    raise "#{generated_xcode_build_settings_path} must exist. If you're running pod install manually, make sure flutter pub get is executed first"
+  end
+
+  File.foreach(generated_xcode_build_settings_path) do |line|
+    matches = line.match(/FLUTTER_ROOT\=(.*)/)
+    return matches[1].strip if matches
+  end
+  raise "FLUTTER_ROOT not found in #{generated_xcode_build_settings_path}. Try deleting Generated.xcconfig, then run flutter pub get"
+end
+
+require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper'), flutter_root)
+
+flutter_ios_podfile_setup
+
+target 'Runner' do
+  use_frameworks!
+
+  # ONNX Runtime 1.30.0 from this repository's release
+  # "onnxruntime-pods-1.30.0" (SHA-256 checked): its own download host and
+  # GitHub repository went offline on 2026-11-22. The same version and the
+  # same podspecs, only their source moved (ios/pods/).
+  pod 'onnxruntime-c', :podspec => 'pods/onnxruntime-c.podspec.json'
+  pod 'onnxruntime-objc', :podspec => 'pods/onnxruntime-objc.podspec.json'
+
+  flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+  target 'RunnerTests' do
+    inherit! :search_paths
+  end
+end
+
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    flutter_additional_ios_build_settings(target)
+  end
+end
