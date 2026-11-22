@@ -12,6 +12,7 @@ import '../../../memorization/application/memorization_progress.dart';
 import '../../../memorization/domain/activity_calendar.dart';
 import '../../../memorization/domain/progress_map.dart';
 import '../../../core/theme/tahfeez_motion.dart';
+import '../../../core/theme/tahfeez_tones.dart';
 
 /// The Quran as a ring of its 30 juz, each segment filled by how much of
 /// that juz is memorized (recited from memory, then only marked, paler),
@@ -54,8 +55,9 @@ class JuzRing extends StatelessWidget {
                 for (final j in juz)
                   (recited: j.recited * t, marked: j.marked * t),
               ],
-              track: scheme.surfaceContainerHighest,
+              track: scheme.progressTrack,
               fill: scheme.primary,
+              partial: scheme.progressPartial,
             ),
             child: Center(
               child: ExcludeSemantics(
@@ -76,11 +78,19 @@ class JuzRing extends StatelessWidget {
 }
 
 class _JuzRingPainter extends CustomPainter {
-  _JuzRingPainter({required this.juz, required this.track, required this.fill});
+  _JuzRingPainter({
+    required this.juz,
+    required this.track,
+    required this.fill,
+    required this.partial,
+  });
 
   /// Each juz's share recited from memory and only marked, 0..1.
   final List<({double recited, double marked})> juz;
   final Color track, fill;
+
+  /// The parts only marked as known.
+  final Color partial;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -100,7 +110,7 @@ class _JuzRingPainter extends CustomPainter {
       ..color = c;
     final trackPaint = paint(track);
     final recitedPaint = paint(fill);
-    final markedPaint = paint(fill.withValues(alpha: 0.35));
+    final markedPaint = paint(partial);
     for (var i = 0; i < n; i++) {
       // Juz 1 at the top, on clockwise.
       final start = -math.pi / 2 + i * (sweep + gap) + gap / 2;
@@ -116,7 +126,10 @@ class _JuzRingPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_JuzRingPainter old) =>
-      old.track != track || old.fill != fill || !_same(old.juz, juz);
+      old.track != track ||
+      old.fill != fill ||
+      old.partial != partial ||
+      !_same(old.juz, juz);
 
   static bool _same(
     List<({double recited, double marked})> a,
@@ -239,7 +252,7 @@ class ActivityHeatmap extends StatelessWidget {
   };
 
   static Color colorOf(int level, ColorScheme scheme) => level == 0
-      ? scheme.surfaceContainerHighest
+      ? scheme.progressTrack
       : scheme.primary.withValues(
           alpha: const [0.0, 0.3, 0.55, 0.8, 1.0][level],
         );

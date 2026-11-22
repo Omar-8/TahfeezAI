@@ -16,7 +16,9 @@ abstract final class TahfeezExplorationPalette {
   static const lightSurface = Color(0xFFFFFFFF);
   static const lightPrimary = Color(0xFF176B5B);
   static const lightPrimaryAccent = Color(0xFF218A73);
-  static const lightPrimaryContainer = Color(0xFFDCEFE8);
+  // Deeper than the first #DCEFE8, which hardly showed on the light glass
+  // (owner, 2026-11-21: the side menu's icons, and every icon circle).
+  static const lightPrimaryContainer = Color(0xFFC3E2D6);
   static const lightText = Color(0xFF18201D);
   static const lightSecondaryText = Color(0xFF58635E);
   static const lightBorder = Color(0xFFE4E8E5);

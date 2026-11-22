@@ -17,6 +17,7 @@ import '../../../quran/application/meaning_defaults.dart';
 import '../../quran/application/quran_index_providers.dart';
 import '../../recitation/application/mushaf_recitation_target.dart';
 import '../../recitation/application/recitation_session_controller.dart';
+import '../data/reciter_timings.dart';
 import '../data/word_timings_repository.dart';
 import '../domain/quran_audio_sources.dart';
 import '../domain/word_timings.dart';
@@ -300,11 +301,30 @@ class QuranAudioPlayer extends Notifier<NowPlaying?> {
     // start without it (all but three — measured 2026-11-06), except
     // Al-Fātiḥah's (its first ayah is the Bismillah) and At-Tawbah.
     final basmala = !reciterRecitesBasmala.contains(reciter.edition);
+    // A reciter recorded by surah: each ayah cut from its surah.
+    SurahTimings? timings;
+    if (reciter.bySurah) {
+      try {
+        timings = await ref.read(
+          reciterTimingsProvider(reciter.edition).future,
+        );
+      } catch (_) {
+        timings = null;
+      }
+      if (attempt != _attempt) return true;
+    }
     final queue = <int>[];
     final translations = <int>{}, basmalas = <int>{};
     for (final (k, a) in ayahIds.indexed) {
       final surah = a ~/ 1000;
-      if (basmala &&
+      // (A surah a reciter recorded by surah lacks: Al-Husary's, his
+      // Bismillah first; one whose file has no Bismillah: Al-Husary's
+      // before it.)
+      final missing =
+          reciter.bySurah &&
+          (timings?.of(a) == null ||
+              (timings?.noBasmala.contains(surah) ?? false));
+      if ((basmala || missing) &&
           a % 1000 == 1 &&
           surah != 1 &&
           surah != 9 &&
@@ -334,6 +354,14 @@ class QuranAudioPlayer extends Notifier<NowPlaying?> {
       // A downloaded reciter plays from the device (offline too).
       final downloads = ref.read(reciterDownloadsProvider.notifier);
       await downloads.ready();
+      AyahSpan? spanOf(int a) => timings?.of(a);
+
+      Reciter whose(int a) =>
+          reciter.bySurah && spanOf(a) == null ? basmalaReciter : reciter;
+      String fileOf(int a, Reciter r) => switch (downloads.localFile(a, r)) {
+        final path? => Uri.file(path).toString(),
+        null => ayahAudioUrl(a, r),
+      };
       // The speed last chosen, wherever it was.
       await audio.setSpeed(ref.read(listenSpeedProvider));
       await audio.playQueue(
@@ -342,23 +370,35 @@ class QuranAudioPlayer extends Notifier<NowPlaying?> {
             if (translations.contains(k))
               translationAudioUrl(a, voice!)
             else if (basmalas.contains(k))
-              switch (downloads.localFile(1001, basmalaReciter)) {
+              fileOf(1001, basmalaReciter)
+            else if (spanOf(a) != null)
+              switch (downloads.localSurahFile(a ~/ 1000, reciter)) {
                 final path? => Uri.file(path).toString(),
-                null => ayahAudioUrl(1001, basmalaReciter),
+                null => surahAudioUrl(a ~/ 1000, reciter),
               }
             else
-              switch (downloads.localFile(a, reciter)) {
-                final path? => Uri.file(path).toString(),
-                null => ayahAudioUrl(a, reciter),
-              },
+              fileOf(a, whose(a)),
         ],
         items: [
           for (final (k, a) in queue.indexed)
             _info(
               a,
-              basmalas.contains(k) ? basmalaReciter : reciter,
+              basmalas.contains(k) ? basmalaReciter : whose(a),
               translation: translations.contains(k) ? voice : null,
             ),
+        ],
+        clips: [
+          for (final (k, a) in queue.indexed)
+            if (translations.contains(k) || basmalas.contains(k))
+              null
+            else
+              switch (spanOf(a)) {
+                final span? => (
+                  start: Duration(milliseconds: span.startMs),
+                  end: Duration(milliseconds: span.endMs),
+                ),
+                null => null,
+              },
         ],
       );
       return true;

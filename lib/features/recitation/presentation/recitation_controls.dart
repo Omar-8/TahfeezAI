@@ -707,11 +707,14 @@ class LiveRecitationBar extends ConsumerWidget {
           ),
           if (recognition != null ||
               ref.watch(coloursOffNoticeProvider) != null)
-            const Positioned(
+            Positioned(
+              // On the bar's top border (owner, 2026-11-21: raised above
+              // it, Follow along's hints covered the last ayah — back
+              // down, each on one line).
               top: -FollowAlongHint.height / 2 + 4,
               left: 16,
               right: 16,
-              child: _BarHints(),
+              child: const _BarHints(),
             ),
         ],
       ),
@@ -1003,7 +1006,7 @@ class _HintPill extends StatelessWidget {
       fontWeight: FontWeight.w600,
     );
     // (Colours off: wrapped to two lines where one is too short.)
-    final wraps = kind == _Hint.coloursOff || kind == _Hint.review;
+    final wraps = kind == _Hint.coloursOff;
     return Container(
       height: wraps ? null : FollowAlongHint.height,
       constraints: const BoxConstraints(minHeight: FollowAlongHint.height),
@@ -1040,7 +1043,9 @@ class _HintPill extends StatelessWidget {
             child: Text(
               switch (kind) {
                 _Hint.mistakes => l10n.followMistakesFound,
-                _Hint.review => l10n.recReviewHint,
+                // One line (owner, 2026-11-21): the mistakes found — a tap
+                // shows them; Try again and Skip say what they do.
+                _Hint.review => l10n.recMistakesShort,
                 _Hint.coloursOff => switch (eye) {
                   EyeNotice.colours => l10n.recColoursOnHint,
                   EyeNotice.hidden => l10n.recAyahsHiddenHint,
@@ -1704,23 +1709,36 @@ class _SessionControls extends ConsumerWidget {
             ],
           ),
           const Spacer(),
-          TextButton(
-            key: const ValueKey('follow-skip'),
-            onPressed: () => inFollow ? unawaited(run.skip()) : hifz.loopSkip(),
-            child: Tooltip(
-              message: l10n.recSkipTip,
-              child: Text(l10n.followSkip),
+          // Long labels (or large text) shrink to fit, not overflow.
+          Flexible(
+            child: TextButton(
+              key: const ValueKey('follow-skip'),
+              onPressed: () =>
+                  inFollow ? unawaited(run.skip()) : hifz.loopSkip(),
+              child: Tooltip(
+                message: l10n.recSkipTip,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(l10n.followSkip, maxLines: 1),
+                ),
+              ),
             ),
           ),
           const SizedBox(width: 4),
-          FilledButton.icon(
-            key: const ValueKey('follow-try-again'),
-            onPressed: () =>
-                inFollow ? unawaited(run.tryAgain()) : hifz.loopTryAgain(),
-            icon: const Icon(Icons.replay_rounded, size: 18),
-            label: Tooltip(
-              message: l10n.recTryAgainTip,
-              child: Text(l10n.followTryAgain),
+          Flexible(
+            flex: 2,
+            child: FilledButton.icon(
+              key: const ValueKey('follow-try-again'),
+              onPressed: () =>
+                  inFollow ? unawaited(run.tryAgain()) : hifz.loopTryAgain(),
+              icon: const Icon(Icons.replay_rounded, size: 18),
+              label: Tooltip(
+                message: l10n.recTryAgainTip,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(l10n.followTryAgain, maxLines: 1),
+                ),
+              ),
             ),
           ),
           const SizedBox(width: 8),

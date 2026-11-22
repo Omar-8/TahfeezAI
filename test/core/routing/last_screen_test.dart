@@ -8,7 +8,6 @@ void main() {
       '/home',
       '/quran',
       '/memorize',
-      '/settings/about',
       '/quran/page/1/40',
       '/home/ayah/2/153',
     ]) {
@@ -21,6 +20,10 @@ void main() {
       '/debug/gallery',
       '/nowhere',
       '/quran/page',
+      // Over a tab (the side menu's): nothing beneath them to go back to.
+      '/settings',
+      '/settings/about',
+      '/qibla',
     ]) {
       expect(restorableScreen(no), isFalse, reason: '$no');
     }

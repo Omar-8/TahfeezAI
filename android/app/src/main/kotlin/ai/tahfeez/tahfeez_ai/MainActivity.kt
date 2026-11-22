@@ -17,6 +17,9 @@ import io.flutter.plugin.common.MethodChannel
 class MainActivity : AudioServiceActivity() {
     private var liveSpeech: LiveSpeechRecognizerChannel? = null
 
+    // The prayer reminders' sound being chosen in Android's picker.
+    private var pendingSound: MethodChannel.Result? = null
+
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         liveSpeech = LiveSpeechRecognizerChannel(
@@ -64,6 +67,39 @@ class MainActivity : AudioServiceActivity() {
                     }
                 } else {
                     result.notImplemented()
+                }
+            }
+        // Prayer times' sound: one of the phone's (alarms, ringtones,
+        // notifications), from Android's own picker (owner, 2026-11-21).
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "tahfeez/sound")
+            .setMethodCallHandler { call, result ->
+                if (call.method != "pick") {
+                    result.notImplemented()
+                    return@setMethodCallHandler
+                }
+                val intent = android.content.Intent(
+                    android.media.RingtoneManager.ACTION_RINGTONE_PICKER,
+                ).apply {
+                    putExtra(
+                        android.media.RingtoneManager.EXTRA_RINGTONE_TYPE,
+                        android.media.RingtoneManager.TYPE_ALL,
+                    )
+                    putExtra(android.media.RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, false)
+                    putExtra(android.media.RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, false)
+                    call.argument<String>("current")?.let {
+                        putExtra(
+                            android.media.RingtoneManager.EXTRA_RINGTONE_EXISTING_URI,
+                            android.net.Uri.parse(it),
+                        )
+                    }
+                }
+                pendingSound?.success(null)
+                pendingSound = result
+                try {
+                    startActivityForResult(intent, SOUND_PICKER)
+                } catch (e: Exception) {
+                    pendingSound = null
+                    result.success(null)
                 }
             }
         // A recitation mistake noticed: a short vibration (the device's
@@ -131,5 +167,36 @@ class MainActivity : AudioServiceActivity() {
         liveSpeech?.dispose()
         liveSpeech = null
         super.cleanUpFlutterEngine(flutterEngine)
+    }
+
+    @Deprecated("Android's sound picker answers here.")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: android.content.Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode != SOUND_PICKER) return
+        val result = pendingSound ?: return
+        pendingSound = null
+        val key = android.media.RingtoneManager.EXTRA_RINGTONE_PICKED_URI
+        val uri: android.net.Uri? = if (resultCode != RESULT_OK || data == null) {
+            null
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            data.getParcelableExtra(key, android.net.Uri::class.java)
+        } else {
+            @Suppress("DEPRECATION")
+            data.getParcelableExtra(key)
+        }
+        if (uri == null) {
+            result.success(null)
+            return
+        }
+        val title = try {
+            android.media.RingtoneManager.getRingtone(this, uri)?.getTitle(this)
+        } catch (e: Exception) {
+            null
+        }
+        result.success(mapOf("uri" to uri.toString(), "title" to (title ?: "")))
+    }
+
+    companion object {
+        private const val SOUND_PICKER = 4711
     }
 }

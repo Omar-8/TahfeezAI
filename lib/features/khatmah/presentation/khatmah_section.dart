@@ -17,6 +17,7 @@ import '../../../core/notifications/daily_reminder_scheduler.dart';
 import '../application/khatmah_controller.dart';
 import '../application/khatmah_reminder.dart';
 import '../domain/khatmah.dart';
+import '../../../core/theme/tahfeez_tones.dart';
 
 /// Home's khatmah card: none yet — what it is and Start; in progress —
 /// today's pages, how far the whole has come, and Read (from the first
@@ -204,7 +205,7 @@ class _ProgressCard extends ConsumerWidget {
                 key: const ValueKey('khatmah-progress'),
                 value: value,
                 minHeight: 6,
-                backgroundColor: scheme.surfaceContainerHighest,
+                backgroundColor: scheme.progressTrack,
               ),
             ),
           ),

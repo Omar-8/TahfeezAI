@@ -86,7 +86,7 @@ Example starting palette for exploration:
 - surface: `#FFFFFF`
 - primary: `#176B5B`
 - primary accent: `#218A73`
-- primary container: `#DCEFE8`
+- primary container: `#C3E2D6` (was `#DCEFE8`: too faint on the light glass — 2026-11-21)
 - text: `#18201D`
 - secondary text: `#68736E`
 - border: `#E4E8E5`

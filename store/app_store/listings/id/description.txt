@@ -9,8 +9,6 @@ SETOR HAFALAN, DENGAN KOREKSI
 • Mendengar bagaimana Anda membaca, bukan hanya apa: huruf, harakat, syaddah, dan akhir kata, bunyi demi bunyi sesuai riwayat Hafs
 • Tajwid juga diperiksa: panjang mad, qalqalah, ghunnah (ikhfa, iqlab, idgham, nun dan mim bertasydid), huruf tebal dan tipis, huruf tenggorokan — setiap hukum bisa dinyalakan atau dimatikan
 • Pilih seberapa ketat pemeriksaannya: longgar, seimbang, atau teliti
-• Getar atau bunyi saat ada kesalahan, dengan peringatan terpisah untuk tajwid
-• Pilih warna kesalahan pelafalan dan tajwid
 • Ulangi satu ayat, ikuti qari, atau uji diri pada satu halaman penuh
 
 BACA DAN PAHAMI
@@ -20,28 +18,33 @@ BACA DAN PAHAMI
 • Warna tajwid pada huruf di mode ayat, hukum demi hukum
 • Ketuk nama surah untuk melihat arti, tempat turun, dan lainnya
 • Bagikan ayat sebagai gambar, beserta terjemahannya
-• Nama surah dengan kaligrafi mushaf; mode fokus untuk halaman saja
 • Cari di seluruh Al-Qur'an, dalam bahasa Arab atau terjemahan
 • Penanda dan bagian tematik diwarnai di halaman
 
 DENGARKAN
-• 31 qari, termasuk Alafasy, Al-Husary, Al-Minshawi, Abdul Basit, dan As-Sudais
+• 32 qari, termasuk Alafasy, Al-Husary, Al-Minshawi, Abdul Basit, dan As-Sudais
 • Ayat menyala saat dibacakan; ulangi satu ayat atau rentang ayat
 • Unduh qari untuk mendengar offline; pemutaran tetap berjalan saat layar mati
 • Terjemahan yang dibacakan setelah setiap ayat, dalam 8 bahasa
-• Pengatur waktu tidur untuk mendengarkan di malam hari
 
 MENGHAFAL DENGAN RENCANA
 • Pelajaran harian dan murajaah berjarak
-• Mode sembunyi, ulang, dan ikuti bacaan
 • Uji saya: kata-kata pertama dari tempat acak yang Anda hafal — lanjutkan dari hafalan
 • Kekuatan setiap bagian terpantau, jadi Anda tahu apa yang perlu dimurajaah
 • Rangkaian hari Anda, kalender hari-hari membaca, cincin 30 juz, dan pencapaian kecil
 
+SETIAP HARI
+• Waktu salat untuk kota Anda dengan azan — dari Makkah, Madinah, Quba atau Al-Aqsa — atau hanya getaran
+• Kompas kiblat
+• Zikir pagi dan petang dari Hisnul Muslim, dengan penghitung dan audio
+• Kebiasaan: wirid harian, salat sunah, hari puasa dan lainnya, dengan pengingat
+• Kalender Hijriah dengan peristiwa sepanjang tahun
+• Widget layar utama: waktu salat, tanggal, ayat harian, lanjutkan membaca, hafalan dan khatam
+
 SESUAI SELERA ANDA
 • Langit berwarna sesuai waktu, kartu kaca, dan pola geometris Islami
 • Tema terang, gelap, hangat, sepia, dan hitam; 4 font Al-Qur'an; teks hingga 200%
-• Dalam 25 bahasa: Arab, Inggris, Jerman, Prancis, Spanyol, Portugis, Belanda, Denmark, Yunani, Rusia, Turki, Indonesia, Melayu, Urdu, Persia, Bengali, Hausa, Kurdi, Pashto, Swahili, Kazakh, Uzbek, Somalia, Jepang, dan Korea
+• Dalam 30 bahasa
 • iPhone dan iPad
 
 SUARA ANDA TETAP DI PERANGKAT ANDA

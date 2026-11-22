@@ -121,16 +121,24 @@ void main() {
       locale: 'ar',
     );
     await tester.runAsync(() => container.read(wordRootsProvider.future));
+    // The reader settled on its page first (its location set: a change of
+    // it hides a pill).
+    await RealApp.settle(tester);
     final context = tester.element(find.byType(Scaffold).last);
+    final peek = find.byKey(const ValueKey('word-peek-word'));
     Future<String> pill(int ayahId, int wordIndex) async {
-      WordPeek.show(
-        context,
-        word: (ayahId: ayahId, wordIndex: wordIndex),
-        at: const Offset(200, 400),
-        onWord: () {},
-        onAyah: () {},
-      );
-      await RealApp.settle(tester);
+      // (The page still loading may hide it — as a page changing does:
+      // shown again then, at most thrice.)
+      for (var i = 0; i < 3 && peek.evaluate().isEmpty; i++) {
+        WordPeek.show(
+          context,
+          word: (ayahId: ayahId, wordIndex: wordIndex),
+          at: const Offset(200, 400),
+          onWord: () {},
+          onAyah: () {},
+        );
+        await RealApp.settle(tester);
+      }
       final text = tester.widget<Text>(
         find.descendant(
           of: find.byKey(const ValueKey('word-peek-word')),

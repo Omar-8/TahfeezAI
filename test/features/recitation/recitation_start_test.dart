@@ -521,33 +521,49 @@ void main() {
     expect(hifz().expected, word(midKursi));
   });
 
-  test('a word chosen, the ayahs hidden, words uncovered by hand: the band '
-      'stays on the word chosen; Recite from it, the words before it shown '
-      'still (owner, 2026-11-15)', () async {
-    await open();
-    container.read(recitationStartProvider.notifier).choose(word(midKursi));
-    await pumpEventQueue();
-    final hide = container.read(mushafHideModeProvider.notifier)..toggle();
-    await pumpEventQueue();
-    hide
-      ..revealNextWord(42)
-      ..revealNextWord(42);
-    await pumpEventQueue();
-    expect(start(), (page: 42, word: word(midKursi)));
-    expect(
-      overlay()!.marks[word(midKursi)],
-      MushafWordMark.current,
-      reason: 'the band where it was',
-    );
-    expect(overlay()!.marks[word(midKursi + 2)], isNot(MushafWordMark.current));
+  test(
+    'a word chosen, the ayahs hidden: the band on it while it is hidden; '
+    'uncovered by hand, the band on with the words uncovered — Recite from '
+    'the next, the words before it shown still (owner, 2026-11-15; '
+    '2026-11-21: after a recitation, revealing no longer moved it)',
+    () async {
+      await open();
+      container.read(recitationStartProvider.notifier).choose(word(midKursi));
+      await pumpEventQueue();
+      final hide = container.read(mushafHideModeProvider.notifier)..toggle();
+      await pumpEventQueue();
+      // Hidden from it, the words before it shown: the band on it.
+      expect(start(), (page: 42, word: word(midKursi)));
+      expect(overlay()!.marks[word(midKursi)], MushafWordMark.current);
+      hide
+        ..revealNextWord(42)
+        ..revealNextWord(42);
+      await pumpEventQueue();
+      // It uncovered (and the next): done with, the band on the next hidden.
+      expect(start(), isNull);
+      expect(
+        overlay()!.marks[word(midKursi + 2)],
+        MushafWordMark.current,
+        reason: 'the band on the next word to uncover',
+      );
+      expect(overlay()!.marks[word(midKursi)], isNot(MushafWordMark.current));
 
-    await reciteOn42();
-    expect(hifz().expected, word(midKursi));
-    final shown = container.read(mushafWordOverlayProvider)!;
-    expect(shown.isHidden(word(kursiStart)), isFalse, reason: 'before: shown');
-    expect(shown.isHidden(word(midKursi - 1)), isFalse);
-    expect(shown.isHidden(word(midKursi + 3)), isTrue, reason: 'after: hidden');
-  });
+      await reciteOn42();
+      expect(hifz().expected, word(midKursi + 2));
+      final shown = container.read(mushafWordOverlayProvider)!;
+      expect(
+        shown.isHidden(word(kursiStart)),
+        isFalse,
+        reason: 'before: shown',
+      );
+      expect(shown.isHidden(word(midKursi + 1)), isFalse);
+      expect(
+        shown.isHidden(word(midKursi + 3)),
+        isTrue,
+        reason: 'after: hidden',
+      );
+    },
+  );
 
   testWidgets('Listen, Loop and Follow along: from the start of the tapped '
       'word\'s ayah — their menus\' own "from" as before', (tester) async {

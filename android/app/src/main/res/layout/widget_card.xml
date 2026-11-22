@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A card widget (daily ayah, continue reading, the date, memorization,
+     the khatmah): the app's icon and the card's title, then what it shows;
+     each widget hides what it doesn't use. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:orientation="vertical" android:paddingStart="12dp" android:paddingEnd="12dp" android:paddingTop="10dp" android:paddingBottom="10dp">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:gravity="center_vertical" android:orientation="horizontal">
+        <ImageView android:id="@+id/icon" android:layout_width="18dp" android:layout_height="18dp"
+            android:importantForAccessibility="no" />
+        <TextView android:id="@+id/title" android:layout_width="0dp" android:layout_weight="1"
+            android:layout_height="wrap_content" android:layout_marginStart="6dp" android:maxLines="1"
+            android:ellipsize="end" android:textSize="13sp" android:textStyle="bold" />
+        <TextView android:id="@+id/corner" android:layout_width="wrap_content"
+            android:layout_height="wrap_content" android:maxLines="1" android:textSize="12sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+    <!-- The rest centred under the header: no empty band below it. -->
+    <LinearLayout android:id="@+id/body" android:layout_width="match_parent" android:layout_height="0dp"
+        android:layout_weight="1" android:gravity="center_vertical" android:orientation="vertical">
+        <TextClock android:id="@+id/clock" android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:layout_marginTop="2dp" android:textSize="30sp" android:textStyle="bold" />
+        <ImageView android:id="@+id/art" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="6dp" android:adjustViewBounds="true" android:scaleType="fitCenter"
+            android:importantForAccessibility="no" />
+        <TextView android:id="@+id/big" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="4dp" android:maxLines="2" android:ellipsize="end" android:textSize="16sp"
+            android:textStyle="bold" />
+        <TextView android:id="@+id/line" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="2dp" android:maxLines="3" android:ellipsize="end" android:textSize="13sp" />
+        <LinearLayout android:id="@+id/r0" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="4dp" android:gravity="center_vertical" android:orientation="horizontal">
+            <ImageView android:id="@+id/rc0" android:layout_width="16dp" android:layout_height="16dp"
+                android:importantForAccessibility="no" />
+            <TextView android:id="@+id/rt0" android:layout_width="0dp" android:layout_weight="1"
+                android:layout_height="wrap_content" android:layout_marginStart="6dp" android:maxLines="1"
+                android:ellipsize="end" android:textSize="13sp" />
+            <TextView android:id="@+id/rv0" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:maxLines="1" android:ellipsize="end" android:textSize="12sp" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/r1" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="4dp" android:gravity="center_vertical" android:orientation="horizontal">
+            <ImageView android:id="@+id/rc1" android:layout_width="16dp" android:layout_height="16dp"
+                android:importantForAccessibility="no" />
+            <TextView android:id="@+id/rt1" android:layout_width="0dp" android:layout_weight="1"
+                android:layout_height="wrap_content" android:layout_marginStart="6dp" android:maxLines="1"
+                android:ellipsize="end" android:textSize="13sp" />
+            <TextView android:id="@+id/rv1" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:maxLines="1" android:ellipsize="end" android:textSize="12sp" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/r2" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="4dp" android:gravity="center_vertical" android:orientation="horizontal">
+            <ImageView android:id="@+id/rc2" android:layout_width="16dp" android:layout_height="16dp"
+                android:importantForAccessibility="no" />
+            <TextView android:id="@+id/rt2" android:layout_width="0dp" android:layout_weight="1"
+                android:layout_height="wrap_content" android:layout_marginStart="6dp" android:maxLines="1"
+                android:ellipsize="end" android:textSize="13sp" />
+            <TextView android:id="@+id/rv2" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:maxLines="1" android:ellipsize="end" android:textSize="12sp" />
+        </LinearLayout>
+        <ProgressBar android:id="@+id/progress" style="@android:style/Widget.ProgressBar.Horizontal"
+            android:layout_width="match_parent" android:layout_height="6dp" android:layout_marginTop="8dp"
+            android:max="1000" />
+        <TextView android:id="@+id/foot" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="4dp" android:maxLines="1" android:ellipsize="end" android:textSize="12sp" />
+    </LinearLayout>
+</LinearLayout>

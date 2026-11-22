@@ -1,3 +1,5 @@
+import '../../../app/shell/app_menu.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -5,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../home/presentation/home_sky.dart';
 import '../../../core/localization/generated/app_localizations.dart';
 import '../../../core/routing/app_routes.dart';
+import '../../../core/theme/app_spacing.dart';
 
 import '../../../core/routing/quran_location_routing.dart';
 import '../../../core/theme/components/components.dart';
@@ -60,6 +63,15 @@ class _QuranIndexScreenState extends ConsumerState<QuranIndexScreen>
       child: SkyBackdrop(
         child: Scaffold(
           appBar: TahfeezAppBar(
+            // ☰ where Home has it (owner, 2026-11-20): 16 from the edge.
+            leading: const Padding(
+              padding: EdgeInsetsDirectional.only(start: TahfeezSpacing.md),
+              child: Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: AppMenuButton(),
+              ),
+            ),
+            leadingWidth: 64,
             title: Text(AppLocalizations.of(context).quranTitle),
             centerTitle: false,
             actions: [

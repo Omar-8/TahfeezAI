@@ -21,6 +21,7 @@ import '../../recitation/application/hifz_controller.dart';
 import '../../recitation/application/mushaf_recitation_target.dart';
 import '../../recitation/application/recitation_session_controller.dart';
 import 'memorize_screen.dart' show ScorePair, ayahRangeLabel, surahNames;
+import '../../../core/theme/tahfeez_tones.dart';
 
 /// A session's results, after it ends — an overview: how many ayahs and how
 /// they went, memorization and tajweed, the strength before → after, and
@@ -314,7 +315,7 @@ class _VsLastBar extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              ColoredBox(color: scheme.surfaceContainerHighest),
+              ColoredBox(color: scheme.progressTrack),
               fill(then, scheme.onSurfaceVariant.withValues(alpha: 0.3)),
               TweenAnimationBuilder<double>(
                 tween: Tween(begin: then, end: now),

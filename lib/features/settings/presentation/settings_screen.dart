@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:file_picker/file_picker.dart';
 
 import '../../../core/sharing/image_sharer.dart';
@@ -14,6 +16,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../home/presentation/home_sky.dart';
 import '../../../core/core_providers.dart';
+import '../../../core/localization/clock_format.dart';
 import '../../../core/localization/generated/app_localizations.dart';
 import '../../../core/routing/app_routes.dart';
 import '../../../core/localization/locale_controller.dart';
@@ -51,10 +54,16 @@ import '../../listen/presentation/reciter_avatar.dart';
 import 'arabic_font_choices.dart';
 import 'theme_choices.dart';
 import '../../../quran/presentation/meaning_resource_names.dart';
-import '../../../core/ui/back_to_exit.dart';
 import '../../../core/ui/app_name_text.dart';
 import '../../../core/ui/animations_setting.dart';
 import '../../../core/theme/tahfeez_motion.dart';
+import '../../salawat/salawat_reminder.dart';
+import '../../athkar/application/athkar_reminder.dart';
+import '../../habits/application/habits_controller.dart';
+import '../../habits/domain/habit.dart' show HabitReminderKind;
+import '../../habits/domain/habit_catalog.dart';
+import '../../prayer/application/prayer_controller.dart';
+import '../../prayer/domain/prayer_times.dart';
 
 /// The Settings tab: the app's language and theme (the Quran page's own
 /// theme is chosen in the Mushaf, independently, so the two can be mixed).
@@ -124,10 +133,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         .watch(dailyReminderSchedulerProvider)
         .supported;
     final reminder = ref.watch(memorizationReminderProvider);
-    final reminderTime = TimeOfDay(
-      hour: reminder.minutes ~/ 60,
-      minute: reminder.minutes % 60,
-    );
 
     // Each section with the words it is found by (its options' names).
     // The most used at the top, the others below — every one collapsed to
@@ -168,381 +173,651 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       ));
     }
 
-    return BackToExit(
-      child: SkyBackdrop(
-        child: Scaffold(
-          appBar: TahfeezAppBar(
-            title: Text(l10n.settingsTitle),
-            centerTitle: false,
-          ),
-          body: Builder(
-            builder: (context) {
-              // Built afresh each time: this builder runs again on its own
-              // (the keyboard closing changes the bottom space), and every
-              // section added twice broke the list — the page frozen, the
-              // search field not tappable.
-              sections.clear();
-              // First: the welcome setup and its recitation demo, to see
-              // again (those who had the app before it never saw it).
-              sections.add((
-                collapsed: false,
-                words: [l10n.settingsSetupAgain, l10n.settingsSetupAgainSub],
-                widget: _SetupCard(onTap: () => showFirstRunSetup(context)),
-              ));
-              group(
-                l10n.settingsLanguage,
-                Icons.translate,
-                _LanguageRow(
-                  key: const ValueKey('settings-language'),
-                  code: locale?.languageCode ?? '',
-                  onChanged: (code) => ref
-                      .read(localeControllerProvider.notifier)
-                      .setLocale(code.isEmpty ? null : Locale(code)),
-                ),
-                words: [
+    // Opened from the side menu, over a tab: back returns to it.
+    return SkyBackdrop(
+      child: Scaffold(
+        appBar: TahfeezAppBar(
+          title: Text(l10n.settingsTitle),
+          centerTitle: false,
+        ),
+        body: Builder(
+          builder: (context) {
+            // Built afresh each time: this builder runs again on its own
+            // (the keyboard closing changes the bottom space), and every
+            // section added twice broke the list — the page frozen, the
+            // search field not tappable.
+            sections.clear();
+            // First: the welcome setup and its recitation demo, to see
+            // again (those who had the app before it never saw it).
+            sections.add((
+              collapsed: false,
+              words: [l10n.settingsSetupAgain, l10n.settingsSetupAgainSub],
+              widget: _SetupCard(onTap: () => showFirstRunSetup(context)),
+            ));
+            group(
+              l10n.settingsLanguage,
+              Icons.translate,
+              _LanguageRow(
+                key: const ValueKey('settings-language'),
+                code: locale?.languageCode ?? '',
+                onChanged: (code) => ref
+                    .read(localeControllerProvider.notifier)
+                    .setLocale(code.isEmpty ? null : Locale(code)),
+              ),
+              words: [
+                l10n.settingsLanguageSystem,
+                for (final (_, _, name) in kAppLanguages) name,
+              ],
+              summary:
+                  [
+                    for (final (code, _, name) in kAppLanguages)
+                      if (code == locale?.languageCode) name,
+                  ].firstOrNull ??
                   l10n.settingsLanguageSystem,
-                  for (final (_, _, name) in kAppLanguages) name,
-                ],
-                summary:
-                    [
-                      for (final (code, _, name) in kAppLanguages)
-                        if (code == locale?.languageCode) name,
-                    ].firstOrNull ??
-                    l10n.settingsLanguageSystem,
-              );
-              group(
-                l10n.settingsAppTheme,
-                Icons.palette_outlined,
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Wrap(
-                      key: const ValueKey('settings-app-theme'),
-                      spacing: TahfeezSpacing.sm,
-                      runSpacing: TahfeezSpacing.sm,
-                      children: [
-                        for (final choice in AppThemeChoice.values)
-                          ChoiceChip(
-                            avatar: choice == AppThemeChoice.system
-                                ? const Icon(Icons.brightness_auto_outlined)
-                                : ThemeSwatch(
-                                    paper: _paper(choice),
-                                    ink: _ink(choice),
-                                  ),
-                            label: Text(choice.label(l10n)),
-                            selected: choice == appTheme,
-                            showCheckmark: false,
-                            onSelected: (_) {
-                              ref
-                                  .read(themeModeControllerProvider.notifier)
-                                  .setThemeMode(choice.mode);
-                              ref
-                                  .read(appSurfaceToneProvider.notifier)
-                                  .setTone(choice.tone);
-                            },
-                          ),
-                      ],
-                    ),
-                    SwitchListTile(
-                      key: const ValueKey('settings-time-of-day'),
-                      contentPadding: EdgeInsets.zero,
-                      title: SearchText(l10n.settingsTimeOfDay),
-                      subtitle: SearchText(l10n.settingsTimeOfDaySub),
-                      value: ref.watch(homeSkyProvider),
-                      onChanged: (on) =>
-                          ref.read(homeSkyProvider.notifier).setEnabled(on),
-                    ),
-                    SwitchListTile(
-                      key: const ValueKey('settings-animations'),
-                      contentPadding: EdgeInsets.zero,
-                      title: SearchText(l10n.settingsAnimations),
-                      subtitle: SearchText(l10n.settingsAnimationsSub),
-                      value: ref.watch(animationsProvider),
-                      onChanged: (on) =>
-                          ref.read(animationsProvider.notifier).setEnabled(on),
-                    ),
-                  ],
-                ),
-                words: [
-                  for (final c in AppThemeChoice.values) c.label(l10n),
-                  l10n.settingsTimeOfDay,
-                  l10n.settingsTimeOfDaySub,
-                  l10n.settingsAnimations,
-                  l10n.settingsAnimationsSub,
-                ],
-                summary: appTheme.label(l10n),
-              );
-              group(
-                l10n.settingsArabicFont,
-                Icons.font_download_outlined,
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  spacing: TahfeezSpacing.smPlus,
-                  children: [
-                    const ArabicFontChoices(),
-                    Text(
-                      'مساء الخير · آية اليوم · متابعة القراءة',
-                      textDirection: TextDirection.rtl,
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        fontFamily: arabicFont.family,
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-                words: [for (final f in ArabicUiFont.values) f.arabicName],
-                summary: arabicFont.arabicName,
-                collapsed: true,
-              );
-              group(
-                l10n.readerTranslationTafsir,
-                Icons.translate_outlined,
-                const _MeaningSettings(),
-                words: [
-                  l10n.searchTranslations,
-                  l10n.readerTafsir,
-                  l10n.settingsTransliteration,
-                ],
-                summary: _meaningSummary(ref, l10n),
-              );
-              group(
-                l10n.settingsRecitation,
-                Icons.mic_none_rounded,
-                // Also in the Mushaf's Hifz settings.
-                SwitchListTile(
-                  key: const ValueKey('settings-sajdah-reminder'),
-                  contentPadding: EdgeInsets.zero,
-                  title: SearchText(l10n.sajdahReminder),
-                  subtitle: SearchText(l10n.sajdahReminderSub),
-                  value: ref.watch(
-                    hifzSettingsProvider.select((s) => s.sajdahReminder),
+            );
+            // 12- or 24-hour, everywhere (owner, 2026-11-22).
+            group(
+              l10n.settingsTimeFormat,
+              Icons.schedule,
+              SegmentedButton<ClockFormat>(
+                key: const ValueKey('settings-time-format'),
+                showSelectedIcon: false,
+                segments: [
+                  ButtonSegment(
+                    value: ClockFormat.system,
+                    label: Text(l10n.settingsTimeFormatSystem),
                   ),
-                  onChanged: (on) => ref
-                      .read(hifzSettingsProvider.notifier)
-                      .update(
-                        ref
-                            .read(hifzSettingsProvider)
-                            .copyWith(sajdahReminder: on),
-                      ),
-                ),
-                words: [l10n.sajdahReminder, l10n.sajdahReminderSub],
-                summary:
-                    '${l10n.sajdahReminder}: ${ref.watch(hifzSettingsProvider.select((s) => s.sajdahReminder)) ? l10n.commonOn : l10n.commonOff}',
-                collapsed: true,
-              );
-              group(
-                l10n.listenTitle,
-                Icons.headphones_outlined,
-                const _ListenSettings(),
-                words: [
-                  l10n.listenReciter,
-                  if (ref.read(reciterDownloadsProvider.notifier).supported)
-                    l10n.listenDownload,
-                  l10n.listenSearchReciters,
+                  ButtonSegment(
+                    value: ClockFormat.h12,
+                    label: Text(l10n.settingsTimeFormat12),
+                  ),
+                  ButtonSegment(
+                    value: ClockFormat.h24,
+                    label: Text(l10n.settingsTimeFormat24),
+                  ),
                 ],
-                summary: reciterName(
-                  context,
-                  reciterFor(ref.watch(reciterProvider)),
+                selected: {ref.watch(clockFormatProvider)},
+                onSelectionChanged: (s) => unawaited(
+                  ref.read(clockFormatProvider.notifier).set(s.first),
                 ),
-                summaryLeading: ReciterAvatar(
-                  reciter: reciterFor(ref.watch(reciterProvider)),
-                  size: 20,
-                ),
-              );
-              if (reminderSupported) {
-                group(
-                  l10n.memReminderTitle,
-                  Icons.notifications_outlined,
-                  Column(
+              ),
+              words: [
+                l10n.settingsTimeFormatSystem,
+                l10n.settingsTimeFormat12,
+                l10n.settingsTimeFormat24,
+              ],
+              summary: switch (ref.watch(clockFormatProvider)) {
+                ClockFormat.system => l10n.settingsTimeFormatSystem,
+                ClockFormat.h12 => l10n.settingsTimeFormat12,
+                ClockFormat.h24 => l10n.settingsTimeFormat24,
+              },
+            );
+            group(
+              l10n.settingsAppTheme,
+              Icons.palette_outlined,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Wrap(
+                    key: const ValueKey('settings-app-theme'),
+                    spacing: TahfeezSpacing.sm,
+                    runSpacing: TahfeezSpacing.sm,
                     children: [
-                      SwitchListTile(
-                        key: const ValueKey('settings-reminder'),
-                        contentPadding: EdgeInsets.zero,
-                        title: SearchText(l10n.memReminderSwitch),
-                        subtitle: Text(
-                          l10n.memReminderAt(reminderTime.format(context)),
+                      for (final choice in AppThemeChoice.values)
+                        ChoiceChip(
+                          avatar: choice == AppThemeChoice.system
+                              ? const Icon(Icons.brightness_auto_outlined)
+                              : ThemeSwatch(
+                                  paper: _paper(choice),
+                                  ink: _ink(choice),
+                                ),
+                          label: Text(choice.label(l10n)),
+                          selected: choice == appTheme,
+                          showCheckmark: false,
+                          onSelected: (_) {
+                            ref
+                                .read(themeModeControllerProvider.notifier)
+                                .setThemeMode(choice.mode);
+                            ref
+                                .read(appSurfaceToneProvider.notifier)
+                                .setTone(choice.tone);
+                          },
                         ),
-                        value: reminder.enabled,
-                        onChanged: (on) async {
-                          final messenger = ScaffoldMessenger.of(context);
-                          final done = await ref
-                              .read(memorizationReminderProvider.notifier)
-                              .setEnabled(on);
-                          if (!done) {
-                            messenger.showSnackBar(
-                              SnackBar(content: Text(l10n.memReminderDenied)),
-                            );
-                          }
-                        },
-                      ),
-                      ListTile(
-                        key: const ValueKey('settings-reminder-time'),
-                        contentPadding: EdgeInsets.zero,
-                        enabled: reminder.enabled,
-                        leading: const Icon(Icons.schedule),
-                        title: SearchText(l10n.memReminderTime),
-                        trailing: Text(reminderTime.format(context)),
-                        onTap: () async {
-                          final picked = await showTimePicker(
-                            context: context,
-                            initialTime: reminderTime,
-                          );
-                          if (picked == null) return;
-                          await ref
-                              .read(memorizationReminderProvider.notifier)
-                              .setTime(picked.hour * 60 + picked.minute);
-                        },
-                      ),
                     ],
                   ),
-                  words: [l10n.memReminderSwitch, l10n.memReminderTime],
-                  summary: reminder.enabled
-                      ? l10n.memReminderAt(reminderTime.format(context))
-                      : l10n.commonOff,
-                  collapsed: true,
-                );
+                  SwitchListTile(
+                    key: const ValueKey('settings-time-of-day'),
+                    contentPadding: EdgeInsets.zero,
+                    title: SearchText(l10n.settingsTimeOfDay),
+                    subtitle: SearchText(l10n.settingsTimeOfDaySub),
+                    value: ref.watch(homeSkyProvider),
+                    onChanged: (on) =>
+                        ref.read(homeSkyProvider.notifier).setEnabled(on),
+                  ),
+                  SwitchListTile(
+                    key: const ValueKey('settings-animations'),
+                    contentPadding: EdgeInsets.zero,
+                    title: SearchText(l10n.settingsAnimations),
+                    subtitle: SearchText(l10n.settingsAnimationsSub),
+                    value: ref.watch(animationsProvider),
+                    onChanged: (on) =>
+                        ref.read(animationsProvider.notifier).setEnabled(on),
+                  ),
+                ],
+              ),
+              words: [
+                for (final c in AppThemeChoice.values) c.label(l10n),
+                l10n.settingsTimeOfDay,
+                l10n.settingsTimeOfDaySub,
+                l10n.settingsAnimations,
+                l10n.settingsAnimationsSub,
+              ],
+              summary: appTheme.label(l10n),
+            );
+            group(
+              l10n.settingsArabicFont,
+              Icons.font_download_outlined,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                spacing: TahfeezSpacing.smPlus,
+                children: [
+                  const ArabicFontChoices(),
+                  Text(
+                    'مساء الخير · آية اليوم · متابعة القراءة',
+                    textDirection: TextDirection.rtl,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      fontFamily: arabicFont.family,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+              words: [for (final f in ArabicUiFont.values) f.arabicName],
+              summary: arabicFont.arabicName,
+              collapsed: true,
+            );
+            group(
+              l10n.readerTranslationTafsir,
+              Icons.translate_outlined,
+              const _MeaningSettings(),
+              words: [
+                l10n.searchTranslations,
+                l10n.readerTafsir,
+                l10n.settingsTransliteration,
+              ],
+              summary: _meaningSummary(ref, l10n),
+            );
+            group(
+              l10n.settingsRecitation,
+              Icons.mic_none_rounded,
+              // Also in the Mushaf's Hifz settings.
+              SwitchListTile(
+                key: const ValueKey('settings-sajdah-reminder'),
+                contentPadding: EdgeInsets.zero,
+                title: SearchText(l10n.sajdahReminder),
+                subtitle: SearchText(l10n.sajdahReminderSub),
+                value: ref.watch(
+                  hifzSettingsProvider.select((s) => s.sajdahReminder),
+                ),
+                onChanged: (on) => ref
+                    .read(hifzSettingsProvider.notifier)
+                    .update(
+                      ref
+                          .read(hifzSettingsProvider)
+                          .copyWith(sajdahReminder: on),
+                    ),
+              ),
+              words: [l10n.sajdahReminder, l10n.sajdahReminderSub],
+              summary:
+                  '${l10n.sajdahReminder}: ${ref.watch(hifzSettingsProvider.select((s) => s.sajdahReminder)) ? l10n.commonOn : l10n.commonOff}',
+              collapsed: true,
+            );
+            group(
+              l10n.listenTitle,
+              Icons.headphones_outlined,
+              const _ListenSettings(),
+              words: [
+                l10n.listenReciter,
+                if (ref.read(reciterDownloadsProvider.notifier).supported)
+                  l10n.listenDownload,
+                l10n.listenSearchReciters,
+              ],
+              summary: reciterName(
+                context,
+                reciterFor(ref.watch(reciterProvider)),
+              ),
+              summaryLeading: ReciterAvatar(
+                reciter: reciterFor(ref.watch(reciterProvider)),
+                size: 20,
+              ),
+            );
+            // Every notification the app sends, each on or off at its
+            // time (owner, 2026-11-21): the daily reminder, the khatmah's,
+            // the morning and evening athkar.
+            if (reminderSupported) {
+              final khatmah = ref.watch(khatmahReminderProvider);
+              final athkar = ref.watch(athkarReminderProvider);
+              final morning = athkar[AthkarTime.morning]!;
+              final evening = athkar[AthkarTime.evening]!;
+              final messenger = ScaffoldMessenger.of(context);
+              void denied(bool done) {
+                if (!done) {
+                  messenger.showSnackBar(
+                    SnackBar(content: Text(l10n.memReminderDenied)),
+                  );
+                }
               }
+
+              final on = [
+                if (reminder.enabled) l10n.memTitle,
+                if (khatmah.enabled) l10n.khatmahTitle,
+                if (morning.enabled) l10n.athkarMorningTitle,
+                if (evening.enabled) l10n.athkarEveningTitle,
+                for (final h in ref.watch(habitsProvider).habits)
+                  if (h.remindersOn && h.reminders.isNotEmpty)
+                    habitName(l10n, h),
+                if (ref.watch(prayerSettingsProvider).notify.isNotEmpty)
+                  l10n.prayerTitle,
+              ];
               group(
-                l10n.settingsBackupTitle,
-                Icons.save_alt_rounded,
+                l10n.settingsNotifications,
+                Icons.notifications_outlined,
                 Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    ListTile(
-                      key: const ValueKey('settings-export'),
-                      contentPadding: EdgeInsets.zero,
-                      leading: const Icon(Icons.upload_file_rounded),
-                      title: SearchText(l10n.settingsExportTitle),
-                      subtitle: SearchText(l10n.settingsExportSub),
-                      onTap: () => _export(context, ref),
+                    // The Quran's reminders, then the athkar's, then the
+                    // habits', each in one entry that opens (owner,
+                    // 2026-11-22: not crowding the group).
+                    _ReminderFold(
+                      keyName: 'reading',
+                      open: searching,
+                      icon: Icons.auto_stories_outlined,
+                      title: l10n.settingsReadingReminders,
+                      on: [
+                        if (reminder.enabled) l10n.memTitle,
+                        if (khatmah.enabled) l10n.khatmahTitle,
+                      ],
+                      children: [
+                        _NotificationRow(
+                          keyName: 'reminder',
+                          icon: Icons.school_outlined,
+                          heading: l10n.memTitle,
+                          title: l10n.memReminderSwitch,
+                          enabled: reminder.enabled,
+                          minutes: reminder.minutes,
+                          onEnabled: (v) async => denied(
+                            await ref
+                                .read(memorizationReminderProvider.notifier)
+                                .setEnabled(v),
+                          ),
+                          onTime: (m) => ref
+                              .read(memorizationReminderProvider.notifier)
+                              .setTime(m),
+                        ),
+                        _NotificationRow(
+                          keyName: 'khatmah-reminder',
+                          icon: Icons.menu_book_outlined,
+                          heading: l10n.khatmahTitle,
+                          title: l10n.khatmahReminderSwitch,
+                          enabled: khatmah.enabled,
+                          minutes: khatmah.minutes,
+                          onEnabled: (v) async => denied(
+                            await ref
+                                .read(khatmahReminderProvider.notifier)
+                                .setEnabled(v),
+                          ),
+                          onTime: (m) => ref
+                              .read(khatmahReminderProvider.notifier)
+                              .setTime(m),
+                        ),
+                      ],
                     ),
-                    ListTile(
-                      key: const ValueKey('settings-import'),
-                      contentPadding: EdgeInsets.zero,
-                      leading: const Icon(Icons.download_rounded),
-                      title: SearchText(l10n.settingsImportTitle),
-                      subtitle: SearchText(l10n.settingsImportSub),
-                      onTap: () => _import(context, ref),
+                    _ReminderFold(
+                      keyName: 'athkar',
+                      open: searching,
+                      icon: Icons.record_voice_over_outlined,
+                      title: l10n.athkarTitle,
+                      on: [
+                        if (morning.enabled) l10n.athkarMorningTitle,
+                        if (evening.enabled) l10n.athkarEveningTitle,
+                      ],
+                      children: [
+                        for (final (t, setting, icon, title) in [
+                          (
+                            AthkarTime.morning,
+                            morning,
+                            Icons.wb_sunny_outlined,
+                            l10n.athkarMorningTitle,
+                          ),
+                          (
+                            AthkarTime.evening,
+                            evening,
+                            Icons.nights_stay_outlined,
+                            l10n.athkarEveningTitle,
+                          ),
+                        ])
+                          _NotificationRow(
+                            keyName: 'athkar-${t.name}',
+                            icon: icon,
+                            heading: l10n.athkarTitle,
+                            title: title,
+                            enabled: setting.enabled,
+                            minutes: setting.minutes,
+                            onEnabled: (v) async => denied(
+                              await ref
+                                  .read(athkarReminderProvider.notifier)
+                                  .setEnabled(t, v),
+                            ),
+                            onTime: (m) => ref
+                                .read(athkarReminderProvider.notifier)
+                                .setTime(t, m),
+                          ),
+                      ],
                     ),
+                    // The prayers' (owner, 2026-11-21): set on prayer
+                    // times' own page.
                     ListTile(
-                      key: const ValueKey('settings-reset'),
+                      key: const ValueKey('settings-prayer'),
                       contentPadding: EdgeInsets.zero,
-                      leading: Icon(
-                        Icons.delete_forever_outlined,
-                        color: theme.colorScheme.error,
+                      leading: const Icon(Icons.mosque_outlined),
+                      title: Text(l10n.prayerTitle),
+                      subtitle: Text(
+                        ref.watch(prayerSettingsProvider).notify.isEmpty
+                            ? l10n.commonOff
+                            : [
+                                for (final p in Prayer.values)
+                                  if (ref
+                                      .watch(prayerSettingsProvider)
+                                      .notify
+                                      .contains(p))
+                                    prayerName(l10n, p),
+                              ].join(' · '),
                       ),
-                      title: SearchText(
-                        l10n.settingsResetTitle,
-                        style: TextStyle(color: theme.colorScheme.error),
-                      ),
-                      subtitle: SearchText(l10n.settingsResetSub),
-                      onTap: () => _confirmReset(context, ref),
+                      trailing: const Icon(Icons.chevron_right_rounded),
+                      onTap: () => context.push(AppRoutes.prayer),
                     ),
+                    if (ref
+                            .watch(habitsProvider)
+                            .habits
+                            .where((h) => h.reminders.isNotEmpty)
+                            .toList()
+                        case final withReminders when withReminders.isNotEmpty)
+                      _ReminderFold(
+                        keyName: 'habits',
+                        open: searching,
+                        icon: Icons.event_available_outlined,
+                        title: l10n.habitsTitle,
+                        on: [
+                          for (final h in withReminders)
+                            if (h.remindersOn) habitName(l10n, h),
+                        ],
+                        children: [
+                          // Each habit: its switch, then each reminder's
+                          // time to change (owner, 2026-11-22).
+                          for (final h in withReminders) ...[
+                            SwitchListTile(
+                              key: ValueKey('settings-habit-${h.id}'),
+                              contentPadding: EdgeInsets.zero,
+                              secondary: Icon(habitIcon(h)),
+                              title: Text(habitName(l10n, h)),
+                              subtitle: h.remindersOn
+                                  ? null
+                                  : Text(
+                                      [
+                                        for (final r in h.reminders)
+                                          TimeOfDay(
+                                            hour: r.minutes ~/ 60,
+                                            minute: r.minutes % 60,
+                                          ).format(context),
+                                      ].join(' · '),
+                                    ),
+                              value: h.remindersOn,
+                              onChanged: (v) async {
+                                if (v &&
+                                    !await ref
+                                        .read(dailyReminderSchedulerProvider)
+                                        .requestPermission()) {
+                                  denied(false);
+                                  return;
+                                }
+                                ref
+                                    .read(habitsProvider.notifier)
+                                    .update(h.copyWith(remindersOn: v));
+                              },
+                            ),
+                            if (h.remindersOn)
+                              for (final (i, r) in h.reminders.indexed)
+                                ListTile(
+                                  key: ValueKey(
+                                    'settings-habit-${h.id}-time-$i',
+                                  ),
+                                  contentPadding:
+                                      const EdgeInsetsDirectional.only(
+                                        start: 40,
+                                      ),
+                                  leading: const Icon(Icons.schedule),
+                                  title: Text(switch (r.kind) {
+                                    HabitReminderKind.fastTomorrow =>
+                                      l10n.habitsReminderEveningBefore,
+                                    HabitReminderKind.suhoor =>
+                                      l10n.habitsReminderSuhoor,
+                                    HabitReminderKind.reminder =>
+                                      l10n.memReminderTime,
+                                  }),
+                                  trailing: Text(
+                                    TimeOfDay(
+                                      hour: r.minutes ~/ 60,
+                                      minute: r.minutes % 60,
+                                    ).format(context),
+                                  ),
+                                  onTap: () async {
+                                    final picked = await showTimePicker(
+                                      context: context,
+                                      initialTime: TimeOfDay(
+                                        hour: r.minutes ~/ 60,
+                                        minute: r.minutes % 60,
+                                      ),
+                                    );
+                                    if (picked == null) return;
+                                    final now = ref
+                                        .read(habitsProvider)
+                                        .habit(h.id);
+                                    if (now == null) return;
+                                    ref
+                                        .read(habitsProvider.notifier)
+                                        .update(
+                                          now.copyWith(
+                                            reminders: [
+                                              for (final (k, x)
+                                                  in now.reminders.indexed)
+                                                k == i
+                                                    ? x.withMinutes(
+                                                        picked.hour * 60 +
+                                                            picked.minute,
+                                                      )
+                                                    : x,
+                                            ],
+                                          ),
+                                        );
+                                  },
+                                ),
+                          ],
+                        ],
+                      ),
                   ],
                 ),
                 words: [
-                  l10n.settingsExportTitle,
-                  l10n.settingsImportTitle,
-                  l10n.settingsResetTitle,
-                  l10n.settingsResetSub,
+                  l10n.settingsReadingReminders,
+                  l10n.habitsTitle,
+                  l10n.memReminderTitle,
+                  l10n.memReminderSwitch,
+                  l10n.memReminderTime,
+                  l10n.khatmahReminderSwitch,
+                  l10n.athkarTitle,
+                  l10n.athkarMorningTitle,
+                  l10n.athkarEveningTitle,
                 ],
+                summary: on.isEmpty ? l10n.commonOff : on.join(' · '),
                 collapsed: true,
               );
-              sections.add((
-                collapsed: true,
-                words: [
-                  l10n.appName,
-                  'GitHub',
-                  l10n.settingsRate,
-                  l10n.settingsShare,
-                  l10n.settingsCheckUpdates,
-                  l10n.settingsUpdateOffers,
-                  l10n.aboutTitle,
-                  l10n.aboutSubtitle,
-                  l10n.privacyTitle,
-                  l10n.settingsReport,
+            }
+            group(
+              l10n.salawatSettingTitle,
+              Icons.favorite_outline_rounded,
+              SwitchListTile(
+                key: const ValueKey('settings-salawat'),
+                contentPadding: EdgeInsets.zero,
+                title: SearchText(l10n.salawatSettingSwitch),
+                value: ref.watch(salawatReminderProvider),
+                onChanged: (on) =>
+                    ref.read(salawatReminderProvider.notifier).setEnabled(on),
+              ),
+              words: [l10n.salawatSettingTitle, l10n.salawatSettingSwitch],
+              summary: ref.watch(salawatReminderProvider)
+                  ? l10n.commonOn
+                  : l10n.commonOff,
+              collapsed: true,
+            );
+            group(
+              l10n.settingsBackupTitle,
+              Icons.save_alt_rounded,
+              Column(
+                children: [
+                  ListTile(
+                    key: const ValueKey('settings-export'),
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.upload_file_rounded),
+                    title: SearchText(l10n.settingsExportTitle),
+                    subtitle: SearchText(l10n.settingsExportSub),
+                    onTap: () => _export(context, ref),
+                  ),
+                  ListTile(
+                    key: const ValueKey('settings-import'),
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.download_rounded),
+                    title: SearchText(l10n.settingsImportTitle),
+                    subtitle: SearchText(l10n.settingsImportSub),
+                    onTap: () => _import(context, ref),
+                  ),
+                  ListTile(
+                    key: const ValueKey('settings-reset'),
+                    contentPadding: EdgeInsets.zero,
+                    leading: Icon(
+                      Icons.delete_forever_outlined,
+                      color: theme.colorScheme.error,
+                    ),
+                    title: SearchText(
+                      l10n.settingsResetTitle,
+                      style: TextStyle(color: theme.colorScheme.error),
+                    ),
+                    subtitle: SearchText(l10n.settingsResetSub),
+                    onTap: () => _confirmReset(context, ref),
+                  ),
                 ],
-                // Last: the app — its version, source code, rating, sharing,
-                // updates, and its sources.
-                widget: TahfeezCollapsibleSection(
-                  key: const ValueKey('settings-group-about'),
-                  title: l10n.aboutTitle,
-                  icon: Icons.info_outline_rounded,
-                  open: searching,
-                  child: const _AboutApp(),
-                ),
-              ));
-              final query = _fold(_query.trim());
-              final shown = [
-                for (final collapsed in [false, true])
-                  for (final section in sections)
-                    if (section.collapsed == collapsed &&
-                        (query.isEmpty ||
-                            section.words.any((w) => _fold(w).contains(query))))
-                      section.widget,
-              ];
-              // Rows compact (dense list tiles); chips and switches keep
-              // their 48 × 48 to tap (a compact density shrank them to 40).
-              return SettingsSearchScope(
-                query: query,
-                child: ListTileTheme(
-                  dense: true,
-                  minVerticalPadding: 2,
-                  child: ListView(
-                    key: _listKey,
-                    padding: withBarSpace(
-                      context,
-                      const EdgeInsets.fromLTRB(
-                        TahfeezSpacing.md,
-                        TahfeezSpacing.sm,
-                        TahfeezSpacing.md,
-                        TahfeezSpacing.md,
+              ),
+              words: [
+                l10n.settingsExportTitle,
+                l10n.settingsImportTitle,
+                l10n.settingsResetTitle,
+                l10n.settingsResetSub,
+              ],
+              collapsed: true,
+            );
+            sections.add((
+              collapsed: true,
+              words: [
+                l10n.appName,
+                'GitHub',
+                l10n.settingsRate,
+                l10n.settingsShare,
+                l10n.settingsCheckUpdates,
+                l10n.settingsUpdateOffers,
+                l10n.aboutTitle,
+                l10n.aboutSubtitle,
+                l10n.privacyTitle,
+                l10n.settingsReport,
+              ],
+              // Last: the app — its version, source code, rating, sharing,
+              // updates, and its sources.
+              widget: TahfeezCollapsibleSection(
+                key: const ValueKey('settings-group-about'),
+                title: l10n.aboutTitle,
+                icon: Icons.info_outline_rounded,
+                open: searching,
+                child: const _AboutApp(),
+              ),
+            ));
+            final query = _fold(_query.trim());
+            final shown = [
+              for (final collapsed in [false, true])
+                for (final section in sections)
+                  if (section.collapsed == collapsed &&
+                      (query.isEmpty ||
+                          section.words.any((w) => _fold(w).contains(query))))
+                    section.widget,
+            ];
+            // Rows compact (dense list tiles); chips and switches keep
+            // their 48 × 48 to tap (a compact density shrank them to 40).
+            return SettingsSearchScope(
+              query: query,
+              child: ListTileTheme(
+                dense: true,
+                minVerticalPadding: 2,
+                child: ListView(
+                  key: _listKey,
+                  padding: withBarSpace(
+                    context,
+                    const EdgeInsets.fromLTRB(
+                      TahfeezSpacing.md,
+                      TahfeezSpacing.sm,
+                      TahfeezSpacing.md,
+                      TahfeezSpacing.md,
+                    ),
+                  ),
+                  children: [
+                    // Glass, as the groups below it.
+                    TahfeezGlassSurface(
+                      borderRadius: BorderRadius.circular(TahfeezRadii.pill),
+                      blur: false,
+                      child: TextField(
+                        key: const ValueKey('settings-search'),
+                        onChanged: _search,
+                        textInputAction: TextInputAction.search,
+                        textAlignVertical: TextAlignVertical.center,
+                        decoration: InputDecoration(
+                          prefixIcon: const Icon(Icons.search_rounded),
+                          hintText: l10n.settingsSearchHint,
+                          isDense: true,
+                          // 48 high: a tap target's least.
+                          constraints: const BoxConstraints(minHeight: 48),
+                          border: InputBorder.none,
+                          // Centred by `textAlignVertical`, not by
+                          // paddings (the web's line metrics differ).
+                          contentPadding: EdgeInsets.zero,
+                        ),
                       ),
                     ),
-                    children: [
-                      // Glass, as the groups below it.
-                      TahfeezGlassSurface(
-                        borderRadius: BorderRadius.circular(TahfeezRadii.pill),
-                        blur: false,
-                        child: TextField(
-                          key: const ValueKey('settings-search'),
-                          onChanged: _search,
-                          textInputAction: TextInputAction.search,
-                          textAlignVertical: TextAlignVertical.center,
-                          decoration: InputDecoration(
-                            prefixIcon: const Icon(Icons.search_rounded),
-                            hintText: l10n.settingsSearchHint,
-                            isDense: true,
-                            // 48 high: a tap target's least.
-                            constraints: const BoxConstraints(minHeight: 48),
-                            border: InputBorder.none,
-                            // Centred by `textAlignVertical`, not by
-                            // paddings (the web's line metrics differ).
-                            contentPadding: EdgeInsets.zero,
+                    const SizedBox(height: TahfeezSpacing.md),
+                    if (shown.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.all(TahfeezSpacing.lg),
+                        child: Text(
+                          l10n.settingsNoMatch,
+                          textAlign: TextAlign.center,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ),
-                      const SizedBox(height: TahfeezSpacing.md),
-                      if (shown.isEmpty)
-                        Padding(
-                          padding: const EdgeInsets.all(TahfeezSpacing.lg),
-                          child: Text(
-                            l10n.settingsNoMatch,
-                            textAlign: TextAlign.center,
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ),
-                      for (var i = 0; i < shown.length; i++) ...[
-                        if (i > 0) const SizedBox(height: TahfeezSpacing.md),
-                        shown[i],
-                      ],
+                    for (var i = 0; i < shown.length; i++) ...[
+                      if (i > 0) const SizedBox(height: TahfeezSpacing.md),
+                      shown[i],
                     ],
-                  ),
+                  ],
                 ),
-              );
-            },
-          ),
+              ),
+            );
+          },
         ),
       ),
     );
@@ -744,7 +1019,8 @@ Future<void> _import(BuildContext context, WidgetRef ref) async {
     ref
       ..invalidate(memorizationReminderProvider)
       ..invalidate(khatmahProvider)
-      ..invalidate(khatmahReminderProvider);
+      ..invalidate(khatmahReminderProvider)
+      ..invalidate(athkarReminderProvider);
   }
   // Started over (Android closes, the web reloads, iOS asks to reopen):
   // what the app read before must not be saved over the backup (2026-11-15).
@@ -1106,6 +1382,114 @@ class _SetupCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// One notification in Settings → Notifications: what it is for, its
+/// switch, and its time (once on).
+/// Reminders of one kind in one entry that opens (owner, 2026-11-22): its
+/// title, which of them are on (else "Off"), and their rows. Open while
+/// Settings is searched ([open]), so what matches shows.
+class _ReminderFold extends StatelessWidget {
+  const _ReminderFold({
+    required this.keyName,
+    required this.open,
+    required this.icon,
+    required this.title,
+    required this.on,
+    required this.children,
+  });
+
+  /// Its key: `settings-$keyName`.
+  final String keyName;
+  final bool open;
+  final IconData icon;
+  final String title;
+  final List<String> on;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) => KeyedSubtree(
+    // (A new tile when searching starts or ends: opened or closed again.)
+    key: ValueKey('$keyName-$open'),
+    child: ExpansionTile(
+      key: ValueKey('settings-$keyName'),
+      initiallyExpanded: open,
+      tilePadding: EdgeInsets.zero,
+      childrenPadding: const EdgeInsetsDirectional.only(
+        start: TahfeezSpacing.md,
+      ),
+      leading: Icon(icon),
+      title: Text(title),
+      subtitle: Text(
+        on.isEmpty ? AppLocalizations.of(context).commonOff : on.join(' · '),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+      children: children,
+    ),
+  );
+}
+
+class _NotificationRow extends StatelessWidget {
+  const _NotificationRow({
+    required this.keyName,
+    required this.icon,
+    required this.heading,
+    required this.title,
+    required this.enabled,
+    required this.minutes,
+    required this.onEnabled,
+    required this.onTime,
+  });
+
+  /// Its keys: `settings-$keyName` (its switch), `…-time`.
+  final String keyName;
+  final IconData icon;
+  final String heading, title;
+  final bool enabled;
+  final int minutes;
+  final Future<void> Function(bool) onEnabled;
+  final Future<void> Function(int) onTime;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final time = TimeOfDay(hour: minutes ~/ 60, minute: minutes % 60);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SwitchListTile(
+          key: ValueKey('settings-$keyName'),
+          contentPadding: EdgeInsets.zero,
+          secondary: Icon(icon),
+          title: SearchText(title),
+          subtitle: Text(
+            enabled
+                ? '$heading · ${l10n.memReminderAt(time.format(context))}'
+                : heading,
+          ),
+          value: enabled,
+          onChanged: onEnabled,
+        ),
+        if (enabled)
+          ListTile(
+            key: ValueKey('settings-$keyName-time'),
+            contentPadding: const EdgeInsetsDirectional.only(start: 40),
+            leading: const Icon(Icons.schedule),
+            title: Text(l10n.memReminderTime),
+            trailing: Text(time.format(context)),
+            onTap: () async {
+              final picked = await showTimePicker(
+                context: context,
+                initialTime: time,
+              );
+              if (picked == null) return;
+              await onTime(picked.hour * 60 + picked.minute);
+            },
+          ),
+      ],
     );
   }
 }

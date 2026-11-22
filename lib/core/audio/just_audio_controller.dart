@@ -195,11 +195,22 @@ class JustAudioController implements AudioController, MediaSessionTarget {
   /// A new run: its items, their lengths measured in the background — a
   /// downloaded file's from its size, a streamed one's from the size the
   /// server gives (constant-bitrate recitation files), a few at a time.
-  void _begin(List<String> urls, List<AudioItemInfo?> items) {
+  void _begin(
+    List<String> urls,
+    List<AudioItemInfo?> items, {
+    List<AudioClip?>? clips,
+  }) {
     final run = ++_run;
     _urls = urls;
     _items = items;
-    _measured = List<int?>.filled(urls.length, null);
+    // A clip's length is known: no need to measure its file.
+    _measured = [
+      for (var i = 0; i < urls.length; i++)
+        switch (clips != null && i < clips.length ? clips[i] : null) {
+          final AudioClip c => (c.end - c.start).inMilliseconds,
+          null => null,
+        },
+    ];
     _loaded = List<int?>.filled(urls.length, null);
     if (_session == null || urls.length < 2) return;
     unawaited(_measure(run));
@@ -217,7 +228,7 @@ class JustAudioController implements AudioController, MediaSessionTarget {
       while (run == _run && next < _urls.length) {
         final i = next++;
         final kbps = _items[i]?.kbps;
-        if (kbps == null) continue;
+        if (kbps == null || _measured[i] != null) continue;
         final url = _urls[i];
         int? bytes;
         if (url.startsWith('file:')) {
@@ -316,15 +327,34 @@ class JustAudioController implements AudioController, MediaSessionTarget {
   Future<void> playQueue(
     List<String> urls, {
     List<AudioItemInfo>? items,
+    List<AudioClip?>? clips,
   }) async {
-    _begin(urls, [
-      for (var i = 0; i < urls.length; i++)
-        items != null && i < items.length ? items[i] : null,
-    ]);
+    AudioClip? clipAt(int i) =>
+        clips != null && i < clips.length ? clips[i] : null;
+    _begin(
+      urls,
+      [
+        for (var i = 0; i < urls.length; i++)
+          items != null && i < items.length ? items[i] : null,
+      ],
+      clips: [for (var i = 0; i < urls.length; i++) clipAt(i)],
+    );
     final player = await _playerForNewSource();
     await player.setAudioSources([
       for (var i = 0; i < urls.length; i++)
-        _source(urls[i], items != null && i < items.length ? items[i] : null),
+        switch ((
+          _source(urls[i], items != null && i < items.length ? items[i] : null),
+          clipAt(i),
+        )) {
+          // An ayah of a whole surah's recording.
+          (final child, final AudioClip clip) => ClippingAudioSource(
+            child: child,
+            start: clip.start,
+            end: clip.end,
+            tag: child.tag,
+          ),
+          (final child, null) => child,
+        },
     ]);
     _listenIfNew();
     await _play(player);

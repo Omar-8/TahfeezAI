@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/scheduler.dart' show SchedulerBinding;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -9,6 +11,7 @@ import '../../../core/storage/storage_providers.dart';
 import '../../../memorization/application/memorization_today.dart'
     show memorizationClockProvider;
 import '../domain/khatmah.dart';
+import '../../quran/application/quran_index_providers.dart';
 import 'khatmah_controller.dart';
 
 const _enabledKey = 'khatmah.reminder_enabled';
@@ -62,10 +65,19 @@ class KhatmahReminderController extends Notifier<KhatmahReminder> {
     if (enabled) await _reschedule();
   }
 
+  /// A tap on it: the Mushaf at today's first page not read (over Home,
+  /// back returns there) — read at once (owner, 2026-11-21); today's done,
+  /// or none, Home.
   void _openHome() {
     // After the first frame: the router may not be built yet at launch.
-    SchedulerBinding.instance.addPostFrameCallback((_) {
-      if (ref.mounted) ref.read(appRouterProvider).go(AppRoutes.home);
+    SchedulerBinding.instance.addPostFrameCallback((_) async {
+      if (!ref.mounted) return;
+      final router = ref.read(appRouterProvider)..go(AppRoutes.home);
+      final page = ref.read(khatmahTodayProvider)?.nextPage;
+      if (page == null) return;
+      final mushaf = await ref.read(defaultMushafProvider.future);
+      if (mushaf == null || !ref.mounted) return;
+      unawaited(router.push('${AppRoutes.home}/page/${mushaf.id}/$page'));
     });
   }
 

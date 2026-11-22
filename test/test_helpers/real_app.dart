@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:drift/native.dart';
@@ -6,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tahfeez_ai/features/home_widgets/data/home_widget_bridge.dart';
 import 'package:tahfeez_ai/core/theme/lazy_fonts.dart';
 import 'package:tahfeez_ai/app/app.dart';
 import 'package:tahfeez_ai/core/core_providers.dart';
@@ -47,6 +49,13 @@ import 'package:tahfeez_ai/wbw/wbw_providers.dart';
 import 'empty_memorization_repository.dart';
 import 'fake_audio_controller.dart';
 
+import 'package:tahfeez_ai/features/qibla/data/qibla_sensors.dart';
+
+import 'fake_qibla_sensors.dart';
+
+import 'package:tahfeez_ai/features/athkar/data/athkar_source.dart';
+import 'package:tahfeez_ai/features/athkar/domain/athkar.dart';
+
 /// The whole app as on a device, for tests that walk through it: the
 /// app's own fonts, the bundled Quran, translations, tafsir and word
 /// meanings seeded once ([prepare]), the printed page's native engine
@@ -61,8 +70,14 @@ class RealApp {
   static late FakeEngineBackend _backend;
 
   /// Fonts loaded and the data seeded — once, in `setUpAll`.
+  static late AthkarBook _athkar;
+
   static Future<void> prepare() async {
     await loadAppFonts();
+    _athkar = AthkarBook.fromJson(
+      jsonDecode(utf8.decode(gzip.decode(File(kAthkarAsset).readAsBytesSync())))
+          as Map<String, Object?>,
+    );
     _quran = QuranDatabase(NativeDatabase.memory());
     _translations = TranslationDatabase(NativeDatabase.memory());
     _tafsir = TafsirDatabase(NativeDatabase.memory());
@@ -127,6 +142,8 @@ class RealApp {
     bool passages = false,
     bool firstRun = false,
     MemorizationRepository memorization = const EmptyMemorizationRepository(),
+    QiblaSensors? qiblaSensors,
+    HomeWidgetBridge? homeWidgets,
     List<Override> overrides = const [],
   }) async {
     recordErrors();
@@ -151,6 +168,16 @@ class RealApp {
         mushafQuranEngineBackendProvider.overrideWith((ref) async => _backend),
         localeControllerProvider.overrideWithBuild((ref, _) => Locale(locale)),
         firstRunPromptsProvider.overrideWithValue(firstRun),
+        // No location or compass plugins in a test.
+        qiblaSensorsProvider.overrideWithValue(
+          qiblaSensors ?? FakeQiblaSensors(),
+        ),
+        // The athkar as the app reads them, without its isolate.
+        athkarBookProvider.overrideWith((ref) async => _athkar),
+        // No home-screen widgets in a test (unless one is given).
+        homeWidgetBridgeProvider.overrideWithValue(
+          homeWidgets ?? const UnsupportedHomeWidgetBridge(),
+        ),
         ...overrides,
       ],
     );

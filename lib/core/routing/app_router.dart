@@ -9,6 +9,17 @@ import '../../app/shell/app_shell.dart';
 import '../../features/bookmarks/presentation/bookmarks_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
 import '../../features/memorize/presentation/memorize_screen.dart';
+import '../../features/athkar/presentation/athkar_category_screen.dart';
+import '../../features/habits/presentation/habit_catalog_screen.dart';
+import '../../features/habits/presentation/habit_counter_screen.dart';
+import '../../features/habits/presentation/habit_detail_screen.dart';
+import '../../features/habits/presentation/habit_template_screen.dart';
+import '../../features/habits/presentation/habits_screen.dart';
+import '../../features/home/presentation/hijri_calendar_screen.dart';
+import '../../features/prayer/presentation/prayer_screen.dart';
+import '../../features/athkar/presentation/athkar_look.dart';
+import '../../features/athkar/presentation/athkar_screen.dart';
+import '../../features/qibla/presentation/qibla_screen.dart';
 import '../../features/quran/presentation/quran_index_screen.dart';
 import '../../features/search/presentation/search_screen.dart';
 import '../../features/settings/presentation/about_screen.dart';
@@ -22,6 +33,7 @@ import '../storage/storage_providers.dart';
 import 'app_routes.dart';
 import 'last_screen.dart';
 import 'quran_location_routing.dart';
+import 'tahfeez_page.dart';
 
 export 'app_routes.dart';
 
@@ -36,6 +48,15 @@ GoRouter appRouter(Ref ref) {
     // Where the app was when it last closed (or was closed by the phone
     // in the background), else Home.
     initialLocation: ref.read(restoredScreenProvider) ?? AppRoutes.home,
+    // A home-screen widget's link (tahfeezwidget://open?route=…), handed to
+    // the router as the app opens: Home — the widget's own screen is opened
+    // over it (HomeWidgetsPublisher), not an error page first.
+    redirect: (context, state) =>
+        state.uri.scheme == 'tahfeezwidget' ||
+            state.uri.queryParameters.containsKey('homeWidget') ||
+            state.uri.path == '/open'
+        ? AppRoutes.home
+        : null,
     routes: [
       StatefulShellRoute(
         // The tabs cross-fade (as indexedStack's, each kept alive, the
@@ -82,7 +103,8 @@ GoRouter appRouter(Ref ref) {
                   ),
                   GoRoute(
                     path: 'bookmarks',
-                    builder: (context, state) => const BookmarksScreen(),
+                    pageBuilder: (context, state) =>
+                        tahfeezPage(state, const BookmarksScreen()),
                   ),
                 ],
               ),
@@ -111,19 +133,125 @@ GoRouter appRouter(Ref ref) {
               ),
             ],
           ),
-          StatefulShellBranch(
-            // (Menus open in a tab's own navigator.)
-            observers: [TahfeezPopupObserver()],
+        ],
+      ),
+      // Over the tabs, from the side menu (owner, 2026-11-20): back returns
+      // to the tab they were opened from.
+      GoRoute(
+        path: AppRoutes.settings,
+        pageBuilder: (context, state) =>
+            tahfeezPage(state, const SettingsScreen()),
+        routes: [
+          GoRoute(
+            path: 'about',
+            pageBuilder: (context, state) =>
+                tahfeezPage(state, const AboutScreen()),
+          ),
+        ],
+      ),
+      GoRoute(
+        path: AppRoutes.qibla,
+        pageBuilder: (context, state) =>
+            tahfeezPage(state, const QiblaScreen()),
+      ),
+      // Prayer times (owner, 2026-11-21: the side menu and Home).
+      GoRoute(
+        path: AppRoutes.prayer,
+        pageBuilder: (context, state) =>
+            tahfeezPage(state, const PrayerScreen()),
+      ),
+      // The Hijri calendar (owner, 2026-11-21: from Home's date).
+      GoRoute(
+        path: AppRoutes.hijriCalendar,
+        pageBuilder: (context, state) =>
+            tahfeezPage(state, const HijriCalendarScreen()),
+      ),
+      // Habits (owner, 2026-11-21): today's and their progress; adding
+      // one (ready-made, or one's own); one habit; a wird counted.
+      GoRoute(
+        path: AppRoutes.habits,
+        pageBuilder: (context, state) =>
+            tahfeezPage(state, const HabitsScreen()),
+        routes: [
+          // (Before ':id': "add" and "new" are no habit's id.)
+          GoRoute(
+            path: 'add',
+            pageBuilder: (context, state) =>
+                tahfeezPage(state, const HabitCatalogScreen()),
+          ),
+          GoRoute(
+            path: 'new',
+            pageBuilder: (context, state) =>
+                tahfeezPage(state, const HabitNewScreen()),
+          ),
+          GoRoute(
+            path: 'template/:template',
+            pageBuilder: (context, state) => tahfeezPage(
+              state,
+              HabitTemplateScreen(id: state.pathParameters['template']!),
+            ),
+          ),
+          GoRoute(
+            path: ':id',
+            pageBuilder: (context, state) => tahfeezPage(
+              state,
+              HabitDetailScreen(id: state.pathParameters['id']!),
+            ),
             routes: [
               GoRoute(
-                path: AppRoutes.settings,
-                builder: (context, state) => const SettingsScreen(),
-                routes: [
-                  GoRoute(
-                    path: 'about',
-                    builder: (context, state) => const AboutScreen(),
+                path: 'count',
+                pageBuilder: (context, state) => tahfeezPage(
+                  state,
+                  HabitCounterScreen(
+                    id: state.pathParameters['id']!,
+                    day: state.uri.queryParameters['day'] ?? '',
                   ),
-                ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+      // Athkar (owner, 2026-11-21): its chapters; one chapter (its athkar
+      // as tiles); its athkar one after another, from one (`?at=`).
+      GoRoute(
+        path: AppRoutes.athkar,
+        pageBuilder: (context, state) =>
+            tahfeezPage(state, const AthkarScreen()),
+        routes: [
+          // (Before ':id': "section" is not a chapter's number.)
+          GoRoute(
+            path: 'section/:name',
+            pageBuilder: (context, state) => tahfeezPage(
+              state,
+              AthkarSectionScreen(
+                group: AthkarGroup.values.firstWhere(
+                  (g) => g.name == state.pathParameters['name'],
+                  orElse: () => AthkarGroup.daily,
+                ),
+              ),
+            ),
+          ),
+          GoRoute(
+            path: ':id',
+            pageBuilder: (context, state) => tahfeezPage(
+              state,
+              AthkarCategoryScreen(
+                categoryId: int.tryParse(state.pathParameters['id']!) ?? 0,
+              ),
+            ),
+            routes: [
+              GoRoute(
+                path: 'read',
+                pageBuilder: (context, state) => tahfeezPage(
+                  state,
+                  AthkarReaderScreen(
+                    categoryId: int.tryParse(state.pathParameters['id']!) ?? 0,
+                    start:
+                        int.tryParse(state.uri.queryParameters['at'] ?? '') ??
+                        0,
+                  ),
+                ),
               ),
             ],
           ),

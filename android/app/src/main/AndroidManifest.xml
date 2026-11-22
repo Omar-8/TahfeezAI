@@ -1,16 +1,22 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
     <!-- Live recitation sessions (Milestone R1). Requested at runtime the
          first time the user taps the Mushaf microphone button. -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <!-- A short vibration when a recitation mistake is noticed (Hifz). -->
     <uses-permission android:name="android.permission.VIBRATE" />
+    <!-- The Qibla finder: the city-level position, used on the phone only (never stored or sent). -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <!-- Online services: speech recognition, acoustic verification. -->
     <uses-permission android:name="android.permission.INTERNET"/>
     <!-- The optional daily memorization reminder (opt-in in Settings):
-         shown at its time, and rescheduled after a reboot. Inexact, so no
-         exact-alarm permission. -->
+         shown at its time, and rescheduled after a reboot. Inexact. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <!-- Prayer times' adhan at the minute (2026-11-21): exact alarms where
+         the reader allows them in "Alarms & reminders" (asked for on the
+         prayer times page); inexact, within minutes, otherwise. -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
     <!-- Recitation audio keeps playing with the screen off or the app in
          the background, as a media session (just_audio_background):
          its notification and lock-screen controls. -->
@@ -27,6 +33,11 @@
         android:label="TahfeezAI"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        <!-- geolocator's background location service: the Qibla finder asks
+             for one position while open, never in the background. -->
+        <service
+            android:name="com.baseflow.geolocator.GeolocatorLocationService"
+            tools:node="remove" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -48,6 +59,10 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+            <!-- A home-screen widget tapped: the app at its screen. -->
+            <intent-filter>
+                <action android:name="es.antonborri.home_widget.action.LAUNCH" />
             </intent-filter>
         </activity>
         <!-- flutter_local_notifications: shows scheduled notifications and
@@ -81,6 +96,130 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </receiver>
+        <!-- Home-screen widgets (owner, 2026-11-22): TahfeezWidgets.kt; what
+             they show written by the app (lib/features/home_widgets). -->
+        <receiver android:name=".widgets.HomeWidget" android:exported="true"
+            android:label="@string/widget_home">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider"
+                android:resource="@xml/widget_home" />
+        </receiver>
+        <receiver android:name=".widgets.TodayWidget" android:exported="true"
+            android:label="@string/widget_today">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider"
+                android:resource="@xml/widget_today" />
+        </receiver>
+        <receiver android:name=".widgets.PrayerWidget" android:exported="true"
+            android:label="@string/widget_prayer">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider"
+                android:resource="@xml/widget_prayer" />
+        </receiver>
+        <receiver android:name=".widgets.QiblaWidget" android:exported="true"
+            android:label="@string/widget_qibla">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider"
+                android:resource="@xml/widget_qibla" />
+        </receiver>
+        <receiver android:name=".widgets.AthkarWidget" android:exported="true"
+            android:label="@string/widget_athkar">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider"
+                android:resource="@xml/widget_athkar" />
+        </receiver>
+        <receiver android:name=".widgets.HabitsWidget" android:exported="true"
+            android:label="@string/widget_habits">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider"
+                android:resource="@xml/widget_habits" />
+        </receiver>
+        <receiver android:name=".widgets.ShortcutsWidget" android:exported="true"
+            android:label="@string/widget_shortcuts">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider"
+                android:resource="@xml/widget_shortcuts" />
+        </receiver>
+        <receiver android:name=".widgets.ShortcutsSmallWidget" android:exported="true"
+            android:label="@string/widget_shortcuts_small">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider"
+                android:resource="@xml/widget_shortcuts_small" />
+        </receiver>
+        <receiver android:name=".widgets.AyahWidget" android:exported="true"
+            android:label="@string/widget_ayah">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider"
+                android:resource="@xml/widget_ayah" />
+        </receiver>
+        <receiver android:name=".widgets.ReadingWidget" android:exported="true"
+            android:label="@string/widget_reading">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider"
+                android:resource="@xml/widget_reading" />
+        </receiver>
+        <receiver android:name=".widgets.DateWidget" android:exported="true"
+            android:label="@string/widget_date">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider"
+                android:resource="@xml/widget_date" />
+        </receiver>
+        <receiver android:name=".widgets.MemorizeWidget" android:exported="true"
+            android:label="@string/widget_memorize">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider"
+                android:resource="@xml/widget_memorize" />
+        </receiver>
+        <receiver android:name=".widgets.KhatmahWidget" android:exported="true"
+            android:label="@string/widget_khatmah">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider"
+                android:resource="@xml/widget_khatmah" />
+        </receiver>
+        <receiver android:name=".widgets.QuranWidget" android:exported="true"
+            android:label="@string/widget_quran">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider"
+                android:resource="@xml/widget_quran" />
+        </receiver>
+        <!-- Their redraws at prayer times and midnights, kept across a
+             restart or an update (home_widget's scheduler). -->
+        <receiver android:name="es.antonborri.home_widget.HomeWidgetScheduledUpdateReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.app.action.SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED" />
             </intent-filter>
         </receiver>
         <!-- Don't delete the meta-data below.

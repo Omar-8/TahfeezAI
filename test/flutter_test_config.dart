@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:shared_preferences_platform_interface/in_memory_shared_preferences_async.dart';
 import 'package:shared_preferences_platform_interface/shared_preferences_async_platform_interface.dart';
+import 'package:tahfeez_ai/core/theme/components/quran_mark.dart';
+import 'package:tahfeez_ai/features/qibla/presentation/calibration_hint.dart';
 
 /// Global test setup, automatically picked up by the Flutter test runner for
 /// every test file under `test/`.
@@ -13,5 +15,10 @@ import 'package:shared_preferences_platform_interface/shared_preferences_async_p
 Future<void> testExecutable(FutureOr<void> Function() testMain) async {
   SharedPreferencesAsyncPlatform.instance =
       InMemorySharedPreferencesAsync.empty();
+  // The Qibla screen's figure 8 goes round without end in the app: in
+  // rounds here, so screens showing it settle (its own test checks both).
+  CalibrationHint.endless = false;
+  // …and the Quran tab's arc going round (its own test checks it).
+  QuranMark.spinning = false;
   await testMain();
 }

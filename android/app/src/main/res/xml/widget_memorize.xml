@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Tahfeez's memorize widget (owner, 2026-11-22): resizable, sized as on Home
+     by default (TahfeezWidgets.kt); its picker preview: preview_memorize. -->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="180dp"
+    android:minHeight="57dp"
+    android:minResizeWidth="110dp"
+    android:minResizeHeight="50dp"
+    android:targetCellWidth="3"
+    android:targetCellHeight="1"
+    android:resizeMode="horizontal|vertical"
+    android:widgetCategory="home_screen"
+    android:initialLayout="@layout/widget_card"
+    android:previewLayout="@layout/preview_memorize"
+    android:previewImage="@drawable/widget_preview_memorize"
+    android:description="@string/widget_memorize"
+    android:updatePeriodMillis="1800000" />

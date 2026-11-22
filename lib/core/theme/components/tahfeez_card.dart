@@ -63,10 +63,16 @@ class TahfeezGlassSurface extends StatelessWidget {
     this.onLongPress,
     this.blur = true,
     this.borderRadius,
+    this.raised = false,
   });
 
   final Widget child;
   final ShapeBorder? shape;
+
+  /// Clearer against a light page (owner, 2026-11-21: Home's shortcuts and
+  /// cards): more paper, a visible edge, a firmer shadow. Dark themes as
+  /// ever.
+  final bool raised;
 
   /// In place of [shape]'s (a pill, for a search bar).
   final BorderRadius? borderRadius;
@@ -93,16 +99,18 @@ class TahfeezGlassSurface extends StatelessWidget {
             // Without a blur (most of them), a little more paper in light
             // themes keeps the frosted look.
             scheme.surfaceContainerLowest.withValues(
-              alpha: dark ? 0.22 : (blur ? 0.48 : 0.58),
+              alpha: dark ? 0.22 : (raised ? 0.86 : (blur ? 0.48 : 0.58)),
             ),
             scheme.surfaceContainerLow.withValues(
-              alpha: dark ? 0.12 : (blur ? 0.26 : 0.36),
+              alpha: dark ? 0.12 : (raised ? 0.7 : (blur ? 0.26 : 0.36)),
             ),
           ],
         ),
         border: Border.all(
           color: dark
               ? Colors.white.withValues(alpha: 0.08)
+              : raised
+              ? scheme.primary.withValues(alpha: 0.16)
               : Colors.white.withValues(alpha: 0.7),
         ),
       ),
@@ -126,9 +134,9 @@ class TahfeezGlassSurface extends StatelessWidget {
             ? null
             : [
                 BoxShadow(
-                  color: scheme.shadow.withValues(alpha: 0.06),
-                  blurRadius: 18,
-                  offset: const Offset(0, 6),
+                  color: scheme.shadow.withValues(alpha: raised ? 0.11 : 0.06),
+                  blurRadius: raised ? 14 : 18,
+                  offset: Offset(0, raised ? 4 : 6),
                 ),
               ],
       ),

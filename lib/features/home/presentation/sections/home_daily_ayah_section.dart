@@ -169,18 +169,24 @@ class _DailyAyahCard extends ConsumerWidget {
                         width: constraints.maxWidth,
                         textScaler: MediaQuery.textScalerOf(context),
                       );
-                      // Typed out as the app opens, its number appearing
+                      // Revealed word by word as the app opens, its number appearing
                       // at the end.
                       return TypeOnce(
                         id: 'daily-ayah',
                         length: text.length,
                         delay: const Duration(milliseconds: 600),
+                        perCharacter: const Duration(milliseconds: 30),
+                        longest: const Duration(milliseconds: 2600),
                         builder: (context, typed) => Directionality(
                           textDirection: TextDirection.rtl,
                           child: Text.rich(
                             TextSpan(
                               children: [
-                                ...typedSpans(text, typed),
+                                ...revealedWordSpans(
+                                  text,
+                                  typed,
+                                  styleAt(size).color ?? scheme.onSurface,
+                                ),
                                 const TextSpan(text: ' '),
                                 WidgetSpan(
                                   alignment: PlaceholderAlignment.middle,

@@ -284,6 +284,103 @@ void main() {
     });
   }
 
+  testWidgets("a reciter who hasn't recorded every surah: his download "
+      'list has only those he has (Islam Sobhi: 109, not 37)', (tester) async {
+    final root = Directory.systemTemp.createTempSync('reciter_picker_sobhi');
+    addTearDown(() => root.deleteSync(recursive: true));
+    final container = ProviderContainer(
+      overrides: [
+        reciterAudioDirectoryProvider.overrideWith((ref) async => root),
+        networkClientProvider.overrideWithValue(_FakeNetwork()),
+      ],
+    );
+    addTearDown(container.dispose);
+    await tester.runAsync(
+      () => container.read(reciterDownloadsProvider.notifier).ready(),
+    );
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Builder(
+            builder: (context) => TextButton(
+              onPressed: () => showReciterSheet(context),
+              child: const Text('open'),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const ValueKey('reciter-search')),
+      'sobhi',
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.byKey(const ValueKey('reciter-download-ar.islamsobhi')),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('download-tab-surah')));
+    await tester.pumpAndSettle();
+    final list = find
+        .descendant(
+          of: find.byType(TabBarView),
+          matching: find.byType(Scrollable),
+        )
+        .last;
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('download-surah-38')),
+      300,
+      scrollable: list,
+    );
+    expect(find.byKey(const ValueKey('download-surah-36')), findsOneWidget);
+    expect(find.byKey(const ValueKey('download-surah-37')), findsNothing);
+    expect(find.byKey(const ValueKey('download-surah-38')), findsOneWidget);
+  });
+
+  testWidgets("for a surah: only the reciters who recite it (Islam Sobhi "
+      'not for 37, there for 36)', (tester) async {
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    int? surah;
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: Builder(
+            builder: (context) => TextButton(
+              onPressed: () => showReciterSheet(context, surah: surah),
+              child: const Text('open'),
+            ),
+          ),
+        ),
+      ),
+    );
+    for (final (s, shown) in [(37, false), (36, true), (null, true)]) {
+      surah = s;
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(const ValueKey('reciter-search')),
+        'sobhi',
+      );
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const ValueKey('reciter-ar.islamsobhi')),
+        shown ? findsOneWidget : findsNothing,
+        reason: 'surah $s',
+      );
+      await tester.tapAt(const Offset(5, 5));
+      await tester.pumpAndSettle();
+    }
+  });
+
   testWidgets('every reciter with his picture: a photo, else his initial', (
     tester,
   ) async {

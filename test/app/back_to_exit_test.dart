@@ -9,7 +9,7 @@ import '../test_helpers/widget_test_overrides.dart';
 
 /// On every tab's first screen: back once to be told, twice to leave.
 void main() {
-  for (final route in const ['/home', '/quran', '/memorize', '/settings']) {
+  for (final route in const ['/home', '/quran', '/memorize']) {
     testWidgets('$route: back once tells, twice leaves the app', (
       tester,
     ) async {
@@ -50,7 +50,10 @@ void main() {
       await tester.binding.handlePopRoute();
       await tester.pump();
       expect(left, 1);
-      await tester.pumpAndSettle(const Duration(seconds: 3));
+      // The snack bar's time out (then settled between the Quran mark's
+      // pulses).
+      await tester.pump(const Duration(seconds: 3));
+      await tester.pumpAndSettle();
     });
   }
 }

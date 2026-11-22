@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../localization/generated/app_localizations.dart';
 import '../app_spacing.dart';
+import '../tahfeez_tones.dart';
 
 /// A single resource's download progress: title, a linear progress bar (or
 /// an indeterminate one while size is unknown), and a percentage/cancel
@@ -60,7 +61,7 @@ class TahfeezDownloadProgressRow extends StatelessWidget {
             child: LinearProgressIndicator(
               value: fraction,
               minHeight: 4,
-              backgroundColor: scheme.surfaceContainerHighest,
+              backgroundColor: scheme.progressTrack,
             ),
           ),
         ],

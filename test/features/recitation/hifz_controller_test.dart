@@ -176,6 +176,38 @@ void main() {
   }
 
   test(
+    'revealing by hand while reciting: the band on the next word to '
+    'recite — after a word, after a whole ayah (owner, 2026-11-20)',
+    () async {
+      await setUpHifz(
+        from: (chapterNo: 2, verseNo: 253),
+        to: (chapterNo: 2, verseNo: 256),
+      );
+      WordRef? band() => container
+          .read(mushafWordOverlayProvider)
+          ?.marks
+          .entries
+          .where((e) => e.value == MushafWordMark.current)
+          .map((e) => e.key)
+          .firstOrNull;
+      final start = corpus.verseStartPosition((chapterNo: 2, verseNo: 253))!;
+      expect(band(), corpus.words[start].ref);
+      final hifz = container.read(hifzControllerProvider.notifier);
+      hifz.revealNext();
+      await pumpEventQueue();
+      expect(band(), corpus.words[start + 1].ref);
+      hifz.revealNext(wholeAyah: true);
+      await pumpEventQueue();
+      expect(
+        band(),
+        corpus
+            .words[corpus.verseStartPosition((chapterNo: 2, verseNo: 254))!]
+            .ref,
+      );
+    },
+  );
+
+  test(
     'session start hides the range; correct recitation reveals it all',
     () async {
       const kursiVerse = (chapterNo: 2, verseNo: 255);
@@ -2065,6 +2097,96 @@ void main() {
       );
       expect((hifz().completed, hifz().loopReview), (true, false));
     });
+
+    for (final hidden in [true, false]) {
+      test('Follow along, not strict (ayahs ${hidden ? 'hidden' : 'shown'}): '
+          'the last ayah\'s mistakes keep their colours as the next ayah\'s '
+          'turn starts (owner, 2026-11-20: they turned green)', () async {
+        const first = (chapterNo: 2, verseNo: 253);
+        const second = (chapterNo: 2, verseNo: 254);
+        await setUpHifz(
+          from: first,
+          to: first,
+          loop: const HifzLoop(mode: HifzLoopMode.range, count: 1),
+          strict: false,
+          hideMode: hidden,
+          ownLoop: false,
+        );
+        final words = spoken(2, 253).split(' ')..removeAt(3);
+        await recite(words.join(' '));
+        await pauseAndResume();
+        await Future<void>.delayed(const Duration(milliseconds: 1700));
+        await pumpEventQueue();
+        MushafWordMark? markOf(int p) => container
+            .read(mushafWordOverlayProvider)
+            ?.marks[corpus.words[p].ref];
+        final skippedAt = corpus.verseStartPosition(first)! + 3;
+        expect(markOf(skippedAt), MushafWordMark.skipped);
+        // A pronunciation mistake on its first word, from this turn's pass.
+        final vowelAt = corpus.verseStartPosition(first)!;
+        final acoustic = container.read(
+          acousticVerificationControllerProvider.notifier,
+        ) as _Acoustic;
+        acoustic.put({
+          corpus.words[vowelAt].ref: AcousticWordResult(
+            RecitationErrorType.wrongVowel,
+            const [],
+            pass: container.read(recitationPassProvider),
+          ),
+        });
+        await pumpEventQueue();
+        expect(markOf(vowelAt), MushafWordMark.tashkeel);
+
+        // Follow along: the turn stopped, then the next ayah's turn (the
+        // reciter's in between), its colours kept — the pronunciation
+        // checker's verdicts cleared as the next session starts (as the
+        // real one's are), not turning its mistakes green.
+        await session().stop();
+        await pumpEventQueue();
+        acoustic.put(const {});
+        await pumpEventQueue();
+        expect(markOf(vowelAt), MushafWordMark.tashkeel, reason: 'reset');
+        container
+            .read(hifzControllerProvider.notifier)
+            .setLoop(
+              (from: second, to: second),
+              const HifzLoop(mode: HifzLoopMode.range, count: 1),
+              showBefore: true,
+              keepMarks: true,
+              ownLoop: false,
+            );
+        await session().start(startLocation: const QuranLocation.page(1, 42));
+        await pumpEventQueue();
+        expect(markOf(skippedAt), MushafWordMark.skipped, reason: 'kept');
+        expect(markOf(vowelAt), MushafWordMark.tashkeel, reason: 'kept');
+        expect(markOf(vowelAt + 1), MushafWordMark.correct);
+
+        // The second ayah recited, and on to the third: the first's colours
+        // still there (not only the last turn's).
+        await recite(spoken(2, 254));
+        await pauseAndResume();
+        await Future<void>.delayed(const Duration(milliseconds: 1700));
+        await pumpEventQueue();
+        await session().stop();
+        await pumpEventQueue();
+        const third = (chapterNo: 2, verseNo: 255);
+        container
+            .read(hifzControllerProvider.notifier)
+            .setLoop(
+              (from: third, to: third),
+              const HifzLoop(mode: HifzLoopMode.range, count: 1),
+              showBefore: true,
+              keepMarks: true,
+              ownLoop: false,
+            );
+        await session().start(startLocation: const QuranLocation.page(1, 42));
+        await pumpEventQueue();
+        expect(markOf(skippedAt), MushafWordMark.skipped, reason: 'two back');
+        expect(markOf(vowelAt), MushafWordMark.tashkeel, reason: 'two back');
+        final secondAt = corpus.verseStartPosition(second)!;
+        expect(markOf(secondAt), MushafWordMark.correct, reason: 'one back');
+      });
+    }
 
     test('a pass\'s colours stay as the next is recited, each until its '
         'word is recited again', () async {

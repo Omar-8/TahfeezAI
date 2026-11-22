@@ -29,6 +29,7 @@ const reciterPhotos = {
   'ar.alijaber': 'alijaber',
   'ar.juhani': 'juhani',
   'ar.matroud': 'matroud',
+  'ar.islamsobhi': 'islamsobhi',
 };
 
 /// [reciter]'s photo's asset, if he has one.

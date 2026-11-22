@@ -166,11 +166,11 @@ See the [privacy policy](docs/PRIVACY_POLICY.md) and the [Play data-safety answe
 
 | Android | iOS | Web |
 |:-:|:-:|:-:|
-| *Google Play — coming soon* | *App Store — coming soon* | [**Open in your browser**](https://omar-8.github.io/TahfeezAI/app/) |
+| [**Get it on Google Play**](https://play.google.com/store/apps/details?id=ai.tahfeez.tahfeez_ai) | [**Download on the App Store**](https://apps.apple.com/app/id6829199977) | [**Open in your browser**](https://omar-8.github.io/TahfeezAI/app/) |
 
 The web app is the same app — the Mushaf, translations, memorization and recitation checking on your own computer — with a layout for wide windows. Best in a recent Chrome, Edge or Firefox; Safari works, but checks recitation more slowly (no threads there). Reciter downloads for offline listening and the daily reminder are phone-only.
 
-Until then, builds are on the [releases page](https://github.com/Omar-8/TahfeezAI/releases), or [build it yourself](#build-and-run).
+Builds are also on the [releases page](https://github.com/Omar-8/TahfeezAI/releases), or [build it yourself](#build-and-run).
 
 ## Build and run
 

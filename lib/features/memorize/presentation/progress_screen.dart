@@ -27,6 +27,7 @@ import '../../khatmah/presentation/khatmah_section.dart';
 import 'mark_known_sheet.dart';
 import 'progress_visuals.dart';
 import 'memorize_screen.dart';
+import '../../../core/theme/tahfeez_tones.dart';
 
 /// "Mark as known" in a top bar, a glass pill: named where there is room
 /// for it beside the bar's [title], else its icon alone.
@@ -470,7 +471,7 @@ class _Summary extends StatelessWidget {
 /// only marked (not recited yet), else its strength's colour — paler the
 /// less of the page is memorized.
 Color? _cellColor(PageProgress p, ColorScheme scheme) {
-  if (p.isEmpty) return scheme.surfaceContainerHighest;
+  if (p.isEmpty) return scheme.progressTrack;
   final s = p.strength;
   if (s == null) return null;
   final share = p.memorized / p.ayahs;
@@ -577,7 +578,7 @@ class _StrengthMap extends ConsumerWidget {
               legend(scheme.tertiary, l10n.memMapFading),
               legend(scheme.error, l10n.memMapWeak),
               legend(null, l10n.memUnverified),
-              legend(scheme.surfaceContainerHighest, l10n.memMapNone),
+              legend(scheme.progressTrack, l10n.memMapNone),
             ],
           ),
         ],

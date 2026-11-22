@@ -5,6 +5,7 @@ import 'package:tahfeez_ai/app/app.dart';
 import 'package:tahfeez_ai/core/theme/components/tahfeez_collapsible_section.dart';
 
 import '../test_helpers/widget_test_overrides.dart';
+import '../test_helpers/app_menu.dart';
 
 /// Every tappable on the main screens at least 48 × 48 (Android's
 /// guideline; iOS asks 44): a phone in portrait.
@@ -42,8 +43,7 @@ void main() {
   testWidgets('Settings', (tester) async {
     final semantics = tester.ensureSemantics();
     await open(tester);
-    await tester.tap(find.text('Settings'));
-    await tester.pumpAndSettle();
+    await openFromMenu(tester, 'settings');
     await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
     semantics.dispose();
   });
@@ -51,8 +51,7 @@ void main() {
   testWidgets('Settings, every group opened', (tester) async {
     final semantics = tester.ensureSemantics();
     await open(tester);
-    await tester.tap(find.text('Settings'));
-    await tester.pumpAndSettle();
+    await openFromMenu(tester, 'settings');
     // Tall enough for all of it on screen at once.
     tester.view.physicalSize = const Size(390, 5000);
     await tester.pumpAndSettle();

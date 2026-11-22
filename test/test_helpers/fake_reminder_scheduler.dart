@@ -12,6 +12,25 @@ class FakeReminderScheduler implements DailyReminderScheduler {
 
   /// The one-off notifications pending, by id.
   final once = <int, ({DateTime at, String title, String body})>{};
+
+  /// Each one-off's sound, channel and whether exact, by id.
+  final onceSound =
+      <int, ({ReminderSound sound, String channelId, bool exact})>{};
+
+  /// Whether exact alarms are allowed; [requestExact] calls.
+  bool exact = true;
+  var exactRequested = 0;
+  @override
+  Future<bool> exactAllowed() async => exact;
+  @override
+  Future<void> requestExact() async => exactRequested++;
+
+  /// The repeating ones, by id: daily ([weekday] `null`) or weekly.
+  final repeating =
+      <
+        int,
+        ({int? weekday, int hour, int minute, String title, String payload})
+      >{};
   final handlers = <String, void Function()>{};
 
   @override
@@ -42,9 +61,43 @@ class FakeReminderScheduler implements DailyReminderScheduler {
     required String channelId,
     required String channelName,
     required String payload,
-  }) async => once[id] = (at: at, title: title, body: body);
+    ReminderSound sound = ReminderSound.standard,
+    bool exact = false,
+  }) async {
+    once[id] = (at: at, title: title, body: body);
+    onceSound[id] = (sound: sound, channelId: channelId, exact: exact);
+  }
+
   @override
-  Future<void> cancelIds(Iterable<int> ids) async => ids.forEach(once.remove);
+  Future<void> scheduleRepeating({
+    required int id,
+    int? weekday,
+    required int hour,
+    required int minute,
+    required String title,
+    required String body,
+    required String channelId,
+    required String channelName,
+    required String payload,
+  }) async => repeating[id] = (
+    weekday: weekday,
+    hour: hour,
+    minute: minute,
+    title: title,
+    payload: payload,
+  );
   @override
-  Future<void> cancelAll() async => once.clear();
+  Future<void> cancelIds(Iterable<int> ids) async {
+    for (final id in ids) {
+      once.remove(id);
+      onceSound.remove(id);
+      repeating.remove(id);
+    }
+  }
+
+  @override
+  Future<void> cancelAll() async {
+    once.clear();
+    repeating.clear();
+  }
 }

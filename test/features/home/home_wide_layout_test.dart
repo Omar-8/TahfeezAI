@@ -42,9 +42,10 @@ void main() {
             : ayah.left < memorization.left,
         isTrue,
       );
-      // In the middle of the height.
+      // About the middle of the height (lower since the date and prayer
+      // times cards above them, 2026-11-21).
       final cards = tester.getRect(twoColumns);
-      expect(cards.center.dy, closeTo(size.height / 2, 150));
+      expect(cards.center.dy, closeTo(size.height / 2, 200));
       final sky = tester.getRect(find.byType(HomeSky));
       final rail = tester.getRect(find.byType(TahfeezPrimaryNavigationRail));
       expect(sky.width, closeTo(size.width - rail.width - 1, 2));

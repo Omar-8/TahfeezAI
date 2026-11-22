@@ -4,6 +4,7 @@
      them unused and removed them: every playback update then failed ("You
      must specify an icon resource id to build a CustomAction") and no media
      notification, lock-screen or island player ever showed (Play 1.1.11 on
-     a Poco F7, 2026-11-07). -->
+     a Poco F7, 2026-11-07). The prayer reminders' adhans (adhan_*.ogg) are
+     found by name too (2026-11-21). -->
 <resources xmlns:tools="http://schemas.android.com/tools"
-    tools:keep="@drawable/audio_service_*,@mipmap/ic_launcher" />
+    tools:keep="@drawable/audio_service_*,@mipmap/ic_launcher,@raw/adhan_*" />

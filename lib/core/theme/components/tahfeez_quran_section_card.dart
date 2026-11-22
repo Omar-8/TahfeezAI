@@ -6,6 +6,7 @@ import '../tahfeez_motion.dart';
 import '../tahfeez_icon_sizes.dart';
 import 'tahfeez_card.dart';
 import 'tahfeez_geometric_pattern.dart';
+import '../tahfeez_tones.dart';
 
 /// A card representing one Quran navigation unit — a chapter, Juz, Hizb, or
 /// page — for use in navigator lists (`docs/reference/04_READER_SPEC.md`
@@ -165,7 +166,7 @@ class TahfeezQuranSectionCard extends StatelessWidget {
                             value: p,
                             minHeight: 4,
                             color: progressColor ?? accent,
-                            backgroundColor: scheme.surfaceContainerHighest,
+                            backgroundColor: scheme.progressTrack,
                           ),
                         ),
                       ],
@@ -223,7 +224,7 @@ class TahfeezQuranSectionCard extends StatelessWidget {
                                 value: p,
                                 minHeight: 3,
                                 color: progressColor ?? accent,
-                                backgroundColor: scheme.surfaceContainerHighest,
+                                backgroundColor: scheme.progressTrack,
                               ),
                             ),
                     ),

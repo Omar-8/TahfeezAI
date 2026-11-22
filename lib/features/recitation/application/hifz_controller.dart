@@ -1137,13 +1137,20 @@ class HifzController extends Notifier<HifzState> {
     MushafWordMark.uncertain,
   };
 
+  /// The pronunciation verdicts a finished recitation's colours were drawn
+  /// from — still theirs once the checker clears its own for the next
+  /// session (owner, 2026-11-20: Follow along's mistakes turned green as
+  /// its next turn began).
+  Map<WordRef, AcousticWordResult> _resultsAcoustic = const {};
+
   /// A finished test's colours: every recited word as it went, no band on
   /// a next word, and the page hidden only as hide mode hides it.
   void _showResults() {
     final judge = _judge;
     if (judge == null) return;
     final corpus = judge.corpus;
-    final acoustic = ref.read(acousticVerificationControllerProvider).words;
+    final now = ref.read(acousticVerificationControllerProvider).words;
+    final acoustic = now.isEmpty ? _resultsAcoustic : (_resultsAcoustic = now);
     ref
         .read(mushafWordOverlayProvider.notifier)
         .set(
@@ -1229,6 +1236,7 @@ class HifzController extends Notifier<HifzState> {
                 e.key: e.value,
           }
         : const {};
+    _resultsAcoustic = const {};
     // A new recitation: the last one's colours go.
     if (_results) {
       _results = false;

@@ -22,6 +22,7 @@ class ReciterDownload {
     this.surah,
     this.jobDone = 0,
     this.jobTotal = 0,
+    this.total = _ayahCount,
   });
 
   /// Ayah files on the device.
@@ -36,11 +37,15 @@ class ReciterDownload {
   final int? juz, surah;
   final int jobDone, jobTotal;
 
-  bool get complete => files >= _ayahCount;
+  /// The ayahs the reciter has (all but the surahs a reciter recorded by
+  /// surah lacks).
+  final int total;
+
+  bool get complete => files >= total;
 
   /// The running download's progress; else how much of the Quran is here.
   double get progress =>
-      downloading && jobTotal > 0 ? jobDone / jobTotal : files / _ayahCount;
+      downloading && jobTotal > 0 ? jobDone / jobTotal : files / total;
 }
 
 /// Where downloaded recitations live: the app's own storage (removed with
@@ -110,8 +115,12 @@ class ReciterDownloads extends Notifier<Map<String, ReciterDownload>> {
     for (final r in reciters) {
       final dir = Directory(p.join(root.path, r.edition));
       if (!await dir.exists()) continue;
-      final n = await dir.list().where((f) => f.path.endsWith('.mp3')).length;
-      if (n > 0) found[r.edition] = ReciterDownload(files: n);
+      final n = r.bySurah
+          ? _surahAyahs(await _surahsIn(dir))
+          : await dir.list().where((f) => f.path.endsWith('.mp3')).length;
+      if (n > 0) {
+        found[r.edition] = ReciterDownload(files: n, total: _totalOf(r));
+      }
     }
     if (ref.mounted) state = {...found, ...state};
   }
@@ -122,7 +131,9 @@ class ReciterDownloads extends Notifier<Map<String, ReciterDownload>> {
   /// [ayahId]'s file for [reciter] if downloaded, for the player.
   String? localFile(int ayahId, Reciter reciter) {
     final root = _root;
-    if (root == null || (state[reciter.edition]?.files ?? 0) == 0) {
+    if (root == null ||
+        reciter.bySurah ||
+        (state[reciter.edition]?.files ?? 0) == 0) {
       return null;
     }
     final file = File(_path(root, reciter.edition, globalAyahNumber(ayahId)));
@@ -131,6 +142,40 @@ class ReciterDownloads extends Notifier<Map<String, ReciterDownload>> {
 
   static String _path(Directory root, String edition, int n) =>
       p.join(root.path, edition, '$n.mp3');
+
+  /// Surah [surah]'s whole recording on the device, for a reciter recorded
+  /// by surah ([Reciter.bySurah]).
+  String? localSurahFile(int surah, Reciter reciter) {
+    final root = _root;
+    if (root == null || (state[reciter.edition]?.files ?? 0) == 0) {
+      return null;
+    }
+    final file = File(_surahPath(root, reciter.edition, surah));
+    return file.existsSync() ? file.path : null;
+  }
+
+  static String _surahPath(Directory root, String edition, int surah) =>
+      p.join(root.path, edition, 's${surah.toString().padLeft(3, '0')}.mp3');
+
+  /// The surahs downloaded in [dir] (a reciter recorded by surah).
+  static Future<Set<int>> _surahsIn(Directory dir) async => {
+    await for (final f in dir.list())
+      if (RegExp(r's(\d{3})\.mp3$').firstMatch(f.path) case final m?)
+        int.parse(m.group(1)!),
+  };
+
+  static int _surahAyahs(Iterable<int> surahs) =>
+      surahs.fold(0, (n, s) => n + surahAyahCounts[s - 1]);
+
+  /// The ayahs [reciter] has.
+  static int _totalOf(Reciter reciter) =>
+      _ayahCount - _surahAyahs(reciter.missingSurahs);
+
+  /// The surahs (that [reciter] has) holding any of [ayahs].
+  static List<int> _surahsOf(Reciter reciter, Iterable<int> ayahs) => [
+    for (final s in {for (final n in ayahs) ayahIdAtGlobal(n) ~/ 1000})
+      if (reciter.recites(s)) s,
+  ];
 
   /// Whether all of juz [juz] of [edition] is on the device.
   bool juzComplete(String edition, int juz) =>
@@ -143,6 +188,12 @@ class ReciterDownloads extends Notifier<Map<String, ReciterDownload>> {
   bool _allHere(String edition, Iterable<int> ayahs) {
     final root = _root;
     if (root == null || (state[edition]?.files ?? 0) == 0) return false;
+    final reciter = reciterFor(edition);
+    if (reciter.bySurah) {
+      final surahs = _surahsOf(reciter, ayahs);
+      return surahs.isNotEmpty &&
+          surahs.every((s) => File(_surahPath(root, edition, s)).existsSync());
+    }
     return ayahs.every((n) => File(_path(root, edition, n)).existsSync());
   }
 
@@ -154,6 +205,9 @@ class ReciterDownloads extends Notifier<Map<String, ReciterDownload>> {
     final reciter = reciterFor(edition);
     final dir = Directory(p.join(root.path, edition));
     await dir.create(recursive: true);
+    if (reciter.bySurah) {
+      return _downloadSurahs(reciter, root, dir, juz: juz, surah: surah);
+    }
     final wanted = juz != null
         ? juzAyahNumbers(juz).toList()
         : surah != null
@@ -224,6 +278,82 @@ class ReciterDownloads extends Notifier<Map<String, ReciterDownload>> {
     _tokens.remove(edition);
     if (_deleted.remove(edition)) {
       // A file finishing after the delete may have brought the folder back.
+      if (await dir.exists()) await dir.delete(recursive: true);
+      return;
+    }
+    if (!ref.mounted) return;
+    _set(edition, progress(downloading: false, failed: failed));
+  }
+
+  /// A reciter recorded by surah: its whole-surah files ([juz]'s surahs,
+  /// [surah], or all it has), one at a time (large files).
+  Future<void> _downloadSurahs(
+    Reciter reciter,
+    Directory root,
+    Directory dir, {
+    int? juz,
+    int? surah,
+  }) async {
+    final edition = reciter.edition;
+    final wanted = juz != null
+        ? _surahsOf(reciter, juzAyahNumbers(juz))
+        : surah != null
+        ? [if (reciter.recites(surah)) surah]
+        : [
+            for (var s = 1; s <= 114; s++)
+              if (reciter.recites(s)) s,
+          ];
+    final missing = [
+      for (final s in wanted)
+        if (!File(_surahPath(root, edition, s)).existsSync()) s,
+    ];
+    var files = _surahAyahs(await _surahsIn(dir));
+    var done = 0;
+    final token = CancelToken();
+    _tokens[edition] = token;
+    ReciterDownload progress({bool downloading = true, bool failed = false}) =>
+        ReciterDownload(
+          files: files,
+          downloading: downloading,
+          failed: failed,
+          juz: juz,
+          surah: surah,
+          jobDone: done,
+          jobTotal: _surahAyahs(missing),
+          total: _totalOf(reciter),
+        );
+    _set(edition, progress());
+    final network = ref.read(networkClientProvider);
+    var failed = false;
+    for (final s in missing) {
+      if (token.isCancelled) break;
+      final target = _surahPath(root, edition, s);
+      final part = '$target.part';
+      var saved = false;
+      for (var t = 0; t < _tries && !saved && !token.isCancelled; t++) {
+        try {
+          await network.download(
+            surahAudioUrl(s, reciter),
+            part,
+            cancelToken: token,
+          );
+          await File(part).rename(target);
+          saved = true;
+        } catch (_) {
+          if (token.isCancelled) break;
+          await Future<void>.delayed(Duration(seconds: 1 + t));
+        }
+      }
+      if (!saved) {
+        if (!token.isCancelled) failed = true;
+        break;
+      }
+      files += surahAyahCounts[s - 1];
+      done += surahAyahCounts[s - 1];
+      if (ref.mounted) _set(edition, progress());
+    }
+    _tokens.remove(edition);
+    if (_deleted.remove(edition)) {
       if (await dir.exists()) await dir.delete(recursive: true);
       return;
     }

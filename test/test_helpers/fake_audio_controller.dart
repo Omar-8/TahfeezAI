@@ -56,13 +56,18 @@ class FakeAudioController implements AudioController {
   /// The last queue's titles.
   List<AudioItemInfo>? items;
 
+  /// The last queue's clips (an ayah cut from its surah).
+  List<AudioClip?>? clips;
+
   @override
   Future<void> playQueue(
     List<String> urls, {
     List<AudioItemInfo>? items,
+    List<AudioClip?>? clips,
   }) async {
     queue = urls;
     this.items = items;
+    this.clips = clips;
     _emit(
       (s) => s.copyWith(isPlaying: true, durationMs: 60000, currentIndex: 0),
     );

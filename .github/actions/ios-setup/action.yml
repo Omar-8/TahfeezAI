@@ -56,6 +56,13 @@ runs:
         dart run build_runner build --delete-conflicting-outputs
         flutter gen-l10n
 
+    # The home-screen widgets' extension (owner, 2026-11-22), added to this
+    # run's copy of the Xcode project (the xcodeproj gem comes with
+    # CocoaPods).
+    - name: Widget extension
+      shell: bash
+      run: ruby tool/ios/add_widget_extension.rb
+
     - name: Quran data cache
       uses: actions/cache@v4
       with:

@@ -1,3 +1,5 @@
+import '../../../app/shell/app_menu.dart';
+
 import 'package:flutter/material.dart';
 
 import '../../../core/ui/motion.dart';
@@ -28,6 +30,7 @@ import 'test_me_card.dart';
 import '../../../core/ui/back_to_exit.dart';
 import '../../mushaf/application/reading_surah.dart';
 import '../../../core/theme/tahfeez_motion.dart';
+import '../../../core/theme/tahfeez_tones.dart';
 
 /// The Memorize tab, in two tabs: the plan — today's memorization, the
 /// three parts of a Hifz day (`docs/MEMORIZATION_MILESTONE.md`), with how
@@ -92,6 +95,15 @@ class _MemorizeScreenState extends ConsumerState<MemorizeScreen>
       child: SkyBackdrop(
         child: Scaffold(
           appBar: TahfeezAppBar(
+            // ☰ where Home has it (owner, 2026-11-20): 16 from the edge.
+            leading: const Padding(
+              padding: EdgeInsetsDirectional.only(start: TahfeezSpacing.md),
+              child: Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: AppMenuButton(),
+              ),
+            ),
+            leadingWidth: 64,
             title: Text(l10n.memTitle),
             centerTitle: false,
             // Marking what is already known: on both tabs.
@@ -286,7 +298,7 @@ class ScoreBar extends StatelessWidget {
               value: v,
               minHeight: dense ? 4 : 6,
               color: color,
-              backgroundColor: scheme.surfaceContainerHighest,
+              backgroundColor: scheme.progressTrack,
             ),
           ),
         ),

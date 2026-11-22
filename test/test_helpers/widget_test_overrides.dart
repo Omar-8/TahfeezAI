@@ -2,6 +2,7 @@ import 'package:drift/native.dart';
 import 'package:tahfeez_ai/core/audio/audio_controller.dart';
 import 'package:tahfeez_ai/core/core_providers.dart';
 import 'package:tahfeez_ai/core/ui/first_run.dart';
+import 'package:tahfeez_ai/features/home_widgets/data/home_widget_bridge.dart';
 import 'package:tahfeez_ai/memorization/memorization_providers.dart';
 import 'package:tahfeez_ai/quran/data/quran_database.dart';
 import 'package:tahfeez_ai/quran/data/search_index_database.dart';
@@ -16,6 +17,10 @@ import 'package:tahfeez_ai/wbw/wbw_providers.dart';
 
 import 'empty_memorization_repository.dart';
 import 'fake_audio_controller.dart';
+
+import 'package:tahfeez_ai/features/qibla/data/qibla_sensors.dart';
+
+import 'fake_qibla_sensors.dart';
 
 /// The default override set for widget tests that render `TahfeezApp` (or
 /// any subtree under it) now that `HomeScreen`/`AppShell` genuinely depend
@@ -46,6 +51,12 @@ import 'fake_audio_controller.dart';
 // ignore: strict_top_level_inference
 tahfeezWidgetTestOverrides({AudioController? audioController}) {
   return [
+    // No location or compass plugins in a test.
+    qiblaSensorsProvider.overrideWithValue(FakeQiblaSensors()),
+    // Nor home-screen widgets.
+    homeWidgetBridgeProvider.overrideWithValue(
+      const UnsupportedHomeWidgetBridge(),
+    ),
     quranDatabaseProvider.overrideWith((ref) {
       final db = QuranDatabase(NativeDatabase.memory());
       ref.onDispose(db.close);

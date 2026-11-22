@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Tahfeez's ayah widget (owner, 2026-11-22): resizable, sized as on Home
+     by default (TahfeezWidgets.kt); its picker preview: preview_ayah. -->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="250dp"
+    android:minHeight="110dp"
+    android:minResizeWidth="110dp"
+    android:minResizeHeight="50dp"
+    android:targetCellWidth="5"
+    android:targetCellHeight="2"
+    android:resizeMode="horizontal|vertical"
+    android:widgetCategory="home_screen"
+    android:initialLayout="@layout/widget_card"
+    android:previewLayout="@layout/preview_ayah"
+    android:previewImage="@drawable/widget_preview_ayah"
+    android:description="@string/widget_ayah"
+    android:updatePeriodMillis="1800000" />

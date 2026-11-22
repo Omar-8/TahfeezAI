@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Home's prayer card, one row high: the time and today's date (both
+     calendars) — or, under Home's date card, the place — and the next
+     prayer "in 36 min"; then the day's six times, the next one marked. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/prayerBox" android:layout_width="match_parent"
+    android:layout_height="wrap_content" android:orientation="vertical">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:gravity="center_vertical" android:orientation="horizontal">
+        <TextClock android:id="@+id/headClock" android:layout_width="wrap_content"
+            android:layout_height="wrap_content" android:layout_marginEnd="6dp" android:maxLines="1"
+            android:format12Hour="h:mm a" android:format24Hour="HH:mm"
+            android:textSize="14sp" android:textStyle="bold" />
+        <TextView android:id="@+id/headDivider" android:layout_width="wrap_content"
+            android:layout_height="wrap_content" android:layout_marginEnd="6dp" android:text="|"
+            android:textSize="13sp" />
+        <TextView android:id="@+id/place" android:layout_width="0dp" android:layout_weight="1"
+            android:layout_height="wrap_content" android:maxLines="1" android:ellipsize="end"
+            android:textSize="13sp" android:textStyle="bold" />
+        <TextView android:id="@+id/countdown" android:layout_width="wrap_content"
+            android:layout_height="wrap_content" android:layout_marginStart="8dp"
+            android:maxLines="1" android:textSize="13sp" android:textStyle="bold" />
+    </LinearLayout>
+    <LinearLayout android:id="@+id/tiles" android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:layout_marginTop="6dp"
+        android:orientation="horizontal">
+        <LinearLayout android:id="@+id/t0" android:layout_width="0dp" android:layout_weight="1"
+            android:layout_height="wrap_content" android:layout_marginStart="0dp"
+            android:gravity="center" android:orientation="vertical"
+            android:paddingTop="4dp" android:paddingBottom="4dp" android:paddingStart="1dp" android:paddingEnd="1dp">
+            <TextView android:id="@+id/n0" android:layout_width="match_parent" android:layout_height="14dp"
+                android:gravity="center" android:maxLines="1" android:autoSizeTextType="uniform"
+                android:autoSizeMinTextSize="7sp" android:autoSizeMaxTextSize="11sp" />
+            <TextView android:id="@+id/v0" android:layout_width="match_parent" android:layout_height="18dp"
+                android:gravity="center" android:maxLines="1" android:textStyle="bold"
+                android:autoSizeTextType="uniform" android:autoSizeMinTextSize="7sp"
+                android:autoSizeMaxTextSize="14sp" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/t1" android:layout_width="0dp" android:layout_weight="1"
+            android:layout_height="wrap_content" android:layout_marginStart="2dp"
+            android:gravity="center" android:orientation="vertical"
+            android:paddingTop="4dp" android:paddingBottom="4dp" android:paddingStart="1dp" android:paddingEnd="1dp">
+            <TextView android:id="@+id/n1" android:layout_width="match_parent" android:layout_height="14dp"
+                android:gravity="center" android:maxLines="1" android:autoSizeTextType="uniform"
+                android:autoSizeMinTextSize="7sp" android:autoSizeMaxTextSize="11sp" />
+            <TextView android:id="@+id/v1" android:layout_width="match_parent" android:layout_height="18dp"
+                android:gravity="center" android:maxLines="1" android:textStyle="bold"
+                android:autoSizeTextType="uniform" android:autoSizeMinTextSize="7sp"
+                android:autoSizeMaxTextSize="14sp" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/t2" android:layout_width="0dp" android:layout_weight="1"
+            android:layout_height="wrap_content" android:layout_marginStart="2dp"
+            android:gravity="center" android:orientation="vertical"
+            android:paddingTop="4dp" android:paddingBottom="4dp" android:paddingStart="1dp" android:paddingEnd="1dp">
+            <TextView android:id="@+id/n2" android:layout_width="match_parent" android:layout_height="14dp"
+                android:gravity="center" android:maxLines="1" android:autoSizeTextType="uniform"
+                android:autoSizeMinTextSize="7sp" android:autoSizeMaxTextSize="11sp" />
+            <TextView android:id="@+id/v2" android:layout_width="match_parent" android:layout_height="18dp"
+                android:gravity="center" android:maxLines="1" android:textStyle="bold"
+                android:autoSizeTextType="uniform" android:autoSizeMinTextSize="7sp"
+                android:autoSizeMaxTextSize="14sp" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/t3" android:layout_width="0dp" android:layout_weight="1"
+            android:layout_height="wrap_content" android:layout_marginStart="2dp"
+            android:gravity="center" android:orientation="vertical"
+            android:paddingTop="4dp" android:paddingBottom="4dp" android:paddingStart="1dp" android:paddingEnd="1dp">
+            <TextView android:id="@+id/n3" android:layout_width="match_parent" android:layout_height="14dp"
+                android:gravity="center" android:maxLines="1" android:autoSizeTextType="uniform"
+                android:autoSizeMinTextSize="7sp" android:autoSizeMaxTextSize="11sp" />
+            <TextView android:id="@+id/v3" android:layout_width="match_parent" android:layout_height="18dp"
+                android:gravity="center" android:maxLines="1" android:textStyle="bold"
+                android:autoSizeTextType="uniform" android:autoSizeMinTextSize="7sp"
+                android:autoSizeMaxTextSize="14sp" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/t4" android:layout_width="0dp" android:layout_weight="1"
+            android:layout_height="wrap_content" android:layout_marginStart="2dp"
+            android:gravity="center" android:orientation="vertical"
+            android:paddingTop="4dp" android:paddingBottom="4dp" android:paddingStart="1dp" android:paddingEnd="1dp">
+            <TextView android:id="@+id/n4" android:layout_width="match_parent" android:layout_height="14dp"
+                android:gravity="center" android:maxLines="1" android:autoSizeTextType="uniform"
+                android:autoSizeMinTextSize="7sp" android:autoSizeMaxTextSize="11sp" />
+            <TextView android:id="@+id/v4" android:layout_width="match_parent" android:layout_height="18dp"
+                android:gravity="center" android:maxLines="1" android:textStyle="bold"
+                android:autoSizeTextType="uniform" android:autoSizeMinTextSize="7sp"
+                android:autoSizeMaxTextSize="14sp" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/t5" android:layout_width="0dp" android:layout_weight="1"
+            android:layout_height="wrap_content" android:layout_marginStart="2dp"
+            android:gravity="center" android:orientation="vertical"
+            android:paddingTop="4dp" android:paddingBottom="4dp" android:paddingStart="1dp" android:paddingEnd="1dp">
+            <TextView android:id="@+id/n5" android:layout_width="match_parent" android:layout_height="14dp"
+                android:gravity="center" android:maxLines="1" android:autoSizeTextType="uniform"
+                android:autoSizeMinTextSize="7sp" android:autoSizeMaxTextSize="11sp" />
+            <TextView android:id="@+id/v5" android:layout_width="match_parent" android:layout_height="18dp"
+                android:gravity="center" android:maxLines="1" android:textStyle="bold"
+                android:autoSizeTextType="uniform" android:autoSizeMinTextSize="7sp"
+                android:autoSizeMaxTextSize="14sp" />
+        </LinearLayout>
+    </LinearLayout>
+    <TextView android:id="@+id/empty" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="4dp" android:textSize="13sp" />
+</LinearLayout>

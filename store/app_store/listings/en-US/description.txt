@@ -9,8 +9,6 @@ RECITE FROM MEMORY — WITH FEEDBACK
 • Hears how you recite, not only what: letters, vowels, shadda and case endings, sound by sound against the Hafs pronunciation
 • Tajweed checked too: madd length, qalqala, ghunnah (ikhfa, iqlab, idgham, and a doubled nun or mim held), heavy and light letters, throat letters — each rule can be turned on or off
 • Choose how strict the check is: lenient, balanced or precise
-• A vibration or sound on a mistake, with tajweed mistakes alerted apart
-• Choose the colours of pronunciation and tajweed mistakes
 • Loop an ayah, follow along with a reciter, or test a whole page
 
 READ AND UNDERSTAND
@@ -20,28 +18,33 @@ READ AND UNDERSTAND
 • Tajweed colours on the letters in Ayah mode, rule by rule
 • Tap a surah's name for its meaning, revelation and more
 • Share an ayah as an image, with its translation
-• Surah names in the Mushaf's own calligraphy; focus mode for the page alone
 • Search the whole Quran, in Arabic or in translation
 • Bookmarks and thematic passages coloured on the page
 
 LISTEN
-• 31 reciters, including Alafasy, Al-Husary, Al-Minshawi, Abdul Basit and As-Sudais
+• 32 reciters, including Alafasy, Al-Husary, Al-Minshawi, Abdul Basit and As-Sudais
 • The ayah lights up as it is recited; repeat an ayah or a range
 • Download a reciter to listen offline; playback continues with the screen locked
 • A translation read aloud after each ayah, in 8 languages
-• A sleep timer for listening at night
 
 MEMORIZE WITH A PLAN
 • A daily lesson and spaced revision
-• Hide mode, Loop and Follow along
 • Test me: the first words of a random place you know — continue from memory
 • Every part's strength tracked, so you know what to revise
 • Your streak, a calendar of the days you recited, a ring of the 30 juz and gentle milestones
 
+EVERY DAY
+• Prayer times for your city, with the adhan — from Makkah, Madinah, Quba or Al-Aqsa — or just a vibration
+• A Qibla compass
+• Morning and evening athkar from Hisn al-Muslim, with a counter and audio
+• Habits: your daily wird, sunnah prayers, fasting days and more, with reminders
+• A Hijri calendar with the year's occasions
+• Home-screen widgets: prayer times, the date, a daily ayah, continue reading, memorization and khatmah
+
 MAKE IT YOURS
 • A sky in the colours of the time of day, glass cards and an Islamic geometric pattern
 • Light, dark, warm, sepia and black themes; 4 Quran fonts; text up to 200%
-• In 30 languages: Arabic, English, German, French, Spanish, Italian, Portuguese, Dutch, Danish, Greek, Russian, Turkish, Indonesian, Malay, Urdu, Hindi, Tamil, Malayalam, Persian, Bengali, Hausa, Kurdish, Pashto, Swahili, Kazakh, Uzbek, Somali, Chinese, Japanese and Korean
+• In 30 languages
 • iPhone and iPad
 
 YOUR VOICE STAYS ON YOUR DEVICE

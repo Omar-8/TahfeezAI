@@ -1,6 +1,6 @@
 # TahfeezAI — Privacy Policy
 
-_Last updated: 13 November 2026_
+_Last updated: 20 November 2026_
 
 TahfeezAI helps you read and memorize the Quran. It is built to keep your data on your phone. There are no accounts, no ads, no analytics and no tracking.
 
@@ -8,7 +8,10 @@ TahfeezAI helps you read and memorize the Quran. It is built to keep your data o
 
 - **Your recitation.** When you recite, the microphone audio is analysed on your phone by the app's own speech model, to follow your place and point out mistakes. The audio is never sent anywhere and is not saved: once a recitation ends, its audio is gone.
 - **Your memorization data:** which ayahs you have memorized, your test results, your plans, your bookmarks and your settings. They are stored only in the app's storage on your phone.
-- **Reminders.** The daily memorization reminder and the khatmah's reminder of each day's pages are scheduled on your phone; nothing is sent to a server.
+- **Your habits and athkar:** the habits you keep and each day's log (what you did, and how much — for example an amount of sadaqa you enter), and the athkar you counted today. Stored only in the app's storage on your phone (and in a backup, if you make one).
+- **Your location, for the qibla and prayer times.** The Qibla finder and prayer times ask for your phone's approximate (city-level) location in automatic mode, and work out the direction of the Kaaba and the day's prayer times on your phone. So that Home can show today's prayer times without asking again, the location is kept in the app's storage on your phone only rounded to about a kilometre (two decimal places), with the name of the nearest city from the app's built-in city list. It is never sent anywhere. If you choose your city by hand instead, only that city is kept, and no location permission is needed. Prayer-time reminders, if you turn them on, are scheduled on your phone.
+- **Home-screen widgets.** If you add Tahfeez's widgets to your home screen, the app writes what they show — the coming days' prayer times and your place's name, the Hijri dates, the daily ayahs, where you stopped reading, and today's memorization and khatmah progress — into storage on your phone that only the app and its widgets can read. Nothing of it is sent anywhere.
+- **Reminders.** The daily memorization reminder, the khatmah's reminder of each day's pages, the morning and evening athkar reminders and your habits' reminders are scheduled on your phone; nothing is sent to a server.
 
 We (the developers) never receive any of this data, and we have no server that stores it.
 
@@ -18,6 +21,7 @@ Only to play recitation audio, and only when you ask for it:
 
 - **Ayah recitations** stream from the Islamic Network audio service (`cdn.islamic.network`, run by alquran.cloud), or, for some reciters, from EveryAyah (`everyayah.com`).
 - **Single-word audio** streams from Quran.com's audio service (`audio.qurancdn.com`).
+- **Athkar audio**, when you play a zikr or a chapter, streams from Hisn al-Muslim's website (`www.hisnmuslim.com`). The athkar's text is in the app; nothing is sent but the request for the audio file, which, like any web request, shows your IP address to that site.
 - **Listen to the correction** asks Quran.com (`api.quran.com`, `api.qurancdn.com`) where each word falls in the reciter's recording, and for some reciters plays that recording from QuranicAudio (`download.quranicaudio.com`). The timings are kept only until the app closes.
 - **Downloading a reciter** for offline listening fetches that reciter's audio files from the same service and stores them on your phone; you can delete them at any time.
 - **Translations, tafsir and word meanings** other than English and Arabic are downloaded on Android and iOS from the app's own open-source repository on GitHub (`github.com/Omar-8/TahfeezAI`, its release files), when the app's language needs them or when you download one, and stored on your phone; you can delete them at any time. Each download is checked against a fingerprint built into the app before it is used.
@@ -56,6 +60,7 @@ Some reciters are shown with a small photo beside their name. The photos are par
 - Ali Jaber — Engalali9, CC0
 - Abdullah Awad Al-Juhani — الشيخ هيثم الدخين, CC BY-SA 4.0
 - Abdullah Matroud — tvquran.com, CC BY-SA 4.0
+- Islam Sobhi — Moaz600, CC BY-SA 4.0
 
 The photos were cropped and made smaller. If you hold the rights to one of them, or are its subject, and want it removed, write to the address below and it will be taken out of the app. Reciters without a photo are shown by the first letter of their name.
 
@@ -66,8 +71,9 @@ The photos were cropped and made smaller. If you hold the rights to one of them,
 ## Permissions
 
 - **Microphone** — to follow and check your recitation, on the phone only. Used only while you are reciting.
+- **Approximate location** — for the Qibla finder's and prayer times' automatic mode, on the phone only. Kept on the phone only rounded to about a kilometre, for prayer times; never sent. Not needed if you choose your city by hand.
 - **Notifications** — for the optional daily reminders (memorization, and each day's khatmah pages).
-- **Internet** — for streaming and downloading recitation audio, and downloading translations, tafsir and word meanings.
+- **Internet** — for streaming and downloading recitation audio, streaming athkar audio, and downloading translations, tafsir and word meanings.
 - **Vibration** — to signal a mistake while you recite.
 - **Run at startup** — to keep your reminders after the phone restarts.
 

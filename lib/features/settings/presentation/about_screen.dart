@@ -79,6 +79,11 @@ class AboutScreen extends ConsumerWidget {
                         ? [
                             (Icons.mic_none_rounded, l10n.privacyRecitationWeb),
                             (Icons.devices_rounded, l10n.privacyLocalWeb),
+                            (Icons.explore_outlined, l10n.privacyLocation),
+                            (
+                              Icons.record_voice_over_outlined,
+                              l10n.privacyAthkarAudio,
+                            ),
                             (Icons.cloud_outlined, l10n.privacyNetworkWeb),
                             (Icons.block_rounded, l10n.privacyNoTracking),
                             (
@@ -89,6 +94,11 @@ class AboutScreen extends ConsumerWidget {
                         : [
                             (Icons.mic_none_rounded, l10n.privacyRecitation),
                             (Icons.phone_android_rounded, l10n.privacyLocal),
+                            (Icons.explore_outlined, l10n.privacyLocation),
+                            (
+                              Icons.record_voice_over_outlined,
+                              l10n.privacyAthkarAudio,
+                            ),
                             (Icons.cloud_outlined, l10n.privacyNetwork),
                             (Icons.block_rounded, l10n.privacyNoTracking),
                             (Icons.delete_outline_rounded, l10n.privacyDelete),

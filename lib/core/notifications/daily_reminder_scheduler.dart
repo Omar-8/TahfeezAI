@@ -6,6 +6,41 @@ import 'package:timezone/timezone.dart' as tz;
 
 import '../core_providers.dart';
 
+/// A notification's sound: the phone's usual one, none, one the app
+/// brings (an Android raw resource, an iPhone's Library/Sounds file — by
+/// the same name), or a sound on the phone (an Android content URI).
+class ReminderSound {
+  const ReminderSound._({
+    this.bundled,
+    this.uri,
+    this.silent = false,
+    this.vibrate = true,
+  });
+
+  /// The phone's notification sound.
+  static const standard = ReminderSound._();
+
+  /// No sound, no vibration.
+  static const none = ReminderSound._(silent: true, vibrate: false);
+
+  /// No sound; a vibration (Android: an iPhone has no vibration without
+  /// a sound).
+  static const vibrateOnly = ReminderSound._(silent: true);
+
+  /// The app's sound [name] (`adhan_madinah`: res/raw/adhan_madinah.ogg on
+  /// Android, Library/Sounds/adhan_madinah.caf on an iPhone).
+  const ReminderSound.bundled(String name) : this._(bundled: name);
+
+  /// A sound on the phone, chosen in Android's sound picker.
+  const ReminderSound.device(String uri) : this._(uri: uri);
+
+  final String? bundled, uri;
+  final bool silent;
+
+  /// Whether it vibrates (where the phone vibrates for notifications).
+  final bool vibrate;
+}
+
 /// Schedules local notifications — the platform adapter behind the daily
 /// memorization reminder (`docs/MEMORIZATION_MILESTONE.md`, M5) and the
 /// khatmah's reminder of each day's pages. Callers never check the
@@ -37,10 +72,38 @@ abstract class DailyReminderScheduler {
   Future<void> cancel();
 
   /// Shows a notification once, at [at] local time (replacing any with the
-  /// same [id]); a tap runs [payload]'s [onOpen] handler.
+  /// same [id]); a tap runs [payload]'s [onOpen] handler. With [sound] (on
+  /// Android fixed for its channel: a channel of its own for each sound);
+  /// [exact]: at the minute, where the phone allows exact alarms
+  /// ([exactAllowed]), else within a few minutes.
   Future<void> scheduleOnce({
     required int id,
     required DateTime at,
+    required String title,
+    required String body,
+    required String channelId,
+    required String channelName,
+    required String payload,
+    ReminderSound sound = ReminderSound.standard,
+    bool exact = false,
+  });
+
+  /// Whether notifications may come at the exact minute (Android's
+  /// "Alarms & reminders" access; elsewhere always).
+  Future<bool> exactAllowed();
+
+  /// Opens the phone's setting for exact alarms (Android).
+  Future<void> requestExact();
+
+  /// Shows a notification every day at [hour]:[minute] local time — or,
+  /// with [weekday] ([DateTime.monday] … [DateTime.sunday]), every week on
+  /// that day — one pending notification however long it repeats (an
+  /// iPhone keeps only 64). A tap runs [payload]'s [onOpen] handler.
+  Future<void> scheduleRepeating({
+    required int id,
+    int? weekday,
+    required int hour,
+    required int minute,
     required String title,
     required String body,
     required String channelId,
@@ -194,7 +257,10 @@ class LocalNotificationsReminderScheduler implements DailyReminderScheduler {
     required String channelId,
     required String channelName,
     required String payload,
+    ReminderSound sound = ReminderSound.standard,
+    bool exact = false,
   }) async {
+    final bundled = sound.bundled, uri = sound.uri;
     await _plugin.zonedSchedule(
       id: id,
       scheduledDate: tz.TZDateTime(
@@ -211,12 +277,88 @@ class LocalNotificationsReminderScheduler implements DailyReminderScheduler {
         android: AndroidNotificationDetails(
           channelId,
           channelName,
+          // (An adhan: shown at the top of the screen too.)
+          importance: bundled != null || uri != null
+              ? Importance.high
+              : Importance.defaultImportance,
+          priority: bundled != null || uri != null
+              ? Priority.high
+              : Priority.defaultPriority,
+          playSound: !sound.silent,
+          enableVibration: sound.vibrate,
+          sound: bundled != null
+              ? RawResourceAndroidNotificationSound(bundled)
+              : uri != null
+              ? UriAndroidNotificationSound(uri)
+              : null,
+        ),
+        iOS: DarwinNotificationDetails(
+          presentSound: !sound.silent,
+          sound: bundled == null ? null : '$bundled.caf',
+        ),
+      ),
+      androidScheduleMode: exact && await exactAllowed()
+          ? AndroidScheduleMode.exactAllowWhileIdle
+          : AndroidScheduleMode.inexactAllowWhileIdle,
+      payload: payload,
+    );
+  }
+
+  @override
+  Future<bool> exactAllowed() async {
+    final android = _android;
+    if (android == null) return true;
+    return await android.canScheduleExactNotifications() ?? false;
+  }
+
+  @override
+  Future<void> requestExact() async {
+    await _android?.requestExactAlarmsPermission();
+  }
+
+  @override
+  Future<void> scheduleRepeating({
+    required int id,
+    int? weekday,
+    required int hour,
+    required int minute,
+    required String title,
+    required String body,
+    required String channelId,
+    required String channelName,
+    required String payload,
+  }) async {
+    final now = tz.TZDateTime.now(tz.local);
+    var at = tz.TZDateTime(
+      tz.local,
+      now.year,
+      now.month,
+      now.day,
+      hour,
+      minute,
+    );
+    // The first time: today's (or that weekday's) yet to come.
+    while (!at.isAfter(now) || (weekday != null && at.weekday != weekday)) {
+      at = tz.TZDateTime(tz.local, at.year, at.month, at.day + 1, hour, minute);
+    }
+    await _plugin.zonedSchedule(
+      id: id,
+      scheduledDate: at,
+      title: title,
+      body: body,
+      notificationDetails: NotificationDetails(
+        android: AndroidNotificationDetails(
+          channelId,
+          channelName,
           importance: Importance.defaultImportance,
           priority: Priority.defaultPriority,
         ),
         iOS: const DarwinNotificationDetails(),
       ),
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      matchDateTimeComponents: weekday == null
+          ? DateTimeComponents.time
+          : DateTimeComponents.dayOfWeekAndTime,
       payload: payload,
     );
   }
@@ -258,6 +400,24 @@ class UnsupportedReminderScheduler implements DailyReminderScheduler {
   Future<void> scheduleOnce({
     required int id,
     required DateTime at,
+    required String title,
+    required String body,
+    required String channelId,
+    required String channelName,
+    required String payload,
+    ReminderSound sound = ReminderSound.standard,
+    bool exact = false,
+  }) async {}
+  @override
+  Future<bool> exactAllowed() async => false;
+  @override
+  Future<void> requestExact() async {}
+  @override
+  Future<void> scheduleRepeating({
+    required int id,
+    int? weekday,
+    required int hour,
+    required int minute,
     required String title,
     required String body,
     required String channelId,

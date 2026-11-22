@@ -2,6 +2,9 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:tahfeez_ai/features/listen/application/follow_along_controller.dart';
+import 'package:tahfeez_ai/features/listen/presentation/follow_along_sheet.dart'
+    show FollowAlongHint;
 import 'package:tahfeez_ai/core/localization/fallback_localizations.dart';
 import 'package:tahfeez_ai/core/localization/generated/app_localizations.dart';
 import 'package:tahfeez_ai/core/theme/app_theme.dart';
@@ -55,9 +58,13 @@ void main() {
     // The eye starting in colour (the app's default); else plain, one tap
     // from the ayahs hidden.
     bool colours = false,
+    // Follow along in its review (its hint's place over the bar).
+    bool followReview = false,
   }) {
     return ProviderScope(
       overrides: [
+        if (followReview)
+          followAlongControllerProvider.overrideWith(_FollowInReview.new),
         if (!colours)
           mushafColoursShownProvider.overrideWith(
             () => MushafColoursShown(initial: false),
@@ -525,6 +532,47 @@ void main() {
         tester.getCenter(find.byTooltip(tip)).dy,
         closeTo(stopY, 1),
         reason: tip,
+      );
+    }
+  });
+
+  testWidgets('Follow along\'s review: one line, "Mistakes found", on the '
+      'bar\'s border as its turns\' hints — not over the last ayah, and '
+      'clear of Skip and Try again (owner, 2026-11-20 and -21)', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(app(devPanel: false, followReview: true));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Start recitation'));
+    await tester.pumpAndSettle();
+    final hint = find.byKey(const ValueKey('mistakes-hint'));
+    expect(hint, findsOneWidget);
+    final pill = tester.getRect(
+      find.byKey(const ValueKey('follow-hint-review')),
+    );
+    expect(pill.height, FollowAlongHint.height, reason: 'one line');
+    expect(find.text('Mistakes'), findsOneWidget);
+    // On the bar's top border (half above it at most), as before.
+    final barTop = tester.getRect(find.byKey(bar)).top;
+    expect(pill.top, greaterThanOrEqualTo(barTop - FollowAlongHint.height / 2));
+    expect(pill.bottom, greaterThan(barTop));
+    // Their labels clear of it (one line now; on two it covered them).
+    for (final key in ['follow-skip', 'follow-try-again']) {
+      final label = tester.getRect(
+        find
+            .descendant(
+              of: find.byKey(ValueKey(key)),
+              matching: find.byType(Text),
+            )
+            .first,
+      );
+      expect(
+        pill.bottom,
+        lessThanOrEqualTo(label.top),
+        reason: '$key\'s label not under the hint',
       );
     }
   });
@@ -1453,4 +1501,17 @@ class _IntroSeen extends HifzSettingsController {
   @override
   HifzSettings build() =>
       HifzSettings(introsSeen: RecitationIntroMode.values.toSet());
+}
+
+/// Follow along waiting after a strict turn with mistakes.
+class _FollowInReview extends FollowAlongController {
+  @override
+  FollowAlongState? build() => const FollowAlongState(
+    parts: [
+      [1001],
+    ],
+    index: 0,
+    phase: FollowAlongPhase.review,
+    options: FollowAlongOptions(strict: true),
+  );
 }

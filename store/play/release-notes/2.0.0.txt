@@ -1,0 +1,150 @@
+<en-US>
+• Prayer times with the adhan or a vibration, a Qibla compass and a Hijri calendar
+• Morning and evening athkar from Hisn al-Muslim, and habits with reminders
+• Home-screen widgets: prayer times, date, daily ayah, reading, memorization, khatmah
+• New reciter: Islam Sobhi; a 12- or 24-hour clock in Settings
+</en-US>
+<ar>
+• مواقيت الصلاة مع الأذان أو الاهتزاز، وبوصلة القبلة، والتقويم الهجري
+• أذكار الصباح والمساء من حصن المسلم، والعادات مع تذكيرات
+• أدوات الشاشة الرئيسية: المواقيت والتاريخ وآية اليوم والقراءة والحفظ والختمة
+• قارئ جديد: إسلام صبحي؛ وساعة ١٢ أو ٢٤ ساعة في الإعدادات
+</ar>
+<bn-BD>
+• আজান বা কম্পনসহ নামাজের সময়, কিবলা কম্পাস ও হিজরি ক্যালেন্ডার
+• হিসনুল মুসলিম থেকে সকাল-সন্ধ্যার যিকির, আর রিমাইন্ডারসহ অভ্যাস
+• হোম স্ক্রিন উইজেট: নামাজের সময়, তারিখ, দৈনিক আয়াত, পড়া, হিফজ, খতম
+• নতুন কারী: ইসলাম সুবহি; সেটিংসে ১২ বা ২৪ ঘণ্টার ঘড়ি
+</bn-BD>
+<da-DK>
+• Bedetider med adhan eller vibration, et Qibla-kompas og en Hijri-kalender
+• Morgen- og aften-adhkar fra Hisn al-Muslim, og vaner med påmindelser
+• Widgets til startskærmen: bedetider, dato, dagens vers, læsning, memorering, khatmah
+• Ny recitator: Islam Sobhi; 12- eller 24-timers ur i Indstillinger
+</da-DK>
+<de-DE>
+• Gebetszeiten mit Adhan oder Vibration, ein Qibla-Kompass und ein Hidschri-Kalender
+• Morgen- und Abend-Adhkar aus Hisn al-Muslim und Gewohnheiten mit Erinnerungen
+• Startbildschirm-Widgets: Gebetszeiten, Datum, Vers des Tages, Lesen, Auswendiglernen, Khatmah
+• Neuer Rezitator: Islam Sobhi; 12- oder 24-Stunden-Uhr in den Einstellungen
+</de-DE>
+<el-GR>
+• Ώρες προσευχής με αζάν ή δόνηση, πυξίδα Κίμπλα και ημερολόγιο Χιτζρί
+• Πρωινά και βραδινά άζκαρ από το Hisn al-Muslim, και συνήθειες με υπενθυμίσεις
+• Widget αρχικής οθόνης: ώρες προσευχής, ημερομηνία, εδάφιο, ανάγνωση, απομνημόνευση, khatmah
+• Νέος απαγγελτής: Islam Sobhi· ρολόι 12 ή 24 ωρών στις Ρυθμίσεις
+</el-GR>
+<es-ES>
+• Horarios de oración con adhan o vibración, brújula de la Qibla y calendario hégira
+• Adhkar de la mañana y de la tarde de Hisn al-Muslim, y hábitos con recordatorios
+• Widgets de inicio: horarios de oración, fecha, aleya diaria, lectura, memorización, khatmah
+• Nuevo recitador: Islam Sobhi; reloj de 12 o 24 horas en Ajustes
+</es-ES>
+<fa>
+• اوقات نماز با اذان یا لرزش، قطب‌نمای قبله و تقویم قمری
+• اذکار صبح و شام از حصن المسلم، و عادت‌ها با یادآور
+• ابزارک‌های صفحهٔ اصلی: اوقات نماز، تاریخ، آیهٔ روز، خواندن، حفظ، ختم
+• قاری تازه: اسلام صبحی؛ ساعت ۱۲ یا ۲۴ ساعته در تنظیمات
+</fa>
+<fr-FR>
+• Heures de prière avec adhan ou vibration, boussole de la Qibla et calendrier hégirien
+• Adhkar du matin et du soir de Hisn al-Muslim, et habitudes avec rappels
+• Widgets d'accueil : heures de prière, date, verset du jour, lecture, mémorisation, khatmah
+• Nouveau récitateur : Islam Sobhi ; horloge 12 h ou 24 h dans les Réglages
+</fr-FR>
+<id>
+• Waktu salat dengan azan atau getaran, kompas kiblat dan kalender Hijriah
+• Zikir pagi dan petang dari Hisnul Muslim, serta kebiasaan dengan pengingat
+• Widget layar utama: waktu salat, tanggal, ayat harian, bacaan, hafalan, khatam
+• Qari baru: Islam Sobhi; jam 12 atau 24 jam di Pengaturan
+</id>
+<ja-JP>
+• アザーンまたはバイブレーションつきの礼拝時刻、キブラコンパス、ヒジュラ暦
+• 『ヒスヌル・ムスリム』の朝と夕方のズィクル、リマインダーつきの習慣
+• ホーム画面ウィジェット：礼拝時刻、日付、今日の節、読書、暗記、ハトマ
+• 新しい朗誦者：イスラーム・スブヒー。設定で12時間/24時間表示
+</ja-JP>
+<kk>
+• Азан не дірілмен намаз уақыттары, құбыла компасы және хижри күнтізбесі
+• «Хисн әл-Муслимнен» таңғы және кешкі зікірлер, еске салғышы бар әдеттер
+• Басты экран виджеттері: намаз уақыттары, күн, күннің аяты, оқу, жаттау, хатым
+• Жаңа қари: Ислам Субхи; Баптауларда 12 не 24 сағаттық уақыт
+</kk>
+<ko-KR>
+• 아잔 또는 진동이 있는 예배 시간, 키블라 나침반, 히즈라력
+• 히스눌 무슬림의 아침·저녁 디크르와 알림이 있는 습관
+• 홈 화면 위젯: 예배 시간, 날짜, 오늘의 아야, 읽기, 암송, 카트마
+• 새 낭송자: 이슬람 소브히; 설정에서 12/24시간제
+</ko-KR>
+<ms>
+• Waktu solat dengan azan atau getaran, kompas kiblat dan kalendar Hijrah
+• Zikir pagi dan petang daripada Hisnul Muslim, dan tabiat dengan peringatan
+• Widget skrin utama: waktu solat, tarikh, ayat harian, bacaan, hafazan, khatam
+• Qari baharu: Islam Sobhi; jam 12 atau 24 jam dalam Tetapan
+</ms>
+<nl-NL>
+• Gebedstijden met adhan of trilling, een qibla-kompas en een hidjri-kalender
+• Ochtend- en avond-adhkar uit Hisn al-Muslim, en gewoonten met herinneringen
+• Startschermwidgets: gebedstijden, datum, vers van de dag, lezen, memoriseren, khatmah
+• Nieuwe reciteur: Islam Sobhi; 12- of 24-uursklok in Instellingen
+</nl-NL>
+<pt-BR>
+• Horários de oração com adhan ou vibração, bússola da Qibla e calendário hegírico
+• Adhkar da manhã e da tarde do Hisn al-Muslim, e hábitos com lembretes
+• Widgets da tela inicial: horários de oração, data, versículo do dia, leitura, memorização, khatmah
+• Novo recitador: Islam Sobhi; relógio de 12 ou 24 horas nos Ajustes
+</pt-BR>
+<ru-RU>
+• Время намаза с азаном или вибрацией, компас киблы и календарь хиджры
+• Утренние и вечерние азкары из «Крепости мусульманина» и привычки с напоминаниями
+• Виджеты главного экрана: время намаза, дата, аят дня, чтение, заучивание, хатм
+• Новый чтец: Ислам Субхи; 12- или 24-часовой формат в настройках
+</ru-RU>
+<sw>
+• Nyakati za swala pamoja na adhana au mtetemo, dira ya Kibla na kalenda ya Hijria
+• Adhkar za asubuhi na jioni kutoka Hisnul Muslim, na mazoea yenye vikumbusho
+• Wijeti za skrini ya nyumbani: nyakati za swala, tarehe, aya ya siku, kusoma, kuhifadhi, khitma
+• Msomaji mpya: Islam Sobhi; saa ya 12 au 24 katika Mipangilio
+</sw>
+<tr-TR>
+• Ezan veya titreşimle namaz vakitleri, kıble pusulası ve hicri takvim
+• Hısnu'l-Müslim'den sabah ve akşam zikirleri, hatırlatıcılı alışkanlıklar
+• Ana ekran widget'ları: namaz vakitleri, tarih, günün ayeti, okuma, ezber, hatim
+• Yeni kâri: İslam Subhi; Ayarlar'da 12 veya 24 saat biçimi
+</tr-TR>
+<ur>
+• اذان یا وائبریشن کے ساتھ نماز کے اوقات، قبلہ کمپاس اور ہجری کیلنڈر
+• حصن المسلم سے صبح و شام کے اذکار، اور یاد دہانی والی عادات
+• ہوم اسکرین ویجیٹس: نماز کے اوقات، تاریخ، آج کی آیت، پڑھنا، حفظ، ختم
+• نئے قاری: اسلام صبحی؛ ترتیبات میں 12 یا 24 گھنٹے کی گھڑی
+</ur>
+<zh-CN>
+• 礼拜时间（宣礼或振动）、朝向指南针与伊斯兰历
+• 《穆斯林堡垒》早晨与傍晚记念词，以及带提醒的习惯
+• 主屏幕小组件：礼拜时间、日期、每日经文、阅读、背记、通读
+• 新诵读者：伊斯兰·苏卜希；设置中可选 12 或 24 小时制
+</zh-CN>
+<hi-IN>
+• अज़ान या कंपन के साथ नमाज़ के समय, क़िबला कम्पास और हिजरी कैलेंडर
+• हिस्नुल मुस्लिम से सुबह-शाम के अज़कार, और रिमाइंडर के साथ आदतें
+• होम स्क्रीन विजेट: नमाज़ के समय, तारीख़, आज की आयत, पढ़ना, हिफ़्ज़, ख़त्म
+• नए क़ारी: इस्लाम सुब्ही; सेटिंग्स में 12 या 24 घंटे की घड़ी
+</hi-IN>
+<ta-IN>
+• பாங்கு அல்லது அதிர்வுடன் தொழுகை நேரங்கள், கிப்லா திசைகாட்டி, ஹிஜ்ரி நாட்காட்டி
+• ஹிஸ்னுல் முஸ்லிமிலிருந்து காலை, மாலை அத்கார்; நினைவூட்டலுடன் பழக்கங்கள்
+• முகப்புத் திரை விட்ஜெட்டுகள்: தொழுகை நேரம், தேதி, வசனம், ஓதுதல், மனனம், கத்தம்
+• புதிய காரி: இஸ்லாம் சுப்ஹி; அமைப்புகளில் 12/24 மணி நேரக் கடிகாரம்
+</ta-IN>
+<ml-IN>
+• ബാങ്കോ വൈബ്രേഷനോ ഉള്ള നമസ്കാര സമയങ്ങൾ, ഖിബ്‌ല കോമ്പസ്, ഹിജ്റ കലണ്ടർ
+• ഹിസ്നുൽ മുസ്‌ലിമിൽ നിന്ന് പ്രഭാത, സായാഹ്ന അദ്കാർ; ഓർമ്മപ്പെടുത്തലുള്ള ശീലങ്ങൾ
+• ഹോം സ്ക്രീൻ വിജറ്റുകൾ: നമസ്കാര സമയം, തീയതി, ആയത്ത്, വായന, ഹിഫ്ള്, ഖത്തം
+• പുതിയ ഖാരിഅ്: ഇസ്‌ലാം സുബ്ഹി; ക്രമീകരണങ്ങളിൽ 12/24 മണിക്കൂർ ക്ലോക്ക്
+</ml-IN>
+<it-IT>
+• Orari di preghiera con adhan o vibrazione, bussola per la Qibla e calendario dell'egira
+• Adhkar del mattino e della sera da Hisn al-Muslim, e abitudini con promemoria
+• Widget Home: orari di preghiera, data, versetto del giorno, lettura, memorizzazione, khatmah
+• Nuovo recitatore: Islam Sobhi; orologio a 12 o 24 ore nelle Impostazioni
+</it-IT>

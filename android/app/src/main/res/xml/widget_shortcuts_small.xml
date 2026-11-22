@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Tahfeez's shortcuts widget (owner, 2026-11-22): resizable, sized as on Home
+     by default (TahfeezWidgets.kt); its picker preview: preview_shortcuts_small. -->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="180dp"
+    android:minHeight="57dp"
+    android:minResizeWidth="110dp"
+    android:minResizeHeight="50dp"
+    android:targetCellWidth="3"
+    android:targetCellHeight="1"
+    android:resizeMode="horizontal|vertical"
+    android:widgetCategory="home_screen"
+    android:initialLayout="@layout/widget_shortcuts"
+    android:previewLayout="@layout/preview_shortcuts_small"
+    android:previewImage="@drawable/widget_preview_shortcuts_small"
+    android:description="@string/widget_shortcuts_small"
+    android:updatePeriodMillis="1800000" />

@@ -25,8 +25,14 @@ abstract class AudioController {
 
   /// Plays [urls] one after another; [AudioPlaybackState.currentIndex] says
   /// which. Throws when the first can't be loaded (e.g. offline). [items]:
-  /// each one's title for the media notification and lock screen.
-  Future<void> playQueue(List<String> urls, {List<AudioItemInfo>? items});
+  /// each one's title for the media notification and lock screen; [clips]:
+  /// the part of each file played, where not all of it (an ayah of a
+  /// whole surah's recording).
+  Future<void> playQueue(
+    List<String> urls, {
+    List<AudioItemInfo>? items,
+    List<AudioClip?>? clips,
+  });
   Future<void> pause();
   Future<void> resume();
   Future<void> stop();

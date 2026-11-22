@@ -19,7 +19,24 @@ class Reciter {
     this.kbps, {
     this.everyAyah,
     this.fileKbps,
+    this.surahFolder,
+    this.missingSurahs = const {},
   });
+
+  /// Where its whole-surah recordings are (`<folder>001.mp3` …), for a
+  /// reciter recorded by surah only: each ayah is cut from its surah by
+  /// Tahfeez's own timings (`assets/quran/reciter_timings/<edition>.json`,
+  /// tool/acoustic_verification/align_surah_audio.py).
+  final String? surahFolder;
+
+  /// The surahs it has no recording of (played by [basmalaReciter]).
+  final Set<int> missingSurahs;
+
+  /// Recorded by whole surahs ([surahFolder]).
+  bool get bySurah => surahFolder != null;
+
+  /// Whether it recites surah [surah] itself.
+  bool recites(int surah) => !missingSurahs.contains(surah);
 
   /// The CDN edition, e.g. `ar.alafasy` — the reciter's id in the app
   /// (its setting, its downloads' folder) whatever serves it.
@@ -46,6 +63,18 @@ class Reciter {
 /// size of 128, a difference hardly heard in recitation). A reciter who asks to be removed is removed here.
 const reciters = [
   Reciter('ar.alafasy', 'Mishary Alafasy', 'مشاري العفاسي', 64),
+  // Added 2026-11-21 (owner's request; listed below Alafasy): mp3quran.net
+  // has him by whole surahs only — 109 of 114 (not 37, 39, 40, 45, 65,
+  // played by Al-Husary) — each ayah cut from its surah at Tahfeez's own
+  // timings.
+  Reciter(
+    'ar.islamsobhi',
+    'Islam Sobhi',
+    'إسلام صبحي',
+    128,
+    surahFolder: 'https://cdn.mp3quran.net/audio/islam-sobhi/r1/',
+    missingSurahs: {37, 39, 40, 45, 65},
+  ),
   Reciter('ar.husary', 'Mahmoud Khalil Al-Husary', 'محمود خليل الحصري', 64),
   Reciter('ar.husarymujawwad', 'Al-Husary (Mujawwad)', 'الحصري (مجوّد)', 64),
   Reciter(
@@ -264,7 +293,13 @@ String translationAudioUrl(int ayahId, TranslationVoice voice) =>
 /// 113:1, 114:1 against their surahs' other ayahs, from the files' sizes at
 /// their bitrate, 2026-11-06). Every other reciter's first ayahs start
 /// without it: theirs is played before them ([basmalaReciter]).
-const reciterRecitesBasmala = {'ar.ahmedajamy', 'ar.banna', 'ar.parhizgar'};
+const reciterRecitesBasmala = {
+  'ar.ahmedajamy',
+  'ar.banna',
+  'ar.parhizgar',
+  // (His first ayah's timing starts at his own Bismillah.)
+  'ar.islamsobhi',
+};
 
 /// The Bismillah played before a surah for the reciters without one: Al-
 /// Husary's (his 1:1, Al-Fātiḥah's first ayah).
@@ -292,7 +327,14 @@ List<int> ayahRange(int from, int to) {
   return out;
 }
 
+/// Surah [surah]'s whole recording by [reciter] ([Reciter.bySurah]).
+String surahAudioUrl(int surah, Reciter reciter) =>
+    '${reciter.surahFolder}${surah.toString().padLeft(3, '0')}.mp3';
+
+/// Ayah [ayahId]'s file. A reciter recorded by surah has none (its ayahs
+/// are cut from [surahAudioUrl]); a surah it lacks is [basmalaReciter]'s.
 String ayahAudioUrl(int ayahId, Reciter reciter) {
+  if (reciter.bySurah) return ayahAudioUrl(ayahId, basmalaReciter);
   final folder = reciter.everyAyah;
   if (folder != null) {
     String three(int n) => n.toString().padLeft(3, '0');
@@ -358,6 +400,8 @@ const reciterDownloadBytes = <String, int>{
   'ar.juhani': 1177015868,
   'ar.matroud': 1613355087,
   'ar.tunaiji': 792626170,
+  // (Its 109 whole-surah files, their exact sizes, 2026-11-21.)
+  'ar.islamsobhi': 1626463209,
 };
 
 /// [reciter]'s download size, as "≈ 640 MB" / "≈ 1.2 GB"; `null` if
@@ -456,8 +500,24 @@ Iterable<int> juzAyahNumbers(int juz) sync* {
 /// unknown.
 String? juzDownloadSize(Reciter reciter, int juz) {
   final bytes = reciterDownloadBytes[reciter.edition];
-  return bytes == null ? null : _sizeLabel(bytes * juzShare[juz - 1]);
+  if (bytes == null) return null;
+  if (!reciter.bySurah) return _sizeLabel(bytes * juzShare[juz - 1]);
+  // Recorded by surah: a juz downloads each of its surahs whole.
+  final surahs = {
+    for (final n in juzAyahNumbers(juz)) ayahIdAtGlobal(n) ~/ 1000,
+  }.where(reciter.recites);
+  return _sizeLabel(
+    bytes *
+        surahs.fold(0.0, (t, s) => t + surahShare[s - 1]) /
+        _recitedShare(reciter),
+  );
 }
+
+/// The share of the Quran [reciter] recites (the whole, or the surahs a
+/// reciter recorded by surah has): his download's total is of those.
+double _recitedShare(Reciter reciter) => reciter.missingSurahs.isEmpty
+    ? 1
+    : 1 - reciter.missingSurahs.fold(0.0, (t, s) => t + surahShare[s - 1]);
 
 /// Each surah's share of the whole recitation (by its letters, as
 /// [juzShare]), Al-Fatiha first — for its download size.
@@ -590,5 +650,7 @@ Iterable<int> surahAyahNumbers(int surah) sync* {
 /// unknown.
 String? surahDownloadSize(Reciter reciter, int surah) {
   final bytes = reciterDownloadBytes[reciter.edition];
-  return bytes == null ? null : _sizeLabel(bytes * surahShare[surah - 1]);
+  return bytes == null
+      ? null
+      : _sizeLabel(bytes * surahShare[surah - 1] / _recitedShare(reciter));
 }

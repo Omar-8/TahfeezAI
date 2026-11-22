@@ -13,7 +13,9 @@ enum AudioContentOption { quranOnly, translationOnly, both }
 /// Matches `docs/reference/08_AUDIO_SPEC.md` §3 (`AudioEndBehaviour`).
 enum AudioEndBehaviour { stopPlayback, nextChapter, repeatChapter }
 
-/// Immutable snapshot of what the audio subsystem is doing right now.
+/// The part of a file played: from [start] to [end].
+typedef AudioClip = ({Duration start, Duration end});
+
 /// What is playing, as the media notification and lock screen show it.
 class AudioItemInfo {
   const AudioItemInfo({
@@ -36,6 +38,7 @@ class AudioItemInfo {
   final int? kbps;
 }
 
+/// Immutable snapshot of what the audio subsystem is doing right now.
 class AudioPlaybackState {
   const AudioPlaybackState({
     this.isPlaying = false,

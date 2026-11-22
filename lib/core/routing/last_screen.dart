@@ -54,7 +54,7 @@ bool restorableScreen(String? location) {
     AppRoutes.search,
     AppRoutes.bookmarks,
     AppRoutes.memorize,
-    AppRoutes.settings,
-    AppRoutes.about,
+    // (Settings, About and Qibla open over a tab: not reopened alone, with
+    // nothing to go back to.)
   }.contains(path);
 }

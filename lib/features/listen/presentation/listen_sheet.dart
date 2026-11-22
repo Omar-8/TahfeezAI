@@ -94,7 +94,11 @@ Future<void> offerDownloadReciterTip(
   // up for it.)
   if (!downloads.known) return;
   final reciter = reciterFor(ref.read(reciterProvider));
-  if (downloads.localFile(ayahId, reciter) != null) return;
+  // (A reciter recorded by surah: his surah's file.)
+  final local = reciter.bySurah
+      ? downloads.localSurahFile(ayahId ~/ 1000, reciter)
+      : downloads.localFile(ayahId, reciter);
+  if (local != null) return;
   final due = await appTipDue(
     storage,
     AppTip.downloadReciter,
@@ -150,17 +154,26 @@ Future<String?> showTranslationVoiceSheet(
 );
 
 /// The reciters, to pick one (Settings, the Listen and Follow along
-/// menus), with a search box over their English and Arabic names.
-Future<void> showReciterSheet(BuildContext context) =>
-    showTahfeezModalBottomSheet<void>(
-      context: context,
-      title: AppLocalizations.of(context).listenReciter,
-      besideOnWide: kIsWeb,
-      builder: (context) => const _ReciterPicker(),
-    );
+/// menus), with a search box over their English and Arabic names. For
+/// [surah] (the Listen menu's, to [toSurah] for a range): only those who
+/// recite all of them (owner, 2026-11-22: Islam Sobhi not offered for the
+/// surahs he lacks).
+Future<void> showReciterSheet(
+  BuildContext context, {
+  int? surah,
+  int? toSurah,
+}) => showTahfeezModalBottomSheet<void>(
+  context: context,
+  title: AppLocalizations.of(context).listenReciter,
+  besideOnWide: kIsWeb,
+  builder: (context) => _ReciterPicker(surah: surah, toSurah: toSurah),
+);
 
 class _ReciterPicker extends ConsumerStatefulWidget {
-  const _ReciterPicker();
+  const _ReciterPicker({this.surah, this.toSurah});
+
+  final int? surah;
+  final int? toSurah;
 
   @override
   ConsumerState<_ReciterPicker> createState() => _ReciterPickerState();
@@ -184,11 +197,22 @@ class _ReciterPickerState extends ConsumerState<_ReciterPicker> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final q = _fold(_query);
+    final surah = widget.surah;
+    final last = widget.toSurah ?? surah;
+    bool recitesAll(Reciter r) {
+      if (surah == null || last == null) return true;
+      for (var s = surah; s <= last; s++) {
+        if (!r.recites(s)) return false;
+      }
+      return true;
+    }
+
     final shown = [
       for (final r in reciters)
-        if (q.isEmpty ||
-            _fold(r.nameEn).contains(q) ||
-            _fold(r.nameAr).contains(q))
+        if (recitesAll(r) &&
+            (q.isEmpty ||
+                _fold(r.nameEn).contains(q) ||
+                _fold(r.nameAr).contains(q)))
           r,
     ];
     return Column(
@@ -392,7 +416,11 @@ class _ListenSheetState extends ConsumerState<_ListenSheet> {
                   name: reciterName(context, reciter),
                 ),
                 trailing: const Icon(Icons.chevron_right),
-                onTap: () => showReciterSheet(context),
+                onTap: () => showReciterSheet(
+                  context,
+                  surah: from.chapterNo,
+                  toSurah: to.chapterNo,
+                ),
               ),
             ),
           ),
@@ -615,9 +643,8 @@ class _ReciterRow extends ConsumerWidget {
         '${_surahName(ref, l10n, surah)} · ${(progress * 100).floor()}%',
       ReciterDownload(:final progress, downloading: true) =>
         '${(progress * 100).floor()}%',
-      ReciterDownload(:final files) when files > 0 => l10n.listenDownloadedPart(
-        (files * 100 / 6236).ceil(),
-      ),
+      ReciterDownload(:final files, :final total) when files > 0 =>
+        l10n.listenDownloadedPart((files * 100 / total).ceil()),
       _ => null,
     };
     return ListTile(
@@ -631,7 +658,13 @@ class _ReciterRow extends ConsumerWidget {
       ),
       title: Text(reciterName(context, reciter)),
       subtitle: Text(
-        [?size, ?status].join(' · '),
+        [
+          // (A reciter who hasn't recorded every surah: how many.)
+          if (reciter.missingSurahs.isNotEmpty)
+            l10n.listenSurahsOf(114 - reciter.missingSurahs.length),
+          ?size,
+          ?status,
+        ].join(' · '),
         style: theme.textTheme.bodySmall?.copyWith(
           color: d?.failed ?? false
               ? theme.colorScheme.error
@@ -740,137 +773,148 @@ String _surahName(WidgetRef ref, AppLocalizations l10n, int surah) {
 /// What to download of [reciter]: the whole Quran, or — in two tabs — one
 /// juz or one surah (each with its size; a check on what is already here).
 /// Deletes what is here, too.
-Future<void> _showDownloadChoices(BuildContext context, Reciter reciter) =>
-    showTahfeezModalBottomSheet<void>(
-      context: context,
-      title: reciterName(context, reciter),
-      builder: (context) => Consumer(
-        builder: (context, ref, _) {
-          final l10n = AppLocalizations.of(context);
-          final theme = Theme.of(context);
-          final downloads = ref.read(reciterDownloadsProvider.notifier);
-          final d = ref.watch(
-            reciterDownloadsProvider.select((all) => all[reciter.edition]),
-          );
-          final check = Icon(
-            Icons.check_circle_rounded,
-            color: theme.colorScheme.primary,
-          );
-          void start({int? juz, int? surah}) {
-            final messenger = ScaffoldMessenger.of(context);
-            final offline = l10n.downloadOffline;
-            final connectivity = ref.read(connectivityServiceProvider);
-            Navigator.of(context).pop();
-            // Offline: said at once, not a download failing later. (Unknown:
-            // tried.)
-            unawaited(() async {
-              var online = true;
-              try {
-                online = await connectivity.isOnline;
-              } catch (_) {}
-              if (!online) {
-                messenger
-                  ..hideCurrentSnackBar()
-                  ..showSnackBar(SnackBar(content: Text(offline)));
-                return;
-              }
-              await downloads.download(reciter.edition, juz: juz, surah: surah);
-            }());
+Future<void> _showDownloadChoices(
+  BuildContext context,
+  Reciter reciter,
+) => showTahfeezModalBottomSheet<void>(
+  context: context,
+  title: reciterName(context, reciter),
+  builder: (context) => Consumer(
+    builder: (context, ref, _) {
+      final l10n = AppLocalizations.of(context);
+      final theme = Theme.of(context);
+      final downloads = ref.read(reciterDownloadsProvider.notifier);
+      final surahs = [
+        for (var n = 1; n <= 114; n++)
+          if (reciter.recites(n)) n,
+      ];
+      final d = ref.watch(
+        reciterDownloadsProvider.select((all) => all[reciter.edition]),
+      );
+      final check = Icon(
+        Icons.check_circle_rounded,
+        color: theme.colorScheme.primary,
+      );
+      void start({int? juz, int? surah}) {
+        final messenger = ScaffoldMessenger.of(context);
+        final offline = l10n.downloadOffline;
+        final connectivity = ref.read(connectivityServiceProvider);
+        Navigator.of(context).pop();
+        // Offline: said at once, not a download failing later. (Unknown:
+        // tried.)
+        unawaited(() async {
+          var online = true;
+          try {
+            online = await connectivity.isOnline;
+          } catch (_) {}
+          if (!online) {
+            messenger
+              ..hideCurrentSnackBar()
+              ..showSnackBar(SnackBar(content: Text(offline)));
+            return;
           }
+          await downloads.download(reciter.edition, juz: juz, surah: surah);
+        }());
+      }
 
-          Widget part({
-            required Key key,
-            required String title,
-            required String? size,
-            required bool here,
-            required VoidCallback onTap,
-          }) => ListTile(
-            key: key,
-            dense: true,
-            title: Text(title),
-            subtitle: Text(size ?? ''),
-            trailing: here
-                ? check
-                : const Icon(Icons.download_rounded, size: 20),
-            onTap: here ? null : onTap,
-          );
+      Widget part({
+        required Key key,
+        required String title,
+        required String? size,
+        required bool here,
+        required VoidCallback onTap,
+      }) => ListTile(
+        key: key,
+        dense: true,
+        title: Text(title),
+        subtitle: Text(size ?? ''),
+        trailing: here ? check : const Icon(Icons.download_rounded, size: 20),
+        onTap: here ? null : onTap,
+      );
 
-          return DefaultTabController(
-            length: 2,
-            child: Column(
-              children: [
-                ListTile(
-                  key: const ValueKey('download-whole'),
-                  leading: const Icon(Icons.menu_book_rounded),
-                  title: Text(l10n.listenDownloadWhole),
-                  subtitle: Text(reciterDownloadSize(reciter) ?? ''),
-                  trailing: d?.complete ?? false
-                      ? check
-                      : const Icon(Icons.download_rounded),
-                  onTap: d?.complete ?? false ? null : () => start(),
+      return DefaultTabController(
+        length: 2,
+        child: Column(
+          children: [
+            ListTile(
+              key: const ValueKey('download-whole'),
+              leading: const Icon(Icons.menu_book_rounded),
+              title: Text(l10n.listenDownloadWhole),
+              subtitle: Text(reciterDownloadSize(reciter) ?? ''),
+              trailing: d?.complete ?? false
+                  ? check
+                  : const Icon(Icons.download_rounded),
+              onTap: d?.complete ?? false ? null : () => start(),
+            ),
+            TabBar(
+              tabs: [
+                Tab(
+                  key: const ValueKey('download-tab-juz'),
+                  text: l10n.quranTabJuz,
                 ),
-                TabBar(
-                  tabs: [
-                    Tab(
-                      key: const ValueKey('download-tab-juz'),
-                      text: l10n.quranTabJuz,
-                    ),
-                    Tab(
-                      key: const ValueKey('download-tab-surah'),
-                      text: l10n.quranTabSurah,
-                    ),
-                  ],
+                // (A reciter without every surah: how many, so a list
+                // numbered to 114 isn't taken for all of them.)
+                Tab(
+                  key: const ValueKey('download-tab-surah'),
+                  text: reciter.missingSurahs.isEmpty
+                      ? l10n.quranTabSurah
+                      : '${l10n.quranTabSurah} · ${l10n.listenSurahsOf(surahs.length)}',
                 ),
-                Expanded(
-                  child: TabBarView(
-                    children: [
-                      _PartsList(
-                        count: 30,
-                        builder: (i) => part(
-                          key: ValueKey('download-juz-${i + 1}'),
-                          title: l10n.homeContinueReadingJuz(i + 1),
-                          size: juzDownloadSize(reciter, i + 1),
-                          here: downloads.juzComplete(reciter.edition, i + 1),
-                          onTap: () => start(juz: i + 1),
-                        ),
-                      ),
-                      _PartsList(
-                        count: 114,
-                        builder: (i) => part(
-                          key: ValueKey('download-surah-${i + 1}'),
-                          title: '${i + 1}. ${_surahName(ref, l10n, i + 1)}',
-                          size: surahDownloadSize(reciter, i + 1),
-                          here: downloads.surahComplete(reciter.edition, i + 1),
-                          onTap: () => start(surah: i + 1),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                if ((d?.files ?? 0) > 0) ...[
-                  const Divider(height: 1),
-                  ListTile(
-                    key: const ValueKey('download-delete-all'),
-                    leading: Icon(
-                      Icons.delete_outline_rounded,
-                      color: theme.colorScheme.error,
-                    ),
-                    title: Text(
-                      l10n.listenDownloadDeleteAll,
-                      style: TextStyle(color: theme.colorScheme.error),
-                    ),
-                    onTap: () {
-                      unawaited(downloads.delete(reciter.edition));
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                ],
               ],
             ),
-          );
-        },
-      ),
-    );
+            Expanded(
+              child: TabBarView(
+                children: [
+                  _PartsList(
+                    count: 30,
+                    builder: (i) => part(
+                      key: ValueKey('download-juz-${i + 1}'),
+                      title: l10n.homeContinueReadingJuz(i + 1),
+                      size: juzDownloadSize(reciter, i + 1),
+                      here: downloads.juzComplete(reciter.edition, i + 1),
+                      onTap: () => start(juz: i + 1),
+                    ),
+                  ),
+                  // (Only the surahs the reciter recites: Islam Sobhi
+                  // has 109.)
+                  _PartsList(
+                    count: surahs.length,
+                    builder: (i) => part(
+                      key: ValueKey('download-surah-${surahs[i]}'),
+                      title:
+                          '${surahs[i]}. ${_surahName(ref, l10n, surahs[i])}',
+                      size: surahDownloadSize(reciter, surahs[i]),
+                      here: downloads.surahComplete(reciter.edition, surahs[i]),
+                      onTap: () => start(surah: surahs[i]),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if ((d?.files ?? 0) > 0) ...[
+              const Divider(height: 1),
+              ListTile(
+                key: const ValueKey('download-delete-all'),
+                leading: Icon(
+                  Icons.delete_outline_rounded,
+                  color: theme.colorScheme.error,
+                ),
+                title: Text(
+                  l10n.listenDownloadDeleteAll,
+                  style: TextStyle(color: theme.colorScheme.error),
+                ),
+                onTap: () {
+                  unawaited(downloads.delete(reciter.edition));
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ],
+        ),
+      );
+    },
+  ),
+);
 
 /// The download sheet's juz or surahs: a list on a phone, two or three
 /// columns where the sheet is wider (a tablet, a phone on its side) — each

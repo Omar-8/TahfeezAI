@@ -2,17 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:tahfeez_ai/core/ui/type_once.dart';
 
-/// Typed out the first time in a run, laid out whole from the start (the
-/// rest transparent); whole at once after that.
+/// Revealed word by word the first time in a run (owner, 2026-11-21: each
+/// word fading in), laid out whole from the start; whole at once after
+/// that.
 void main() {
   setUp(TypeOnce.reset);
 
   Widget app() => MaterialApp(
     home: TypeOnce(
       id: 'greeting',
-      length: 10,
+      length: 18,
       builder: (context, typed) => Text.rich(
-        TextSpan(children: typedSpans('Assalamu..', typed)),
+        TextSpan(
+          children: revealedWordSpans(
+            'Wa alaykum assalam',
+            typed,
+            Colors.black,
+          ),
+        ),
         key: const ValueKey('typed'),
       ),
     ),
@@ -32,20 +39,22 @@ void main() {
     await tester.pump(const Duration(milliseconds: 16)); // its first frame
     await tester.pump(const Duration(milliseconds: 90));
     final mid = spans(tester);
-    expect(mid, hasLength(2));
-    expect(mid.first.text!.length, inInclusiveRange(1, 9));
-    expect(mid.last.style?.color, Colors.transparent);
-    expect(
-      mid.first.text! + mid.last.text!,
-      'Assalamu..',
-      reason: 'laid out whole',
-    );
+    // Every word laid out; the first ones shown (more than the last).
+    expect(mid.map((s) => s.text).join(), 'Wa alaykum assalam');
+    expect(mid, hasLength(3));
+    final alphas = [for (final s in mid) s.style!.color!.a];
+    expect(alphas.first, greaterThan(alphas.last), reason: 'in order');
+    expect(alphas.last, lessThan(1), reason: 'the last not yet whole');
     await tester.pumpAndSettle();
-    expect(spans(tester).single.text, 'Assalamu..');
+    expect(spans(tester).single.text, 'Wa alaykum assalam');
 
     await tester.pumpWidget(const SizedBox());
     await tester.pumpWidget(app());
-    expect(spans(tester).single.text, 'Assalamu..', reason: 'already typed');
+    expect(
+      spans(tester).single.text,
+      'Wa alaykum assalam',
+      reason: 'already revealed',
+    );
   });
 
   testWidgets('"remove animations" on: whole at once', (tester) async {
@@ -55,6 +64,6 @@ void main() {
         child: app(),
       ),
     );
-    expect(spans(tester).single.text, 'Assalamu..');
+    expect(spans(tester).single.text, 'Wa alaykum assalam');
   });
 }

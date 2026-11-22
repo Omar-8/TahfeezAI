@@ -1,3 +1,4 @@
+import '../core/localization/clock_format.dart';
 import '../core/localization/fallback_localizations.dart';
 import '../features/guide/guide.dart';
 import 'get_the_app_prompt.dart';
@@ -25,6 +26,10 @@ import '../quran/application/meaning_language_follower.dart';
 import '../quran/presentation/meaning_packs_layer.dart';
 import '../core/ui/animations_setting.dart';
 import '../core/ui/reopen_required.dart';
+import '../features/athkar/application/athkar_reminder.dart';
+import '../features/habits/application/habit_reminders.dart';
+import '../features/home_widgets/application/home_widgets_publisher.dart';
+import '../features/prayer/application/prayer_controller.dart';
 
 /// TahfeezAI's root widget.
 ///
@@ -49,6 +54,18 @@ class TahfeezApp extends ConsumerWidget {
     ref.listen(memorizationReminderProvider, (_, _) {});
     // The khatmah's: each day's pages, scheduled again as they change.
     ref.listen(khatmahReminderProvider, (_, _) {});
+    // The morning and evening athkar's: scheduled again at every start.
+    ref.listen(athkarReminderProvider, (_, _) {});
+    // The habits': scheduled again whenever they change.
+    ref.listen(habitRemindersProvider, (_, _) {});
+    // The prayers': their next days, scheduled again at every start.
+    ref.listen(prayerRemindersProvider, (_, _) {});
+    // The home-screen widgets, kept up to date; a tapped one opens its
+    // screen (owner, 2026-11-22).
+    ref.listen(homeWidgetsPublisherProvider, (_, _) {});
+    // The morning and evening athkar's reminders: one, habits and Athkar
+    // in step (owner, 2026-11-22).
+    ref.listen(athkarHabitReminderSyncProvider, (_, _) {});
     // Lifetime counts reached (ayahs, words, days in the Mushaf): each
     // celebrated once.
     ref.listen(activityMilestonesProvider, (_, _) {});
@@ -106,17 +123,19 @@ class TahfeezApp extends ConsumerWidget {
           // The Mushaf's guide, above every screen and menu.
           // and a milestone just reached, gently, over that.
           // (The app's data replaced on iOS: covered until reopened.)
-          builder: (context, child) => ReopenRequiredLayer(
-            child: _WebSheetWidth(
-              // (In a phone's browser: where to get the app.)
-              child: GetTheAppPrompt(
-                // (In a browser: the recitation model, fetched meanwhile.)
-                child: WebModelPreload(
-                  child: AnimationsOff(
-                    child: MilestoneLayer(
-                      child: MeaningPacksLayer(
-                        child: GuideLayer(
-                          child: child ?? const SizedBox.shrink(),
+          builder: (context, child) => ClockFormatScope(
+            child: ReopenRequiredLayer(
+              child: _WebSheetWidth(
+                // (In a phone's browser: where to get the app.)
+                child: GetTheAppPrompt(
+                  // (In a browser: the recitation model, fetched meanwhile.)
+                  child: WebModelPreload(
+                    child: AnimationsOff(
+                      child: MilestoneLayer(
+                        child: MeaningPacksLayer(
+                          child: GuideLayer(
+                            child: child ?? const SizedBox.shrink(),
+                          ),
                         ),
                       ),
                     ),

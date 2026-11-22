@@ -1,0 +1,3 @@
+// The widgets' extension: the app's version and build number (Flutter's
+// generated settings), nothing of the app's pods.
+#include "../Flutter/Generated.xcconfig"

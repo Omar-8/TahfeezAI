@@ -12,12 +12,16 @@ class TahfeezAppBar extends StatelessWidget implements PreferredSizeWidget {
     required this.title,
     this.actions,
     this.leading,
+    this.leadingWidth,
     this.centerTitle = true,
   });
 
   final Widget title;
   final List<Widget>? actions;
   final Widget? leading;
+
+  /// Room for [leading] (a wider glass button), Material's 56 if unset.
+  final double? leadingWidth;
   final bool centerTitle;
 
   @override
@@ -26,6 +30,7 @@ class TahfeezAppBar extends StatelessWidget implements PreferredSizeWidget {
       title: title,
       actions: actions,
       leading: leading,
+      leadingWidth: leadingWidth,
       centerTitle: centerTitle,
     );
   }

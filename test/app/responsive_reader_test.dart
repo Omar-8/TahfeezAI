@@ -31,6 +31,11 @@ import 'package:tahfeez_ai/features/mushaf/presentation/mushaf_appearance_sheet.
 
 import '../test_helpers/real_app.dart';
 
+import 'package:tahfeez_ai/app/shell/app_menu.dart';
+import 'package:tahfeez_ai/features/qibla/presentation/qibla_screen.dart';
+import 'package:tahfeez_ai/features/salawat/salawat_reminder.dart';
+import 'package:tahfeez_ai/features/athkar/presentation/athkar_reminder_sheet.dart';
+
 /// The reader — the printed page's frame and Ayah mode in both layouts —
 /// on every screen size, portrait and landscape, in every UI language, at
 /// normal to Android's largest text, through every Quran font, Ayah mode
@@ -154,6 +159,7 @@ void main() {
     'en', 'ar', 'de', 'fr', 'tr', 'ur', 'id', 'es', 'ru', 'fa', 'bn', //
     'ms', 'ha', 'ckb', 'ps', 'sw', 'kk', 'uz', 'so', //
     'nl', 'da', 'el', 'ja', 'ko', 'pt', 'zh', //
+    'hi', 'ta', 'ml', 'it', //
   ];
   // Long (2:282, the longest ayah), medium (Ya-Sin's start, after a
   // surah's end) and short ayahs (page 604: three surahs, their headers).
@@ -240,6 +246,21 @@ void main() {
     '/memorize/progress',
     '/settings',
     '/settings/about',
+    '/qibla',
+    // Athkar (2026-11-21): its chapters; a chapter's tiles; a long zikr
+    // (Ayat al-Kursi) on its card; a chapter of one.
+    '/athkar',
+    '/athkar/27',
+    '/athkar/27/read?at=0',
+    '/athkar/6',
+    // Habits (2026-11-21): today's (none yet), the catalog, one's own.
+    '/habits',
+    '/habits/add',
+    '/habits/new',
+    // The Hijri calendar (2026-11-21).
+    '/calendar',
+    // Prayer times (2026-11-21).
+    '/prayer',
   ];
   var s = 0;
   for (final MapEntry(key: sizeName, value: size) in sizes.entries) {
@@ -311,6 +332,13 @@ void main() {
     // Its topics (4:163: twelve, the prophets) as chips under its words.
     'ayah with topics': (c) => showAyahDetailSheet(c, ayahId: 4163),
     'khatmah days': (c) => showKhatmahDaysSheet(c),
+    // The side menu (2026-11-20), and the Qibla finder's place, a city
+    // list under its search.
+    'side menu': (c) => appShellScaffoldKey.currentState?.openDrawer(),
+    'qibla place': (c) => showQiblaPlaceSheet(c, search: 'al'),
+    'salawat reminder': showSalawatReminder,
+    // Athkar (2026-11-21): its reminders.
+    'athkar reminders': showAthkarReminderSheet,
   };
   var t = 0;
   for (final MapEntry(key: sizeName, value: size) in sizes.entries) {

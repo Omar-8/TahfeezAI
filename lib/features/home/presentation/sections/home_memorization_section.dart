@@ -16,6 +16,7 @@ import '../../../../memorization/domain/plan_scheduler.dart';
 import '../../../../memorization/domain/recitation_score.dart';
 import '../../../../memorization/domain/today_scheduler.dart';
 import '../../../memorize/presentation/memorize_screen.dart';
+import '../../../../core/theme/tahfeez_tones.dart';
 
 /// Home's memorization card (`docs/MEMORIZATION_MILESTONE.md`, M5): today's
 /// three parts — the new lesson, recent and old revision — with how far
@@ -306,7 +307,7 @@ class TodayRing extends StatelessWidget {
         builder: (context, value, child) => CustomPaint(
           painter: _RingPainter(
             value: value,
-            track: scheme.surfaceContainerHighest,
+            track: scheme.progressTrack,
             fill: scheme.primary,
           ),
           child: child,

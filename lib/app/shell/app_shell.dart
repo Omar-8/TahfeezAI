@@ -11,8 +11,11 @@ import '../../core/theme/components/components.dart';
 import '../../core/ui/web_margin_scroll.dart';
 import '../../core/theme/tahfeez_content_widths.dart';
 import '../../features/recitation/presentation/recitation_controls.dart';
+import '../../features/salawat/salawat_reminder.dart';
+import 'app_menu.dart';
 
-/// Tahfeez's main app shell: the persistent chrome around Home/Quran/Settings.
+/// Tahfeez's main app shell: the persistent chrome around Home/Quran/Memorize,
+/// and the side menu (Qibla, Bookmarks, Settings, About) they open.
 ///
 /// **Navigation architecture decision (Milestone 4)**: a shell-based
 /// `go_router` model (`StatefulShellRoute.indexedStack`, wired in
@@ -79,17 +82,16 @@ class AppShell extends ConsumerWidget {
         icon: Icons.menu_book_outlined,
         selectedIcon: Icons.menu_book,
         label: l10n.navQuran,
+        // The centre: the Quran's own mark (design A, owner 2026-11-20).
+        mark: true,
       ),
       TahfeezPrimaryNavItem(
         icon: Icons.school_outlined,
         selectedIcon: Icons.school,
         label: l10n.navMemorize,
       ),
-      TahfeezPrimaryNavItem(
-        icon: Icons.settings_outlined,
-        selectedIcon: Icons.settings,
-        label: l10n.navSettings,
-      ),
+      // Settings: in the side menu (☰ on each tab), with Qibla, Bookmarks
+      // and About (owner, 2026-11-20).
     ];
 
     void onDestinationSelected(int index) {
@@ -101,6 +103,8 @@ class AppShell extends ConsumerWidget {
 
     final content = Column(
       children: [
+        // The ṣalawāt reminder as the app opens (draws nothing).
+        const SalawatOnStart(),
         Expanded(
           // The wrapper is kept in place (rather than swapped out) so the
           // branch `Navigator` subtree keeps its element identity — only the
@@ -125,6 +129,11 @@ class AppShell extends ConsumerWidget {
       return AnnotatedRegion<SystemUiOverlayStyle>(
         value: _systemNavigationBarStyle(scheme),
         child: Scaffold(
+          key: appShellScaffoldKey,
+          // The side menu: opened by ☰ only (an edge swipe would fight the
+          // phone's back gesture).
+          drawer: const AppMenuDrawer(),
+          drawerEnableOpenDragGesture: false,
           resizeToAvoidBottomInset: !reader,
           // Screens drawn on beneath the glass navigation bar, which blurs
           // them — not the Mushaf under its recitation bar.
@@ -144,6 +153,9 @@ class AppShell extends ConsumerWidget {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: _systemNavigationBarStyle(scheme),
       child: Scaffold(
+        key: appShellScaffoldKey,
+        drawer: const AppMenuDrawer(),
+        drawerEnableOpenDragGesture: false,
         resizeToAvoidBottomInset: !reader,
         body: Row(
           children: [
@@ -176,7 +188,6 @@ class AppShell extends ConsumerWidget {
     AppRoutes.home,
     AppRoutes.quran,
     AppRoutes.memorize,
-    AppRoutes.settings,
   };
 
   bool _isStandaloneMushafRoute(String location) {

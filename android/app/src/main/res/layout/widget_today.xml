@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Home's date card and prayer times, without the buttons, each on its
+     own glass (owner, 2026-11-22). -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:gravity="center_vertical"
+    android:orientation="vertical">
+    <FrameLayout android:id="@+id/dateCard" android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:padding="12dp">
+        <include layout="@layout/part_date" android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </FrameLayout>
+    <FrameLayout android:id="@+id/prayerCard" android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:layout_marginTop="8dp"
+        android:paddingStart="12dp" android:paddingEnd="12dp" android:paddingTop="8dp" android:paddingBottom="8dp">
+        <include layout="@layout/part_prayer" android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </FrameLayout>
+</LinearLayout>

@@ -6,6 +6,8 @@ import 'package:tahfeez_ai/core/audio/audio_models.dart';
 import 'package:tahfeez_ai/core/core_providers.dart';
 import 'package:tahfeez_ai/features/listen/application/listen_options.dart';
 import 'package:tahfeez_ai/features/listen/application/quran_audio_player.dart';
+import 'package:tahfeez_ai/features/listen/application/reciter_controller.dart';
+import 'package:tahfeez_ai/features/listen/data/reciter_timings.dart';
 import 'package:tahfeez_ai/features/listen/domain/quran_audio_sources.dart';
 import 'package:tahfeez_ai/features/recitation/application/mushaf_recitation_target.dart';
 import 'package:tahfeez_ai/quran/domain/models/quran_location.dart';
@@ -126,6 +128,72 @@ void main() {
       await player.playRange(from, from + 1);
       expect(container.read(quranAudioPlayerProvider)?.basmalas, isEmpty);
     }
+  });
+
+  test('a reciter recorded by surah (Islam Sobhi): each ayah cut from its '
+      "surah's file at its timings; his Bismillah in the first; a file "
+      'without one, and a surah he lacks, as the reciters without', () async {
+    final audio = FakeAudioController();
+    final container = ProviderContainer(
+      overrides: [
+        audioControllerProvider.overrideWithValue(audio),
+        defaultMushafProvider.overrideWith((ref) async => null),
+        reciterTimingsProvider.overrideWith(
+          (ref, edition) async => parseSurahTimings({
+            '113': [
+              [200, 7800],
+              [7840, 10920],
+              [10960, 14600],
+              [14640, 18000],
+              [18040, 22000],
+            ],
+            '112': [
+              [10480, 13480],
+              [13520, 15840],
+              [15880, 18720],
+              [18760, 22100],
+            ],
+            'noBasmala': [112],
+          }),
+        ),
+      ],
+    );
+    addTearDown(container.dispose);
+    container.read(reciterProvider.notifier).select('ar.islamsobhi');
+    final player = container.read(quranAudioPlayerProvider.notifier);
+
+    await player.playRange(113001, 113002);
+    expect(container.read(quranAudioPlayerProvider)?.basmalas, isEmpty);
+    expect(audio.queue, [
+      'https://cdn.mp3quran.net/audio/islam-sobhi/r1/113.mp3',
+      'https://cdn.mp3quran.net/audio/islam-sobhi/r1/113.mp3',
+    ]);
+    expect(audio.clips, [
+      (
+        start: const Duration(milliseconds: 200),
+        end: const Duration(milliseconds: 7800),
+      ),
+      (
+        start: const Duration(milliseconds: 7840),
+        end: const Duration(milliseconds: 10920),
+      ),
+    ]);
+    expect(audio.items!.first.subtitle, 'Islam Sobhi');
+
+    // No Bismillah in his 112: Al-Husary's first.
+    await player.playRange(112001, 112001);
+    expect(audio.queue.first, ayahAudioUrl(1001, basmalaReciter));
+    expect(audio.clips, [null, isNotNull]);
+
+    // 37 not recorded: Al-Husary's, his Bismillah first.
+    await player.playRange(37001, 37002);
+    expect(audio.queue, [
+      ayahAudioUrl(1001, basmalaReciter),
+      ayahAudioUrl(37001, basmalaReciter),
+      ayahAudioUrl(37002, basmalaReciter),
+    ]);
+    expect(audio.clips, [null, null, null]);
+    expect(audio.items![1].subtitle, basmalaReciter.nameEn);
   });
 
   test('a range runs across surah ends', () {

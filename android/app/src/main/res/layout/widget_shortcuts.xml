@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Qibla, Athkar and Habits, each on its own glass, as on Home. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <include layout="@layout/part_buttons" android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+</FrameLayout>

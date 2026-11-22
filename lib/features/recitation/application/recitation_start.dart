@@ -134,8 +134,8 @@ class RecitationStartController extends Notifier<RecitationStart?> {
 
   /// The ayahs hidden or words uncovered by hand (not by a recitation or
   /// the reciter): a word chosen stays chosen, the band on it (owner,
-  /// 2026-11-15: uncovering words moved it); none chosen, the band on the
-  /// next word to uncover.
+  /// 2026-11-15: uncovering words moved it) — until it is uncovered itself;
+  /// none chosen, the band on the next word to uncover.
   void _onHideMode(MushafHideModeState? was, MushafHideModeState now) {
     if (now.enabled &&
         !ref.read(recitationSessionControllerProvider).isActive &&
@@ -163,6 +163,26 @@ class RecitationStartController extends Notifier<RecitationStart?> {
             if (!ref.mounted) return;
             ref.read(mushafHideModeProvider.notifier).setRevealed(reveal);
           });
+        }
+      }
+      // The chosen word itself uncovered (revealed by hand — or the word
+      // a recitation or the reciter stopped before): done with, the band
+      // on to the next word to uncover (owner, 2026-11-21: after a
+      // recitation, revealing no longer moved it).
+      if (was != null &&
+          was.enabled &&
+          start != null &&
+          pages != null &&
+          pages.contains(start.page)) {
+        final at =
+            ref
+                .read(mushafPageWordsProvider)[start.page]
+                ?.indexOf(start.word) ??
+            -1;
+        if (at >= 0 &&
+            was.isWordHidden(start.page, at) &&
+            !now.isWordHidden(start.page, at)) {
+          _set(null);
         }
       }
     }

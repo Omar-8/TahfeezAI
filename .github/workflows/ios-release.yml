@@ -6,6 +6,8 @@
 #   IOS_DIST_P12_BASE64      the Apple Distribution certificate and its key (.p12), base64
 #   IOS_DIST_P12_PASSWORD    that .p12's password
 #   IOS_PROFILE_BASE64       the App Store provisioning profile (.mobileprovision), base64
+#   IOS_WIDGET_PROFILE_BASE64  the widgets' extension's App Store profile
+#                            (ai.tahfeez.tahfeezAi.TahfeezWidgets), base64
 #   ASC_KEY_ID               the App Store Connect API key's ID
 #   ASC_ISSUER_ID            its issuer ID
 #   ASC_KEY_P8_BASE64        the key itself (AuthKey_<id>.p8), base64
@@ -41,6 +43,7 @@ jobs:
           P12: ${{ secrets.IOS_DIST_P12_BASE64 }}
           P12_PASSWORD: ${{ secrets.IOS_DIST_P12_PASSWORD }}
           PROFILE: ${{ secrets.IOS_PROFILE_BASE64 }}
+          WIDGET_PROFILE: ${{ secrets.IOS_WIDGET_PROFILE_BASE64 }}
         run: |
           set -eo pipefail
           keychain="$RUNNER_TEMP/signing.keychain-db"
@@ -64,6 +67,15 @@ jobs:
           echo "PROFILE_NAME=$name" >> "$GITHUB_ENV"
           echo "profile: $name ($uuid)"
 
+          # The home-screen widgets' extension's.
+          echo "$WIDGET_PROFILE" | base64 --decode > "$RUNNER_TEMP/widgets.mobileprovision"
+          security cms -D -i "$RUNNER_TEMP/widgets.mobileprovision" > "$RUNNER_TEMP/widgets.plist"
+          uuid=$(/usr/libexec/PlistBuddy -c 'Print UUID' "$RUNNER_TEMP/widgets.plist")
+          name=$(/usr/libexec/PlistBuddy -c 'Print Name' "$RUNNER_TEMP/widgets.plist")
+          cp "$RUNNER_TEMP/widgets.mobileprovision" "$dir/$uuid.mobileprovision"
+          echo "WIDGET_PROFILE_NAME=$name" >> "$GITHUB_ENV"
+          echo "widgets' profile: $name ($uuid)"
+
       # Manual signing for the app's target only (the pods sign nothing),
       # in this run's copy of the project.
       - name: Signing settings
@@ -85,6 +97,16 @@ jobs:
           )
           assert s.count(line) == 3, s.count(line)  # Debug, Release, Profile
           s = s.replace(line, signing)
+          # The widgets' extension (tool/ios/add_widget_extension.rb).
+          line = 'PRODUCT_BUNDLE_IDENTIFIER = ai.tahfeez.tahfeezAi.TahfeezWidgets;'
+          signing = (
+              line + '\n'
+              '\t\t\t\tCODE_SIGN_STYLE = Manual;\n'
+              f'\t\t\t\tPROVISIONING_PROFILE_SPECIFIER = "{os.environ["WIDGET_PROFILE_NAME"]}";\n'
+              '\t\t\t\t"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Distribution";'
+          )
+          assert s.count(line) == 3, s.count(line)
+          s = s.replace(line, signing)
           open(path, 'w').write(s)
           EOF
           cat > ios/ExportOptions.plist <<EOF
@@ -97,7 +119,10 @@ jobs:
             <key>signingStyle</key><string>manual</string>
             <key>signingCertificate</key><string>Apple Distribution</string>
             <key>provisioningProfiles</key>
-            <dict><key>ai.tahfeez.tahfeezAi</key><string>$PROFILE_NAME</string></dict>
+            <dict>
+              <key>ai.tahfeez.tahfeezAi</key><string>$PROFILE_NAME</string>
+              <key>ai.tahfeez.tahfeezAi.TahfeezWidgets</key><string>$WIDGET_PROFILE_NAME</string>
+            </dict>
             <key>uploadSymbols</key><true/>
           </dict>
           </plist>

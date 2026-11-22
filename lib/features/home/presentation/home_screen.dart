@@ -11,6 +11,8 @@ import '../../../core/ui/bar_space.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../prayer/presentation/prayer_card.dart';
+import 'home_date_card.dart';
 import 'home_sky.dart';
 import 'home_store_prompts.dart';
 
@@ -29,6 +31,11 @@ import 'sections/home_memorization_section.dart';
 import 'sections/home_read_history_section.dart';
 import 'sections/home_resource_updates_banner.dart';
 import '../../../core/ui/app_name_text.dart';
+
+import 'package:go_router/go_router.dart';
+
+import '../../../app/shell/app_menu.dart';
+import '../../../core/routing/app_routes.dart';
 
 /// Tahfeez's Home screen — the app's single non-tabbed landing screen
 /// (`docs/reference/03_NAVIGATION_MAP.md`), composed from the
@@ -60,9 +67,16 @@ class HomeScreen extends ConsumerWidget {
     // On a tablet the cards sit in the middle of the height (a phone fills
     // it anyway), the sky reaching down behind them.
     final centered = !TahfeezBreakpoint.of(context).isPhone;
+    // Its top as the other tabs' bars (56 high, ☰ in the middle): the menu
+    // button in the same place on all three (owner, 2026-11-20).
     final padding = withBarSpace(
       context,
-      const EdgeInsets.all(TahfeezSpacing.md),
+      const EdgeInsets.fromLTRB(
+        TahfeezSpacing.md,
+        (kToolbarHeight - AppMenuButton.size) / 2,
+        TahfeezSpacing.md,
+        TahfeezSpacing.md,
+      ),
     );
     return BackToExit(
       child: Stack(
@@ -104,6 +118,18 @@ class HomeScreen extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               _HomeBrandHeader(l10n: l10n),
+                              const SizedBox(height: TahfeezSpacing.md),
+                              // Today: its date, time and Hijri date,
+                              // an event coming (owner, 2026-11-21).
+                              const HomeDateCard(),
+                              // Today's prayer times, under the date
+                              // (owner, 2026-11-21).
+                              const SizedBox(height: TahfeezSpacing.sm),
+                              const PrayerTimesCard(),
+                              const SizedBox(height: TahfeezSpacing.sm),
+                              // Shortcuts (owner, 2026-11-20): the Qibla
+                              // first, more to come.
+                              const _HomeShortcuts(),
                               // The first time Home shows: a word of welcome (a
                               // dialog; no room of its own).
                               const _WelcomeOnce(),
@@ -197,18 +223,44 @@ class _HomeBrandHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    // ☰ (the side menu) before the name; the salam below them, the whole
+    // width its own (owner, 2026-11-20: beside the buttons it shrank).
+    return _brand(theme);
+  }
+
+  Widget _brand(ThemeData theme) {
     return Semantics(
       header: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AppNameText(
-            l10n.appName,
-            style: theme.textTheme.headlineMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-              height: 1.2,
+          // As tall as the button, whatever the text size or script: ☰
+          // where the other tabs' bars have it (owner, 2026-11-20: at a
+          // larger text size the taller name pushed it down); the name
+          // shrinks to fit rather.
+          SizedBox(
+            height: AppMenuButton.size,
+            child: Row(
+              spacing: TahfeezSpacing.smPlus,
+              children: [
+                const AppMenuButton(),
+                Expanded(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: AlignmentDirectional.centerStart,
+                    child: AppNameText(
+                      l10n.appName,
+                      style: theme.textTheme.headlineMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        height: 1.2,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
+          const SizedBox(height: TahfeezSpacing.xs),
           // Update offers and, now and then, a rating request (draws
           // nothing).
           const HomeStorePrompts(),
@@ -216,13 +268,20 @@ class _HomeBrandHeader extends StatelessWidget {
           FittedBox(
             fit: BoxFit.scaleDown,
             alignment: AlignmentDirectional.centerStart,
-            // Typed out as the app opens.
+            // Revealed word by word as the app opens.
             child: TypeOnce(
               id: 'home-salam',
               length: l10n.homeSalam.length,
               delay: const Duration(milliseconds: 250),
+              perCharacter: const Duration(milliseconds: 30),
               builder: (context, typed) => Text.rich(
-                TextSpan(children: typedSpans(l10n.homeSalam, typed)),
+                TextSpan(
+                  children: revealedWordSpans(
+                    l10n.homeSalam,
+                    typed,
+                    theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
                 maxLines: 1,
                 style: theme.textTheme.bodyLarge?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
@@ -231,6 +290,101 @@ class _HomeBrandHeader extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Home's shortcuts, under its header: glass pills in a row (scrolling
+/// sideways when they outgrow it).
+class _HomeShortcuts extends StatelessWidget {
+  const _HomeShortcuts();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return SingleChildScrollView(
+      key: const ValueKey('home-shortcuts'),
+      scrollDirection: Axis.horizontal,
+      clipBehavior: Clip.none,
+      child: Row(
+        spacing: TahfeezSpacing.sm,
+        children: [
+          _Shortcut(
+            key: const ValueKey('home-qibla'),
+            icon: Icons.explore_outlined,
+            label: l10n.menuQibla,
+            tooltip: l10n.menuQiblaSub,
+            onTap: () => context.push(AppRoutes.qibla),
+          ),
+          // Athkar beside it (owner, 2026-11-21).
+          _Shortcut(
+            key: const ValueKey('home-athkar'),
+            icon: Icons.record_voice_over_outlined,
+            label: l10n.athkarTitle,
+            tooltip: l10n.athkarMenuSubtitle,
+            onTap: () => context.push(AppRoutes.athkar),
+          ),
+          // Habits beside them (owner, 2026-11-21).
+          _Shortcut(
+            key: const ValueKey('home-habits'),
+            icon: Icons.event_available_outlined,
+            label: l10n.habitsTitle,
+            tooltip: l10n.habitsMenuSubtitle,
+            onTap: () => context.push(AppRoutes.habits),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// One shortcut: the cards' glass as a pill, its icon and name in the
+/// app's green; 48 high, a full tap target.
+class _Shortcut extends StatelessWidget {
+  const _Shortcut({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.tooltip,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label, tooltip;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return Tooltip(
+      message: tooltip,
+      child: TahfeezGlassSurface(
+        raised: true,
+        // No live blur (as most of the app's glass): blurring what scrolled
+        // beneath it made it flicker as Home scrolled (owner, 2026-11-21).
+        blur: false,
+        borderRadius: BorderRadius.circular(TahfeezRadii.pill),
+        onTap: onTap,
+        child: Container(
+          constraints: const BoxConstraints(minHeight: 48),
+          padding: const EdgeInsets.symmetric(horizontal: TahfeezSpacing.md),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            spacing: TahfeezSpacing.sm,
+            children: [
+              Icon(icon, size: 22, color: scheme.primary),
+              Text(
+                label,
+                style: theme.textTheme.titleSmall?.copyWith(
+                  color: scheme.primary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

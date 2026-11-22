@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Tahfeez's date widget (owner, 2026-11-22): resizable, sized as on Home
+     by default (TahfeezWidgets.kt); its picker preview: preview_date. -->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="250dp"
+    android:minHeight="57dp"
+    android:minResizeWidth="110dp"
+    android:minResizeHeight="50dp"
+    android:targetCellWidth="5"
+    android:targetCellHeight="1"
+    android:resizeMode="horizontal|vertical"
+    android:widgetCategory="home_screen"
+    android:initialLayout="@layout/widget_date"
+    android:previewLayout="@layout/preview_date"
+    android:previewImage="@drawable/widget_preview_date"
+    android:description="@string/widget_date"
+    android:updatePeriodMillis="1800000" />

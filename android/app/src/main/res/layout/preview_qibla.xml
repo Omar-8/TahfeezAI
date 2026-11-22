@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The widget picker's preview. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="match_parent" android:gravity="center" android:orientation="vertical" android:background="@drawable/widget_glass_light">
+    <ImageView android:layout_width="30dp" android:layout_height="30dp" android:src="@drawable/widget_preview_icon_explore" />
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:text="@string/widget_qibla" android:textSize="13sp" android:textStyle="bold" android:textColor="#176B5B" />
+</LinearLayout>

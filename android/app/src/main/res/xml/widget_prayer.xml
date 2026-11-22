@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Tahfeez's prayer widget (owner, 2026-11-22): resizable, sized as on Home
+     by default (TahfeezWidgets.kt); its picker preview: preview_prayer. -->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="250dp"
+    android:minHeight="70dp"
+    android:minResizeWidth="110dp"
+    android:minResizeHeight="50dp"
+    android:targetCellWidth="5"
+    android:targetCellHeight="1"
+    android:resizeMode="horizontal|vertical"
+    android:widgetCategory="home_screen"
+    android:initialLayout="@layout/widget_prayer"
+    android:previewLayout="@layout/preview_prayer"
+    android:previewImage="@drawable/widget_preview_prayer"
+    android:description="@string/widget_prayer"
+    android:updatePeriodMillis="1800000" />

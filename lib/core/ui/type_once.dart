@@ -4,10 +4,11 @@ import 'package:flutter/material.dart';
 
 import 'motion.dart';
 
-/// Text typed out quickly the first time it shows in this run of the app
-/// (Home's greeting and daily ayah as the app opens); shown whole after.
-/// [builder] gets how much is typed (0–1) — see [typedSpans] — so the text
-/// is laid out whole from the start and nothing moves as it is typed.
+/// Text revealed the first time it shows in this run of the app (Home's
+/// greeting and daily ayah as the app opens), word by word; shown whole
+/// after. [builder] gets how far it has come (0–1) — see
+/// [revealedWordSpans] — so the text is laid out whole from the start and
+/// nothing moves as it appears.
 /// None with the phone's "remove animations".
 class TypeOnce extends StatefulWidget {
   const TypeOnce({
@@ -85,17 +86,31 @@ class _TypeOnceState extends State<TypeOnce>
   }
 }
 
-/// [text] with its first [typed] share shown and the rest laid out but
-/// transparent (only the colour changes between the two, so the line
-/// breaks stay put and Arabic letters stay joined).
-List<InlineSpan> typedSpans(String text, double typed) {
-  if (typed >= 1) return [TextSpan(text: text)];
-  final n = (text.length * typed).round().clamp(0, text.length);
+/// [text] revealed word by word, [shown] of the way through (0–1): each
+/// word fading in from transparent to [color] after the one before (owner,
+/// 2026-11-21: as if revealed, not typed). Laid out whole from the start —
+/// only colours change, so the lines stay put and Arabic letters stay
+/// joined (a word is one span).
+List<InlineSpan> revealedWordSpans(String text, double shown, Color color) {
+  if (shown >= 1) return [TextSpan(text: text)];
+  // Words with the spaces after them.
+  final words = RegExp(r'\S+\s*').allMatches(text).map((m) => m[0]!).toList();
+  final lead = text.length - text.trimLeft().length;
+  final n = words.length;
+  if (n == 0) return [TextSpan(text: text)];
+  // Each word's fade a little longer than its turn: they overlap.
+  final fade = 2.5 / (n + 1.5);
+  final step = (1 - fade) / (n > 1 ? n - 1 : 1);
   return [
-    TextSpan(text: text.substring(0, n)),
-    TextSpan(
-      text: text.substring(n),
-      style: const TextStyle(color: Colors.transparent),
-    ),
+    if (lead > 0) TextSpan(text: text.substring(0, lead)),
+    for (final (i, w) in words.indexed)
+      TextSpan(
+        text: w,
+        style: TextStyle(
+          color: color.withValues(
+            alpha: color.a * ((shown - i * step) / fade).clamp(0.0, 1.0),
+          ),
+        ),
+      ),
   ];
 }

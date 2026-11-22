@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.6.4+41
+version: 2.0.0+42
 
 environment:
   sdk: ^3.13.3
@@ -79,6 +79,12 @@ dependencies:
   # Tahfeez's own iOS platform channels (Android's are in android/app).
   tahfeez_ios:
     path: packages/tahfeez_ios
+  geolocator: ^14.0.1
+  flutter_compass: ^0.8.1
+  geomag: ^0.3.0
+  hijri: ^3.0.1
+  adhan: ^2.0.0+1
+  home_widget: ^0.10.0
 
 # A locally-vendored, minimally-patched copy of qvp_flutter 0.2.2 —
 # exposes QvpViewLayout.maxAspectSlack (already a real, documented,
@@ -189,6 +195,18 @@ flutter:
     - assets/quran/topics.json
     # Each word's root (Quranic Arabic Corpus) — tool/quran_data/build_word_roots.py.
     - assets/quran/word_roots.json
+    # The Qibla finder's cities (GeoNames) — tool/quran_data/build_cities.py.
+    # Ayah timings of the reciters recorded by whole surahs —
+    # tool/acoustic_verification/align_surah_audio.py.
+    - assets/quran/reciter_timings/
+    - assets/qibla/cities.json.gz
+    # Country names (CLDR, through Babel) — tool/quran_data/build_country_names.py.
+    - assets/qibla/country_names.json.gz
+    # Hisn al-Muslim (hisnmuslim.com): tool/athkar/build_athkar.py.
+    - assets/athkar/athkar.json.gz
+    # Prayer times' adhans (Wikimedia Commons, free licences): their first
+    # 30 s, heard before choosing and an iPhone's sound — tool/adhan/build_adhan.py.
+    - assets/adhan/
     # Word meanings (translation milestone T3; licence unverified, owner
     # decision — docs/THIRD_PARTY_RESOURCES.md).
     - assets/quran/wbw/en_qurancom.json

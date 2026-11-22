@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Prayer times, as Home's card (one row, full width); narrow: the next
+     prayer, its time and how long until it. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:paddingStart="12dp" android:paddingEnd="12dp" android:paddingTop="8dp" android:paddingBottom="8dp">
+    <include layout="@layout/part_prayer" android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:layout_gravity="center_vertical" />
+    <LinearLayout android:id="@+id/nextBox" android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:layout_gravity="center_vertical"
+        android:orientation="vertical">
+        <TextView android:id="@+id/nextPlace" android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:maxLines="1" android:ellipsize="end" android:textSize="12sp" android:textStyle="bold" />
+        <TextView android:id="@+id/nextName" android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:layout_marginTop="4dp" android:maxLines="1" android:textSize="20sp" android:textStyle="bold" />
+        <TextView android:id="@+id/nextTime" android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:maxLines="1" android:textSize="15sp" />
+        <TextView android:id="@+id/nextCountdown" android:layout_width="wrap_content"
+            android:layout_height="wrap_content" android:maxLines="1" android:textSize="13sp" android:textStyle="bold" />
+    </LinearLayout>
+</FrameLayout>

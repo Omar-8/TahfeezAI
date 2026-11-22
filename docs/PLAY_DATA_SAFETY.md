@@ -16,7 +16,8 @@ Play counts data as **collected** only when it is transmitted off the device. Ta
 |---|---|
 | Audio (voice or sound recordings) | Recitation audio is processed on the device by the bundled model and discarded; nothing is uploaded. Release builds store no recordings (`TAHFEEZ_KEEP_RECORDINGS` is off). |
 | App activity, app info and performance | Memorization progress, bookmarks and settings stay in local storage; no analytics or crash-reporting SDK. |
-| Personal info, location, contacts, identifiers | Not accessed. No accounts, no advertising ID. |
+| Personal info, contacts, identifiers | Not accessed. No accounts, no advertising ID. |
+| Location (approximate) | **Accessed, not collected** (since 2026-11-20, the Qibla finder; prayer times since 2026-11-21): a city-level position in automatic mode, used on the phone to compute the qibla direction and prayer times; kept on the phone only rounded to about a kilometre (two decimals, named after the nearest built-in city) so Home shows today's prayer times; never transmitted — Play's "processed only on the device" exception, so the form's answer stays "no data collected". A city chosen by hand is stored on the phone only. Permission: `ACCESS_COARSE_LOCATION` (no fine, no background; geolocator's location service removed from the manifest). Prayer reminders are local notifications. |
 | Files and docs | The export file is written only where the user picks; it is never uploaded by the app. |
 
 Audio requests to `cdn.islamic.network` and `audio.qurancdn.com` contain only the name of a public audio file. The IP address these services see is inherent to the internet request; no user data is attached.

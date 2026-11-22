@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:tahfeez_ai/core/theme/components/tahfeez_collapsible_section.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:tahfeez_ai/core/localization/clock_format.dart';
 import 'package:tahfeez_ai/app/app.dart';
 import 'package:tahfeez_ai/core/localization/locale_controller.dart';
 import 'package:tahfeez_ai/core/core_providers.dart';
@@ -17,6 +18,13 @@ import 'package:tahfeez_ai/features/settings/presentation/about_screen.dart';
 import 'package:tahfeez_ai/features/onboarding/presentation/first_run_setup.dart';
 
 import '../../test_helpers/widget_test_overrides.dart';
+import '../../test_helpers/app_menu.dart';
+import '../../test_helpers/fake_reminder_scheduler.dart';
+
+import 'package:tahfeez_ai/core/notifications/daily_reminder_scheduler.dart';
+import 'package:tahfeez_ai/features/athkar/application/athkar_reminder.dart';
+import 'package:tahfeez_ai/features/habits/application/habits_controller.dart';
+import 'package:tahfeez_ai/features/habits/domain/habit_catalog.dart';
 
 /// The settings list (the search field holds a scrollable too).
 final _list = find
@@ -53,6 +61,148 @@ Future<void> _openLanguage(WidgetTester tester) async {
 }
 
 void main() {
+  testWidgets('Notifications: every one the app sends, each on or off at its '
+      'time — the daily reminder, the khatmah\'s, the morning and evening '
+      'athkar (owner, 2026-11-21)', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+    final scheduler = FakeReminderScheduler();
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          ...tahfeezWidgetTestOverrides(),
+          dailyReminderSchedulerProvider.overrideWithValue(scheduler),
+        ],
+        child: const TahfeezApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await openFromMenu(tester, 'settings');
+    // No group of its own for the daily reminder any more.
+    expect(
+      find.byKey(const ValueKey('settings-group-Daily reminder')),
+      findsNothing,
+    );
+    await _openGroup(tester, 'settings-group-Notifications');
+    // Grouped (owner, 2026-11-22): reading, athkar — closed, "Off".
+    for (final fold in ['settings-reading', 'settings-athkar']) {
+      final f = find.byKey(ValueKey(fold));
+      await tester.scrollUntilVisible(f, 100, scrollable: _list);
+      expect(
+        find.descendant(of: f, matching: find.text('Off')),
+        findsWidgets,
+        reason: fold,
+      );
+      expect(
+        find.byKey(
+          ValueKey(
+            fold == 'settings-reading'
+                ? 'settings-reminder'
+                : 'settings-athkar-morning',
+          ),
+        ),
+        findsNothing,
+        reason: '$fold closed',
+      );
+      await tester.tap(f);
+      await tester.pumpAndSettle();
+    }
+    for (final key in [
+      'settings-reminder',
+      'settings-khatmah-reminder',
+      'settings-athkar-morning',
+      'settings-athkar-evening',
+    ]) {
+      await tester.scrollUntilVisible(
+        find.byKey(ValueKey(key)),
+        100,
+        scrollable: _list,
+      );
+      expect(
+        tester.widget<SwitchListTile>(find.byKey(ValueKey(key))).value,
+        isFalse,
+        reason: key,
+      );
+    }
+    // The morning athkar's, on: scheduled, its time shown to change.
+    final morning = find.byKey(const ValueKey('settings-athkar-morning'));
+    await tester.tap(morning);
+    await tester.pumpAndSettle();
+    expect(tester.widget<SwitchListTile>(morning).value, isTrue);
+    expect(scheduler.repeating.keys, [AthkarTime.morning.firstId]);
+    expect(
+      find.byKey(const ValueKey('settings-athkar-morning-time')),
+      findsOneWidget,
+    );
+    // Its time picker as the app's time format says (owner, 2026-11-22):
+    // 24-hour, no AM/PM.
+    final app = ProviderScope.containerOf(
+      tester.element(find.byType(TahfeezApp)),
+    );
+    await app.read(clockFormatProvider.notifier).set(ClockFormat.h24);
+    await tester.pumpAndSettle();
+    await tester.tap(
+      find.byKey(const ValueKey('settings-athkar-morning-time')),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byType(TimePickerDialog), findsOneWidget);
+    expect(find.text('AM'), findsNothing);
+    expect(find.text('PM'), findsNothing);
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    await app.read(clockFormatProvider.notifier).set(ClockFormat.system);
+    await tester.pumpAndSettle();
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('settings-athkar')),
+        matching: find.text('Morning athkar'),
+      ),
+      findsWidgets,
+      reason: 'the fold says which are on',
+    );
+    // Off again.
+    await tester.tap(morning);
+    await tester.pumpAndSettle();
+    expect(scheduler.repeating, isEmpty);
+
+    // A habit with reminders: there too, its switch its own.
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(TahfeezApp)),
+    );
+    final duha = container
+        .read(habitsProvider.notifier)
+        .addTemplate(habitTemplate('duha')!);
+    await tester.pumpAndSettle();
+    // (In one Habits entry, opened.)
+    final habits = find.byKey(const ValueKey('settings-habits'));
+    await tester.scrollUntilVisible(habits, 100, scrollable: _list);
+    expect(
+      find.descendant(of: habits, matching: find.text('Ḍuḥā prayer')),
+      findsWidgets,
+    );
+    await tester.tap(habits);
+    await tester.pumpAndSettle();
+    final row = find.byKey(ValueKey('settings-habit-${duha.id}'));
+    await tester.scrollUntilVisible(row, 100, scrollable: _list);
+    expect(tester.widget<SwitchListTile>(row).value, isTrue);
+    // Its reminder's time, there to change (owner, 2026-11-22).
+    expect(
+      find.byKey(ValueKey('settings-habit-${duha.id}-time-0')),
+      findsOneWidget,
+    );
+    await tester.tap(row);
+    await tester.pumpAndSettle();
+    expect(container.read(habitsProvider).habit(duha.id)!.remindersOn, isFalse);
+    expect(
+      find.descendant(of: habits, matching: find.text('Off')),
+      findsWidgets,
+      reason: 'none on: the entry says so',
+    );
+    container.read(habitsProvider.notifier).remove(duha.id);
+    await tester.pumpAndSettle();
+  });
+
   testWidgets('the Settings tab sets the theme and the language', (
     tester,
   ) async {
@@ -71,8 +221,7 @@ void main() {
       tester.element(find.byType(TahfeezApp)),
     );
 
-    await tester.tap(find.text('Settings'));
-    await tester.pumpAndSettle();
+    await openFromMenu(tester, 'settings');
     expect(container.read(themeModeControllerProvider), ThemeMode.system);
     // Every group closed at first, the most used too (owner, 2026-11-08).
     expect(find.byKey(const ValueKey('settings-app-theme')), findsNothing);
@@ -178,8 +327,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Settings'));
-    await tester.pumpAndSettle();
+    await openFromMenu(tester, 'settings');
     final search = find.byKey(const ValueKey('settings-search'));
 
     // An option's name finds its section.
@@ -231,8 +379,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Settings'));
-    await tester.pumpAndSettle();
+    await openFromMenu(tester, 'settings');
     // Closed: the language and the theme chosen, under their titles.
     expect(
       tester
@@ -287,8 +434,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Settings'));
-    await tester.pumpAndSettle();
+    await openFromMenu(tester, 'settings');
     final card = find.byKey(const ValueKey('settings-setup-again'));
     expect(card, findsOne);
     expect(
@@ -321,8 +467,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Settings'));
-    await tester.pumpAndSettle();
+    await openFromMenu(tester, 'settings');
     final group = find.byKey(const ValueKey('settings-group-Recitation audio'));
     await tester.scrollUntilVisible(group, 200, scrollable: _list);
     // Closed: the reciter's picture before his name.
@@ -364,8 +509,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Settings'));
-    await tester.pumpAndSettle();
+    await openFromMenu(tester, 'settings');
     await _openGroup(tester, 'settings-group-about');
     final about = find.byKey(const ValueKey('settings-about'));
     await tester.scrollUntilVisible(about, 200, scrollable: _list);
@@ -418,8 +562,7 @@ void main() {
     await storage.setString('core.theme_mode', 'dark');
     await storage.setString('quran.dataset.seeded_version', 'v1');
 
-    await tester.tap(find.text('Settings'));
-    await tester.pumpAndSettle();
+    await openFromMenu(tester, 'settings');
     await _openGroup(tester, 'settings-group-Your data');
     final reset = find.byKey(const ValueKey('settings-reset'));
     await tester.scrollUntilVisible(reset, 200, scrollable: _list);
@@ -470,8 +613,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Settings'));
-      await tester.pumpAndSettle();
+      await openFromMenu(tester, 'settings');
       await _openGroup(tester, 'settings-group-about');
       final rate = find.text('Rate TahfeezAI');
       await tester.scrollUntilVisible(rate, 200, scrollable: _list);

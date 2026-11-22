@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:tahfeez_ai/app/app.dart';
 
 import '../../test_helpers/widget_test_overrides.dart';
+import '../../test_helpers/app_menu.dart';
 
 void main() {
   for (final q in ['reciter', 'reset', 'theme', 'a']) {
@@ -22,8 +23,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Settings'));
-      await tester.pumpAndSettle();
+      await openFromMenu(tester, 'settings');
       final search = find.byKey(const ValueKey('settings-search'));
       await tester.tap(search);
       tester.view.viewInsets = const FakeViewPadding(bottom: 300);
