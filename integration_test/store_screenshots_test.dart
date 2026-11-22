@@ -13,7 +13,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tahfeez_ai/core/routing/app_routes.dart';
+import 'package:tahfeez_ai/features/athkar/domain/athkar.dart';
+import 'package:tahfeez_ai/features/habits/application/habits_controller.dart';
+import 'package:tahfeez_ai/features/habits/domain/habit.dart';
+import 'package:tahfeez_ai/features/habits/domain/habit_catalog.dart';
 import 'package:tahfeez_ai/features/home/presentation/home_sky.dart';
+import 'package:tahfeez_ai/features/prayer/application/saved_place.dart';
+import 'package:tahfeez_ai/features/qibla/domain/qibla_place.dart';
 import 'package:tahfeez_ai/app/app.dart';
 import 'package:tahfeez_ai/app/bootstrap.dart';
 import 'package:tahfeez_ai/core/localization/locale_controller.dart';
@@ -175,6 +182,31 @@ void main() {
     }
     await run(6); // a card already on screen slides away
 
+    // ── Every day (2.0.0): prayer times for Makkah, a few habits kept
+    // these past days ──
+    await container
+        .read(savedPlaceProvider.notifier)
+        .set(
+          const QiblaPlace(
+            latitude: 21.4225,
+            longitude: 39.8262,
+            name: 'Makkah',
+            country: 'SA',
+          ),
+        );
+    final habits = container.read(habitsProvider.notifier);
+    for (final id in ['athkarMorning', 'quranPages', 'witr', 'fastMonThu']) {
+      final habit = habits.addTemplate(
+        habitCatalog.firstWhere((t) => t.id == id),
+      );
+      for (var d = 1; d <= 9; d++) {
+        if ((d + id.length) % 4 == 0) continue;
+        habits.tick(habit, habitDay(now.subtract(Duration(days: d))));
+      }
+      if (id != 'witr') habits.tick(habit, habitDay(now));
+    }
+    await run(3);
+
     // ── Light ── under a morning sky
     debugSkyTime = DateTime(2026, 10, 26, 9);
     await theme(dark: false);
@@ -232,6 +264,16 @@ void main() {
     await run(3);
     await shot('07-search-light');
 
+    // Prayer times, the morning athkar, the Hijri calendar (2.0.0).
+    await go(AppRoutes.prayer);
+    await run(2);
+    await shot('20-prayer-times-light');
+    await go(AppRoutes.athkarRead(AthkarBook.morningEvening));
+    await run(2);
+    await shot('21-athkar-light');
+    await go(AppRoutes.hijriCalendar);
+    await shot('23-calendar-light');
+
     // ── Dark ── under a night sky
     debugSkyTime = DateTime(2026, 10, 26, 21);
     await theme(dark: true);
@@ -275,6 +317,8 @@ void main() {
     await shot('13-progress-dark');
     await go('/settings');
     await shot('14-settings-dark');
+    await go(AppRoutes.habits);
+    await shot('22-habits-dark');
 
     // ── Arabic ──
     await container
