@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui' show DisplayFeature, DisplayFeatureState, DisplayFeatureType;
 
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
@@ -130,6 +131,9 @@ class RealApp {
     WidgetTester tester, {
     String route = '/home',
     Size size = const Size(390, 844),
+
+    /// A dual-screen device's hinge, spanned (none: a phone, a tablet…).
+    Rect? hinge,
     String locale = 'en',
     double textScale = 1.0,
     ReaderMode mode = ReaderMode.mushaf,
@@ -149,6 +153,14 @@ class RealApp {
     recordErrors();
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
+    tester.view.displayFeatures = [
+      if (hinge != null)
+        DisplayFeature(
+          bounds: hinge,
+          type: DisplayFeatureType.hinge,
+          state: DisplayFeatureState.postureFlat,
+        ),
+    ];
     tester.platformDispatcher.textScaleFactorTestValue = textScale;
     addTearDown(tester.view.reset);
     addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);

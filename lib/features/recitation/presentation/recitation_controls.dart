@@ -68,6 +68,7 @@ import '../../mushaf/presentation/mushaf_appearance_sheet.dart';
 import '../../../memorization/application/memorization_today.dart';
 import '../../memorize/presentation/test_summary_sheet.dart';
 import '../../../core/theme/tahfeez_motion.dart';
+import '../../../core/ui/display_hinge.dart';
 import '../../../core/ui/motion.dart';
 
 export '../application/mushaf_recitation_target.dart';
@@ -1136,9 +1137,16 @@ List<Widget> _idleRow({
 /// their gutter and frames), at most the window less its margins; `null` on a
 /// phone, a tablet's app, or a phone-sized browser window — the bar as it
 /// is there.
+///
+/// A dual-screen device with the Mushaf across both (owner, 2026-11-23:
+/// as in a browser): the same, each half under its own screen's page —
+/// nothing under the hinge.
 double? wideWebBarWidth(BuildContext context, WidgetRef ref) {
-  if (!ref.watch(platformCapabilitiesProvider).isWeb) return null;
   final size = MediaQuery.sizeOf(context);
+  if (DisplayHinge.of(MediaQuery.of(context))?.vertical ?? false) {
+    return size.width;
+  }
+  if (!ref.watch(platformCapabilitiesProvider).isWeb) return null;
   if (size.width < webWideFrom) return null;
   // Three quarters of the spread's width.
   return math.min(size.width - 32, math.max(560, 0.75 * webSpreadWidth(size)));

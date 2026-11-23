@@ -10,6 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../quran/presentation/surah_info_sheet.dart';
 
+import '../../../core/ui/display_hinge.dart';
 import '../../../core/theme/components/tahfeez_bottom_sheet.dart';
 import '../../../core/ui/web_margin_scroll.dart';
 import '../../../core/core_providers.dart';
@@ -100,6 +101,8 @@ bool ayahModeIsContinuous(BuildContext context, WidgetRef ref) =>
         ref.watch(ayahViewPreferencesProvider.select((v) => v.layout)) ==
             AyahLayout.continuous);
 
+/// (And a dual-screen device's, its Mushaf across both screens: each half of
+/// the bar under its screen's page.)
 final ValueNotifier<({double pageWidth, double gutter})?> webSpreadPages =
     ValueNotifier(null);
 
@@ -205,6 +208,30 @@ class _MushafPagerState extends ConsumerState<MushafPager> {
   // spread — two fixed-aspect pages that the reading cap only ever squeezes —
   // earns full-bleed.
   bool _requestedFullBleed = false;
+
+  /// Where the pager is on the screen — measured only with a dual-screen
+  /// device's hinge across it, to put the spine on the hinge.
+  Rect? _pagerRect;
+  bool _measureScheduled = false;
+
+  void _measureForHinge() {
+    if (_measureScheduled) return;
+    _measureScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _measureScheduled = false;
+      if (!mounted) return;
+      final box = context.findRenderObject();
+      if (box is! RenderBox || !box.hasSize) return;
+      final rect = box.localToGlobal(Offset.zero) & box.size;
+      final old = _pagerRect;
+      if (old == null ||
+          (old.left - rect.left).abs() > 0.5 ||
+          (old.right - rect.right).abs() > 0.5) {
+        setState(() => _pagerRect = rect);
+      }
+    });
+  }
+
   bool _appliedFullBleed = false;
   bool _applyScheduled = false;
   // Cached (never touched via `ref` at callback time, since `ref` is invalid
@@ -747,6 +774,41 @@ class _MushafPagerState extends ConsumerState<MushafPager> {
 
     final spreadCount = (widget.pageCount / 2).ceil();
     _itemCount = spreadCount;
+    // A dual-screen device spanned (owner, 2026-11-23): a page on each
+    // screen, the hinge between them as the spine — measured against where
+    // the pages are on the screen (after a frame).
+    final hinge = isWeb ? null : DisplayHinge.of(MediaQuery.of(context));
+    final across = hinge != null && hinge.vertical ? hinge.bounds : null;
+    if (across != null) _measureForHinge();
+    final at = _pagerRect;
+    final split =
+        across != null &&
+            at != null &&
+            across.left > at.left &&
+            across.right < at.right
+        ? (
+            right: at.right - across.right,
+            spine: across.width,
+            left: across.left - at.left,
+          )
+        : null;
+    // The bar under the pages as in a browser: a half under each screen's
+    // page, a margin either side of the hinge (the bar's own padding in).
+    if (split != null) {
+      final under = (
+        pageWidth: math.min(split.left, split.right) - 16,
+        gutter: split.spine + 16,
+      );
+      if (webSpreadPages.value != under) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted && _twoPageSpread == true) webSpreadPages.value = under;
+        });
+      }
+    }
+    // The right page's room, then the left's (the row runs right to left).
+    Widget slot(double? width, Widget child) => width == null
+        ? Expanded(child: child)
+        : SizedBox(width: width, child: child);
     final pageView = PageView.builder(
       key: const ValueKey('spread'),
       controller: _controller,
@@ -797,8 +859,9 @@ class _MushafPagerState extends ConsumerState<MushafPager> {
           textDirection: TextDirection.rtl,
           child: Row(
             children: [
-              Expanded(
-                child: isWeb
+              slot(
+                split?.right,
+                isWeb
                     // Direction-aware Align (not Center, and not an absolute
                     // `centerRight`) is what lets `_bordered`'s container size
                     // to the aspect-keyed page (loose constraints) while
@@ -829,6 +892,13 @@ class _MushafPagerState extends ConsumerState<MushafPager> {
                       )
                     : rightPage,
               ),
+              if (split != null)
+                SizedBox(
+                  key: const ValueKey('mushaf-hinge-spine'),
+                  width: split.spine,
+                  height: double.infinity,
+                  child: ColoredBox(color: appearanceColors.background),
+                ),
               if (isWeb)
                 SizedBox(
                   width: _webGutterWidth,
@@ -840,8 +910,9 @@ class _MushafPagerState extends ConsumerState<MushafPager> {
                   // every appearance other than whichever one was hardcoded.
                   child: ColoredBox(color: appearanceColors.background),
                 ),
-              Expanded(
-                child: isWeb
+              slot(
+                split?.left,
+                isWeb
                     ? Align(
                         alignment: AlignmentDirectional.centerStart,
                         child: _bordered(

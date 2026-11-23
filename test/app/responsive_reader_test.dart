@@ -58,6 +58,7 @@ void main() {
     WidgetTester tester, {
     required String route,
     required Size size,
+    Rect? hinge,
     required String locale,
     required double textScale,
     required ReaderMode mode,
@@ -75,6 +76,7 @@ void main() {
     final container = await RealApp.launch(
       tester,
       size: size,
+      hinge: hinge,
       locale: locale,
       textScale: textScale,
       mode: mode,
@@ -160,6 +162,18 @@ void main() {
     },
     'desktop': const Size(1440, 900),
     'large desktop': const Size(1920, 1080),
+    // A foldable opened (an inner screen near-square), both ways; a
+    // dual-screen device spanned, side by side and one above the other —
+    // the app on one screen, the Mushaf's pages on both (owner, 2026-11-23).
+    'fold open': const Size(673, 841),
+    'fold open landscape': const Size(841, 673),
+    'dual screen': const Size(1114, 720),
+    'dual screen stacked': const Size(720, 1114),
+  };
+  // Their hinges (Surface Duo's: 34 between two 540 × 720 screens).
+  const hinges = {
+    'dual screen': Rect.fromLTWH(540, 0, 34, 720),
+    'dual screen stacked': Rect.fromLTWH(0, 540, 720, 34),
   };
   const locales = [
     'en', 'ar', 'de', 'fr', 'tr', 'ur', 'id', 'es', 'ru', 'fa', 'bn', //
@@ -224,6 +238,7 @@ void main() {
               tester,
               route: route,
               size: size,
+              hinge: hinges[sizeName],
               locale: locale,
               textScale: textScale,
               mode: mode,
@@ -291,6 +306,7 @@ void main() {
             tester,
             route: route,
             size: size,
+            hinge: hinges[sizeName],
             locale: locale,
             textScale: textScale,
             mode: ReaderMode.mushaf,
@@ -365,6 +381,7 @@ void main() {
             tester,
             route: '/quran/ayah/2/282',
             size: size,
+            hinge: hinges[sizeName],
             locale: locale,
             textScale: textScale,
             mode: ReaderMode.values[i % 2],
@@ -388,6 +405,7 @@ void main() {
           tester,
           route: pages['long ayah']!,
           size: size,
+          hinge: hinges[sizeName],
           locale: 'de',
           textScale: 2.0,
           mode: ReaderMode.ayah,
@@ -406,6 +424,7 @@ void main() {
             tester,
             route: pages['long ayah']!,
             size: size,
+            hinge: hinges[sizeName],
             locale: locale,
             textScale: 2.0,
             mode: ReaderMode.ayah,

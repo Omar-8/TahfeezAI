@@ -123,6 +123,21 @@ class HabitsAddAction extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final style = theme.textTheme.labelLarge?.copyWith(color: scheme.primary);
+    // A narrow phone at large text: the + alone, its name its tooltip —
+    // only where the button, the back button and a little of the title
+    // wouldn't fit across the bar (elsewhere as ever).
+    final label = TextPainter(
+      text: TextSpan(text: l10n.habitsAdd, style: style),
+      textDirection: Directionality.of(context),
+      textScaler: MediaQuery.textScalerOf(context),
+      maxLines: 1,
+    )..layout();
+    final button = label.width + 20 + TahfeezSpacing.xs + 2 * TahfeezSpacing.md;
+    final named =
+        button + TahfeezSpacing.sm + kToolbarHeight + 56 <=
+        MediaQuery.sizeOf(context).width;
+    label.dispose();
     return Padding(
       padding: const EdgeInsetsDirectional.only(end: TahfeezSpacing.sm),
       child: Center(
@@ -138,19 +153,27 @@ class HabitsAddAction extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(
                   horizontal: TahfeezSpacing.md,
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  spacing: TahfeezSpacing.xs,
-                  children: [
-                    Icon(Icons.add_rounded, size: 20, color: scheme.primary),
-                    Text(
-                      l10n.habitsAdd,
-                      style: theme.textTheme.labelLarge?.copyWith(
-                        color: scheme.primary,
+                child: named
+                    ? Row(
+                        mainAxisSize: MainAxisSize.min,
+                        spacing: TahfeezSpacing.xs,
+                        children: [
+                          Icon(
+                            Icons.add_rounded,
+                            size: 20,
+                            color: scheme.primary,
+                          ),
+                          Text(l10n.habitsAdd, style: style),
+                        ],
+                      )
+                    : Tooltip(
+                        message: l10n.habitsAdd,
+                        child: Icon(
+                          Icons.add_rounded,
+                          size: 20,
+                          color: scheme.primary,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
               ),
             ),
           ),

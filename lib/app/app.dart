@@ -1,6 +1,7 @@
 import '../core/localization/clock_format.dart';
 import '../core/localization/fallback_localizations.dart';
 import '../features/guide/guide.dart';
+import 'dual_screen_layer.dart';
 import 'get_the_app_prompt.dart';
 import '../features/recitation/presentation/web_model_preload.dart';
 import '../features/memorize/presentation/milestone_banner.dart';
@@ -123,18 +124,23 @@ class TahfeezApp extends ConsumerWidget {
           // The Mushaf's guide, above every screen and menu.
           // and a milestone just reached, gently, over that.
           // (The app's data replaced on iOS: covered until reopened.)
-          builder: (context, child) => ClockFormatScope(
-            child: ReopenRequiredLayer(
-              child: _WebSheetWidth(
-                // (In a phone's browser: where to get the app.)
-                child: GetTheAppPrompt(
-                  // (In a browser: the recitation model, fetched meanwhile.)
-                  child: WebModelPreload(
-                    child: AnimationsOff(
-                      child: MilestoneLayer(
-                        child: MeaningPacksLayer(
-                          child: GuideLayer(
-                            child: child ?? const SizedBox.shrink(),
+          // (A dual-screen device spanned: the app on one screen, the
+          // Mushaf's pages on both.)
+          builder: (context, child) => DualScreenLayer(
+            router: router,
+            child: ClockFormatScope(
+              child: ReopenRequiredLayer(
+                child: _WebSheetWidth(
+                  // (In a phone's browser: where to get the app.)
+                  child: GetTheAppPrompt(
+                    // (In a browser: the recitation model, fetched meanwhile.)
+                    child: WebModelPreload(
+                      child: AnimationsOff(
+                        child: MilestoneLayer(
+                          child: MeaningPacksLayer(
+                            child: GuideLayer(
+                              child: child ?? const SizedBox.shrink(),
+                            ),
                           ),
                         ),
                       ),
