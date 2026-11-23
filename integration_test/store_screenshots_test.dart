@@ -214,6 +214,9 @@ void main() {
     debugSkyTime = DateTime(now.year, now.month, now.day, 9, 41);
     debugClockTime = debugSkyTime;
     await theme(dark: false);
+    // Reading left in Al-Kahf: Home's "Continue reading" shows it.
+    container.read(readerModeProvider.notifier).set(ReaderMode.mushaf);
+    await go('/quran/surah/18');
     await go('/home');
     await shot('01-home-light');
     // The surah list: glass cards, the names in the Mushaf's calligraphy.
@@ -331,6 +334,19 @@ void main() {
         .setLocale(const Locale('ar'));
     await run(2);
     await theme(dark: false);
+    // Morning again, and Makkah by its Arabic name.
+    debugSkyTime = DateTime(now.year, now.month, now.day, 9, 41);
+    debugClockTime = debugSkyTime;
+    await container
+        .read(savedPlaceProvider.notifier)
+        .set(
+          const QiblaPlace(
+            latitude: 21.4225,
+            longitude: 39.8262,
+            name: 'مكة المكرمة',
+            country: 'SA',
+          ),
+        );
     await go('/home');
     await shot('15-home-arabic-light');
     await ayahView(font: QuranFont.amiri);
