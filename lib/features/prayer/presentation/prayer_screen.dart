@@ -325,72 +325,87 @@ class _DayTimes extends StatelessWidget {
                 color: next?.prayer == p ? scheme.primaryContainer : null,
                 borderRadius: BorderRadius.circular(TahfeezRadii.md),
               ),
-              child: ListTile(
-                dense: p == Prayer.sunrise,
-                leading: Icon(
-                  switch (p) {
-                    Prayer.fajr => Icons.wb_twilight_rounded,
-                    Prayer.sunrise => Icons.wb_sunny_outlined,
-                    Prayer.duha => Icons.light_mode_outlined,
-                    Prayer.dhuhr => Icons.wb_sunny_rounded,
-                    Prayer.asr => Icons.sunny_snowing,
-                    Prayer.maghrib => Icons.wb_twilight_rounded,
-                    Prayer.isha => Icons.nightlight_round,
-                  },
-                  color: p == Prayer.sunrise
-                      ? scheme.onSurfaceVariant
-                      : scheme.primary,
-                ),
-                title: Text(
-                  prayerName(l10n, p),
-                  style: p == Prayer.sunrise
-                      ? theme.textTheme.bodyMedium?.copyWith(
-                          color: scheme.onSurfaceVariant,
-                        )
-                      : theme.textTheme.titleSmall,
-                ),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      clock.format(times[p]!),
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        fontFeatures: const [FontFeature.tabularFigures()],
-                      ),
-                    ),
-                    // The bell (owner, 2026-11-22): off → the adhan → a
-                    // vibration only (silent on an iPhone) → off.
-                    if (p.remindable)
-                      IconButton(
-                        key: ValueKey('prayer-notify-${p.name}'),
-                        tooltip: switch (alertOf(p)) {
-                          PrayerAlert.off => l10n.prayerNotifyTip,
-                          PrayerAlert.sound => l10n.prayerSound,
-                          PrayerAlert.vibrate =>
-                            vibrates
-                                ? l10n.prayerSoundVibrate
-                                : l10n.prayerSoundSilent,
-                        },
-                        icon: Icon(
-                          switch (alertOf(p)) {
-                            PrayerAlert.off => Icons.notifications_none_rounded,
-                            PrayerAlert.sound =>
-                              Icons.notifications_active_rounded,
-                            PrayerAlert.vibrate =>
-                              vibrates
-                                  ? Icons.vibration_rounded
-                                  : Icons.notifications_paused_outlined,
-                          },
-                          color: alertOf(p) == PrayerAlert.off
-                              ? scheme.onSurfaceVariant
-                              : scheme.primary,
+              // At large text on a narrow phone the time shrinks to fit
+              // (it would otherwise take the whole row).
+              child: LayoutBuilder(
+                builder: (context, box) => ListTile(
+                  dense: p == Prayer.sunrise,
+                  leading: Icon(
+                    switch (p) {
+                      Prayer.fajr => Icons.wb_twilight_rounded,
+                      Prayer.sunrise => Icons.wb_sunny_outlined,
+                      Prayer.duha => Icons.light_mode_outlined,
+                      Prayer.dhuhr => Icons.wb_sunny_rounded,
+                      Prayer.asr => Icons.sunny_snowing,
+                      Prayer.maghrib => Icons.wb_twilight_rounded,
+                      Prayer.isha => Icons.nightlight_round,
+                    },
+                    color: p == Prayer.sunrise
+                        ? scheme.onSurfaceVariant
+                        : scheme.primary,
+                  ),
+                  title: Text(
+                    prayerName(l10n, p),
+                    style: p == Prayer.sunrise
+                        ? theme.textTheme.bodyMedium?.copyWith(
+                            color: scheme.onSurfaceVariant,
+                          )
+                        : theme.textTheme.titleSmall,
+                  ),
+                  trailing: ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: box.maxWidth * 0.5),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Flexible(
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              clock.format(times[p]!),
+                              style: theme.textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.w700,
+                                fontFeatures: const [
+                                  FontFeature.tabularFigures(),
+                                ],
+                              ),
+                            ),
+                          ),
                         ),
-                        onPressed: () => onNotify(p, alertOf(p).next),
-                      )
-                    else
-                      const SizedBox(width: 48),
-                  ],
+                        // The bell (owner, 2026-11-22): off → the adhan → a
+                        // vibration only (silent on an iPhone) → off.
+                        if (p.remindable)
+                          IconButton(
+                            key: ValueKey('prayer-notify-${p.name}'),
+                            tooltip: switch (alertOf(p)) {
+                              PrayerAlert.off => l10n.prayerNotifyTip,
+                              PrayerAlert.sound => l10n.prayerSound,
+                              PrayerAlert.vibrate =>
+                                vibrates
+                                    ? l10n.prayerSoundVibrate
+                                    : l10n.prayerSoundSilent,
+                            },
+                            icon: Icon(
+                              switch (alertOf(p)) {
+                                PrayerAlert.off =>
+                                  Icons.notifications_none_rounded,
+                                PrayerAlert.sound =>
+                                  Icons.notifications_active_rounded,
+                                PrayerAlert.vibrate =>
+                                  vibrates
+                                      ? Icons.vibration_rounded
+                                      : Icons.notifications_paused_outlined,
+                              },
+                              color: alertOf(p) == PrayerAlert.off
+                                  ? scheme.onSurfaceVariant
+                                  : scheme.primary,
+                            ),
+                            onPressed: () => onNotify(p, alertOf(p).next),
+                          )
+                        else
+                          const SizedBox(width: 48),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ),

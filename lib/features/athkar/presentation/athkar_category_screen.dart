@@ -327,6 +327,11 @@ class AthkarReaderScreen extends ConsumerStatefulWidget {
 }
 
 class _AthkarReaderState extends ConsumerState<AthkarReaderScreen> {
+  /// The pages: the rest of the height, or (when [short]) most of it.
+  static Widget sized(bool short, double height, Widget pages) => short
+      ? SizedBox(height: height < 275 ? 220 : height * 0.8, child: pages)
+      : Expanded(child: pages);
+
   late final _pages = PageController(initialPage: widget.start);
   late var _page = widget.start;
   Timer? _advance;
@@ -401,111 +406,123 @@ class _AthkarReaderState extends ConsumerState<AthkarReaderScreen> {
             file: zikr!.audio!,
           ),
       ],
-      body: Column(
-        children: [
-          // The chapter's name, whole, under the bar.
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              TahfeezSpacing.md,
-              TahfeezSpacing.sm,
-              TahfeezSpacing.md,
-              0,
-            ),
-            child: Align(
-              alignment: AlignmentDirectional.centerStart,
-              child: AthkarHeading(
-                category.titleIn(language),
-                full: category.fullTitleIn(language),
+      // A short landscape phone at large text: the page scrolls, the zikr
+      // a fixed height, so the counter stays reachable.
+      body: LayoutBuilder(
+        builder: (context, box) {
+          final short = box.maxHeight < 400;
+          final children = <Widget>[
+            // The chapter's name, whole, under the bar.
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                TahfeezSpacing.md,
+                TahfeezSpacing.sm,
+                TahfeezSpacing.md,
+                0,
+              ),
+              child: Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: AthkarHeading(
+                  category.titleIn(language),
+                  full: category.fullTitleIn(language),
+                ),
               ),
             ),
-          ),
-          Expanded(
-            child: PageView.builder(
-              key: const ValueKey('athkar-pages'),
-              controller: _pages,
-              itemCount: pages,
-              onPageChanged: (p) {
-                _advance?.cancel();
-                setState(() => _page = p);
-              },
-              itemBuilder: (context, i) => i == n
-                  ? _AllDone(category: category)
-                  : _ZikrPage(
-                      zikr: category.athkar[i],
-                      onCount: () => _count(category, i),
-                    ),
-            ),
-          ),
-          // At the foot, in one row: back, the counter, on (owner,
-          // 2026-11-21: they stood too high, one above the other).
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              TahfeezSpacing.md,
-              TahfeezSpacing.xs,
-              TahfeezSpacing.md,
-              TahfeezSpacing.sm,
-            ),
-            child: Row(
-              children: [
-                if (n > 1)
-                  IconButton(
-                    key: const ValueKey('athkar-previous'),
-                    tooltip: l10n.commonPrevious,
-                    iconSize: 32,
-                    icon: Icon(
-                      rtl
-                          ? Icons.chevron_right_rounded
-                          : Icons.chevron_left_rounded,
-                    ),
-                    onPressed: _page > 0 ? () => _go(_page - 1) : null,
-                  ),
-                Expanded(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (zikr != null)
-                        _Counter(
-                          key: ValueKey('athkar-counter-${zikr.id}'),
-                          count: count,
-                          repeat: zikr.repeat,
-                          onTap: () => _count(category, _page),
-                        )
-                      else
-                        const SizedBox(height: _Counter.size),
-                      const SizedBox(height: TahfeezSpacing.xs),
-                      Text(
-                        [
-                          if (n > 1 && zikr != null) '${_page + 1} / $n',
-                          if (zikr != null)
-                            count >= zikr.repeat
-                                ? l10n.athkarTimes(zikr.repeat)
-                                : l10n.athkarTapToCount,
-                        ].join('  ·  '),
-                        key: const ValueKey('athkar-position'),
-                        textAlign: TextAlign.center,
-                        style: theme.textTheme.labelMedium?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
+            sized(
+              short,
+              box.maxHeight,
+              PageView.builder(
+                key: const ValueKey('athkar-pages'),
+                controller: _pages,
+                itemCount: pages,
+                onPageChanged: (p) {
+                  _advance?.cancel();
+                  setState(() => _page = p);
+                },
+                itemBuilder: (context, i) => i == n
+                    ? _AllDone(category: category)
+                    : _ZikrPage(
+                        zikr: category.athkar[i],
+                        onCount: () => _count(category, i),
                       ),
-                    ],
-                  ),
-                ),
-                if (n > 1)
-                  IconButton(
-                    key: const ValueKey('athkar-next'),
-                    tooltip: l10n.commonNext,
-                    iconSize: 32,
-                    icon: Icon(
-                      rtl
-                          ? Icons.chevron_left_rounded
-                          : Icons.chevron_right_rounded,
-                    ),
-                    onPressed: _page < pages - 1 ? () => _go(_page + 1) : null,
-                  ),
-              ],
+              ),
             ),
-          ),
-        ],
+            // At the foot, in one row: back, the counter, on (owner,
+            // 2026-11-21: they stood too high, one above the other).
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                TahfeezSpacing.md,
+                TahfeezSpacing.xs,
+                TahfeezSpacing.md,
+                TahfeezSpacing.sm,
+              ),
+              child: Row(
+                children: [
+                  if (n > 1)
+                    IconButton(
+                      key: const ValueKey('athkar-previous'),
+                      tooltip: l10n.commonPrevious,
+                      iconSize: 32,
+                      icon: Icon(
+                        rtl
+                            ? Icons.chevron_right_rounded
+                            : Icons.chevron_left_rounded,
+                      ),
+                      onPressed: _page > 0 ? () => _go(_page - 1) : null,
+                    ),
+                  Expanded(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (zikr != null)
+                          _Counter(
+                            key: ValueKey('athkar-counter-${zikr.id}'),
+                            count: count,
+                            repeat: zikr.repeat,
+                            onTap: () => _count(category, _page),
+                          )
+                        else
+                          const SizedBox(height: _Counter.size),
+                        const SizedBox(height: TahfeezSpacing.xs),
+                        Text(
+                          [
+                            if (n > 1 && zikr != null) '${_page + 1} / $n',
+                            if (zikr != null)
+                              count >= zikr.repeat
+                                  ? l10n.athkarTimes(zikr.repeat)
+                                  : l10n.athkarTapToCount,
+                          ].join('  ·  '),
+                          key: const ValueKey('athkar-position'),
+                          textAlign: TextAlign.center,
+                          style: theme.textTheme.labelMedium?.copyWith(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (n > 1)
+                    IconButton(
+                      key: const ValueKey('athkar-next'),
+                      tooltip: l10n.commonNext,
+                      iconSize: 32,
+                      icon: Icon(
+                        rtl
+                            ? Icons.chevron_left_rounded
+                            : Icons.chevron_right_rounded,
+                      ),
+                      onPressed: _page < pages - 1
+                          ? () => _go(_page + 1)
+                          : null,
+                    ),
+                ],
+              ),
+            ),
+          ];
+          return short
+              ? SingleChildScrollView(child: Column(children: children))
+              : Column(children: children);
+        },
       ),
     );
   }

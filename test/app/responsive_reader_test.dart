@@ -35,6 +35,7 @@ import 'package:tahfeez_ai/app/shell/app_menu.dart';
 import 'package:tahfeez_ai/features/qibla/presentation/qibla_screen.dart';
 import 'package:tahfeez_ai/features/salawat/salawat_reminder.dart';
 import 'package:tahfeez_ai/features/athkar/presentation/athkar_reminder_sheet.dart';
+import 'package:tahfeez_ai/features/duas/application/duas_providers.dart';
 
 /// The reader — the printed page's frame and Ayah mode in both layouts —
 /// on every screen size, portrait and landscape, in every UI language, at
@@ -85,6 +86,11 @@ void main() {
       appTheme: appTheme,
       passages: passages,
     );
+    // The hadith duas parse in an isolate: wait for them in real time
+    // (the screen's spinner never settles otherwise).
+    if (route.startsWith('/duas')) {
+      await tester.runAsync(() => container.read(hadithDuasProvider.future));
+    }
     // An ayah opened at is highlighted too.
     container.read(appRouterProvider).go(route);
     await settle(tester);
@@ -261,6 +267,12 @@ void main() {
     '/calendar',
     // Prayer times (2026-11-21).
     '/prayer',
+    // Duas (2026-11-23): its sections; a section of Quran duas and Hisn
+    // al-Muslim's chapters; one with hadith tiles too; a long hadith.
+    '/duas',
+    '/duas/children',
+    '/duas/forgiveness',
+    '/duas/hadith/bukhari/6306',
   ];
   var s = 0;
   for (final MapEntry(key: sizeName, value: size) in sizes.entries) {
