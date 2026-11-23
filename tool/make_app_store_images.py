@@ -44,7 +44,7 @@ SHARED = [name for name in PHONE if not (ROOT / "tool/store_media" / f"shot-{nam
 # English only: more of the app (make_store_images.py's captions).
 ENGLISH_MORE = [
     "10-hide-mode-dark", "05-follow-along-light", "18-quran-tab-light",
-    "08-ayah-mode-dark", "07-search-light",
+    "08-ayah-mode-dark", "23-calendar-light",
 ]
 
 # Every language: the recitation shots too (owner, 2026-11-15), captioned.
@@ -133,9 +133,9 @@ MORE = {
 
 # The order on the store: recitation first (owner, 2026-11-15).
 ORDER = [
-    "10-hide-mode-dark", "05-follow-along-light", "02-mushaf-light",
-    "04-ayah-mode-light", "19-topics-light", "13-progress-dark", "01-home-light",
-    "18-quran-tab-light", "08-ayah-mode-dark", "07-search-light",
+    "10-hide-mode-dark", "05-follow-along-light", "01-home-light",
+    "20-prayer-times-light", "21-athkar-light", "22-habits-dark", "02-mushaf-light",
+    "18-quran-tab-light", "08-ayah-mode-dark", "23-calendar-light",
 ]
 
 
