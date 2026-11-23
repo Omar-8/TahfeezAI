@@ -983,6 +983,7 @@
   "homeEventTomorrow": "{event}：明天",
   "homeEventInDays": "{event}：{days} 天后",
   "hijriCalendarTitle": "伊斯兰历",
+  "hijriCalendarMenuSub": "月份与全年节日",
   "hijriCalendarWhiteDays": "白日（13–15日）",
   "hijriCalendarEvents": "节日",
   "prayerTitle": "礼拜时间",

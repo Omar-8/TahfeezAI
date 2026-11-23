@@ -983,6 +983,7 @@
   "homeEventTomorrow": "{event}: আগামীকাল",
   "homeEventInDays": "{event}: {days} দিন পর",
   "hijriCalendarTitle": "হিজরি ক্যালেন্ডার",
+  "hijriCalendarMenuSub": "মাসগুলো ও বছরের উপলক্ষ",
   "hijriCalendarWhiteDays": "আইয়ামে বিজ (১৩–১৫)",
   "hijriCalendarEvents": "উপলক্ষ",
   "prayerTitle": "নামাজের সময়",

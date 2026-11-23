@@ -8,6 +8,7 @@ import 'package:tahfeez_ai/features/home/presentation/home_date_card.dart';
 import 'package:tahfeez_ai/features/home/presentation/hijri_calendar_screen.dart';
 import 'package:tahfeez_ai/memorization/application/memorization_today.dart';
 
+import '../../test_helpers/app_menu.dart';
 import '../../test_helpers/real_app.dart';
 
 /// Home's date (owner, 2026-11-21): today, the time, the Hijri date, a
@@ -130,6 +131,25 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('hijri-previous')));
     await RealApp.settle(tester);
     expect(find.text('Dhu al-Qaʿdah 1448'), findsOneWidget);
+    await RealApp.quit(tester);
+  });
+
+  testWidgets('the side menu: the Hijri calendar, as the date card opens '
+      'it', (tester) async {
+    final arafah = dayOf(HijriEvent.arafah, 1448);
+    await RealApp.launch(
+      tester,
+      route: '/home',
+      overrides: [
+        memorizationClockProvider.overrideWithValue(
+          () => DateTime(arafah.year, arafah.month, arafah.day - 4, 10),
+        ),
+      ],
+    );
+    await RealApp.settle(tester);
+    await openFromMenu(tester, 'calendar');
+    expect(find.byType(HijriCalendarScreen), findsOneWidget);
+    expect(find.text('Dhu al-Hijjah 1448'), findsOneWidget);
     await RealApp.quit(tester);
   });
 

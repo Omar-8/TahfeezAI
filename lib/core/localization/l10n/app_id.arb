@@ -983,6 +983,7 @@
   "homeEventTomorrow": "{event}: besok",
   "homeEventInDays": "{event}: {days} hari lagi",
   "hijriCalendarTitle": "Kalender Hijriah",
+  "hijriCalendarMenuSub": "Bulan-bulan dan peristiwa sepanjang tahun",
   "hijriCalendarWhiteDays": "Ayyamul Bidh (13–15)",
   "hijriCalendarEvents": "Peristiwa",
   "prayerTitle": "Waktu salat",

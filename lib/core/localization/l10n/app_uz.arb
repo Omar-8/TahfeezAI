@@ -983,6 +983,7 @@
   "homeEventTomorrow": "{event}: ertaga",
   "homeEventInDays": "{event}: {days} kundan keyin",
   "hijriCalendarTitle": "Hijriy taqvim",
+  "hijriCalendarMenuSub": "Oylar va yil sanalari",
   "hijriCalendarWhiteDays": "Oq kunlar (13–15)",
   "hijriCalendarEvents": "Voqealar",
   "prayerTitle": "Namoz vaqtlari",

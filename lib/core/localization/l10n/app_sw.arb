@@ -983,6 +983,7 @@
   "homeEventTomorrow": "{event}: kesho",
   "homeEventInDays": "{event}: {days, plural, =1{baada ya siku 1} other{baada ya siku {days}}}",
   "hijriCalendarTitle": "Kalenda ya Hijria",
+  "hijriCalendarMenuSub": "Miezi na matukio ya mwaka",
   "hijriCalendarWhiteDays": "Siku nyeupe (13–15)",
   "hijriCalendarEvents": "Matukio",
   "prayerTitle": "Nyakati za swala",

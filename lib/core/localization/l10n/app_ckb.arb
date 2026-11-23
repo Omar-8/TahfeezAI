@@ -983,6 +983,7 @@
   "homeEventTomorrow": "{event}: بەیانی",
   "homeEventInDays": "{event}: {days, plural, =1{دوای ١ ڕۆژ} other{دوای {days} ڕۆژ}}",
   "hijriCalendarTitle": "ڕۆژژمێری کۆچی",
+  "hijriCalendarMenuSub": "مانگەکان و بۆنەکانی ساڵ",
   "hijriCalendarWhiteDays": "ئەییامی بیض (١٣–١٥)",
   "hijriCalendarEvents": "بۆنەکان",
   "prayerTitle": "کاتەکانی نوێژ",

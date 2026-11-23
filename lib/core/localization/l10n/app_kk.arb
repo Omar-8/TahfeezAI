@@ -983,6 +983,7 @@
   "homeEventTomorrow": "{event}: ертең",
   "homeEventInDays": "{event}: {days} күннен кейін",
   "hijriCalendarTitle": "Хижри күнтізбесі",
+  "hijriCalendarMenuSub": "Айлар және жыл оқиғалары",
   "hijriCalendarWhiteDays": "Ақ күндер (13–15)",
   "hijriCalendarEvents": "Оқиғалар",
   "prayerTitle": "Намаз уақыттары",

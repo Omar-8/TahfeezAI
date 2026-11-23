@@ -983,6 +983,7 @@
   "homeEventTomorrow": "{event}: gobe",
   "homeEventInDays": "{event}: {days, plural, =1{cikin kwana 1} other{cikin kwana {days}}}",
   "hijriCalendarTitle": "Kalandar Hijira",
+  "hijriCalendarMenuSub": "Watanni da bukukuwan shekara",
   "hijriCalendarWhiteDays": "Ranakun fari (13–15)",
   "hijriCalendarEvents": "Lokuta",
   "prayerTitle": "Lokutan sallah",

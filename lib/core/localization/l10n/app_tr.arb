@@ -983,6 +983,7 @@
   "homeEventTomorrow": "{event}: yarın",
   "homeEventInDays": "{event}: {days, plural, =1{1 gün sonra} other{{days} gün sonra}}",
   "hijriCalendarTitle": "Hicri takvim",
+  "hijriCalendarMenuSub": "Aylar ve yılın özel günleri",
   "hijriCalendarWhiteDays": "Eyyâm-ı bîd (13–15)",
   "hijriCalendarEvents": "Özel günler",
   "prayerTitle": "Namaz vakitleri",

@@ -983,6 +983,7 @@
   "homeEventTomorrow": "{event}: завтра",
   "homeEventInDays": "{event}: через {days, plural, =1{{days} день} few{{days} дня} many{{days} дней} other{{days} дня}}",
   "hijriCalendarTitle": "Календарь хиджры",
+  "hijriCalendarMenuSub": "Месяцы и события года",
   "hijriCalendarWhiteDays": "Белые дни (13–15)",
   "hijriCalendarEvents": "События",
   "prayerTitle": "Время намаза",

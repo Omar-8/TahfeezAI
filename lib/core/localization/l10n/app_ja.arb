@@ -983,6 +983,7 @@
   "homeEventTomorrow": "{event}：明日",
   "homeEventInDays": "{event}：あと{days}日",
   "hijriCalendarTitle": "ヒジュラ暦",
+  "hijriCalendarMenuSub": "月と一年の行事",
   "hijriCalendarWhiteDays": "白い日々（13〜15日）",
   "hijriCalendarEvents": "行事",
   "prayerTitle": "礼拝時刻",

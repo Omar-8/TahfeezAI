@@ -2600,6 +2600,10 @@
     }
   },
   "hijriCalendarTitle": "Hijri calendar",
+  "hijriCalendarMenuSub": "The months and the year’s occasions",
+  "@hijriCalendarMenuSub": {
+    "description": "Side menu: the Hijri calendar entry's line under its title."
+  },
   "hijriCalendarWhiteDays": "The white days (13–15)",
   "hijriCalendarEvents": "Events",
   "prayerTitle": "Prayer times",

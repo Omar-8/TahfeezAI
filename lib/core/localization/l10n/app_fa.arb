@@ -983,6 +983,7 @@
   "homeEventTomorrow": "{event}: فردا",
   "homeEventInDays": "{event}: {days, plural, =1{۱ روز دیگر} other{{days} روز دیگر}}",
   "hijriCalendarTitle": "تقویم قمری",
+  "hijriCalendarMenuSub": "ماه‌ها و مناسبت‌های سال",
   "hijriCalendarWhiteDays": "ایام البیض (۱۳–۱۵)",
   "hijriCalendarEvents": "مناسبت‌ها",
   "prayerTitle": "اوقات شرعی",

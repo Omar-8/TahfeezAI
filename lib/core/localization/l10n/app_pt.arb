@@ -983,6 +983,7 @@
   "homeEventTomorrow": "{event}: amanhã",
   "homeEventInDays": "{event}: {days, plural, =1{em 1 dia} other{em {days} dias}}",
   "hijriCalendarTitle": "Calendário hegírico",
+  "hijriCalendarMenuSub": "Os meses e as datas do ano",
   "hijriCalendarWhiteDays": "Os dias brancos (13–15)",
   "hijriCalendarEvents": "Datas especiais",
   "prayerTitle": "Horários de oração",

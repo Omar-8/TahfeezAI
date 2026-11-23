@@ -983,6 +983,7 @@
   "homeEventTomorrow": "{event}: i morgen",
   "homeEventInDays": "{event}: {days, plural, =1{om 1 dag} other{om {days} dage}}",
   "hijriCalendarTitle": "Hijri-kalender",
+  "hijriCalendarMenuSub": "Månederne og årets begivenheder",
   "hijriCalendarWhiteDays": "De hvide dage (13.–15.)",
   "hijriCalendarEvents": "Begivenheder",
   "prayerTitle": "Bedetider",

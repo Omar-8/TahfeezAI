@@ -123,6 +123,14 @@ class _AppMenuDrawerState extends State<AppMenuDrawer>
         subtitle: l10n.habitsMenuSubtitle,
         onTap: () => _open(AppRoutes.habits),
       ),
+      // The Hijri calendar, as Home's date card opens it (owner, 2026-11-23).
+      (
+        key: 'calendar',
+        icon: Icons.calendar_month_outlined,
+        title: l10n.hijriCalendarTitle,
+        subtitle: l10n.hijriCalendarMenuSub,
+        onTap: () => _open(AppRoutes.hijriCalendar),
+      ),
       (
         key: 'bookmarks',
         icon: Icons.bookmark_outline_rounded,

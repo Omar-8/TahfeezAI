@@ -983,6 +983,7 @@
   "homeEventTomorrow": "{event}: غدًا",
   "homeEventInDays": "{event}: بعد {days, plural, =1{يوم} =2{يومين} few{{days} أيام} other{{days} يومًا}}",
   "hijriCalendarTitle": "التقويم الهجري",
+  "hijriCalendarMenuSub": "الشهور ومناسبات العام",
   "hijriCalendarWhiteDays": "الأيام البيض (13–15)",
   "hijriCalendarEvents": "المناسبات",
   "prayerTitle": "مواقيت الصلاة",

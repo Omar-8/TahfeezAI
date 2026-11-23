@@ -983,6 +983,7 @@
   "homeEventTomorrow": "{event}: αύριο",
   "homeEventInDays": "{event}: {days, plural, =1{σε 1 ημέρα} other{σε {days} ημέρες}}",
   "hijriCalendarTitle": "Ημερολόγιο Χιτζρί",
+  "hijriCalendarMenuSub": "Οι μήνες και οι περιστάσεις του έτους",
   "hijriCalendarWhiteDays": "Οι λευκές ημέρες (13–15)",
   "hijriCalendarEvents": "Γεγονότα",
   "prayerTitle": "Ώρες προσευχής",

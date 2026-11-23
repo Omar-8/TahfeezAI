@@ -983,6 +983,7 @@
   "homeEventTomorrow": "{event}: നാളെ",
   "homeEventInDays": "{event}: {days, plural, =1{1 ദിവസത്തിൽ} other{{days} ദിവസത്തിൽ}}",
   "hijriCalendarTitle": "ഹിജ്റ കലണ്ടർ",
+  "hijriCalendarMenuSub": "മാസങ്ങളും വർഷത്തിലെ വിശേഷ ദിവസങ്ങളും",
   "hijriCalendarWhiteDays": "അയ്യാമുൽ ബീള് (13–15)",
   "hijriCalendarEvents": "വിശേഷ ദിനങ്ങൾ",
   "prayerTitle": "നമസ്കാര സമയങ്ങൾ",

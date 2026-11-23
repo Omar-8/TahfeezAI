@@ -983,6 +983,7 @@
   "homeEventTomorrow": "{event}: سبا",
   "homeEventInDays": "{event}: {days, plural, =1{۱ ورځ وروسته} other{{days} ورځې وروسته}}",
   "hijriCalendarTitle": "قمري جنتري",
+  "hijriCalendarMenuSub": "میاشتې او د کال مناسبتونه",
   "hijriCalendarWhiteDays": "ایام البیض (۱۳–۱۵)",
   "hijriCalendarEvents": "مناسبتونه",
   "prayerTitle": "د لمانځه وختونه",

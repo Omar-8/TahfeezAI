@@ -983,6 +983,7 @@
   "homeEventTomorrow": "{event}: நாளை",
   "homeEventInDays": "{event}: {days, plural, =1{1 நாளில்} other{{days} நாட்களில்}}",
   "hijriCalendarTitle": "ஹிஜ்ரி நாட்காட்டி",
+  "hijriCalendarMenuSub": "மாதங்களும் ஆண்டின் நிகழ்வுகளும்",
   "hijriCalendarWhiteDays": "அய்யாமுல் பீழ் (13–15)",
   "hijriCalendarEvents": "நிகழ்வுகள்",
   "prayerTitle": "தொழுகை நேரங்கள்",

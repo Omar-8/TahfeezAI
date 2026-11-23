@@ -974,6 +974,7 @@ homeEventToday = {event}: आज
 homeEventTomorrow = {event}: कल
 homeEventInDays = {event}: {days, plural, =1{1 दिन में} other{{days} दिन में}}
 hijriCalendarTitle = हिजरी कैलेंडर
+hijriCalendarMenuSub = महीने और साल के अवसर
 hijriCalendarWhiteDays = अय्यामे बीज़ (13–15)
 hijriCalendarEvents = अवसर
 prayerTitle = नमाज़ के समय

@@ -983,6 +983,7 @@
   "homeEventTomorrow": "{event}: morgen",
   "homeEventInDays": "{event}: {days, plural, =1{in 1 Tag} other{in {days} Tagen}}",
   "hijriCalendarTitle": "Hidschri-Kalender",
+  "hijriCalendarMenuSub": "Die Monate und die Anlässe des Jahres",
   "hijriCalendarWhiteDays": "Die weißen Tage (13.–15.)",
   "hijriCalendarEvents": "Anlässe",
   "prayerTitle": "Gebetszeiten",

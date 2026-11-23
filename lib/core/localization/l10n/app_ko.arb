@@ -983,6 +983,7 @@
   "homeEventTomorrow": "{event}: 내일",
   "homeEventInDays": "{event}: {days}일 후",
   "hijriCalendarTitle": "히즈라력",
+  "hijriCalendarMenuSub": "달과 한 해의 절기",
   "hijriCalendarWhiteDays": "흰 날들 (13–15일)",
   "hijriCalendarEvents": "행사",
   "prayerTitle": "예배 시간",

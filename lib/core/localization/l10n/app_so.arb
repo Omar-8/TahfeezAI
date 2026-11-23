@@ -983,6 +983,7 @@
   "homeEventTomorrow": "{event}: berri",
   "homeEventInDays": "{event}: {days, plural, =1{1 maalin kadib} other{{days} maalmood kadib}}",
   "hijriCalendarTitle": "Kalandarka Hijriga",
+  "hijriCalendarMenuSub": "Bilaha iyo munaasabadaha sanadka",
   "hijriCalendarWhiteDays": "Maalmaha cad (13–15)",
   "hijriCalendarEvents": "Munaasabadaha",
   "prayerTitle": "Waqtiyada salaadda",

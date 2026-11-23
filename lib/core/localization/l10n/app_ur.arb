@@ -983,6 +983,7 @@
   "homeEventTomorrow": "{event}: کل",
   "homeEventInDays": "{event}: {days, plural, =1{1 دن بعد} other{{days} دن بعد}}",
   "hijriCalendarTitle": "ہجری کیلنڈر",
+  "hijriCalendarMenuSub": "مہینے اور سال کے مواقع",
   "hijriCalendarWhiteDays": "ایامِ بیض (13–15)",
   "hijriCalendarEvents": "مواقع",
   "prayerTitle": "نماز کے اوقات",
