@@ -2604,6 +2604,115 @@
   "@hijriCalendarMenuSub": {
     "description": "Side menu: the Hijri calendar entry's line under its title."
   },
+  "duasTitle": "Duas",
+  "@duasTitle": {
+    "description": "Duas: the page (side menu, Home shortcut) with supplications from the Quran and Hisn al-Muslim."
+  },
+  "duasMenuSub": "For health, provision, family and more",
+  "@duasMenuSub": {
+    "description": "Side menu: the Duas entry's line under its title."
+  },
+  "duasSearchHint": "Search duas",
+  "@duasSearchHint": {
+    "description": "Duas: the search field."
+  },
+  "duasFromQuran": "From the Quran",
+  "@duasFromQuran": {
+    "description": "Duas: a section's heading over its duas from the Quran."
+  },
+  "duasFromSunnah": "From the Sunnah",
+  "@duasFromSunnah": {
+    "description": "Duas: a section's heading over its duas from Sahih al-Bukhari and Sahih Muslim."
+  },
+  "duasFromHisn": "From Hisn al-Muslim",
+  "@duasFromHisn": {
+    "description": "Duas: a section's heading over its Hisn al-Muslim chapters."
+  },
+  "duasBukhari": "Sahih al-Bukhari",
+  "@duasBukhari": {
+    "description": "Duas: the hadith book's name, before a hadith's number."
+  },
+  "duasMuslim": "Sahih Muslim",
+  "@duasMuslim": {
+    "description": "Duas: the hadith book's name, before a hadith's number."
+  },
+  "duasSource": "Duas from the Quran; from Sahih al-Bukhari and Sahih Muslim (Arabic and translations via the hadith-api project); and from Hisn al-Muslim (Fortress of the Muslim) by Sa'id ibn Wahf al-Qahtani.",
+  "@duasSource": {
+    "description": "Duas: where its duas come from (the page's foot)."
+  },
+  "duasCount": "{count, plural, =1{1 dua} other{{count} duas}}",
+  "@duasCount": {
+    "description": "Duas: how many duas a section has.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "duasGroupHealth": "Health and healing",
+  "@duasGroupHealth": {
+    "description": "Duas: a section (Health)."
+  },
+  "duasGroupProvision": "Money and provision",
+  "@duasGroupProvision": {
+    "description": "Duas: a section (Provision)."
+  },
+  "duasGroupMarriage": "Marriage",
+  "@duasGroupMarriage": {
+    "description": "Duas: a section (Marriage)."
+  },
+  "duasGroupChildren": "Children",
+  "@duasGroupChildren": {
+    "description": "Duas: a section (Children)."
+  },
+  "duasGroupParents": "Parents",
+  "@duasGroupParents": {
+    "description": "Duas: a section (Parents)."
+  },
+  "duasGroupDistress": "Worry and hardship",
+  "@duasGroupDistress": {
+    "description": "Duas: a section (Distress)."
+  },
+  "duasGroupForgiveness": "Forgiveness",
+  "@duasGroupForgiveness": {
+    "description": "Duas: a section (Forgiveness)."
+  },
+  "duasGroupGuidance": "Guidance and knowledge",
+  "@duasGroupGuidance": {
+    "description": "Duas: a section (Guidance)."
+  },
+  "duasGroupProtection": "Protection",
+  "@duasGroupProtection": {
+    "description": "Duas: a section (Protection)."
+  },
+  "duasGroupHereafter": "Paradise and the Hereafter",
+  "@duasGroupHereafter": {
+    "description": "Duas: a section (Hereafter)."
+  },
+  "duasGroupTravel": "Travel",
+  "@duasGroupTravel": {
+    "description": "Duas: a section (Travel)."
+  },
+  "duasGroupDeceased": "The deceased",
+  "@duasGroupDeceased": {
+    "description": "Duas: a section (Deceased)."
+  },
+  "supplicationBookmark": "Bookmark",
+  "@supplicationBookmark": {
+    "description": "Athkar and Duas: the bookmark button (tooltip)."
+  },
+  "supplicationsBookmarked": "Bookmarked",
+  "@supplicationsBookmarked": {
+    "description": "Athkar and Duas: the heading over the bookmarked ones, shown first."
+  },
+  "athkarSections": "Sections",
+  "@athkarSections": {
+    "description": "Athkar and Duas: the heading over the sections, under the bookmarked ones."
+  },
+  "bookmarksSupplications": "Athkar and duas",
+  "@bookmarksSupplications": {
+    "description": "Bookmarks page: the heading over the bookmarked athkar and duas."
+  },
   "hijriCalendarWhiteDays": "The white days (13–15)",
   "hijriCalendarEvents": "Events",
   "prayerTitle": "Prayer times",

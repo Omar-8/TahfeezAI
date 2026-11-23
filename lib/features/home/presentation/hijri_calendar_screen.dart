@@ -1,8 +1,11 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hijri/hijri_calendar.dart';
 import 'package:intl/intl.dart' show DateFormat;
 
+import '../../../core/core_providers.dart';
 import '../../../core/localization/fallback_localizations.dart';
 import '../../../core/localization/generated/app_localizations.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -40,6 +43,10 @@ List<({DateTime date, int day})> hijriMonthDays(
   return days;
 }
 
+/// A day's height at most in a browser's calendar.
+@visibleForTesting
+const hijriWebDayHeight = 52.0;
+
 /// The Hijri calendar (owner, 2026-11-21: from Home's date): a month at a
 /// time, each day with its Gregorian date, today ringed, the white days
 /// (13–15) and the year's events marked, and the month's events listed.
@@ -68,6 +75,7 @@ class _HijriCalendarState extends ConsumerState<HijriCalendarScreen> {
     final shown = _shown ?? (year: todayHijri.year, month: todayHijri.month);
     final days = hijriMonthDays(shown.year, shown.month, adjust: adjust);
     final rtl = Directionality.of(context) == TextDirection.rtl;
+    final web = ref.watch(platformCapabilitiesProvider).isWeb;
     void go(int by) {
       var m = shown.month + by, y = shown.year;
       if (m < 1) {
@@ -166,24 +174,32 @@ class _HijriCalendarState extends ConsumerState<HijriCalendarScreen> {
                       ),
                   ],
                 ),
-                GridView.count(
-                  crossAxisCount: 7,
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  childAspectRatio: 0.85,
-                  children: [
-                    for (var i = 0; i < lead; i++) const SizedBox.shrink(),
-                    for (final d in days)
-                      _DayCell(
-                        day: d.day,
-                        date: d.date,
-                        today: d.date == today,
-                        white: d.day >= 13 && d.day <= 15,
-                        event: HijriEvent.values.any(
-                          (e) => e.month == shown.month && e.day == d.day,
+                // In a browser the days no taller than [hijriWebDayHeight]:
+                // the whole month and its events in view without scrolling
+                // (owner, 2026-11-23: web only).
+                LayoutBuilder(
+                  builder: (context, box) => GridView.count(
+                    key: const ValueKey('hijri-grid'),
+                    crossAxisCount: 7,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    childAspectRatio: web
+                        ? math.max(0.85, box.maxWidth / 7 / hijriWebDayHeight)
+                        : 0.85,
+                    children: [
+                      for (var i = 0; i < lead; i++) const SizedBox.shrink(),
+                      for (final d in days)
+                        _DayCell(
+                          day: d.day,
+                          date: d.date,
+                          today: d.date == today,
+                          white: d.day >= 13 && d.day <= 15,
+                          event: HijriEvent.values.any(
+                            (e) => e.month == shown.month && e.day == d.day,
+                          ),
                         ),
-                      ),
-                  ],
+                    ],
+                  ),
                 ),
                 Wrap(
                   spacing: TahfeezSpacing.md,

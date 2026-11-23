@@ -3,6 +3,7 @@
 "widget_prayer" = "നമസ്കാര സമയങ്ങൾ";
 "widget_qibla" = "ഖിബ്‌ല";
 "widget_athkar" = "അദ്കാർ";
+"widget_duas" = "ദുആകൾ";
 "widget_habits" = "ശീലങ്ങൾ";
 "widget_ayah" = "ഇന്നത്തെ ആയത്ത്";
 "widget_reading" = "വായന തുടരുക";
@@ -11,5 +12,5 @@
 "widget_khatmah" = "ഖത്ം";
 "widget_quran" = "ഖുർആൻ";
 "widget_today" = "ഹിജ്റ കലണ്ടർ · നമസ്കാര സമയങ്ങൾ";
-"widget_shortcuts" = "ഖിബ്‌ല · അദ്കാർ · ശീലങ്ങൾ";
-"widget_shortcuts_small" = "ഖിബ്‌ല · അദ്കാർ · ശീലങ്ങൾ (3×1)";
+"widget_shortcuts" = "ഖിബ്‌ല · അദ്കാർ · ദുആകൾ · ശീലങ്ങൾ";
+"widget_shortcuts_small" = "ഖിബ്‌ല · അദ്കാർ · ദുആകൾ · ശീലങ്ങൾ (3×1)";

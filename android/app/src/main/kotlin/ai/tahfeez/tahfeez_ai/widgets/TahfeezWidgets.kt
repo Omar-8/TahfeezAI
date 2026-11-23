@@ -98,8 +98,14 @@ abstract class TahfeezWidget : HomeWidgetProvider() {
           context, MainActivity::class.java,
           Uri.parse("tahfeezwidget://open?route=" + Uri.encode(route)))
 
-  /** The app's icon [codepoint] (its MaterialIcons font) in [color]. */
+  /** The app's icon [codepoint] (its MaterialIcons font) in [color]; [DUAS]:
+   * the Duas hands, drawn (no font has them). */
   protected fun icon(context: Context, views: RemoteViews, id: Int, codepoint: Int, color: Int, sizeDp: Float = 24f) {
+    if (codepoint == DUAS) {
+      views.setImageViewResource(id, R.drawable.ic_dua_hands)
+      views.setInt(id, "setColorFilter", color)
+      return
+    }
     val glyph = String(Character.toChars(codepoint))
     val bitmap = HomeWidgetFonts.textBitmap(
         context, Look.icons(context), glyph, fontSizeSp = sizeDp, maxWidthDp = sizeDp * 2)
@@ -259,21 +265,39 @@ abstract class TahfeezWidget : HomeWidgetProvider() {
     fillPrayer(context, views, data, look, header = false)
   }
 
-  /** Home's three buttons (part_buttons), each on its glass. */
-  protected fun fillButtons(context: Context, views: RemoteViews, data: WidgetData, look: Look) {
+  /** Home's four buttons as one group (part_buttons; owner, 2026-11-23):
+   * Qibla, Athkar, Duas, Habits on one glass, a fine line between them. */
+  protected fun fillButtons(context: Context, views: RemoteViews, data: WidgetData, look: Look, w: Float) {
     val buttons = listOf(
         Triple("qibla", EXPLORE, R.string.widget_qibla),
         Triple("athkar", ATHKAR, R.string.widget_athkar),
+        Triple("duas", DUAS, R.string.widget_duas),
         Triple("habits", HABITS, R.string.widget_habits))
     val ids = listOf(
         Triple(R.id.b0, R.id.i0, R.id.l0),
         Triple(R.id.b1, R.id.i1, R.id.l1),
-        Triple(R.id.b2, R.id.i2, R.id.l2))
+        Triple(R.id.b2, R.id.i2, R.id.l2),
+        Triple(R.id.b3, R.id.i3, R.id.l3))
+    views.setInt(R.id.buttonsBox, "setBackgroundResource", look.glass)
+    for (d in listOf(R.id.d1, R.id.d2, R.id.d3)) {
+      views.setInt(d, "setBackgroundColor", (look.primary and 0x00FFFFFF) or 0x24000000)
+    }
+    val labels = buttons.map { data.label(it.first, context.getString(it.third)) }
+    // A name wider than its share: all four the same smaller size, not that
+    // one alone (owner, 2026-11-23).
+    val dm = context.resources.displayMetrics
+    val paint = android.text.TextPaint().apply {
+      typeface = Typeface.DEFAULT_BOLD
+      textSize = android.util.TypedValue.applyDimension(android.util.TypedValue.COMPLEX_UNIT_SP, 13f, dm)
+    }
+    val widest = labels.maxOf { paint.measureText(it) }
+    val room = (w / 4 - 14) * dm.density
+    val size = if (widest > room) maxOf(9f, 13f * room / widest) else 13f
     for ((i, b) in buttons.withIndex()) {
       val (box, iconId, labelId) = ids[i]
-      views.setInt(box, "setBackgroundResource", look.glass)
       icon(context, views, iconId, b.second, look.primary)
-      text(views, labelId, data.label(b.first, context.getString(b.third)), look.primary)
+      text(views, labelId, labels[i], look.primary)
+      views.setTextViewTextSize(labelId, android.util.TypedValue.COMPLEX_UNIT_SP, size)
       views.setOnClickPendingIntent(box, open(context, data.route(b.first)))
     }
   }
@@ -283,6 +307,7 @@ abstract class TahfeezWidget : HomeWidgetProvider() {
     const val EXPLORE = 0xf037          // explore_outlined: the Qibla
     const val ATHKAR = 0xf2f3           // record_voice_over_outlined
     const val HABITS = 0xf02c           // event_available_outlined
+    const val DUAS = -1                 // not a glyph: ic_dua_hands
     const val KHATMAH = 0xeeaf          // auto_stories_outlined
     const val QURAN = 0xf1c2            // menu_book_outlined
     const val MEMORIZE = 0xf33c         // school_outlined
@@ -393,7 +418,7 @@ class WidgetData(private val json: JSONObject) {
   }
 }
 
-/** A widget that is one button: Qibla, Athkar, Habits, the Qur'an. */
+/** A widget that is one button: Qibla, Athkar, Duas, Habits, the Qur'an. */
 abstract class TileWidget : TahfeezWidget() {
   abstract val codepoint: Int
   abstract val fallbackLabel: Int
@@ -419,6 +444,12 @@ class AthkarWidget : TileWidget() {
   override val fallbackLabel = R.string.widget_athkar
 }
 
+class DuasWidget : TileWidget() {
+  override val kind = "duas"
+  override val codepoint = DUAS
+  override val fallbackLabel = R.string.widget_duas
+}
+
 class HabitsWidget : TileWidget() {
   override val kind = "habits"
   override val codepoint = HABITS
@@ -431,7 +462,7 @@ class QuranWidget : TileWidget() {
   override val fallbackLabel = R.string.widget_quran
 }
 
-/** Qibla, Athkar and Habits, each on its own glass, as on Home. */
+/** Qibla, Athkar, Duas and Habits as one group, as on Home. */
 open class ShortcutsWidget : TahfeezWidget() {
   override val kind = "shortcuts"
 
@@ -439,12 +470,12 @@ open class ShortcutsWidget : TahfeezWidget() {
     val views = RemoteViews(context.packageName, R.layout.widget_shortcuts)
     views.setInt(R.id.root, "setLayoutDirection",
         if (data.rtl) View.LAYOUT_DIRECTION_RTL else View.LAYOUT_DIRECTION_LTR)
-    fillButtons(context, views, data, look)
+    fillButtons(context, views, data, look, w)
     return views
   }
 }
 
-/** The same three buttons, 3 × 1 (owner, 2026-11-22). */
+/** The same four buttons, 3 × 1 (owner, 2026-11-22). */
 class ShortcutsSmallWidget : ShortcutsWidget()
 
 /** Prayer times, as Home's card: the place, the next prayer counting down,
@@ -483,7 +514,7 @@ class HomeWidget : TahfeezWidget() {
     tickEveryMinute(context)
     val views = RemoteViews(context.packageName, R.layout.widget_home)
     homeCards(context, views, data, look)
-    fillButtons(context, views, data, look)
+    fillButtons(context, views, data, look, w)
     return views
   }
 }

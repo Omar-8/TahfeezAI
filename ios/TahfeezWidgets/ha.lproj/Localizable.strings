@@ -3,6 +3,7 @@
 "widget_prayer" = "Lokutan sallah";
 "widget_qibla" = "Alƙibla";
 "widget_athkar" = "Azkar";
+"widget_duas" = "Addu'o'i";
 "widget_habits" = "Ɗabi’u";
 "widget_ayah" = "Ayar Yau";
 "widget_reading" = "Ci gaba da Karatu";
@@ -11,5 +12,5 @@
 "widget_khatmah" = "Sauka";
 "widget_quran" = "Alƙur'ani";
 "widget_today" = "Kalandar Hijira · Lokutan sallah";
-"widget_shortcuts" = "Alƙibla · Azkar · Ɗabi’u";
-"widget_shortcuts_small" = "Alƙibla · Azkar · Ɗabi’u (3×1)";
+"widget_shortcuts" = "Alƙibla · Azkar · Addu'o'i · Ɗabi’u";
+"widget_shortcuts_small" = "Alƙibla · Azkar · Addu'o'i · Ɗabi’u (3×1)";

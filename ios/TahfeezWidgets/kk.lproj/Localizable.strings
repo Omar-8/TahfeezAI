@@ -3,6 +3,7 @@
 "widget_prayer" = "Намаз уақыттары";
 "widget_qibla" = "Құбыла";
 "widget_athkar" = "Зікірлер";
+"widget_duas" = "Дұғалар";
 "widget_habits" = "Әдеттер";
 "widget_ayah" = "Күннің аяты";
 "widget_reading" = "Оқуды жалғастыру";
@@ -11,5 +12,5 @@
 "widget_khatmah" = "Хатым";
 "widget_quran" = "Құран";
 "widget_today" = "Хижри күнтізбесі · Намаз уақыттары";
-"widget_shortcuts" = "Құбыла · Зікірлер · Әдеттер";
-"widget_shortcuts_small" = "Құбыла · Зікірлер · Әдеттер (3×1)";
+"widget_shortcuts" = "Құбыла · Зікірлер · Дұғалар · Әдеттер";
+"widget_shortcuts_small" = "Құбыла · Зікірлер · Дұғалар · Әдеттер (3×1)";

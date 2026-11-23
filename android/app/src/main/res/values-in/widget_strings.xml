@@ -5,6 +5,7 @@
     <string name="widget_prayer">Waktu salat</string>
     <string name="widget_qibla">Kiblat</string>
     <string name="widget_athkar">Zikir</string>
+    <string name="widget_duas">Doa</string>
     <string name="widget_habits">Kebiasaan</string>
     <string name="widget_ayah">Ayat Harian</string>
     <string name="widget_reading">Lanjutkan Membaca</string>
@@ -13,8 +14,8 @@
     <string name="widget_khatmah">Khatam</string>
     <string name="widget_quran">Al-Qur\'an</string>
     <string name="widget_today">Kalender Hijriah · Waktu salat</string>
-    <string name="widget_shortcuts">Kiblat · Zikir · Kebiasaan</string>
-    <string name="widget_shortcuts_small">Kiblat · Zikir · Kebiasaan (3×1)</string>
+    <string name="widget_shortcuts">Kiblat · Zikir · Doa · Kebiasaan</string>
+    <string name="widget_shortcuts_small">Kiblat · Zikir · Doa · Kebiasaan (3×1)</string>
     <string name="widget_p_fajr">Subuh</string>
     <string name="widget_p_sunrise">Terbit</string>
     <string name="widget_p_dhuhr">Zuhur</string>

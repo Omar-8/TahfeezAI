@@ -88,7 +88,11 @@ enum SkyTime {
 /// days ("ʿArafah in 2 days"); the sun or the moon rising into place as
 /// Home opens. A tap opens the Hijri calendar.
 class HomeDateCard extends ConsumerStatefulWidget {
-  const HomeDateCard({super.key});
+  const HomeDateCard({super.key, this.large = false});
+
+  /// Larger time, text and sun or moon, filling a taller card (beside the
+  /// prayer times in a wide browser; owner, 2026-11-23: web only).
+  final bool large;
 
   /// How long its sun or moon takes to rise as it appears.
   static const play = Duration(milliseconds: 1200);
@@ -156,9 +160,10 @@ class _HomeDateCardState extends ConsumerState<HomeDateCard>
     final event = nextHijriEvent(now, adjust: adjust);
     final time = SkyTime.of(now);
     final use24 = MediaQuery.alwaysUse24HourFormatOf(context);
-    final muted = theme.textTheme.bodySmall?.copyWith(
-      color: scheme.onSurfaceVariant,
-    );
+    final large = widget.large;
+    final muted =
+        (large ? theme.textTheme.bodyLarge : theme.textTheme.bodySmall)
+            ?.copyWith(color: scheme.onSurfaceVariant);
     return TahfeezGlassSurface(
       key: const ValueKey('home-date'),
       blur: false,
@@ -168,9 +173,12 @@ class _HomeDateCardState extends ConsumerState<HomeDateCard>
         child: Row(
           spacing: TahfeezSpacing.smPlus,
           children: [
-            _TimeTile(now: now, intl: intl, use24: use24),
+            _TimeTile(now: now, intl: intl, use24: use24, large: large),
             Expanded(
               child: Column(
+                // In the middle when the card is taller (beside the prayer
+                // times in a wide browser).
+                mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 spacing: 2,
                 children: [
@@ -179,7 +187,9 @@ class _HomeDateCardState extends ConsumerState<HomeDateCard>
                   Text(
                     DateFormat.MMMMEEEEd(intl).format(now),
                     key: const ValueKey('home-date-today'),
-                    style: theme.textTheme.titleSmall,
+                    style: large
+                        ? theme.textTheme.titleLarge
+                        : theme.textTheme.titleSmall,
                   ),
                   Text(
                     formatHijri(hijri, language),
@@ -235,6 +245,7 @@ class _HomeDateCardState extends ConsumerState<HomeDateCard>
               ),
             ),
             Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               spacing: 2,
               children: [
                 // The sun or the moon, rising into place.
@@ -251,7 +262,7 @@ class _HomeDateCardState extends ConsumerState<HomeDateCard>
                     time.icon,
                     key: ValueKey('home-sky-${time.name}'),
                     color: const Color(0xFFE0A526),
-                    size: 22,
+                    size: large ? 34 : 22,
                   ),
                 ),
               ],
@@ -268,11 +279,16 @@ class _HomeDateCardState extends ConsumerState<HomeDateCard>
 /// here, not the day): hours and minutes, AM/PM under them on a 12-hour
 /// phone.
 class _TimeTile extends StatelessWidget {
-  const _TimeTile({required this.now, required this.intl, required this.use24});
+  const _TimeTile({
+    required this.now,
+    required this.intl,
+    required this.use24,
+    this.large = false,
+  });
 
   final DateTime now;
   final String intl;
-  final bool use24;
+  final bool use24, large;
 
   @override
   Widget build(BuildContext context) {
@@ -285,8 +301,8 @@ class _TimeTile extends StatelessWidget {
       blur: false,
       borderRadius: BorderRadius.circular(TahfeezRadii.md),
       child: SizedBox(
-        width: 60,
-        height: 56,
+        width: large ? 92 : 60,
+        height: large ? 80 : 56,
         child: FittedBox(
           fit: BoxFit.scaleDown,
           child: Column(
@@ -296,6 +312,7 @@ class _TimeTile extends StatelessWidget {
                 digits,
                 style: theme.textTheme.titleMedium?.copyWith(
                   color: scheme.primary,
+                  fontSize: large ? 26 : null,
                   fontWeight: FontWeight.w700,
                   fontFeatures: const [FontFeature.tabularFigures()],
                 ),
@@ -303,10 +320,14 @@ class _TimeTile extends StatelessWidget {
               if (period != null)
                 Text(
                   period,
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: scheme.primary,
-                    fontWeight: FontWeight.w700,
-                  ),
+                  style:
+                      (large
+                              ? theme.textTheme.labelMedium
+                              : theme.textTheme.labelSmall)
+                          ?.copyWith(
+                            color: scheme.primary,
+                            fontWeight: FontWeight.w700,
+                          ),
                 ),
             ],
           ),

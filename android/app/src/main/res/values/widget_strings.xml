@@ -5,6 +5,7 @@
     <string name="widget_prayer">Prayer times</string>
     <string name="widget_qibla">Qibla</string>
     <string name="widget_athkar">Athkar</string>
+    <string name="widget_duas">Duas</string>
     <string name="widget_habits">Habits</string>
     <string name="widget_ayah">Daily Ayah</string>
     <string name="widget_reading">Continue Reading</string>
@@ -13,8 +14,8 @@
     <string name="widget_khatmah">Khatmah</string>
     <string name="widget_quran">Qur\'an</string>
     <string name="widget_today">Hijri calendar · Prayer times</string>
-    <string name="widget_shortcuts">Qibla · Athkar · Habits</string>
-    <string name="widget_shortcuts_small">Qibla · Athkar · Habits (3×1)</string>
+    <string name="widget_shortcuts">Qibla · Athkar · Duas · Habits</string>
+    <string name="widget_shortcuts_small">Qibla · Athkar · Duas · Habits (3×1)</string>
     <string name="widget_p_fajr">Fajr</string>
     <string name="widget_p_sunrise">Sunrise</string>
     <string name="widget_p_dhuhr">Dhuhr</string>

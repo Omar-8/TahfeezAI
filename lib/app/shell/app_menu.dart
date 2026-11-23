@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/localization/generated/app_localizations.dart';
 import '../../core/routing/app_routes.dart';
+import '../../core/theme/components/dua_hands_icon.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/tahfeez_motion.dart';
 import '../../core/ui/app_name_text.dart';
@@ -97,28 +98,36 @@ class _AppMenuDrawerState extends State<AppMenuDrawer>
     final entries = [
       (
         key: 'qibla',
-        icon: Icons.explore_outlined,
+        icon: const Icon(Icons.explore_outlined),
         title: l10n.menuQibla,
         subtitle: l10n.menuQiblaSub,
         onTap: () => _open(AppRoutes.qibla),
       ),
       (
         key: 'prayer',
-        icon: Icons.mosque_outlined,
+        icon: const Icon(Icons.mosque_outlined),
         title: l10n.prayerTitle,
         subtitle: l10n.prayerMenuSub,
         onTap: () => _open(AppRoutes.prayer),
       ),
       (
         key: 'athkar',
-        icon: Icons.record_voice_over_outlined,
+        icon: const Icon(Icons.record_voice_over_outlined),
         title: l10n.athkarTitle,
         subtitle: l10n.athkarMenuSubtitle,
         onTap: () => _open(AppRoutes.athkar),
       ),
+      // Duas, beside the athkar (owner, 2026-11-23).
+      (
+        key: 'duas',
+        icon: const DuaHandsIcon(),
+        title: l10n.duasTitle,
+        subtitle: l10n.duasMenuSub,
+        onTap: () => _open(AppRoutes.duas),
+      ),
       (
         key: 'habits',
-        icon: Icons.event_available_outlined,
+        icon: const Icon(Icons.event_available_outlined),
         title: l10n.habitsTitle,
         subtitle: l10n.habitsMenuSubtitle,
         onTap: () => _open(AppRoutes.habits),
@@ -126,28 +135,28 @@ class _AppMenuDrawerState extends State<AppMenuDrawer>
       // The Hijri calendar, as Home's date card opens it (owner, 2026-11-23).
       (
         key: 'calendar',
-        icon: Icons.calendar_month_outlined,
+        icon: const Icon(Icons.calendar_month_outlined),
         title: l10n.hijriCalendarTitle,
         subtitle: l10n.hijriCalendarMenuSub,
         onTap: () => _open(AppRoutes.hijriCalendar),
       ),
       (
         key: 'bookmarks',
-        icon: Icons.bookmark_outline_rounded,
+        icon: const Icon(Icons.bookmark_outline_rounded),
         title: l10n.bookmarksTitle,
         subtitle: null,
         onTap: () => _open(AppRoutes.bookmarks, inTab: AppRoutes.quran),
       ),
       (
         key: 'settings',
-        icon: Icons.settings_outlined,
+        icon: const Icon(Icons.settings_outlined),
         title: l10n.settingsTitle,
         subtitle: null,
         onTap: () => _open(AppRoutes.settings),
       ),
       (
         key: 'about',
-        icon: Icons.info_outline_rounded,
+        icon: const Icon(Icons.info_outline_rounded),
         title: l10n.aboutTitle,
         subtitle: l10n.aboutSubtitle,
         onTap: () => _open(AppRoutes.about),
@@ -294,7 +303,7 @@ class _MenuEntry extends StatelessWidget {
     this.subtitle,
   });
 
-  final IconData icon;
+  final Widget icon;
   final String title;
   final String? subtitle;
   final VoidCallback onTap;
@@ -323,7 +332,10 @@ class _MenuEntry extends StatelessWidget {
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(TahfeezSpacing.sm),
-                  child: Icon(icon, color: scheme.primary, size: 22),
+                  child: IconTheme.merge(
+                    data: IconThemeData(color: scheme.primary, size: 22),
+                    child: icon,
+                  ),
                 ),
               ),
               Expanded(

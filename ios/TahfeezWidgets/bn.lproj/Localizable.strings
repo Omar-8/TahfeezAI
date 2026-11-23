@@ -3,6 +3,7 @@
 "widget_prayer" = "নামাজের সময়";
 "widget_qibla" = "কিবলা";
 "widget_athkar" = "যিকির";
+"widget_duas" = "দোয়া";
 "widget_habits" = "অভ্যাস";
 "widget_ayah" = "আজকের আয়াত";
 "widget_reading" = "পড়া চালিয়ে যান";
@@ -11,5 +12,5 @@
 "widget_khatmah" = "খতম";
 "widget_quran" = "কুরআন";
 "widget_today" = "হিজরি ক্যালেন্ডার · নামাজের সময়";
-"widget_shortcuts" = "কিবলা · যিকির · অভ্যাস";
-"widget_shortcuts_small" = "কিবলা · যিকির · অভ্যাস (3×1)";
+"widget_shortcuts" = "কিবলা · যিকির · দোয়া · অভ্যাস";
+"widget_shortcuts_small" = "কিবলা · যিকির · দোয়া · অভ্যাস (3×1)";

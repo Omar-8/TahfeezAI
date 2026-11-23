@@ -15,6 +15,7 @@ enum HomeWidgetKind {
   prayer,
   qibla,
   athkar,
+  duas,
   habits,
   shortcuts,
   shortcutsSmall,

@@ -3,6 +3,7 @@
 "widget_prayer" = "礼拝時刻";
 "widget_qibla" = "キブラ";
 "widget_athkar" = "ズィクル";
+"widget_duas" = "ドゥアー";
 "widget_habits" = "習慣";
 "widget_ayah" = "今日のアーヤ";
 "widget_reading" = "続きを読む";
@@ -11,5 +12,5 @@
 "widget_khatmah" = "ハトマ";
 "widget_quran" = "クルアーン";
 "widget_today" = "ヒジュラ暦 · 礼拝時刻";
-"widget_shortcuts" = "キブラ · ズィクル · 習慣";
-"widget_shortcuts_small" = "キブラ · ズィクル · 習慣 (3×1)";
+"widget_shortcuts" = "キブラ · ズィクル · ドゥアー · 習慣";
+"widget_shortcuts_small" = "キブラ · ズィクル · ドゥアー · 習慣 (3×1)";

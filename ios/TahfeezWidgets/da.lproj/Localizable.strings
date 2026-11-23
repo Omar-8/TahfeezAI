@@ -3,6 +3,7 @@
 "widget_prayer" = "Bedetider";
 "widget_qibla" = "Qibla";
 "widget_athkar" = "Adhkar";
+"widget_duas" = "Duaer";
 "widget_habits" = "Vaner";
 "widget_ayah" = "Dagens vers";
 "widget_reading" = "Fortsæt læsningen";
@@ -11,5 +12,5 @@
 "widget_khatmah" = "Khatma";
 "widget_quran" = "Koranen";
 "widget_today" = "Hijri-kalender · Bedetider";
-"widget_shortcuts" = "Qibla · Adhkar · Vaner";
-"widget_shortcuts_small" = "Qibla · Adhkar · Vaner (3×1)";
+"widget_shortcuts" = "Qibla · Adhkar · Duaer · Vaner";
+"widget_shortcuts_small" = "Qibla · Adhkar · Duaer · Vaner (3×1)";

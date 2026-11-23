@@ -5,6 +5,7 @@
     <string name="widget_prayer">نماز کے اوقات</string>
     <string name="widget_qibla">قبلہ</string>
     <string name="widget_athkar">اذکار</string>
+    <string name="widget_duas">دعائیں</string>
     <string name="widget_habits">عادات</string>
     <string name="widget_ayah">آج کی آیت</string>
     <string name="widget_reading">تلاوت جاری رکھیں</string>
@@ -13,8 +14,8 @@
     <string name="widget_khatmah">ختم</string>
     <string name="widget_quran">قرآن</string>
     <string name="widget_today">ہجری کیلنڈر · نماز کے اوقات</string>
-    <string name="widget_shortcuts">قبلہ · اذکار · عادات</string>
-    <string name="widget_shortcuts_small">قبلہ · اذکار · عادات (3×1)</string>
+    <string name="widget_shortcuts">قبلہ · اذکار · دعائیں · عادات</string>
+    <string name="widget_shortcuts_small">قبلہ · اذکار · دعائیں · عادات (3×1)</string>
     <string name="widget_p_fajr">فجر</string>
     <string name="widget_p_sunrise">طلوعِ آفتاب</string>
     <string name="widget_p_dhuhr">ظہر</string>

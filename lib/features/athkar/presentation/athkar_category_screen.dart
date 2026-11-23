@@ -14,6 +14,8 @@ import '../../../core/theme/tahfeez_tones.dart';
 import '../../../core/ui/bar_space.dart';
 import '../../home/presentation/home_sky.dart';
 import '../../mushaf/application/reader_mode.dart';
+import '../../duas/application/saved_supplications.dart';
+import '../../duas/presentation/saved_button.dart';
 import '../application/athkar_audio.dart';
 import '../application/athkar_haptics.dart';
 import '../application/athkar_progress.dart';
@@ -127,6 +129,7 @@ class AthkarCategoryScreen extends ConsumerWidget {
     return _AthkarScaffold(
       title: l10n.athkarTitle,
       actions: [
+        SavedSupplicationButton(SavedSupplications.chapterKey(category.id)),
         _ListenButton(
           key: const ValueKey('athkar-listen-category'),
           file: category.audio,
@@ -391,6 +394,7 @@ class _AthkarReaderState extends ConsumerState<AthkarReaderScreen> {
     return _AthkarScaffold(
       title: l10n.athkarTitle,
       actions: [
+        SavedSupplicationButton(SavedSupplications.chapterKey(category.id)),
         if (zikr?.audio != null)
           _ListenButton(
             key: ValueKey('athkar-listen-$_page'),

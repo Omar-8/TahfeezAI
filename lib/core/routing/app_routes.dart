@@ -33,6 +33,16 @@ abstract final class AppRoutes {
   /// A chapter's athkar one after another, from its [at]th.
   static String athkarRead(int id, {int at = 0}) => '/athkar/$id/read?at=$at';
 
+  /// Duas (from Home and the side menu).
+  static const duas = '/duas';
+
+  /// A hadith dua ([HadithDua.book], [HadithDua.number]).
+  static String duasHadith(String book, String number) =>
+      '/duas/hadith/$book/$number';
+
+  /// A Duas section (its `DuaGroup.name`).
+  static String duasGroup(String name) => '/duas/$name';
+
   /// Prayer times (from Home and the side menu).
   static const prayer = '/prayer';
 

@@ -10,6 +10,8 @@ import '../../../core/theme/tahfeez_content_widths.dart';
 import '../../../core/ui/bar_space.dart';
 import '../../../quran/domain/search_normalizer.dart';
 import '../../home/presentation/home_sky.dart';
+import '../../duas/application/saved_supplications.dart';
+import '../../duas/presentation/saved_button.dart';
 import '../application/athkar_progress.dart';
 import '../data/athkar_source.dart';
 import '../domain/athkar.dart';
@@ -63,9 +65,10 @@ class _AthkarScreenState extends ConsumerState<AthkarScreen> {
               ),
               child: Column(
                 children: [
-                  _SearchBar(
+                  AthkarSearchBar(
                     controller: _search,
                     query: _query,
+                    hint: l10n.athkarSearchHint,
                     onChanged: (q) => setState(() => _query = q),
                   ),
                   Expanded(
@@ -90,16 +93,21 @@ class _AthkarScreenState extends ConsumerState<AthkarScreen> {
   }
 }
 
-class _SearchBar extends StatelessWidget {
-  const _SearchBar({
+/// The search field over Athkar's (and Duas') tiles.
+class AthkarSearchBar extends StatelessWidget {
+  const AthkarSearchBar({
+    super.key,
     required this.controller,
     required this.query,
+    required this.hint,
     required this.onChanged,
+    this.fieldKey = const ValueKey('athkar-search'),
   });
 
   final TextEditingController controller;
-  final String query;
+  final String query, hint;
   final ValueChanged<String> onChanged;
+  final Key fieldKey;
 
   @override
   Widget build(BuildContext context) {
@@ -115,12 +123,12 @@ class _SearchBar extends StatelessWidget {
       child: TahfeezGlassSurface(
         borderRadius: BorderRadius.circular(TahfeezRadii.pill),
         child: TextField(
-          key: const ValueKey('athkar-search'),
+          key: fieldKey,
           controller: controller,
           textAlignVertical: TextAlignVertical.center,
           style: Theme.of(context).textTheme.bodyMedium,
           decoration: InputDecoration(
-            hintText: l10n.athkarSearchHint,
+            hintText: hint,
             border: InputBorder.none,
             isDense: true,
             constraints: const BoxConstraints(minHeight: 48),
@@ -234,14 +242,19 @@ class _Categories extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final counts = ref.watch(athkarProgressProvider);
+    final saved = ref.watch(savedSupplicationsProvider);
     final searching = query.trim().isNotEmpty;
     final List<Widget> slivers;
     if (searching) {
       final index = ref.watch(_searchIndexProvider).value ?? const {};
-      final found = [
-        for (final c in book.categories)
-          if (athkarMatches(c, index[c.id] ?? '', query)) c,
-      ];
+      final found = savedFirst(
+        [
+          for (final c in book.categories)
+            if (athkarMatches(c, index[c.id] ?? '', query)) c,
+        ],
+        saved,
+        (c) => SavedSupplications.chapterKey(c.id),
+      );
       slivers = found.isEmpty
           ? [
               SliverToBoxAdapter(
@@ -262,7 +275,27 @@ class _Categories extends ConsumerWidget {
               ),
             ];
     } else {
+      // The chapters bookmarked first, over the sections (owner,
+      // 2026-11-23).
+      final bookmarked = [
+        for (final key in saved)
+          if (SavedSupplications.chapterOf(key) case final id?)
+            ?book.category(id),
+      ];
       slivers = [
+        if (bookmarked.isNotEmpty) ...[
+          SliverToBoxAdapter(child: SavedHeading(l10n.supplicationsBookmarked)),
+          SliverGrid.builder(
+            key: const ValueKey('athkar-bookmarked'),
+            gridDelegate: athkarTileGrid(context),
+            itemCount: bookmarked.length,
+            itemBuilder: (context, i) =>
+                AthkarCategoryTile(category: bookmarked[i], counts: counts),
+          ),
+          SliverToBoxAdapter(
+            child: SavedHeading(l10n.athkarSections, top: TahfeezSpacing.lg),
+          ),
+        ],
         // Wide and low, two across: every section in view at once (owner,
         // 2026-11-21), each name with room for its words.
         SliverGrid.builder(
@@ -386,10 +419,15 @@ class AthkarSectionScreen extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final book = ref.watch(athkarBookProvider).value;
     final counts = ref.watch(athkarProgressProvider);
-    final chapters = [
-      if (book != null)
-        for (final id in group.categories) ?book.category(id),
-    ];
+    // The bookmarked ones first (owner, 2026-11-23).
+    final chapters = savedFirst(
+      [
+        if (book != null)
+          for (final id in group.categories) ?book.category(id),
+      ],
+      ref.watch(savedSupplicationsProvider),
+      (c) => SavedSupplications.chapterKey(c.id),
+    );
     return SkyBackdrop(
       child: Scaffold(
         appBar: TahfeezAppBar(
@@ -486,6 +524,12 @@ class AthkarCategoryTile extends StatelessWidget {
                   key: ValueKey('athkar-category-done-${category.id}'),
                   color: scheme.primary,
                 ),
+              // Bookmarked: first among the tiles, and on the Bookmarks
+              // page (owner, 2026-11-23).
+              SavedSupplicationButton(
+                SavedSupplications.chapterKey(category.id),
+                compact: true,
+              ),
             ],
           ),
           Column(
@@ -510,6 +554,28 @@ class AthkarCategoryTile extends StatelessWidget {
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// A heading over a run of tiles ("Bookmarked", "Sections").
+class SavedHeading extends StatelessWidget {
+  const SavedHeading(this.text, {super.key, this.top = 0});
+
+  final String text;
+  final double top;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: EdgeInsets.only(top: top, bottom: TahfeezSpacing.sm),
+      child: Text(
+        text,
+        style: theme.textTheme.titleSmall?.copyWith(
+          color: theme.colorScheme.onSurfaceVariant,
+        ),
       ),
     );
   }

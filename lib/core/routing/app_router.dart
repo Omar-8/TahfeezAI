@@ -19,6 +19,8 @@ import '../../features/home/presentation/hijri_calendar_screen.dart';
 import '../../features/prayer/presentation/prayer_screen.dart';
 import '../../features/athkar/presentation/athkar_look.dart';
 import '../../features/athkar/presentation/athkar_screen.dart';
+import '../../features/duas/domain/duas.dart';
+import '../../features/duas/presentation/duas_screen.dart';
 import '../../features/qibla/presentation/qibla_screen.dart';
 import '../../features/quran/presentation/quran_index_screen.dart';
 import '../../features/search/presentation/search_screen.dart';
@@ -54,7 +56,12 @@ GoRouter appRouter(Ref ref) {
     redirect: (context, state) =>
         state.uri.scheme == 'tahfeezwidget' ||
             state.uri.queryParameters.containsKey('homeWidget') ||
-            state.uri.path == '/open'
+            state.uri.path == '/open' ||
+            // A widget's link as Android hands it to the router at a cold
+            // start ("/?route=/duas"): Home, the widget's screen then
+            // pushed over it (a red "no routes" flashed before, 2026-11-23).
+            (state.uri.path == '/' &&
+                state.uri.queryParameters.containsKey('route'))
         ? AppRoutes.home
         : null,
     routes: [
@@ -254,6 +261,35 @@ GoRouter appRouter(Ref ref) {
                 ),
               ),
             ],
+          ),
+        ],
+      ),
+      // Duas (owner, 2026-11-23): its sections; one section's duas.
+      GoRoute(
+        path: AppRoutes.duas,
+        pageBuilder: (context, state) => tahfeezPage(state, const DuasScreen()),
+        routes: [
+          GoRoute(
+            path: 'hadith/:book/:number',
+            pageBuilder: (context, state) => tahfeezPage(
+              state,
+              HadithDuaScreen(
+                book: state.pathParameters['book']!,
+                number: state.pathParameters['number']!,
+              ),
+            ),
+          ),
+          GoRoute(
+            path: ':group',
+            pageBuilder: (context, state) => tahfeezPage(
+              state,
+              DuaGroupScreen(
+                group: DuaGroup.values.firstWhere(
+                  (g) => g.name == state.pathParameters['group'],
+                  orElse: () => DuaGroup.health,
+                ),
+              ),
+            ),
           ),
         ],
       ),

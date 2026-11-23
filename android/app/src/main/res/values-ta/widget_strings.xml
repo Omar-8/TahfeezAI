@@ -5,6 +5,7 @@
     <string name="widget_prayer">தொழுகை நேரங்கள்</string>
     <string name="widget_qibla">கிப்லா</string>
     <string name="widget_athkar">அத்கார்</string>
+    <string name="widget_duas">துஆக்கள்</string>
     <string name="widget_habits">பழக்கங்கள்</string>
     <string name="widget_ayah">இன்றைய வசனம்</string>
     <string name="widget_reading">தொடர்ந்து ஓதுக</string>
@@ -13,8 +14,8 @@
     <string name="widget_khatmah">கத்முல் குர்ஆன்</string>
     <string name="widget_quran">குர்ஆன்</string>
     <string name="widget_today">ஹிஜ்ரி நாட்காட்டி · தொழுகை நேரங்கள்</string>
-    <string name="widget_shortcuts">கிப்லா · அத்கார் · பழக்கங்கள்</string>
-    <string name="widget_shortcuts_small">கிப்லா · அத்கார் · பழக்கங்கள் (3×1)</string>
+    <string name="widget_shortcuts">கிப்லா · அத்கார் · துஆக்கள் · பழக்கங்கள்</string>
+    <string name="widget_shortcuts_small">கிப்லா · அத்கார் · துஆக்கள் · பழக்கங்கள் (3×1)</string>
     <string name="widget_p_fajr">ஃபஜ்ர்</string>
     <string name="widget_p_sunrise">சூரிய உதயம்</string>
     <string name="widget_p_dhuhr">ளுஹ்ர்</string>

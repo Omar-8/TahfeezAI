@@ -5,6 +5,7 @@
     <string name="widget_prayer">Намаз уақыттары</string>
     <string name="widget_qibla">Құбыла</string>
     <string name="widget_athkar">Зікірлер</string>
+    <string name="widget_duas">Дұғалар</string>
     <string name="widget_habits">Әдеттер</string>
     <string name="widget_ayah">Күннің аяты</string>
     <string name="widget_reading">Оқуды жалғастыру</string>
@@ -13,8 +14,8 @@
     <string name="widget_khatmah">Хатым</string>
     <string name="widget_quran">Құран</string>
     <string name="widget_today">Хижри күнтізбесі · Намаз уақыттары</string>
-    <string name="widget_shortcuts">Құбыла · Зікірлер · Әдеттер</string>
-    <string name="widget_shortcuts_small">Құбыла · Зікірлер · Әдеттер (3×1)</string>
+    <string name="widget_shortcuts">Құбыла · Зікірлер · Дұғалар · Әдеттер</string>
+    <string name="widget_shortcuts_small">Құбыла · Зікірлер · Дұғалар · Әдеттер (3×1)</string>
     <string name="widget_p_fajr">Таң</string>
     <string name="widget_p_sunrise">Күн шығуы</string>
     <string name="widget_p_dhuhr">Бесін</string>

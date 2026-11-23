@@ -5,6 +5,7 @@
     <string name="widget_prayer">Nyakati za swala</string>
     <string name="widget_qibla">Kibla</string>
     <string name="widget_athkar">Adhkar</string>
+    <string name="widget_duas">Dua</string>
     <string name="widget_habits">Mazoea</string>
     <string name="widget_ayah">Aya ya Siku</string>
     <string name="widget_reading">Endelea Kusoma</string>
@@ -13,8 +14,8 @@
     <string name="widget_khatmah">Khatma</string>
     <string name="widget_quran">Qur\'ani</string>
     <string name="widget_today">Kalenda ya Hijria · Nyakati za swala</string>
-    <string name="widget_shortcuts">Kibla · Adhkar · Mazoea</string>
-    <string name="widget_shortcuts_small">Kibla · Adhkar · Mazoea (3×1)</string>
+    <string name="widget_shortcuts">Kibla · Adhkar · Dua · Mazoea</string>
+    <string name="widget_shortcuts_small">Kibla · Adhkar · Dua · Mazoea (3×1)</string>
     <string name="widget_p_fajr">Alfajiri</string>
     <string name="widget_p_sunrise">Macheo</string>
     <string name="widget_p_dhuhr">Adhuhuri</string>

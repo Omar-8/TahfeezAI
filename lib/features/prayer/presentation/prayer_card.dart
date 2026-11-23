@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart' show DateFormat;
 
+import '../../../core/core_providers.dart';
 import '../../../core/localization/fallback_localizations.dart';
 import '../../../core/localization/generated/app_localizations.dart';
 import '../../../core/routing/app_routes.dart';
@@ -28,6 +29,11 @@ const homePrayers = [
   Prayer.isha,
 ];
 
+/// From this width (inside the card) a browser shows the six times in one
+/// row; narrower, two rows of three.
+@visibleForTesting
+const prayerOneRowWidth = 420.0;
+
 /// "1 h 5 min" / "40 min" until [at].
 String untilText(AppLocalizations l10n, DateTime now, DateTime at) {
   final minutes = (at.difference(now).inSeconds / 60).ceil();
@@ -41,7 +47,11 @@ String untilText(AppLocalizations l10n, DateTime now, DateTime at) {
 /// six times (the next one marked). A tap opens prayer times; no place yet,
 /// it asks for one there.
 class PrayerTimesCard extends ConsumerStatefulWidget {
-  const PrayerTimesCard({super.key});
+  const PrayerTimesCard({super.key, this.oneRow = false});
+
+  /// The six times in one row, whatever the width (beside the date in a
+  /// wide browser, where its height is measured: no LayoutBuilder there).
+  final bool oneRow;
 
   @override
   ConsumerState<PrayerTimesCard> createState() => _PrayerTimesCardState();
@@ -88,6 +98,7 @@ class _PrayerTimesCardState extends ConsumerState<PrayerTimesCard> {
     final now = ref.watch(memorizationClockProvider)();
     final use24 = MediaQuery.alwaysUse24HourFormatOf(context);
     final clock = use24 ? DateFormat.Hm(intl) : DateFormat.jm(intl);
+    final web = ref.watch(platformCapabilitiesProvider).isWeb;
     return TahfeezGlassSurface(
       key: const ValueKey('home-prayer'),
       blur: false,
@@ -197,6 +208,26 @@ class _PrayerTimesCardState extends ConsumerState<PrayerTimesCard> {
                     );
                   }
 
+                  Widget rows(bool oneRow) => Column(
+                    key: ValueKey(
+                      oneRow ? 'home-prayer-one-row' : 'home-prayer-rows',
+                    ),
+                    spacing: TahfeezSpacing.sm,
+                    children: [
+                      for (final row
+                          in oneRow
+                              ? [homePrayers]
+                              : [
+                                  homePrayers.sublist(0, 3),
+                                  homePrayers.sublist(3),
+                                ])
+                        Row(
+                          spacing: TahfeezSpacing.sm,
+                          children: [for (final p in row) cell(p)],
+                        ),
+                    ],
+                  );
+
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     spacing: TahfeezSpacing.smPlus,
@@ -226,14 +257,15 @@ class _PrayerTimesCardState extends ConsumerState<PrayerTimesCard> {
                           ),
                         ],
                       ),
-                      // Two rows of three: room for each name and time.
-                      for (final row in [
-                        homePrayers.sublist(0, 3),
-                        homePrayers.sublist(3),
-                      ])
-                        Row(
-                          spacing: TahfeezSpacing.sm,
-                          children: [for (final p in row) cell(p)],
+                      // Two rows of three: room for each name and time;
+                      // in a browser with room, the six in one row
+                      // (owner, 2026-11-23: web only).
+                      if (widget.oneRow)
+                        rows(true)
+                      else
+                        LayoutBuilder(
+                          builder: (context, box) =>
+                              rows(web && box.maxWidth >= prayerOneRowWidth),
                         ),
                     ],
                   );

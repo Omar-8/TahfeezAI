@@ -3,6 +3,7 @@
 "widget_prayer" = "礼拜时间";
 "widget_qibla" = "朝向（基卜拉）";
 "widget_athkar" = "记念词";
+"widget_duas" = "祈祷词";
 "widget_habits" = "习惯";
 "widget_ayah" = "每日一节";
 "widget_reading" = "继续阅读";
@@ -11,5 +12,5 @@
 "widget_khatmah" = "通读（赫特姆）";
 "widget_quran" = "古兰经";
 "widget_today" = "伊斯兰历 · 礼拜时间";
-"widget_shortcuts" = "朝向（基卜拉） · 记念词 · 习惯";
-"widget_shortcuts_small" = "朝向（基卜拉） · 记念词 · 习惯 (3×1)";
+"widget_shortcuts" = "朝向（基卜拉） · 记念词 · 祈祷词 · 习惯";
+"widget_shortcuts_small" = "朝向（基卜拉） · 记念词 · 祈祷词 · 习惯 (3×1)";

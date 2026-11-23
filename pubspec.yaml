@@ -204,6 +204,9 @@ flutter:
     - assets/qibla/country_names.json.gz
     # Hisn al-Muslim (hisnmuslim.com): tool/athkar/build_athkar.py.
     - assets/athkar/athkar.json.gz
+    # Duas from Sahih al-Bukhari and Sahih Muslim (fawazahmed0/hadith-api,
+    # The Unlicense): tool/duas/build_hadith_duas.py.
+    - assets/duas/hadith_duas.json.gz
     # Prayer times' adhans (Wikimedia Commons, free licences): their first
     # 30 s, heard before choosing and an iPhone's sound — tool/adhan/build_adhan.py.
     - assets/adhan/

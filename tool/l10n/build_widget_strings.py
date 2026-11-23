@@ -22,6 +22,7 @@ NAMES = {
     'prayer': 'prayerTitle',
     'qibla': 'qiblaTitle',
     'athkar': 'athkarTitle',
+    'duas': 'duasTitle',
     'habits': 'habitsTitle',
     'ayah': 'homeSectionDailyAyah',
     'reading': 'homeSectionContinueReading',
@@ -51,11 +52,11 @@ def main():
         code = arb.stem.removeprefix('app_')
         d = json.loads(arb.read_text(encoding='utf-8'))
         names = {k: d[v] for k, v in NAMES.items()}
-        # The three buttons together: their names, as on Home.
+        # The four buttons together: their names, as on Home.
         # Home's date and prayer times, without the buttons.
         names['today'] = f"{d['hijriCalendarTitle']} · {d['prayerTitle']}"
         names['shortcuts'] = ' · '.join(
-            d[k] for k in ('qiblaTitle', 'athkarTitle', 'habitsTitle'))
+            d[k] for k in ('qiblaTitle', 'athkarTitle', 'duasTitle', 'habitsTitle'))
         # The same, 3 × 1 (the picker names its size too).
         names['shortcuts_small'] = names['shortcuts'] + ' (3×1)'
         folder = RES / ('values' if code == 'en' else f'values-{ANDROID_DIR.get(code, code)}')

@@ -618,8 +618,19 @@ const credits = <Credit>[
     owner: "Sa'id ibn Wahf al-Qahtani; hisnmuslim.com",
     licence: 'No licence stated; used with credit (the audio streamed)',
     url: 'https://www.hisnmuslim.com',
-    useEn: 'Athkar: the remembrances, their counts and their audio',
-    useAr: 'الأذكار: نصوصها وأعداد تكرارها وصوتها',
+    useEn: 'Athkar and Duas: the remembrances, their counts and their audio',
+    useAr: 'الأذكار والأدعية: نصوصها وأعداد تكرارها وصوتها',
+  ),
+  Credit(
+    group: CreditGroup.data,
+    name:
+        'Hadith API — Sahih al-Bukhari and Sahih Muslim, Arabic and '
+        'translations',
+    owner: 'Fawaz Ahmed (fawazahmed0), from sunnah.com and others',
+    licence: 'The Unlicense (public domain)',
+    url: 'https://github.com/fawazahmed0/hadith-api',
+    useEn: 'Duas: 19 supplications from Sahih al-Bukhari and Sahih Muslim',
+    useAr: 'الأدعية: ١٩ دعاءً من صحيحي البخاري ومسلم',
   ),
   Credit(
     group: CreditGroup.data,

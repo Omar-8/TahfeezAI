@@ -3,6 +3,7 @@
 "widget_prayer" = "Waktu salat";
 "widget_qibla" = "Kiblat";
 "widget_athkar" = "Zikir";
+"widget_duas" = "Doa";
 "widget_habits" = "Kebiasaan";
 "widget_ayah" = "Ayat Harian";
 "widget_reading" = "Lanjutkan Membaca";
@@ -11,5 +12,5 @@
 "widget_khatmah" = "Khatam";
 "widget_quran" = "Al-Qur'an";
 "widget_today" = "Kalender Hijriah · Waktu salat";
-"widget_shortcuts" = "Kiblat · Zikir · Kebiasaan";
-"widget_shortcuts_small" = "Kiblat · Zikir · Kebiasaan (3×1)";
+"widget_shortcuts" = "Kiblat · Zikir · Doa · Kebiasaan";
+"widget_shortcuts_small" = "Kiblat · Zikir · Doa · Kebiasaan (3×1)";

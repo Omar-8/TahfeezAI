@@ -3,6 +3,7 @@
 "widget_prayer" = "Namoz vaqtlari";
 "widget_qibla" = "Qibla";
 "widget_athkar" = "Zikrlar";
+"widget_duas" = "Duolar";
 "widget_habits" = "Odatlar";
 "widget_ayah" = "Kun oyati";
 "widget_reading" = "Oʻqishni davom ettirish";
@@ -11,5 +12,5 @@
 "widget_khatmah" = "Xatm";
 "widget_quran" = "Qurʼon";
 "widget_today" = "Hijriy taqvim · Namoz vaqtlari";
-"widget_shortcuts" = "Qibla · Zikrlar · Odatlar";
-"widget_shortcuts_small" = "Qibla · Zikrlar · Odatlar (3×1)";
+"widget_shortcuts" = "Qibla · Zikrlar · Duolar · Odatlar";
+"widget_shortcuts_small" = "Qibla · Zikrlar · Duolar · Odatlar (3×1)";

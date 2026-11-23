@@ -7,6 +7,9 @@ import 'package:flutter_test/flutter_test.dart';
 Future<void> openFromMenu(WidgetTester tester, String entry) async {
   await tester.tap(find.byKey(const ValueKey('app-menu')).hitTestable().first);
   await tester.pumpAndSettle();
+  // (Scrolled to it first: the menu runs past a phone's height.)
+  await tester.ensureVisible(find.byKey(ValueKey('menu-$entry')));
+  await tester.pumpAndSettle();
   await tester.tap(find.byKey(ValueKey('menu-$entry')));
   await tester.pumpAndSettle();
 }

@@ -5,6 +5,7 @@
     <string name="widget_prayer">Gebetszeiten</string>
     <string name="widget_qibla">Qibla</string>
     <string name="widget_athkar">Adhkar</string>
+    <string name="widget_duas">Bittgebete</string>
     <string name="widget_habits">Gewohnheiten</string>
     <string name="widget_ayah">Vers des Tages</string>
     <string name="widget_reading">Weiterlesen</string>
@@ -13,8 +14,8 @@
     <string name="widget_khatmah">Khatma</string>
     <string name="widget_quran">Koran</string>
     <string name="widget_today">Hidschri-Kalender · Gebetszeiten</string>
-    <string name="widget_shortcuts">Qibla · Adhkar · Gewohnheiten</string>
-    <string name="widget_shortcuts_small">Qibla · Adhkar · Gewohnheiten (3×1)</string>
+    <string name="widget_shortcuts">Qibla · Adhkar · Bittgebete · Gewohnheiten</string>
+    <string name="widget_shortcuts_small">Qibla · Adhkar · Bittgebete · Gewohnheiten (3×1)</string>
     <string name="widget_p_fajr">Fadschr</string>
     <string name="widget_p_sunrise">Sonnenaufgang</string>
     <string name="widget_p_dhuhr">Dhuhr</string>

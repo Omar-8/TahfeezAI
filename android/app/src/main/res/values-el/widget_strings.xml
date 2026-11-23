@@ -5,6 +5,7 @@
     <string name="widget_prayer">Ώρες προσευχής</string>
     <string name="widget_qibla">Κίμπλα</string>
     <string name="widget_athkar">Άζκαρ</string>
+    <string name="widget_duas">Ντουά</string>
     <string name="widget_habits">Συνήθειες</string>
     <string name="widget_ayah">Εδάφιο της ημέρας</string>
     <string name="widget_reading">Συνέχεια ανάγνωσης</string>
@@ -13,8 +14,8 @@
     <string name="widget_khatmah">Χάτμα</string>
     <string name="widget_quran">Κοράνιο</string>
     <string name="widget_today">Ημερολόγιο Χιτζρί · Ώρες προσευχής</string>
-    <string name="widget_shortcuts">Κίμπλα · Άζκαρ · Συνήθειες</string>
-    <string name="widget_shortcuts_small">Κίμπλα · Άζκαρ · Συνήθειες (3×1)</string>
+    <string name="widget_shortcuts">Κίμπλα · Άζκαρ · Ντουά · Συνήθειες</string>
+    <string name="widget_shortcuts_small">Κίμπλα · Άζκαρ · Ντουά · Συνήθειες (3×1)</string>
     <string name="widget_p_fajr">Φάτζρ</string>
     <string name="widget_p_sunrise">Ανατολή</string>
     <string name="widget_p_dhuhr">Ζουχρ</string>

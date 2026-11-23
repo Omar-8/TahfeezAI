@@ -5,6 +5,7 @@
     <string name="widget_prayer">Lokutan sallah</string>
     <string name="widget_qibla">Alƙibla</string>
     <string name="widget_athkar">Azkar</string>
+    <string name="widget_duas">Addu\'o\'i</string>
     <string name="widget_habits">Ɗabi’u</string>
     <string name="widget_ayah">Ayar Yau</string>
     <string name="widget_reading">Ci gaba da Karatu</string>
@@ -13,8 +14,8 @@
     <string name="widget_khatmah">Sauka</string>
     <string name="widget_quran">Alƙur\'ani</string>
     <string name="widget_today">Kalandar Hijira · Lokutan sallah</string>
-    <string name="widget_shortcuts">Alƙibla · Azkar · Ɗabi’u</string>
-    <string name="widget_shortcuts_small">Alƙibla · Azkar · Ɗabi’u (3×1)</string>
+    <string name="widget_shortcuts">Alƙibla · Azkar · Addu\'o\'i · Ɗabi’u</string>
+    <string name="widget_shortcuts_small">Alƙibla · Azkar · Addu\'o\'i · Ɗabi’u (3×1)</string>
     <string name="widget_p_fajr">Asuba</string>
     <string name="widget_p_sunrise">Fitowar rana</string>
     <string name="widget_p_dhuhr">Azahar</string>

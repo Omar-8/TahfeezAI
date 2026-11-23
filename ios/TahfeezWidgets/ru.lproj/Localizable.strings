@@ -3,6 +3,7 @@
 "widget_prayer" = "Время намаза";
 "widget_qibla" = "Кибла";
 "widget_athkar" = "Азкары";
+"widget_duas" = "Дуа";
 "widget_habits" = "Привычки";
 "widget_ayah" = "Аят дня";
 "widget_reading" = "Продолжить чтение";
@@ -11,5 +12,5 @@
 "widget_khatmah" = "Хатм";
 "widget_quran" = "Коран";
 "widget_today" = "Календарь хиджры · Время намаза";
-"widget_shortcuts" = "Кибла · Азкары · Привычки";
-"widget_shortcuts_small" = "Кибла · Азкары · Привычки (3×1)";
+"widget_shortcuts" = "Кибла · Азкары · Дуа · Привычки";
+"widget_shortcuts_small" = "Кибла · Азкары · Дуа · Привычки (3×1)";

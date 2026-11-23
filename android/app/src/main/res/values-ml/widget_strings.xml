@@ -5,6 +5,7 @@
     <string name="widget_prayer">നമസ്കാര സമയങ്ങൾ</string>
     <string name="widget_qibla">ഖിബ്‌ല</string>
     <string name="widget_athkar">അദ്കാർ</string>
+    <string name="widget_duas">ദുആകൾ</string>
     <string name="widget_habits">ശീലങ്ങൾ</string>
     <string name="widget_ayah">ഇന്നത്തെ ആയത്ത്</string>
     <string name="widget_reading">വായന തുടരുക</string>
@@ -13,8 +14,8 @@
     <string name="widget_khatmah">ഖത്ം</string>
     <string name="widget_quran">ഖുർആൻ</string>
     <string name="widget_today">ഹിജ്റ കലണ്ടർ · നമസ്കാര സമയങ്ങൾ</string>
-    <string name="widget_shortcuts">ഖിബ്‌ല · അദ്കാർ · ശീലങ്ങൾ</string>
-    <string name="widget_shortcuts_small">ഖിബ്‌ല · അദ്കാർ · ശീലങ്ങൾ (3×1)</string>
+    <string name="widget_shortcuts">ഖിബ്‌ല · അദ്കാർ · ദുആകൾ · ശീലങ്ങൾ</string>
+    <string name="widget_shortcuts_small">ഖിബ്‌ല · അദ്കാർ · ദുആകൾ · ശീലങ്ങൾ (3×1)</string>
     <string name="widget_p_fajr">സുബ്ഹ്</string>
     <string name="widget_p_sunrise">സൂര്യോദയം</string>
     <string name="widget_p_dhuhr">ളുഹ്ർ</string>

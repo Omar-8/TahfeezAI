@@ -5,6 +5,7 @@
     <string name="widget_prayer">کاتەکانی نوێژ</string>
     <string name="widget_qibla">قیبلە</string>
     <string name="widget_athkar">زیکرەکان</string>
+    <string name="widget_duas">دوعاکان</string>
     <string name="widget_habits">خووەکان</string>
     <string name="widget_ayah">ئایەتی ڕۆژ</string>
     <string name="widget_reading">بەردەوامبوون لە خوێندنەوە</string>
@@ -13,8 +14,8 @@
     <string name="widget_khatmah">خەتم</string>
     <string name="widget_quran">قورئان</string>
     <string name="widget_today">ڕۆژژمێری کۆچی · کاتەکانی نوێژ</string>
-    <string name="widget_shortcuts">قیبلە · زیکرەکان · خووەکان</string>
-    <string name="widget_shortcuts_small">قیبلە · زیکرەکان · خووەکان (3×1)</string>
+    <string name="widget_shortcuts">قیبلە · زیکرەکان · دوعاکان · خووەکان</string>
+    <string name="widget_shortcuts_small">قیبلە · زیکرەکان · دوعاکان · خووەکان (3×1)</string>
     <string name="widget_p_fajr">بەیانی</string>
     <string name="widget_p_sunrise">خۆرهەڵاتن</string>
     <string name="widget_p_dhuhr">نیوەڕۆ</string>

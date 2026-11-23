@@ -5,6 +5,7 @@
     <string name="widget_prayer">礼拝時刻</string>
     <string name="widget_qibla">キブラ</string>
     <string name="widget_athkar">ズィクル</string>
+    <string name="widget_duas">ドゥアー</string>
     <string name="widget_habits">習慣</string>
     <string name="widget_ayah">今日のアーヤ</string>
     <string name="widget_reading">続きを読む</string>
@@ -13,8 +14,8 @@
     <string name="widget_khatmah">ハトマ</string>
     <string name="widget_quran">クルアーン</string>
     <string name="widget_today">ヒジュラ暦 · 礼拝時刻</string>
-    <string name="widget_shortcuts">キブラ · ズィクル · 習慣</string>
-    <string name="widget_shortcuts_small">キブラ · ズィクル · 習慣 (3×1)</string>
+    <string name="widget_shortcuts">キブラ · ズィクル · ドゥアー · 習慣</string>
+    <string name="widget_shortcuts_small">キブラ · ズィクル · ドゥアー · 習慣 (3×1)</string>
     <string name="widget_p_fajr">ファジュル</string>
     <string name="widget_p_sunrise">日の出</string>
     <string name="widget_p_dhuhr">ズフル</string>

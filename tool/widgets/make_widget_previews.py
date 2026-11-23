@@ -19,12 +19,26 @@ SANS = str(ROOT / 'assets/fonts/NotoSans-Variable.ttf')
 QURAN = str(ROOT / 'assets/fonts/AmiriQuran.ttf')
 K = 3  # px per dp
 
-TEXT = (0x18, 0x20, 0x1D)
-MUTED = (0x58, 0x63, 0x5E)
-PRIMARY = (0x17, 0x6B, 0x5B)
-CONTAINER = (0xC3, 0xE2, 0xD6)
-ON = (0x0D, 0x3F, 0x35)
 GOLD = (0xE0, 0xA5, 0x26)
+
+# The app's two looks, as the widgets draw them (TahfeezWidgets.kt's Look,
+# drawable/widget_glass_*, widget_tile_*).
+LOOKS = {
+    'light': dict(TEXT=(0x18, 0x20, 0x1D), MUTED=(0x58, 0x63, 0x5E), PRIMARY=(0x17, 0x6B, 0x5B),
+                  CONTAINER=(0xC3, 0xE2, 0xD6), ON=(0x0D, 0x3F, 0x35), OUTLINE=(0xB7, 0xC2, 0xBC),
+                  GLASS=(252, 253, 251, 235), EDGE=(0x17, 0x6B, 0x5B, 70),
+                  TILE=(255, 255, 255, 240), TILE_EDGE=(0xE4, 0xE8, 0xE5, 255),
+                  NEXT_EDGE=(0x17, 0x6B, 0x5B, 90)),
+    'dark': dict(TEXT=(0xEC, 0xF2, 0xEF), MUTED=(0xAA, 0xB6, 0xB0), PRIMARY=(0x68, 0xC6, 0xA8),
+                 CONTAINER=(0x20, 0x3D, 0x34), ON=(0xC3, 0xE2, 0xD6), OUTLINE=(0x5E, 0x6B, 0x65),
+                 GLASS=(0x1A, 0x22, 0x1E, 230), EDGE=(255, 255, 255, 40),
+                 TILE=(0x2A, 0x35, 0x2F, 255), TILE_EDGE=(255, 255, 255, 18),
+                 NEXT_EDGE=(0x68, 0xC6, 0xA8, 90)),
+}
+globals().update(LOOKS['light'])
+
+# Each picture as drawn in each look, before the two are put together.
+DRAWN = {}
 GLYPH = {'explore': 0xf037, 'athkar': 0xf2f3, 'habits': 0xf02c, 'khatmah': 0xeeaf, 'quran': 0xf1c2,
          'memorize': 0xf33c, 'ayah': 0xeea9, 'bookmark': 0xe0f4, 'calendar': 0xf051f, 'done': 0xf635,
          'open': 0xe504, 'sun': 0xf02ae}
@@ -51,23 +65,34 @@ class Canvas:
 
     def glass(self, x, y, w, h, r=24):
         box = [x * K, y * K, (x + w) * K - 1, (y + h) * K - 1]
-        self.d.rounded_rectangle(box, r * K, fill=(252, 253, 251, 235), outline=(0x17, 0x6B, 0x5B, 70), width=K)
+        self.d.rounded_rectangle(box, r * K, fill=GLASS, outline=EDGE, width=K)
 
     def tile(self, x, y, w, h, nxt=False):
         self.d.rounded_rectangle([x * K, y * K, (x + w) * K, (y + h) * K], 12 * K,
-                                 fill=CONTAINER if nxt else (255, 255, 255, 240),
-                                 outline=(0x17, 0x6B, 0x5B, 90) if nxt else (0xE4, 0xE8, 0xE5, 255), width=K)
+                                 fill=CONTAINER if nxt else TILE,
+                                 outline=NEXT_EDGE if nxt else TILE_EDGE, width=K)
 
-    def text(self, x, y, s, size=13, color=TEXT, bold=False, anchor='la', path=SANS, direction=None):
+    def text(self, x, y, s, size=13, color=None, bold=False, anchor='la', path=SANS, direction=None):
+        color = color or TEXT
         self.d.text((x * K, y * K), s, font=font(size, bold, path), fill=color, anchor=anchor,
                     direction=direction)
 
-    def icon(self, x, y, name, size=18, color=PRIMARY, anchor='la'):
+    def icon(self, x, y, name, size=18, color=None, anchor='la'):
+        color = color or PRIMARY
+        if name == 'duas':
+            # The Duas hands (tool/widgets/make_dua_hands.py), not a glyph:
+            # its shape, in [color].
+            shape = Image.open(OUT / 'widget_preview_icon_duas.png').resize((size * K, size * K))
+            im = Image.new('RGBA', shape.size, color + (0,))
+            im.putalpha(shape.getchannel('A'))
+            left = x * K - (size * K // 2 if anchor[0] == 'm' else 0)
+            self.im.alpha_composite(im, (int(left), int(y * K)))
+            return
         self.d.text((x * K, y * K), chr(GLYPH[name]), font=ImageFont.truetype(ICONS, size * K),
                     fill=color, anchor=anchor)
 
     def save(self, kind):
-        self.im.save(OUT / f'widget_preview_{kind}.png', optimize=True)
+        DRAWN.setdefault(kind, []).append(self.im)
 
 
 def prayer_row(c, x, y, w, header):
@@ -75,7 +100,7 @@ def prayer_row(c, x, y, w, header):
     times = ['5:12', '6:41', '11:52', '2:47', '5:04', '6:27']
     if header:
         c.text(x, y, '1:35 PM', 14, PRIMARY, bold=True)
-        c.text(x + 62, y, '|', 13, (0xB7, 0xC2, 0xBC))
+        c.text(x + 62, y, '|', 13, OUTLINE)
         c.text(x + 72, y + 1, 'Sun, Nov 22', 12, MUTED)
     else:
         c.text(x, y, 'Cairo, Egypt', 14, bold=True)
@@ -99,10 +124,15 @@ def date_card(c, x, y, w):
 
 
 def buttons(c, x, y, w, h):
-    bw = (w - 16) / 3
-    for i, (name, label) in enumerate([('explore', 'Qibla'), ('athkar', 'Athkar'), ('habits', 'Habits')]):
-        bx = x + i * (bw + 8)
-        c.glass(bx, y, bw, h)
+    """Home's four buttons as one group (owner, 2026-11-23)."""
+    c.glass(x, y, w, h)
+    bw = w / 4
+    for i, (name, label) in enumerate([('explore', 'Qibla'), ('athkar', 'Athkar'),
+                                       ('duas', 'Duas'), ('habits', 'Habits')]):
+        bx = x + i * bw
+        if i:
+            c.d.line([(bx * K, (y + 14) * K), (bx * K, (y + h - 14) * K)],
+                     fill=(0x17, 0x6B, 0x5B, 36), width=K)
         c.icon(bx + bw / 2, y + h / 2 - 16, name, 24, anchor='ma')
         c.text(bx + bw / 2, y + h / 2 + 12, label, 13, PRIMARY, bold=True, anchor='ma')
 
@@ -116,6 +146,22 @@ def header(c, x, y, w, glyph, title, corner=None):
 
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
+    for look in ('light', 'dark'):
+        globals().update(LOOKS[look])
+        draw()
+    # One picture each, light and dark together (owner, 2026-11-23): the
+    # widget split on a slant — light before, dark after.
+    for kind, (light, dark) in DRAWN.items():
+        w, h = light.size
+        mask = Image.new('L', (w, h), 0)
+        ImageDraw.Draw(mask).polygon([(w * 0.58, 0), (w, 0), (w, h), (w * 0.42, h)], fill=255)
+        out = light.copy()
+        out.paste(dark, (0, 0), mask)
+        out.save(OUT / f'widget_preview_{kind}.png', optimize=True)
+    print('ok')
+
+
+def draw():
     # Prayer times, 5 × 1.
     c = Canvas(360, 90); c.glass(0, 0, 360, 90); prayer_row(c, 12, 10, 336, True); c.save('prayer')
     # The date, 5 × 1.
@@ -129,12 +175,13 @@ def main():
     c.glass(0, 0, 360, 78); date_card(c, 12, 10, 336)
     c.glass(0, 86, 360, 84); prayer_row(c, 12, 96, 336, False)
     buttons(c, 0, 178, 360, 76); c.save('home')
-    # The three buttons, 5 × 1 and 3 × 1.
+    # The four buttons, 5 × 1 and 3 × 1.
     c = Canvas(360, 76); buttons(c, 0, 0, 360, 76); c.save('shortcuts')
     c = Canvas(220, 76); buttons(c, 0, 0, 220, 76); c.save('shortcuts_small')
     # One button each.
     for kind, glyph, label in [('qibla', 'explore', 'Qibla'), ('athkar', 'athkar', 'Athkar'),
-                               ('habits', 'habits', 'Habits'), ('quran', 'quran', "Qur'an")]:
+                               ('duas', 'duas', 'Duas'), ('habits', 'habits', 'Habits'),
+                               ('quran', 'quran', "Qur'an")]:
         c = Canvas(84, 84); c.glass(0, 0, 84, 84)
         c.icon(42, 18, glyph, 30, anchor='ma'); c.text(42, 56, label, 13, PRIMARY, bold=True, anchor='ma')
         c.save(kind)
@@ -154,7 +201,6 @@ def main():
         c.d.rounded_rectangle([12 * K, 64 * K, 208 * K, 70 * K], 3 * K, fill=(0xE4, 0xE8, 0xE5, 255))
         c.d.rounded_rectangle([12 * K, 64 * K, (12 + 196 * p) * K, 70 * K], 3 * K, fill=PRIMARY)
         c.save(kind)
-    print('ok')
 
 
 if __name__ == '__main__':

@@ -78,6 +78,9 @@ void main() {
       expect((p['labels']! as Map)['qibla'], 'Qibla');
       expect((p['routes']! as Map)['prayer'], '/prayer');
       expect((p['routes']! as Map)['date'], '/calendar');
+      // Duas (owner, 2026-11-23): its own widget and the buttons' group.
+      expect((p['labels']! as Map)['duas'], 'Duas');
+      expect((p['routes']! as Map)['duas'], '/duas');
       expect(p['prayer'], isNull, reason: 'no place yet');
       expect((p['dates']! as List), hasLength(30));
       final firstDay = (p['dates']! as List).first as Map;
@@ -142,6 +145,17 @@ void main() {
         containsAll([0, 17, 19]),
         reason: "and as the date card's sun or moon changes",
       );
+      await RealApp.quit(tester);
+    });
+
+    testWidgets('the app started by a widget\'s link ("/?route=/duas", as '
+        'Android hands it to the router): Home, no "page not found"', (
+      tester,
+    ) async {
+      await RealApp.launch(tester, route: '/?route=%2Fduas');
+      expect(find.textContaining('Page Not Found'), findsNothing);
+      expect(find.textContaining('GoException'), findsNothing);
+      expect(find.byKey(const ValueKey('home-shortcuts')), findsOneWidget);
       await RealApp.quit(tester);
     });
 

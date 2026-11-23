@@ -3,6 +3,7 @@
 "widget_prayer" = "مواقيت الصلاة";
 "widget_qibla" = "القبلة";
 "widget_athkar" = "الأذكار";
+"widget_duas" = "الأدعية";
 "widget_habits" = "العادات";
 "widget_ayah" = "آية اليوم";
 "widget_reading" = "متابعة القراءة";
@@ -11,5 +12,5 @@
 "widget_khatmah" = "الختمة";
 "widget_quran" = "القرآن";
 "widget_today" = "التقويم الهجري · مواقيت الصلاة";
-"widget_shortcuts" = "القبلة · الأذكار · العادات";
-"widget_shortcuts_small" = "القبلة · الأذكار · العادات (3×1)";
+"widget_shortcuts" = "القبلة · الأذكار · الأدعية · العادات";
+"widget_shortcuts_small" = "القبلة · الأذكار · الأدعية · العادات (3×1)";

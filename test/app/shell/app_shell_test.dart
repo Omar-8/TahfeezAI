@@ -212,11 +212,9 @@ void main() {
     await tester.pumpAndSettle();
     // No live blur: blurring what scrolls beneath it flickered (owner,
     // 2026-11-21).
+    // (The shortcuts' group is the glass, 2026-11-23.)
     final glass = tester.widget<TahfeezGlassSurface>(
-      find.descendant(
-        of: find.byKey(const ValueKey('home-qibla')),
-        matching: find.byType(TahfeezGlassSurface),
-      ),
+      find.byKey(const ValueKey('home-shortcuts')),
     );
     expect(glass.blur, isFalse);
     await tester.tap(find.byKey(const ValueKey('home-qibla')));

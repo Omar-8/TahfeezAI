@@ -3,6 +3,7 @@
 "widget_prayer" = "Orari di preghiera";
 "widget_qibla" = "Qibla";
 "widget_athkar" = "Adhkar";
+"widget_duas" = "Dua";
 "widget_habits" = "Abitudini";
 "widget_ayah" = "Versetto del giorno";
 "widget_reading" = "Continua a leggere";
@@ -11,5 +12,5 @@
 "widget_khatmah" = "Khatma";
 "widget_quran" = "Corano";
 "widget_today" = "Calendario dell’egira · Orari di preghiera";
-"widget_shortcuts" = "Qibla · Adhkar · Abitudini";
-"widget_shortcuts_small" = "Qibla · Adhkar · Abitudini (3×1)";
+"widget_shortcuts" = "Qibla · Adhkar · Dua · Abitudini";
+"widget_shortcuts_small" = "Qibla · Adhkar · Dua · Abitudini (3×1)";

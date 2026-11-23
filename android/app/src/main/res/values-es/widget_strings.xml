@@ -5,6 +5,7 @@
     <string name="widget_prayer">Horarios de oración</string>
     <string name="widget_qibla">Qibla</string>
     <string name="widget_athkar">Adhkar</string>
+    <string name="widget_duas">Duas</string>
     <string name="widget_habits">Hábitos</string>
     <string name="widget_ayah">Aleya del día</string>
     <string name="widget_reading">Seguir leyendo</string>
@@ -13,8 +14,8 @@
     <string name="widget_khatmah">Jatma</string>
     <string name="widget_quran">Corán</string>
     <string name="widget_today">Calendario hégira · Horarios de oración</string>
-    <string name="widget_shortcuts">Qibla · Adhkar · Hábitos</string>
-    <string name="widget_shortcuts_small">Qibla · Adhkar · Hábitos (3×1)</string>
+    <string name="widget_shortcuts">Qibla · Adhkar · Duas · Hábitos</string>
+    <string name="widget_shortcuts_small">Qibla · Adhkar · Duas · Hábitos (3×1)</string>
     <string name="widget_p_fajr">Fajr</string>
     <string name="widget_p_sunrise">Salida del sol</string>
     <string name="widget_p_dhuhr">Dhuhr</string>

@@ -5,6 +5,7 @@
     <string name="widget_prayer">নামাজের সময়</string>
     <string name="widget_qibla">কিবলা</string>
     <string name="widget_athkar">যিকির</string>
+    <string name="widget_duas">দোয়া</string>
     <string name="widget_habits">অভ্যাস</string>
     <string name="widget_ayah">আজকের আয়াত</string>
     <string name="widget_reading">পড়া চালিয়ে যান</string>
@@ -13,8 +14,8 @@
     <string name="widget_khatmah">খতম</string>
     <string name="widget_quran">কুরআন</string>
     <string name="widget_today">হিজরি ক্যালেন্ডার · নামাজের সময়</string>
-    <string name="widget_shortcuts">কিবলা · যিকির · অভ্যাস</string>
-    <string name="widget_shortcuts_small">কিবলা · যিকির · অভ্যাস (3×1)</string>
+    <string name="widget_shortcuts">কিবলা · যিকির · দোয়া · অভ্যাস</string>
+    <string name="widget_shortcuts_small">কিবলা · যিকির · দোয়া · অভ্যাস (3×1)</string>
     <string name="widget_p_fajr">ফজর</string>
     <string name="widget_p_sunrise">সূর্যোদয়</string>
     <string name="widget_p_dhuhr">যোহর</string>

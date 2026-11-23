@@ -3,6 +3,7 @@
 "widget_prayer" = "Heures de prière";
 "widget_qibla" = "Qibla";
 "widget_athkar" = "Adhkar";
+"widget_duas" = "Douas";
 "widget_habits" = "Habitudes";
 "widget_ayah" = "Verset du jour";
 "widget_reading" = "Reprendre la lecture";
@@ -11,5 +12,5 @@
 "widget_khatmah" = "Khatma";
 "widget_quran" = "Coran";
 "widget_today" = "Calendrier hégirien · Heures de prière";
-"widget_shortcuts" = "Qibla · Adhkar · Habitudes";
-"widget_shortcuts_small" = "Qibla · Adhkar · Habitudes (3×1)";
+"widget_shortcuts" = "Qibla · Adhkar · Douas · Habitudes";
+"widget_shortcuts_small" = "Qibla · Adhkar · Douas · Habitudes (3×1)";

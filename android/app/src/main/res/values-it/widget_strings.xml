@@ -5,6 +5,7 @@
     <string name="widget_prayer">Orari di preghiera</string>
     <string name="widget_qibla">Qibla</string>
     <string name="widget_athkar">Adhkar</string>
+    <string name="widget_duas">Dua</string>
     <string name="widget_habits">Abitudini</string>
     <string name="widget_ayah">Versetto del giorno</string>
     <string name="widget_reading">Continua a leggere</string>
@@ -13,8 +14,8 @@
     <string name="widget_khatmah">Khatma</string>
     <string name="widget_quran">Corano</string>
     <string name="widget_today">Calendario dell’egira · Orari di preghiera</string>
-    <string name="widget_shortcuts">Qibla · Adhkar · Abitudini</string>
-    <string name="widget_shortcuts_small">Qibla · Adhkar · Abitudini (3×1)</string>
+    <string name="widget_shortcuts">Qibla · Adhkar · Dua · Abitudini</string>
+    <string name="widget_shortcuts_small">Qibla · Adhkar · Dua · Abitudini (3×1)</string>
     <string name="widget_p_fajr">Fajr</string>
     <string name="widget_p_sunrise">Alba</string>
     <string name="widget_p_dhuhr">Dhuhr</string>

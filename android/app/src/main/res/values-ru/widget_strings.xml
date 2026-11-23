@@ -5,6 +5,7 @@
     <string name="widget_prayer">Время намаза</string>
     <string name="widget_qibla">Кибла</string>
     <string name="widget_athkar">Азкары</string>
+    <string name="widget_duas">Дуа</string>
     <string name="widget_habits">Привычки</string>
     <string name="widget_ayah">Аят дня</string>
     <string name="widget_reading">Продолжить чтение</string>
@@ -13,8 +14,8 @@
     <string name="widget_khatmah">Хатм</string>
     <string name="widget_quran">Коран</string>
     <string name="widget_today">Календарь хиджры · Время намаза</string>
-    <string name="widget_shortcuts">Кибла · Азкары · Привычки</string>
-    <string name="widget_shortcuts_small">Кибла · Азкары · Привычки (3×1)</string>
+    <string name="widget_shortcuts">Кибла · Азкары · Дуа · Привычки</string>
+    <string name="widget_shortcuts_small">Кибла · Азкары · Дуа · Привычки (3×1)</string>
     <string name="widget_p_fajr">Фаджр</string>
     <string name="widget_p_sunrise">Восход</string>
     <string name="widget_p_dhuhr">Зухр</string>

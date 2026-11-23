@@ -3,6 +3,7 @@
 "widget_prayer" = "Ώρες προσευχής";
 "widget_qibla" = "Κίμπλα";
 "widget_athkar" = "Άζκαρ";
+"widget_duas" = "Ντουά";
 "widget_habits" = "Συνήθειες";
 "widget_ayah" = "Εδάφιο της ημέρας";
 "widget_reading" = "Συνέχεια ανάγνωσης";
@@ -11,5 +12,5 @@
 "widget_khatmah" = "Χάτμα";
 "widget_quran" = "Κοράνιο";
 "widget_today" = "Ημερολόγιο Χιτζρί · Ώρες προσευχής";
-"widget_shortcuts" = "Κίμπλα · Άζκαρ · Συνήθειες";
-"widget_shortcuts_small" = "Κίμπλα · Άζκαρ · Συνήθειες (3×1)";
+"widget_shortcuts" = "Κίμπλα · Άζκαρ · Ντουά · Συνήθειες";
+"widget_shortcuts_small" = "Κίμπλα · Άζκαρ · Ντουά · Συνήθειες (3×1)";

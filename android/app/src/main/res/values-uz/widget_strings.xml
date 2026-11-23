@@ -5,6 +5,7 @@
     <string name="widget_prayer">Namoz vaqtlari</string>
     <string name="widget_qibla">Qibla</string>
     <string name="widget_athkar">Zikrlar</string>
+    <string name="widget_duas">Duolar</string>
     <string name="widget_habits">Odatlar</string>
     <string name="widget_ayah">Kun oyati</string>
     <string name="widget_reading">Oʻqishni davom ettirish</string>
@@ -13,8 +14,8 @@
     <string name="widget_khatmah">Xatm</string>
     <string name="widget_quran">Qurʼon</string>
     <string name="widget_today">Hijriy taqvim · Namoz vaqtlari</string>
-    <string name="widget_shortcuts">Qibla · Zikrlar · Odatlar</string>
-    <string name="widget_shortcuts_small">Qibla · Zikrlar · Odatlar (3×1)</string>
+    <string name="widget_shortcuts">Qibla · Zikrlar · Duolar · Odatlar</string>
+    <string name="widget_shortcuts_small">Qibla · Zikrlar · Duolar · Odatlar (3×1)</string>
     <string name="widget_p_fajr">Bomdod</string>
     <string name="widget_p_sunrise">Quyosh chiqishi</string>
     <string name="widget_p_dhuhr">Peshin</string>

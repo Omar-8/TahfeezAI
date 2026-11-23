@@ -5,6 +5,7 @@
 /// building from these — per this milestone's Definition of Done.
 library;
 
+export 'dua_hands_icon.dart';
 export 'quran_mark.dart';
 export 'tahfeez_app_bar.dart';
 export 'tahfeez_bottom_sheet.dart';

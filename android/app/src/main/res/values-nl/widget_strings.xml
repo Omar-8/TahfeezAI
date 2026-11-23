@@ -5,6 +5,7 @@
     <string name="widget_prayer">Gebedstijden</string>
     <string name="widget_qibla">Qibla</string>
     <string name="widget_athkar">Adhkar</string>
+    <string name="widget_duas">Smeekbeden</string>
     <string name="widget_habits">Gewoonten</string>
     <string name="widget_ayah">Vers van de dag</string>
     <string name="widget_reading">Verder lezen</string>
@@ -13,8 +14,8 @@
     <string name="widget_khatmah">Khatma</string>
     <string name="widget_quran">Koran</string>
     <string name="widget_today">Hidjri-kalender · Gebedstijden</string>
-    <string name="widget_shortcuts">Qibla · Adhkar · Gewoonten</string>
-    <string name="widget_shortcuts_small">Qibla · Adhkar · Gewoonten (3×1)</string>
+    <string name="widget_shortcuts">Qibla · Adhkar · Smeekbeden · Gewoonten</string>
+    <string name="widget_shortcuts_small">Qibla · Adhkar · Smeekbeden · Gewoonten (3×1)</string>
     <string name="widget_p_fajr">Fadjr</string>
     <string name="widget_p_sunrise">Zonsopgang</string>
     <string name="widget_p_dhuhr">Dhuhr</string>

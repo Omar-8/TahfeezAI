@@ -3,6 +3,7 @@
 "widget_prayer" = "Namaz vakitleri";
 "widget_qibla" = "Kıble";
 "widget_athkar" = "Zikirler";
+"widget_duas" = "Dualar";
 "widget_habits" = "Alışkanlıklar";
 "widget_ayah" = "Günün ayeti";
 "widget_reading" = "Okumaya devam et";
@@ -11,5 +12,5 @@
 "widget_khatmah" = "Hatim";
 "widget_quran" = "Kur'an";
 "widget_today" = "Hicri takvim · Namaz vakitleri";
-"widget_shortcuts" = "Kıble · Zikirler · Alışkanlıklar";
-"widget_shortcuts_small" = "Kıble · Zikirler · Alışkanlıklar (3×1)";
+"widget_shortcuts" = "Kıble · Zikirler · Dualar · Alışkanlıklar";
+"widget_shortcuts_small" = "Kıble · Zikirler · Dualar · Alışkanlıklar (3×1)";

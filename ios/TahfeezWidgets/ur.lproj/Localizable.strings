@@ -3,6 +3,7 @@
 "widget_prayer" = "نماز کے اوقات";
 "widget_qibla" = "قبلہ";
 "widget_athkar" = "اذکار";
+"widget_duas" = "دعائیں";
 "widget_habits" = "عادات";
 "widget_ayah" = "آج کی آیت";
 "widget_reading" = "تلاوت جاری رکھیں";
@@ -11,5 +12,5 @@
 "widget_khatmah" = "ختم";
 "widget_quran" = "قرآن";
 "widget_today" = "ہجری کیلنڈر · نماز کے اوقات";
-"widget_shortcuts" = "قبلہ · اذکار · عادات";
-"widget_shortcuts_small" = "قبلہ · اذکار · عادات (3×1)";
+"widget_shortcuts" = "قبلہ · اذکار · دعائیں · عادات";
+"widget_shortcuts_small" = "قبلہ · اذکار · دعائیں · عادات (3×1)";

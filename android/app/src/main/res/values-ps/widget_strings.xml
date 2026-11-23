@@ -5,6 +5,7 @@
     <string name="widget_prayer">د لمانځه وختونه</string>
     <string name="widget_qibla">قبله</string>
     <string name="widget_athkar">اذکار</string>
+    <string name="widget_duas">دعاګانې</string>
     <string name="widget_habits">عادتونه</string>
     <string name="widget_ayah">د ورځې آیت</string>
     <string name="widget_reading">لوستل جاري وساتئ</string>
@@ -13,8 +14,8 @@
     <string name="widget_khatmah">ختم</string>
     <string name="widget_quran">قرآن</string>
     <string name="widget_today">قمري جنتري · د لمانځه وختونه</string>
-    <string name="widget_shortcuts">قبله · اذکار · عادتونه</string>
-    <string name="widget_shortcuts_small">قبله · اذکار · عادتونه (3×1)</string>
+    <string name="widget_shortcuts">قبله · اذکار · دعاګانې · عادتونه</string>
+    <string name="widget_shortcuts_small">قبله · اذکار · دعاګانې · عادتونه (3×1)</string>
     <string name="widget_p_fajr">سهار</string>
     <string name="widget_p_sunrise">لمر ختل</string>
     <string name="widget_p_dhuhr">ماسپښین</string>

@@ -3,6 +3,7 @@
 "widget_prayer" = "Gebedstijden";
 "widget_qibla" = "Qibla";
 "widget_athkar" = "Adhkar";
+"widget_duas" = "Smeekbeden";
 "widget_habits" = "Gewoonten";
 "widget_ayah" = "Vers van de dag";
 "widget_reading" = "Verder lezen";
@@ -11,5 +12,5 @@
 "widget_khatmah" = "Khatma";
 "widget_quran" = "Koran";
 "widget_today" = "Hidjri-kalender · Gebedstijden";
-"widget_shortcuts" = "Qibla · Adhkar · Gewoonten";
-"widget_shortcuts_small" = "Qibla · Adhkar · Gewoonten (3×1)";
+"widget_shortcuts" = "Qibla · Adhkar · Smeekbeden · Gewoonten";
+"widget_shortcuts_small" = "Qibla · Adhkar · Smeekbeden · Gewoonten (3×1)";

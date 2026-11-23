@@ -5,6 +5,7 @@
     <string name="widget_prayer">Namaz vakitleri</string>
     <string name="widget_qibla">Kıble</string>
     <string name="widget_athkar">Zikirler</string>
+    <string name="widget_duas">Dualar</string>
     <string name="widget_habits">Alışkanlıklar</string>
     <string name="widget_ayah">Günün ayeti</string>
     <string name="widget_reading">Okumaya devam et</string>
@@ -13,8 +14,8 @@
     <string name="widget_khatmah">Hatim</string>
     <string name="widget_quran">Kur\'an</string>
     <string name="widget_today">Hicri takvim · Namaz vakitleri</string>
-    <string name="widget_shortcuts">Kıble · Zikirler · Alışkanlıklar</string>
-    <string name="widget_shortcuts_small">Kıble · Zikirler · Alışkanlıklar (3×1)</string>
+    <string name="widget_shortcuts">Kıble · Zikirler · Dualar · Alışkanlıklar</string>
+    <string name="widget_shortcuts_small">Kıble · Zikirler · Dualar · Alışkanlıklar (3×1)</string>
     <string name="widget_p_fajr">İmsak</string>
     <string name="widget_p_sunrise">Güneş</string>
     <string name="widget_p_dhuhr">Öğle</string>

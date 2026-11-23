@@ -140,6 +140,14 @@
             <meta-data android:name="android.appwidget.provider"
                 android:resource="@xml/widget_athkar" />
         </receiver>
+        <receiver android:name=".widgets.DuasWidget" android:exported="true"
+            android:label="@string/widget_duas">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider"
+                android:resource="@xml/widget_duas" />
+        </receiver>
         <receiver android:name=".widgets.HabitsWidget" android:exported="true"
             android:label="@string/widget_habits">
             <intent-filter>
