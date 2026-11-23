@@ -4,7 +4,7 @@
 
 # TahfeezAI · تحفيظ
 
-**Read, understand, memorize and recite the Holy Quran — with tajweed feedback from an AI that runs on your phone.**
+**Read, understand, memorize and recite the Holy Quran — with tajweed feedback from an AI that runs on your phone. Prayer times, athkar and habits for every day.**
 
 **100% free · Works offline · No ads · No account · Your voice never leaves your phone**
 
@@ -20,7 +20,7 @@
 
 [**Website**](https://omar-8.github.io/TahfeezAI/) · [**Open in your browser**](https://omar-8.github.io/TahfeezAI/app/) · [Features](#features) · [Tajweed](#tajweed-feedback) · [Screenshots](#screenshots) · [Build it](#build-and-run)
 
-<img src="site/images/screens/06b-pronunciation-dark.webp" width="24%" alt="Hears the vowel you said"> <img src="site/images/screens/10b-hide-recite-dark.webp" width="24%" alt="Recite it from memory"> <img src="site/images/screens/01-home-light.webp" width="24%" alt="Home under a time-of-day sky"> <img src="site/images/screens/02-mushaf-light.webp" width="24%" alt="The Madinah Mushaf">
+<img src="site/images/screens/06b-pronunciation-dark.webp" width="24%" alt="Hears the vowel you said"> <img src="site/images/screens/10b-hide-recite-dark.webp" width="24%" alt="Recite it from memory"> <img src="site/images/screens/01-home-light.webp" width="24%" alt="Home: the date, prayer times, reading"> <img src="site/images/screens/20-prayer-times-light.webp" width="24%" alt="Prayer times with the adhan">
 
 </div>
 
@@ -35,6 +35,8 @@
   - [Listen](#listen)
   - [Recite — with tajweed feedback](#tajweed-feedback)
   - [Memorize](#memorize)
+  - [Every day](#every-day)
+  - [Home-screen widgets](#home-screen-widgets)
   - [Make it yours](#make-it-yours)
 - [Screenshots](#screenshots)
 - [Privacy](#privacy)
@@ -74,13 +76,13 @@ It is a gift, not a product:
 ### Understand
 
 - **Word by word**: the meaning under every word — in English, Urdu, Indonesian, Turkish, Persian, Bengali or French — with **transliteration**; in Arabic, the meanings of each ayah's difficult words from **al-Sirāj**. Tap a word for its details and audio.
-- **Translations** in 23 languages: English, German, French, Spanish, Portuguese, Dutch, Greek, Russian, Turkish, Indonesian, Malay, Urdu, Persian, Bengali, Hausa, Kurdish (Sorani), Pashto, Swahili, Kazakh, Uzbek, Somali, Japanese and Korean.
-- **Tafsir**: At-Tafsir Al-Muyassar, Al-Mukhtasar, Al-Nafahat Al-Makkiyyah, Bayan Ma'ani Al-Quran and al-Sirāj (Arabic), Al-Mukhtasar (English, French, Spanish, Russian, Turkish, Indonesian, Persian, Bengali, Kurdish, Pashto, Uzbek, Japanese) and Ahsan-ul-Bayan (Urdu).
+- **Translations** in 28 languages: English, German, French, Spanish, Italian, Portuguese, Dutch, Greek, Russian, Turkish, Indonesian, Malay, Urdu, Hindi, Tamil, Malayalam, Persian, Bengali, Hausa, Kurdish (Sorani), Pashto, Swahili, Kazakh, Uzbek, Somali, Chinese, Japanese and Korean.
+- **Tafsir**: At-Tafsir Al-Muyassar, Al-Mukhtasar, Al-Nafahat Al-Makkiyyah, Bayan Ma'ani Al-Quran and al-Sirāj (Arabic), Al-Mukhtasar (English, French, Spanish, Italian, Russian, Turkish, Indonesian, Persian, Bengali, Hindi, Tamil, Malayalam, Kurdish, Pashto, Uzbek, Chinese, Japanese) and Ahsan-ul-Bayan (Urdu).
 - Translations, tafsir and word meanings **follow the app's language** — unless you choose another.
 
 ### Listen
 
-- **31 renowned reciters** — Mishary Alafasy, Al-Husary (murattal, mujawwad and *muallim*, the teaching recitation), Al-Minshawi, Abdul Basit, As-Sudais, Ash-Shuraym, Al-Muaiqly, Saad Al-Ghamdi, Yasser Al-Dossary, Nasser Al-Qatami, Al-Tablawi, Al-Banna and more.
+- **32 renowned reciters** — Mishary Alafasy, Islam Sobhi, Al-Husary (murattal, mujawwad and *muallim*, the teaching recitation), Al-Minshawi, Abdul Basit, As-Sudais, Ash-Shuraym, Al-Muaiqly, Saad Al-Ghamdi, Yasser Al-Dossary, Nasser Al-Qatami, Al-Tablawi, Al-Banna and more.
 - The ayah being recited **lights up and is followed** page after page; playback speed; repeat an ayah or a range; download a reciter to listen offline — **the whole Quran, a juz or a single surah**.
 - **A translation read aloud after each ayah** — English, Urdu, French, Russian, Persian, Turkish, Kazakh or Uzbek.
 - **Sleep timer** — pause after 15 to 60 minutes, or at the end of the ayah playing.
@@ -124,20 +126,35 @@ Each word is coloured as you go — right, wrong, skipped or mispronounced — w
 - **Gentle milestones** — a juz or a surah memorized, a share of the Quran, days in a row — each celebrated once, never in the middle of a recitation.
 - **Daily reminder**, sajdah reminders, an activity count of the ayahs heard and recited.
 
+### Every day
+
+- **Prayer times** for your city — found automatically (approximately) or chosen from a list of the world's cities — worked out on your phone by the calculation method of your country (over 20 methods: Umm al-Qura, Egyptian, Muslim World League, ISNA, Karachi, Diyanet, JAKIM, Kemenag, the Gulf, the European and more), each adjustable by a few minutes. Home shows today's six times and the minutes to the next.
+- **The adhan** as each prayer's notification — from Makkah, Madinah, Quba, Al-Aqsa and more, a sound from your phone, or **vibration only**; each prayer on or off.
+- **Qibla compass** — the direction of the Kaaba from where you are (magnetic declination corrected, WMM2025), or from a city you choose.
+- **Athkar** — morning and evening, after prayer, before sleep and the rest of **Hisn al-Muslim**, in Arabic with its English translation, each counted with a tap, with its audio; morning and evening reminders.
+- **Habits** — your daily wird, the sunnah prayers, Witr, Qiyam, fasting Mondays and Thursdays or the white days, reading Al-Kahf on Friday and more (22 ready-made, or your own), each with reminders, a streak and its own progress.
+- **Hijri calendar** (Umm al-Qura, adjustable by a day) with the year's occasions; the Hijri date on Home beside today's.
+- **12- or 24-hour time**, as you choose, everywhere the app and its widgets show the time.
+
+### Home-screen widgets
+
+On Android and iPhone, light or dark as the app is, right to left in Arabic, Urdu and Persian: **prayer times** (one row, the minutes to the next prayer), **today** (the date and prayer times), **Home** (with Qibla, Athkar and Habits buttons), the **date**, a **daily ayah**, **continue reading**, today's **memorization**, the **khatmah**, **shortcuts**, and Qibla, Athkar, Habits and Quran tiles. Each opens its screen.
+
 ### Make it yours
 
 - **App themes** — light, dark, warm, sepia and black, or follow your phone — with a **sky in the colours of the time of day** (dawn, day, golden hour, sunset, night) and an **Islamic geometric pattern** of our own behind Home, the Quran tab and Memorize, and **glass cards** over it.
 - **Reader themes** for the page — light, warm, sepia, dark, black.
 - **4 Quran fonts** for Ayah mode (Scheherazade New, Amiri Quran, Noto Naskh Arabic, Lateef) and **3 Arabic fonts** for the app (Noto Kufi, Almarai, Tajawal).
 - **Text size** from 80 % to 200 %, and the app follows your phone's own text size.
-- **25 languages** — العربية · English · Deutsch · Français · Español · Português · Nederlands · Dansk · Ελληνικά · Русский · Türkçe · Bahasa Indonesia · Bahasa Melayu · اردو · فارسی · বাংলা · Hausa · کوردی · پښتو · Kiswahili · Қазақша · Oʻzbekcha · Soomaali · 日本語 · 한국어 — with full right-to-left layout; the translation and tafsir follow your language.
+- **30 languages** — العربية · English · Deutsch · Français · Español · Italiano · Português · Nederlands · Dansk · Ελληνικά · Русский · Türkçe · Bahasa Indonesia · Bahasa Melayu · اردو · हिन्दी · தமிழ் · മലയാളം · فارسی · বাংলা · Hausa · کوردی · پښتو · Kiswahili · Қазақша · Oʻzbekcha · Soomaali · 中文 · 日本語 · 한국어 — with full right-to-left layout; the translation and tafsir follow your language.
 - Tested for phones from 280 px foldable cover screens to tablets, in portrait and landscape.
 
 ## Screenshots
 
 | | | |
 |:-:|:-:|:-:|
-| <img src="site/images/screens/01-home-light.webp" width="260"> | <img src="site/images/screens/02-mushaf-light.webp" width="260"> | <img src="site/images/screens/03-listening-dark.webp" width="260"> |
+| <img src="site/images/screens/01-home-light.webp" width="260"> | <img src="site/images/screens/20-prayer-times-light.webp" width="260"> | <img src="site/images/screens/21-athkar-light.webp" width="260"> |
+| <img src="site/images/screens/22-habits-dark.webp" width="260"> | <img src="site/images/screens/23-calendar-light.webp" width="260"> | <img src="site/images/screens/02-mushaf-light.webp" width="260"> |
 | <img src="site/images/screens/05b-recite-marks-dark.webp" width="260"> | <img src="site/images/screens/06b-pronunciation-dark.webp" width="260"> | <img src="site/images/screens/10b-hide-recite-dark.webp" width="260"> |
 | <img src="site/images/screens/04-ayah-mode-light.webp" width="260"> | <img src="site/images/screens/05-follow-along-light.webp" width="260"> | <img src="site/images/screens/06-tajweed-settings-light.webp" width="260"> |
 | <img src="site/images/screens/08-ayah-mode-dark.webp" width="260"> | <img src="site/images/screens/09-view-settings-dark.webp" width="260"> | <img src="site/images/screens/10-hide-mode-dark.webp" width="260"> |
@@ -150,7 +167,8 @@ Each word is coloured as you go — right, wrong, skipped or mispronounced — w
 - **No account**, no sign-in, no advertising ID, **no analytics or crash-reporting SDK**.
 - **Your recitation stays on your device.** The audio is checked by the on-device model — in the browser, inside the browser — and discarded; release builds keep no recordings.
 - Memorization progress, bookmarks and settings live only on your device. Export a backup file wherever you choose; *Settings → Your data → Reset all data* erases everything.
-- The only network requests are the reciters' audio files (when you listen without having downloaded a reciter), and app updates and reviews through the store.
+- **Your location**, for prayer times and the Qibla, is used on your phone only — kept rounded to about a kilometre, never sent; or choose your city by hand.
+- The only network requests are the reciters' audio files (when you listen without having downloaded a reciter), athkar audio when you play it (Hisn al-Muslim's site), and app updates and reviews through the store.
 
 In the browser, the app's engine also loads fonts from Google Fonts (its default font, and characters the app's fonts lack).
 
@@ -168,7 +186,7 @@ See the [privacy policy](docs/PRIVACY_POLICY.md) and the [Play data-safety answe
 |:-:|:-:|:-:|
 | [**Get it on Google Play**](https://play.google.com/store/apps/details?id=ai.tahfeez.tahfeez_ai) | [**Download on the App Store**](https://apps.apple.com/app/id6829199977) | [**Open in your browser**](https://omar-8.github.io/TahfeezAI/app/) |
 
-The web app is the same app — the Mushaf, translations, memorization and recitation checking on your own computer — with a layout for wide windows. Best in a recent Chrome, Edge or Firefox; Safari works, but checks recitation more slowly (no threads there). Reciter downloads for offline listening and the daily reminder are phone-only.
+The web app is the same app — the Mushaf, translations, memorization and recitation checking on your own computer — with a layout for wide windows. Best in a recent Chrome, Edge or Firefox; Safari works, but checks recitation more slowly (no threads there). Reciter downloads for offline listening, reminders, the adhan and the widgets are phone-only.
 
 Builds are also on the [releases page](https://github.com/Omar-8/TahfeezAI/releases), or [build it yourself](#build-and-run).
 
@@ -189,7 +207,7 @@ git clone https://github.com/Omar-8/TahfeezAI.git
 cd TahfeezAI
 flutter pub get
 dart run build_runner build --delete-conflicting-outputs   # Drift, Freezed, Riverpod
-flutter gen-l10n                                           # the 25 languages
+flutter gen-l10n                                           # the 30 languages
 ```
 
 ### 2. Quran data (not in git: rebuilt from its sources, checksums verified)
