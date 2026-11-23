@@ -205,3 +205,16 @@ h1 { font-size: clamp(2.2rem, 5.2vw, 4rem); font-weight: 800; letter-spacing: -0
   .brand span { display: none; }
   .open-app { padding: 7px 12px; font-size: 0.9rem; }
 }
+
+/* Every day (2.0.0): four screens in a row, two on narrow screens. */
+.daily { text-align: center; }
+.daily .lead { max-width: 680px; margin: 12px auto 0; opacity: .8; }
+.daily-shots {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-top: 36px;
+}
+.daily-shots img { width: 100%; border-radius: 22px; box-shadow: var(--shadow); }
+@media (max-width: 900px) { .daily-shots { grid-template-columns: 1fr 1fr; } }
+.open-app.ghost { background: transparent; color: inherit; border: 1px solid currentColor; opacity: .85; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .open-app.ghost { color: inherit; } }
+:root[data-theme="dark"] .open-app.ghost { color: inherit; }
+@media (max-width: 720px) { .open-app.ghost { display: none; } }

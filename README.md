@@ -18,7 +18,7 @@
 ![No ads](https://img.shields.io/badge/ads-none-176B5B)
 ![Offline](https://img.shields.io/badge/works-offline-176B5B)
 
-[**Website**](https://omar-8.github.io/TahfeezAI/) · [**Open in your browser**](https://omar-8.github.io/TahfeezAI/app/) · [Features](#features) · [Tajweed](#tajweed-feedback) · [Screenshots](#screenshots) · [Build it](#build-and-run)
+[**Google Play**](https://play.google.com/store/apps/details?id=ai.tahfeez.tahfeez_ai) · [**App Store**](https://apps.apple.com/app/id6829199977) · [**Website**](https://omar-8.github.io/TahfeezAI/) · [**Open in your browser**](https://omar-8.github.io/TahfeezAI/app/) · [Features](#features) · [Tajweed](#tajweed-feedback) · [Screenshots](#screenshots) · [Build it](#build-and-run)
 
 <img src="site/images/screens/06b-pronunciation-dark.webp" width="24%" alt="Hears the vowel you said"> <img src="site/images/screens/10b-hide-recite-dark.webp" width="24%" alt="Recite it from memory"> <img src="site/images/screens/01-home-light.webp" width="24%" alt="Home: the date, prayer times, reading"> <img src="site/images/screens/20-prayer-times-light.webp" width="24%" alt="Prayer times with the adhan">
 
