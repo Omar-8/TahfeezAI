@@ -2453,8 +2453,9 @@ class MushafHideControls extends ConsumerWidget {
               : colours
               ? l10n.recHideColours
               : l10n.recHideAyahs,
-          // (On: a tint of the bar's ink on its glass.)
-          style: hide.enabled
+          // (On: a tint of the bar's ink on its glass — the colours
+          // hidden too, the eye itself left plain; owner, 2026-11-24.)
+          style: hide.enabled || !colours
               ? IconButton.styleFrom(
                   backgroundColor: Theme.of(context).colorScheme.onSurface
                       .withValues(alpha: 0.10),
@@ -3028,9 +3029,17 @@ class _HifzSettingsSheetState extends ConsumerState<_HifzSettingsSheet>
           // Every setting of both tabs found by a word, as in Settings.
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-            child: TahfeezGlassSurface(
-              borderRadius: BorderRadius.circular(TahfeezRadii.pill),
-              blur: false,
+            // A faint pill, outlined: Home's white glass vanished on the sheet's
+            // white paper (owner, 2026-11-24).
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainerLow,
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.outlineVariant
+                      .withValues(alpha: 0.7),
+                ),
+                borderRadius: BorderRadius.circular(TahfeezRadii.pill),
+              ),
               child: TextField(
                 key: const ValueKey('hifz-settings-search'),
                 onChanged: _search,

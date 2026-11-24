@@ -390,6 +390,13 @@ class SheetCloseButton extends StatelessWidget {
   );
 }
 
+bool _opaque(ThemeData theme) {
+  final paper =
+      theme.bottomSheetTheme.modalBackgroundColor ??
+      theme.bottomSheetTheme.backgroundColor;
+  return paper != null && paper.a >= 1;
+}
+
 /// A sheet's content as frosted glass: the screen behind it blurred under
 /// the sheet's see-through paper (`bottomSheetTheme`), clipped to its
 /// rounded top. (In a browser: plain, opaque paper.)
@@ -460,7 +467,9 @@ class GlassSheet extends StatelessWidget {
       // In a browser, no blur: the Mushaf's pages there are the browser's
       // own canvases, which it cannot blur — only the dim over them, its
       // edges darkened. The sheet is opaque there instead (`app_theme`).
-      child: kIsWeb
+      // Opaque paper (light themes'): no blur — nothing shows through, and
+      // its edge drew the dim above into the sheet's top as a grey band.
+      child: kIsWeb || _opaque(theme)
           ? content
           : BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),

@@ -60,17 +60,16 @@ ThemeData buildTahfeezTheme(
     // behind it — GlassSheet), a bright hairline along its top. In a
     // browser, which cannot blur the Mushaf's pages: opaque.
     bottomSheetTheme: BottomSheetThemeData(
-      // Light themes (owner, 2026-11-24: "silver grey"): whiter paper, all
-      // but opaque — the dim behind came through it — and no tint of the
-      // theme's colour.
+      // Light themes (owner, 2026-11-24: "silver grey"): whiter paper,
+      // opaque — the dim behind came through it, and the blur drew it into
+      // the sheet's top as a grey band (GlassSheet doesn't blur opaque
+      // paper) — and no tint of the theme's colour.
       backgroundColor: light
-          ? lightSheet.withValues(alpha: kIsWeb ? 1 : 0.97)
+          ? lightSheet
           : kIsWeb
           ? scheme.surface
           : scheme.surface.withValues(alpha: 0.86),
-      modalBackgroundColor: light
-          ? lightSheet.withValues(alpha: kIsWeb ? 1 : 0.97)
-          : null,
+      modalBackgroundColor: light ? lightSheet : null,
       surfaceTintColor: Colors.transparent,
       shape: sheetShape.copyWith(
         side: BorderSide(
