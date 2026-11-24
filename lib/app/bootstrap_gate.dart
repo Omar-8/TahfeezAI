@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import 'app.dart';
@@ -116,7 +118,22 @@ class _FadeOutState extends State<_FadeOut>
   @override
   void didUpdateWidget(covariant _FadeOut oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (!widget.visible && oldWidget.visible) _controller.reverse();
+    if (!widget.visible && oldWidget.visible) {
+      unawaited(_fadeAfterFirstFrames());
+    }
+  }
+
+  /// The fade once the app under it has drawn its first frames — begun on
+  /// the frame that builds the whole app, it stuttered, and over a light
+  /// app the stuck frames showed grey (owner, 2026-11-24).
+  Future<void> _fadeAfterFirstFrames() async {
+    for (var i = 0; i < 3; i++) {
+      await WidgetsBinding.instance.endOfFrame;
+      if (!mounted) return;
+      // (Another frame asked for, should nothing else.)
+      WidgetsBinding.instance.scheduleFrame();
+    }
+    if (mounted) unawaited(_controller.reverse());
   }
 
   @override

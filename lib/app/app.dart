@@ -17,6 +17,7 @@ import '../core/localization/supported_locales.dart';
 import '../core/routing/app_router.dart';
 import '../core/theme/app_surface_tone.dart';
 import '../core/theme/app_theme.dart';
+import '../core/theme/app_themes_scope.dart';
 import '../core/theme/components/tahfeez_bottom_sheet.dart';
 import '../core/theme/theme_controller.dart';
 import '../features/memorize/application/memorization_reminder.dart';
@@ -97,18 +98,20 @@ class TahfeezApp extends ConsumerWidget {
           darkScheme = family.colorScheme(Brightness.dark);
         }
 
+        final lightTheme = buildTahfeezTheme(
+          tone.apply(lightScheme),
+          arabicFont: arabicFont,
+        );
+        final darkTheme = buildTahfeezTheme(
+          tone.apply(darkScheme),
+          arabicFont: arabicFont,
+        );
         return MaterialApp.router(
           onGenerateTitle: (context) => AppLocalizations.of(context).appName,
           debugShowCheckedModeBanner: false,
           themeMode: themeMode,
-          theme: buildTahfeezTheme(
-            tone.apply(lightScheme),
-            arabicFont: arabicFont,
-          ),
-          darkTheme: buildTahfeezTheme(
-            tone.apply(darkScheme),
-            arabicFont: arabicFont,
-          ),
+          theme: lightTheme,
+          darkTheme: darkTheme,
           locale: localeOverride,
           supportedLocales: kTahfeezSupportedLocales,
           localizationsDelegates: const [
@@ -126,20 +129,24 @@ class TahfeezApp extends ConsumerWidget {
           // (The app's data replaced on iOS: covered until reopened.)
           // (A dual-screen device spanned: the app on one screen, the
           // Mushaf's pages on both.)
-          builder: (context, child) => DualScreenLayer(
-            router: router,
-            child: ClockFormatScope(
-              child: ReopenRequiredLayer(
-                child: _WebSheetWidth(
-                  // (In a phone's browser: where to get the app.)
-                  child: GetTheAppPrompt(
-                    // (In a browser: the recitation model, fetched meanwhile.)
-                    child: WebModelPreload(
-                      child: AnimationsOff(
-                        child: MilestoneLayer(
-                          child: MeaningPacksLayer(
-                            child: GuideLayer(
-                              child: child ?? const SizedBox.shrink(),
+          builder: (context, child) => AppThemesScope(
+            light: lightTheme,
+            dark: darkTheme,
+            child: DualScreenLayer(
+              router: router,
+              child: ClockFormatScope(
+                child: ReopenRequiredLayer(
+                  child: _WebSheetWidth(
+                    // (In a phone's browser: where to get the app.)
+                    child: GetTheAppPrompt(
+                      // (In a browser: the recitation model, fetched meanwhile.)
+                      child: WebModelPreload(
+                        child: AnimationsOff(
+                          child: MilestoneLayer(
+                            child: MeaningPacksLayer(
+                              child: GuideLayer(
+                                child: child ?? const SizedBox.shrink(),
+                              ),
                             ),
                           ),
                         ),

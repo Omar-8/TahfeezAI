@@ -1,3 +1,6 @@
+import '../core/localization/locale_controller.dart';
+import '../core/theme/app_surface_tone.dart';
+import '../core/theme/theme_controller.dart';
 import '../features/settings/presentation/about_screen.dart';
 
 import 'dart:async';
@@ -102,6 +105,16 @@ Future<void> bootstrap() async {
   };
 
   final container = ProviderContainer();
+  // The chosen theme, its colours and the language, read now behind the
+  // splash: read first as the app built, its first frames were the phone's
+  // own (dark) before the chosen light (owner, 2026-11-24).
+  container
+    ..read(themeModeControllerProvider)
+    ..read(themeFamilyControllerProvider)
+    ..read(dynamicColorPreferenceControllerProvider)
+    ..read(arabicFontControllerProvider)
+    ..read(appSurfaceToneProvider)
+    ..read(localeControllerProvider);
   // Its failure kept (quranSetupProvider): the screens needing the Quran
   // show it, with a way to try again.
   final seeder = BundledDatasetSeeder(

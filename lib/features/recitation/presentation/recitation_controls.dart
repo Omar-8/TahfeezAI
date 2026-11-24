@@ -8,6 +8,7 @@ import '../../../ai/acoustic/local_quran_acoustic_model.dart';
 import 'package:flutter/foundation.dart'
     show ValueListenable, kIsWeb, kReleaseMode, listEquals;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../core/ui/settings_search.dart';
 import '../../../core/theme/components/tahfeez_card.dart'
@@ -64,10 +65,14 @@ import '../application/recitation_session_controller.dart';
 import '../../listen/presentation/listen_sheet.dart';
 import 'quick_start.dart';
 import 'recitation_loop_sheet.dart';
+import '../../mushaf/application/mushaf_appearance_controller.dart';
+import '../../mushaf/domain/mushaf_appearance.dart';
 import '../../mushaf/presentation/mushaf_appearance_sheet.dart';
 import '../../../memorization/application/memorization_today.dart';
 import '../../memorize/presentation/test_summary_sheet.dart';
 import '../../../core/theme/tahfeez_motion.dart';
+import '../../../core/theme/app_surface_tone.dart';
+import '../../../core/theme/app_themes_scope.dart';
 import '../../../core/ui/display_hinge.dart';
 import '../../../core/ui/motion.dart';
 
@@ -234,34 +239,146 @@ class BarButtonGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return Container(
-      height: groupHeight,
-      decoration: BoxDecoration(
-        color: scheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(groupHeight / 2),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 2),
-      child: Row(
-        mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
-        children: [
-          for (var i = 0; i < children.length; i++) ...[
-            if (i > 0)
-              VerticalDivider(
-                width: 1,
-                thickness: 1,
-                indent: 10,
-                endIndent: 10,
-                color: scheme.outlineVariant,
-              ),
-            if (expand)
-              Expanded(flex: flex?[i] ?? 1, child: children[i])
-            else
-              children[i],
-          ],
+    final row = Row(
+      mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
+      children: [
+        for (var i = 0; i < children.length; i++) ...[
+          if (i > 0)
+            VerticalDivider(
+              width: 1,
+              thickness: 1,
+              indent: 10,
+              endIndent: 10,
+              color: scheme.outlineVariant,
+            ),
+          if (expand)
+            Expanded(flex: flex?[i] ?? 1, child: children[i])
+          else
+            children[i],
         ],
+      ],
+    );
+    final radius = BorderRadius.circular(groupHeight / 2);
+    final inside = SizedBox(
+      height: groupHeight,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 2),
+        child: row,
       ),
     );
+    return barGlass(context, radius: radius, child: inside);
   }
+}
+
+/// The colours of the page the recitation bar is over (its Mushaf theme's),
+/// for its groups — `null` away from a Mushaf.
+class BarPage extends InheritedWidget {
+  const BarPage({super.key, required this.colors, required super.child});
+
+  final MushafAppearanceColors? colors;
+
+  static MushafAppearanceColors? of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<BarPage>()?.colors;
+
+  @override
+  bool updateShouldNotify(BarPage old) => old.colors != colors;
+}
+
+/// The bar's glass as one opaque colour and its edge (for a menu opened
+/// from it): `null` away from a Mushaf.
+({Color fill, Color edge})? barGlassColours(BuildContext context) {
+  final page = BarPage.of(context);
+  if (page == null) return null;
+  final brightness = ThemeData.estimateBrightnessForColor(page.background);
+  final tone = AppSurfaceTone.values.firstWhere(
+    (t) => t.surface == page.background,
+    orElse: () => AppSurfaceTone.standard,
+  );
+  final scheme = tone.apply(AppThemesScope.of(context, brightness).colorScheme);
+  final dark = brightness == Brightness.dark;
+  return (
+    fill: Color.alphaBlend(
+      scheme.surfaceContainerLowest.withValues(alpha: dark ? 0.22 : 0.86),
+      page.background,
+    ),
+    edge: dark
+        ? Colors.white.withValues(alpha: 0.08)
+        : scheme.primary.withValues(alpha: 0.16),
+  );
+}
+
+/// A group of the recitation bar's buttons — the modes, hide mode's, a
+/// session's, the eye — as Home's button group is drawn (owner, 2026-11-24):
+/// raised glass, a soft edge and shadow; over a Mushaf, in its theme's
+/// colours (white, warm, sepia, dark, black), elsewhere in the app's.
+Widget barGlass(
+  BuildContext context, {
+  required BorderRadius radius,
+  required Widget child,
+}) {
+  final page = BarPage.of(context);
+  if (page == null) {
+    final scheme = Theme.of(context).colorScheme;
+    if (scheme.brightness == Brightness.light) {
+      return TahfeezGlassSurface(
+        raised: true,
+        blur: false,
+        borderRadius: radius,
+        child: child,
+      );
+    }
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: scheme.surfaceContainerHighest,
+        borderRadius: radius,
+      ),
+      child: child,
+    );
+  }
+  // Home's group exactly (TahfeezGlassSurface, raised, no blur), its
+  // colours the app's theme on the page's paper — the warm and sepia (and
+  // black) tones are the Mushaf's own papers (owner, 2026-11-24: "the same
+  // colour as Home's group on sepia and warm").
+  final brightness = ThemeData.estimateBrightnessForColor(page.background);
+  final tone = AppSurfaceTone.values.firstWhere(
+    (t) => t.surface == page.background,
+    orElse: () => AppSurfaceTone.standard,
+  );
+  final scheme = tone.apply(AppThemesScope.of(context, brightness).colorScheme);
+  final dark = brightness == Brightness.dark;
+  return DecoratedBox(
+    decoration: BoxDecoration(
+      borderRadius: radius,
+      boxShadow: dark
+          ? null
+          : [
+              BoxShadow(
+                color: scheme.shadow.withValues(alpha: 0.11),
+                blurRadius: 14,
+                offset: const Offset(0, 4),
+              ),
+            ],
+    ),
+    child: DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: radius,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            scheme.surfaceContainerLowest.withValues(alpha: dark ? 0.22 : 0.86),
+            scheme.surfaceContainerLow.withValues(alpha: dark ? 0.12 : 0.7),
+          ],
+        ),
+        border: Border.all(
+          color: dark
+              ? Colors.white.withValues(alpha: 0.08)
+              : scheme.primary.withValues(alpha: 0.16),
+        ),
+      ),
+      child: child,
+    ),
+  );
 }
 
 /// The Sujood al-Tilawah reminder while it is up (a session's results wait
@@ -587,6 +704,45 @@ class LiveRecitationBar extends ConsumerWidget {
       }
     });
 
+    // Under a Mushaf (owner, 2026-11-24): the bar in the app's light or
+    // dark theme as its page is — not the app's own.
+    final onPage = ref.watch(mushafRecitationTargetProvider) != null;
+    final page = ref.watch(mushafAppearanceControllerProvider).colors;
+    final base = onPage
+        ? AppThemesScope.of(
+            context,
+            ThemeData.estimateBrightnessForColor(page.background),
+          )
+        : Theme.of(context);
+    return Theme(
+      // Its ink the Mushaf theme's, as the reader's top bar (warm, sepia,
+      // black…): icons and labels in the page's text colours, the dividers
+      // a shade between page and text.
+      data: onPage
+          ? base.copyWith(
+              colorScheme: base.colorScheme.copyWith(
+                onSurface: page.text,
+                onSurfaceVariant: page.secondaryText,
+                outlineVariant: Color.lerp(page.background, page.text, 0.18),
+              ),
+              iconTheme: base.iconTheme.copyWith(color: page.secondaryText),
+            )
+          : base,
+      child: const _LiveRecitationBarBody(),
+    );
+  }
+}
+
+/// [LiveRecitationBar]'s content, in its theme.
+class _LiveRecitationBarBody extends ConsumerWidget {
+  const _LiveRecitationBarBody();
+
+  /// The banners' room above the buttons under a Mushaf: less than their
+  /// height, the rest over the page's foot.
+  static const _hintRoom = 16.0;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     final scheme = Theme.of(context).colorScheme;
     final state = ref.watch(recitationSessionControllerProvider);
     final location = ref.watch(mushafRecitationTargetProvider)?.location;
@@ -624,101 +780,155 @@ class LiveRecitationBar extends ConsumerWidget {
         state.isActive &&
         ref.watch(liveRecognitionDevPanelEnabledProvider);
 
-    return Material(
-      key: const ValueKey('recitation-bottom-bar'),
-      // Same surface as the navigation bar it replaces (and the system
-      // navigation bar the shell already tints to match).
-      color: scheme.surfaceContainer,
-      // Follow along's turn hint sits on the bar's top border, over the page.
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          SafeArea(
-            top: false,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (showDevPanel)
-                  RecognitionDevPanel(
-                    state: recognition,
-                    match: quranMatch,
-                    acoustic: acoustic,
-                    config: aiConfig,
-                    inference: inference,
-                  ),
-                if (recognition != null)
-                  _RecitationAiNotice(config: aiConfig, inference: inference),
-                if (inference != null) const _ModelDownload(),
-                ConstrainedBox(
-                  constraints: const BoxConstraints(minHeight: 72),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 12,
-                    ),
-                    child: _BarWidth(
-                      width: barWidth,
-                      child: AnimatedSwitcher(
-                        duration: TahfeezMotionDuration.medium,
-                        child: state.isActive
-                            ? _SessionControls(
-                                key: const ValueKey(
-                                  'recitation-session-controls',
-                                ),
-                                state: state,
-                              )
-                            : listening
-                            ? const _ListenControls(
-                                key: ValueKey('listen-controls'),
-                              )
-                            : GuideTarget(
-                                id: 'bar',
-                                child: _UnderPages(
-                                  key: const ValueKey('recitation-start'),
-                                  wide: barWidth != null,
-                                  left: _ModeButtons(
-                                    location: location,
-                                    starting: starting,
-                                    recognition: recognition != null,
-                                    collapsed: false,
-                                    expand: true,
-                                  ),
-                                  right: _RevealUnderPage(hidden: hidden),
-                                  otherwise: Row(
-                                    // Spread to the edges, within thumb reach.
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      ..._idleRow(
+    // Under a Mushaf: its page's own ground, so only the bar's buttons show
+    // — no band of the navigation bar's surface under them (owner,
+    // 2026-11-24); elsewhere (a session over another screen) that surface.
+    final ground = location != null
+        ? ref.watch(mushafAppearanceControllerProvider).colors.background
+        : scheme.surfaceContainer;
+    // The phone's own navigation strip under it the same (not the
+    // navigation bar's colour the shell gives it).
+    final darkGround =
+        ThemeData.estimateBrightnessForColor(ground) == Brightness.dark;
+    final strip = location != null;
+    final hints =
+        recognition != null || ref.watch(coloursOffNoticeProvider) != null;
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle(
+        systemNavigationBarColor: ground,
+        systemNavigationBarIconBrightness: darkGround
+            ? Brightness.light
+            : Brightness.dark,
+        systemNavigationBarDividerColor: Colors.transparent,
+        systemNavigationBarContrastEnforced: false,
+      ),
+      child: BarPage(
+        colors: location != null
+            ? ref.watch(mushafAppearanceControllerProvider).colors
+            : null,
+        child: Material(
+          key: const ValueKey('recitation-bottom-bar'),
+          color: ground,
+          // Elsewhere, Follow along's turn hint on the bar's top border.
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              SafeArea(
+                top: false,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (showDevPanel)
+                      RecognitionDevPanel(
+                        state: recognition,
+                        match: quranMatch,
+                        acoustic: acoustic,
+                        config: aiConfig,
+                        inference: inference,
+                      ),
+                    if (recognition != null)
+                      _RecitationAiNotice(
+                        config: aiConfig,
+                        inference: inference,
+                      ),
+                    if (inference != null) const _ModelDownload(),
+                    // Under a Mushaf (owner, 2026-11-24): the banners
+                    // ("Mistakes found", the colours shown or hidden, a
+                    // loop's, listening) in a strip of their own over the
+                    // buttons — not over the page's last line — and the
+                    // buttons lower, nearer the screen's foot.
+                    if (strip)
+                      Padding(
+                        // (Touching the buttons; the page down to them, the
+                        // banners a little over its foot — owner,
+                        // 2026-11-24.)
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: SizedBox(
+                          key: const ValueKey('recitation-bar-hints'),
+                          height: _hintRoom,
+                          child: hints
+                              ? const OverflowBox(
+                                  maxHeight: double.infinity,
+                                  alignment: Alignment.bottomCenter,
+                                  child: _BarHints(),
+                                )
+                              : null,
+                        ),
+                      ),
+                    ConstrainedBox(
+                      // (Under a Mushaf: the buttons' own height, the page the rest.)
+                      constraints: BoxConstraints(minHeight: strip ? 48 : 72),
+                      child: Padding(
+                        padding: strip
+                            ? const EdgeInsets.fromLTRB(6, 0, 6, 2)
+                            : const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 12,
+                              ),
+                        child: _BarWidth(
+                          width: barWidth,
+                          child: AnimatedSwitcher(
+                            duration: TahfeezMotionDuration.medium,
+                            child: state.isActive
+                                ? _SessionControls(
+                                    key: const ValueKey(
+                                      'recitation-session-controls',
+                                    ),
+                                    state: state,
+                                  )
+                                : listening
+                                ? const _ListenControls(
+                                    key: ValueKey('listen-controls'),
+                                  )
+                                : GuideTarget(
+                                    id: 'bar',
+                                    child: _UnderPages(
+                                      key: const ValueKey('recitation-start'),
+                                      wide: barWidth != null,
+                                      left: _ModeButtons(
                                         location: location,
                                         starting: starting,
                                         recognition: recognition != null,
-                                        hidden: hidden,
-                                        roomy: barWidth != null,
+                                        collapsed: false,
+                                        expand: true,
                                       ),
-                                    ],
+                                      right: _RevealUnderPage(hidden: hidden),
+                                      otherwise: Row(
+                                        // Spread to the edges, within thumb reach.
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          ..._idleRow(
+                                            location: location,
+                                            starting: starting,
+                                            recognition: recognition != null,
+                                            hidden: hidden,
+                                            roomy: barWidth != null,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
                                   ),
-                                ),
-                              ),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+              if (hints && !strip)
+                Positioned(
+                  // On the bar's top border (owner, 2026-11-21: raised above
+                  // it, Follow along's hints covered the last ayah — back
+                  // down, each on one line).
+                  top: -FollowAlongHint.height / 2 + 4,
+                  left: 16,
+                  right: 16,
+                  child: const _BarHints(),
+                ),
+            ],
           ),
-          if (recognition != null ||
-              ref.watch(coloursOffNoticeProvider) != null)
-            Positioned(
-              // On the bar's top border (owner, 2026-11-21: raised above
-              // it, Follow along's hints covered the last ayah — back
-              // down, each on one line).
-              top: -FollowAlongHint.height / 2 + 4,
-              left: 16,
-              right: 16,
-              child: const _BarHints(),
-            ),
-        ],
+        ),
       ),
     );
   }
@@ -1347,6 +1557,28 @@ class _ModeButtons extends ConsumerWidget {
         children: [
           MenuAnchor(
             alignmentOffset: const Offset(0, 4),
+            // In the bar's colours — its Mushaf theme's (owner,
+            // 2026-11-24).
+            style: switch (barGlassColours(context)) {
+              final c? => MenuStyle(
+                backgroundColor: WidgetStatePropertyAll(c.fill),
+                surfaceTintColor: const WidgetStatePropertyAll(
+                  Colors.transparent,
+                ),
+                // (A soft shadow, as the bar's groups.)
+                elevation: const WidgetStatePropertyAll(3),
+                shadowColor: WidgetStatePropertyAll(
+                  Colors.black.withValues(alpha: 0.18),
+                ),
+                shape: WidgetStatePropertyAll(
+                  RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(TahfeezRadii.md),
+                    side: BorderSide(color: c.edge),
+                  ),
+                ),
+              ),
+              null => null,
+            },
             menuChildren: [
               for (final m in modes)
                 MenuItemButton(
@@ -2199,51 +2431,58 @@ class MushafHideControls extends ConsumerWidget {
     // moving the eye.
     final eye = GuideTarget(
       id: 'eye',
-      child: IconButton(
-        key: const ValueKey('mushaf-hide-toggle'),
-        // 48 × 48 to tap, as every button on the bar.
-        isSelected: hide.enabled,
-        // (The Recite button's green.)
-        icon: colours
-            ? Icon(
-                Icons.visibility_outlined,
-                key: const ValueKey('mushaf-eye-coloured'),
-                color: Theme.of(context).colorScheme.primary,
-              )
-            : const Icon(Icons.visibility_outlined),
-        selectedIcon: const Icon(Icons.visibility_off_outlined),
-        tooltip: hide.enabled
-            ? l10n.recShowAyahs
-            : colours
-            ? l10n.recHideColours
-            : l10n.recHideAyahs,
-        style: hide.enabled
-            ? IconButton.styleFrom(
-                backgroundColor: Theme.of(context)
-                    .colorScheme
-                    .secondaryContainer,
-              )
-            : null,
-        onPressed: () {
-          // (The guide's hide tour: straight to the ayahs hidden.)
-          final guided = ref.read(guideProvider) != null;
-          final notice = ref.read(coloursOffNoticeProvider.notifier);
-          if (hide.enabled || guided) {
-            if (!guided) {
-              notice.show(hide.enabled ? EyeNotice.colours : EyeNotice.hidden);
+      // On the glass of the bar's groups (as Home's), round.
+      child: barGlass(
+        context,
+        radius: BorderRadius.circular(24),
+        child: IconButton(
+          key: const ValueKey('mushaf-hide-toggle'),
+          // 48 × 48 to tap, as every button on the bar.
+          isSelected: hide.enabled,
+          // (The Recite button's green.)
+          icon: colours
+              ? Icon(
+                  Icons.visibility_outlined,
+                  key: const ValueKey('mushaf-eye-coloured'),
+                  color: Theme.of(context).colorScheme.primary,
+                )
+              : const Icon(Icons.visibility_outlined),
+          selectedIcon: const Icon(Icons.visibility_off_outlined),
+          tooltip: hide.enabled
+              ? l10n.recShowAyahs
+              : colours
+              ? l10n.recHideColours
+              : l10n.recHideAyahs,
+          // (On: a tint of the bar's ink on its glass.)
+          style: hide.enabled
+              ? IconButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.onSurface
+                      .withValues(alpha: 0.10),
+                )
+              : null,
+          onPressed: () {
+            // (The guide's hide tour: straight to the ayahs hidden.)
+            final guided = ref.read(guideProvider) != null;
+            final notice = ref.read(coloursOffNoticeProvider.notifier);
+            if (hide.enabled || guided) {
+              if (!guided) {
+                notice.show(
+                  hide.enabled ? EyeNotice.colours : EyeNotice.hidden,
+                );
+              }
+              notifier.toggle();
+            } else if (colours) {
+              setColours(false);
+              notice.show();
+              return;
+            } else {
+              notice.show(EyeNotice.hidden);
+              notifier.toggle();
             }
-            notifier.toggle();
-          } else if (colours) {
-            setColours(false);
-            notice.show();
-            return;
-          } else {
-            notice.show(EyeNotice.hidden);
-            notifier.toggle();
-          }
-          // Ayahs hidden or shown again: in colour.
-          setColours(true);
-        },
+            // Ayahs hidden or shown again: in colour.
+            setColours(true);
+          },
+        ),
       ),
     );
     final steps = part == MushafHideControlsPart.pinned

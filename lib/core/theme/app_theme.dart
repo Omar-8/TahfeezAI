@@ -19,7 +19,14 @@ ThemeData buildTahfeezTheme(
   ColorScheme scheme, {
   ArabicUiFont arabicFont = ArabicUiFont.kufi,
 }) {
+  scheme = _firmerContainers(scheme);
   final textTheme = buildTahfeezTextTheme(scheme, arabic: arabicFont);
+  final light = scheme.brightness == Brightness.light;
+  // A light sheet's paper: the surface (its tone) brought near white.
+  final lightSheet = Color.alphaBlend(
+    Colors.white.withValues(alpha: 0.7),
+    scheme.surface,
+  );
   final cardShape = RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(TahfeezRadii.md),
   );
@@ -53,9 +60,18 @@ ThemeData buildTahfeezTheme(
     // behind it — GlassSheet), a bright hairline along its top. In a
     // browser, which cannot blur the Mushaf's pages: opaque.
     bottomSheetTheme: BottomSheetThemeData(
-      backgroundColor: kIsWeb
+      // Light themes (owner, 2026-11-24: "silver grey"): whiter paper, all
+      // but opaque — the dim behind came through it — and no tint of the
+      // theme's colour.
+      backgroundColor: light
+          ? lightSheet.withValues(alpha: kIsWeb ? 1 : 0.97)
+          : kIsWeb
           ? scheme.surface
           : scheme.surface.withValues(alpha: 0.86),
+      modalBackgroundColor: light
+          ? lightSheet.withValues(alpha: kIsWeb ? 1 : 0.97)
+          : null,
+      surfaceTintColor: Colors.transparent,
       shape: sheetShape.copyWith(
         side: BorderSide(
           color: scheme.brightness == Brightness.dark
@@ -111,3 +127,22 @@ ThemeData buildLightTheme() =>
 
 ThemeData buildDarkTheme() =>
     buildTahfeezTheme(TahfeezThemeFamily.emerald.colorScheme(Brightness.dark));
+
+/// Light themes: the tonal containers (a tonal button's fill — "Start
+/// another", "Start with Al-Fatiha", the + buttons —, a selected chip's) a
+/// firmer tint of the theme's colour (owner, 2026-11-24: the pale green was
+/// lost on the page), their text a deep shade of it. Dark themes as ever.
+ColorScheme _firmerContainers(ColorScheme scheme) {
+  if (scheme.brightness != Brightness.light) return scheme;
+  final fill = Color.alphaBlend(
+    scheme.primary.withValues(alpha: 0.34),
+    Colors.white,
+  );
+  final ink = Color.lerp(scheme.primary, Colors.black, 0.4)!;
+  return scheme.copyWith(
+    primaryContainer: fill,
+    onPrimaryContainer: ink,
+    secondaryContainer: fill,
+    onSecondaryContainer: ink,
+  );
+}
