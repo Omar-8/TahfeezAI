@@ -1,0 +1,150 @@
+<en-US>
+• Duas from the Quran, Bukhari, Muslim and Hisn al-Muslim, in sections — and bookmarks for duas and athkar
+• The recitation bar takes the Mushaf's colours (warm, sepia, black…), and the page is taller
+• Foldables and dual-screen phones: the Mushaf with a page on each screen
+• A crisper light theme with whiter sheets, and a smoother start
+</en-US>
+<ar>
+• أدعية من القرآن والبخاري ومسلم وحصن المسلم، في أقسام — مع علامات للأدعية والأذكار
+• شريط التلاوة يأخذ ألوان المصحف (دافئ، بنّي، أسود…)، والصفحة أطول
+• الهواتف القابلة للطي وذات الشاشتين: المصحف بصفحة على كل شاشة
+• مظهر فاتح أوضح ونوافذ أنصع بياضًا، وبدء أنعم للتطبيق
+</ar>
+<bn-BD>
+• কুরআন, বুখারি, মুসলিম ও হিসনুল মুসলিম থেকে দোয়া, বিভাগ অনুযায়ী — দোয়া ও যিকিরের বুকমার্কসহ
+• তিলাওয়াত বার এখন মুসহাফের রং নেয় (উষ্ণ, সেপিয়া, কালো…), আর পৃষ্ঠা আরও লম্বা
+• ভাঁজযোগ্য ও দুই-স্ক্রিনের ফোন: প্রতিটি স্ক্রিনে মুসহাফের একটি পৃষ্ঠা
+• আরও স্পষ্ট লাইট থিম, আরও সাদা শিট, আর মসৃণ শুরু
+</bn-BD>
+<da-DK>
+• Duaer fra Koranen, Bukhari, Muslim og Hisn al-Muslim, i afsnit — og bogmærker til duaer og adhkar
+• Recitationslinjen får Mushafens farver (varm, sepia, sort…), og siden er højere
+• Foldbare telefoner og telefoner med to skærme: Mushafen med en side på hver skærm
+• Et klarere lyst tema med hvidere ark og en mere glidende start
+</da-DK>
+<de-DE>
+• Duas aus dem Koran, von Bukhari, Muslim und aus Hisn al-Muslim, in Abschnitten — mit Lesezeichen für Duas und Adhkar
+• Die Rezitationsleiste übernimmt die Farben des Mushaf (warm, Sepia, Schwarz …), und die Seite ist höher
+• Faltbare Geräte und Telefone mit zwei Bildschirmen: der Mushaf mit einer Seite auf jedem Bildschirm
+• Ein klareres helles Design mit weißeren Fenstern und ein flüssigerer Start
+</de-DE>
+<el-GR>
+• Ντουά από το Κοράνι, τον Μπουχάρι, τον Μούσλιμ και το Χισν αλ-Μούσλιμ, σε ενότητες — με σελιδοδείκτες για ντουά και άντκαρ
+• Η γραμμή απαγγελίας παίρνει τα χρώματα του Μουσχάφ (ζεστό, σέπια, μαύρο…) και η σελίδα είναι ψηλότερη
+• Αναδιπλούμενα τηλέφωνα και τηλέφωνα με δύο οθόνες: το Μουσχάφ με μια σελίδα σε κάθε οθόνη
+• Πιο καθαρό φωτεινό θέμα με πιο λευκά φύλλα και πιο ομαλή εκκίνηση
+</el-GR>
+<es-ES>
+• Duas del Corán, de Bujari, de Muslim y de Hisn al-Muslim, por secciones, y marcadores para duas y adhkar
+• La barra de recitación toma los colores del Mushaf (cálido, sepia, negro…) y la página es más alta
+• Móviles plegables y de doble pantalla: el Mushaf con una página en cada pantalla
+• Un tema claro más nítido, hojas más blancas y un inicio más fluido
+</es-ES>
+<fa>
+• دعاهایی از قرآن، بخاری، مسلم و حصن المسلم، در بخش‌ها — همراه با نشانک برای دعاها و اذکار
+• نوار تلاوت رنگ‌های مصحف را می‌گیرد (گرم، قهوه‌ای، سیاه…) و صفحه بلندتر است
+• گوشی‌های تاشو و دوصفحه‌ای: مصحف با یک صفحه روی هر نمایشگر
+• پوستهٔ روشن واضح‌تر با برگه‌های سفیدتر، و آغازی نرم‌تر
+</fa>
+<fr-FR>
+• Des douas du Coran, de Boukhari, de Mouslim et de Hisn al-Mouslim, par sections — et des signets pour les douas et les adhkar
+• La barre de récitation prend les couleurs du Mushaf (chaud, sépia, noir…), et la page est plus haute
+• Téléphones pliables et à double écran : le Mushaf avec une page sur chaque écran
+• Un thème clair plus net, des feuilles plus blanches et un démarrage plus fluide
+</fr-FR>
+<id>
+• Doa dari Al-Qur'an, Bukhari, Muslim, dan Hisnul Muslim, per bagian — serta penanda untuk doa dan zikir
+• Bilah tilawah mengikuti warna mushaf (hangat, sepia, hitam…), dan halamannya lebih tinggi
+• Ponsel lipat dan layar ganda: mushaf dengan satu halaman di tiap layar
+• Tema terang yang lebih jernih, lembar yang lebih putih, dan pembukaan yang lebih mulus
+</id>
+<ja-JP>
+• クルアーン、ブハーリー、ムスリム、ヒスヌル・ムスリムのドゥアーをセクション別に。ドゥアーとアズカールのブックマークも
+• 読誦バーがムスハフの配色（ウォーム、セピア、ブラックなど）に合わせて変わり、ページがより縦長に
+• 折りたたみ・デュアルスクリーンのスマートフォン：各画面にムスハフを1ページずつ表示
+• よりくっきりしたライトテーマ、より白いシート、よりなめらかな起動
+</ja-JP>
+<kk>
+• Құраннан, Бұхари, Мүслим және «Хисну әл-Мүслимнен» дұғалар, бөлімдерге бөлінген — дұғалар мен зікірлерге бетбелгілер
+• Қиратхан жолағы Мұсхафтың түстерін алады (жылы, сепия, қара…), ал бет биігірек
+• Бүктелетін және екі экранды телефондар: әр экранда Мұсхафтың бір беті
+• Айқынырақ ашық тақырып, ақшылырақ парақтар және жайлырақ іске қосылу
+</kk>
+<ko-KR>
+• 꾸란, 부카리, 무슬림, 히스눌 무슬림의 두아를 섹션별로 — 두아와 아드카르 북마크까지
+• 낭송 바가 무스하프의 색(따뜻한 색, 세피아, 검정 등)을 따르고, 페이지가 더 길어졌습니다
+• 폴더블 및 듀얼 스크린 휴대폰: 화면마다 무스하프 한 페이지씩
+• 더 선명한 라이트 테마, 더 하얀 시트, 더 부드러운 시작
+</ko-KR>
+<ms>
+• Doa daripada al-Quran, Bukhari, Muslim dan Hisnul Muslim, mengikut bahagian — serta penanda buku untuk doa dan zikir
+• Bar bacaan mengikut warna mushaf (hangat, sepia, hitam…), dan halamannya lebih tinggi
+• Telefon boleh lipat dan dwi-skrin: mushaf dengan satu halaman pada setiap skrin
+• Tema cerah yang lebih jelas, helaian lebih putih dan permulaan yang lebih lancar
+</ms>
+<nl-NL>
+• Doea's uit de Koran, Bukhari, Muslim en Hisn al-Muslim, in secties — en bladwijzers voor doea's en adhkar
+• De recitatiebalk krijgt de kleuren van de Mushaf (warm, sepia, zwart…), en de pagina is hoger
+• Vouwbare telefoons en telefoons met twee schermen: de Mushaf met een pagina op elk scherm
+• Een helderder licht thema met wittere panelen en een vlottere start
+</nl-NL>
+<pt-BR>
+• Duas do Alcorão, de Bukhari, de Muslim e do Hisn al-Muslim, em seções — e marcadores para duas e adhkar
+• A barra de recitação assume as cores do Mushaf (quente, sépia, preto…), e a página ficou mais alta
+• Celulares dobráveis e de tela dupla: o Mushaf com uma página em cada tela
+• Um tema claro mais nítido, painéis mais brancos e uma abertura mais suave
+</pt-BR>
+<ru-RU>
+• Дуа из Корана, сборников аль-Бухари и Муслима и «Крепости мусульманина», по разделам — и закладки для дуа и азкаров
+• Панель чтения принимает цвета Мусхафа (тёплый, сепия, чёрный…), а страница стала выше
+• Складные телефоны и телефоны с двумя экранами: Мусхаф по странице на каждом экране
+• Более чистая светлая тема, более белые панели и более плавный запуск
+</ru-RU>
+<sw>
+• Dua kutoka Qur'ani, Bukhari, Muslim na Hisnul Muslim, kwa sehemu — pamoja na alamisho za dua na adhkar
+• Upau wa kisomo unachukua rangi za Msahafu (joto, sepia, nyeusi…), na ukurasa ni mrefu zaidi
+• Simu zinazokunjika na zenye skrini mbili: Msahafu ukiwa na ukurasa kwenye kila skrini
+• Mandhari angavu iliyo wazi zaidi, karatasi nyeupe zaidi, na kuanza kwa ulaini zaidi
+</sw>
+<tr-TR>
+• Kur'an'dan, Buhârî, Müslim ve Hısnü'l-Müslim'den dualar, bölümler hâlinde — dualar ve zikirler için yer imleri
+• Tilavet çubuğu Mushaf'ın renklerini alıyor (sıcak, sepya, siyah…) ve sayfa daha uzun
+• Katlanabilir ve çift ekranlı telefonlar: her ekranda Mushaf'tan bir sayfa
+• Daha net bir açık tema, daha beyaz paneller ve daha akıcı bir açılış
+</tr-TR>
+<ur>
+• قرآن، بخاری، مسلم اور حصن المسلم سے دعائیں، حصوں میں — دعاؤں اور اذکار کے لیے بُک مارکس کے ساتھ
+• تلاوت کی پٹی اب مصحف کے رنگ لیتی ہے (گرم، سیپیا، سیاہ…)، اور صفحہ لمبا ہے
+• فولڈ ہونے والے اور دو اسکرین والے فون: ہر اسکرین پر مصحف کا ایک صفحہ
+• زیادہ واضح لائٹ تھیم، زیادہ سفید شیٹس، اور ہموار آغاز
+</ur>
+<zh-CN>
+• 来自《古兰经》、布哈里、穆斯林和《穆斯林堡垒》的都阿，按类别编排——还可为都阿和记念词添加书签
+• 诵读栏随经本配色变化（暖色、棕褐、黑色等），页面更高
+• 折叠屏和双屏手机：每块屏幕各显示一页经本
+• 更清爽的浅色主题、更白的面板，启动更流畅
+</zh-CN>
+<hi-IN>
+• क़ुरआन, बुख़ारी, मुस्लिम और हिस्नुल मुस्लिम से दुआएँ, भागों में — दुआओं और अज़कार के लिए बुकमार्क के साथ
+• तिलावत बार अब मुसहफ़ के रंग लेता है (गर्म, सीपिया, काला…), और पेज लंबा है
+• फ़ोल्ड होने वाले और दो स्क्रीन वाले फ़ोन: हर स्क्रीन पर मुसहफ़ का एक पेज
+• ज़्यादा साफ़ लाइट थीम, ज़्यादा सफ़ेद शीट्स, और सहज शुरुआत
+</hi-IN>
+<ta-IN>
+• குர்ஆன், புகாரி, முஸ்லிம், ஹிஸ்னுல் முஸ்லிம் ஆகியவற்றிலிருந்து துஆக்கள், பிரிவுகளாக — துஆக்களுக்கும் அத்கார்களுக்கும் புக்மார்க்குகளுடன்
+• ஓதுதல் பட்டை இப்போது முஸ்ஹஃபின் நிறங்களை ஏற்கிறது (வெதுவெதுப்பு, செபியா, கருப்பு…), பக்கம் நீளமாகியுள்ளது
+• மடிக்கக்கூடிய மற்றும் இரட்டைத் திரை ஃபோன்கள்: ஒவ்வொரு திரையிலும் முஸ்ஹஃபின் ஒரு பக்கம்
+• இன்னும் தெளிவான லைட் தீம், வெண்மையான தாள்கள், சீரான தொடக்கம்
+</ta-IN>
+<ml-IN>
+• ഖുർആൻ, ബുഖാരി, മുസ്‌ലിം, ഹിസ്നുൽ മുസ്‌ലിം എന്നിവയിൽ നിന്നുള്ള ദുആകൾ, വിഭാഗങ്ങളായി — ദുആകൾക്കും അദ്കാറുകൾക്കും ബുക്ക്മാർക്കുകളോടെ
+• പാരായണ ബാർ ഇപ്പോൾ മുസ്ഹഫിന്റെ നിറങ്ങൾ സ്വീകരിക്കുന്നു (ഊഷ്മളം, സെപിയ, കറുപ്പ്…), പേജ് കൂടുതൽ ഉയരമുള്ളതാണ്
+• മടക്കാവുന്നതും ഇരട്ട സ്ക്രീനുള്ളതുമായ ഫോണുകൾ: ഓരോ സ്ക്രീനിലും മുസ്ഹഫിന്റെ ഓരോ പേജ്
+• കൂടുതൽ വ്യക്തമായ ലൈറ്റ് തീം, കൂടുതൽ വെളുത്ത ഷീറ്റുകൾ, സുഗമമായ തുടക്കം
+</ml-IN>
+<it-IT>
+• Dua dal Corano, da Bukhari, da Muslim e dall'Hisn al-Muslim, divise in sezioni, con segnalibri per dua e adhkar
+• La barra di recitazione prende i colori del Mushaf (caldo, seppia, nero…) e la pagina è più alta
+• Telefoni pieghevoli e con doppio schermo: il Mushaf con una pagina su ogni schermo
+• Un tema chiaro più nitido, pannelli più bianchi e un avvio più fluido
+</it-IT>
