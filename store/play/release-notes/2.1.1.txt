@@ -1,0 +1,75 @@
+<en-US>
+• Small improvements and fixes.
+</en-US>
+<ar>
+• تحسينات وإصلاحات صغيرة.
+</ar>
+<bn-BD>
+• ছোটখাটো উন্নতি ও সংশোধন।
+</bn-BD>
+<da-DK>
+• Små forbedringer og rettelser.
+</da-DK>
+<de-DE>
+• Kleine Verbesserungen und Fehlerbehebungen.
+</de-DE>
+<el-GR>
+• Μικρές βελτιώσεις και διορθώσεις.
+</el-GR>
+<es-ES>
+• Pequeñas mejoras y correcciones.
+</es-ES>
+<fa>
+• بهبودها و رفع اشکال‌های کوچک.
+</fa>
+<fr-FR>
+• Petites améliorations et corrections.
+</fr-FR>
+<id>
+• Peningkatan kecil dan perbaikan.
+</id>
+<ja-JP>
+• 細かな改善と修正。
+</ja-JP>
+<kk>
+• Шағын жақсартулар мен түзетулер.
+</kk>
+<ko-KR>
+• 작은 개선 사항 및 수정.
+</ko-KR>
+<ms>
+• Penambahbaikan kecil dan pembetulan.
+</ms>
+<nl-NL>
+• Kleine verbeteringen en oplossingen.
+</nl-NL>
+<pt-BR>
+• Pequenas melhorias e correções.
+</pt-BR>
+<ru-RU>
+• Небольшие улучшения и исправления.
+</ru-RU>
+<sw>
+• Maboresho madogo na marekebisho.
+</sw>
+<tr-TR>
+• Küçük iyileştirmeler ve düzeltmeler.
+</tr-TR>
+<ur>
+• چھوٹی بہتریاں اور اصلاحات۔
+</ur>
+<zh-CN>
+• 小幅改进与修复。
+</zh-CN>
+<hi-IN>
+• छोटे सुधार और समस्याओं का समाधान।
+</hi-IN>
+<ta-IN>
+• சிறு மேம்பாடுகள் மற்றும் திருத்தங்கள்.
+</ta-IN>
+<ml-IN>
+• ചെറിയ മെച്ചപ്പെടുത്തലുകളും പരിഹാരങ്ങളും.
+</ml-IN>
+<it-IT>
+• Piccoli miglioramenti e correzioni.
+</it-IT>
